@@ -137,7 +137,15 @@ entire lifetime, including if the source registry, request, prepared plan or
 configuration has been destroyed. Each `create` constructs fresh unique mutable
 workspaces. Workspaces are noncopyable; one owner may transfer them to a worker.
 Concurrent use of a single workspace remains unsupported. A borrowed `basis()`
-pointer is valid only while its owning bound workspace exists. Moved-from
+pointer is valid only while its owning bound workspace exists. The optional
+`basis_factory(request, workspace)` receives the actual freshly created typed
+mathematical workspace, after its non-null check. A diagnostic may borrow that
+one workspace to observe its evolving solve state; it must not refer to a
+different creation or coordinate through mutable captured state. Diagnostics
+are destroyed before the mathematical workspace, including exceptional creation
+cleanup. Neither object depends on the prepared plan or registry remaining alive.
+A null primary factory result rejects creation before dereferencing it or
+invoking the basis connection. Moved-from
 prepared handles are only suitable for destruction or assignment.
 
 Opaque `SetPayload` and `JointRelationPayload` values cannot be deep-copied
@@ -175,7 +183,18 @@ introduced here.
 [Registry tests](../../tests/contract/registry/registry_tests.cpp) register two
 test-only working LP algorithms: endpoint enumeration and coefficient-sign
 selection. Both support only one finite interval variable with no constraint
-rows. The same caller changes only configured method identity:
+rows, subject to a conservative binary64 arithmetic profile: endpoint products
+and `std::fma(coefficient, endpoint, offset)` objective values must be finite.
+When the coefficient is nonzero and the endpoints differ, the two evaluated
+objectives must remain distinguishable; otherwise both adapters reject with
+`unsupported` / `lp.arithmetic` during capability checking, before factories.
+This includes overflow, underflow ties and a large offset rounding unequal
+objectives to a tie. A genuinely constant objective or degenerate interval is
+still accepted when its arithmetic is finite. Both algorithms evaluate accepted
+objectives using the same specified fused operation; endpoint enumeration orders
+the two endpoint values, while coefficient-sign selection chooses the endpoint
+from the coefficient. Numerical objective values are not validated exact bounds.
+The same caller changes only configured method identity:
 `min(3*x+2), x in [-1,4]` gives `x=-1`, value `-1`; coefficients `-2` and `0`
 give `(4,-6)` and `(-1,2)`. They publish distinct `endpoint/1.0` and `sign/2.0`
 provenance. This establishes bounded LP substitution, not general LP support or

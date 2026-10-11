@@ -84,7 +84,9 @@ template<class Port> struct Registration {
     Identity identity;
     std::function<Capability(const typename Port::Request&, const Requirements&)> capabilities;
     std::function<std::unique_ptr<typename Port::Workspace>(const typename Port::Request&)> factory;
-    std::function<std::unique_ptr<BasisDiagnostics>(const typename Port::Request&)> basis_factory{};
+    // The diagnostic may borrow this particular workspace; BoundWorkspace destroys
+    // diagnostics before the mathematical workspace. No cross-creation state is shared.
+    std::function<std::unique_ptr<BasisDiagnostics>(const typename Port::Request&, typename Port::Workspace&)> basis_factory{};
 };
 namespace detail {
 struct PipelineAccess;
@@ -180,7 +182,8 @@ namespace detail {
 struct PipelineAccess {
     template<class Port> static std::unique_ptr<BoundWorkspace<Port>> create(const PreparedEntry<Port>& e) {
         auto workspace = e.entry.factory(*e.request);
-        auto basis = e.requirements.basis_diagnostics ? e.entry.basis_factory(*e.request) : nullptr;
+        if (!workspace) throw std::logic_error("registered factory returned a null workspace");
+        auto basis = e.requirements.basis_diagnostics ? e.entry.basis_factory(*e.request,*workspace) : nullptr;
         if (e.requirements.basis_diagnostics && !basis) throw std::logic_error("basis factory returned null");
         return std::unique_ptr<BoundWorkspace<Port>>(new BoundWorkspace<Port>(e.request,std::move(workspace),std::move(basis)));
     }

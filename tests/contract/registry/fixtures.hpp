@@ -19,8 +19,8 @@ public:
     ProgramOutcome solve(const LinearProgram& p, const ExecutionContext&) override {
         ++calls_;
         const double lower = *p.variables[0].lower, upper = *p.variables[0].upper;
-        const double lower_value = p.objective[0]*lower+p.offset;
-        const double upper_value = p.objective[0]*upper+p.offset;
+        const double lower_value = std::fma(p.objective[0],lower,p.offset);
+        const double upper_value = std::fma(p.objective[0],upper,p.offset);
         const double x = lower_value <= upper_value ? lower : upper;
         const double value = lower_value <= upper_value ? lower_value : upper_value;
         const ClaimEvidence evidence{p.identity.problem, Unestablished{}};
@@ -35,7 +35,7 @@ public:
     ProgramOutcome solve(const LinearProgram& p, const ExecutionContext&) override {
         ++calls_;
         const double x = p.objective[0] < 0 ? *p.variables[0].upper : *p.variables[0].lower;
-        const double value = p.objective[0]*x+p.offset;
+        const double value = std::fma(p.objective[0],x,p.offset);
         const ClaimEvidence evidence{p.identity.problem, Unestablished{}};
         return ProgramResult{Termination::completed, {p.identity, MathematicalOutcome::optimal,
             SymbolicArgument{"coefficient sign", "affine objective on finite interval"}, {}},
@@ -50,6 +50,15 @@ inline Capability interval_capability(const LinearProgram& p, const Requirements
         !std::isfinite(*p.variables[0].lower) || !std::isfinite(*p.variables[0].upper) ||
         *p.variables[0].lower>*p.variables[0].upper || !std::isfinite(p.objective[0]) || !std::isfinite(p.offset))
         return Diagnostics{{DiagnosticCode::unsupported,"lp.domain","requires one variable, finite interval and no rows"}};
+    const double coefficient = p.objective[0];
+    const double lower = *p.variables[0].lower, upper = *p.variables[0].upper;
+    const double lower_value = std::fma(coefficient,lower,p.offset);
+    const double upper_value = std::fma(coefficient,upper,p.offset);
+    if (!std::isfinite(coefficient*lower) || !std::isfinite(coefficient*upper) ||
+        !std::isfinite(lower_value) || !std::isfinite(upper_value))
+        return Diagnostics{{DiagnosticCode::unsupported,"lp.arithmetic","fixture requires finite endpoint products and objective values"}};
+    if (coefficient != 0 && lower != upper && lower_value == upper_value)
+        return Diagnostics{{DiagnosticCode::unsupported,"lp.arithmetic","unequal endpoint objectives are indistinguishable in binary64"}};
     return Offer{};
 }
 inline Registration<LPPort> endpoint_registration() {

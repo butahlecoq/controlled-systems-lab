@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/registry/registry.hpp>
+#include <limits>
 #include "fixtures.hpp"
 
 using namespace csl;
@@ -55,6 +56,55 @@ TEST_CASE("negative and zero coefficients and genuinely unsupported LPs") {
         const auto& rejection = std::get<Rejection>(result);
         CHECK(rejection.provenance.actual->id.value == id);
         CHECK(rejection.diagnostics[0].field == "lp.domain");
+    }
+}
+
+TEST_CASE("bounded LP preflight rejects overflow and rounded unequal endpoint ties before factories") {
+    std::array<int,2> factories{};
+    Registry<LPPort> registry;
+    auto endpoint = endpoint_registration();
+    endpoint.factory = [&](const LinearProgram&) { ++factories[0]; return std::make_unique<EndpointWorkspace>(); };
+    auto sign = sign_registration();
+    sign.factory = [&](const LinearProgram&) { ++factories[1]; return std::make_unique<SignWorkspace>(); };
+    registry.add(endpoint); registry.add(sign);
+    auto overflow = interval_lp(-std::numeric_limits<double>::max());
+    overflow.variables[0] = {2,3};
+    auto rounded_tie = interval_lp(-1); rounded_tie.offset = 1e20;
+    auto underflow = interval_lp(std::numeric_limits<double>::denorm_min());
+    underflow.variables[0] = {0,0.5}; underflow.offset = 0;
+    for (const auto& request : {overflow,rounded_tie,underflow}) {
+        for (const auto& id : {"endpoint","sign"}) {
+            CAPTURE(std::string(id)); CAPTURE(request.objective[0]); CAPTURE(request.offset);
+            auto result = prepare_pipeline(select(registry,Method{{id},{}},request));
+            CHECK(std::holds_alternative<Rejection>(result));
+            if (!std::holds_alternative<Rejection>(result)) continue;
+            const auto& rejection = std::get<Rejection>(result);
+            CHECK(rejection.provenance.requested.id.value == id);
+            CHECK(rejection.provenance.actual->id.value == id);
+            CHECK(rejection.provenance.actual->version == (std::string(id)=="endpoint" ? "1.0" : "2.0"));
+            CHECK(rejection.diagnostics[0].code == DiagnosticCode::unsupported);
+            CHECK(rejection.diagnostics[0].field == "lp.arithmetic");
+            CHECK_FALSE(rejection.diagnostics[0].explanation.empty());
+            CHECK(factories == std::array<int,2>{0,0});
+        }
+    }
+}
+
+TEST_CASE("constant objectives and degenerate intervals remain legitimate bounded LP inputs") {
+    Registry<LPPort> registry;
+    registry.add(endpoint_registration()); registry.add(sign_registration());
+    auto constant = interval_lp(0); constant.offset = 1e20;
+    auto degenerate = interval_lp(-1); degenerate.variables[0] = {4,4}; degenerate.offset = 1e20;
+    for (const auto& id : {"endpoint","sign"}) {
+        for (const auto& request : {constant,degenerate}) {
+            auto result = prepare_pipeline(select(registry,Method{{id},{}},request));
+            REQUIRE_FALSE(std::holds_alternative<Rejection>(result));
+            auto workers = std::get<0>(result).create();
+            const auto answer = std::get<ProgramResult>(std::get<0>(workers)->run(context()));
+            CHECK(answer.primal == (request.objective[0] == 0 ? std::optional<Vector>{{-1}} : std::optional<Vector>{{4}}));
+            CHECK(answer.objective.upper->value == 1e20);
+            CHECK(answer.outcome.value == MathematicalOutcome::optimal);
+        }
     }
 }
 
@@ -188,7 +238,7 @@ TEST_CASE("all existing ports execute through typed factories and rejection cons
 TEST_CASE("optional basis is executable only when requested") {
     Registry<LPPort> registry;
     auto entry = endpoint_registration();
-    entry.basis_factory = [](const LinearProgram&) { return std::make_unique<BasisFixture>(); };
+    entry.basis_factory = [](const LinearProgram&,LPWorkspace&) { return std::make_unique<BasisFixture>(); };
     registry.add(entry);
     Requirements requirements; requirements.basis_diagnostics = true;
     const auto request = interval_lp(3);
@@ -198,6 +248,97 @@ TEST_CASE("optional basis is executable only when requested") {
     REQUIRE(std::get<0>(workers)->basis() != nullptr);
     CHECK(std::get<0>(workers)->basis()->describe_basis() == "fixture basis: column 0");
     CHECK(std::get<ProgramResult>(std::get<0>(workers)->run(context())).primal == std::optional<Vector>{{-1}});
+}
+
+TEST_CASE("basis diagnostics observe their own LP workspace after the prepared plan exits") {
+    struct StatefulLP final : LPWorkspace {
+        int calls{};
+        std::shared_ptr<std::vector<std::string>> destruction;
+        explicit StatefulLP(std::shared_ptr<std::vector<std::string>> log) : destruction(std::move(log)) {}
+        ~StatefulLP() override { destruction->push_back("workspace"); }
+        ProgramOutcome solve(const LinearProgram& p,const ExecutionContext&) override {
+            ++calls;
+            return ProgramResult{Termination::completed,{p.identity,MathematicalOutcome::undetermined,Unestablished{},{}},
+                {},{},std::to_string(calls)};
+        }
+    };
+    struct BoundBasis final : BasisDiagnostics {
+        const StatefulLP& workspace;
+        explicit BoundBasis(const StatefulLP& w) : workspace(w) {}
+        ~BoundBasis() override { workspace.destruction->push_back("basis@"+std::to_string(workspace.calls)); }
+        std::string describe_basis() const override { return "solve "+std::to_string(workspace.calls); }
+    };
+    struct ConnectBasis {
+        std::unique_ptr<BasisDiagnostics> operator()(const LinearProgram&,LPWorkspace& workspace) const {
+            return std::make_unique<BoundBasis>(dynamic_cast<const StatefulLP&>(workspace));
+        }
+    };
+    const auto destruction = std::make_shared<std::vector<std::string>>();
+    auto workers = [&] {
+        Registry<LPPort> registry;
+        auto entry = endpoint_registration();
+        entry.factory = [destruction](const LinearProgram&) { return std::make_unique<StatefulLP>(destruction); };
+        entry.basis_factory = ConnectBasis{};
+        registry.add(entry);
+        const auto request = interval_lp(3);
+        Requirements requirements; requirements.basis_diagnostics = true;
+        auto result = prepare_pipeline(select(registry,Method{{"endpoint"},{}},request,requirements));
+        REQUIRE_FALSE(std::holds_alternative<Rejection>(result));
+        const auto& plan = std::get<0>(result);
+        return std::pair{plan.create(),plan.create()};
+    }();
+    auto& first = std::get<0>(workers.first);
+    auto& second = std::get<0>(workers.second);
+    REQUIRE(first->basis()); REQUIRE(second->basis());
+    CHECK(first->basis()->describe_basis() == "solve 0");
+    CHECK(std::get<ProgramResult>(first->run(context())).raw_diagnostics == "1");
+    CHECK(first->basis()->describe_basis() == "solve 1");
+    CHECK(second->basis()->describe_basis() == "solve 0");
+    CHECK(std::get<ProgramResult>(first->run(context())).raw_diagnostics == "2");
+    CHECK(first->basis()->describe_basis() == "solve 2");
+    first.reset();
+    CHECK(*destruction == std::vector<std::string>{"basis@2","workspace"});
+    CHECK(std::get<ProgramResult>(second->run(context())).raw_diagnostics == "1");
+    CHECK(second->basis()->describe_basis() == "solve 1");
+    second.reset();
+    CHECK(*destruction == std::vector<std::string>{"basis@2","workspace","basis@1","workspace"});
+
+    destruction->clear();
+    Registry<LPPort> throwing_registry;
+    auto throwing_entry = endpoint_registration();
+    throwing_entry.factory = [destruction](const LinearProgram&) { return std::make_unique<StatefulLP>(destruction); };
+    throwing_entry.basis_factory = [](const LinearProgram& request,LPWorkspace& workspace) -> std::unique_ptr<BasisDiagnostics> {
+        auto diagnostic = ConnectBasis{}(request,workspace);
+        throw std::runtime_error("basis connection failure");
+    };
+    throwing_registry.add(throwing_entry);
+    const auto request = interval_lp(3);
+    Requirements requirements; requirements.basis_diagnostics = true;
+    auto result = prepare_pipeline(select(throwing_registry,Method{{"endpoint"},{}},request,requirements));
+    REQUIRE_FALSE(std::holds_alternative<Rejection>(result));
+    CHECK_THROWS_WITH_AS(std::get<0>(result).create(),"basis connection failure",std::runtime_error);
+    CHECK(*destruction == std::vector<std::string>{"basis@0","workspace"});
+}
+
+TEST_CASE("a null LP factory fails before invoking a basis connection") {
+    struct CountConnection {
+        int& calls;
+        std::unique_ptr<BasisDiagnostics> operator()(const LinearProgram&,LPWorkspace&) const {
+            ++calls; return std::make_unique<BasisFixture>();
+        }
+    };
+    int connections = 0;
+    Registry<LPPort> registry;
+    auto entry = endpoint_registration();
+    entry.factory = [](const LinearProgram&) -> std::unique_ptr<LPWorkspace> { return {}; };
+    entry.basis_factory = CountConnection{connections};
+    registry.add(entry);
+    const auto request = interval_lp(3);
+    Requirements requirements; requirements.basis_diagnostics = true;
+    auto result = prepare_pipeline(select(registry,Method{{"endpoint"},{}},request,requirements));
+    REQUIRE_FALSE(std::holds_alternative<Rejection>(result));
+    CHECK_THROWS_WITH_AS(std::get<0>(result).create(),"registered factory returned a null workspace",std::logic_error);
+    CHECK(connections == 0);
 }
 
 TEST_CASE("a custom port extends registry without product dispatch and freezes only after acceptance") {
