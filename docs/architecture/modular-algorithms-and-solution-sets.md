@@ -78,6 +78,8 @@ Draft SolutionFamily operations: witness(selection), contains(candidate,toleranc
 
 Owner decision: first extract different complete optimal control sequences and their consistent trajectories, then compare approaches visually, numerically and by computation time. This query does not replace the requirement to represent the optimal family.
 
+Owner decision: the first completed method comparison is historical reachability/backward recovery versus direct joint-trajectory optimization. Reachable-set approximations are deferred. A historical-method-based family builder may need extensions beyond the archived single-witness implementation; document those changes separately from archival reproduction. Both strategies use the same nominal problem, objective convention and optimal-family request. Shared LP/convex backends are permitted; strategy selection and backend selection remain separate axes.
+
 Proposed separation: a WitnessSelector queries the family, a TrajectoryVerifier independently checks model/constraint/objective consistency, and a ComparisonRunner records aligned experiment results. Plot/export code consumes those records and contains no scientific solver logic. Selector identity, settings and any random seed belong in result provenance independently of the synthesis algorithm.
 
 A request for k distinct witnesses records requested/returned counts, duplicate filtering and the selection rule. A singleton family may provide only one distinct solution. Failure to discover more witnesses does not prove uniqueness. Selection need not be uniformly random; no such sampling guarantee is implied. The default selector is proposed to be reproducible, with explicit diversity settings for multi-witness exploration.
@@ -219,9 +221,9 @@ Share a total thread/memory budget between outer workers and BLAS/solver interna
 ## 6. First implementation slice after design agreement
 
 1. Agree model, set evidence, backend status and optimal-family query contracts, using the two-step integrator counterexample.
-2. Build one nominal affine/polyhedral pipeline returning a joint optimal relation, with independent witness verification. Keep continuous, finite and mixed domains representable; the first baseline solver supports continuous actions and original stagewise constraints under its declared convexity/domain assumptions; new temporal couplings are excluded from these first experiments.
+2. Build both selected nominal affine/polyhedral strategies (reachability/backward recovery and direct joint-trajectory optimization), each returning a dependency-preserving optimal relation, with independent witness verification. Keep continuous, finite and mixed domains representable; the first baseline solver supports continuous actions and original stagewise constraints under its declared convexity/domain assumptions; new temporal couplings are excluded from these first experiments.
 3. Plug in a second LP implementation and a second representation/conversion strategy without changing the problem or frontend API.
-4. Compare exact generator propagation with a compatible ellipsoidal approximation, checking inclusion and objective bounds rather than demanding identical sets.
+4. In a later slice, compare exact generator propagation with a compatible ellipsoidal approximation, checking inclusion and objective bounds rather than demanding identical sets.
 5. Restore and reproduce an archived nominal experiment with both historical and new output scopes recorded. Profile conversions, reduction, optimization, queries and memory separately.
 
 The published experiments are validation anchors. They do not replace the architecture discussion or require implementing every possible representation before the first useful solve.

@@ -10,6 +10,8 @@ Provide a native library that accepts a controlled system and a nominal finite-h
 
 The first slice uses discrete affine dynamics, a known initial state, continuous convex polyhedral admissibility, stagewise constraints and one of three structured convex terminal objectives. It starts without process disturbances or added temporal couplings. Observation channels, external inputs, finite/mixed domains and temporal constraints remain representable; unsupported solver combinations produce capability diagnostics before execution. Hybrid models, feedback, arbitrary callbacks, GPU execution and distributed scheduling are separate later slices.
 
+The owner selected two strategies for the first completed comparison: historical-reachability-based construction with backward control recovery, and direct joint-trajectory optimization. Reachable-set approximation comparisons are deferred. Both strategies return the same family/evidence contract; neither can substitute a single optimizer for a family.
+
 A native library API and CMake build targets are proposed. Selecting a matrix library or LP/convex solver is a later integration decision, not hidden in these contracts.
 
 ## Interface approach
@@ -195,6 +197,6 @@ For [B04](../../research/b04-restoration.md), the intended flow is load scenario
 
 A reviewer should be able to verify that swapping an LP backend does not change model/objective types; swapping a set representation requires registered compatible operations rather than editing the planner; independent workers cannot share mutable solver state; and a returned family preserves all temporal dependencies and makes its completeness evidence explicit.
 
-The first implementation plan should cover only the nominal polyhedral optimal-family slice, its capability checks, witness selection, independent verification and these analytic oracles. It should select a concrete native matrix/LP/convex integration with primary-documentation and licensing checks. General robust/feedback synthesis, all approximation families and arbitrary binary plugin loading remain subsequent plans, not acceptance requirements for that slice.
+The first implementation plan should cover the two selected strategies within the nominal polyhedral optimal-family slice, its capability checks, witness selection, independent verification and these analytic oracles. It should select a concrete native matrix/LP/convex integration with primary-documentation and licensing checks. General robust/feedback synthesis, all approximation families and arbitrary binary plugin loading remain subsequent plans, not acceptance requirements for that slice.
 
 See [mathematical module definitions](../../architecture/modular-algorithms-and-solution-sets.md), [linear model contract](../../architecture/linear-system-contract.md), [set representation study](../../architecture/set-representations-and-ellipsoidal-toolbox.md) and [temporal-constraint proof](../../research/temporal-coupling.md).

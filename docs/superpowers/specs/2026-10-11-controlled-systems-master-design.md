@@ -1,6 +1,6 @@
 # Controlled Systems Lab: consolidated requirements and architecture specification
 
-Date: 2026-10-11. Version: 0.1. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
+Date: 2026-10-11. Version: 0.2. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
 
 ## Product intent
 
@@ -18,6 +18,7 @@ All newly authored artifacts are in English. Owner discussion is in Russian. The
 | Control values | Owner selected continuous actions first | Preserve finite/mixed domains and separate future hybrid models |
 | Primary output | Owner selected all optimal solutions | Preserve a joint relation, not only one trajectory or stage marginals |
 | First family query | Owner selected different complete witnesses | Visual, numerical and runtime comparison of approaches |
+| First method comparison | Owner selected the two optimization approaches; reachable-set approximations later | Reachability/backward-recovery strategy versus direct joint-trajectory optimization |
 | Objective modules | Recorded owner agreement | Linear, convex quadratic, weighted Euclidean residual terminal criteria first |
 | Temporal constraints | Owner requested representability, exclusion from first experiments | Future supported lifts/strategies; no default added couplings |
 | Verification | Recorded owner agreement | Numerical first; future claim-specific validated certificates |
@@ -35,6 +36,8 @@ The accepted language decision is [ADR 0001](../../architecture/decisions/0001-c
 The first proposed implementation slice is nominal discrete affine dynamics with known initial state, continuous convex polyhedral stagewise state/control sets, a supported structured convex terminal criterion, a dependency-preserving optimal family, witness extraction and independent numerical verification.
 
 The model contract is broader than any one solver. Representable disturbances, observation channels, singular transitions, unbounded sets or future domains do not imply that the first algorithm supports them. Unsupported is a capability outcome, distinct from mathematical infeasibility.
+
+The first completed comparison includes two synthesis strategies under the same problem/result contracts: a strategy based on historical reachability and backward control recovery, and direct optimization of the joint trajectory. Both must construct the supported optimal family, beyond finding a single minimizer. This compares end-to-end mathematical strategies; changing an LP backend is an independent replacement axis. Reachable-set approximations are explicitly deferred.
 
 Later slices include extra geometry/solvers, inner/outer approximations, minimax/feedback, estimation, temporal lifts, finite/mixed controls, hybrid/nonlinear/descriptor models, validated arithmetic, bindings and optional remote/GPU execution. Each requires its own mathematical capabilities and acceptance cases. No claim that all these features can be implemented in the initial slice is implied.
 
@@ -96,6 +99,7 @@ The catalog includes H/V polyhedra, boxes/parallelotopes, zonotopes, constrained
 | RUN-03 | C/P | Shared resource policy, cancellation and partial evidence | Outer/backend threads share budget; cancellation reports incumbent/bounds where available; enforcement limitations recorded |
 | RUN-04 | C | Scalability claims must be measured for declared outputs | Record dimensions, representation size, memory, backend versions and output scope; changing language alone does not claim removal of exponential complexity |
 | EXP-01 | C | Compare methods visually, numerically and by time | Common scenario/objective/query/tolerance; controls/states, residuals, family evidence and separated setup/solve/query/verification timing |
+| EXP-05 | C | First compare reachability/backward recovery with direct joint-trajectory optimization | Both strategies run the shared analytic acceptance cases with the same optimum and consistent complete-family semantics; approximation comparison is later |
 | EXP-02 | C | Published experiments and figures/tables anchor baselines | Keep reported values separate from independently reproduced results and source variants |
 | EXP-03 | C | B04 first archival target; unresolved inputs remain explicit | Historical non-executable manifest cannot be silently promoted by guessed bounds or fitted matrices |
 | EXP-04 | C/P | Reproducible versioned artifacts | Scenario hashes, seeds, selection settings, module versions, resources and raw comparison data recorded |
@@ -134,11 +138,11 @@ Module unit tests are a required deliverable. Use mathematical answers, invarian
 | T-V02 | Contract | Incomplete/sample/relaxed family and backend success do not become complete/validated evidence; evidence problem ID mismatch rejected | EVD-02/03 |
 | T-R01 | Integration | Parallel independent runs use separate workspaces; compare mathematical results with sequential runs under explicit tolerance | RUN-02/03 |
 | T-R02 | Integration | Cancel at a supported boundary and exhaust a documented resource limit; preserve actual partial evidence without changing outcome claims | RUN-03, EVD-02 |
-| T-X01 | Integration | Switch two compatible LP/strategy/representation configurations as available; same user contract and analytically equivalent answer/evidence scope | ALG-01/03/07, EXP-01 |
+| T-X01 | Integration + mathematical | Run both selected synthesis strategies on T-S01/02/03; check known optimal relations, objective and independently verified witnesses. Witness coordinates may differ. Backend/representation replacement has additional contract cases when implemented | ALG-01/03/07, SOL-01/02, EXP-01/05 |
 | T-X02 | Artifact integration | Round-trip supported versioned scenario/result metadata; collect setup/family/query/check times and selector/resource provenance | EXP-01/04 |
 | T-B04 | Archival regression | Current historical manifest gives restoration diagnostics; later canonical reproduction compares sourced inputs, trajectories and original cost with explicit tolerances | EXP-02/03 |
 
-At the first-slice boundary, every implemented capability has applicable unit/contract tests, T-S01/02/03 and T-V01/02 establish end-to-end semantics, and integration/resource tests cover advertised execution behavior. Tests for later representations or certificate verifiers are added when those capabilities are implemented. Unsupported capabilities are tested as diagnostics now.
+At the first-slice boundary, every implemented capability has applicable unit/contract tests, T-S01/02/03 and T-V01/02 establish end-to-end semantics, T-X01 verifies the mandatory two-strategy comparison, and integration/resource tests cover advertised execution behavior. Tests for later representations or certificate verifiers are added when those capabilities are implemented. Unsupported capabilities are tested as diagnostics now.
 
 Property tests may add random low-dimensional examples with fixed reproducible seeds; compare to independent analytic/exhaustive reference cases where possible. Sanitizer/race-check tooling should cover native ownership/concurrency when supported by the selected compiler platform. The test framework and CI matrix remain planning choices. Performance studies report measurements rather than fragile wall-clock unit-test thresholds.
 
@@ -168,12 +172,17 @@ Suggested responsibility groups are shared model/problem/data contracts, set/geo
 
 Subagents may propose contract changes but cannot silently alter accepted requirements to make their own ticket pass. They should return changed files/commits, tests run, assumptions and unresolved evidence limitations. Task completion means the stated acceptance evidence is present, not merely that code compiles. Owner/scientist feedback becomes explicit specification revisions and follow-up tickets.
 
+## Change record
+
+- Version 0.1: consolidated conversation decisions, native design references, requirement/test IDs and subagent delivery boundaries.
+- Version 0.2: owner selected the initial two-optimization-strategy comparison and deferred reachable-set approximations; EXP-05 and T-X01 record its acceptance obligations.
+
 ## Open decisions for the next review
 
 - Accept the proposed first polyhedral nominal slice and its supported complete-family construction; distinguish mathematical exactness from numerical evidence.
 - Select the first matrix, LP, convex solver, CMake packaging and test integrations without exposing their internal types in the public contract.
 - Decide the first user interface and supported compiler/OS distribution targets; no real-time deadline is currently specified.
-- Choose initial comparison backends/representations and realistic scale ranges using the supplied experiments.
+- Choose compatible backends/representations for the two selected optimization strategies and realistic scale ranges using the supplied experiments. Reachable-set approximation comparison is a later slice.
 - Restore B04 canonical inputs separately; the provisional control interval stays labelled provisional until sourced or explicitly adopted as a new scenario.
 
 Changes to these open proposals do not reopen the confirmed C++ choice or silently change archival data. Stable requirement IDs and a dated change record should keep subsequent tickets/reviews traceable.
