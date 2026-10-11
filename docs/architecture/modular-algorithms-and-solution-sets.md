@@ -66,6 +66,18 @@ A request for k distinct witnesses records requested/returned counts, duplicate 
 
 Use the same problem data, primary objective, tolerances, output scope and witness request for comparable runs. Use a common selector when supported and record incompatible selection semantics. Different optimal trajectories can have equal primary cost; shape differences alone do not establish that one algorithm is better. A method returning one witness without the family has different output scope, even if its selected trajectory is optimal.
 
+### Two verification levels
+
+Owner decision: include numerical and validated/certificate-based verification in the architecture; implement numerical verification first. Mathematical assumptions and theoretical guarantees remain documented for every algorithm at both levels.
+
+An EvidenceVerifier is a replaceable port alongside the solver. NumericalVerification checks selected trajectories against immutable problem data, recomputes the primary objective, and reports dynamics/constraint residuals with explicit absolute/relative tolerances, coordinate scales, arithmetic precision and verifier version. Preserve backend diagnostics and objective-bound provenance. A solver flag, small residual or agreement with a historical number does not establish global optimality or complete optimizer coverage.
+
+A future ValidatedVerification adapter checks supported certificates and accounts for rounding/truncation under declared arithmetic and model assumptions. Feasibility, objective bounds, set inclusion and family completeness require evidence suited to their respective claims. A generic certificate container alone does not create a proof.
+
+Result fields identify requested/applied verification levels, evidence scope, assumptions and verifier status. Distinguish trajectory feasibility, optimality evidence and family completeness. Store evidence references/data in versioned artifacts independently of plots. A request for validated evidence unsupported by the configured pipeline returns that limitation explicitly; numerical verification must not be silently relabeled as validated.
+
+This decision does not authorize substituting near-optimal or sampled output for the requested optimal family. The first implementation reports its actual numerical evidence and any unestablished completeness rather than claiming a certified family.
+
 Numerical solver success does not certify completeness. Family evidence identifies the mathematical target, supported plan/policy class, exact or enclosure relation, tolerances, objective bounds, and complete/partial/unknown coverage. Algebraically exact set construction in floating point is distinct from validated enclosure.
 
 If only certified bounds L <= v* <= U are known, the feasible family phi <= U+epsilon is a candidate relaxation containing exact optimizers, with cost gap at most U-L+epsilon. It is not automatically the exact optimizer set. Conversely, a set of tied floating-point incumbents is not proof that no other optimizer exists. The initial API must report incomplete evidence rather than silently substituting approximate or sampled output.

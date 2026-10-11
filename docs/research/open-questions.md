@@ -7,6 +7,7 @@ Date: 2026-10-11. Questions are recorded for later discussion; unanswered prefer
 - Build a convenient general interface for controlled systems, with scientific and algorithmic extensibility, performance and parallel scalability.
 - First solver control domain: continuous actions. Preserve explicit finite and mixed control domains for future algorithms; hybrid dynamics are a separate future model capability. Continuous-domain convexity is an algorithm assumption, not implied by the word continuous.
 - Architecture and replaceable mathematical algorithms are primary. Define contracts before benchmark implementation. The first output represents all optimal plans and consistent trajectories; feasible and near-optimal families are not initial public requests.
+- Verification architecture includes numerical and validated/certificate-based levels. Implement numerical verification first, with explicit tolerances, independent trajectory checks and supported optimality evidence; algorithm assumptions are documented from the start.
 - First optimal-family operation: obtain different consistent complete control sequences and their trajectories, for visual, numerical and runtime comparison of methods. Membership/projections and user-facing secondary optimization remain later query priorities.
 - Use the supplied application experiments and published numerical outcomes as initial baselines.
 - First user workflow selected: optimal control planning. Given a model and constraints, obtain a control sequence, its corresponding trajectory, and an objective/quality evaluation. The first solve will be nominal, without process disturbances. The model contract must nevertheless account for external/adversarial inputs and partial/noisy observation. The first reproduction baseline remains undecided.
@@ -21,14 +22,14 @@ The immediate workflow compares alternative algorithms through complete witness 
 
 | Priority | Question | Why it matters |
 |---|---|---|
-| 1 | What numerical versus validated evidence must the first comparison provide? | Witness extraction is selected; distinguish numerical residuals/gaps from certified optimality and family completeness |
+| 1 | Which state/control constraints and temporal couplings belong in the first solver? | Verification levels and witness extraction are selected; this defines the first supported problem class |
 | 1 | Which supplied experiment should be our first complete reproduction: nominal B04, constrained minimax B07, four-step minimax B08, or adaptive B09? | Defines one concrete end-to-end result and missing inputs |
 | 1 | Can original MATLAB/Pascal projects, full control histories, OpenLoopControl.py, and the distinct minimax adaptive source be recovered? | Resolves reproduction and duplicate-folder gaps |
 | 1 | Which actual terminal criterion was used for L04/L13 numerical tables? | Printed Euclidean formulas and displayed state/cost rows disagree |
 | 2 | Which other application domains should the interface serve first? | Validates generality beyond fuel-management assumptions |
 | 2 | What typical/maximal dimensions, horizons, action counts and set complexities are expected? | Distinguishes numerical vs combinatorial bottlenecks |
 | 2 | Is the priority scientific experiments, offline synthesis, or online control with a deadline? | Determines scheduling, deployment and timing contracts |
-| 2 | Which guarantees are required: numerical feasibility, validated enclosure, global minimax, or probabilistic coverage? | Determines algorithms and evidence costs |
+| 2 | Which future claims require validated certificates: set inclusion, global minimax, family completeness, or statistical coverage? | Both verification levels are in the architecture; concrete certificate support remains claim-specific |
 | 2 | Which continuous-domain shapes and temporal couplings should the first solver support? | Continuous actions are selected; distinguish convex polytopes/boxes from nonconvex domains and coupled constraints |
 | 2 | Are disturbances bounded independently each step, correlated, fixed unknown parameters, or statistical? | Determines reachable-set and minimax semantics |
 | 2 | Is full state observed? Are observation/model uncertainties estimated online? | Defines information pattern and estimator responsibilities |

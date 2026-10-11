@@ -79,6 +79,8 @@ A set object exposes ambient/affine dimension, representation, exactness/enclosu
 
 ## Result contracts
 
+Owner decision: provide numerical and validated/certificate-based verification contracts, implementing numerical verification first. Document algorithm assumptions at both levels.
+
 Keep these independent:
 
 - **Termination status:** completed, infeasible, unbounded, unsupported, iteration limit, deadline, cancelled, numerical failure.
@@ -141,4 +143,4 @@ The proposed native implementation is C++20 with separate module/adaptor build t
 
 ## Decisions still open
 
-Owner preference between C++ and Rust, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, required guarantee strength, observation assumptions, and the first complete executable baseline. The first solve is nominal and returns the optimal solution family; the contracts remain general. Architecture and language boundaries are discussed now, while benchmark evidence validates implementations. See [interview agenda](../research/open-questions.md).
+Owner preference between C++ and Rust, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, specific future certificate requirements, observation assumptions, and the first complete executable baseline. The first solve is nominal and returns the optimal solution family; the contracts remain general. Architecture and language boundaries are discussed now, while benchmark evidence validates implementations. See [interview agenda](../research/open-questions.md).
