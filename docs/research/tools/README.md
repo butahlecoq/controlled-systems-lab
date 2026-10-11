@@ -53,3 +53,16 @@ python docs/research/tools/test_b04_saved_witnesses.py --figure "$privateB04/1st
 ~~~
 
 The tests run the checker subprocess under optimized Python and compare actual computed values with literals from the prior independent audit. They do not validate complete stage feasibility, constrained optimality, full families, frozen-controller generation or a corrected 100-second replay. No full archive search or native rebuild is needed for this focused reference utility.
+
+## Proof-audit literal reference checks
+
+[check_proof_counterexamples.py](check_proof_counterexamples.py) requires Python 3 and its standard library only. It needs no private source, product solver or numeric package and writes no files.
+
+~~~text
+python -O docs/research/tools/check_proof_counterexamples.py
+python -O docs/research/tools/verify_docs.py
+~~~
+
+The checker prints nine named passes for exact rational hull/clipping, support-gap, nonlinear endpoint and finite-action policy examples in the [reachability](../reachability-proof-audit.md) and [adaptive-policy](../adaptive-policy-proof-audit.md) reports. A failed comparison raises an error and returns a nonzero exit code even under optimized Python. Squared costs avoid irrational floating arithmetic. The continuum bounds, causal lower bound and tie analysis remain analytical proofs in the reports; checking finitely many literal points is not sampling-based certification.
+
+The documentation verifier also checks registered source/hash and anchor references, the ordered antecedent version/review disposition chains, report-section targets, and consistency with the nine public counterexample checks in [proof provenance](../proof-audit-provenance.json). It does not recover missing sources or re-audit the proofs. As before, it writes `docs/research/verification.json`; retain that generated snapshot only when intentionally publishing it.

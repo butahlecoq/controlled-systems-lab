@@ -298,6 +298,37 @@
       "sha256": "ccbe6aac3e9d265999b135a780cbd4fff060d8db574bc747f27e8216c824692d",
       "bytes": 106169,
       "role": "Companion first-witness phase plot; privately inspected"
+    },
+    {
+      "id": "A43",
+      "path": "Публикации/statyi dlya shiryaeva/Булаев В.В. Шориков А.Ф. ИТИС17.pdf",
+      "bytes": 1347343,
+      "sha256": "a90a3e404807238886122dfdfc91a5f18697949137a8d9744af7180508de848a",
+      "title": "Modification of the general recurrent algebraic method for constructing reachability regions of linear discrete controlled systems",
+      "authors": "V. V. Bulaev; A. F. Shorikov",
+      "audit_alias": "RP01",
+      "role": "Retained-basis deletion and distinction between a feasible basis and extreme points"
+    },
+    {
+      "id": "A44",
+      "path": "Публикации/statyi dlya shiryaeva/Горанов А.Ю. Шориков А.Ф. ИТИС17.pdf",
+      "bytes": 555552,
+      "sha256": "493917da7d8ac669a470a978780a2ca269ce9da1b594365f49c6ebd572388fd7",
+      "title": "Modified recurrent method for constructing the reachability region of a linear discrete dynamic system",
+      "authors": "A. Yu. Goranov; A. F. Shorikov",
+      "audit_alias": "RP02",
+      "role": "Incremental enlarged-hull membership with final recheck; not identified as exact L05 reference [5] or [6]"
+    },
+    {
+      "id": "A45",
+      "path": "Публикации/statyi dlya shiryaeva/Булаев В.В., Шориков А.Ф. Пермь.pdf",
+      "bytes": 679336,
+      "sha256": "ce651337929ca727e8210bec8267a7ba543bd2e7fe6a8fc27fba598df6cbdef8",
+      "title": "Method of discretization of linear dynamic systems",
+      "authors": "V. V. Bulaev; A. F. Shorikov",
+      "audit_alias": "RP03",
+      "role": "Exact linear sampled-flow identities under piecewise constant inputs; no certified nonlinear residual",
+      "printed_doi": "10.17072/1993-0550-2016-2-67-73"
     }
   ]
 }
