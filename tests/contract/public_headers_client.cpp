@@ -12,6 +12,7 @@
 #include <csl/model/linear_system.hpp>
 #include <csl/registry/registry.hpp>
 #include <csl/sets/data.hpp>
+#include <csl/adapters/lp/highs.hpp>
 
 #include <iostream>
 #include <stdexcept>

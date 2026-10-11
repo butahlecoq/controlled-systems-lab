@@ -62,3 +62,10 @@ set_target_properties(installed_optimization_client PROPERTIES CXX_EXTENSIONS OF
 add_test(NAME installed_optimization_client COMMAND installed_optimization_client)
 set_tests_properties(installed_optimization_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed optimization client: immutable program, literal checks and exclusive attempts passed")
+
+add_executable(installed_highs_client highs_client.cpp)
+target_link_libraries(installed_highs_client PRIVATE CSL::highs_lp)
+set_target_properties(installed_highs_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_highs_client COMMAND installed_highs_client)
+set_tests_properties(installed_highs_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed HiGHS client: registered offset optimum and neutral evidence passed")
