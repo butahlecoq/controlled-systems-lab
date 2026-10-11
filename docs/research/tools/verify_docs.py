@@ -60,6 +60,17 @@ if reference["plans"] != 625 or reference["disturbance_box_corner_images_per_pla
 if not math.isclose(reference["computed_discrete_minimax"],
                     reference["computed_cost_of_reported_plan"],abs_tol=1e-8):
     errors.append("Published B08 plan does not match computed minimum")
+b04_case = json.loads((root/"benchmarks/scenarios/b04-historical.json").read_text(encoding="utf-8"))
+b04_check = json.loads((root/"docs/research/b04-consistency.json").read_text(encoding="utf-8"))
+if b04_case["executable"] or b04_case["problem"]["controls"]["stage_sets"] is not None:
+    errors.append("Unresolved historical B04 was silently made executable")
+if b04_check["scenario"] != b04_case["id"] or b04_check["historical_reproduction_complete"]:
+    errors.append("Unexpected B04 restoration/reproduction status")
+if not math.isclose(b04_check["reported_point_recomputed_objective"],
+                    float(b04_case["reported"]["objective"]), abs_tol=0.0005):
+    errors.append("B04 printed-point objective check changed")
+if b04_check["unrestricted_terminal_plane_minimum"]["objective_float"] <= float(b04_case["reported"]["objective"]):
+    errors.append("B04 lower-bound discrepancy check changed")
 result = {
     "date":"2026-10-11", "status":"passed" if not errors else "failed",
     "originals_checked":originals_checked, "inventory_entries":len(inventory),
@@ -68,6 +79,7 @@ result = {
     "research_scripts_syntax_checked":len(scripts),
     "legacy_characterization_checks":len(characterization["checks"]),
     "baseline_reference_plans":reference["plans"],
+    "b04_consistency_status":b04_check["status"],
     "errors":errors,"skipped":skipped,
     "limits":["External links were researched using browsing, not exhaustively HTTP-tested by this script.",
               "Markdown math/Mermaid rendering and all paper proofs are not automatically verified.",

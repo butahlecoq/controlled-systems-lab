@@ -18,11 +18,12 @@
       "L24"
     ]
   ],
-  "markdown_documents": 23,
-  "local_links_checked": 76,
-  "research_scripts_syntax_checked": 5,
+  "markdown_documents": 24,
+  "local_links_checked": 86,
+  "research_scripts_syntax_checked": 6,
   "legacy_characterization_checks": 6,
   "baseline_reference_plans": 625,
+  "b04_consistency_status": "displayed_data_inconsistent_with_reported_optimizer",
   "errors": [],
   "skipped": [],
   "limits": [

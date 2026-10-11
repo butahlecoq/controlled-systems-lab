@@ -11,7 +11,7 @@ All numbers below are **reported**, unless explicitly labelled computed in this 
 | B01 | L01/L02 | General terminal control; L02 includes production planning | Equations/example remain in extracted source | Transcribe full numerical data before inclusion in executable suite |
 | B02 | L05, PDF pp. 9–10 | Two nonlinear reachability approximations, dimensions 2 and 4 | Vertex counts, volumes and runtimes below | Initial-state/coordinate and approximation semantics require clarification |
 | B03 | L07, PDF pp. 52–55 | Reachability and convex-hull algorithm comparisons | Runtime/iteration data below | Recover complete model/input generation and random seeds |
-| B04 | L11, PDF pp. 12–14 | Nominal convex terminal control, n=4, T=16 | Objective 30.899, runtime 0.4 s | Matrices and criterion available; full input constraints/control histories need transcription |
+| B04 | L11, PDF pp. 12–14 | Nominal convex terminal control, n=4, T=16 | Objective 30.899, runtime 0.4 s | Selected first; missing canonical bounds/histories and a proved displayed-model/result inconsistency |
 | B05 | L08, numerical-example section and Table 2 | Optimal adaptive vs open-loop, T=16 | Nine tabulated outcomes; 0.4 s open-loop, 10 s adaptive | Equation objects/control labels missing from DOC extraction; use published PDF counterpart |
 | B06 | L09, PDF pp. 10–12 | Unconstrained finite-action minimax, n=4, T=5 | Worst-case 10.11, nonlinear trajectory 9.049, runtime 300 s | Disturbance specification and exact sign of extracted control vector require original inspection |
 | B07 | L10, PDF pp. 10–13 | State-constrained finite-action minimax, n=4, T=5 | 3125 candidates, 365 feasible; worst-case 9.77, runtime 66 s | Disturbance set and full physical-model parameters to recover |
@@ -64,6 +64,8 @@ $$
 Reported terminal optimizer: (1200.7,-22.929,450.2,-7.709); reported cost 30.899. Reported solve time 0.4 s. The source discusses multiple realizing controls; do not require identical control histories when terminal objective and feasibility agree.
 
 The physical meaning of negative working-stock balances must be retained from the source convention and distinguished from total tank mass.
+
+**Selected first, 2026-10-11.** The [restoration audit](b04-restoration.md) and [historical manifest](../../benchmarks/scenarios/b04-historical.json) distinguish supplied data, missing inputs and reported results. An independent exact-rational check shows that the reported terminal point violates a necessary invariant of the displayed model. The unrestricted terminal-plane objective minimum is approximately 160.880654, already above reported 30.899. Terminal-point rounding alone does not explain the gap; the actual numerical model must be recovered. No full B04 reproduction is claimed.
 
 ## B05: adaptive optimal control
 

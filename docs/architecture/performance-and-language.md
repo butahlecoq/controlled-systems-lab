@@ -61,7 +61,7 @@ Hard real-time control would require separate requirements for deadlines, alloca
 
 The architecture contract and requested optimal-family semantics are defined first. The following sequence validates implementations.
 
-1. Restore B04 and one small minimax case (B07 or B08), resolving criterion/data ambiguities.
+1. Restore owner-selected B04 first, resolving its [displayed model/result inconsistency](../research/b04-restoration.md) and missing control bounds. Follow with one small minimax case (B07 or B08) under its separate uncertainty semantics.
 2. Establish a mathematically transparent low-dimensional reference, including vertex worst-case checks.
 3. Compare the historical set method with a direct sparse nominal optimization and a compatible structured set method.
 4. Profile before rewriting kernels: propagation, conversion, reduction, optimization, orchestration and plotting separately.

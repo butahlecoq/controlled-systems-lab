@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-11",
+  "scenario": "B04-historical",
+  "status": "displayed_data_inconsistent_with_reported_optimizer",
+  "arithmetic": "Exact Fraction arithmetic on displayed coefficients; square roots converted to float for presentation",
+  "terminal_control_map_rank": 2,
+  "terminal_base_exact": [
+    "152113/125",
+    "-10952/5",
+    "438787/1000",
+    "14213/10"
+  ],
+  "terminal_plane_basis_exact": [
+    [
+      "17",
+      "0",
+      "-12",
+      "0"
+    ],
+    [
+      "0",
+      "-425/4",
+      "0",
+      "75"
+    ]
+  ],
+  "reported_point_recomputed_objective": 30.898903572780704,
+  "stock_invariant": {
+    "left_vector": [
+      0,
+      12,
+      0,
+      17
+    ],
+    "required_exact": "-21227/10",
+    "reported_point_exact": "-406201/1000",
+    "gap_exact": "1716499/1000",
+    "reported_point_rounding_radius_exact": "29/2000"
+  },
+  "unrestricted_terminal_plane_minimum": {
+    "terminal_state_exact": [
+      "591241264/492375",
+      "-382086/3095",
+      "591057859/1313000",
+      "-233497/6190"
+    ],
+    "terminal_state_float": [
+      1200.7946463569433,
+      -123.45266558966074,
+      450.1583084539223,
+      -37.721647819063
+    ],
+    "sum_controls_exact": "-466579/492375",
+    "weighted_sum_controls_exact": "-1505224/77375",
+    "objective_squared_exact": "2958186538093451/114292546875",
+    "objective_float": 160.8806539455271,
+    "scope": "Global lower bound for any constraints on the displayed linear model; not the historical constrained optimum"
+  },
+  "historical_reproduction_complete": false,
+  "limits": [
+    "No numerical U_t recovered and no constrained optimal family or historical witness computed.",
+    "The displayed coefficients are treated as exact rational data; original unrounded coefficients are unknown.",
+    "Terminal-point rounding alone cannot repair the stock invariant; possible model/coefficient/transcription changes remain unresolved.",
+    "No nonlinear simulation, runtime reproduction or full validated floating-point solver certificate."
+  ]
+}

@@ -81,3 +81,7 @@ Follow-up assessed 2026-10-11. See [architecture implications and reading limits
 |---|---|---|
 | R38 | [Boyd and Vandenberghe, Convex Optimization](https://web.stanford.edu/~boyd/cvxbook/) | Foundational text, 2004; convexity/polyhedral formulation background. Applied derivations are recorded independently in [temporal coupling](temporal-coupling.md) |
 | R39 | [do-mpc LQR increment-state reformulation and source](https://www.do-mpc.com/en/latest/_modules/do_mpc/controller/_lqr.html) | Documented augmentation and source inspected; input-rate penalty example, not a certificate for hard constraints or complete-family recovery |
+
+## B04 publication recovery
+
+R40: [Kalev and Shorikov, optimal open-loop terminal fuel control](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019), 2019, pp. 166–176, DOI 10.1134/S0002338819020094. Published counterpart to L11; numerical section and tables inspected 2026-10-11.

@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "id": "B04-historical",
+  "selection": {
+    "date": "2026-10-11",
+    "role": "first_nominal_end_to_end_benchmark",
+    "owner_confirmed": true
+  },
+  "restoration_status": "incomplete_and_inconsistent",
+  "executable": false,
+  "sources": [
+    {
+      "id": "L11",
+      "sha256": "e04c2f1609e2580c8878ab7fb91bc41151ccc8e0cf1f5deac4cef9fd860ce147",
+      "pdf_pages": [
+        12,
+        13,
+        14
+      ],
+      "visual_check_pages": [
+        12,
+        13
+      ]
+    },
+    {
+      "id": "R40",
+      "url": "https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019",
+      "doi": "10.1134/S0002338819020094",
+      "role": "published_counterpart_with_tables",
+      "accessed": "2026-10-11"
+    }
+  ],
+  "problem": {
+    "time_domain": "discrete",
+    "horizon": 16,
+    "state_indices": [
+      0,
+      16
+    ],
+    "control_indices": [
+      0,
+      15
+    ],
+    "physical_time_seconds": [
+      0,
+      100
+    ],
+    "step_seconds": "25/4",
+    "policy": "nominal_open_loop",
+    "initial_state": [
+      "1216.904",
+      "119500",
+      "438.787",
+      "45300"
+    ],
+    "state_coordinates": [
+      "oxidizer_mass_flow",
+      "oxidizer_working_stock_balance",
+      "fuel_mass_flow",
+      "fuel_working_stock_balance"
+    ],
+    "state_units": [
+      "kg/s",
+      "kg",
+      "kg/s",
+      "kg"
+    ],
+    "dynamics": {
+      "kind": "linear_time_invariant",
+      "A": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          "-25/4",
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          "-25/4",
+          1
+        ]
+      ],
+      "B": [
+        [
+          17
+        ],
+        [
+          0
+        ],
+        [
+          -12
+        ],
+        [
+          0
+        ]
+      ],
+      "offset": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "process_disturbance_channels": []
+    },
+    "observations": {
+      "required_by_nominal_planner": false,
+      "initial_state_known": true
+    },
+    "controls": {
+      "domain": "continuous",
+      "dimension": 1,
+      "stage_sets": null,
+      "missing_means": "unresolved_data_not_unconstrained"
+    },
+    "state_constraints": {
+      "kind": "stagewise_linear",
+      "H": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          -1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          -1,
+          0
+        ]
+      ],
+      "h": [
+        1224,
+        -1176,
+        468,
+        -432
+      ],
+      "stages": {
+        "first": 0,
+        "last": 16,
+        "status": "transcribed_from_throughout_movement"
+      },
+      "additional_stock_constraints": null,
+      "additional_stock_constraints_status": "not_numerically_specified_in_example"
+    },
+    "new_temporal_constraints": [],
+    "objective": {
+      "kind": "affine_residual_euclidean_norm",
+      "residual_matrix": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          "8/3",
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          "8/3"
+        ],
+        [
+          0,
+          1,
+          0,
+          "-8/3"
+        ]
+      ],
+      "residual_target": [
+        1200,
+        0,
+        1200,
+        0,
+        0
+      ],
+      "reported_value_convention": "norm_not_squared_norm"
+    },
+    "requested_output": {
+      "kind": "all_optimal_controls_and_consistent_trajectories",
+      "initial_query": "different_complete_witnesses"
+    }
+  },
+  "reported": {
+    "terminal_state": [
+      "1200.7",
+      "-22.929",
+      "450.2",
+      "-7.709"
+    ],
+    "objective": "30.899",
+    "runtime_seconds": "0.4",
+    "runtime_context": {
+      "software": "MATLAB R2014a",
+      "cpu": "Intel Core i7-3770 3.4 GHz",
+      "ram_gb": 8,
+      "timing_scope": "not_precisely_specified"
+    },
+    "nonlinear_table_rows": [
+      {
+        "policy": "frozen_coefficient_regulator",
+        "terminal_state": [
+          1190.4,
+          101.7,
+          455.12,
+          -72.817
+        ],
+        "objective": 368.45
+      },
+      {
+        "policy": "optimal_linear_witness_1",
+        "terminal_state": [
+          1200.5,
+          -2.695,
+          449.72,
+          10.556
+        ],
+        "objective": 41.855
+      },
+      {
+        "policy": "optimal_linear_witness_2",
+        "terminal_state": [
+          1200.5,
+          0.50887,
+          449.72,
+          17.561
+        ],
+        "objective": 65.874
+      },
+      {
+        "policy": "optimal_linear_witness_3",
+        "terminal_state": [
+          1200.5,
+          -6.366,
+          449.72,
+          -1.475
+        ],
+        "objective": 7.922
+      }
+    ],
+    "nonlinear_table_source": "R40 Table 2",
+    "complete_control_histories": null
+  },
+  "related_noncanonical_evidence": {
+    "source": "L16",
+    "control_interval": [
+      -1,
+      1
+    ],
+    "status": "adaptive_demonstration_only_not_confirmed_B04_data",
+    "source_model_differences": "Different fitted B and documented L28 uniform-grid recurrence defect"
+  },
+  "unresolved": [
+    "Canonical numerical U_t and whether u_0 is fixed",
+    "Matrix/data inconsistency proved by terminal invariant; recover actual numerical model",
+    "Any additional state constraints not displayed in numerical example",
+    "Complete witness histories and nonlinear replay/time convention"
+  ],
+  "execution_gate": "Do not solve this manifest or compare against 30.899 until missing inputs and inconsistent model are resolved. A fully specified reference variant must use a distinct scenario ID."
+}

@@ -123,7 +123,7 @@ Confirmed: optimal control planning without process disturbances. Proposed simpl
 
 The first solver uses continuous control actions on nominal dynamics while the contracts retain finite/mixed domain types, external-input and observation channels. Continuous controls do not imply continuous-time dynamics or convex admissibility. A first affine/polyhedral implementation remains the proposed initial solver class. More complex problems should be rejected by this solver with supported-assumption metadata until compatible algorithms exist.
 
-Confirmed output: a representation of all optimal plans and consistent trajectories, with individual witness selection. Initially expose optimal families only. Still open: first exact baseline, supported stagewise continuous-domain shapes and criterion/guarantee details.
+Confirmed output: a representation of all optimal plans and consistent trajectories, with individual witness selection. Initially expose optimal families only. B04 is selected as the first end-to-end benchmark; see its [restoration audit](../research/b04-restoration.md). Its historical data are incomplete and inconsistent, so reported cost 30.899 is not yet an executable acceptance target. Supported stagewise continuous-domain shapes and concrete certificate support remain to be finalized.
 
 ## 7. C++ target and Python reference workflow
 

@@ -35,3 +35,7 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 ## Follow-up proof notes
 
 [Temporal coupling](temporal-coupling.md) distinguishes reserved cross-step constraints from unchanged first archival experiments. It includes the joint convexity derivation, an exact slew-limit memory lift, a recurrence counterexample and algorithm-specific limits.
+
+## Selected first benchmark
+
+[B04 restoration](b04-restoration.md) records the owner-selected nominal scenario, its versioned historical manifest and an exact terminal-invariant audit. Source gaps and the model/result inconsistency remain explicit before implementation comparisons.

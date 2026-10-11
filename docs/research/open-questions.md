@@ -12,7 +12,7 @@ Date: 2026-10-11. Questions are recorded for later discussion; unanswered prefer
 - First optimal-family operation: obtain different consistent complete control sequences and their trajectories, for visual, numerical and runtime comparison of methods. Membership/projections and user-facing secondary optimization remain later query priorities.
 - First objective modules: explicit linear, convex quadratic and weighted Euclidean terminal forms. General user functions remain a future extension. Preserve each archival objective/weight convention and evaluate original objective values after any solver reformulation.
 - Use the supplied application experiments and published numerical outcomes as initial baselines.
-- First user workflow selected: optimal control planning. Given a model and constraints, obtain a control sequence, its corresponding trajectory, and an objective/quality evaluation. The first solve will be nominal, without process disturbances. The model contract must nevertheless account for external/adversarial inputs and partial/noisy observation. The first reproduction baseline remains undecided.
+- First user workflow selected: optimal control planning. Given a model and constraints, obtain a control sequence, its corresponding trajectory, and an objective/quality evaluation. The first solve will be nominal, without process disturbances. The model contract must nevertheless account for external/adversarial inputs and partial/noisy observation. B04 is selected as the first end-to-end reproduction baseline; its canonical inputs need restoration and its displayed model/result inconsistency must be resolved.
 - Keep all newly authored research/software artifacts in English; converse with the owner in Russian.
 - Prefer a compiled main implementation in C++ or Rust. Python is acceptable for initial verification and references. C++ is the assistant-proposed working target; the owner has not stated a preference between C++ and Rust.
 - The professor's earliest implementation was Pascal; archived MATLAB/Python artifacts are historical evidence.
@@ -24,7 +24,7 @@ The immediate workflow compares alternative algorithms through complete witness 
 
 | Priority | Question | Why it matters |
 |---|---|---|
-| 1 | Which archival nominal experiment and its original stagewise constraints should be reproduced first? | New temporal couplings are reserved but excluded from first experiments; do not silently change a baseline |
+| 1 | Can the original B04 MATLAB project or full numerical inputs be recovered? | B04 is selected; printed matrices violate the reported terminal-point invariant and numerical control bounds are missing |
 | 2 | Which later experiments should follow nominal B04: minimax B07/B08 or adaptive B09? | The selected initial solve is nominal; later workflows have different uncertainty/information assumptions |
 | 1 | Can original MATLAB/Pascal projects, full control histories, OpenLoopControl.py, and the distinct minimax adaptive source be recovered? | Resolves reproduction and duplicate-folder gaps |
 | 1 | Which actual terminal criterion was used for L04/L13 numerical tables? | Printed Euclidean formulas and displayed state/cost rows disagree |
