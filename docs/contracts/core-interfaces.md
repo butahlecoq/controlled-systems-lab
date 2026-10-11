@@ -1,4 +1,4 @@
-# Native interfaces, revision 1.3
+# Native interfaces, revision 1.3.1
 
 Date: 2026-10-11. CORE-01 / issue #11; MODEL-01 / issue #15 and OPT-02 / issue #18 revisions. This revision turns the [native design sketch](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md) into a compiled source contract in [contracts.hpp](../../include/csl/contracts.hpp). The [master specification](../superpowers/specs/2026-10-11-controlled-systems-master-design.md) remains the requirements authority. Integration review is required before downstream adapters depend on this revision.
 
@@ -18,6 +18,15 @@ solve-attempt stamps. See [linear programs](linear-programs.md) for conventions,
 source migration, ownership, checks and limitations. Revision 1.2 observation
 maps, schedules and model semantics are unchanged. This revision implements no
 production native LP adapter or certificate verifier.
+
+Revision 1.3.1 renames the LP data result alias to
+`optimization::LPDataResult<T>` so the LP and objective headers can be included
+together in either order ([issue #119](https://github.com/butahlecoq/controlled-systems-lab/issues/119)).
+LP result annotations using the former `optimization::Result<T>` must migrate;
+callers using inferred types need no change. LP alternatives remain `T` or
+`Diagnostics`, and objective `optimization::Result<T>` remains `T`, `Diagnostic`
+or `OperationStopped`. No mathematical, evidence, ownership or runtime behavior
+changes in this source patch.
 
 ## Common rules
 

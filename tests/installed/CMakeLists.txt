@@ -7,6 +7,13 @@ set_target_properties(installed_public_headers_client PROPERTIES CXX_EXTENSIONS 
 add_test(NAME installed_public_headers_client COMMAND installed_public_headers_client)
 set_tests_properties(installed_public_headers_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Public headers client: retained layout, signed oracle and zero ports passed")
+add_executable(installed_public_headers_lp_first_client public_headers_client.cpp)
+target_link_libraries(installed_public_headers_lp_first_client PRIVATE CSL::numeric)
+target_compile_definitions(installed_public_headers_lp_first_client PRIVATE CSL_PUBLIC_HEADERS_LP_FIRST=1)
+set_target_properties(installed_public_headers_lp_first_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_public_headers_lp_first_client COMMAND installed_public_headers_lp_first_client)
+set_tests_properties(installed_public_headers_lp_first_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Public headers client: retained layout, signed oracle and zero ports passed")
 add_executable(installed_model_client model_client.cpp)
 target_link_libraries(installed_model_client PRIVATE CSL::model)
 set_target_properties(installed_model_client PROPERTIES CXX_EXTENSIONS OFF)

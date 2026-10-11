@@ -1,16 +1,30 @@
 #include <csl/contracts.hpp>
 #include <csl/numeric/data.hpp>
+#ifdef CSL_PUBLIC_HEADERS_LP_FIRST
+#include <csl/optimization/linear_program.hpp>
+#include <csl/optimization/lp_backend.hpp>
 #include <csl/optimization/objectives.hpp>
+#else
+#include <csl/optimization/objectives.hpp>
+#include <csl/optimization/linear_program.hpp>
+#include <csl/optimization/lp_backend.hpp>
+#endif
 #include <csl/model/linear_system.hpp>
 #include <csl/registry/registry.hpp>
 #include <csl/sets/data.hpp>
 
 #include <iostream>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 using namespace csl;
 using namespace csl::numeric;
+
+static_assert(std::is_same_v<csl::optimization::LPDataResult<LinearProgram>,
+    std::variant<LinearProgram, Diagnostics>>);
+static_assert(std::is_same_v<csl::optimization::Result<csl::optimization::Objective>,
+    std::variant<csl::optimization::Objective, Diagnostic, OperationStopped>>);
 
 namespace {
 template<class T> T accepted(Result<T> result) {

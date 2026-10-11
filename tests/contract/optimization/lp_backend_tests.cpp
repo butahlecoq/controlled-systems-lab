@@ -8,7 +8,7 @@ using namespace csl;
 using namespace csl::optimization;
 using namespace csl::registry;
 namespace {
-template<class T> T accepted(Result<T> r) { REQUIRE(std::holds_alternative<T>(r)); return std::get<T>(std::move(r)); }
+template<class T> T accepted(LPDataResult<T> r) { REQUIRE(std::holds_alternative<T>(r)); return std::get<T>(std::move(r)); }
 LinearProgram triangle(double offset=0) { return accepted(make_linear_program({{{"p"},{offset==0?"triangle":"triangle-offset"}},{-1,-2},offset,{1,2,{0,2},{0,1},{1,1}},{{0,{}},{0,{}}},{{{},1}}})); }
 ProgramResult candidate(const LinearProgram& p,Termination t=Termination::resource_limit) {
     return {t,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},Vector{0,1},{},"partial"};

@@ -6,6 +6,15 @@ uses the canonical types in contracts.hpp and the retaining CORE-03 numeric
 views. Source revision 1.3 is a deliberate migration from revision 1.2, not a
 stable binary ABI. Model observation semantics are unchanged.
 
+Source patch 1.3.1 names the LP data result `optimization::LPDataResult<T>`
+(`std::variant<T, Diagnostics>`). Replace explicit LP `optimization::Result<T>`
+annotations with this name; inferred `auto` callers require no change. The
+objective module keeps `optimization::Result<T>` with its distinct `T`,
+`Diagnostic` and `OperationStopped` alternatives. This resolves the public-header
+collision in [issue #119](https://github.com/butahlecoq/controlled-systems-lab/issues/119):
+objective and LP headers can coexist in either include order. Numerical and
+diagnostic semantics are unchanged.
+
 ## Authored input and mathematical convention
 
 Construct `LinearProgramInput`, then handle the alternatives returned by

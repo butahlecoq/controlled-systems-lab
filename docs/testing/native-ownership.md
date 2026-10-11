@@ -63,8 +63,14 @@ No coefficient accessor is called for an empty dimension.
 ## Source and installed clients
 
 [public_headers_client.cpp](../../tests/contract/public_headers_client.cpp)
-includes all six product headers installed after integration onto main
-`56f2e9f7383089eb4d1fa4e131435c1423d50823`, including the public objectives header.
+includes all eight product headers installed after integration onto main
+`82f355a1d7ed7550586433eac38d1fec2395e894`, including public objectives, linear
+program and LP backend headers. Two targets compile and run this source with
+objectives before LP and LP before objectives. Compile-time type checks preserve
+the distinct objective and LP result alternatives. Combining the headers exposed
+[issue #119](https://github.com/butahlecoq/controlled-systems-lab/issues/119);
+the source patch 1.3.1 migration is documented in
+[linear programs](../contracts/linear-programs.md).
 It links only `CSL::numeric`, uses neutral authored values and checks retained ownership,
 the signed literal oracle and zero ports. The same source is copied to a separate
 consumer tree. That project resolves CSL solely with `find_package(CSL 0.1 CONFIG
@@ -116,6 +122,13 @@ g++ -std=c++20 -g -O1 -pthread -Wall -Wextra -Wpedantic -Werror \
   -o build/test01/wsl/public_headers_client
 ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 \
   build/test01/wsl/public_headers_client
+g++ -std=c++20 -g -O1 -pthread -Wall -Wextra -Wpedantic -Werror \
+  -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude \
+  -DCSL_PUBLIC_HEADERS_LP_FIRST=1 \
+  tests/contract/public_headers_client.cpp src/numeric/data.cpp src/contracts.cpp \
+  -o build/test01/wsl/public_headers_lp_first_client
+ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 \
+  build/test01/wsl/public_headers_lp_first_client
 ```
 
 Record actual results, tool versions and skips at delivery. These direct commands
@@ -173,3 +186,17 @@ under WSL GCC 13.3.0 with ASan/UBSan and leak detection; both passed. Installed
 audit comment/include/type controls were repeated, deliberate leaks removed, and
 the restored full suites passed. The initial-base results above remain historical
 records; these integration results do not imply Linux CMake packaging or hosted CI.
+
+Integration round 2 rebased the reserved-future fixture unchanged onto main
+`82f355a1d7ed7550586433eac38d1fec2395e894`. Adding the LP headers exposed the
+conflicting optimization result aliases in both include orders. Literal GCC
+compile failures were recorded before the issue #119 alias fix. After the
+`LPDataResult<T>` migration, fresh MSVC Release and Debug builds each passed
+19/19 root tests and 9/9 installed consumers, including both eight-header orders.
+Both installed neutral targets used only the prefix include path and
+numeric/contracts product libraries. Iterator levels remained 0/2; the numeric
+fixture passed 8 cases / 314 assertions. WSL ASan/UBSan with leak detection passed
+the rebuilt numeric fixture (8 cases / 313 assertions) and both neutral orders.
+Installed audit controls were repeated and their deliberate leaks removed before
+the restored suite passed. The original initial-green expansion record above
+remains separate from this discovered composition defect and its fix.
