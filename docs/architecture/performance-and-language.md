@@ -69,6 +69,8 @@ The architecture contract and requested optimal-family semantics are defined fir
 6. Vary dimensions/horizon/action count/generators/constraints/sparsity to locate memory and time limits.
 7. Test independent-job and subtree parallelism, then GPU/distributed execution if the workload justifies them.
 
+The first comparison extracts different complete witnesses from each optimal family. Separate setup and family-construction time from first/additional witness-query time and independent verification; record end-to-end time, with plot/export cost separate. Pin the scenario, tolerance and witness-selection request. Witness cost/feasibility and family completeness are independent metrics.
+
 Report cold and warm runs, median/tail runtime, peak memory, actual workers/threads, failures, numerical residuals, bound gaps and representation size. Pin environment and hardware information. Store raw results and scenario hashes.
 
 Validate the proposed C++ stack through correctness and representative end-to-end profiling. Keep small Python mathematical references as independent oracles. Rust remains an alternative if owner preference or integration evidence favors it. See the [linear-system contract](linear-system-contract.md).

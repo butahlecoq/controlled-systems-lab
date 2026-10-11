@@ -48,6 +48,24 @@ For terminal-only cost, first determine the entire terminal minimizer set M_T=ar
 
 Draft SolutionFamily operations: witness(selection), contains(candidate,tolerance), project(coordinates), optimize_secondary(criterion), and enumerate_finite(budget) when finite enumeration is supported. Query results carry their own termination and numerical evidence. Secondary selection does not alter the stored primary optimal family. A projection can stay lazy.
 
+### Selected first query and comparison workflow
+
+Owner decision: first extract different complete optimal control sequences and their consistent trajectories, then compare approaches visually, numerically and by computation time. This query does not replace the requirement to represent the optimal family.
+
+Proposed separation: a WitnessSelector queries the family, a TrajectoryVerifier independently checks model/constraint/objective consistency, and a ComparisonRunner records aligned experiment results. Plot/export code consumes those records and contains no scientific solver logic. Selector identity, settings and any random seed belong in result provenance independently of the synthesis algorithm.
+
+A request for k distinct witnesses records requested/returned counts, duplicate filtering and the selection rule. A singleton family may provide only one distinct solution. Failure to discover more witnesses does not prove uniqueness. Selection need not be uniformly random; no such sampling guarantee is implied. The default selector is proposed to be reproducible, with explicit diversity settings for multi-witness exploration.
+
+| Comparison output | Fields / interpretation |
+|---|---|
+| Visual | Controls against the common time grid, state trajectories, terminal states, bounds/targets; identify witnesses and algorithms |
+| Numerical | Primary objective, dynamics residuals, constraint violations/margins, terminal error under declared units/scaling, optimality gap when justified |
+| Family evidence | Representation, coverage/completeness, assumptions and approximation status, separately from the quality of selected witnesses |
+| Runtime | Setup, family construction, first-witness extraction, additional-witness extraction, independent verification, end-to-end time; plot/export separately |
+| Resources | Peak memory, representation size, worker/library thread counts, hardware and backend versions |
+
+Use the same problem data, primary objective, tolerances, output scope and witness request for comparable runs. Use a common selector when supported and record incompatible selection semantics. Different optimal trajectories can have equal primary cost; shape differences alone do not establish that one algorithm is better. A method returning one witness without the family has different output scope, even if its selected trajectory is optimal.
+
 Numerical solver success does not certify completeness. Family evidence identifies the mathematical target, supported plan/policy class, exact or enclosure relation, tolerances, objective bounds, and complete/partial/unknown coverage. Algebraically exact set construction in floating point is distinct from validated enclosure.
 
 If only certified bounds L <= v* <= U are known, the feasible family phi <= U+epsilon is a candidate relaxation containing exact optimizers, with cost gap at most U-L+epsilon. It is not automatically the exact optimizer set. Conversely, a set of tied floating-point incumbents is not proof that no other optimizer exists. The initial API must report incomplete evidence rather than silently substituting approximate or sampled output.

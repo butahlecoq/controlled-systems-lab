@@ -7,6 +7,7 @@ Date: 2026-10-11. Questions are recorded for later discussion; unanswered prefer
 - Build a convenient general interface for controlled systems, with scientific and algorithmic extensibility, performance and parallel scalability.
 - First solver control domain: continuous actions. Preserve explicit finite and mixed control domains for future algorithms; hybrid dynamics are a separate future model capability. Continuous-domain convexity is an algorithm assumption, not implied by the word continuous.
 - Architecture and replaceable mathematical algorithms are primary. Define contracts before benchmark implementation. The first output represents all optimal plans and consistent trajectories; feasible and near-optimal families are not initial public requests.
+- First optimal-family operation: obtain different consistent complete control sequences and their trajectories, for visual, numerical and runtime comparison of methods. Membership/projections and user-facing secondary optimization remain later query priorities.
 - Use the supplied application experiments and published numerical outcomes as initial baselines.
 - First user workflow selected: optimal control planning. Given a model and constraints, obtain a control sequence, its corresponding trajectory, and an objective/quality evaluation. The first solve will be nominal, without process disturbances. The model contract must nevertheless account for external/adversarial inputs and partial/noisy observation. The first reproduction baseline remains undecided.
 - Keep all newly authored research/software artifacts in English; converse with the owner in Russian.
@@ -14,13 +15,13 @@ Date: 2026-10-11. Questions are recorded for later discussion; unanswered prefer
 - The professor's earliest implementation was Pascal; archived MATLAB/Python artifacts are historical evidence.
 - Create a public GitHub repository for active tracking and scientific review. Approved name: controlled-systems-lab. Owner will add reviewers.
 
-The owner's baseline answer did not choose between one large solve, many experiments, or a deadline-bound feedback controller. Treat that requirement as undecided.
+The immediate workflow compares alternative algorithms through complete witness trajectories, numerical quality and computation time. Target workload scale and any deadline-bound online controller remain undecided.
 
 ## Next focused interview
 
 | Priority | Question | Why it matters |
 |---|---|---|
-| 1 | Which optimal-family operations should be available first: witness selection, membership, projections or secondary optimization? | All optimal plans are confirmed; this prioritizes queries without weakening the result contract |
+| 1 | What numerical versus validated evidence must the first comparison provide? | Witness extraction is selected; distinguish numerical residuals/gaps from certified optimality and family completeness |
 | 1 | Which supplied experiment should be our first complete reproduction: nominal B04, constrained minimax B07, four-step minimax B08, or adaptive B09? | Defines one concrete end-to-end result and missing inputs |
 | 1 | Can original MATLAB/Pascal projects, full control histories, OpenLoopControl.py, and the distinct minimax adaptive source be recovered? | Resolves reproduction and duplicate-folder gaps |
 | 1 | Which actual terminal criterion was used for L04/L13 numerical tables? | Printed Euclidean formulas and displayed state/cost rows disagree |
