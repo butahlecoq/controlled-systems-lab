@@ -28,6 +28,24 @@ The [temporal-coupling note](../research/temporal-coupling.md) proves convexity/
 
 Future MemoryLift and joint-relation strategies declare which couplings they support, preserve original-to-auxiliary coordinate mappings, and record initial memory. Augmented dimension, intersections, representation class and numerical evidence must be checked. A new constrained study gets its own scenario ID and comparison record. Exact mathematical equivalence does not promise unchanged numerical cost or exact ordinary-zonotope closure.
 
+### Structured objective modules for the first version
+
+Owner agreement: begin with explicit linear, convex quadratic and weighted Euclidean terminal objectives. General user-supplied functions remain a future extension with value/derivative oracles and declared properties. The first archival experiments retain the original objective and weights.
+
+| ObjectiveSpec | Mathematical form | Required data / capabilities |
+|---|---|---|
+| LinearTerminal | c^T x_T+d | Coordinate dimension and coefficient/offset conventions; linear minimization |
+| ConvexQuadraticTerminal | (1/2)x_T^T Q x_T+q^T x_T+c, Q symmetric positive semidefinite | Explicit factor convention, PSD evidence and compatible convex quadratic backend |
+| AffineResidualNormTerminal | norm(L x_T-r,2) | Residual coordinates/scaling, rectangular L and target r; compatible norm/conic or equivalent quadratic method |
+
+The weighted-target form norm(W(x_T-x_d),2) is a special case with L=W and r=W x_d. Allow rectangular residual maps, not only diagonal weights: the B04 criterion includes a residual combining two mass coordinates. Units, scaling and the physical meaning of each residual remain scenario metadata.
+
+The norm objective can be minimized through its square without changing minimizers, since the square is strictly increasing on nonnegative values. For the quadratic convention above, its square has Q=2 L^T L, q=-2 L^T r and c=r^T r. Report the original norm for comparisons and label any transformed solver objective. Do not apply this equivalence blindly to a sum containing other objective terms.
+
+Convexity, differentiability and a concrete solver representation are distinct capabilities; the norm can be nondifferentiable at zero residual. A backend must support the requested form or an explicit justified reformulation. A future opaque callback must not silently inherit convexity, gradient or certificate claims.
+
+ObjectiveModel supplies the primary criterion; ObjectiveReformulator creates compatible backend data and preserves the source-to-solver mapping; ObjectiveEvaluator independently evaluates returned trajectories in original coordinates. Diagnostics such as control energy or smoothness remain comparison metrics unless the problem explicitly includes them in its primary objective.
+
 ## 1. What constitutes the result
 
 For nominal dynamics and a specified initial condition, let z=(x_0,...,x_T,u_0,...,u_{T-1}). Define F as the joint feasible relation containing dynamics, all state/control constraints and any temporal coupling. For terminal cost phi:
