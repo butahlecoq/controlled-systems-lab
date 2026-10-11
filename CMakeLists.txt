@@ -14,7 +14,11 @@ add_library(csl_numeric STATIC src/numeric/data.cpp)
 add_library(CSL::numeric ALIAS csl_numeric)
 set_target_properties(csl_numeric PROPERTIES EXPORT_NAME numeric CXX_EXTENSIONS OFF)
 target_link_libraries(csl_numeric PUBLIC CSL::contracts)
-foreach(target IN ITEMS csl_contracts csl_numeric)
+add_library(csl_registry STATIC src/registry/registry.cpp)
+add_library(CSL::registry ALIAS csl_registry)
+set_target_properties(csl_registry PROPERTIES EXPORT_NAME registry CXX_EXTENSIONS OFF)
+target_link_libraries(csl_registry PUBLIC CSL::contracts)
+foreach(target IN ITEMS csl_contracts csl_numeric csl_registry)
   target_compile_features(${target} PUBLIC cxx_std_20)
   target_include_directories(${target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -26,10 +30,11 @@ foreach(target IN ITEMS csl_contracts csl_numeric)
   endif()
 endforeach()
 
-install(TARGETS csl_contracts csl_numeric EXPORT CSLTargets
+install(TARGETS csl_contracts csl_numeric csl_registry EXPORT CSLTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES include/csl/contracts.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl)
 install(FILES include/csl/numeric/data.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/numeric)
+install(FILES include/csl/registry/registry.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/registry)
 install(EXPORT CSLTargets NAMESPACE CSL:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CSL)
 configure_package_config_file(cmake/CSLConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/CSLConfig.cmake
@@ -55,6 +60,12 @@ if(BUILD_TESTING)
   add_executable(numeric_tests tests/unit/numeric/data_tests.cpp)
   target_link_libraries(numeric_tests PRIVATE CSL::numeric doctest::doctest Threads::Threads)
   add_test(NAME numeric_tests COMMAND numeric_tests)
+  add_executable(registry_tests tests/contract/registry/registry_tests.cpp)
+  target_link_libraries(registry_tests PRIVATE CSL::registry doctest::doctest)
+  add_test(NAME registry_tests COMMAND registry_tests)
+  add_executable(registry_public_client tests/installed/registry_client.cpp)
+  target_link_libraries(registry_public_client PRIVATE CSL::registry)
+  add_test(NAME registry_public_client COMMAND registry_public_client)
   add_executable(caller_example probes/core-01/caller_example.cpp)
   target_link_libraries(caller_example PRIVATE CSL::contracts Threads::Threads)
   add_test(NAME caller_example COMMAND caller_example)

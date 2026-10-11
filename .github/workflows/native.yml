@@ -53,7 +53,7 @@ jobs:
         run: cmake --install tmp/native --config Release --prefix install
 
   sanitizers:
-    name: Linux GCC 13 / ASan and UBSan (contracts only)
+    name: Linux GCC 13 / ASan and UBSan (public modules and consumers)
     runs-on: ubuntu-24.04
     env:
       CC: gcc-13
@@ -68,7 +68,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install cmake==3.31.6
-      - name: Configure instrumented contracts and consumers
+      - name: Configure instrumented public modules and consumers
         run: >-
           cmake -S . -B tmp/sanitizers -G Ninja -DCMAKE_BUILD_TYPE=Debug
           -DCSL_DEPENDENCY_PROBES=OFF

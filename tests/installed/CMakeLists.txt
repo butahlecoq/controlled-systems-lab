@@ -15,3 +15,10 @@ set_target_properties(installed_numeric_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_numeric_client COMMAND installed_numeric_client)
 set_tests_properties(installed_numeric_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed numeric client: dense/CSR snapshots and retained literal fixture passed")
+
+add_executable(installed_registry_client registry_client.cpp)
+target_link_libraries(installed_registry_client PRIVATE CSL::registry)
+set_target_properties(installed_registry_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_registry_client COMMAND installed_registry_client)
+set_tests_properties(installed_registry_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed registry client: retained custom-port fixture and exclusive workspaces passed")
