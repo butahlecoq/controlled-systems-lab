@@ -1,6 +1,6 @@
 # C++20 core contracts: nominal optimal-family slice
 
-Date: 2026-10-11. Status: design sketch for owner and scientific review. The [C++ language direction](../../architecture/decisions/0001-cpp20-core.md) is accepted. CORE-01 now supplies [compiled native interface revision 1](../../contracts/core-interfaces.md) and [pinned dependency probes](../../architecture/decisions/0002-native-integrations.md), pending integration review. The sketches below retain the broader intended design; they do not imply implemented numerical adapters or synthesis.
+Date: 2026-10-11. Status: design sketch for owner and scientific review. The [C++ language direction](../../architecture/decisions/0001-cpp20-core.md) is accepted. CORE-01 now supplies [compiled native interface revision 1.1](../../contracts/core-interfaces.md) and [pinned dependency probes](../../architecture/decisions/0002-native-integrations.md), pending integration review. Revision 1.1 adds problem/program-bound outcome claims and neutral geometry operands with reference-bound evidence. The sketches below retain the broader intended design; they do not imply implemented numerical adapters or synthesis.
 
 Requirements, test IDs and delivery boundaries are governed by the [consolidated specification](2026-10-11-controlled-systems-master-design.md). This document details its proposed native interfaces.
 
@@ -142,7 +142,7 @@ struct Witness {
 
 struct SynthesisResult {
     Termination termination;
-    MathematicalOutcome outcome;
+    SynthesisOutcomeClaim outcome; // problem, mathematical outcome, support and assumptions
     ObjectiveEvidence objective;
     std::optional<OptimalFamily> family;
     std::vector<Witness> incumbents;
@@ -150,7 +150,7 @@ struct SynthesisResult {
 };
 ~~~
 
-Termination reports completed/cancelled/resource-limit/numerical-failure. MathematicalOutcome separately reports optimal/infeasible/unbounded/infimum-not-attained/undetermined/unsupported. A normal return from a numerical solver is not proof of the outcome. ObjectiveEvidence records bounds with evidence levels, residuals and their applicability. FamilyEvidence separately records feasibility, optimality and completeness, including any assumptions/certificates. All evidence binds to the same problem identity.
+Termination reports completed/cancelled/resource-limit/numerical-failure. An outcome claim separately reports optimal/infeasible/unbounded/infimum-not-attained/undetermined with explicit support (including unestablished) and assumptions. Unsupported requests have a separate result alternative. Synthesis outcome claims bind to the original problem; backend outcome claims bind to both problem and specific program identity. Infeasible/unbounded claims do not require an objective bound or family to carry evidence. A normal return from a numerical solver is not proof of the outcome. ObjectiveEvidence records bounds with evidence levels, residuals and their applicability. FamilyEvidence separately records feasibility, optimality and completeness, including any assumptions/certificates. All evidence binds to the same problem identity.
 
 An unsupported strategy is diagnosed before expensive execution. A timeout can return an incumbent and bounds without a complete family. An approximation or finite sample cannot be labelled the full optimal family. If numerical sublevel relaxation phi <= incumbent+tolerance is used, the relation is explicitly a candidate relaxation, not exact Z*. Initial public queries request optimal families; approximate candidates are visible as diagnostic solve results.
 

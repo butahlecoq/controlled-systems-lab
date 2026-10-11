@@ -1,6 +1,6 @@
 # CORE-01 isolated contract and dependency probes
 
-This is not the product build or a synthesis executable. It compiles [interface revision 1](../../docs/contracts/core-interfaces.md), its guards, dependency probes and two explicit strategy fixtures. Dependency choices and upstream licensing are in [ADR 0002](../../docs/architecture/decisions/0002-native-integrations.md).
+This is not the product build or a synthesis executable. It compiles [interface revision 1.1](../../docs/contracts/core-interfaces.md), its guards, dependency probes and two explicit strategy fixtures. Dependency choices and upstream licensing are in [ADR 0002](../../docs/architecture/decisions/0002-native-integrations.md).
 
 From the repository root in PowerShell (build directory is ignored):
 
@@ -26,5 +26,7 @@ ctest --test-dir tmp/core01-linux --output-on-failure
 ```
 
 The first TDD run compiled four permissive guard bodies returning empty diagnostics. With the authored tests in place it failed 9 of 10 cases, 23 of 34 assertions. Replacing the placeholders with the guards produced 10/10 cases and 66/66 assertions. The dependency probe produced 6/6 cases and 51/51 assertions. Neither CMake configuration, dependency compilation nor the deliberately unsupported caller fixture is treated as proof that numerical synthesis exists.
+
+Revision 1.1 review fixes extended outcome evidence and geometry channels. Outcome-guard red: 13 cases/3 failed, 82 assertions/4 failed; green: 13 cases/90 assertions passed. Geometry-guard red: 20 cases/7 failed, 122 assertions/16 failed; initial green: 20 cases/145 assertions passed. With additional positive shape cases and safe diagnostic-index assertions, the final suite passes 20 cases/151 assertions. These guards check identities, claim scopes and operand/metadata shapes; they do not execute geometry or validate certificates.
 
 Observed platform: Windows x64, MSVC 19.44.35215.0, CMake 3.31.6-msvc6, Release. Upstream doctest/HiGHS may emit CMake compatibility deprecation notices; these are upstream configuration warnings, not test failures. No sanitizer/race test or Linux run is claimed.

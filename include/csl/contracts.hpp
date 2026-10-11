@@ -10,8 +10,13 @@
 #include <vector>
 
 namespace csl {
-// Revision 1. This is a source contract, not a stable binary ABI.
+// Revision 1.1. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
+struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
+struct ProgramIdentity { ProblemId problem; ProgramId program; bool operator==(const ProgramIdentity&) const = default; };
+struct SetId { std::string value; bool operator==(const SetId&) const = default; };
+struct RequestId { std::string value; bool operator==(const RequestId&) const = default; };
+struct ReferenceId { std::string value; bool operator==(const ReferenceId&) const = default; };
 struct ModuleId { std::string value; };
 struct RepresentationId { std::string value; };
 struct StageIndex { std::size_t value; };
@@ -40,7 +45,7 @@ struct SetMetadata {
     SetProperty convex, polyhedral, bounded;
 };
 class SetPayload { public: virtual ~SetPayload() = default; };
-struct SetHandle { SetMetadata metadata; std::shared_ptr<const SetPayload> payload; };
+struct SetHandle { SetMetadata metadata; std::shared_ptr<const SetPayload> payload; SetId id; };
 struct EmptySet { std::size_t dimension; };
 struct UniversalSet { std::size_t dimension; };
 struct Singleton { Vector point; };
@@ -82,18 +87,53 @@ using EvidenceSupport = std::variant<Unestablished, NumericalCheck, SymbolicArgu
 struct ClaimEvidence { ProblemId problem; EvidenceSupport support; };
 struct FamilyEvidence { ClaimEvidence feasibility, optimality, completeness; };
 enum class SetRelation { equivalent, inner, outer, heuristic };
+struct GeometryRequestIdentity {
+    ProblemId problem;
+    RequestId request; // identifies the complete immutable request, including operands
+    ReferenceId ideal_output; // exact mathematical set, support value or containment proposition
+    bool operator==(const GeometryRequestIdentity&) const = default;
+};
+struct GeometryReference {
+    GeometryRequestIdentity identity;
+    std::vector<SetId> inputs; // ordered, extracted from operation operands
+    bool operator==(const GeometryReference&) const = default;
+};
+enum class GeometryClaimScope { set_relation, support_value, containment };
+struct GeometryErrorBound { ModuleId metric; double bound; std::string units; };
+struct GeometryEvidence {
+    GeometryReference reference;
+    GeometryClaimScope scope;
+    EvidenceSupport support;
+    std::vector<std::string> assumptions;
+    std::optional<GeometryErrorBound> error_bound; // justified only by this claim's support
+};
+struct AffineImage { SetHandle input; Matrix map; Vector offset; }; // y=Mx+b
+struct MinkowskiSum { SetHandle left, right; };
+struct Intersection { SetHandle left, right; };
+struct Projection { SetHandle input; std::vector<std::size_t> coordinates; }; // ordered zero-based indices
+struct AffinePreimage { SetHandle target; Matrix map; Vector offset; }; // {x: Mx+b in target}
+struct SupportQuery { SetHandle input; Vector direction; }; // sup d'x
+struct ContainmentQuery { SetHandle subset, superset; };
+using GeometryOperation = std::variant<AffineImage, MinkowskiSum, Intersection, Projection,
+    AffinePreimage, SupportQuery, ContainmentQuery>;
 struct OperationRequest {
-    ModuleId operation;
-    std::vector<SetHandle> inputs;
-    SetRelation required_relation;
+    GeometryRequestIdentity identity;
+    ModuleId implementation;
+    GeometryOperation operation;
+    SetRelation required_relation; // set-valued operations only; query values use their own evidence
     Assurance assurance;
 };
-struct OperationResult { SetHandle output; SetRelation relation; ClaimEvidence evidence; };
-struct ConversionRequest { SetHandle input; RepresentationId output; Assurance assurance; };
-struct ApproximationRequest { SetHandle input; RepresentationId output; SetRelation direction; std::size_t size_budget; Assurance assurance; };
+struct OperationResult { SetHandle output; SetRelation relation; GeometryEvidence evidence; };
+struct EmptySupport {};
+struct UnboundedSupport {};
+struct SupportResult { std::variant<double, EmptySupport, UnboundedSupport> value; std::optional<Vector> maximizer; GeometryEvidence evidence; };
+enum class ContainmentDecision { contained, not_contained, undetermined };
+struct ContainmentResult { ContainmentDecision decision; std::optional<Vector> counterexample; GeometryEvidence evidence; };
+struct ConversionRequest { GeometryRequestIdentity identity; SetHandle input; RepresentationId output; Assurance assurance; };
+struct ApproximationRequest { GeometryRequestIdentity identity; SetHandle input; RepresentationId output; SetRelation direction; std::size_t size_budget; Assurance assurance; };
 
 struct LinearProgram {
-    ProblemId problem;
+    ProgramIdentity identity;
     Vector objective; double offset;
     SparseMatrix constraints;
     std::vector<Interval> variables, rows;
@@ -102,20 +142,29 @@ struct QuadraticProgram { LinearProgram linear; SparseMatrix hessian; }; // full
 using ConvexProgram = std::variant<QuadraticProgram>; // conic forms require a revision
 enum class Termination { completed, cancelled, resource_limit, numerical_failure };
 enum class MathematicalOutcome { optimal, infeasible, unbounded, infimum_not_attained, undetermined };
+template<class Subject> struct OutcomeClaim {
+    Subject subject;
+    MathematicalOutcome value;
+    EvidenceSupport support;
+    std::vector<std::string> assumptions;
+};
+using ProgramOutcomeClaim = OutcomeClaim<ProgramIdentity>;
+using SynthesisOutcomeClaim = OutcomeClaim<ProblemId>;
 struct ObjectiveBound { double value; ClaimEvidence evidence; };
 struct ObjectiveEvidence { std::optional<ObjectiveBound> lower, upper; };
 enum class StopReason { cancelled, resource_limit, numerical_failure };
 struct OperationStopped { StopReason reason; std::string diagnostics; }; // no successful set/guarantee
 struct ProgramResult {
     Termination termination;
-    MathematicalOutcome outcome;
+    ProgramOutcomeClaim outcome;
     std::optional<Vector> primal;
     ObjectiveEvidence objective;
     std::string raw_diagnostics;
 };
 struct Unsupported { Diagnostics diagnostics; };
 using ProgramOutcome = std::variant<ProgramResult, Unsupported>;
-using OperationOutcome = std::variant<OperationResult, OperationStopped, Unsupported>;
+using SetTransformOutcome = std::variant<OperationResult, OperationStopped, Unsupported>;
+using OperationOutcome = std::variant<OperationResult, SupportResult, ContainmentResult, OperationStopped, Unsupported>;
 
 struct ResourcePolicy {
     std::size_t total_threads, outer_workers, threads_per_worker;
@@ -161,10 +210,10 @@ class SetOperatorWorkspace : public ExclusiveWorkspace {
 public: virtual OperationOutcome apply(const OperationRequest&, const ExecutionContext&) = 0;
 };
 class RepresentationConverterWorkspace : public ExclusiveWorkspace {
-public: virtual OperationOutcome convert(const ConversionRequest&, const ExecutionContext&) = 0;
+public: virtual SetTransformOutcome convert(const ConversionRequest&, const ExecutionContext&) = 0;
 };
 class SetApproximatorWorkspace : public ExclusiveWorkspace {
-public: virtual OperationOutcome approximate(const ApproximationRequest&, const ExecutionContext&) = 0;
+public: virtual SetTransformOutcome approximate(const ApproximationRequest&, const ExecutionContext&) = 0;
 };
 
 // Canonical joint order: x0,...,xT,u0,...,u(T-1); a lifted payload retains this map.
@@ -183,7 +232,7 @@ public: virtual std::variant<WitnessSelection, Unsupported> select(const Optimal
 struct TimingSpan { std::size_t id; std::optional<std::size_t> parent; ModuleId module; double start_seconds, end_seconds; }; // overlapping intervals, not additive latency
 struct SynthesisResult {
     Termination termination;
-    MathematicalOutcome outcome;
+    SynthesisOutcomeClaim outcome;
     ObjectiveEvidence objective;
     std::optional<OptimalFamily> family;
     std::vector<Witness> incumbents;
@@ -209,4 +258,10 @@ Diagnostics check_model_shape(const Dynamics&, std::size_t horizon);
 Diagnostics check_nominal_profile(const Problem&, bool requires_inverse, Assurance);
 Diagnostics check_family_evidence(const OptimalFamily&, const ProblemId&, Assurance);
 Diagnostics check_resources(const ResourcePolicy&);
+Diagnostics check_outcome_evidence(const ProgramOutcomeClaim&, const ProgramIdentity&, Assurance);
+Diagnostics check_outcome_evidence(const SynthesisOutcomeClaim&, const ProblemId&, Assurance);
+Diagnostics check_operation_shape(const OperationRequest&);
+Diagnostics check_geometry_evidence(const GeometryEvidence&, const OperationRequest&);
+Diagnostics check_geometry_evidence(const GeometryEvidence&, const ConversionRequest&);
+Diagnostics check_geometry_evidence(const GeometryEvidence&, const ApproximationRequest&);
 } // namespace csl
