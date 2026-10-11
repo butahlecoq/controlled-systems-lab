@@ -60,8 +60,9 @@ No coefficient accessor is called for an empty dimension.
 ## Source and installed clients
 
 [public_headers_client.cpp](../../tests/contract/public_headers_client.cpp)
-includes every product header installed at the TEST-01 base revision. It links
-only `CSL::numeric`, uses neutral authored values and checks retained ownership,
+includes all six product headers installed after integration onto main
+`56f2e9f7383089eb4d1fa4e131435c1423d50823`, including the public objectives header.
+It links only `CSL::numeric`, uses neutral authored values and checks retained ownership,
 the signed literal oracle and zero ports. The same source is copied to a separate
 consumer tree. That project resolves CSL solely with `find_package(CSL 0.1 CONFIG
 REQUIRED)` and the installed prefix. It receives no source-tree, matrix-library,
@@ -157,3 +158,15 @@ a restored green suite. Linux CMake/installed-package testing and hosted CI on
 the final integrated commit remain separate gates; neither is claimed by the
 direct WSL compilation. The Windows configure emitted doctest's existing
 CMake minimum-version deprecation warning; product builds emitted no new warning.
+
+After rebasing onto main `56f2e9f7383089eb4d1fa4e131435c1423d50823`, integration
+round 1 used a fresh `build/test01/integration-round1/msvc` cache. All objectives,
+model, sets and other existing source/installed tests remained configured. Full
+MSVC Release and Debug CTest each passed 15/15; the installed consumers each
+passed 7/7. Iterator levels remained 0/2. The six-header neutral client retained
+only the installed public include path and numeric/contracts product libraries.
+The unchanged eight-case numeric expansion and updated neutral client were rebuilt
+under WSL GCC 13.3.0 with ASan/UBSan and leak detection; both passed. Installed
+audit comment/include/type controls were repeated, deliberate leaks removed, and
+the restored full suites passed. The initial-base results above remain historical
+records; these integration results do not imply Linux CMake packaging or hosted CI.

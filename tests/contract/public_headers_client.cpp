@@ -1,5 +1,6 @@
 #include <csl/contracts.hpp>
 #include <csl/numeric/data.hpp>
+#include <csl/optimization/objectives.hpp>
 #include <csl/model/linear_system.hpp>
 #include <csl/registry/registry.hpp>
 #include <csl/sets/data.hpp>
