@@ -1,0 +1,39 @@
+# Controlled Systems Research Workspace
+
+Initial research assessment, 11 October 2026. Documentation is in English; source artifacts retain their original language.
+
+This archive supports a general library for constrained discrete-time control, reachable-set computation, terminal optimization, and minimax control. Aerospace fuel management is a domain adapter, not the definition of the mathematical core. The accompanying report also covers flight dynamics, slosh, elastic modes, and model discretization.
+
+## Start here
+
+| Document | Purpose |
+|---|---|
+| [Research index](docs/research/README.md) | Scope, evidence levels, and reading order |
+| [Source map](docs/research/source-map.md) | All 31 original files, relationships, and extraction limitations |
+| [Scientific foundations](docs/research/scientific-foundations.md) | Equations, assumptions, algorithm descriptions, and guarantee boundaries |
+| [Published baselines](docs/research/baselines.md) | Numerical experiments to reproduce and compare |
+| [Legacy implementation audit](docs/research/legacy-audit.md) | Source findings and isolated executable checks |
+| [Research developments, 2021–2026](docs/research/recent-research.md) | Relevant recent methods and software analogues |
+| [Initial architecture](docs/architecture/initial-architecture.md) | Proposed modules, contracts, and workflows |
+| [Performance and language](docs/architecture/performance-and-language.md) | Parallelism, complexity, and language evaluation |
+| [Glossary](docs/research/glossary.md) | Shared mathematical and software vocabulary |
+| [Open questions](docs/research/open-questions.md) | Interview agenda and next research steps |
+| [Bibliography](docs/research/bibliography.md) | Primary sources and reading depth |
+
+## Current conclusions
+
+The first reusable core should represent affine discrete-time models, time-dependent constraints, uncertainty semantics, terminal objectives, and interchangeable set representations. Algorithms should advertise their supported assumptions and returned guarantees.
+
+The archive's finite-action minimax solver enumerates control sequences; changing language alone will not remove exponential growth. Exact polytope operations, support-function methods, constrained zonotopes, and structured optimization deserve separate backends.
+
+Published experiments are the starting baselines, as requested by the research owner. Their numbers are recorded as reported results, not new reproductions. Several source and implementation inconsistencies must be resolved before they become acceptance criteria.
+
+No implementation language is selected. Julia, C++, Rust with numerical libraries, and Python with compiled numerical kernels remain candidates. This is an initial architecture hypothesis and research package, not an approved implementation specification.
+
+## Evidence and preservation
+
+Original files were inventoried with SHA-256 hashes and left unchanged. Thirty content-bearing artifacts were extracted; one file is an Office lock file. Raw extraction lives in the local-only docs/research/extracted directory and may contain OCR errors, original Russian text, equation fragments, and personal information already present in the source files.
+
+All 21 PDFs (226 pages in total; see the inventory for authoritative counts) were text-extracted. Selected mathematical and numerical pages were also visually inspected. Embedded Equation Editor objects in the two legacy Word files were not decoded. The full historical MATLAB/Pascal workflows have not been reproduced.
+
+See [machine-readable inventory](docs/research/inventory.json), [characterization results](docs/research/legacy-characterization.json), and [verification record](docs/research/verification.md).

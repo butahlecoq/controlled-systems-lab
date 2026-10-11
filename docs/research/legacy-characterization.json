@@ -1,0 +1,181 @@
+{
+  "kind": "isolated characterization, not a repaired implementation",
+  "numpy": "2.3.2",
+  "scipy": "1.16.3",
+  "checks": [
+    {
+      "id": "uniform_grid_mass_memory",
+      "A0": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -9.090909090909092,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -9.090909090909092,
+          0.0
+        ]
+      ],
+      "rank": 2,
+      "actual_next_state_zero_u": [
+        1192.5,
+        -10840.909090909092,
+        454.0,
+        -4127.272727272728
+      ],
+      "expected_mass_oxidizer": 108659.09090909091,
+      "expected_mass_fuel": 41172.72727272727
+    },
+    {
+      "id": "nonuniform_grid_mass_memory",
+      "rank": 4,
+      "diagonal": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "id": "worst_case_positive_convex_cost",
+      "legacy_return": [
+        -0.0
+      ],
+      "true_max_over_vertices": 1.0,
+      "note": "Function minimizes supplied callable, then negates value. No caller sign inversion is present in the module."
+    },
+    {
+      "id": "python3_reachability_parse",
+      "result": {
+        "type": "SyntaxError",
+        "line": 17,
+        "message": "Missing parentheses in call to 'print'. Did you mean print(...)?"
+      }
+    },
+    {
+      "id": "closed_loop_isolated_dependencies",
+      "type": "NameError",
+      "message": "name 'T' is not defined"
+    },
+    {
+      "id": "finite_action_enumeration",
+      "sequences": [
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "number_q2_T16": 65536,
+      "number_q9_T16": 1853020188851841
+    }
+  ],
+  "definitions": {
+    "L16": [
+      {
+        "name": "ClosedLoopControl",
+        "line": 5
+      },
+      {
+        "name": "NewPosition",
+        "line": 13
+      },
+      {
+        "name": "Visualization",
+        "line": 25
+      }
+    ],
+    "L19": [
+      {
+        "name": "minimax_openloop_control",
+        "line": 4
+      },
+      {
+        "name": "feasible_actions",
+        "line": 18
+      },
+      {
+        "name": "reachable_set",
+        "line": 35
+      },
+      {
+        "name": "Polytope",
+        "line": 49
+      },
+      {
+        "name": "simplex_algorithm",
+        "line": 223
+      },
+      {
+        "name": "optimize_on_rs",
+        "line": 246
+      },
+      {
+        "name": "__init__",
+        "line": 50
+      },
+      {
+        "name": "__str__",
+        "line": 91
+      },
+      {
+        "name": "__add__",
+        "line": 101
+      },
+      {
+        "name": "remove_redundancy",
+        "line": 109
+      },
+      {
+        "name": "double_description",
+        "line": 137
+      }
+    ],
+    "L22": [
+      {
+        "name": "ClosedLoopControl",
+        "line": 5
+      },
+      {
+        "name": "NewPosition",
+        "line": 13
+      },
+      {
+        "name": "Visualization",
+        "line": 25
+      }
+    ],
+    "L28": [
+      {
+        "name": "LinearSystem",
+        "line": 13
+      }
+    ]
+  }
+}

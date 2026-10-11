@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-11",
+  "status": "passed",
+  "originals_checked": 31,
+  "inventory_entries": 31,
+  "pdf_pages": 226,
+  "duplicate_groups": [
+    [
+      "L16",
+      "L22"
+    ],
+    [
+      "L17",
+      "L23"
+    ],
+    [
+      "L18",
+      "L24"
+    ]
+  ],
+  "markdown_documents": 19,
+  "local_links_checked": 47,
+  "research_scripts_syntax_checked": 5,
+  "legacy_characterization_checks": 6,
+  "baseline_reference_plans": 625,
+  "errors": [],
+  "skipped": [],
+  "limits": [
+    "External links were researched using browsing, not exhaustively HTTP-tested by this script.",
+    "Markdown math/Mermaid rendering and all paper proofs are not automatically verified.",
+    "Full historical workflows and nonlinear simulations are not reproduced."
+  ]
+}

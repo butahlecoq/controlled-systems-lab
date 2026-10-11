@@ -1,0 +1,54 @@
+{
+  "kind": "independent floating-point reference from transcribed discrete model",
+  "baseline": "B08",
+  "source": "L04 PDF pages 12-13",
+  "method": "enumerate all finite plans and all box-corner images; convex norm attains maximum on a box at a corner",
+  "numpy": "2.3.2",
+  "plans": 625,
+  "disturbance_box_corner_images_per_plan": 256,
+  "best_plan": [
+    0.3,
+    0.6,
+    0.6,
+    -0.6
+  ],
+  "computed_discrete_minimax": 67.150601101407,
+  "tie_absolute_tolerance": 1e-08,
+  "plans_tied_within_tolerance": [
+    [
+      0.6,
+      0.6,
+      -0.3,
+      0.0
+    ],
+    [
+      0.6,
+      0.3,
+      0.3,
+      -0.3
+    ],
+    [
+      0.3,
+      0.6,
+      0.6,
+      -0.6
+    ]
+  ],
+  "reported_discrete_minimax": 67.12,
+  "reported_plan": [
+    0.6,
+    0.6,
+    -0.3,
+    0.0
+  ],
+  "computed_cost_of_reported_plan": 67.15060110141198,
+  "nonlinear_displayed_state_euclidean_cost": 16.42069148970286,
+  "reported_nonlinear_cost": 14.048,
+  "L13_adaptive_displayed_state_euclidean_cost": 20.79278721095371,
+  "L13_reported_adaptive_cost": 22.657,
+  "limitations": [
+    "Uses rounded displayed matrices/state, not original MATLAB arrays.",
+    "No validated rounding enclosure; mathematical exhaustive formulation, floating arithmetic.",
+    "Does not reproduce nonlinear dynamics, plots, historical runtime, or other article versions."
+  ]
+}

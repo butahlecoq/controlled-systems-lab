@@ -1,0 +1,9 @@
+# Local research originals and raw extraction are not part of the public release.
+/papers/
+/Свидетельства/
+/docs/research/extracted/
+/tmp/
+__pycache__/
+*.py[cod]
+.env
+.env.*
