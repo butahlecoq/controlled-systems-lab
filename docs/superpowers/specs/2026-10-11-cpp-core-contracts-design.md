@@ -1,6 +1,6 @@
 # C++20 core contracts: nominal optimal-family slice
 
-Date: 2026-10-11. Status: draft for owner and scientific review. The [C++ language direction](../../architecture/decisions/0001-cpp20-core.md) is accepted. These interface proposals are not implemented headers or an approved implementation plan.
+Date: 2026-10-11. Status: design sketch for owner and scientific review. The [C++ language direction](../../architecture/decisions/0001-cpp20-core.md) is accepted. CORE-01 now supplies [compiled native interface revision 1](../../contracts/core-interfaces.md) and [pinned dependency probes](../../architecture/decisions/0002-native-integrations.md), pending integration review. The sketches below retain the broader intended design; they do not imply implemented numerical adapters or synthesis.
 
 Requirements, test IDs and delivery boundaries are governed by the [consolidated specification](2026-10-11-controlled-systems-master-design.md). This document details its proposed native interfaces.
 

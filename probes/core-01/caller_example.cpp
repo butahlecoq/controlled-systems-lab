@@ -1,0 +1,71 @@
+// Contract fixtures only. No numerical synthesis or family construction happens here.
+#include <csl/contracts.hpp>
+#include <future>
+#include <iostream>
+#include <utility>
+
+namespace {
+using namespace csl;
+class FixtureWorkspace final : public SynthesisWorkspace {
+public:
+    explicit FixtureWorkspace(ModuleId strategy) : strategy_(std::move(strategy)) {}
+    SynthesisOutcome solve(const Problem&, const ExecutionContext&) override {
+        return Unsupported{{{DiagnosticCode::unsupported, strategy_.value,
+            "Contract fixture: synthesis adapter is not implemented"}}};
+    }
+private:
+    ModuleId strategy_;
+};
+class FixtureStrategy final : public SynthesisStrategy {
+public:
+    explicit FixtureStrategy(StrategyConfiguration config) : config_(std::move(config)) {}
+    Diagnostics check_capabilities(const Problem& p, Assurance assurance) const override {
+        auto diagnostics = check_nominal_profile(p,false,assurance);
+        diagnostics.push_back({DiagnosticCode::unsupported,config_.strategy.value,
+            "Contract fixture: no executable synthesis capability"});
+        return diagnostics;
+    }
+    std::unique_ptr<SynthesisWorkspace> make_workspace() const override {
+        return std::make_unique<FixtureWorkspace>(config_.strategy);
+    }
+private:
+    StrategyConfiguration config_;
+};
+StrategyConfiguration configuration(std::string strategy) {
+    return {{std::move(strategy)}, {"highs/lp"}, {"highs/qp"}, {"barycentric/hull"},
+        {"polyhedral/operators"}, {"equivalent/conversion"}, {"reject/approximation"},
+        {"directional/selector"}, {"joint/polyhedral"}};
+}
+}
+
+int main() {
+    using namespace csl;
+    auto model = std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}},{}});
+    const auto problem = std::make_shared<const Problem>(Problem{
+        {"example/two-step-integrator"},model,{0,1,2},KnownInitial{{0}},
+        ContinuousDomain{{UniversalSet{1},UniversalSet{1}}},
+        {UniversalSet{1},UniversalSet{1},UniversalSet{1}}, {},{},InformationPattern::nominal_open_loop,
+        ResidualNormTerminal{{1,1,{1}},{1}}});
+    FixtureStrategy reachability(configuration("reachability/backward-recovery"));
+    FixtureStrategy joint(configuration("joint/trajectory-optimization"));
+    auto policy = std::make_shared<const ResourcePolicy>(ResourcePolicy{2,2,1,{}});
+    if (!check_resources(*policy).empty()) return 1;
+    const ExecutionContext context{policy,{}, {}, {1e-8,1e-8}, "fixture/comparison"};
+    // A product caller stops at the unsupported capability diagnostic.
+    // Here we also allocate workspaces to demonstrate their exclusive ownership.
+    auto first = reachability.make_workspace();
+    auto second = joint.make_workspace();
+    if (first.get() == second.get()) return 2;
+    auto run = [problem,context](std::unique_ptr<SynthesisWorkspace> workspace) {
+        return workspace->solve(*problem,context);
+    };
+    auto a = std::async(std::launch::async,run,std::move(first));
+    auto b = std::async(std::launch::async,run,std::move(second));
+    for (auto* strategy : {&reachability,&joint}) {
+        auto diagnostics = strategy->check_capabilities(*problem,Assurance::numerical);
+        for (const auto& d : diagnostics) std::cout << d.field << ": " << d.explanation << '\n';
+    }
+    if (!std::holds_alternative<Unsupported>(a.get()) || !std::holds_alternative<Unsupported>(b.get())) return 3;
+    std::cout << "Two exclusive workspaces completed fixture calls. No solver/family result was produced.\n";
+}

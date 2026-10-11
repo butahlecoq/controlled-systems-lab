@@ -126,7 +126,7 @@ The first comparison presents final optimal-family results, selected controls/tr
 
 Public ports return common statuses and evidence while retaining raw backend diagnostics. Backend library containers stay behind adapters. Expected capability/math/numerical failures are represented in results; allocation/programming error policy will be settled in the implementation plan. A future C ABI is distinct from selecting registered native modules at runtime.
 
-The [native contract document](2026-10-11-cpp-core-contracts-design.md) specifies illustrative types, ownership, result/family semantics and an intended user flow. Code fences are design sketches and have not been compiled.
+The [native contract document](2026-10-11-cpp-core-contracts-design.md) specifies illustrative types, ownership, result/family semantics and an intended user flow. Its code fences remain design sketches. CORE-01 supplies the subordinate [compiled interface revision 1](../../contracts/core-interfaces.md) and [dependency decision/probes](../../architecture/decisions/0002-native-integrations.md), pending integration review; numerical adapters and synthesis remain downstream work.
 
 ## Scenario-file workflow
 
