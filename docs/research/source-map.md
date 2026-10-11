@@ -8,7 +8,7 @@ Original filenames are retained for provenance; original files and extracted tex
 
 | ID | Original artifact | Extracted text | Initial interpretation |
 |---|---|---|---|
-| L01 | papers/1993 АиТ Алгоритм решения задачи терминального управления для ЛДС.pdf | Local: L01.txt | 1993 foundational terminal-control algorithm; LTV dynamics, compact convex constraints, forward/backward reachable constructions and LP. |
+| L01 | papers/1993 АиТ Алгоритм решения задачи терминального управления для ЛДС.pdf | Local: L01.txt | 1993 foundational terminal-control algorithm; fixed A/B/P (LTI), linear terminal objective, compact convex initial/control polyhedra; no intermediate state restrictions. Forward/backward constructions and LP; [reviewed scope](temporal-lift-source-audit.md). |
 | L02 | papers/1997 Алгоритм решения задачи оптимального терминального управления в ЛДДС.pdf | Local: L02.txt | General optimal terminal and adaptive control, including production planning. Filename says 1997; L04 references an identically titled 2005 work. Publication identification remains provisional. |
 | L03 | papers/pardalos.docx | Local: L03.txt | Reachability chapter draft: vertex redundancy, simplex reuse, ordering and divide-and-conquer hull construction. Filename alone does not establish authorship by Pardalos. |
 | L04 | papers/Shorikov_Kalev_AиT_New.pdf | Local: L04.txt | 2020-labelled minimax open-loop article revision; four-state, four-step fuel example, 625 control sequences. Different from the five-step examples in L09/L10. |
@@ -18,7 +18,7 @@ Original filenames are retained for provenance; original files and extracted tex
 | L08 | papers/Шориков АФ Калев ВИ Вестник ЮУрГУ_Часть 2 new.doc | Local: L08.txt | Adaptive optimal fuel control, Part II draft; published counterpart DOI 10.14529/ctcr190203. Legacy embedded equations not decoded; table text is accessible. |
 | L09 | papers/Шориков АФ, Калев ВИ статья в Косм. иссл..pdf | Local: L09.txt | Minimax open-loop fuel draft; five-step, 3125-action-sequence example with synchronization penalty. Different objective from L10. |
 | L10 | papers/Шориков, Калев, статья.pdf | Local: L10.txt | Minimax open-loop fuel draft with robust state constraints; five-step enumeration prunes 3125 sequences to 365. Weighted terminal objective without L09 synchronization term. |
-| L11 | papers/ШориковАФ, КалевВИ, последняя версия.pdf | Local: L11.txt | 2019-labelled optimal open-loop terminal fuel draft; four-state, 16-step example; weighted criterion with synchronization penalty; reported optimum 30.899. |
+| L11 | papers/ШориковАФ, КалевВИ, последняя версия.pdf | Local: L11.txt | 2019-labelled optimal open-loop terminal fuel draft; pp.6–9 use four states, scalar input, stage constraints and physical Euclidean distance ([reviewed scope](temporal-lift-source-audit.md)); later 16-step example has weighted criterion with synchronization penalty; reported optimum 30.899. |
 | L12 | papers/ШориковАФ, КалевВИ, текст.doc | Local: L12.txt | Editable draft in the optimal-control family of L11; not byte-identical. Equation Editor objects not decoded. |
 | L13 | papers/Электронная версия_статьи.pdf | Local: L13.txt | Published 2019 minimax adaptive fuel study, Samara Aerospace 18(4), 129–145; DOI 10.18287/2541-7533-2019-18-4-129-145. Four-step, nine-action receding-open-loop example. |
 | L14 | Свидетельства/Свидетельство на ПО №3 (опт. прогр)/Листинг.pdf | Local: L14.txt | Optimal open-loop listing, PDF only: OpenLoopControl, ConvexProgram, Snatch and LPControl. Missing standalone OpenLoopControl.py. |

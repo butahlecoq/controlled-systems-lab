@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 
 from check_proof_counterexamples import check_counterexamples
+from check_temporal_lift import check_temporal_lift
 
 
 def verify_proof_provenance(provenance, registered, research_dir):
@@ -23,7 +24,13 @@ def verify_proof_provenance(provenance, registered, research_dir):
         require(isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value),
                 "Invalid SHA-256 identity")
 
-    require(provenance["schema_version"] == 1, "Unsupported schema version")
+    require(provenance["schema_version"] == 2, "Unsupported schema version")
+    require(provenance.get("public_report_digest_convention") == "utf8-lf",
+            "Public report digest convention must be utf8-lf")
+    report_hashes = provenance.get("public_report_sha256")
+    require(isinstance(report_hashes, dict)
+            and set(report_hashes) == {a["id"] for a in provenance["audits"]},
+            "Public report hash coverage differs")
     sources = provenance["sources"]
     source_ids = [source["id"] for source in sources]
     require(len(source_ids) == len(set(source_ids)), "Duplicate source ID")
@@ -56,7 +63,8 @@ def verify_proof_provenance(provenance, registered, research_dir):
                     if "pages" in registered[sid]:
                         require(anchor["end"] <= registered[sid]["pages"], "PDF anchor out of range")
                 else:
-                    require(registered[sid]["path"].endswith(".m"), "Code anchor for non-code")
+                    require(Path(registered[sid]["path"]).suffix in (".m", ".py", ".pas"),
+                            "Code anchor for non-code")
             anchors[aid] = sid
     aliases = {source["antecedent_alias"]: source["id"] for source in sources
                if "antecedent_alias" in source}
@@ -72,7 +80,14 @@ def verify_proof_provenance(provenance, registered, research_dir):
         key = audit["id"]
         require(re.fullmatch(r"[a-z-]+", key) and key not in audits, "Invalid/duplicate audit ID")
         require(audit["public_report"] == "docs/research/" + key + ".md", "Unexpected report path")
-        text = (research_dir / (key + ".md")).read_text(encoding="utf-8")
+        report_bytes = (research_dir / (key + ".md")).read_bytes()
+        # Only public authored reports use the declared LF convention. Primary
+        # sources and private antecedent/review identities retain their raw bytes.
+        report_bytes = report_bytes.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        digest(report_hashes[key])
+        require(hashlib.sha256(report_bytes).hexdigest() == report_hashes[key],
+                "Public report hash differs: " + key)
+        text = report_bytes.decode("utf-8")
         headings[key] = set(re.findall(r"^#{1,6} (.+)$", text, re.MULTILINE))
         require(audit["original_issue_status"] == "open", "Original issue silently closed")
         refs = audit["source_anchor_refs"]
@@ -108,7 +123,7 @@ def verify_proof_provenance(provenance, registered, research_dir):
             else:
                 require("result_version_sha256" not in event, "Review cannot create an authored version")
             for finding, disposition in event["dispositions"].items():
-                require(disposition in ("changes_requested", "addressed", "disputed_on_primary_source", "withdrawn"),
+                require(disposition in ("changes_requested", "clarification_requested", "addressed", "disputed_on_primary_source", "withdrawn"),
                         "Unknown finding disposition")
                 require(states.get(finding) != "withdrawn" or disposition == "withdrawn",
                         "Withdrawn finding resurrected")
@@ -133,7 +148,7 @@ def verify_proof_provenance(provenance, registered, research_dir):
         require(finding["source_anchor_refs"] and set(finding["source_anchor_refs"]) <= set(audits[key]["source_anchor_refs"]),
                 "Finding source anchor outside audit")
         require(finding["report_section"] in headings[key], "Missing finding report section")
-    checks = check_counterexamples()
+    checks = check_counterexamples() | check_temporal_lift()
     references = provenance["counterexample_checks"]
     require(len(references) == len(checks) and {r["name"] for r in references} == checks.keys(),
             "Counterexample reference coverage differs")

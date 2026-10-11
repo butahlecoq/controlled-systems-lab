@@ -49,3 +49,5 @@ The [targeted follow-up search](archive-followup.md) records recovered MATLAB/Pa
 [B04 numerical tables](b04-tables.md) transcribe the owner-identified table document and record the provisional [-1,1] control-interval recollection.
 
 [B04 saved witnesses and replay](b04-saved-witnesses.md) curates three independently checked nominal/nonlinear pairs as a distinct evidence variant, with [machine-readable facts](evidence/b04-saved-witnesses.json) and an explicit-private-source reference checker. It preserves the frozen objective mismatch, historical 99.99-second endpoint and missing canonical T16 configuration. The historical scenario remains non-executable.
+
+The [reviewed temporal-lift source audit](temporal-lift-source-audit.md) curates the complete-history proof, L01/L11 assumption crosswalk, corrected constrained recovery, saved-code limitations and unchanged first-manifest evidence for original #9. It distinguishes unique physical endpoints from lifted memory fibres and records the scoped independent review chain in [proof provenance](proof-audit-provenance.json). EXT-03 remains a separate implementation task.
