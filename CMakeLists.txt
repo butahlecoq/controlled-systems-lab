@@ -191,3 +191,5 @@ if(BUILD_TESTING)
 elseif(CSL_DEPENDENCY_PROBES)
   message(FATAL_ERROR "CSL_DEPENDENCY_PROBES requires BUILD_TESTING=ON")
 endif()
+
+include(cmake/ReportTargets.cmake)
