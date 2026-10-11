@@ -9,6 +9,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/numeric_client.cpp" DESTINATION "${
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/model_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/registry_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/sets_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/objectives_client.cpp" DESTINATION "${work}/source")
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
 set(generator_args -G "${CSL_GENERATOR}")

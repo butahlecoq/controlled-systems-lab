@@ -35,3 +35,10 @@ set_target_properties(installed_sets_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_sets_client COMMAND installed_sets_client)
 set_tests_properties(installed_sets_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed sets client: retained H segment and elementary zero-dimensional cases passed")
+
+add_executable(installed_objectives_client objectives_client.cpp)
+target_link_libraries(installed_objectives_client PRIVATE CSL::objectives)
+set_target_properties(installed_objectives_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_objectives_client COMMAND installed_objectives_client)
+set_tests_properties(installed_objectives_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Objective client: rectangular reformulation and independent original cost passed")
