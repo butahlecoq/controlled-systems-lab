@@ -1,6 +1,6 @@
 # Controlled Systems Lab: consolidated requirements and architecture specification
 
-Date: 2026-10-11. Version: 0.4. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
+Date: 2026-10-11. Version: 0.5. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
 
 ## Product intent
 
@@ -16,6 +16,7 @@ All newly authored artifacts are in English. Owner discussion is in Russian. The
 | Main language | Owner selected C++; C++20 carried forward as working standard | Native core; Python independent references are permitted |
 | First workflow | Owner selected nominal optimal-control planning | Initially no process disturbance/second player |
 | Control values | Owner selected continuous actions first | Preserve finite/mixed domains and separate future hybrid models |
+| Initial time domain | Owner selected discrete models first | Scenario matrices describe stage transitions directly; continuous-time input/discretization is a later module |
 | Primary output | Owner selected all optimal solutions | Preserve a joint relation, not only one trajectory or stage marginals |
 | First family query | Owner selected different complete witnesses | Visual, numerical and runtime comparison of approaches |
 | First method comparison | Owner selected the two optimization approaches; reachable-set approximations later | Reachability/backward-recovery strategy versus direct joint-trajectory optimization |
@@ -59,6 +60,7 @@ IDs are stable references for future tickets. C means a confirmed requirement; P
 | MOD-06 | C/R | Continuous first, finite/mixed later; hybrid modes separate | Domain identities survive serialization; convexifying finite choices is an explicit relaxation |
 | MOD-07 | C/R | Optional linear temporal constraints; absent initially | Empty collection accepted; unsupported coupled request diagnosed; first archival manifests acquire no extra rate limits |
 | MOD-08 | P | Known initial point and nominal open-loop information for first slice | Validator rejects unsupported uncertainty/policy semantics rather than assuming an existential or robust quantifier |
+| MOD-09 | C | First scenario input is a discrete-time model | Use supplied transition matrices directly; continuous-time coefficients are not silently interpreted as discrete transitions or discretized |
 
 ### Objectives and solution families
 
@@ -140,6 +142,8 @@ Provide a small template catalog with explanations of dimensions, stage indexing
 
 Constant coefficients and bounds should be entered once. Stage-varying values have an explicit separate form. Small matrices can be inline; optional external matrix data can be added under a documented reference/layout contract when needed. Common domain shapes should have concise named forms such as a box, with general polyhedral data available as an advanced form. Defaults must not invent control bounds, targets, uncertainty semantics or full-state observation. If a nominal profile omits external inputs, observations or state restrictions, its resolved meaning is documented and recorded.
 
+Confirmed time-domain scope: the file supplies discrete transitions x_(t+1)=A_t x_t+B_t u_t+a_t for the initial nominal problem. The horizon is T transitions. Optional physical timestamps describe those stages; they do not trigger matrix discretization. Continuous-time input and its integration/hold semantics belong to a later explicit module. Continuous-valued controls remain the selected initial action domain.
+
 File syntax (for example YAML versus JSON) and the concrete schema are still proposals. The [scenario-file design sketch](2026-10-11-scenario-files-design.md) illustrates the intended authoring experience; it is not a parser or an accepted schema. Existing archival JSON manifests do not automatically define the future user-facing format.
 
 ## Test specification
@@ -150,7 +154,7 @@ Module unit tests are a required deliverable. Use mathematical answers, invarian
 |---|---|---|---|
 | T-M01 | Unit | Reject wrong dimensions/stage counts; constant and stagewise providers produce the same model behavior | MOD-01/02 |
 | T-M02 | Unit | No external/control port, singleton/universal/empty sets and full/partial/no observations retain their semantics | MOD-03/04 |
-| T-M03 | Contract | Singular dynamics accepted by model; inverse-only strategy rejects; unsupported temporal/domain/information request distinguished from infeasible | MOD-05/06/07/08, ALG-05 |
+| T-M03 | Contract | Singular dynamics accepted by model; inverse-only strategy rejects; unsupported temporal/domain/information/continuous-time request distinguished from infeasible | MOD-05/06/07/08/09, ALG-05 |
 | T-O01 | Unit + analytic | Evaluate all three objective conventions; rectangular L; valid/invalid quadratic properties under documented validation policy | OPT-01 |
 | T-O02 | Mathematical | Norm versus norm-square has the same minimizers and different correctly reported costs; no unreviewed sum-of-terms reformulation | OPT-02 |
 | T-G01 | Unit + analytic | Hand-derived affine image, sum, intersection, support and preimage cases, including lower-dimensional/empty inputs where supported | ALG-03/05 |
@@ -209,6 +213,7 @@ Subagents may propose contract changes but cannot silently alter accepted requir
 
 - Version 0.3: owner selected final results and trajectories as sufficient for the initial comparison; EXP-06 defers intermediate-computation inspection while preserving final evidence and performance summaries.
 - Version 0.4: owner selected scenario-file input and user-authored scenarios based on supplied simple templates; input requirements, glossary distinctions and validation tests added.
+- Version 0.5: owner confirmed discrete models for the first version; MOD-09 reserves continuous-time input/discretization for a later module.
 
 ## Open decisions for the next review
 

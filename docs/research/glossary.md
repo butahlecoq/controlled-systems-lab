@@ -13,6 +13,7 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Observation | Measured output, possibly noisy or partial; not necessarily the full state |
 | LTI | Linear time-invariant dynamics; stage matrices are constant |
 | LTV | Linear time-varying dynamics; matrices may vary by stage/time |
+| Discrete-time dynamics | Recurrence describing state transitions between stages; stage-transition coefficients are distinct from continuous-time differential-equation coefficients |
 | Affine dynamics | Linear dynamics plus an offset; essential for general linearization in absolute coordinates |
 | Descriptor system | Dynamics written with a matrix multiplying the derivative; a singular matrix may define a DAE |
 | DAE | Differential-algebraic equation; consistency/index requirements exceed ordinary ODE integration |

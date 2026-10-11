@@ -10,6 +10,8 @@ The user selects an existing scenario, or copies a template, edits mathematical 
 
 The first workflow returns final optimal-family results, selected controls and trajectories, objective/verification evidence and summary runtime/memory. Intermediate computation viewers are deferred.
 
+Owner decision: initial files define discrete models directly, with continuous-valued controls. A supplied A/B pair is already a stage transition, not continuous-time coefficients awaiting conversion. Continuous-time input and discretization are later capabilities; optional physical timestamps do not change this interpretation.
+
 ## Proposed minimal form
 
 The following YAML-shaped example illustrates desired readability. YAML is a candidate, not a selected dependency or accepted schema. The version and field names are illustrative. This is a discrete two-step integrator, not the archival B04 problem.
@@ -60,4 +62,4 @@ Input validation should report a field path, the observed issue and the expected
 
 Version the schema and document defaults. Save a resolved problem/run record so users and reviewers can understand omissions and reproduce an experiment. Do not equate the existing B04 archival JSON record with the eventual executable user schema. A scenario catalogue should distinguish ready-to-run cases from historical restoration records.
 
-Concrete syntax, launch commands, matrix-data references and whether the first launcher is a CLI remain review topics. Adding continuous-time input with discretization would require an explicit time grid and integration/hold semantics; it must not be inferred from a discrete matrix entry.
+Concrete syntax, launch commands, matrix-data references and whether the first launcher is a CLI remain review topics. Continuous-time input/discretization is confirmed as a later capability and will require explicit time-grid and integration/hold semantics.
