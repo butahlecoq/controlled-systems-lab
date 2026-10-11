@@ -255,7 +255,9 @@ fresh last_attempt(), not a deliberately copied historical expected record.
 Replace authored LinearProgram aggregates with LinearProgramInput plus the
 checked factory. Replace public field access with const accessors. LP adapters
 override do_solve rather than solve; LPPort retains its canonical request and
-run path. QuadraticProgram's linear member remains LinearProgram. Only callers
+run path. Source 1.5 replaces the QuadraticProgram placeholder with immutable
+objective/geometry accessors; see the [convex source migration](convex-programs.md).
+Only callers
 that construct LPs need CSL::optimization; registry itself links contracts only.
 
 Existing endpoint/sign registry fixtures retain their finite one-variable domain
