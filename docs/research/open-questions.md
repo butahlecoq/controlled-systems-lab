@@ -14,7 +14,8 @@ Date: 2026-10-11. Questions are recorded for later discussion; unanswered prefer
 - Use the supplied application experiments and published numerical outcomes as initial baselines.
 - First user workflow selected: optimal control planning. Given a model and constraints, obtain a control sequence, its corresponding trajectory, and an objective/quality evaluation. The first solve will be nominal, without process disturbances. The model contract must nevertheless account for external/adversarial inputs and partial/noisy observation. B04 is selected as the first end-to-end reproduction baseline; its canonical inputs need restoration and its displayed model/result inconsistency must be resolved.
 - Keep all newly authored research/software artifacts in English; converse with the owner in Russian.
-- Prefer a compiled main implementation in C++ or Rust. Python is acceptable for initial verification and references. C++ is the assistant-proposed working target; the owner has not stated a preference between C++ and Rust.
+- The owner selected C++ as the main implementation language, with C++20 as the working standard. Python is acceptable for independent verification and references. See the [language decision](../architecture/decisions/0001-cpp20-core.md).
+- Module unit tests are required, with adapter contract, mathematical and integration tests. Consolidate conversation decisions into a specification, then derive tickets and implement dependency-ready work with subagents. See the [consolidated specification](../superpowers/specs/2026-10-11-controlled-systems-master-design.md).
 - The professor's earliest implementation was Pascal; archived MATLAB/Python artifacts are historical evidence.
 - Create a public GitHub repository for active tracking and scientific review. Approved name: controlled-systems-lab. Owner will add reviewers.
 
@@ -51,7 +52,7 @@ Ask one focused group at a time; update the glossary and architecture when answe
 
 **Method comparison:** exact low-dimensional polytope reference, lazy support/CZ alternatives, direct sparse optimization and a supported feedback method. Read the relevant proofs before importing guarantee claims.
 
-**Performance evaluation:** representative original cases followed by independently varied scale factors; profile kernels/conversions/search; then measure language stacks, CPU parallelism and optional GPU/distributed work.
+**Performance evaluation:** representative original cases followed by independently varied scale factors; profile kernels/conversions/search; then measure native backends, CPU parallelism and optional GPU/distributed work.
 
 **Interface implementation:** after agreeing the architecture, implement the selected nominal optimal-family workflow with replaceable algorithm ports. Numerical results validate it; interface design is not deferred until after benchmarking.
 

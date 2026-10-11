@@ -6,7 +6,7 @@ Date: 2026-10-11. Status: concrete architecture proposal for discussion; no prod
 
 The owner requires architecture before numerical benchmarking, replaceable mathematical algorithms, and an initial result representing all optimal plans. The first workflow is nominal optimal control planning with continuous actions. Finite and mixed control domains remain explicit future extension points. Disturbance, observation and richer problem classes remain part of the [model contract](linear-system-contract.md).
 
-Use C++20 as the proposed compiled implementation target now, with a library API and CMake packaging. This is a design choice for review, not a benchmark result or an owner choice of C++ over Rust. Python remains an independent mathematical reference and an optional future binding. Benchmarks validate algorithms, integrations and performance within these boundaries; they do not postpone defining the boundaries. Rust is a possible alternative, but the design below makes concrete C++ ownership and extension choices.
+The owner selected C++ as the main implementation language; C++20 is the working standard. A library API and CMake packaging remain design proposals. Python remains an independent mathematical reference and an optional future binding. Benchmarks validate algorithms, integrations and performance within these boundaries; they do not postpone defining the boundaries. See the [accepted language decision](decisions/0001-cpp20-core.md) and [draft native contracts](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md).
 
 The first public request is an optimal solution family. Feasible sets are internal mathematical objects. Near-optimal output is a future explicit request, not the initial product requirement.
 

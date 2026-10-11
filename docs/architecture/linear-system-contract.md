@@ -2,7 +2,7 @@
 
 Date: 2026-10-11. Status: mathematical/interface discussion draft, not implemented classes.
 
-Owner direction: begin with optimal control planning without disturbances, while designing abstractions with bounded disturbances, adversarial inputs, partial/noisy observations and unconstrained variants in view. Prefer a compiled main implementation (C++ or Rust), with Python allowed for initial verification. C++ is the assistant's proposed working target; specific C++ types and numerical dependencies are not yet chosen.
+Owner direction: begin with optimal control planning without disturbances, while designing abstractions with bounded disturbances, adversarial inputs, partial/noisy observations and unconstrained variants in view. The owner selected C++ for the main implementation, with C++20 as the working standard and Python allowed for independent verification. Specific native types are proposed in the [C++ contracts draft](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md); numerical dependencies remain unselected.
 
 ## 1. Dynamics and observation
 
@@ -127,12 +127,12 @@ Confirmed output: a representation of all optimal plans and consistent trajector
 
 ## 7. C++ target and Python reference workflow
 
-Working proposal: use C++20 as the main implementation target, with small Python references for mathematics and experiments. This is an ecosystem/integration judgement, not a measured language-speed ranking.
+Accepted owner direction: use C++ as the main implementation language, with C++20 as the working standard and small Python references for mathematics and experiments. This decision is not a measured language-speed ranking. See [ADR 0001](decisions/0001-cpp20-core.md).
 
 HiGHS supplies a C++ optimization library; cddlib supplies C polyhedral routines that can be wrapped behind a backend boundary. [HiGHS](https://highs.dev/), [cddlib](https://github.com/cddlib/cddlib). Numerical backends and their release/license constraints still require selection.
 
-Rust remains a viable compiled alternative; Clarabel has a native Rust solver with several language interfaces. [Clarabel](https://clarabel.org/stable/). The owner has not expressed a preference between C++ and Rust.
+A backend implemented in another language can still be adapted behind native ports; for example, Clarabel has a native Rust solver with several language interfaces. [Clarabel](https://clarabel.org/stable/). Such integration does not change the selected C++ core language.
 
 Before migrating any reference algorithm, stabilize its mathematical inputs/outputs and compare shared scenarios, trajectories, objectives, constraints and result evidence. Retain independent references after migration. Shared versioned scenario data avoids binding the mathematics to Python's object layout.
 
-Do not start by transcribing every Python implementation detail into C++ classes. Keep model data, sets, problems, solver workspaces and numerical adapters separate. The [modular algorithm design](modular-algorithms-and-solution-sets.md) now proposes C++20/CMake, coarse runtime algorithm ports, templates inside kernels, immutable shared data and per-worker workspaces. These architecture decisions precede numerical benchmark validation.
+Do not start by transcribing every Python implementation detail into C++ classes. Keep model data, sets, problems, solver workspaces and numerical adapters separate. The [modular algorithm design](modular-algorithms-and-solution-sets.md) uses the selected C++20 target and proposes CMake, coarse runtime algorithm ports, templates inside kernels, immutable shared data and per-worker workspaces. These architecture decisions precede numerical benchmark validation.

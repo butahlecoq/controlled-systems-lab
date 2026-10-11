@@ -86,7 +86,7 @@ Initial queries select different complete witnesses for trajectory plots and num
 - Preserve B04-historical as a transcription record. Any assumed or corrected fully specified problem receives a separate ID and explicit change log.
 - Only then run constrained optimum/family comparisons. Recover control histories and nonlinear replay conventions before attempting Table 2 reproduction.
 
-The historical 0.4-second runtime is contextual evidence, not a current performance target. The first implementation language remains the compiled C++/Rust direction; C++20 is still a working proposal. This restoration does not defer algorithm interfaces or ownership design.
+The historical 0.4-second runtime is contextual evidence, not a current performance target. The owner selected C++ for the main implementation; C++20 is the working standard. This restoration does not defer algorithm interfaces or ownership design.
 
 ## Larger archive follow-up
 

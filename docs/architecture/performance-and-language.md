@@ -2,7 +2,7 @@
 
 Date: 2026-10-11. Initial comparison framework with updated owner direction; no new performance benchmark has been run.
 
-Updated owner direction: prefer C++ or Rust for the main implementation, with Python acceptable for initial verification and references. C++ is proposed as the working target; the owner has not expressed a C++ versus Rust preference. Mathematical performance remains a priority. Historical implementation languages include professor's Pascal, MATLAB experiments and archived Python listings. None constrains the new stack.
+Accepted owner direction: C++ for the main implementation, with C++20 as the working standard and Python acceptable for independent verification and references. See the [language decision](decisions/0001-cpp20-core.md). Mathematical performance remains a priority. Historical implementation languages include professor's Pascal, MATLAB experiments and archived Python listings. None constrains the new stack.
 
 ## What will determine performance
 
@@ -14,9 +14,9 @@ The selected first output is an optimal solution family. Measure useful output: 
 
 ## Working architecture before benchmarking
 
-Use the concrete [C++20 modular design](modular-algorithms-and-solution-sets.md) now: native library API, algorithm/backend ports, explicit set conversions and family-preserving outputs. Benchmarks evaluate these choices and alternative ecosystems; they are not a prerequisite for architecture.
+Use the concrete [C++20 modular design](modular-algorithms-and-solution-sets.md) now: native library API, algorithm/backend ports, explicit set conversions and family-preserving outputs. Benchmarks evaluate native integrations and compare external scientific ecosystems; they are not a prerequisite for architecture.
 
-## Language/system candidates
+## Ecosystems considered before the language decision
 
 | Candidate | Why evaluate it | Questions to resolve |
 |---|---|---|
@@ -25,11 +25,11 @@ Use the concrete [C++20 modular design](modular-algorithms-and-solution-sets.md)
 | Rust orchestration/core with numerical FFI | Ownership and concurrency can make state separation explicit | Availability/maintenance of required geometry and optimization integrations; FFI costs |
 | Python interface with native/JIT kernels and external solvers | Accessible experiments and mature integrations; actual kernels need not be interpreted Python | Remaining Python loops, process/data-transfer overhead, native backend coverage and deployment |
 
-This table is a proposal, not a measured ranking. Python with native numerical work and pure-Python nested loops are materially different architectures. Likewise, Julia requires performance-conscious type/allocation behavior. [Julia performance documentation](https://docs.julialang.org/en/v1/manual/performance-tips/).
+This table records earlier options and potential external comparison tools. C++ is now selected; the table is not a measured ranking. Python with native numerical work and pure-Python nested loops are materially different architectures. Likewise, Julia requires performance-conscious type/allocation behavior. [Julia performance documentation](https://docs.julialang.org/en/v1/manual/performance-tips/).
 
 JuliaReach, pycvxset and acados provide concrete ecosystems worth evaluating; acados' native generated solvers and high-level interfaces demonstrate that interface language and numerical-kernel language can differ. [JuliaReach](https://github.com/JuliaReach/ReachabilityAnalysis.jl), [pycvxset](https://www.merl.com/research/downloads/pycvxset), [acados](https://docs.acados.org/features/).
 
-Do not choose a language from a single syntax microbenchmark. Compare the same mathematics, representations, solver backend, tolerances and requested output. A superior library algorithm may outweigh small language overhead differences.
+Do not infer performance from a single syntax microbenchmark. Compare the same mathematics, representations, solver backend, tolerances and requested output. A superior library algorithm may outweigh small language overhead differences.
 
 ## Parallelism levels
 
@@ -73,4 +73,4 @@ The first comparison extracts different complete witnesses from each optimal fam
 
 Report cold and warm runs, median/tail runtime, peak memory, actual workers/threads, failures, numerical residuals, bound gaps and representation size. Pin environment and hardware information. Store raw results and scenario hashes.
 
-Validate the proposed C++ stack through correctness and representative end-to-end profiling. Keep small Python mathematical references as independent oracles. Rust remains an alternative if owner preference or integration evidence favors it. See the [linear-system contract](linear-system-contract.md).
+Validate the selected C++ stack through correctness and representative end-to-end profiling. Keep small Python mathematical references as independent oracles. Other languages can supply external comparison tools or backend adapters. See the [linear-system contract](linear-system-contract.md).

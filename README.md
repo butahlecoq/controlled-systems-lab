@@ -16,6 +16,9 @@ This archive supports a general library for constrained discrete-time control, r
 | [Published baselines](docs/research/baselines.md) | Numerical experiments to reproduce and compare |
 | [Legacy implementation audit](docs/research/legacy-audit.md) | Source findings and isolated executable checks |
 | [Research developments, 2021–2026](docs/research/recent-research.md) | Relevant recent methods and software analogues |
+| [Consolidated specification](docs/superpowers/specs/2026-10-11-controlled-systems-master-design.md) | Conversation decisions, requirement IDs, acceptance tests and future subagent work breakdown |
+| [C++ core contracts](docs/superpowers/specs/2026-10-11-cpp-core-contracts-design.md) | Draft native interfaces, ownership, extension boundaries and first usage scenarios |
+| [Language decision](docs/architecture/decisions/0001-cpp20-core.md) | Accepted C++ direction and its consequences |
 | [Modular algorithms and optimal families](docs/architecture/modular-algorithms-and-solution-sets.md) | Concrete C++20 ports, interchangeable solvers/geometry, complete solution relations |
 | [Set representations and Ellipsoidal Toolbox](docs/architecture/set-representations-and-ellipsoidal-toolbox.md) | Ellipsoidal methods, newer representations, recovered owner-authored zonotope paper |
 | [Initial architecture](docs/architecture/initial-architecture.md) | Broader modules, contracts, and workflows |
@@ -32,7 +35,7 @@ The archive's finite-action minimax solver enumerates control sequences; changin
 
 Published experiments are the starting baselines, as requested by the research owner. Their numbers are recorded as reported results, not new reproductions. Several source and implementation inconsistencies must be resolved before they become acceptance criteria.
 
-Updated direction: use a compiled main implementation (C++ or Rust), with C++20 proposed as the working target and Python for initial verification/reference computations. Architecture contracts are defined before numerical benchmark implementation. The first user workflow returns an optimal solution family for nominal planning with continuous actions and without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md). This is an initial architecture hypothesis and research package, not an approved implementation specification.
+Owner decision: use C++ as the main implementation language, with C++20 as the working standard and Python for independent verification/reference computations. Architecture contracts are defined before numerical benchmark implementation. The first user workflow returns an optimal solution family for nominal planning with continuous actions and without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md). This is an initial architecture hypothesis and research package, not an approved implementation specification.
 
 ## Evidence and preservation
 

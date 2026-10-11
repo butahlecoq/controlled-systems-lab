@@ -1,6 +1,6 @@
 # Published numerical baselines
 
-Owner direction, 2026-10-11: use the numerical experiments near the ends of supplied articles as the starting quality baselines. Language is undecided. No throughput or real-time requirement has yet been selected.
+Owner direction, 2026-10-11: use the numerical experiments near the ends of supplied articles as the starting quality baselines. The owner selected C++ for the main implementation, with C++20 as the working standard. No throughput or real-time requirement has yet been selected.
 
 All numbers below are **reported**, unless explicitly labelled computed in this assessment. Different article revisions remain separate scenarios. Historical runtimes are context, not modern acceptance thresholds.
 

@@ -1,6 +1,6 @@
 # Initial architecture hypothesis
 
-Date: 2026-10-11. Status: discussion draft. No product implementation is approved by this document. The concrete working proposal is C++20; architecture contracts precede benchmark validation.
+Date: 2026-10-11. Status: discussion draft. No product implementation is approved by this document. The owner selected C++; the working standard is C++20; architecture contracts precede benchmark validation.
 
 ## Intended product
 
@@ -12,13 +12,13 @@ The core should be general within explicitly declared system classes. Fuel manag
 
 Owner selection, 2026-10-11: start with optimal control planning. The initial end-to-end interface should accept a model and constraints and return a representation of all optimal control sequences and their consistent trajectories, with optimum/quality evidence and individual witness queries. The result must identify feasibility and optimality evidence.
 
-The owner subsequently selected nominal planning without process disturbances for the first solve, while retaining more general channels and observations in the model contract. The compiled implementation direction is C++ or Rust, with C++ proposed as the working target and Python allowed for verification. Continuous actions are selected for the first solver; finite and mixed domains remain future extension points. B04 is selected as the first published baseline; its [canonical inputs and model/result consistency](../research/b04-restoration.md) need restoration. Supported stagewise continuous-domain shapes and UI form remain open. Temporal constraints are reserved in the problem contract but excluded from the first archival experiments. Reachability supports this workflow; feedback control remains a later workflow.
+The owner subsequently selected nominal planning without process disturbances for the first solve, while retaining more general channels and observations in the model contract. The owner selected C++ for the main implementation, with C++20 as the working standard and Python allowed for independent verification. Continuous actions are selected for the first solver; finite and mixed domains remain future extension points. B04 is selected as the first published baseline; its [canonical inputs and model/result consistency](../research/b04-restoration.md) need restoration. Supported stagewise continuous-domain shapes and UI form remain open. Temporal constraints are reserved in the problem contract but excluded from the first archival experiments. Reachability supports this workflow; feedback control remains a later workflow.
 
 ## Architectural alternatives
 
 | Approach | Benefit | Cost | Initial assessment |
 |---|---|---|---|
-| One scientific-language package, modular internals | Fast exploration, fewer integration boundaries | Ecosystem/deployment tied to language; external backends still needed | Strong candidate if Julia or another suitable environment wins benchmarks |
+| One scientific-language package, modular internals | Fast exploration, fewer integration boundaries | Ecosystem/deployment tied to language; external backends still needed | Comparison option considered before the C++ decision; useful external scientific reference |
 | Language-neutral problem/result contracts plus one numerical implementation and optional bindings | Reusable interfaces, multiple numerical backends and frontends | Serialization, lifetime and compatibility rules require care | Recommended direction; keep execution in-process initially |
 | Distributed services for each mathematical operation | Operational isolation and remote scheduling | Expensive data transfer, failure modes and orchestration for tightly coupled math | Defer; distribute whole jobs or coarse subproblems only when justified |
 
@@ -141,8 +141,8 @@ adapters/         # later: domain and numerical integration
   ISSUE_TEMPLATE/ # scientific correction, reproduction, algorithm proposal
 ~~~
 
-The proposed native implementation is C++20 with separate module/adaptor build targets; see the concrete modular design. Keep archival raw files outside the public tracked set until release scope is agreed.
+The selected native implementation target is C++20; separate module/adaptor build targets remain proposed. See the [native contracts draft](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md). Keep archival raw files outside the public tracked set until release scope is agreed.
 
 ## Decisions still open
 
-Owner preference between C++ and Rust, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, specific future certificate requirements, observation assumptions, and restoration of the selected B04 baseline to an executable consistent specification. The first solve is nominal and returns the optimal solution family; the contracts remain general. Architecture and language boundaries are discussed now, while benchmark evidence validates implementations. See [interview agenda](../research/open-questions.md).
+Primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, specific future certificate requirements, observation assumptions, and restoration of the selected B04 baseline to an executable consistent specification. The first solve is nominal and returns the optimal solution family; the contracts remain general. Architecture and language boundaries are discussed now, while benchmark evidence validates implementations. See [interview agenda](../research/open-questions.md).
