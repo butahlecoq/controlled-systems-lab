@@ -30,9 +30,9 @@ A convex quadratic solver may minimize its square, preserving minimizers, but al
 
 ## Source recovery
 
-The supplied PDF has table/figure placeholders. The [published counterpart, R40](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019), DOI 10.1134/S0002338819020094, supplies Table 2; its nonlinear outcome rows are recorded in the manifest. Full control histories remain unavailable.
+The supplied PDF has table/figure placeholders. The [published counterpart, R40](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019), DOI 10.1134/S0002338819020094, supplies Table 2; its nonlinear outcome rows are recorded in the manifest. The [local numerical tables](b04-tables.md) now also supply nonlinear parameters and visually checked policy labels. Full control histories remain unavailable.
 
-L16's related adaptive demonstration uses [-1,1], but it is not canonical B04 evidence: its fitted control coefficients differ, and L28's uniform-grid branch has a documented mass-memory defect. Neither those bounds nor its nonlinear coefficients are imported into the historical scenario.
+L16's related adaptive demonstration uses [-1,1], but it is not canonical B04 evidence: its fitted control coefficients differ, and L28's uniform-grid branch has a documented mass-memory defect. Neither those bounds nor its nonlinear coefficients are imported into the historical scenario. The owner subsequently recalled that B04 most likely also used [-1,1]; this is recorded as a provisional hypothesis, while canonical confirmation remains open.
 
 ## Exact inconsistency and lower bound
 

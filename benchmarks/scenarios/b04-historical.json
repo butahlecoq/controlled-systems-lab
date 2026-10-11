@@ -273,8 +273,41 @@
         "objective": 7.922
       }
     ],
-    "nonlinear_table_source": "R40 Table 2",
-    "complete_control_histories": null
+    "nonlinear_table_source": "A11 Table 2; policy labels cross-checked A12 PDF p. 20 and R40 Table 2",
+    "complete_control_histories": null,
+    "nonlinear_parameters": {
+      "source": "A11 Table 1; cross-checked A12 PDF p. 20",
+      "status": "transcribed_not_replayed",
+      "I": 320,
+      "P": 528000,
+      "P_table_unit_label": "kg",
+      "K": "8/3",
+      "nominal_oxidizer_stock": 120000,
+      "nominal_fuel_stock": 45000,
+      "oxidizer_stock_perturbation": -500,
+      "fuel_stock_perturbation": 300,
+      "initial_mixture_ratio_perturbation": "8/75",
+      "coefficients": {
+        "c1": "8/75",
+        "c2": -1675,
+        "c3": 2250,
+        "c4": -15,
+        "c5": -12
+      },
+      "final_physical_time_seconds": 100
+    },
+    "nominal_reference": {
+      "source": "A11 Table 2",
+      "terminal_state": [
+        1200,
+        0,
+        450,
+        0
+      ],
+      "objective": 0,
+      "policy": "u(t)=0",
+      "role": "Separate nominal reference, not a zero-control solution from perturbed B04 initial state"
+    }
   },
   "related_noncanonical_evidence": {
     "source": "L16",
@@ -283,10 +316,19 @@
       1
     ],
     "status": "adaptive_demonstration_only_not_confirmed_B04_data",
-    "source_model_differences": "Different fitted B and documented L28 uniform-grid recurrence defect"
+    "source_model_differences": "Different fitted B and documented L28 uniform-grid recurrence defect",
+    "owner_control_interval_recollection": {
+      "date": "2026-10-11",
+      "interval": [
+        -1,
+        1
+      ],
+      "status": "provisional_owner_recollection",
+      "source_statement": "Most likely u is in [-1,1]; not an exact quotation from the numerical tables"
+    }
   },
   "unresolved": [
-    "Canonical numerical U_t and whether u_0 is fixed",
+    "Canonical numerical U_t (owner provisionally recalls [-1,1]) and whether u_0 is fixed",
     "Matrix/data inconsistency proved by terminal invariant; recover actual numerical model",
     "Any additional state constraints not displayed in numerical example",
     "Complete witness histories and nonlinear replay/time convention"

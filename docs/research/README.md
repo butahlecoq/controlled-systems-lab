@@ -43,3 +43,5 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 ## Larger local archive
 
 The [targeted follow-up search](archive-followup.md) records recovered MATLAB/Pascal algorithms, B04 tables, minimax adaptive run data and the local zonotope paper. Its selected-source register supplements the initial inventory.
+
+[B04 numerical tables](b04-tables.md) transcribe the owner-identified table document and record the provisional [-1,1] control-interval recollection.

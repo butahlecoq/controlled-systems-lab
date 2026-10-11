@@ -61,7 +61,7 @@ $$
 (x_2-\frac83x_4)^2}.
 $$
 
-Reported terminal optimizer: (1200.7,-22.929,450.2,-7.709); reported cost 30.899. Reported solve time 0.4 s. The source discusses multiple realizing controls; do not require identical control histories when terminal objective and feasibility agree.
+Reported terminal optimizer: (1200.7,-22.929,450.2,-7.709); reported cost 30.899. Reported solve time 0.4 s. The source discusses multiple realizing controls; do not require identical control histories when terminal objective and feasibility agree. The [recovered local tables](b04-tables.md) provide nonlinear parameters and outcomes for three witnesses; their nonlinear costs differ despite equal reported linear optimality.
 
 The physical meaning of negative working-stock balances must be retained from the source convention and distinguished from total tank mass.
 
