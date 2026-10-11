@@ -1,0 +1,744 @@
+{
+  "record_version": 1,
+  "date": "2026-10-11",
+  "variant_id": "b04-saved-witness-replay-v1",
+  "scope": "saved-witness/replay evidence",
+  "executable_scenario": false,
+  "historical_reproduction_complete": false,
+  "complete_optimal_family": false,
+  "report": "../b04-saved-witnesses.md",
+  "reference_checker": "../tools/check_b04_saved_witnesses.py",
+  "historical_transcription": {
+    "path": "../../../benchmarks/scenarios/b04-historical.json",
+    "sha256": "167f836bd07c19df67ce9159b06b7b3ecb7396875ce53f2fdd3b76910994f278",
+    "preserved_unchanged": true,
+    "executable": false,
+    "x0": [
+      1216.904,
+      119500,
+      438.787,
+      45300
+    ],
+    "B": [
+      17,
+      0,
+      -12,
+      0
+    ],
+    "reported_nominal_objective": 30.899,
+    "reported_frozen_objective": 368.45,
+    "displayed_model_affine_lower_bound_approx": 160.880653946,
+    "sha256_context": "Unchanged pre-edit Windows checkout bytes (CRLF); use Git blob identity across checkout line-ending conversions",
+    "git_blob": "677f7f4548fa2677d8febd643c0a2c4d8d766c9e",
+    "git_blob_sha256": "92900c07ac4b1ce2f889a99023809e789110e77d7416cd192facc3ffc89d072d"
+  },
+  "sources": [
+    {
+      "id": "A01",
+      "path": "Семинар ИММ/Статья/ReachableSets.m",
+      "bytes": 8645,
+      "sha256": "e7010e0a830595029b9876b1511558514cec8398d2ffa290313a566ba6997558",
+      "role": "Nominal terminal-control example, T=12, different X0 and B"
+    },
+    {
+      "id": "A39",
+      "path": "Семинар ИММ/Статья/1st.fig",
+      "sha256": "1120e70dbf3a300d1f8c9ee19d1082632c3adbb24f5ac445802954b164181f38",
+      "bytes": 1131239,
+      "role": "B04 saved nominal/nonlinear witnesses and frozen coordinates; inert MAT graphics"
+    },
+    {
+      "id": "A40",
+      "path": "Семинар ИММ/Статья/program.m",
+      "sha256": "581a91dbb1041973f9559a6cac07657279a5e3f40091f04606216be0f97bac46",
+      "bytes": 3819,
+      "role": "B04 nonlinear replay kernel; original U workspace unavailable"
+    },
+    {
+      "id": "A41",
+      "path": "Семинар ИММ/Статья/Shorikov_Kalev_Article_v4.pdf",
+      "sha256": "db1f29e55e9e3558b4f9eb4bd52c86931f210233d746a986610dab08102b3891",
+      "bytes": 858237,
+      "role": "B04 article with Table 2 and matching figures; private visual audit anchors"
+    },
+    {
+      "id": "A42",
+      "path": "Семинар ИММ/Статья/1st.png",
+      "sha256": "ccbe6aac3e9d265999b135a780cbd4fff060d8db574bc747f27e8216c824692d",
+      "bytes": 106169,
+      "role": "Companion first-witness phase plot; privately inspected"
+    }
+  ],
+  "source_anchors": {
+    "A01": {
+      "initial_comment": 23,
+      "active_rounded_initial": 24,
+      "current_horizon_12": 28,
+      "stock_recurrence": 30,
+      "B": [
+        31,
+        34
+      ],
+      "flow_domain": [
+        18,
+        26
+      ],
+      "control_interval": 38,
+      "objective": [
+        80,
+        192
+      ],
+      "current_plot_rows": 182,
+      "U_overwrite": [
+        200,
+        202
+      ]
+    },
+    "A40": {
+      "parameters": [
+        2,
+        11
+      ],
+      "z_assignment": 12,
+      "U_row_average": 16,
+      "initialization": [
+        14,
+        22
+      ],
+      "flow_equations": [
+        30,
+        34
+      ],
+      "ordinary_increment": [
+        24,
+        25
+      ],
+      "forced_last_increment": [
+        27,
+        28
+      ],
+      "previous_flow_stock_update": [
+        35,
+        36
+      ],
+      "objective": 57
+    },
+    "A41": {
+      "page_numbering": "one-based physical PDF pages",
+      "prior_visual_audit_pages": [
+        3,
+        4,
+        6,
+        11,
+        12,
+        13,
+        14
+      ],
+      "printed_model": 11,
+      "objective": 12,
+      "table_2": 13,
+      "family_claim": 14
+    },
+    "A39": {
+      "indexing": "zero-based Python children; XData=flow,YData=stock",
+      "witnesses": [
+        {
+          "witness_id": 1,
+          "nominal": [
+            "hgS_070000.children[0].children[3].properties",
+            "hgS_070000.children[2].children[51].properties"
+          ],
+          "nonlinear": [
+            "hgS_070000.children[0].children[4].properties",
+            "hgS_070000.children[2].children[54].properties"
+          ]
+        },
+        {
+          "witness_id": 2,
+          "nominal": [
+            "hgS_070000.children[0].children[55].properties",
+            "hgS_070000.children[2].children[52].properties"
+          ],
+          "nonlinear": [
+            "hgS_070000.children[0].children[57].properties",
+            "hgS_070000.children[2].children[55].properties"
+          ]
+        },
+        {
+          "witness_id": 3,
+          "nominal": [
+            "hgS_070000.children[0].children[56].properties",
+            "hgS_070000.children[2].children[53].properties"
+          ],
+          "nonlinear": [
+            "hgS_070000.children[0].children[58].properties",
+            "hgS_070000.children[2].children[56].properties"
+          ]
+        }
+      ],
+      "frozen": [
+        "hgS_070000.children[0].children[5].properties",
+        "hgS_070000.children[2].children[57].properties"
+      ],
+      "nominal_coordinate_shape": [
+        17
+      ],
+      "nonlinear_coordinate_shape": [
+        10000
+      ],
+      "frozen_coordinate_shape": [
+        17
+      ]
+    }
+  },
+  "model_derivation": {
+    "state_order": [
+      "oxidizer_flow",
+      "oxidizer_working_stock",
+      "fuel_flow",
+      "fuel_working_stock"
+    ],
+    "units": [
+      "kg/s",
+      "kg",
+      "kg/s",
+      "kg"
+    ],
+    "x0": [
+      1220.28265395983,
+      119500.0,
+      440.005764648976,
+      45300.0
+    ],
+    "x0_authority": "A39 saved state; A01 line23 commented decimals",
+    "B_exact_expressions": [
+      "2208/110",
+      "0",
+      "-1152/110",
+      "0"
+    ],
+    "B_authority": "A01 lines31,34; not fitted",
+    "h_seconds": 6.25,
+    "transitions": 16,
+    "h_authority": "17 saved states and -diff(stock)/previous_flow; current A01 T12 does not establish T16 generator",
+    "A": "I+N, N[1,0]=N[3,2]=-6.25; all other N entries zero (zero-based)",
+    "effective_actions": "u[k]=diff(x1)[k]/(2208/110); conditional inference, not original U variables",
+    "objective": "sqrt((1200-x1)^2+x2^2+(64/9)*(450-x3)^2+(64/9)*x4^2+(x2-(8/3)*x4)^2)",
+    "stock_invariant": "12*x2(16)+23*x4(16)=12*(x2(0)-100*x1(0))+23*(x4(0)-100*x3(0))",
+    "constraints_status": "[-1,1] inferred actions and observed flow ranges only; complete historical stage domains unknown"
+  },
+  "nonlinear_kernel": {
+    "source": "A40 lines2-36",
+    "parameters": {
+      "K": "8/3",
+      "P": 528000,
+      "I": 320,
+      "c1": "8/75",
+      "dK": "8/75",
+      "c2": -6700,
+      "c3": 9000,
+      "c4": -15,
+      "c5": -12
+    },
+    "printed_table_1_difference": {
+      "c2": -1675,
+      "c3": 2250,
+      "explanation": "Script factor four explicit; physical/unit rationale unresolved"
+    },
+    "equations": [
+      "Km=K+dK+c1*accumulated_action",
+      "delta=Km-K (audited floating evaluation order)",
+      "Pp=P+c2*delta^2+c3*delta",
+      "Iu=I+c4*delta^2+c5*delta",
+      "fuel=Pp/Iu/(1+Km)",
+      "oxidizer=fuel*Km"
+    ],
+    "timing": {
+      "initial_sample": 1,
+      "initial_time_seconds": 0,
+      "sample_count": 10000,
+      "stock_step_seconds": 0.01,
+      "stock_advances": 9999,
+      "endpoint_seconds": 99.99,
+      "stock_flow": "previous sample",
+      "increments_1_to_15": "MATLAB samples 626,1251,...,9376 (6.25,...,93.75 seconds)",
+      "increment_16": "forced at sample10000; final flow only, no final-stock effect",
+      "clock_authority": "kernel inference; no time vector in saved FIG",
+      "corrected_100_second_variant_implemented": false
+    },
+    "U_authority": "A40 line16 averages unavailable rows i and11; original row mapping unknown"
+  },
+  "numerical_conventions": {
+    "arithmetic": "IEEE double floating reference; not outward-rounded or validated certificate",
+    "objective": "evaluate unrounded saved endpoint, then compare displayed rounding boxes",
+    "recurrence": "matrix residual and stock-difference form reported separately; cancellation/order affects residual",
+    "printed_rounding": "nearest rounding at each displayed decimal precision, using closed half-unit boxes",
+    "nominal_coordinate_half_units": [
+      0.05,
+      0.0005,
+      0.05,
+      0.0005
+    ],
+    "nonlinear_coordinate_half_units": [
+      [
+        0.05,
+        0.0005,
+        0.005,
+        0.0005
+      ],
+      [
+        0.05,
+        5e-06,
+        0.005,
+        0.0005
+      ],
+      [
+        0.05,
+        0.0005,
+        0.005,
+        0.0005
+      ]
+    ],
+    "frozen_coordinate_half_units": [
+      0.05,
+      0.05,
+      0.005,
+      0.0005
+    ],
+    "optimal_objective_half_unit": 0.0005,
+    "frozen_objective_half_unit": 0.005,
+    "frozen_box_method": "all16 corners, conditional on fixed signs of affine gradient of Phi^2 across box",
+    "regression_thresholds": {
+      "recurrence_max_absolute": 1e-10,
+      "control_channel_error": 1e-12,
+      "inferred_step_error": 1e-12,
+      "replay_max_absolute": 2e-12,
+      "off_diagonal_pair_discrepancy_min_exclusive": 500,
+      "conditional_objective_difference": 1e-08
+    },
+    "tolerance_status": "operational regression tolerances, not feasibility/optimality/family certificates"
+  },
+  "bounded_recovery": {
+    "new_search_for_curation": false,
+    "prior_top_level_packages": 34,
+    "prior_expanded_packages": 31,
+    "excluded_library_packages": 3,
+    "selected_source_files": 373,
+    "parsed_nonlibrary_mat_workspaces": 5,
+    "adjacent_model_xml_inventories": 11,
+    "limits": [
+      "opaque MCOS/polyhedron data",
+      "embedded equations",
+      "two mislabeled RTF documents",
+      "binary/generated/model variants not semantically decoded",
+      "sources outside archive not searched"
+    ],
+    "conclusion": "exact T16 driver/U workspace not recovered within finite coverage; no global absence claim"
+  },
+  "unresolved": [
+    "canonical complete numerical stage domains and any stock restrictions",
+    "first-action/index convention",
+    "original T16 generating revision and U row mapping",
+    "printed/script coefficient and unit authority",
+    "frozen generator, sample timing and printed objective conflict",
+    "constrained optimality and complete optimal-family certificate"
+  ],
+  "observed_checks": {
+    "variant_id": "b04-saved-witness-replay-v1",
+    "scope": "saved-witness/replay evidence",
+    "executable_scenario": false,
+    "numerical_status": "floating calculations; not a validated certificate or constrained optimizer",
+    "scalar_samples_compared": 120000,
+    "witnesses": [
+      {
+        "id": 1,
+        "nominal_states": 17,
+        "nonlinear_samples": 10000,
+        "initial_state": [
+          1220.28265395983,
+          119500.0,
+          440.005764648976,
+          45300.0
+        ],
+        "nominal_terminal": [
+          1200.7431326620833,
+          -22.92854502498085,
+          450.20029749997445,
+          -7.708734962674953
+        ],
+        "nonlinear_terminal": [
+          1200.5333404284665,
+          -2.6953203605951366,
+          449.722151226026,
+          10.555966796239204
+        ],
+        "first_inferred_action": -0.6832904864390529,
+        "inferred_action_range": [
+          -0.9999999999999967,
+          0.9999999999999967
+        ],
+        "control_channel_error": 6.369904603786836e-15,
+        "recurrence_max_absolute": 5.684341886080802e-14,
+        "algebraic_stock_difference_max": 7.275957614183426e-12,
+        "inferred_step_range": [
+          6.249999999999994,
+          6.250000000000006
+        ],
+        "flow_ranges": [
+          [
+            1175.9999999999943,
+            1223.999999999922
+          ],
+          [
+            438.06627975849335,
+            463.1097580193252
+          ]
+        ],
+        "nominal_objective": 30.899136030045337,
+        "nonlinear_objective": 41.855290738349495,
+        "replay_error_by_coordinate": [
+          9.094947017729282e-13,
+          0.0,
+          2.2737367544323206e-13,
+          1.7763568394002505e-14
+        ],
+        "initial_stock_invariant": -452.4434444409562,
+        "terminal_stock_invariant": -452.4434444412941
+      },
+      {
+        "id": 2,
+        "nominal_states": 17,
+        "nonlinear_samples": 10000,
+        "initial_state": [
+          1220.28265395983,
+          119500.0,
+          440.005764648976,
+          45300.0
+        ],
+        "nominal_terminal": [
+          1200.7431327206407,
+          -22.928577199003485,
+          450.2002974694224,
+          -7.708718176201273
+        ],
+        "nonlinear_terminal": [
+          1200.5333404870541,
+          0.5088651630344287,
+          449.72215119555005,
+          17.56054143577495
+        ],
+        "first_inferred_action": -0.9999999912873875,
+        "inferred_action_range": [
+          -0.9999999999999967,
+          0.9999999999999967
+        ],
+        "control_channel_error": 6.161737786669619e-15,
+        "recurrence_max_absolute": 5.684341886080802e-14,
+        "algebraic_stock_difference_max": 7.275957614183426e-12,
+        "inferred_step_range": [
+          6.2499999999999964,
+          6.250000000000006
+        ],
+        "flow_ranges": [
+          [
+            1176.0000000099112,
+            1220.28265395983
+          ],
+          [
+            440.005764648976,
+            463.109758014151
+          ]
+        ],
+        "nominal_objective": 30.899136030147798,
+        "nonlinear_objective": 65.8744016598146,
+        "replay_error_by_coordinate": [
+          4.547473508864641e-13,
+          1.0302869668521453e-13,
+          2.8421709430404007e-13,
+          4.973799150320701e-14
+        ],
+        "initial_stock_invariant": -452.4434444409562,
+        "terminal_stock_invariant": -452.4434444406711
+      },
+      {
+        "id": 3,
+        "nominal_states": 17,
+        "nonlinear_samples": 10000,
+        "initial_state": [
+          1220.28265395983,
+          119500.0,
+          440.005764648976,
+          45300.0
+        ],
+        "nominal_terminal": [
+          1200.7431327675115,
+          -22.928545040446807,
+          450.2002974449682,
+          -7.708734954587726
+        ],
+        "nonlinear_terminal": [
+          1200.5333405339486,
+          -6.36621811276736,
+          449.7221511711567,
+          -1.4752731125568275
+        ],
+        "first_inferred_action": -0.9999999972136713,
+        "inferred_action_range": [
+          -0.9999999974698879,
+          0.9999999999999967
+        ],
+        "control_channel_error": 6.827871601444713e-15,
+        "recurrence_max_absolute": 5.684341886080802e-14,
+        "algebraic_stock_difference_max": 7.275957614183426e-12,
+        "inferred_step_range": [
+          6.249999999999995,
+          6.250000000000006
+        ],
+        "flow_ranges": [
+          [
+            1176.0000000005964,
+            1223.9999995271944
+          ],
+          [
+            438.0662800051336,
+            463.10975801901094
+          ]
+        ],
+        "nominal_objective": 30.899136030017026,
+        "nonlinear_objective": 7.921766774950679,
+        "replay_error_by_coordinate": [
+          4.547473508864641e-13,
+          0.0,
+          1.7053025658242404e-13,
+          0.0
+        ],
+        "initial_stock_invariant": -452.4434444409562,
+        "terminal_stock_invariant": -452.4434444408794
+      }
+    ],
+    "replay_pair_max_error_matrix": [
+      [
+        9.094947017729282e-13,
+        503.17292808813363,
+        1085.5136282985768
+      ],
+      [
+        503.17292808813363,
+        4.547473508864641e-13,
+        806.2753500995314
+      ],
+      [
+        1085.5136282985768,
+        806.2753500995314,
+        4.547473508864641e-13
+      ]
+    ],
+    "replay_events": [
+      {
+        "matlab_sample": 626,
+        "time_seconds": 6.25,
+        "increment_number": 1
+      },
+      {
+        "matlab_sample": 1251,
+        "time_seconds": 12.5,
+        "increment_number": 2
+      },
+      {
+        "matlab_sample": 1876,
+        "time_seconds": 18.75,
+        "increment_number": 3
+      },
+      {
+        "matlab_sample": 2501,
+        "time_seconds": 25.0,
+        "increment_number": 4
+      },
+      {
+        "matlab_sample": 3126,
+        "time_seconds": 31.25,
+        "increment_number": 5
+      },
+      {
+        "matlab_sample": 3751,
+        "time_seconds": 37.5,
+        "increment_number": 6
+      },
+      {
+        "matlab_sample": 4376,
+        "time_seconds": 43.75,
+        "increment_number": 7
+      },
+      {
+        "matlab_sample": 5001,
+        "time_seconds": 50.0,
+        "increment_number": 8
+      },
+      {
+        "matlab_sample": 5626,
+        "time_seconds": 56.25,
+        "increment_number": 9
+      },
+      {
+        "matlab_sample": 6251,
+        "time_seconds": 62.5,
+        "increment_number": 10
+      },
+      {
+        "matlab_sample": 6876,
+        "time_seconds": 68.75,
+        "increment_number": 11
+      },
+      {
+        "matlab_sample": 7501,
+        "time_seconds": 75.0,
+        "increment_number": 12
+      },
+      {
+        "matlab_sample": 8126,
+        "time_seconds": 81.25,
+        "increment_number": 13
+      },
+      {
+        "matlab_sample": 8751,
+        "time_seconds": 87.5,
+        "increment_number": 14
+      },
+      {
+        "matlab_sample": 9376,
+        "time_seconds": 93.75,
+        "increment_number": 15
+      },
+      {
+        "matlab_sample": 10000,
+        "time_seconds": 99.99,
+        "increment_number": 16
+      }
+    ],
+    "frozen": {
+      "terminal": [
+        1190.4414912370798,
+        101.7033430973679,
+        455.1220439139795,
+        -72.81705922737456
+      ],
+      "initial": [
+        1220.282653959828,
+        119469.49293365101,
+        440.00576464897654,
+        45288.999855883776
+      ],
+      "objective": 368.6097808680356,
+      "printed_objective": 368.45,
+      "objective_from_printed_coordinates": 368.6068413472544,
+      "rounding_box_objective_range": [
+        368.54934883615726,
+        368.66434608974293
+      ],
+      "rounding_box_gradient_signs_fixed": true,
+      "first_stock_offset_divided_by_first_flow": [
+        0.024999999999995012,
+        0.024999999999998978
+      ]
+    },
+    "last_increment_effect_on_final_sample": [
+      19.91129648549213,
+      0.0,
+      -10.948454768662998,
+      0.0
+    ],
+    "zero_increment_replay_terminal": [
+      1220.2826539598277,
+      -2516.062569422601,
+      440.00576464897637,
+      1303.8235927505934
+    ],
+    "zero_increment_replay_objective": 7371.256616305113,
+    "conditional_affine_minimum": {
+      "assumption": "Fixed saved x0, sourced B, inferred h=6.25; no admissibility certificate",
+      "moments": [
+        -0.973436294984494,
+        -19.970076348240628
+      ],
+      "terminal": [
+        1200.7431326932322,
+        -22.928545021908576,
+        450.20029748372275,
+        -7.708734964262931
+      ],
+      "objective": 30.899136030021875,
+      "observed_terminal_errors": [
+        [
+          -3.114882929367013e-08,
+          -3.0722731025889516e-09,
+          1.6251703982561594e-08,
+          1.5879777492955327e-09
+        ],
+        [
+          2.7408532332628965e-08,
+          -3.217709490854759e-05,
+          -1.4300326256488916e-08,
+          1.6788061657280196e-05
+        ],
+        [
+          7.427934178849682e-08,
+          -1.8538230506237596e-08,
+          -3.8754535580665106e-08,
+          9.67520463746041e-09
+        ]
+      ],
+      "observed_objective_differences": [
+        2.3462121134798508e-11,
+        1.2592238363140495e-10,
+        -4.849454171562684e-12
+      ]
+    },
+    "checks": {
+      "nominal_recurrence": true,
+      "independent_control_channels": true,
+      "inferred_stock_step": true,
+      "all_sample_replay": true,
+      "distinct_pairings": true,
+      "optimal_coordinates_round_to_table": true,
+      "optimal_objectives_round_to_table": true,
+      "frozen_coordinates_round_to_table": true,
+      "frozen_printed_objective_excluded": true,
+      "last_increment_leaves_terminal_stocks_unchanged": true,
+      "conditional_minimum_agrees_at_floating_precision": true,
+      "all_passed": true
+    },
+    "environment": {
+      "python": "3.13.5",
+      "numpy": "2.3.2",
+      "scipy": "1.16.3"
+    },
+    "source_integrity": [
+      {
+        "source_id": "A39",
+        "sha256": "1120e70dbf3a300d1f8c9ee19d1082632c3adbb24f5ac445802954b164181f38",
+        "bytes": 1131239
+      },
+      {
+        "source_id": "A40",
+        "sha256": "581a91dbb1041973f9559a6cac07657279a5e3f40091f04606216be0f97bac46",
+        "bytes": 3819
+      },
+      {
+        "source_id": "A01",
+        "sha256": "e7010e0a830595029b9876b1511558514cec8398d2ffa290313a566ba6997558",
+        "bytes": 8645
+      },
+      {
+        "source_id": "A41",
+        "sha256": "db1f29e55e9e3558b4f9eb4bd52c86931f210233d746a986610dab08102b3891",
+        "bytes": 858237
+      },
+      {
+        "source_id": "A42",
+        "sha256": "ccbe6aac3e9d265999b135a780cbd4fff060d8db574bc747f27e8216c824692d",
+        "bytes": 106169
+      }
+    ]
+  },
+  "provenance_limits": "Five source identities checked by current command; article/image interpretation retained from previous independent visual audit. Raw arrays and original action histories are not published. No archive code executed; no benchmark speed claim."
+}

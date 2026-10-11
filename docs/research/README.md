@@ -45,3 +45,5 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 The [targeted follow-up search](archive-followup.md) records recovered MATLAB/Pascal algorithms, B04 tables, minimax adaptive run data and the local zonotope paper. Its selected-source register supplements the initial inventory.
 
 [B04 numerical tables](b04-tables.md) transcribe the owner-identified table document and record the provisional [-1,1] control-interval recollection.
+
+[B04 saved witnesses and replay](b04-saved-witnesses.md) curates three independently checked nominal/nonlinear pairs as a distinct evidence variant, with [machine-readable facts](evidence/b04-saved-witnesses.json) and an explicit-private-source reference checker. It preserves the frozen objective mismatch, historical 99.99-second endpoint and missing canonical T16 configuration. The historical scenario remains non-executable.
