@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-11",
+  "upstream_repository": "https://github.com/backnotprop/pstack",
+  "commit": "3a604672c46cd8187d2b19980eae0a34f9f91138",
+  "license": "MIT",
+  "installation_scope": "User-local Codex skills; OpenCode and global configuration unchanged",
+  "skills": [
+    {
+      "name": "benchmark-checklist",
+      "disable_model_invocation": true,
+      "required_dependencies": [
+        "principle-explain-the-number"
+      ],
+      "supporting_readings": [],
+      "files": [
+        {
+          "upstream_path": "skills/benchmark-checklist/SKILL.md",
+          "sha256": "6a767e788a60428fa14e645ee10fe2e49896e514ff654f668b1d824deb9038e8"
+        }
+      ]
+    },
+    {
+      "name": "principle-explain-the-number",
+      "disable_model_invocation": true,
+      "required_dependencies": [
+        "benchmark-checklist"
+      ],
+      "supporting_readings": [],
+      "files": [
+        {
+          "upstream_path": "skills/principle-explain-the-number/SKILL.md",
+          "sha256": "5aac99e7ce0bb1b37e2579acf4fe88c32a1456d9d46afd4a57cfe1df9092e89c"
+        }
+      ]
+    },
+    {
+      "name": "principle-type-system-discipline",
+      "disable_model_invocation": true,
+      "required_dependencies": [],
+      "supporting_readings": [
+        "principle-boundary-discipline",
+        "principle-encode-lessons-in-structure"
+      ],
+      "files": [
+        {
+          "upstream_path": "skills/principle-type-system-discipline/SKILL.md",
+          "sha256": "c83da8031ffb4c86410030d3e261f659598fca2b7d8158fd9dc269d70a3a025e"
+        }
+      ]
+    },
+    {
+      "name": "principle-test-behavior-not-implementation",
+      "disable_model_invocation": true,
+      "required_dependencies": [],
+      "supporting_readings": [],
+      "files": [
+        {
+          "upstream_path": "skills/principle-test-behavior-not-implementation/SKILL.md",
+          "sha256": "87e40efe4e486f7ea639d2ed1fc0abe6c93b8fd0e89a81218086909d2470a52e"
+        }
+      ]
+    },
+    {
+      "name": "principle-separate-before-serializing-shared-state",
+      "disable_model_invocation": true,
+      "required_dependencies": [],
+      "supporting_readings": [],
+      "files": [
+        {
+          "upstream_path": "skills/principle-separate-before-serializing-shared-state/SKILL.md",
+          "sha256": "05294b40448e927c5da1c7b6f5c6b9fed3744637e3833d2d948b9154a9dd00bb"
+        }
+      ]
+    },
+    {
+      "name": "principle-boundary-discipline",
+      "disable_model_invocation": true,
+      "required_dependencies": [],
+      "supporting_readings": [],
+      "files": [
+        {
+          "upstream_path": "skills/principle-boundary-discipline/SKILL.md",
+          "sha256": "62ac2862c2caa22dd14531f51c9c6bb445ceb198ca98a687e25b4d47c1f10a28"
+        }
+      ]
+    },
+    {
+      "name": "principle-encode-lessons-in-structure",
+      "disable_model_invocation": true,
+      "required_dependencies": [],
+      "supporting_readings": [],
+      "files": [
+        {
+          "upstream_path": "skills/principle-encode-lessons-in-structure/SKILL.md",
+          "sha256": "77044c83a9ac6df78fc643887ea5f1f11f082adaf14b717c060cdaed03cce863"
+        }
+      ]
+    }
+  ]
+}

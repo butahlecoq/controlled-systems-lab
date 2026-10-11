@@ -1,6 +1,6 @@
 # Controlled Systems Lab: consolidated requirements and architecture specification
 
-Date: 2026-10-11. Version: 0.5. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
+Date: 2026-10-11. Version: 0.6. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
 
 ## Product intent
 
@@ -103,12 +103,18 @@ The catalog includes H/V polyhedra, boxes/parallelotopes, zonotopes, constrained
 | RUN-03 | C/P | Shared resource policy, cancellation and partial evidence | Outer/backend threads share budget; cancellation reports incumbent/bounds where available; enforcement limitations recorded |
 | RUN-04 | C | Scalability claims must be measured for declared outputs | Record dimensions, representation size, memory, backend versions and output scope; changing language alone does not claim removal of exponential complexity |
 | EXP-01 | C | Compare methods visually, numerically and by time | Common scenario/objective/query/tolerance; controls/states, residuals, family evidence and separated setup/solve/query/verification timing |
-| EXP-06 | C | First comparison presents final results, controls and trajectories | Include objective/residual/family evidence and summary time/memory; intermediate-computation inspection/export is not required |
+| EXP-06 | C | First comparison presents final results, controls and trajectories | Include objective/residual/family evidence, detailed module timing tables and final plots; intermediate-computation viewers are not required |
+| EXP-07 | C | Detailed submodule comparison tables | Record module/backend/operator identities, call counts, sizes, iterations when available and nested/parallel timing; preserve raw repetitions and separate overlapping work from latency |
+| EXP-08 | C | Final scientific plots and selectable 2D fuel projections | Export controls/states and requested coordinate pairs with units; mathematical set projections require an explicit compatible query and retain exact/inner/outer/sample labels |
+| OBS-01 | C | Observe independent algorithm and representation substitutions | Record selected module identities, conversions, required/returned guarantees and rejected capabilities without coupling mathematical ports to a viewer |
+| OBS-02 | C | Measure execution and instrumentation honestly | Separate inclusive/exclusive wall/work/CPU scope, unavailable metrics, setup/family/query/verification/replay/export costs and collection overhead |
 | EXP-05 | C | First compare reachability/backward recovery with direct joint-trajectory optimization | Both strategies run the shared analytic acceptance cases with the same optimum and consistent complete-family semantics; approximation comparison is later |
 | EXP-02 | C | Published experiments and figures/tables anchor baselines | Keep reported values separate from independently reproduced results and source variants |
 | EXP-03 | C | B04 first archival target; unresolved inputs remain explicit | Historical non-executable manifest cannot be silently promoted by guessed bounds or fitted matrices |
 | EXP-04 | C/P | Reproducible versioned artifacts | Scenario hashes, seeds, selection settings, module versions, resources and raw comparison data recorded |
 | REV-01 | C | English documentation and public scientific review | Trace assumptions/results to source IDs and review issues; preserve original hashes and avoid publishing unapproved raw archive content |
+| REV-02 | C | Separate module-test expansion tickets | Every implementation ships minimum acceptance tests; separate tickets add independently designed unit/contract suites for module seams and mathematical edge cases |
+| REV-03 | C | Separate rigorous code-review tickets | Review fixed implemented commits for standards, specification, mathematical assumptions, modular replacement, ownership and measured scalability; blocking findings need fixes and independent recheck |
 
 ## Architecture and C++ boundary rules
 
@@ -116,7 +122,7 @@ Use composition across model, problem, sets/geometry, optimization, reachability
 
 Problem data and immutable set payloads can be shared. Workspaces, caches with mutable state and warm starts belong to a solve/worker and cannot be concurrently borrowed without an explicit synchronization contract. Buffer views declare scalar/storage/stride/lifetime. Initially proposed double arithmetic is not validated arithmetic. Registry IDs remain extensible; closed small objective alternatives may use std::variant.
 
-The first comparison presents final optimal-family results, selected controls/trajectories, independent verification and summary timing/memory. Intermediate reachable-set inspection, generated-program dumps and step-by-step trace viewers are deferred. Required capability/failure explanations and evidence remain in the final result. Summary performance accounting does not require retaining every intermediate set or solver iteration.
+The first comparison presents final optimal-family results, selected controls/trajectories, independent verification, detailed module timing tables and standalone scientific figures with selectable 2D fuel-coordinate views. The later owner request extends the previous summary-only presentation. Intermediate reachable-set viewers and generated-program dumps remain optional. Operation counters and nested spans record substitutions, sizes and work without requiring every intermediate set or solver iterate to be retained. Explicit mathematical projection queries have separate capability, evidence and cost records.
 
 Public ports return common statuses and evidence while retaining raw backend diagnostics. Backend library containers stay behind adapters. Expected capability/math/numerical failures are represented in results; allocation/programming error policy will be settled in the implementation plan. A future C ABI is distinct from selecting registered native modules at runtime.
 
@@ -134,7 +140,7 @@ Owner decision: users choose among supplied scenario files or create their own f
 | INP-04 | P | Validate authored input before expensive work | Syntax/shape/schema errors identify the field and expected value; unsupported capabilities are reported separately; unknown fields cannot silently disappear |
 | INP-05 | P | Document, version and record resolved defaults | Optional omissions have explicit stable meanings; a run stores the resolved problem/settings and external-data hashes where used |
 
-Proposed user flow: choose a file -> validate it -> resolve the requested/default comparison configuration -> run the two selected strategies -> obtain final families, controls/trajectories, verification and summary performance. A thin CLI is the proposed first launcher; the input schema must also be usable by later interfaces and the native library.
+Proposed user flow: choose a file -> validate it -> resolve the requested/default comparison configuration -> run the two selected strategies -> obtain final families, controls/trajectories, verification, detailed module performance and final figures. A thin CLI is the proposed first launcher; the input schema must also be usable by later interfaces and the native library.
 
 A scenario describes dynamics, initial information, horizon, admissible sets and the primary criterion. Optional run settings describe methods, witness selection, numerical tolerances and resources. A simple file can contain both without requiring the user to manage multiple files. The default comparison profile is proposed to select the two agreed strategies; advanced backend selection remains optional. Requested capabilities must still be checked.
 
@@ -192,7 +198,7 @@ The [temporal-coupling note](../../research/temporal-coupling.md) proves a speci
 
 ## From specification to tickets and subagents
 
-This is a proposed work breakdown, not yet a set of implementation tickets or a task-by-task coding plan:
+The owner authorized decomposition and GitHub publication. The [implementation backlog](../plans/2026-10-11-controlled-systems-backlog.md) and [machine-readable ticket manifest](../plans/backlog.json) now define the dependency order, acceptance checklists and proposed ownership. Product implementation is a subsequent step:
 
 1. Review this consolidated specification and native contracts; reconcile requirement status and settle the first supported completeness cases.
 2. Select native numerical/test/build integrations, freeze the first interface revision, and write the scoped implementation plan.
@@ -200,7 +206,7 @@ This is a proposed work breakdown, not yet a set of implementation tickets or a 
 4. Implement dependency-ready tickets with subagents in isolated branches/worktrees. Integrate common contracts before downstream work depends on them.
 5. Run unit/adapter/integration evidence, review scientific assumptions and changes, then merge coherent slices and compare methods.
 
-Each future ticket must contain: goal; linked requirement IDs; assumptions/source references; inputs/output contract; included/excluded capabilities; acceptance/test IDs; dependencies; ownership of files/modules; result/evidence expectations; and review/merge criteria. Avoid tickets such as "implement solver" without an output guarantee and independent test oracle.
+Each implementation ticket contains: goal; linked requirement IDs; assumptions/source references; inputs/output contract; included/excluded capabilities; acceptance/test IDs; dependencies; ownership of files/modules; result/evidence expectations; and review/merge criteria. Avoid tickets such as "implement solver" without an output guarantee and independent test oracle.
 
 Suggested responsibility groups are shared model/problem/data contracts, set/geometry adapters, optimization adapters, synthesis/family construction, witness/verification, execution/artifacts, and archival reproduction. Multiple ready adapter/test tickets can run in parallel after common interfaces are fixed. Shared-header redesign, registry/result-schema changes and a strategy's upstream prerequisites are sequential dependencies. One integrator owns cross-module consistency and complete end-to-end checks; scientific review remains distinct from a coding-agent review.
 
@@ -214,6 +220,7 @@ Subagents may propose contract changes but cannot silently alter accepted requir
 - Version 0.3: owner selected final results and trajectories as sufficient for the initial comparison; EXP-06 defers intermediate-computation inspection while preserving final evidence and performance summaries.
 - Version 0.4: owner selected scenario-file input and user-authored scenarios based on supplied simple templates; input requirements, glossary distinctions and validation tests added.
 - Version 0.5: owner confirmed discrete models for the first version; MOD-09 reserves continuous-time input/discretization for a later module.
+- Version 0.6: owner authorized concrete tickets, separate test expansions and rigorous code reviews; detailed module observability/timing and final 2D fuel figures extend EXP-06. Archive-backed optimizer variants, new recursive/warm-start strategies and later representations receive separate capability tickets.
 
 ## Open decisions for the next review
 

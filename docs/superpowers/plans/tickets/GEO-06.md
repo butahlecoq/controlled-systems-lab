@@ -1,0 +1,27 @@
+# GEO-06: Add a separate two-dimensional QuickHull adapter
+
+## Purpose and scope
+
+Provide a geometric 2D hull alternative for exact projected clouds and method comparison.
+
+Requirements: ALG-02, ALG-03, ALG-05. Test oracles: T-G02.
+
+Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/butahlecoq/controlled-systems-lab/blob/main/docs/superpowers/specs/2026-10-11-controlled-systems-master-design.md), [2026-10-11-controlled-systems-backlog.md](https://github.com/butahlecoq/controlled-systems-lab/blob/main/docs/superpowers/plans/2026-10-11-controlled-systems-backlog.md) and [algorithm-module-inventory.md](https://github.com/butahlecoq/controlled-systems-lab/blob/main/docs/research/algorithm-module-inventory.md), [set-representations-and-ellipsoidal-toolbox.md](https://github.com/butahlecoq/controlled-systems-lab/blob/main/docs/architecture/set-representations-and-ellipsoidal-toolbox.md).
+
+## Acceptance criteria
+
+- [ ] Audit Scientific Research quickhull and use a documented independent implementation, not an LP-kernel alias.
+- [ ] Handle duplicates, collinear/all-coincident data and orientation ties; retain original point identities.
+- [ ] Compare hull equality with the LP reference. Reject higher dimensions instead of projecting silently.
+
+## Dependencies
+
+Blocked by GEO-01.
+
+Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
+
+## Delivery and review
+
+Ship meaningful unit/contract tests with the implementation, using the named independent oracle. Return commits, tests and commands run, supported assumptions, numerical/evidence limitations and unresolved findings. Shared contract changes require an explicit specification revision and integration review.
+
+Use the plan ownership map to claim files before editing. Later-phase tickets do not expand the first-release scope. Do not alter source transcriptions or label a witness sample as a complete optimal family.

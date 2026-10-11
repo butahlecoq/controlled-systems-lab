@@ -1,0 +1,4114 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-11",
+  "repository": "https://github.com/butahlecoq/controlled-systems-lab",
+  "spec_version": "0.6",
+  "publication_order": [
+    "CORE-01",
+    "CORE-02",
+    "CORE-03",
+    "CORE-04",
+    "MODEL-01",
+    "GEO-01",
+    "OPT-01",
+    "OPT-02",
+    "TEST-01",
+    "MODEL-02",
+    "OPT-03",
+    "OPT-08",
+    "GEO-06",
+    "APP-01",
+    "RUN-01",
+    "TEST-02",
+    "TEST-04",
+    "MODEL-03",
+    "OPT-04",
+    "OPT-05",
+    "GEO-03",
+    "GEO-07",
+    "APP-02",
+    "APP-04",
+    "TEST-05",
+    "TEST-06",
+    "OPT-06",
+    "OPT-07",
+    "OPT-09",
+    "GEO-02",
+    "GEO-04",
+    "APP-03",
+    "SYN-06",
+    "INP-01",
+    "OPT-11",
+    "OPT-12",
+    "TEST-03",
+    "TEST-07",
+    "OBS-01",
+    "OPT-10",
+    "GEO-05",
+    "GEO-08",
+    "SYN-01",
+    "EXT-05",
+    "EXT-06",
+    "EXP-04",
+    "TEST-19",
+    "TEST-14",
+    "REVIEW-01",
+    "OBS-02",
+    "SYN-02",
+    "EXT-01",
+    "TEST-08",
+    "TEST-09",
+    "TEST-10",
+    "SYN-03",
+    "SYN-04",
+    "EXT-04",
+    "TEST-11",
+    "REVIEW-02",
+    "SYN-05",
+    "INP-03",
+    "EXT-03",
+    "TEST-12",
+    "INP-02",
+    "EXT-02",
+    "TEST-13",
+    "TEST-15",
+    "OBS-03",
+    "RUN-02",
+    "TEST-21",
+    "REVIEW-03",
+    "OBS-04",
+    "TEST-16",
+    "REVIEW-04",
+    "OBS-05",
+    "VIZ-01",
+    "TEST-23",
+    "TEST-17",
+    "REVIEW-06",
+    "VIZ-02",
+    "VIZ-04",
+    "EXP-01",
+    "EXP-02",
+    "REVIEW-05",
+    "VIZ-03",
+    "TEST-22",
+    "TEST-18",
+    "EXP-03",
+    "TEST-20",
+    "REVIEW-07",
+    "REVIEW-08",
+    "REVIEW-10",
+    "REVIEW-09"
+  ],
+  "tickets": [
+    {
+      "key": "CORE-01",
+      "title": "Fix public contracts and choose compatible native dependencies",
+      "kind": "implementation",
+      "area": "core",
+      "phase": 1,
+      "dependencies": [],
+      "scope": "Publish a small interface revision for model, sets, programs, families, evidence and execution. Choose matrix, LP, convex, parser, test and build integrations before adapter work starts.",
+      "acceptance": [
+        "Record supported properties, ownership, error outcomes and performance costs at each interface. No solver-library container appears in a public problem/result type.",
+        "Record candidate versions, license constraints, supported toolchains and an integration probe for each selected dependency. Do not change the undecided project license.",
+        "Provide caller examples for the two synthesis strategies and independent workspaces. Keep numerical evidence separate from validated claims."
+      ],
+      "files": [
+        "docs/contracts/core-interfaces.md",
+        "docs/architecture/decisions/0002-native-integrations.md"
+      ],
+      "requirements": [
+        "MOD-01",
+        "ALG-01",
+        "ALG-03",
+        "ALG-05",
+        "RUN-01",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-M03",
+        "T-V02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": true,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "CORE-02",
+      "title": "Build and run a portable C++20 client with test support",
+      "kind": "implementation",
+      "area": "core",
+      "phase": 1,
+      "dependencies": [
+        "CORE-01"
+      ],
+      "scope": "Deliver a native client and test entry point that builds selected modules without backend-private headers.",
+      "acceptance": [
+        "Provide repeatable configure, build, test and install commands; record initial platform support and dependency versions.",
+        "Run a small backend-neutral client and a literal numeric fixture in CI. Keep generated builds and vendored sources outside tracked scientific artifacts.",
+        "Document unavailable sanitizers/platform counters rather than treating a missing tool as a passed check."
+      ],
+      "files": [
+        "CMakeLists.txt",
+        "cmake/",
+        "tests/contract/public_client.cpp",
+        ".github/workflows/native.yml"
+      ],
+      "requirements": [
+        "RUN-01",
+        "ALG-07"
+      ],
+      "test_ids": [
+        "T-M01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "CORE-03",
+      "title": "Provide owning numeric data and safe matrix views",
+      "kind": "implementation",
+      "area": "core",
+      "phase": 1,
+      "dependencies": [
+        "CORE-02"
+      ],
+      "scope": "Allow clients and adapters to share immutable numeric data without exposing an external matrix type.",
+      "acceptance": [
+        "Check dense/sparse shape, stride, scalar and owner lifetime at input seams; define zero-sized data behavior.",
+        "For matrix [[1,2,3],[4,5,6]] and vector [7,11,13], all supported layouts yield [68,161].",
+        "Retained asynchronous views preserve ownership; workers do not mutate shared input values."
+      ],
+      "files": [
+        "include/csl/numeric/",
+        "src/numeric/",
+        "tests/unit/numeric/"
+      ],
+      "requirements": [
+        "RUN-02",
+        "MOD-04"
+      ],
+      "test_ids": [
+        "T-M02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "CORE-04",
+      "title": "Select compatible algorithm adapters through a registry",
+      "kind": "implementation",
+      "area": "core",
+      "phase": 1,
+      "dependencies": [
+        "CORE-03"
+      ],
+      "scope": "Resolve registered methods, set operations and backend workspaces from capabilities and requested evidence.",
+      "acceptance": [
+        "Register at least two distinct compatible adapters without editing model or client dispatch logic.",
+        "Reject unsupported representation/objective/scalar/guarantee requests before allocation-heavy work; include a reason and actual method identity.",
+        "Create independent mutable workspaces from immutable configuration; no portable cross-compiler C++ ABI is claimed."
+      ],
+      "files": [
+        "include/csl/registry/",
+        "src/registry/",
+        "tests/contract/registry/"
+      ],
+      "requirements": [
+        "ALG-01",
+        "ALG-03",
+        "ALG-05",
+        "ALG-07"
+      ],
+      "test_ids": [
+        "T-M03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "MODEL-01",
+      "title": "Define affine LTI/LTV models and separate observations",
+      "kind": "implementation",
+      "area": "model",
+      "phase": 1,
+      "dependencies": [
+        "CORE-03"
+      ],
+      "scope": "Construct reusable immutable dynamics and observation models with explicit time and input roles.",
+      "acceptance": [
+        "Represent A/B/E/offset and observation/error/feedthrough maps, including singular A and absent ports.",
+        "Compact LTI and explicit LTV providers agree for x0=2, A=3, B=2, a=-1, u=[1,-2]: states [2,7,16].",
+        "Validate timestamps and pre/post-action availability. No observations does not grant full-state knowledge."
+      ],
+      "files": [
+        "include/csl/model/",
+        "src/model/",
+        "tests/unit/model/"
+      ],
+      "requirements": [
+        "MOD-01",
+        "MOD-02",
+        "MOD-03",
+        "MOD-04",
+        "MOD-05",
+        "MOD-09"
+      ],
+      "test_ids": [
+        "T-M01",
+        "T-M02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/linear-system-contract.md"
+      ]
+    },
+    {
+      "key": "MODEL-02",
+      "title": "Represent control domains, constraints and initial information",
+      "kind": "implementation",
+      "area": "model",
+      "phase": 1,
+      "dependencies": [
+        "MODEL-01",
+        "GEO-01"
+      ],
+      "scope": "Build problems with explicit stagewise constraints and natural general-model special cases.",
+      "acceptance": [
+        "Keep point/set initial information, continuous/finite/mixed domains and external-input semantics distinct; first nominal profile uses a known point.",
+        "Distinguish universal, empty, singleton and bounded sets. T transitions use T control and T+1 state stages.",
+        "Retain optional temporal constraints and future hybrid identity without silently relaxing discrete choices or erasing uncertainty quantifiers."
+      ],
+      "files": [
+        "include/csl/problem/domains.hpp",
+        "include/csl/problem/constraints.hpp",
+        "include/csl/problem/initial_information.hpp"
+      ],
+      "requirements": [
+        "MOD-04",
+        "MOD-06",
+        "MOD-07",
+        "MOD-08"
+      ],
+      "test_ids": [
+        "T-M02",
+        "T-M03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/linear-system-contract.md"
+      ]
+    },
+    {
+      "key": "MODEL-03",
+      "title": "Validate complete problems and strategy assumptions",
+      "kind": "implementation",
+      "area": "model",
+      "phase": 1,
+      "dependencies": [
+        "MODEL-02",
+        "OPT-01",
+        "CORE-04"
+      ],
+      "scope": "Validate mathematical inputs separately from configured strategy support.",
+      "acceptance": [
+        "Report shape/index/criterion errors separately from unsupported, infeasible and solver failure.",
+        "Keep singular/unbounded/lower-dimensional problems representable while an inverse/compact-set strategy declares its restrictions.",
+        "Bind resolved problem identity to mathematical data and external content, independent of selected backend settings."
+      ],
+      "files": [
+        "include/csl/problem/validator.hpp",
+        "src/problem/validator.cpp"
+      ],
+      "requirements": [
+        "MOD-05",
+        "MOD-07",
+        "MOD-09",
+        "ALG-05",
+        "INP-03"
+      ],
+      "test_ids": [
+        "T-M03",
+        "T-I03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/linear-system-contract.md"
+      ]
+    },
+    {
+      "key": "GEO-01",
+      "title": "Represent exact polyhedral and elementary sets",
+      "kind": "implementation",
+      "area": "geometry",
+      "phase": 1,
+      "dependencies": [
+        "CORE-03"
+      ],
+      "scope": "Provide immutable H/V set data and empty/singleton/universal cases with explicit evidence.",
+      "acceptance": [
+        "Retain ambient and affine dimension, equality rows, vertices/rays where applicable, coordinate labels and representation ID.",
+        "Keep algebraic equivalence distinct from numerical/validated evidence. Lower-dimensional sets are not rejected by the data model.",
+        "Clients can query metadata without copying or materializing payloads."
+      ],
+      "files": [
+        "include/csl/sets/",
+        "src/sets/"
+      ],
+      "requirements": [
+        "ALG-03",
+        "ALG-04",
+        "MOD-04",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-G01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ]
+    },
+    {
+      "key": "OPT-01",
+      "title": "Evaluate and reformulate structured terminal objectives",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 1,
+      "dependencies": [
+        "CORE-03"
+      ],
+      "scope": "Support linear, convex quadratic and affine residual-norm criteria with independent original-cost evaluation.",
+      "acceptance": [
+        "Validate coefficient shapes, symmetry/PSD evidence policy and rectangular residual maps.",
+        "Record norm-square reformulation Q=2L^TL, q=-2L^Tr, c=r^Tr; report the original norm after solving.",
+        "Cover zero residual and semidefinite/constant criteria without assuming a unique terminal minimizer."
+      ],
+      "files": [
+        "include/csl/optimization/objectives.hpp",
+        "src/optimization/objective_reformulation.cpp"
+      ],
+      "requirements": [
+        "OPT-01",
+        "OPT-02",
+        "SOL-02"
+      ],
+      "test_ids": [
+        "T-O01",
+        "T-O02",
+        "T-C01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-02",
+      "title": "Expose linear-program and basis-diagnostic interfaces",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 1,
+      "dependencies": [
+        "CORE-03"
+      ],
+      "scope": "Give hull, geometry and recovery algorithms a backend-neutral LP interface.",
+      "acceptance": [
+        "Describe equality/inequality rows, variable bounds and objective conventions without a backend container.",
+        "Separate termination, infeasible/unbounded outcomes, primal/dual residuals and justified bounds.",
+        "Make basis/pivot data optional capabilities; use one exclusive workspace per worker."
+      ],
+      "files": [
+        "include/csl/optimization/lp_backend.hpp",
+        "include/csl/optimization/linear_program.hpp"
+      ],
+      "requirements": [
+        "ALG-01",
+        "ALG-02",
+        "RUN-02"
+      ],
+      "test_ids": [
+        "T-L01",
+        "T-L02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-03",
+      "title": "Integrate a reference native LP adapter",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 2,
+      "dependencies": [
+        "OPT-02",
+        "CORE-04"
+      ],
+      "scope": "Run geometry and recovery LPs through the native dependency selected by CORE-01.",
+      "acceptance": [
+        "Register the adapter and translate real statuses and residuals. Feasibility/finite optimum/infeasible/unbounded analytic fixtures pass.",
+        "Reuse compatible native workspaces without sharing mutable solver state between workers.",
+        "Retain raw diagnostics and version identity; do not fabricate certificates unavailable from the backend."
+      ],
+      "files": [
+        "src/adapters/lp/",
+        "tests/contract/lp/"
+      ],
+      "requirements": [
+        "ALG-01",
+        "ALG-05",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-L01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-04",
+      "title": "Implement the archival phase-I feasibility kernel",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 3,
+      "dependencies": [
+        "OPT-02",
+        "OPT-03"
+      ],
+      "scope": "Implement the professor-associated phase-I procedure for the equality/nonnegative feasibility tasks used by hull and recovery modules.",
+      "acceptance": [
+        "Document lineage from L01/L03/L07 and A06; do not claim one saved variant is a verified original release.",
+        "Return feasible coefficients, auxiliary residual, basis/pivot diagnostics and bounded termination. Define degeneracy and anti-cycling policy.",
+        "Check triangle membership, collinear inputs, signed coordinates and deterministic pivot ties against the reference LP."
+      ],
+      "files": [
+        "src/optimization/phase_one/",
+        "tests/contract/phase_one/"
+      ],
+      "requirements": [
+        "ALG-01",
+        "ALG-02"
+      ],
+      "test_ids": [
+        "T-L01",
+        "T-L02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-05",
+      "title": "Reduce hulls with independent membership LPs",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 2,
+      "dependencies": [
+        "OPT-03",
+        "GEO-01"
+      ],
+      "scope": "Deliver a baseline HullReducer that retains the same convex hull and original point identity.",
+      "acceptance": [
+        "Remove p only with supported nonnegative convex-combination evidence relative to other retained points.",
+        "Handle empty/singleton, duplicates, face points and lower-dimensional clouds; record LP calls and outcomes.",
+        "Verify hull equality independently by support/membership queries instead of comparing vertex order."
+      ],
+      "files": [
+        "src/geometry/hull/lp_reducer.cpp",
+        "tests/unit/geometry/hull/"
+      ],
+      "requirements": [
+        "ALG-02",
+        "ALG-03",
+        "ALG-04"
+      ],
+      "test_ids": [
+        "T-L02",
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-06",
+      "title": "Add basis-reuse hull classification as a replaceable method",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 3,
+      "dependencies": [
+        "OPT-04",
+        "OPT-05"
+      ],
+      "scope": "Use completed phase-I basis information to classify multiple hull candidates without changing the HullReducer interface.",
+      "acceptance": [
+        "Distinguish within-solve bulk classification from cross-query warm starts; preserve input point IDs.",
+        "Validate every bulk removal; skipped basis points need a proof or final verification pass.",
+        "Compare permuted, degenerate and interior-basis clouds with the baseline hull. Publish LP/pivot/bulk counters without a universal speedup claim."
+      ],
+      "files": [
+        "src/geometry/hull/basis_reuse_reducer.cpp"
+      ],
+      "requirements": [
+        "ALG-02",
+        "ALG-04",
+        "RUN-04"
+      ],
+      "test_ids": [
+        "T-L02",
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-07",
+      "title": "Add ordered and grouped hull reduction strategies",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 3,
+      "dependencies": [
+        "OPT-05"
+      ],
+      "scope": "Expose the archive ordering/grouping methods inspired by divide-and-conquer as distinct HullReducer adapters.",
+      "acceptance": [
+        "Identify which Scientific Research and Constrained QLPHULL steps actually run; document commented-out sections and differences.",
+        "Sorting, filtering, grouping and final reduction preserve hull equality for every input permutation and degeneracy fixture.",
+        "Declare this as a hull-level strategy, separate from LP pivot rules and recursive QuickHull; expose grouping/order counters."
+      ],
+      "files": [
+        "src/geometry/hull/ordered_reducer.cpp",
+        "src/geometry/hull/grouped_reducer.cpp"
+      ],
+      "requirements": [
+        "ALG-02",
+        "ALG-03",
+        "RUN-04"
+      ],
+      "test_ids": [
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-08",
+      "title": "Integrate convex-program interfaces and a reference adapter",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 2,
+      "dependencies": [
+        "OPT-01",
+        "CORE-04"
+      ],
+      "scope": "Solve supported terminal convex programs through a registered QP/conic adapter.",
+      "acceptance": [
+        "Declare supported objective, equalities, lower-dimensional sets and evidence scope before execution.",
+        "Check inside/boundary optima, zero residual and semidefinite minima against analytic answers.",
+        "Return point and optimality evidence without claiming it already describes every terminal minimizer."
+      ],
+      "files": [
+        "include/csl/optimization/convex_backend.hpp",
+        "src/adapters/convex/"
+      ],
+      "requirements": [
+        "ALG-01",
+        "OPT-01",
+        "SOL-02",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-C01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-09",
+      "title": "Implement the Pascal-derived Zoutendijk projection method",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 3,
+      "dependencies": [
+        "OPT-04",
+        "OPT-08"
+      ],
+      "scope": "Add a feasible-direction adapter for Euclidean projection onto a supported linearly constrained set, using A06 ZODENTEK as source evidence.",
+      "acceptance": [
+        "Record the active-constraint direction LP and feasible-start policy. Implement the smooth quadratic equivalent and retain original projection distance.",
+        "The step bound checks all positive directional derivatives; regression has an inactive zero-derivative row before a later finite bound.",
+        "Compare interval/box/face/singleton projections with analytic and reference QP results; feasible iterates, zero direction, termination and KKT residual are explicit."
+      ],
+      "files": [
+        "src/optimization/zoutendijk/projection.cpp",
+        "docs/research/zoutendijk-derivation.md"
+      ],
+      "requirements": [
+        "ALG-01",
+        "OPT-02",
+        "EVD-01"
+      ],
+      "test_ids": [
+        "T-C01",
+        "T-L02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-10",
+      "title": "Extend feasible directions to declared smooth convex objectives",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 5,
+      "dependencies": [
+        "OPT-09"
+      ],
+      "scope": "Add a reviewed differentiable-convex feasible-direction adapter without treating generic callbacks as certified convex programs.",
+      "acceptance": [
+        "Specify objective/gradient and linear-constraint contracts, line-search conditions and supported convergence/optimality evidence.",
+        "Handle zero direction, infeasible starts and numerical stalls distinctly; compare analytic smooth convex cases with a trusted solver.",
+        "Document ALOWER/projected-gradient source differences; nonconvex or unsupported constraints do not acquire global-optimum labels."
+      ],
+      "files": [
+        "src/optimization/feasible_directions/",
+        "docs/research/feasible-directions.md"
+      ],
+      "requirements": [
+        "ALG-01",
+        "OPT-01",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-C01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "GEO-02",
+      "title": "Compute polyhedral affine images and Minkowski sums",
+      "kind": "implementation",
+      "area": "geometry",
+      "phase": 2,
+      "dependencies": [
+        "GEO-01",
+        "OPT-05"
+      ],
+      "scope": "Provide exact mathematical affine/sum operations used by forward propagation.",
+      "acceptance": [
+        "Check support identities on analytic intervals/squares, singular maps and rectangular control maps.",
+        "Preserve empty/singleton and coordinate/evidence metadata; reduce generated candidates through the chosen HullReducer.",
+        "Finite action sets are not silently replaced by their convex hull."
+      ],
+      "files": [
+        "src/geometry/polyhedral/affine_sum.cpp"
+      ],
+      "requirements": [
+        "ALG-03",
+        "ALG-04",
+        "MOD-06"
+      ],
+      "test_ids": [
+        "T-G01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ]
+    },
+    {
+      "key": "GEO-03",
+      "title": "Convert H and V descriptions with equality and ray support",
+      "kind": "implementation",
+      "area": "geometry",
+      "phase": 2,
+      "dependencies": [
+        "GEO-01",
+        "OPT-03",
+        "CORE-04"
+      ],
+      "scope": "Register a reviewed H/V conversion adapter that handles the declared set class.",
+      "acceptance": [
+        "Round-trip square, simplex, embedded segment and singleton by independent membership/support checks.",
+        "Translate empty/unbounded/equality/ray outcomes honestly; a bounded-only adapter rejects unsupported requests.",
+        "Record conversion identity, time, input/output sizes and numeric evidence; audit A17/A18 lineage without assuming executable equivalence."
+      ],
+      "files": [
+        "src/adapters/polyhedral/",
+        "src/geometry/conversion/"
+      ],
+      "requirements": [
+        "ALG-03",
+        "ALG-04",
+        "ALG-05"
+      ],
+      "test_ids": [
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ]
+    },
+    {
+      "key": "GEO-04",
+      "title": "Intersect state sets and remove redundant inequalities",
+      "kind": "implementation",
+      "area": "geometry",
+      "phase": 2,
+      "dependencies": [
+        "GEO-03",
+        "OPT-03"
+      ],
+      "scope": "Apply state constraints without losing newly created intersection vertices.",
+      "acceptance": [
+        "Test crossing edges with all original vertices outside the constraint, empty intersections and affine equality rows.",
+        "Remove a halfspace only after an implication LP establishes supported nonpositive maximum violation.",
+        "Preserve essential bounding rows, equality conventions and T+1 state indexing."
+      ],
+      "files": [
+        "src/geometry/polyhedral/intersection.cpp",
+        "src/geometry/polyhedral/halfspace_reducer.cpp"
+      ],
+      "requirements": [
+        "ALG-03",
+        "ALG-04",
+        "MOD-02"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ]
+    },
+    {
+      "key": "GEO-05",
+      "title": "Project joint polyhedra and compute nominal predecessors",
+      "kind": "implementation",
+      "area": "geometry",
+      "phase": 2,
+      "dependencies": [
+        "GEO-03",
+        "GEO-04"
+      ],
+      "scope": "Compute existential preimages/projections with explicit coordinate maps and no global invertibility restriction.",
+      "acceptance": [
+        "Implement {x in X: exists u in U, Ax+Bu+a in S}; test singular A, unreachable target and analytic integrator cases.",
+        "An inverse-based fast adapter may require nonsingular A, but a general projection route remains a separate capability.",
+        "Projection can remain lazy until a supported query requests materialization; preserve equality/ray and evidence semantics."
+      ],
+      "files": [
+        "src/geometry/polyhedral/projection.cpp",
+        "src/reachability/nominal_predecessor.cpp"
+      ],
+      "requirements": [
+        "ALG-03",
+        "ALG-05",
+        "MOD-05",
+        "SOL-01"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ]
+    },
+    {
+      "key": "GEO-06",
+      "title": "Add a separate two-dimensional QuickHull adapter",
+      "kind": "implementation",
+      "area": "geometry",
+      "phase": 3,
+      "dependencies": [
+        "GEO-01"
+      ],
+      "scope": "Provide a geometric 2D hull alternative for exact projected clouds and method comparison.",
+      "acceptance": [
+        "Audit Scientific Research quickhull and use a documented independent implementation, not an LP-kernel alias.",
+        "Handle duplicates, collinear/all-coincident data and orientation ties; retain original point identities.",
+        "Compare hull equality with the LP reference. Reject higher dimensions instead of projecting silently."
+      ],
+      "files": [
+        "src/geometry/hull/quickhull_2d.cpp"
+      ],
+      "requirements": [
+        "ALG-02",
+        "ALG-03",
+        "ALG-05"
+      ],
+      "test_ids": [
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ]
+    },
+    {
+      "key": "GEO-07",
+      "title": "Add zonotope and constrained-zonotope exact operations",
+      "kind": "implementation",
+      "area": "geometry",
+      "phase": 4,
+      "dependencies": [
+        "GEO-01",
+        "CORE-04",
+        "OPT-03"
+      ],
+      "scope": "Register generator-based representations and their supported exact operations with dependency-preserving factors.",
+      "acceptance": [
+        "Affine images and sums preserve shared factor identities; constrained-generator equalities are not erased.",
+        "Document closure restrictions and explicit equivalent conversions; unsupported intersections do not become ordinary zonotopes by silent approximation.",
+        "Use boxes, line segments and constrained-factor examples checked by polyhedral reference queries."
+      ],
+      "files": [
+        "include/csl/sets/generator_sets.hpp",
+        "src/geometry/generators/"
+      ],
+      "requirements": [
+        "ALG-03",
+        "ALG-04",
+        "ALG-06",
+        "SOL-01"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ]
+    },
+    {
+      "key": "GEO-08",
+      "title": "Provide lazy support queries and controlled materialization",
+      "kind": "implementation",
+      "area": "geometry",
+      "phase": 4,
+      "dependencies": [
+        "GEO-02",
+        "GEO-03",
+        "CORE-04"
+      ],
+      "scope": "Let set callers query support and affine/projection expressions without mandatory full vertex enumeration.",
+      "acceptance": [
+        "Record expression operands, arithmetic/evidence and immutable ownership; support answers match analytic and polyhedral references.",
+        "Materialization is an explicit budgeted operation with cancellation and representation-growth reporting.",
+        "Finite direction samples are labelled as samples/enclosures under their stated construction, not a complete exact set."
+      ],
+      "files": [
+        "src/geometry/lazy/"
+      ],
+      "requirements": [
+        "ALG-03",
+        "ALG-04",
+        "RUN-03",
+        "RUN-04"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ]
+    },
+    {
+      "key": "APP-01",
+      "title": "Define inner and outer approximation policies and evidence",
+      "kind": "implementation",
+      "area": "approximation",
+      "phase": 4,
+      "dependencies": [
+        "GEO-01",
+        "CORE-04"
+      ],
+      "scope": "Expose approximation as a separate registered operation with a reference set, direction and budget.",
+      "acceptance": [
+        "Equivalent conversion, inner, outer and heuristic output use distinct labels and capability checks.",
+        "For R_in subset R subset R_out, supported objective bounds retain direction; an inner reachable state needs a realizable trajectory for an achievable plan.",
+        "Reject a requested enclosure guarantee when inclusion evidence is unavailable; reachable-set approximation does not imply the same relation for optimizer families."
+      ],
+      "files": [
+        "include/csl/geometry/approximation.hpp",
+        "docs/contracts/approximation.md"
+      ],
+      "requirements": [
+        "ALG-04",
+        "ALG-06",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-G02",
+        "T-V02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "APP-02",
+      "title": "Implement box and parallelotope approximations",
+      "kind": "implementation",
+      "area": "approximation",
+      "phase": 4,
+      "dependencies": [
+        "APP-01",
+        "OPT-03"
+      ],
+      "scope": "Add simple-set enclosure adapters under declared assumptions.",
+      "acceptance": [
+        "Check outer support-direction bounds on intervals/rotated polygons; chosen inner constructions verify every contained vertex or another valid certificate.",
+        "Record orientation, budget, approximation error when justified and input/output representation sizes.",
+        "Degenerate, empty and unbounded inputs receive supported output or a clear capability result."
+      ],
+      "files": [
+        "src/geometry/approximation/box_parallelotope.cpp"
+      ],
+      "requirements": [
+        "ALG-04",
+        "ALG-06"
+      ],
+      "test_ids": [
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "APP-03",
+      "title": "Implement zonotope reduction and enclosure adapters",
+      "kind": "implementation",
+      "area": "approximation",
+      "phase": 4,
+      "dependencies": [
+        "APP-01",
+        "GEO-07"
+      ],
+      "scope": "Control generator growth with explicit enclosure direction and selectable algorithms.",
+      "acceptance": [
+        "Exact removal and conservative reduction are distinct; verify analytic inclusion/support bounds on fixed examples.",
+        "Preserve shared-factor dependencies or record their explicit relaxation. Intersections advertise their actual resulting class.",
+        "Record generator budget, realized size and objective/witness limitations; compare with A04 and owner zonotope paper after source ambiguities are resolved."
+      ],
+      "files": [
+        "src/geometry/approximation/zonotope.cpp"
+      ],
+      "requirements": [
+        "ALG-04",
+        "ALG-06",
+        "RUN-04"
+      ],
+      "test_ids": [
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "APP-04",
+      "title": "Implement ellipsoidal approximation and reference comparison",
+      "kind": "implementation",
+      "area": "approximation",
+      "phase": 4,
+      "dependencies": [
+        "APP-01",
+        "OPT-08"
+      ],
+      "scope": "Add directional ellipsoidal enclosures and an optional external Ellipsoidal Toolbox comparison adapter.",
+      "acceptance": [
+        "Declare supported input class and formulas; check shape PSD, degenerate sets and actual inclusion direction.",
+        "Keep finite ellipsoidal families and their intersection/union semantics explicit; do not assume closure by one ellipsoid.",
+        "Pin external ET inputs/version if used; no missing MATLAB dependency is presented as a completed native verification."
+      ],
+      "files": [
+        "src/geometry/approximation/ellipsoidal.cpp",
+        "docs/research/ellipsoidal-comparison.md"
+      ],
+      "requirements": [
+        "ALG-04",
+        "ALG-06",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-G02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "SYN-01",
+      "title": "Propagate nominal reachable sets with stage constraints",
+      "kind": "implementation",
+      "area": "synthesis",
+      "phase": 2,
+      "dependencies": [
+        "GEO-02",
+        "GEO-04",
+        "MODEL-03"
+      ],
+      "scope": "Compute the nominal tube for selected exact set operations and preserve recovery information.",
+      "acceptance": [
+        "Apply (A_t R_t plus B_t U_t plus a_t) intersect X_(t+1) with correct stage order and initial constraints.",
+        "Check analytic integrators and an LTV sequence independently; cancellation and empty reachable stages have explicit outcomes.",
+        "Keep selected method/representation and shared factors visible; per-stage marginals are not reported as the complete optimal family."
+      ],
+      "files": [
+        "src/reachability/nominal_forward.cpp"
+      ],
+      "requirements": [
+        "MOD-02",
+        "ALG-03",
+        "SOL-01"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-S01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "SYN-02",
+      "title": "Construct the entire terminal minimizer relation",
+      "kind": "implementation",
+      "area": "synthesis",
+      "phase": 2,
+      "dependencies": [
+        "OPT-08",
+        "GEO-05"
+      ],
+      "scope": "Return supported full terminal argmin sets and optimum evidence, including nonunique convex minima.",
+      "acceptance": [
+        "Linear optimal faces, constant objectives and semidefinite/residual-map degeneracy preserve all terminal optima.",
+        "Document and independently check the convex quadratic/residual optimal-level characterization used to build the relation; one solver point alone is insufficient.",
+        "Attainment, finite optimum and numerical completeness limits are explicit; unsupported nonpolyhedral argmin construction is rejected."
+      ],
+      "files": [
+        "src/synthesis/terminal_minimizers.cpp",
+        "docs/research/terminal-minimizer-relations.md"
+      ],
+      "requirements": [
+        "SOL-01",
+        "SOL-02",
+        "SOL-03",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-S02",
+        "T-S03",
+        "T-C01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "SYN-03",
+      "title": "Build optimal families by reachability and backward recovery",
+      "kind": "implementation",
+      "area": "synthesis",
+      "phase": 2,
+      "dependencies": [
+        "SYN-01",
+        "SYN-02",
+        "GEO-05",
+        "OPT-02"
+      ],
+      "scope": "Implement the historical-method-based strategy with complete joint-history semantics.",
+      "acceptance": [
+        "Recover the feasible preimage of the entire terminal minimizer relation, retaining cross-stage state/control dependence.",
+        "For the two-step integrator, represent u0+u1=1 and reject (1,1); for a constant criterion preserve every feasible trajectory.",
+        "Separate extensions for family completeness from the archived single-witness algorithm; record assumptions and any inverse-only fast-path limits."
+      ],
+      "files": [
+        "src/synthesis/reachability_strategy.cpp",
+        "src/synthesis/control_recovery.cpp"
+      ],
+      "requirements": [
+        "SOL-01",
+        "SOL-02",
+        "EXP-05",
+        "ALG-02"
+      ],
+      "test_ids": [
+        "T-S01",
+        "T-S02",
+        "T-S03",
+        "T-L02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "SYN-04",
+      "title": "Build optimal families by direct joint-trajectory optimization",
+      "kind": "implementation",
+      "area": "synthesis",
+      "phase": 2,
+      "dependencies": [
+        "MODEL-03",
+        "OPT-08",
+        "SYN-02"
+      ],
+      "scope": "Solve the sparse full-trajectory program and construct its optimal relation behind the common synthesis interface.",
+      "acceptance": [
+        "Encode every transition, initial/stage constraint and original terminal objective; no hidden state-constraint omission.",
+        "Return supported complete families as relations, not a single QP minimizer; do not use Cartesian control marginals.",
+        "Check the same analytic cases as the reachability strategy, including singular A and multiple histories for one terminal point."
+      ],
+      "files": [
+        "src/synthesis/joint_optimization_strategy.cpp"
+      ],
+      "requirements": [
+        "SOL-01",
+        "SOL-02",
+        "EXP-05",
+        "MOD-05"
+      ],
+      "test_ids": [
+        "T-S01",
+        "T-S02",
+        "T-S03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "SYN-05",
+      "title": "Extract different complete witnesses without changing optimality",
+      "kind": "implementation",
+      "area": "synthesis",
+      "phase": 2,
+      "dependencies": [
+        "SYN-03",
+        "SYN-04"
+      ],
+      "scope": "Select controls and their consistent trajectories from either family through one query interface.",
+      "acceptance": [
+        "Record selection directions/seed and requested/returned/distinct counts; duplicates use explicit tolerance.",
+        "Extract (0,1) and (1,0) for the analytic integrator and keep primary cost zero; singleton results are distinguished from failure to find more.",
+        "Query termination and memory are independent of solve termination; no uniform random or uniqueness guarantee is invented."
+      ],
+      "files": [
+        "src/synthesis/witness_selector.cpp"
+      ],
+      "requirements": [
+        "SOL-04",
+        "SOL-05",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-S01",
+        "T-S03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "SYN-06",
+      "title": "Verify trajectories and evidence independently",
+      "kind": "implementation",
+      "area": "verification",
+      "phase": 2,
+      "dependencies": [
+        "MODEL-03",
+        "OPT-01"
+      ],
+      "scope": "Recompute original problem residuals and verify evidence bindings without trusting the synthesis result flag.",
+      "acceptance": [
+        "Detect injected wrong transition, bound violation and objective mismatch with named residuals/tolerances.",
+        "Keep feasibility, optimality, family completeness and validated claims separate; reject evidence for a different problem identity.",
+        "Retain backend bound provenance and unsupported-verification results without certifying family completeness from sampled witnesses."
+      ],
+      "files": [
+        "src/verification/trajectory_verifier.cpp",
+        "src/verification/evidence_verifier.cpp"
+      ],
+      "requirements": [
+        "EVD-01",
+        "EVD-02",
+        "EVD-03"
+      ],
+      "test_ids": [
+        "T-V01",
+        "T-V02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "INP-01",
+      "title": "Load and validate versioned scenario files",
+      "kind": "implementation",
+      "area": "input",
+      "phase": 1,
+      "dependencies": [
+        "MODEL-03"
+      ],
+      "scope": "Accept short user-authored scenarios and optional run settings without C++ edits.",
+      "acceptance": [
+        "Freeze syntax/schema through CORE-01, infer and cross-check dimensions, and document stable resolved defaults.",
+        "Malformed shape/stage/schema and unknown fields identify the field and expected form; no guessed bounds or automatic discretization.",
+        "Backend changes preserve mathematical scenario identity; historical non-executable records retain restoration diagnostics."
+      ],
+      "files": [
+        "src/input/scenario_loader.cpp",
+        "schemas/scenario/"
+      ],
+      "requirements": [
+        "INP-01",
+        "INP-02",
+        "INP-03",
+        "INP-04",
+        "INP-05",
+        "MOD-09"
+      ],
+      "test_ids": [
+        "T-I01",
+        "T-I02",
+        "T-I03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "INP-02",
+      "title": "Select scenarios and run method profiles from a native CLI",
+      "kind": "implementation",
+      "area": "input",
+      "phase": 2,
+      "dependencies": [
+        "INP-01",
+        "SYN-05",
+        "SYN-06",
+        "RUN-01"
+      ],
+      "scope": "Provide a simple launcher for choosing a scenario, validating it and running the two selected methods.",
+      "acceptance": [
+        "Basic use selects a file and default comparison profile; backend/seed/resources remain optional overrides.",
+        "Return actionable capability/input failures and save final versioned results through the artifact interface.",
+        "CLI contains no duplicated optimization logic and supports validation-only execution without an expensive solve."
+      ],
+      "files": [
+        "src/cli/",
+        "docs/how-to/run-scenario.md"
+      ],
+      "requirements": [
+        "INP-01",
+        "INP-03",
+        "EXP-05",
+        "REV-01"
+      ],
+      "test_ids": [
+        "T-I01",
+        "T-I02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "INP-03",
+      "title": "Publish simple executable templates with known answers",
+      "kind": "implementation",
+      "area": "input",
+      "phase": 2,
+      "dependencies": [
+        "INP-01",
+        "SYN-04",
+        "SYN-06"
+      ],
+      "scope": "Give users a small selectable template catalogue and instructions for their own files.",
+      "acceptance": [
+        "Provide minimal LTI, state-constrained and LTV cases with linear/quadratic/residual-norm examples.",
+        "Every executable template has complete data and an independent expected answer; editing requires no build step.",
+        "Keep B04-historical separate and non-executable until canonical restoration; state stages, coordinates/units and criterion weights are explained."
+      ],
+      "files": [
+        "examples/scenarios/",
+        "docs/how-to/create-scenario.md"
+      ],
+      "requirements": [
+        "INP-01",
+        "INP-02",
+        "EXP-03"
+      ],
+      "test_ids": [
+        "T-I01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "RUN-01",
+      "title": "Execute isolated workspaces with budgets and cancellation",
+      "kind": "implementation",
+      "area": "execution",
+      "phase": 1,
+      "dependencies": [
+        "CORE-04"
+      ],
+      "scope": "Share immutable inputs while controlling mutable solver resources and partial results.",
+      "acceptance": [
+        "Give each worker exclusive workspace/warm-start ownership and a shared outer/BLAS/backend thread budget.",
+        "Cancellation/deadline and documented allocation limits preserve available incumbents and evidence; noninterruptible-call latency is recorded.",
+        "Parallel and sequential analytic runs agree within stated tolerance; unsupported enforcement is not claimed as a hard limit."
+      ],
+      "files": [
+        "src/execution/",
+        "include/csl/execution/"
+      ],
+      "requirements": [
+        "RUN-02",
+        "RUN-03",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-R01",
+        "T-R02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "RUN-02",
+      "title": "Run independent scenario sweeps within one resource budget",
+      "kind": "implementation",
+      "area": "execution",
+      "phase": 2,
+      "dependencies": [
+        "RUN-01",
+        "INP-02"
+      ],
+      "scope": "Scale independent scenarios/seeds/configurations with bounded output and reproducible provenance.",
+      "acceptance": [
+        "Do not treat constrained horizon stages as independent jobs; prioritize coarse runs and compatible set queries.",
+        "Avoid nested oversubscription and copy-heavy immutable payload transfer; record actual workers/backend threads and memory support.",
+        "Sequential/parallel results retain scenario/configuration IDs, failures and deterministic selection settings."
+      ],
+      "files": [
+        "src/experiments/batch_runner.cpp"
+      ],
+      "requirements": [
+        "RUN-03",
+        "RUN-04",
+        "EXP-04"
+      ],
+      "test_ids": [
+        "T-R01",
+        "T-X02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "EXT-01",
+      "title": "Add fixed-plan disturbance reachability and global worst-case reference",
+      "kind": "implementation",
+      "area": "extensions",
+      "phase": 5,
+      "dependencies": [
+        "SYN-01",
+        "OPT-01",
+        "GEO-03"
+      ],
+      "scope": "Support declared independent bounded process disturbances and a justified worst-case objective oracle.",
+      "acceptance": [
+        "For fixed controls propagate the entire disturbance set; reject robust state violations without clipping away counterexamples.",
+        "For supported compact polytopes and convex objectives, evaluate terminal vertices or use another reviewed global bound; a local minimizer of negative convex cost is not a global oracle.",
+        "Check interval endpoint maxima, all-infeasible plans and archived B08 rounded-data reference without claiming nonlinear reproduction."
+      ],
+      "files": [
+        "src/reachability/fixed_plan_disturbance.cpp",
+        "src/optimization/worst_case_vertex.cpp"
+      ],
+      "requirements": [
+        "MOD-02",
+        "EVD-02",
+        "ALG-05"
+      ],
+      "test_ids": [
+        "T-V02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        3,
+        6,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "EXT-02",
+      "title": "Preserve all optimal branches for finite and mixed control domains",
+      "kind": "implementation",
+      "area": "extensions",
+      "phase": 5,
+      "dependencies": [
+        "MODEL-02",
+        "SYN-05",
+        "SYN-06",
+        "EXT-01"
+      ],
+      "scope": "Provide separate finite/minimax and compatible mixed-domain strategies with complete tie/branch semantics.",
+      "acceptance": [
+        "Stream finite prefixes or use a selected mixed-integer adapter under explicit capabilities.",
+        "Retain equal-cost branches and continuous families within them; pruning and DAG merges preserve action identity and history.",
+        "Exhaustive tiny examples independently check all ties; convex-hull relaxation of discrete actions is labelled explicitly.",
+        "For finite minimax, minimize over fixed control plans the maximum over all admissible disturbance sequences using EXT-01; never replace the global worst case with local minimization of a negated convex cost."
+      ],
+      "files": [
+        "src/synthesis/finite_search/",
+        "src/synthesis/mixed_domains/"
+      ],
+      "requirements": [
+        "MOD-06",
+        "SOL-01",
+        "SOL-02",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-S02",
+        "T-V02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        3,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "EXT-03",
+      "title": "Add temporal-constraint strategies and exact memory lifts",
+      "kind": "implementation",
+      "area": "extensions",
+      "phase": 5,
+      "dependencies": [
+        "MODEL-02",
+        "SYN-04"
+      ],
+      "scope": "Support reviewed linear cross-stage constraints through joint relations and specific memory augmentations.",
+      "acceptance": [
+        "Use #9 temporal-coupling proof and counterexample; define initial memory and original/auxiliary coordinate maps.",
+        "Test the counterexample that physical-state-only propagation loses coupling, plus both directions of the one-step slew lift.",
+        "New constrained studies have new scenario IDs; first archival inputs remain unchanged and unsupported robust/geometry combinations are rejected."
+      ],
+      "files": [
+        "src/problem/temporal_lifts.cpp",
+        "src/synthesis/temporal_joint.cpp"
+      ],
+      "requirements": [
+        "MOD-07",
+        "SOL-01",
+        "ALG-05"
+      ],
+      "test_ids": [
+        "T-M03",
+        "T-S01"
+      ],
+      "external_blockers": [
+        9
+      ],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "EXT-04",
+      "title": "Add initial-set semantics and observation-based control workflows",
+      "kind": "implementation",
+      "area": "extensions",
+      "phase": 5,
+      "dependencies": [
+        "MODEL-02",
+        "SYN-06",
+        "EXT-01"
+      ],
+      "scope": "Keep uncertain initial information, estimation and feedback distinct from nominal point-initialized planning.",
+      "acceptance": [
+        "Specify existential versus all-initial-states planning and available observation history; no initial-set union silently becomes one robust plan.",
+        "Implement a supported controller/estimator lifecycle with pre/post-decision timing and per-step evidence.",
+        "Use separate scenario variants and tests for partial/noisy observations; sampled simulation does not certify every disturbance."
+      ],
+      "files": [
+        "src/estimation/",
+        "src/controllers/",
+        "docs/contracts/information-patterns.md"
+      ],
+      "requirements": [
+        "MOD-03",
+        "MOD-08",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-M02",
+        "T-V02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "EXT-05",
+      "title": "Discretize continuous models through an explicit model adapter",
+      "kind": "implementation",
+      "area": "extensions",
+      "phase": 5,
+      "dependencies": [
+        "MODEL-01",
+        "SYN-06"
+      ],
+      "scope": "Allow later continuous-time input with explicit physical times and input-hold/integration semantics.",
+      "acceptance": [
+        "Distinguish continuous coefficients from already-discrete transitions in schema and model metadata.",
+        "Check analytic LTI zero-order-hold examples and reviewed LTV integration references; retain integration/error provenance.",
+        "Descriptor/singular continuous mass matrices and nonlinear models remain separate capabilities, not one extra optional matrix."
+      ],
+      "files": [
+        "src/model/discretization/",
+        "docs/contracts/time-domains.md"
+      ],
+      "requirements": [
+        "MOD-02",
+        "MOD-09",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-M01",
+        "T-V01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "EXT-06",
+      "title": "Verify claim-specific certificates with validated arithmetic",
+      "kind": "implementation",
+      "area": "extensions",
+      "phase": 5,
+      "dependencies": [
+        "SYN-06",
+        "APP-01"
+      ],
+      "scope": "Add a concrete verifier for selected feasibility/inclusion/objective claims rather than a generic proof flag.",
+      "acceptance": [
+        "Choose a certificate class and compatible rounding-aware arithmetic; bind assumptions and problem identity.",
+        "Separate supported claim coverage from family completeness and model-error certification; reject unsupported validated requests.",
+        "Check exact/rational or interval reference fixtures and adversarial rounding cases; failed or inconclusive certificates are not accepted."
+      ],
+      "files": [
+        "src/verification/validated/",
+        "docs/contracts/certificates.md"
+      ],
+      "requirements": [
+        "EVD-02",
+        "EVD-03"
+      ],
+      "test_ids": [
+        "T-V02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-11",
+      "title": "Add a recursive split-and-merge hull strategy",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 3,
+      "dependencies": [
+        "OPT-05",
+        "RUN-01"
+      ],
+      "scope": "Implement a new hull-level divide-and-conquer strategy using hull(hull(P1) union hull(P2)). The archive supports ordered/grouped filtering and a separate 2D QuickHull; this recursive LP-backed strategy is a new extension. Reuse the hull port and selected membership backend.",
+      "acceptance": [
+        "Provide the finite-point hull-equivalence argument and deterministic partition/merge policy before code; stop small leaves with the existing reducer.",
+        "Compare hull support and removed-point certificates with the independent baseline on signed, duplicate and affine-degenerate fixtures, across input permutations.",
+        "Use exclusive child workspaces and a common resource budget; record leaf/merge LP work, peak intermediate point counts and parallel overhead without claiming a universal speedup."
+      ],
+      "files": [
+        "src/geometry/hull/recursive_reducer.cpp",
+        "tests/unit/geometry/recursive_reducer_test.cpp"
+      ],
+      "requirements": [
+        "ALG-02",
+        "ALG-07",
+        "RUN-02",
+        "RUN-03"
+      ],
+      "test_ids": [
+        "T-L02",
+        "T-R01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OPT-12",
+      "title": "Add optional cross-query LP warm starts",
+      "kind": "implementation",
+      "area": "optimization",
+      "phase": 3,
+      "dependencies": [
+        "OPT-02",
+        "OPT-03",
+        "OPT-05",
+        "RUN-01"
+      ],
+      "scope": "Add compatible-backend warm starts as an optional workspace optimization. The archival basis-reuse method reuses classifications within one completed solve; it does not establish this new cross-query feature.",
+      "acceptance": [
+        "Define basis validity, problem-change compatibility, invalidation and fallback without exposing backend containers.",
+        "Cold and warm paths give the same independently checked membership/status on changed rows, columns, bounds and degenerate cases; incompatible hints fall back or diagnose.",
+        "State belongs to one workspace; compare cold/warm setup and solve work with explicit cache state, including a case where reuse costs more."
+      ],
+      "files": [
+        "src/optimization/warm_start.cpp",
+        "tests/contract/optimization/warm_start_test.cpp"
+      ],
+      "requirements": [
+        "ALG-01",
+        "ALG-02",
+        "RUN-02"
+      ],
+      "test_ids": [
+        "T-L01",
+        "T-L02",
+        "T-R01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/algorithm-module-inventory.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "EXP-04",
+      "title": "Implement an independent nonlinear replay adapter",
+      "kind": "implementation",
+      "area": "experiments",
+      "phase": 3,
+      "dependencies": [
+        "MODEL-01",
+        "OPT-01",
+        "SYN-06"
+      ],
+      "scope": "Implement replay of complete controls on an independently specified plant. Start with an analytic nonlinear toy plant; accept B04 only when its plant parameters and timing conventions are sourced. This is simulation, with no nonlinear optimization claim.",
+      "acceptance": [
+        "Declare plant parameters, initial state, integration method, tolerances and control-hold convention; missing data return named prerequisites.",
+        "For x_next=x+u+u^2, x0=0, controls (0,1) and (0.5,0.5) have terminal states 2 and 1.5, although both give 1 under the linear integrator; independently check these values.",
+        "Preserve original plant units and objective, numerical diagnostics, plant identity and separate replay timing; no fitted archival coefficients or invented histories."
+      ],
+      "files": [
+        "include/csl/experiments/plant_replay.hpp",
+        "src/experiments/plant_replay.cpp",
+        "tests/unit/experiments/plant_replay_test.cpp"
+      ],
+      "requirements": [
+        "EXP-01",
+        "EXP-02",
+        "EVD-01"
+      ],
+      "test_ids": [
+        "T-V01",
+        "T-O02",
+        "T-REPLAY01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        6,
+        10
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/baselines.md",
+        "docs/research/b04-restoration.md",
+        "docs/research/b04-tables.md"
+      ]
+    },
+    {
+      "key": "TEST-19",
+      "title": "Expand historical optimizer and hull-variant differential tests",
+      "kind": "test",
+      "area": "testing",
+      "phase": 3,
+      "dependencies": [
+        "OPT-04",
+        "OPT-06",
+        "OPT-07",
+        "OPT-09",
+        "OPT-11",
+        "OPT-12",
+        "GEO-06"
+      ],
+      "scope": "Expand independent tests for phase-I, within-solve basis classification, grouping, recursive reduction, warm starts and Pascal-derived Zoutendijk projection. Each implementation already ships minimum acceptance tests.",
+      "acceptance": [
+        "Check barycentric certificates and hull support against the trusted LP baseline for degenerate bases, signed/flat clouds, permutations and pivot ties; basis membership alone is not extreme-point evidence.",
+        "Check all positive directional constraint derivatives when bounding a Zoutendijk step; include a row with nonpositive derivative before a later finite limiting row.",
+        "Projection onto [0,1]^2 of (2,-1) is (1,0), distance sqrt(2); include already-feasible points, zero gradient, infeasible constraints and numerical limits.",
+        "Counters include every child LP call; warm-state isolation and fallback tests compare mathematical answers rather than expected speedups.",
+        "QuickHull agrees with an independent 2D monotone-chain/orientation oracle on vertical, collinear, repeated, empty-side and rotated fixtures; no slope division assumes nonvertical edges."
+      ],
+      "files": [
+        "tests/unit/optimization/archive_variants_test.cpp",
+        "tests/unit/geometry/hull_variants_test.cpp"
+      ],
+      "requirements": [
+        "ALG-01",
+        "ALG-02",
+        "OPT-02",
+        "RUN-02"
+      ],
+      "test_ids": [
+        "T-L01",
+        "T-L02",
+        "T-C01",
+        "T-R01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-20",
+      "title": "Expand exact structured-set and approximation contract tests",
+      "kind": "test",
+      "area": "testing",
+      "phase": 4,
+      "dependencies": [
+        "GEO-07",
+        "GEO-08",
+        "APP-02",
+        "APP-03",
+        "APP-04",
+        "EXP-03"
+      ],
+      "scope": "Test the implemented zonotope/constrained-zonotope operations and box, parallelotope, zonotope and ellipsoidal approximations against independent low-dimensional inclusion oracles. Each adapter ships its own minimum tests first.",
+      "acceptance": [
+        "Compare exact supported affine/sum operations against analytic supports; intersection is not assumed closed in ordinary zonotopes.",
+        "For a known box/triangle, check claimed inclusion by a valid analytic or complete low-dimensional oracle; sampled directions are labelled samples, not containment proofs.",
+        "Test degenerate dimensions, empty input, infeasible recovery, incompatible guarantee requests and unsupported operations; external ET comparison never becomes a runtime requirement.",
+        "Outer reachability alone cannot supply realizable optimal controls; inner-set cost bounds require a recovery witness and compatible objective assumptions."
+      ],
+      "files": [
+        "tests/contract/geometry/structured_sets_test.cpp",
+        "tests/contract/geometry/approximation_test.cpp"
+      ],
+      "requirements": [
+        "ALG-03",
+        "ALG-04",
+        "ALG-06",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-G02",
+        "T-V02",
+        "T-APPROX01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-08",
+      "title": "Review optimizer variants, structured sets and approximation scalability",
+      "kind": "review",
+      "area": "review",
+      "phase": 4,
+      "dependencies": [
+        "TEST-19",
+        "TEST-20",
+        "EXP-03"
+      ],
+      "scope": "Perform independent standards and specification reviews of the later optimizer/representation adapters, proof assumptions, module seams and measured output costs.",
+      "acceptance": [
+        "Record reviewed commits, file/line findings, severity and reproducible counterexamples; the implementer cannot self-sign off.",
+        "Confirm LP kernels, hull policies, conversion operators and approximations can change independently; test replacement with actual compatible adapters.",
+        "Audit hull preservation, active-constraint step bounds, inclusion direction, numerical versus validated evidence and witness realizability.",
+        "Inspect allocation/materialization costs, workspace ownership and benchmark equivalence; linked blocking fixes are rechecked before closure.",
+        "Include the geometric QuickHull adapter and its independent orientation/degeneracy tests; keep its geometry strategy distinct from the LP-backed recursive reducer."
+      ],
+      "files": [
+        "docs/reviews/optimizer-and-representation-extensions.md"
+      ],
+      "requirements": [
+        "ALG-01",
+        "ALG-03",
+        "ALG-06",
+        "ALG-07",
+        "REV-01",
+        "REV-03"
+      ],
+      "test_ids": [
+        "T-G02",
+        "T-V02",
+        "T-EXP02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-21",
+      "title": "Expand declared extension profiles with independent quantifier oracles",
+      "kind": "test",
+      "area": "testing",
+      "phase": 5,
+      "dependencies": [
+        "EXT-01",
+        "EXT-02",
+        "EXT-03",
+        "EXT-04",
+        "EXT-05",
+        "EXT-06",
+        "OPT-10"
+      ],
+      "scope": "Add profile-specific mathematical tests only for the implemented extension demonstrations. Robust fixed plans, information-based policies, mixed controls and discretization retain separate capability suites; this does not certify a universal hybrid solver.",
+      "acceptance": [
+        "Enumerate a tiny finite-action/vertex-disturbance problem independently, preserve all tied optimal branches, and detect a disturbance path that must not be clipped to a state constraint.",
+        "Compare the approved slew-memory lift to exhaustive short-history feasibility; distinguish initial-set union versus universal feasibility and observation information available before a decision.",
+        "For the constant scalar continuous system x_dot=2x+u with zero-order hold, compare the discretization with exp(2h) and (exp(2h)-1)/2; record integration and hold assumptions.",
+        "Tamper with claim-specific certificate/problem IDs and fail verification; unsupported nonlinear/hybrid or evidence profiles diagnose rather than inherit a guarantee."
+      ],
+      "files": [
+        "tests/contract/extensions/profile_oracles_test.cpp",
+        "tests/reference/extension_oracles.py"
+      ],
+      "requirements": [
+        "MOD-04",
+        "MOD-06",
+        "MOD-07",
+        "MOD-08",
+        "MOD-09",
+        "EVD-03"
+      ],
+      "test_ids": [
+        "T-M03",
+        "T-V02",
+        "T-EXT01"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-09",
+      "title": "Review extension quantifiers, information patterns and native scalability",
+      "kind": "review",
+      "area": "review",
+      "phase": 5,
+      "dependencies": [
+        "TEST-21",
+        "REVIEW-08"
+      ],
+      "scope": "Review the explicitly implemented future profiles and their scientific assumptions. Separate representability from algorithm support; do not broaden a finite demonstration into general robust, feedback or hybrid completeness.",
+      "acceptance": [
+        "Independently inspect disturbance quantifier order, fixed-plan versus feedback semantics, finite/mixed branch completeness and all tied optima.",
+        "Audit temporal-lift equivalence, observation causality, discretization assumptions and certificate scope against referenced proofs and counterexamples.",
+        "Check extension registration without fuel-specific core switches, exclusive worker state, bounded materialization and measured complexity.",
+        "Record reviewed commits and actionable findings; linked blocking fixes must pass independent re-review."
+      ],
+      "files": [
+        "docs/reviews/future-capability-profiles.md"
+      ],
+      "requirements": [
+        "ALG-07",
+        "EVD-03",
+        "REV-01",
+        "REV-03"
+      ],
+      "test_ids": [
+        "T-EXT01",
+        "T-M03",
+        "T-V02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-01",
+      "title": "Expand native buffer, ownership and build-boundary tests",
+      "kind": "test",
+      "scope": "Test C++20 owning values/views, storage/stride conventions and native module boundaries (RUN-01/02, ALG-07). Limit: memory-safety tooling and compile probes support declared platforms; they do not establish a portable C++ ABI.",
+      "acceptance": [
+        "Use a fixed nonsquare matrix [[1,2,3],[4,5,6]] and vector [7,11,13]: each supported row/column-major or strided view yields [68,161] against a hand-calculated oracle; malformed stride/shape is diagnosed.",
+        "Exercise copy/move and retained-owner asynchronous paths; destroy source owners at controlled points and check documented retention or rejection rather than relying on incidental object lifetime.",
+        "Compile a backend-neutral public-client fixture without matrix/solver private include paths; verify installed headers contain no selected backend container dependency.",
+        "Run supported sanitizer/debug-iterator checks with recorded toolchain; zero-length ports have defined behavior and no invalid access.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "CORE-02",
+        "CORE-03",
+        "CORE-01"
+      ],
+      "files": [
+        "tests/unit/numeric/buffer_views_test.cpp",
+        "tests/contract/public_headers_client.cpp",
+        "docs/testing/native-ownership.md"
+      ],
+      "test_ids": [
+        "T-N01 (proposed)",
+        "T-M02",
+        "T-R01"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-02",
+      "title": "Expand affine model and observation contract tests",
+      "kind": "test",
+      "scope": "Test compositional immutable LTI/LTV dynamics, zero-dimensional channels and pre/post-decision observation semantics (MOD-01/02/03/04/09). Limit: model representability does not imply initial nominal strategy support.",
+      "acceptance": [
+        "Compare compact constant coefficients with explicit stage providers using fixed independent trajectories; x0=2, A=3, B=2, a=-1, controls [1,-2] must give states [2,7,16].",
+        "Reject wrong A/B/E/offset shapes and stage indices; enforce T transitions versus T+1 states and document the selected zero-horizon policy.",
+        "Keep absent controls/external channels, zero-valued singleton channels and unrestricted channels semantically distinct; no observation never becomes full-state knowledge.",
+        "Test separate observation channels, partial/full observations, offsets and measurement errors; pre-decision dependence on unavailable current control produces a causal diagnostic.",
+        "Discrete matrices are used directly even when timestamps are nonunit; continuous-time data are distinguished and rejected by the initial loader/planner.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "MODEL-01",
+        "CORE-03"
+      ],
+      "files": [
+        "tests/unit/model/affine_dynamics_test.cpp",
+        "tests/unit/model/observation_model_test.cpp"
+      ],
+      "test_ids": [
+        "T-M01",
+        "T-M02",
+        "T-M03"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-03",
+      "title": "Expand problem validation and whole-pipeline capability tests",
+      "kind": "test",
+      "scope": "Test problem composition, reusable models and early capability diagnostics (MOD-05/06/07/08/09, ALG-04/05). Limit: future disturbance/feedback/finite/hybrid/temporal/arithmetic capabilities are representable or rejected; this suite does not implement them.",
+      "acceptance": [
+        "Reuse one immutable model with two constraints/objectives and compare against distinct hand-derived feasible regions; run settings cannot mutate problem data.",
+        "Singular A is accepted by the model; a registered inverse-only strategy returns unsupported with the offending stage while a compatible noninverse path is not rejected merely for singularity.",
+        "Finite/mixed domains remain distinguishable from continuous convex hulls; empty temporal constraints pass and unsupported nonempty coupling, uncertain initial quantifier, disturbance or feedback requests get specific diagnostics.",
+        "Inject missing downstream operation, incompatible output guarantee, noncompact vertex-only input and validated-evidence requests; a counting backend confirms validation fails before expensive solve/workspace execution.",
+        "Empty admissibility means mathematical infeasibility; missing unsupported operator means unsupported; nonfinite or malformed numerical data follow documented validation rather than becoming infeasibility.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "MODEL-03",
+        "CORE-04",
+        "MODEL-01",
+        "GEO-01"
+      ],
+      "files": [
+        "tests/unit/problem/validator_test.cpp",
+        "tests/contract/pipeline_capability_test.cpp"
+      ],
+      "test_ids": [
+        "T-M03",
+        "T-G02",
+        "T-I02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-04",
+      "title": "Expand objective evaluation and justified reformulation tests",
+      "kind": "test",
+      "scope": "Test the linear, convex-quadratic and rectangular residual-norm modules independently of solvers (OPT-01/02). Limit: convexity is checked under the declared numerical policy; a numerical PSD check is not a validated certificate.",
+      "acceptance": [
+        "At x=[1,2], linear c=[2,-1], d=3 gives 3; Q=diag(2,0), q=[0,1], c=3 gives 6 using the one-half convention.",
+        "For L=[[1,0,0],[0,1,1]], r=[1,4], x=[1,1,3], the norm is zero; at x=[4,1,7], original norm is 5 and squared solver cost is 25.",
+        "Use analytic bounded minimizer sets to show norm/square give the same minimizers while reporting different original versus transformed values; include zero residual and rank-deficient L.",
+        "Reject wrong rectangular-map dimensions, materially nonsymmetric/indefinite Q and nonfinite data under documented tolerances.",
+        "A sum containing other objective terms cannot inherit the pure norm-to-square equivalence; transformation provenance records weights, offsets and conventions.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "OPT-01"
+      ],
+      "files": [
+        "tests/unit/objectives/evaluator_test.cpp",
+        "tests/unit/objectives/reformulation_test.cpp"
+      ],
+      "test_ids": [
+        "T-O01",
+        "T-O02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-05",
+      "title": "Run reusable LP adapter contracts on every selected backend",
+      "kind": "test",
+      "scope": "Test LP port, backend status translation and optional simplex diagnostics (ALG-01/02, SOL-03). Limit: tests only claim bounds/rays/certificates actually supported by each adapter; passing examples do not verify arbitrary backend correctness.",
+      "acceptance": [
+        "Independent analytic oracle: minimize -x-2y with x,y>=0 and x+y<=1 gives (0,1), objective -2; include maximization-to-minimization sign translation and explicit free/fixed variable bounds.",
+        "x<=0 and x>=1 is infeasible; minimize -x with x>=0 is unbounded; contradictory redundant rows and degenerate optimal faces exercise status translation.",
+        "Recompute primal residuals and any reported dual bound from neutral program data, including equalities and infinite bounds; test scaling and objective offset preservation.",
+        "Induce a documented iteration/resource limit or use a contract stub; partial candidate/bound evidence cannot become optimal or infeasible.",
+        "Run the same neutral suite per selected LP adapter; optional basis diagnostics are explicitly unavailable on generic adapters and supported simplex diagnostics obey a dedicated contract.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "OPT-03",
+        "OPT-02",
+        "RUN-01"
+      ],
+      "files": [
+        "tests/contract/optimization/lp_backend_contract.cpp",
+        "tests/fixtures/optimization/analytic_lp_cases.json"
+      ],
+      "test_ids": [
+        "T-L01",
+        "T-L02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-06",
+      "title": "Run reusable convex adapter contracts with singular objectives",
+      "kind": "test",
+      "scope": "Test convex backend capabilities, objective mappings and numerical status evidence (OPT-01/02, ALG-01, SOL-03). Limit: this covers supported convex minimization; it supplies no convex-maximization or minimax guarantee.",
+      "acceptance": [
+        "Hand-solved QP: minimize (x-2)^2 on [0,1] gives x=1 and original cost 1; unconstrained positive-definite examples check stationarity and translated one-half factors.",
+        "On [0,1]^2, minimize (x+y-1)^2: optimum zero has the whole segment x+y=1; the backend point output cannot be labeled a complete family.",
+        "Test rectangular/rank-deficient residual norm with zero optimal residual and nondifferentiability, through the adapter's supported conic or documented quadratic reformulation.",
+        "Unsupported objective classes and invalid convexity get preflight diagnostics; finite optimum, infeasible and solver numerical-limit cases keep distinct outcomes.",
+        "Recompute objective and residuals independently; verify primal/dual evidence provenance only where adapter capabilities support it.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "OPT-08",
+        "OPT-01",
+        "RUN-01"
+      ],
+      "files": [
+        "tests/contract/optimization/convex_backend_contract.cpp",
+        "tests/fixtures/optimization/analytic_convex_cases.json"
+      ],
+      "test_ids": [
+        "T-C01",
+        "T-O02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-07",
+      "title": "Expand barycentric membership and hull reduction tests",
+      "kind": "test",
+      "scope": "Test hull membership, redundancy removal and recovery independently of optional phase-I basis reuse (ALG-02). Limit: tolerances report numerical membership; hull preservation is established for analytic fixtures, not inferred from successful simplex pivots.",
+      "acceptance": [
+        "For triangle vertices (0,0),(1,0),(0,1), validate interior (1/4,1/4), edge (1/2,1/2), vertex and exterior (1,1) against hand-derived x>=0,y>=0,x+y<=1.",
+        "Recompute nonnegative barycentric weights, sum-to-one and reconstruction residual independently; duplicate points and a collinear hull cannot crash or be promoted to full dimension.",
+        "Remove interior/repeated points from a square and compare support in analytic directions and surviving extremes, rather than asserting one arbitrary vertex order.",
+        "Exercise generic LP feasibility adapter without basis diagnostics and a specialized adapter when present; required specialized capability fails explicitly if absent.",
+        "Stage-labelled barycentric recovery preserves coordinate maps and returns a complete reconstructed input/control vector, including zero-dimensional cases.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "OPT-05",
+        "OPT-03",
+        "GEO-01"
+      ],
+      "files": [
+        "tests/unit/geometry/barycentric_membership_test.cpp",
+        "tests/unit/geometry/hull_reducer_test.cpp"
+      ],
+      "test_ids": [
+        "T-L02",
+        "T-G01"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-08",
+      "title": "Expand exact polyhedral operation tests with degenerate cases",
+      "kind": "test",
+      "scope": "Test supported H/V polyhedral affine image, sum, intersection, support and preimage/projection operations (ALG-03/05). Limit: mathematically exact formulas executed in double are numerical evidence, not validated inclusion.",
+      "acceptance": [
+        "Use independently enumerated rational boxes/triangles: translate and reflect a unit box; intersect x+y<=1 with [0,1]^2; Minkowski-sum [0,1] and [2,3] gives [2,4].",
+        "Affine singular map (x,y)->(x,0) of [0,1]^2 is a segment, not an empty or two-dimensional set; distinguish ambient and affine dimensions.",
+        "Preimage of y=0 through (x,y)->y is an unbounded line; where unsupported, return unsupported instead of invented finite vertices.",
+        "Test empty, singleton, universal and lower-dimensional inputs separately; support distinguishes finite value, empty and unbounded.",
+        "Check projection of x+y=1 in [0,1]^2 gives [0,1] and preserve equality information; use fixed-seed low-dimensional cases with independent rational enumeration where applicable.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "GEO-02",
+        "GEO-03",
+        "GEO-04",
+        "GEO-05",
+        "GEO-01",
+        "OPT-03"
+      ],
+      "files": [
+        "tests/unit/geometry/polyhedral_operations_test.cpp",
+        "tests/reference/polyhedral_oracles.py"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-G02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-09",
+      "title": "Expand geometry registry, conversion and guarantee contract tests",
+      "kind": "test",
+      "scope": "Test extensible registrations, equivalent H/V routes and future approximation metadata (ALG-03/04/06/07). Limit: approximation algorithms remain deferred; fake inner/outer operators test contract enforcement only.",
+      "acceptance": [
+        "Register a test representation/operator externally and resolve it without changing planner switches; registration conflict and missing compatible operation give actionable diagnostics.",
+        "Round-trip a rational triangle and a degenerate segment between supported H/V forms; compare membership, supports and dimension against analytic oracles, not byte equality.",
+        "An unbounded half-space cannot silently convert into a bounded V-point list; fail or use declared ray-capable output.",
+        "Request equivalent output from a fake outer-only adapter: preflight rejects; inner/outer/heuristic results retain their relation and reference-set/problem identities through serialization.",
+        "Use fake future zonotope/ellipsoid registrations to verify no automatic exact closure or conversion route is assumed and no approximation downgrade is allowed.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "CORE-04",
+        "GEO-03",
+        "GEO-02",
+        "GEO-04",
+        "GEO-05"
+      ],
+      "files": [
+        "tests/contract/geometry/registry_contract.cpp",
+        "tests/unit/geometry/conversion_test.cpp"
+      ],
+      "test_ids": [
+        "T-G02",
+        "T-M03"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-10",
+      "title": "Expand reachability and nominal predecessor mathematical tests",
+      "kind": "test",
+      "scope": "Test exact nominal propagation and predecessor module composition (ALG-03/05, MOD-05, SOL-01). Limit: existential nominal reachability does not establish robust feedback or preserve histories by itself.",
+      "acceptance": [
+        "For x0=0, x+=u, u in [0,1], R1=[0,1], R2=[0,2]; adding X1=[0,1/2] gives R2=[0,3/2], detecting missed stage intersections.",
+        "Include an affine offset and LTV stage with hand-derived intervals; compact LTI and expanded providers agree.",
+        "For x+=x+u and target {1}, predecessor under u in [0,1] is [0,1]; validate using explicit one-step witnesses and rejection outside the set.",
+        "Singular transitions exercise a supported projection predecessor or explicit inverse-only rejection; empty target/admissibility stays empty.",
+        "Test that reaching a terminal point alone is not treated as a complete trajectory history and that all operation guarantees/assumptions are propagated.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "SYN-01",
+        "GEO-05",
+        "GEO-02",
+        "GEO-03",
+        "GEO-04",
+        "MODEL-01"
+      ],
+      "files": [
+        "tests/unit/reachability/stepper_test.cpp",
+        "tests/unit/reachability/predecessor_test.cpp"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-M03",
+        "T-S01"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-11",
+      "title": "Expand terminal minimizer-set construction tests",
+      "kind": "test",
+      "scope": "Test entire supported terminal minimizer sets and attainment/capability outcomes (OPT-01/02, SOL-02/03). Limit: unsupported nonpolyhedral minimizer relations are rejected; no numerical uniqueness/completeness claim comes from one optimizer.",
+      "acceptance": [
+        "On [0,1]^2, linear cost x gives the whole edge x=0; constant cost gives the whole square, not a selected vertex.",
+        "On [0,2]^2, minimize (x+y-1)^2: the minimizer set is the segment x+y=1 with endpoints (0,1),(1,0); test rank-deficient quadratic/residual construction or explicit unsupported completeness.",
+        "A strictly convex terminal objective with an analytically unique minimizer is distinguished from unique control history; empty terminal reachability is infeasible.",
+        "Exercise finite attained, unbounded and undetermined/unsupported attainment results with analytic cases or status contract stubs; do not invent an unattained example in a closed bounded polyhedral slice.",
+        "Objective tolerances and solver bounds remain separate from exact level-set definitions; a relaxed sublevel is labeled a relaxation.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "SYN-02",
+        "OPT-01",
+        "OPT-08",
+        "OPT-03",
+        "GEO-05"
+      ],
+      "files": [
+        "tests/unit/synthesis/terminal_minimizers_test.cpp",
+        "tests/fixtures/synthesis/terminal_minimizer_cases.json"
+      ],
+      "test_ids": [
+        "T-S02",
+        "T-S03",
+        "T-C01",
+        "T-V02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-12",
+      "title": "Expand direct joint-trajectory family tests",
+      "kind": "test",
+      "scope": "Test direct sparse feasible-relation assembly and supported optimal-family construction (SOL-01/02/03, EXP-05). Limit: exact symbolic family identities on fixtures do not validate arbitrary floating-point completeness.",
+      "acceptance": [
+        "Use T-S01 with independent relation u0+u1=1, 0<=u<=1 and x1=u0,x2=1: recover (0,1),(1,0),(1/4,3/4), reject (1,1) and (0,0) as primary optima.",
+        "T-S02 with constant objective preserves every feasible history and multiple terminal states; T-S03 distinguishes a unique terminal minimizer from infinitely many histories.",
+        "For T=1, A=2, B=3, a=-1, x0=4, the relation is x1=7+3u; independently check stage/block indexing and state/control bounds.",
+        "Use a stage state constraint that cuts histories and a singular A case supported by direct assembly; expected constraints must be found from neutral relation data.",
+        "Backend optimizer alone, sampled witnesses and tolerance-sublevel candidates cannot become a complete exact family; termination and mathematical outcome stay distinct.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "SYN-04",
+        "SYN-02",
+        "OPT-03",
+        "OPT-08"
+      ],
+      "files": [
+        "tests/unit/synthesis/direct_family_test.cpp",
+        "tests/reference/optimal_family_oracles.py"
+      ],
+      "test_ids": [
+        "T-S01",
+        "T-S02",
+        "T-S03",
+        "T-V02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-13",
+      "title": "Expand backward recovery and distinct witness-selection tests",
+      "kind": "test",
+      "scope": "Test reachability/backward-family recovery and complete witness selection (SOL-01/02/04/05, EXP-05). Limit: failure to discover another witness proves no uniqueness, and selected trajectories prove no completeness.",
+      "acceptance": [
+        "Apply the same analytic T-S01/02/03 oracles to backward recovery; all terminal minimizers are recovered and cross-stage fibers exclude spurious Cartesian combinations.",
+        "Verify returned T controls and T+1 states independently against full dynamics; include constrained intermediate states and affine offsets.",
+        "Request multiple witnesses from a segment, a singleton and a nonunique terminal set; check requested/returned/distinct counts and stated coordinate tolerance.",
+        "Recorded directions/seed reproduce selection semantics; duplicate or exhausted searches have diagnostics and do not mutate the primary family or primary optimum.",
+        "Run shared strategy contract cases with direct and backward methods and compare the known relation/evidence, not identical arbitrary witness coordinates; flag capability asymmetry.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "SYN-03",
+        "SYN-05",
+        "SYN-01",
+        "SYN-02",
+        "SYN-04"
+      ],
+      "files": [
+        "tests/unit/synthesis/backward_family_test.cpp",
+        "tests/unit/witnesses/selector_test.cpp",
+        "tests/contract/synthesis/two_strategy_contract.cpp"
+      ],
+      "test_ids": [
+        "T-S01",
+        "T-S02",
+        "T-S03",
+        "T-X01"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-14",
+      "title": "Expand independent trajectory verification and evidence isolation tests",
+      "kind": "test",
+      "scope": "Test numerical verifier, original objective recomputation and evidence binding (EVD-01/02/03). Limit: witness feasibility never certifies global optimality, inclusion or complete optimizer coverage.",
+      "acceptance": [
+        "Start with analytic valid witnesses, then inject wrong initial state, one transition, violating control/state constraint, wrong horizon and wrong reported original objective; each named residual identifies the stage/quantity.",
+        "Use original norm 5 versus squared cost 25 and rectangular residual map to detect accidental verifier reuse of transformed solver objective.",
+        "Check absolute/relative and coordinate-scale policies near boundaries, nonfinite values and tolerance changes; no NaN bypasses comparisons.",
+        "Give backend-success, sampled-family, relaxed-family and symbolic-floating-point metadata: the verifier must not promote them to global/complete/validated evidence.",
+        "Reject problem ID mismatches in witnesses, families, bounds and certificates; independently supplied immutable problem data drive checks.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "SYN-06",
+        "CORE-01",
+        "OPT-01",
+        "MODEL-03"
+      ],
+      "files": [
+        "tests/unit/verification/trajectory_verifier_test.cpp",
+        "tests/contract/verification/evidence_scope_test.cpp"
+      ],
+      "test_ids": [
+        "T-V01",
+        "T-V02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-15",
+      "title": "Expand execution isolation, cancellation and resource-policy tests",
+      "kind": "test",
+      "scope": "Test immutable inputs, exclusive mutable worker state and partial-result/resource behavior (RUN-02/03/04). Limit: concurrency tools support listed platforms and budgets are only enforced where adapters declare enforcement.",
+      "acceptance": [
+        "Concurrent fixed analytic runs use distinct workspace/warm-start/cache ownership; a barrier-controlled detecting backend fails on cross-worker borrowing.",
+        "Sequential versus parallel mathematical results agree under recorded tolerance and seed settings; require deterministic output ordering where contracted, not bitwise floating-point equality.",
+        "Cancel before solve, at documented operation boundaries and during supported native calls; keep incumbents/bounds with actual evidence and no complete-family promotion.",
+        "Nested outer/solver/BLAS requests share total thread policy; unsupported thread-control and memory admission-only modes are exposed rather than represented as enforced.",
+        "Run supported race/ownership tooling and a bounded multi-run stress fixture; record tool limitations. Memory/resource exhaustion has documented outcomes without timing-based unit-test deadlines.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "RUN-01",
+        "OPT-03",
+        "OPT-08",
+        "SYN-03",
+        "SYN-04",
+        "SYN-05"
+      ],
+      "files": [
+        "tests/unit/execution/resource_policy_test.cpp",
+        "tests/integration/execution/workspace_isolation_test.cpp",
+        "tests/integration/execution/cancellation_test.cpp"
+      ],
+      "test_ids": [
+        "T-R01",
+        "T-R02"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-16",
+      "title": "Expand scenario-file and comparison-artifact contracts",
+      "kind": "test",
+      "scope": "Test authored inputs, resolved defaults, problem identity and aligned two-strategy exports (INP-01/02/03/04/05, EXP-02/03/04/05/06). Limit: B04 restoration remains separate; historical reported values are not executable oracles.",
+      "acceptance": [
+        "Each executable minimal/LTI/LTV/state-constrained template loads and runs without C++ changes; invalid shapes, stage counts, schema versions, unknown fields and unsupported capability fields get field-specific distinct diagnostics.",
+        "Changing strategy/resources/selection leaves mathematical scenario identity stable; changing coefficients, initial data, objective or constraints changes it. Resolved defaults and external-file hashes round-trip.",
+        "Run both strategies on analytic fixtures under the same problem/tolerance/output/witness scope; exports contain original costs, verifier residuals, family evidence, counts and module/resource provenance.",
+        "Unknown/new evidence fields follow an explicit schema compatibility policy; partial/unsupported runs serialize without fabricating family or cost data.",
+        "Current B04 manifest remains non-executable with restoration diagnostics; no guessed control bound, fitted matrix or reported 30.899 is inserted as a verified target.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "INP-01",
+        "INP-03",
+        "OBS-04",
+        "OBS-01",
+        "SYN-03",
+        "SYN-04",
+        "SYN-06"
+      ],
+      "files": [
+        "tests/unit/scenarios/loader_test.cpp",
+        "tests/integration/experiments/comparison_artifact_test.cpp",
+        "tests/fixtures/scenarios/invalid/"
+      ],
+      "test_ids": [
+        "T-I01",
+        "T-I02",
+        "T-I03",
+        "T-X01",
+        "T-X02",
+        "T-B04"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-17",
+      "title": "Verify detailed submodule timing tables and accounting",
+      "kind": "test",
+      "scope": "Test mandatory user-requested observability: detailed per-submodule timing across both strategies, workers and final reports (EXP-01/04 plus proposed T-TIM01). This extends earlier summary-only docs. Limit: synthetic-clock correctness does not establish speed or hard real-time performance.",
+      "acceptance": [
+        "Inject a deterministic monotonic fake clock; verify setup/validation, forward propagation, intersections, hull reduction, conversion, terminal optimization, direct assembly, backward recovery, backend calls, first/additional witness, independent verification, projection and export rows where applicable.",
+        "Nested spans report inclusive/exclusive duration, call count and strategy/run/worker/module identity; sums use documented nesting rules and cannot double-count parent and child into end-to-end time.",
+        "Overlapping worker spans distinguish elapsed wall time from aggregate worker time; a missing/unimplemented phase is explicitly not-applicable rather than invented zero.",
+        "Exceptions, cancellation, resource limits and early unsupported results close spans and preserve partial timing rows; disabled tracing uses documented behavior.",
+        "Versioned raw timing records render detailed machine-readable and human-readable tables with time units, cold/warm state, backend versions and thread settings; actual profiling smoke tests use no fragile time thresholds.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "OBS-02",
+        "OBS-03",
+        "OBS-04",
+        "OBS-05"
+      ],
+      "files": [
+        "tests/unit/observability/timing_collector_test.cpp",
+        "tests/integration/observability/timing_table_test.cpp",
+        "tests/fixtures/observability/fake_clock_traces.json"
+      ],
+      "test_ids": [
+        "T-X02",
+        "T-R02",
+        "T-TIM01 (proposed)"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-18",
+      "title": "Verify fuel-case 2D projection data and visual artifacts",
+      "kind": "test",
+      "scope": "Test mandatory fuel-case visualization through generic coordinate projection/export adapters (EXP-01 plus proposed T-PLOT01). Cover final optimal-family/terminal projections and trajectories; intermediate projections only when explicitly supplied. Limit: projection/samples cannot prove full-family coverage or historical reproduction.",
+      "acceptance": [
+        "Project the unit 3D box to two selected coordinates and a 3D affine segment (s,1-s,2s), 0<=s<=1, to the expected 2D segment; compare coordinates/support extrema to analytic oracles.",
+        "For supported fuel scenario data, plot requested state pairs with source coordinate names/units, time/stage labels, trajectory/witness/strategy IDs, target/bound overlays and numerical versus exact/approximate relation labels.",
+        "Test coordinate reorder, rectangular linear projections, degenerate point/segment, empty and unsupported unbounded outputs; a sampled cloud is labeled sampled and not filled as a proven exact boundary.",
+        "Projection metadata preserve problem hash, source relation/stage and requested coordinates; a generic nonfuel scenario renders using the same exporter without fuel-index constants in the core.",
+        "Produce reference PNG/SVG and numeric projection fixtures, manually inspect legibility and overlays, and compare geometry numerically with stable tolerances. Unresolved B04 gets a restoration-labelled diagnostic view rather than a canonical reproduction claim.",
+        "The originating implementation ships with meaningful minimum acceptance tests written before its code; this separate issue expands the suite using independently designed oracles and records discovered defects as fixes."
+      ],
+      "dependencies": [
+        "GEO-05",
+        "VIZ-02",
+        "VIZ-03",
+        "VIZ-01",
+        "OBS-04"
+      ],
+      "files": [
+        "tests/unit/visualization/projection_data_test.cpp",
+        "tests/integration/visualization/fuel_projection_export_test.cpp",
+        "tests/fixtures/visualization/",
+        "docs/testing/projection-visual-qa.md"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-X02",
+        "T-PLOT01 (proposed)",
+        "T-B04"
+      ],
+      "area": "testing",
+      "phase": 2,
+      "requirements": [
+        "REV-02"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-01",
+      "title": "Deep review of core composition, native contracts and ownership",
+      "kind": "review",
+      "scope": "Inspect implemented C++20 foundations/model/problem/public ports for generality and module depth (MOD-01..09, ALG-07, RUN-01/02). Review architectural/code behavior, not document-only proposals. Scientific limit: no claim of support for future problem classes without implementation/capability evidence.",
+      "acceptance": [
+        "Map actual dependency/include graphs: model/problem types cannot depend on solvers, fuel physics or plots; backend containers stay private; observations/time/information are separate.",
+        "Perform a substitution exercise with a nonfuel affine scenario and a second test backend/provider; identify every required core edit and reject closed switches/hidden assumptions inconsistent with extensibility.",
+        "Audit value/view lifetime, zero ports, cache ownership, exceptions and expected result failures; compile public-client fixtures and inspect unsupported versus infeasible paths.",
+        "Trace generic representation scope versus selected solver restrictions (singular A, finite/mixed, temporal, disturbance/continuous time); record missing diagnostics and accidental defaults.",
+        "Publish a report with explicit generality/modularity/scalability findings and interface recommendations; resolve blocking API changes before dependent module integration.",
+        "Run after the relevant code and evidence exist. An independent reviewer records commit IDs, file/line findings, reproductions and severity; blocking findings become linked fix tickets and are rechecked before closure. The implementer cannot self-sign off."
+      ],
+      "dependencies": [
+        "CORE-03",
+        "CORE-04",
+        "MODEL-01",
+        "MODEL-03",
+        "TEST-01",
+        "TEST-02",
+        "TEST-03"
+      ],
+      "files": [
+        "docs/reviews/core-composition-and-ownership.md"
+      ],
+      "test_ids": [
+        "T-N01 (proposed)",
+        "T-M01",
+        "T-M02",
+        "T-M03"
+      ],
+      "area": "review",
+      "phase": 2,
+      "requirements": [
+        "REV-03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-02",
+      "title": "Deep review of geometry algorithms and interchangeable backends",
+      "kind": "review",
+      "scope": "Inspect implemented polyhedral geometry, hull/recovery, conversions, registry and LP/convex adapters (ALG-01..07, OPT-01/02). Scientific limit: numerical exact formulas do not certify rounding; later zonotope/ellipsoid/approximation capabilities remain deferred.",
+      "acceptance": [
+        "Trace a second compatible LP adapter through neutral programs, statuses and evidence without editing models/objectives/planners; generic membership cannot require specialized phase-I basis data.",
+        "Review mathematical formulas, bounds/equalities/rays and lower-dimensional/empty behavior against analytic fixtures; inspect status/dual-bound translation and rectangular objective mappings.",
+        "Exercise test representation registration and incompatible guarantee routes; equivalent versus inner/outer/heuristic conversions must be explicit with no silent relaxation.",
+        "Audit conversion/materialization costs, redundancy degeneracy and allocation growth; identify hidden dimensional/compactness/invertibility assumptions and capabilities needed for each path.",
+        "Review dependency/version/license decisions only from recorded pinned integrations and primary evidence; findings include concrete reproductions, fixes and numerical limitations.",
+        "Run after the relevant code and evidence exist. An independent reviewer records commit IDs, file/line findings, reproductions and severity; blocking findings become linked fix tickets and are rechecked before closure. The implementer cannot self-sign off."
+      ],
+      "dependencies": [
+        "GEO-02",
+        "GEO-03",
+        "GEO-04",
+        "GEO-05",
+        "CORE-04",
+        "OPT-03",
+        "OPT-08",
+        "OPT-05",
+        "OPT-01",
+        "TEST-04",
+        "TEST-05",
+        "TEST-06",
+        "TEST-07",
+        "TEST-08",
+        "TEST-09"
+      ],
+      "files": [
+        "docs/reviews/geometry-and-backend-substitution.md"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-G02",
+        "T-L01",
+        "T-L02",
+        "T-C01",
+        "T-O01",
+        "T-O02"
+      ],
+      "area": "review",
+      "phase": 2,
+      "requirements": [
+        "REV-03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-03",
+      "title": "Rigorous review of both strategies and complete optimal-family semantics",
+      "kind": "review",
+      "scope": "Inspect reachability/backward recovery and direct joint optimization as distinct strategies (SOL-01..05, EXP-05). Scientific limit: theoretical completeness, numerical evidence and archival fidelity are distinct; a returned optimizer or finite sample is insufficient.",
+      "acceptance": [
+        "Derive the feasible joint relation and optimum for T-S01/02/03 independently; inspect actual relation/coordinate maps and query witnesses, including rejected cross-stage Cartesian combinations.",
+        "Trace all terminal minimizers into each family: constant objectives, exposed faces, rank-deficient quadratic/residual cases and unique-terminal/multiple-history cases must preserve supported optima or reject unsupported completeness.",
+        "Review attainment/infeasible/unbounded/unsupported pathways and any inverse-based assumptions; flag tolerance-relaxed sublevels mislabeled as exact optimizer families.",
+        "Check backward recovery does not lose feasible intermediate histories and direct optimization performs family construction beyond optimizer return; separately document extensions over archival single-witness algorithms.",
+        "Compare the same mathematical output scope across strategies; turn missing family cases and unsupported assumptions into explicit fixes/capability limits before first comparison approval.",
+        "Run after the relevant code and evidence exist. An independent reviewer records commit IDs, file/line findings, reproductions and severity; blocking findings become linked fix tickets and are rechecked before closure. The implementer cannot self-sign off."
+      ],
+      "dependencies": [
+        "SYN-03",
+        "SYN-04",
+        "SYN-02",
+        "SYN-01",
+        "SYN-05",
+        "TEST-10",
+        "TEST-11",
+        "TEST-12",
+        "TEST-13"
+      ],
+      "files": [
+        "docs/reviews/optimal-family-mathematics.md",
+        "docs/reviews/two-strategy-equivalence-cases.md"
+      ],
+      "test_ids": [
+        "T-S01",
+        "T-S02",
+        "T-S03",
+        "T-X01",
+        "T-V02"
+      ],
+      "area": "review",
+      "phase": 2,
+      "requirements": [
+        "REV-03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-04",
+      "title": "Deep review of numerical verification and scientific evidence claims",
+      "kind": "review",
+      "scope": "Inspect independent verifier, evidence schema, objective transformations and problem binding (EVD-01/02/03). Scientific limit: small residuals, solver success, sample agreement and historical cost agreement cannot certify completeness, global optimality or nonlinear global performance.",
+      "acceptance": [
+        "Run fault-injected witnesses and trace verifier dataflow to immutable problem inputs; no solver/family feasibility flag substitutes for recalculation.",
+        "Review original objective weights/units, absolute/relative residual scales, nonfinite handling and numerical conditioning; norm versus squared costs remain explicit.",
+        "Audit every evidence promotion path for feasibility/optimality/inclusion/completeness/validated arithmetic and mismatched problem IDs; verify bounds reference the exact primary problem.",
+        "Inspect cancelled/limited/numerical-failure results and relaxed/sample families for honest unknown/partial claims; unsupported validated requests cannot silently become numeric verification.",
+        "Record claim-by-claim evidence, counterexamples and supported scientific limits; require fixes to overclaims before public result publication.",
+        "Run after the relevant code and evidence exist. An independent reviewer records commit IDs, file/line findings, reproductions and severity; blocking findings become linked fix tickets and are rechecked before closure. The implementer cannot self-sign off."
+      ],
+      "dependencies": [
+        "SYN-06",
+        "OPT-01",
+        "OBS-04",
+        "TEST-14",
+        "TEST-04"
+      ],
+      "files": [
+        "docs/reviews/numerical-verification-and-evidence.md"
+      ],
+      "test_ids": [
+        "T-V01",
+        "T-V02",
+        "T-O02",
+        "T-R02"
+      ],
+      "area": "review",
+      "phase": 2,
+      "requirements": [
+        "REV-03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-05",
+      "title": "Deep review of per-worker execution and measured scalability",
+      "kind": "review",
+      "scope": "Inspect immutable sharing, per-worker state, cancellation/resource contracts and scaling behavior (RUN-01..04). Scientific limit: measured ranges do not imply polynomial complexity, hard real-time guarantees or scalable enumeration of exponential output.",
+      "acceptance": [
+        "Audit all mutable caches, solver workspaces, warm starts, lazy payloads and logging paths for actual ownership/synchronization; run overlap detectors and supported race tooling.",
+        "Trace total outer/backend/BLAS thread policy and memory enforcement declarations; noninterruptible calls and cancellation latency must match capabilities.",
+        "Run reproducible dimension/horizon/constraint/representation-size sweeps on both strategies, with equal family/witness output scope, numerical tolerance and verification; retain raw data and hardware.",
+        "Separate representation/output growth, sparse assembly/factorization, conversions, family queries and instrumentation overhead; report failures and memory limits rather than only best runtimes.",
+        "Identify architectural bottlenecks/copies and fixes based on measured evidence; require mathematical correctness and partial-evidence behavior to hold under parallel stress.",
+        "Run after the relevant code and evidence exist. An independent reviewer records commit IDs, file/line findings, reproductions and severity; blocking findings become linked fix tickets and are rechecked before closure. The implementer cannot self-sign off.",
+        "Review batch job isolation, failure/cancellation propagation, result ordering and per-scenario provenance using TEST-23; distinguish outer concurrency from native backend threads."
+      ],
+      "dependencies": [
+        "RUN-01",
+        "OPT-03",
+        "OPT-08",
+        "SYN-03",
+        "SYN-04",
+        "OBS-02",
+        "TEST-15",
+        "TEST-17",
+        "RUN-02",
+        "TEST-23"
+      ],
+      "files": [
+        "docs/reviews/execution-and-scalability.md",
+        "benchmarks/results/review-scalability/"
+      ],
+      "test_ids": [
+        "T-R01",
+        "T-R02",
+        "T-TIM01 (proposed)"
+      ],
+      "area": "review",
+      "phase": 2,
+      "requirements": [
+        "REV-03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-06",
+      "title": "Deep review of scenario workflow, application independence and provenance",
+      "kind": "review",
+      "scope": "Inspect scenario loader/templates, thin frontend, domain adapters and versioned experiment artifacts (INP-01..05, MOD-01/09, EXP-02/03/04). Scientific limit: a custom fuel scenario is not restored B04; changing data creates a new identified experiment.",
+      "acceptance": [
+        "Follow a new user's path from minimal template to custom nonfuel case without C++ edits; review stage indexing, matrices, units, defaults and diagnostic clarity.",
+        "Switch strategy/backend/run settings and prove mathematical identity remains unchanged; alter problem data and prove identity changes; external referenced data hashes and resolved settings persist.",
+        "Inspect that CLI/plots/domain adapters do not duplicate scientific algorithms or inject fuel dimensions, control bounds, targets, implicit observation/information or continuous-time discretization.",
+        "Audit provenance separation of historical reported values, reproduced data and corrected/new variants; unresolved B04 stays non-executable with linked restoration diagnostics.",
+        "Review schema compatibility and unsupported fields/capabilities; produce concrete usability and architectural fixes without broadening the first-slice scientific scope.",
+        "Run after the relevant code and evidence exist. An independent reviewer records commit IDs, file/line findings, reproductions and severity; blocking findings become linked fix tickets and are rechecked before closure. The implementer cannot self-sign off."
+      ],
+      "dependencies": [
+        "INP-01",
+        "INP-03",
+        "INP-02",
+        "VIZ-01",
+        "OBS-04",
+        "TEST-16"
+      ],
+      "files": [
+        "docs/reviews/scenario-workflow-and-provenance.md"
+      ],
+      "test_ids": [
+        "T-I01",
+        "T-I02",
+        "T-I03",
+        "T-X02",
+        "T-B04"
+      ],
+      "area": "review",
+      "phase": 2,
+      "requirements": [
+        "REV-03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-07",
+      "title": "Deep review of fuel projections, timing tables and comparison validity",
+      "kind": "review",
+      "scope": "Inspect mandatory projection visualizations and detailed submodule timing observability for the first two-strategy comparison (EXP-01/04/05 plus new observability requirements). This supersedes earlier summary-only scope for these deliverables. Scientific limit: a 2D view loses dependencies and cannot establish family completeness or higher-dimensional inclusion.",
+      "acceptance": [
+        "Independently compare exported 2D geometry with analytic projection fixtures and fuel coordinate metadata; inspect axis units, state pairs, witness/strategy identity, targets and exact/numeric/approximate/sample labels.",
+        "Visually inspect rendered fuel figures for usable bounds, legible labels and overlays; non-executable B04 is clearly restoration-labelled and no sampled polygon is promoted to exact geometry.",
+        "Audit detailed timing tables against raw nested/parallel spans; distinguish wall/worker and inclusive/exclusive time, phase call counts, not-applicable phases, cold/warm conditions and export cost.",
+        "Confirm both strategies use the same scenario, objective conventions, tolerances, output/witness scope and resources; unequal family evidence/capability is explicit rather than presented as a speed win.",
+        "Review raw versions/hashes, dimensions, representation sizes and memory provenance; measure instrumentation/projection overhead and report actual limits without hard-coded timing thresholds.",
+        "Run after the relevant code and evidence exist. An independent reviewer records commit IDs, file/line findings, reproductions and severity; blocking findings become linked fix tickets and are rechecked before closure. The implementer cannot self-sign off."
+      ],
+      "dependencies": [
+        "VIZ-02",
+        "VIZ-03",
+        "OBS-03",
+        "OBS-04",
+        "VIZ-01",
+        "TEST-17",
+        "TEST-18",
+        "TEST-16",
+        "REVIEW-03",
+        "REVIEW-04"
+      ],
+      "files": [
+        "docs/reviews/observability-and-comparison-validity.md",
+        "benchmarks/results/review-observability/"
+      ],
+      "test_ids": [
+        "T-PLOT01 (proposed)",
+        "T-TIM01 (proposed)",
+        "T-X01",
+        "T-X02",
+        "T-B04"
+      ],
+      "area": "review",
+      "phase": 2,
+      "requirements": [
+        "REV-03"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OBS-01",
+      "title": "Define versioned module and operation statistics artifacts",
+      "kind": "contract",
+      "scope": "Goal: extend final-result observability for detailed submodule computation times. Requirements EXP-01/04/06, RUN-04, ALG-01/03/04/05; the owner's updated detailed timing request extends the summary accounting in the consolidated specification. Sources: C++ contracts, modular architecture and performance-and-language.md. Propose RunStatistics, OperationSpan and ModuleIdentity value contracts in artifacts/execution. A span identifies run, parent/task, module/algorithm/backend and pinned version, operation, stage/query, input/output representation and size, requested/applied guarantee, status/evidence, clock metric and duration. No intermediate-set retention, solver iteration dump or interactive trace viewer is required. Contract review must settle schema versioning and bounded collection behavior before producers and exporters implement it.",
+      "acceptance": [
+        "Round-trip a final result containing nested module/backend spans, strategy identity, selector identity, resource settings and raw backend diagnostics references without any solver-library container in the schema.",
+        "Record exact/equivalent, inner, outer and heuristic operation relations separately from numerical versus validated evidence; a missing metric is null/unavailable with a reason, never a fabricated zero.",
+        "Every timing record binds to the immutable problem ID and resolved configuration ID; two backend configurations retain the same mathematical problem identity.",
+        "Collection limits report dropped-detail counts or aggregate mode without changing the mathematical solve outcome, and final artifacts remain usable without intermediate geometry payloads.",
+        "Provide a schema example and compatibility rules; review/merge requires artifact-contract and execution owners to agree field meaning and lifetime."
+      ],
+      "dependencies": [
+        "CORE-01",
+        "MODEL-03",
+        "RUN-01",
+        "CORE-04"
+      ],
+      "files": [
+        "include/csl/artifacts/run_statistics.hpp",
+        "include/csl/execution/observability.hpp",
+        "docs/contracts/run-statistics.md",
+        "tests/artifacts/run_statistics_contract.cpp"
+      ],
+      "test_ids": [
+        "T-X02",
+        "T-I03",
+        "T-OBS01: statistics schema identity and missing-metric contract"
+      ],
+      "area": "observability",
+      "phase": 2,
+      "requirements": [
+        "OBS-01",
+        "OBS-02",
+        "EXP-07"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OBS-02",
+      "title": "Implement nested and parallel timing with explicit wall and CPU semantics",
+      "kind": "implementation",
+      "scope": "Goal: supply a lightweight ExecutionContext timing collector for OBS-01. Requirements RUN-02/03/04 and EXP-01/04. Inputs are scoped module/operation spans and worker/task relationships; output is timing data and correctly defined aggregates. Use a monotonic wall clock, optional CPU clock with process/thread scope explicitly stated, and an injectable clock for tests. Keep the disabled collector cheap. Do not enforce platform-specific CPU or peak-memory counters where unavailable, or claim parent/child times are additive.",
+      "acceptance": [
+        "A deterministic fake-clock nested example distinguishes inclusive duration from exclusive wall time computed by child interval union; parent and child inclusive durations are never summed as an end-to-end total.",
+        "Overlapping parallel spans report run wall latency separately from sum of worker work durations. CPU metrics declare thread/process scope and availability; shared process CPU deltas are not attributed independently to overlapping children.",
+        "Cross-thread task parentage and span IDs survive concurrent collection without sharing mutable solver workspaces, data races, or double-counting the same span.",
+        "RAII scope closure records cancelled, failed and resource-limited operations; clock anomalies and incomplete spans are diagnosed rather than producing plausible false totals.",
+        "Disabled collection retains results/evidence and yields explicitly absent detailed metrics; test overhead as a benchmark measurement, not a fragile wall-clock unit-test threshold."
+      ],
+      "dependencies": [
+        "OBS-01",
+        "RUN-01"
+      ],
+      "files": [
+        "src/execution/timing_collector.cpp",
+        "include/csl/execution/timing_collector.hpp",
+        "tests/execution/timing_collector.cpp",
+        "benchmarks/observability_overhead.cpp"
+      ],
+      "test_ids": [
+        "T-R01",
+        "T-R02",
+        "T-X02",
+        "T-OBS02: fake-clock nested and overlapping interval oracle"
+      ],
+      "area": "observability",
+      "phase": 2,
+      "requirements": [
+        "OBS-01",
+        "OBS-02",
+        "EXP-07"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OBS-03",
+      "title": "Instrument mathematical ports and expose substitutions and rejected capabilities",
+      "kind": "integration",
+      "scope": "Goal: instrument coarse mathematical boundaries using OBS-02 without embedding plotting or solver internals in shared contracts. Requirements ALG-01/02/03/04/05/07, EXP-01 and RUN-04. Sources: modular architecture and native contracts. Cover propagation/intersection, hull or redundancy reduction, conversion, approximation when implemented, LP/convex calls, terminal optimization, predecessor/recovery, family construction and witness queries. A decorator/helper maps registered identity and operation requests/results to spans. This ticket observes existing modules; it does not implement simplex, Zoutendijk, geometry algorithms or new approximations.",
+      "acceptance": [
+        "For a supported analytic solve, report independent time/count/size records for each actually invoked module and backend, including conversions and first/additional witness operations.",
+        "Changing an implemented LP/convex adapter or representation/operator changes recorded identities without editing the problem or adding representation-specific switches to synthesis. Spy adapters cover future identities in phase 2; actual Zoutendijk substitution is validated after OPT-09 in EXP-02 and REVIEW-08.",
+        "Conversion and approximation spans retain source/target IDs, operation reference set, requested/applied relation, assumptions and error/inclusion evidence; an unsupported exact request cannot appear as a successful outer conversion.",
+        "Preflight rejections identify module/backend, missing capability and requested operation before expensive calls. Missing basis diagnostics cause an explicit compatible algorithm selection or rejection, never a silent claim of historical basis reuse.",
+        "Tests use instrumented spy adapters to prove unsupported combinations never invoke numerical solve, and failure/cancellation span statuses agree with actual result evidence."
+      ],
+      "dependencies": [
+        "OBS-02",
+        "CORE-04",
+        "MODEL-03",
+        "GEO-01",
+        "OPT-02",
+        "OPT-08",
+        "SYN-03",
+        "SYN-04",
+        "SYN-05"
+      ],
+      "files": [
+        "include/csl/execution/instrumented_operation.hpp",
+        "src/execution/operation_observability.cpp",
+        "tests/integration/operation_observability.cpp"
+      ],
+      "test_ids": [
+        "T-M03",
+        "T-G02",
+        "T-L02",
+        "T-X01",
+        "T-OBS03: substitution identity and zero-call rejection spies"
+      ],
+      "area": "observability",
+      "phase": 2,
+      "requirements": [
+        "OBS-01",
+        "OBS-02",
+        "EXP-07"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OBS-04",
+      "title": "Record reproducible comparison runs and instrumentation overhead",
+      "kind": "integration",
+      "scope": "Goal: make ComparisonRunner produce a versioned final artifact for the two agreed strategies on one immutable scenario. Requirements EXP-01/04/05/06, RUN-04, INP-03/05. Sources: consolidated specification, performance-and-language.md and baselines.md. Inputs are resolved run configurations, common witness requests and verifier output; output preserves per-repetition data, outcome/evidence, timing/resources and environment. Bind frontend/CLI later through the same runner. Exclude hard real-time claims and historical-runtime pass thresholds.",
+      "acceptance": [
+        "Store problem/source hashes, code and backend versions, hardware/OS/compiler/build settings, arithmetic/tolerances, seeds, cold/warm and workspace reuse policy, requested/actual workers/library threads, and requested/returned/distinct witness counts.",
+        "Separate parsing/validation, capability checks, workspace/setup, family construction, first/additional witness queries, independent verification and end-to-end solve latency. Plot/export and optional nonlinear replay have separately bounded phases.",
+        "Run instrumentation-enabled and disabled repetitions under the same resolved mathematical configuration; report measured overhead and outcome/residual/family-evidence agreement within declared tolerances without asserting universal zero overhead.",
+        "Persist failed/unsupported/cancelled runs with evidence and available metrics; failed configurations are not silently omitted from comparisons or reported as zero-time successes.",
+        "A small analytic comparison validates both strategies and round-trips the final artifact; different witness coordinates remain acceptable when independently verified primary quality and family semantics agree.",
+        "For measured method choices, alternate at least five tuned release repetitions per side, retain median/range and failures, confirm the timed work actually ran, and identify the limiter from a separate profile. Report inconclusive comparisons when evidence is insufficient."
+      ],
+      "dependencies": [
+        "OBS-03",
+        "INP-01",
+        "SYN-03",
+        "SYN-04",
+        "SYN-05",
+        "SYN-06"
+      ],
+      "files": [
+        "include/csl/experiments/comparison_artifact.hpp",
+        "src/experiments/comparison_runner.cpp",
+        "tests/integration/comparison_artifact.cpp",
+        "benchmarks/observability_comparison.cpp"
+      ],
+      "test_ids": [
+        "T-X01",
+        "T-X02",
+        "T-I03",
+        "T-R01",
+        "T-OBS04: instrumentation on/off analytic result comparison"
+      ],
+      "area": "observability",
+      "phase": 2,
+      "requirements": [
+        "OBS-01",
+        "OBS-02",
+        "EXP-07"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "OBS-05",
+      "title": "Export detailed module computation tables and raw performance records",
+      "kind": "implementation",
+      "scope": "Goal: generate readable final scientific tables from ComparisonArtifact without accessing solver workspaces. Requirements EXP-01/02/04/06 and RUN-04 plus updated owner detailed submodule timings. Inputs are OBS-04 artifacts; outputs are versioned machine-readable raw records and shareable tables in documented text/CSV formats. Rows distinguish strategy, LP/simplex variant, convex optimizer including Zoutendijk if implemented, representation/operator, operation and stage/query aggregation. Exclude mandatory intermediate-computation UI and avoid selecting a language binding or table-library dependency in this ticket.",
+      "acceptance": [
+        "Expose per-module/operation call counts, total and distribution of inclusive wall/work durations, explicitly defined exclusive metrics when available, CPU scope/availability, input/output representation sizes, solver iterations when supplied, and memory scope/availability.",
+        "Report setup/family/first-query/additional-query/verification/end-to-end/plot-export phases with median and a documented tail statistic across measured repetitions; do not sum overlapping inclusive phases into latency.",
+        "Place objective in its original convention, residuals, justified gaps, feasibility/optimality/completeness evidence and approximation direction alongside timing so differing outputs cannot appear as identical work.",
+        "A deterministic fixture with nested parallel spans yields independently hand-calculated aggregates and exports unavailable, unsupported and failed values explicitly; unit labels and precision prevent misleading zeros.",
+        "Raw per-run data, schema version and provenance accompany the table, allowing another tool to recreate it without a live solve; historical reported numbers use a separate provenance-labelled track."
+      ],
+      "dependencies": [
+        "OBS-04"
+      ],
+      "files": [
+        "src/artifacts/performance_table.cpp",
+        "include/csl/artifacts/performance_table.hpp",
+        "docs/artifacts/performance-tables.md",
+        "tests/artifacts/performance_table.cpp"
+      ],
+      "test_ids": [
+        "T-X02",
+        "T-OBS05: hand-calculated nested/parallel table fixture"
+      ],
+      "area": "observability",
+      "phase": 2,
+      "requirements": [
+        "OBS-01",
+        "OBS-02",
+        "EXP-07"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "VIZ-01",
+      "title": "Prepare backend-neutral final control and state plot data",
+      "kind": "contract",
+      "scope": "Goal: define a PlotData adapter that consumes final comparison artifacts and independently verified complete witnesses. Requirements SOL-04/05, EXP-01/06, EVD-01/02. Sources: modular architecture and B04 tables/restoration. Outputs carry state/control coordinates, units, stage/time axes, method/witness identities, known bounds/targets, objective and evidence labels. Rendering is outside synthesis/geometry/optimization; no frontend, Python binding or interactive intermediate viewer is selected here.",
+      "acceptance": [
+        "Controls use T stage intervals and states T+1 stage points; optional physical timestamps are used only when supplied and do not discretize dynamics. The control hold convention is explicit where a physical-time step plot is shown.",
+        "Plot every selected witness with stable method/witness identity and common axes; label samples as selected complete witnesses rather than the whole optimal family.",
+        "Expose original objective, residual/evidence references, requested/returned/distinct counts and duplicate diagnostics; a path marked invalid or unverified cannot be displayed as certified optimal.",
+        "For fuel metadata preserve oxidizer flow/working-stock balance and fuel flow/working-stock balance, units kg/s and kg, and source targets/flow bounds. Negative stock balance remains visible without an invented nonnegative constraint.",
+        "An analytic two-step fixture validates axis indexing and control/state alignment; malformed witness lengths, evidence/problem mismatch and missing physical-time conventions give explicit errors or stage-only plots."
+      ],
+      "dependencies": [
+        "OBS-04",
+        "SYN-05",
+        "MODEL-01",
+        "SYN-06"
+      ],
+      "files": [
+        "include/csl/artifacts/plot_data.hpp",
+        "src/artifacts/final_plot_data.cpp",
+        "tests/artifacts/final_plot_data.cpp"
+      ],
+      "test_ids": [
+        "T-S01",
+        "T-V01",
+        "T-V02",
+        "T-X02",
+        "T-VIZ01: stage/time plot-data alignment"
+      ],
+      "area": "visualization",
+      "phase": 2,
+      "requirements": [
+        "EXP-08",
+        "EXP-06"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "VIZ-02",
+      "title": "Support selectable fuel-state 2D plots with explicit projection guarantees",
+      "kind": "implementation",
+      "scope": "Goal: add a final PlotRequest accepting coordinate pairs, with trajectory-pair views available immediately and mathematical set projections only on explicit request. Requirements EXP-01/06, ALG-03/04/05 and reserved SOL-06 projection capability, refined by the owner's fuel 2D projection request. Sources: set-representation review and B04 restoration. Inputs name state/control relation, stage when applicable, coordinate pair and required guarantee; outputs bind projected data to the same problem, stage and set/family identity. Exclude all-stage intermediate reachable-set viewers and automatic full-dimensional vertex materialization.",
+      "acceptance": [
+        "The four-state fuel case accepts any distinct in-range state pair, including flow/flow, stock/stock and flow/stock, with correct labels/units; repeated/out-of-range coordinates reject clearly.",
+        "Without an explicit set-projection query, render only selected trajectory coordinate pairs and terminal samples. Spy operators prove ordinary trajectory export invokes no exact projection or H/V conversion.",
+        "An explicit final reachable-set or optimal-family projection request calls a compatible registered operator, records query cost and reference identity, and returns unsupported if its required exact/equivalent guarantee cannot be met.",
+        "Distinguish exact projected geometry under declared arithmetic evidence, inner/outer enclosures, heuristic shapes and finite witness/support samples in plot data and legends; an outer approximation or sampled convex hull is never relabelled exact.",
+        "Use a hand-derived rectangle and lower-dimensional line projection oracle; test empty/unbounded/unsupported cases according to implemented capabilities, and retain cross-stage dependence claims separately from displayed 2D marginals."
+      ],
+      "dependencies": [
+        "VIZ-01",
+        "OBS-03",
+        "CORE-01",
+        "GEO-05"
+      ],
+      "files": [
+        "include/csl/artifacts/plot_request.hpp",
+        "src/artifacts/projection_plot_data.cpp",
+        "tests/artifacts/projection_plot_data.cpp"
+      ],
+      "test_ids": [
+        "T-G01",
+        "T-G02",
+        "T-V02",
+        "T-VIZ02: analytic 2D projection and no-query spy oracle"
+      ],
+      "area": "visualization",
+      "phase": 2,
+      "requirements": [
+        "EXP-08",
+        "EXP-06"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "VIZ-03",
+      "title": "Export standalone scientific final-result figures",
+      "kind": "implementation",
+      "scope": "Goal: render PlotData and performance-table records with standard scientific plotting tools into standalone vector figures and raster previews. Requirements EXP-01/02/04/06. Choose and document a plotting/export adapter after dependency review; a standalone external plotting tool is allowed and does not select public language bindings. Inputs are saved artifacts and PlotRequest; outputs include control/state figures, selected 2D pair figures and detailed timing charts/tables. Plotting/export stays outside solver logic, and interactive intermediate viewing is optional future scope.",
+      "acceptance": [
+        "Export standalone SVG or PDF plus PNG with axes, units, readable legends, method/witness labels, objective/evidence context, approximation/sample labels and scenario identity. Figures open and remain interpretable without an app or live solver.",
+        "Support plot regeneration from saved raw data with a versioned style/export configuration; record plotting-tool version and export timing separately from mathematical solve/query latency.",
+        "Provide fuel flow/stock state plots, stage-aligned controls and requested 2D coordinate pairs; visually inspect exported artifacts for clipped labels, indistinguishable series, hidden negative balances and misleading projection legends.",
+        "A timing figure preserves wall-versus-work/CPU definitions and labels unavailable metrics; it does not show overlapping inclusive durations as an additive latency stack.",
+        "Integration tests validate artifact contents and numerical series against an analytic fixture, while documented visual QA checks the produced figures; avoid brittle exact-pixel assertions."
+      ],
+      "dependencies": [
+        "VIZ-01",
+        "VIZ-02",
+        "OBS-05",
+        "CORE-01"
+      ],
+      "files": [
+        "tools/plotting/export_final_results/",
+        "docs/artifacts/figure-export.md",
+        "tests/artifacts/figure_export/"
+      ],
+      "test_ids": [
+        "T-X02",
+        "T-VIZ03: regenerated standalone figure integration and visual QA"
+      ],
+      "area": "visualization",
+      "phase": 2,
+      "requirements": [
+        "EXP-08",
+        "EXP-06"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "VIZ-04",
+      "title": "Associate nonlinear replay results with linearly optimal witnesses",
+      "kind": "integration",
+      "scope": "Goal: extend final comparison/plot artifacts with optional independent plant replay records for complete selected linear witnesses. Requirements EXP-01/02/04, EVD-01/02 and SOL-04/05. Sources: b04-tables.md and b04-restoration.md. Inputs are witness history, explicit reference-plant identity/parameters/initial conditions and integration/control-hold conventions; outputs store replay trajectory, original replay objective, numerical/integration diagnostics and distinct replay timing. This ticket consumes a separately implemented plant adapter. It neither implements nonlinear optimization nor chooses the best replay witness as a new primary objective.",
+      "acceptance": [
+        "A linear witness links to separate linear verification and nonlinear replay records; labels distinguish linear optimality evidence, nonlinear feasibility/quality and absence of nonlinear global-optimality evidence.",
+        "Different linearly optimal witnesses can produce distinct replay trajectories/costs without being called inconsistent linear solver results; original objective convention and plant units are preserved.",
+        "Missing plant parameters, initial conditions, full controls or integration/hold conventions yield unavailable replay with named prerequisites; no interpolation of historical controls or fitted coefficients fills gaps silently.",
+        "Keep nominal reference, frozen-coefficient regulator and witness policies distinct, including the fact that the nominal u=0 row is not a demonstrated zero-control solution from perturbed B04 initial data.",
+        "A small independently specified nonlinear test plant demonstrates replay variation for tied linear witnesses and detects deliberately wrong control timing; B04 replay reproduction remains gated by canonical histories/conventions."
+      ],
+      "dependencies": [
+        "VIZ-01",
+        "OBS-04",
+        "EXP-04",
+        "SYN-05",
+        "OPT-01"
+      ],
+      "files": [
+        "include/csl/experiments/replay_artifact.hpp",
+        "src/experiments/replay_comparison.cpp",
+        "tests/integration/replay_comparison.cpp"
+      ],
+      "test_ids": [
+        "T-O02",
+        "T-V01",
+        "T-V02",
+        "T-X02",
+        "T-REPLAY01: tied linear witnesses with distinct nonlinear replay"
+      ],
+      "area": "visualization",
+      "phase": 3,
+      "requirements": [
+        "EXP-08",
+        "EXP-06"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        6,
+        10
+      ],
+      "ready": false,
+      "sources": [
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "EXP-01",
+      "title": "Present B04 historical tables alongside restoration diagnostics",
+      "kind": "artifact",
+      "scope": "Goal: add provenance-labelled B04 reported table rows and restoration status to final comparison exports. Requirements EXP-02/03/04 and T-B04. Sources: b04-tables.md, baselines.md, b04-restoration.md, archive-selected-sources.json and b04-historical.json. Inputs are checked source transcriptions and measured artifacts when available; outputs separate historical reported values, evaluations at printed coordinates and independently reproduced results. Canonical model/control recovery is a separate module/ticket, not work to be guessed by this exporter.",
+      "acceptance": [
+        "Historical B04 loading/export reports non-executable restoration diagnostics for missing canonical control bounds, first-action convention and displayed-model/terminal-result inconsistency; provisional [-1,1] belongs only to a separately identified exploratory scenario.",
+        "Preserve Table 2 policy labels and all reported terminal/objective rows with source/hash/precision metadata; recomputed printed-coordinate costs use separate columns and rounding-aware interpretation.",
+        "Display the checked stock-invariant contradiction and unrestricted-plane lower bound as restoration evidence, never as a recovered constrained optimum or solver performance target.",
+        "The reported 30.899 and 0.4 seconds are historical data, not exact unit-test or modern performance thresholds; corrected/exploratory/reproduced scenario IDs cannot overwrite the transcription identity.",
+        "A B04 export with no executable run remains useful and truthfully marks current measured fields unavailable; later reproduction columns require a canonical executable manifest and explicit source changes."
+      ],
+      "dependencies": [
+        "OBS-05"
+      ],
+      "files": [
+        "src/artifacts/historical_comparison_table.cpp",
+        "tests/artifacts/b04_historical_comparison.cpp",
+        "docs/artifacts/historical-versus-reproduced.md"
+      ],
+      "test_ids": [
+        "T-B04",
+        "T-I01",
+        "T-X02",
+        "T-B04-TABLE: reported/computed/reproduced separation"
+      ],
+      "area": "experiments",
+      "phase": 2,
+      "requirements": [
+        "EXP-01",
+        "EXP-04",
+        "EXP-07"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        6,
+        10
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/baselines.md",
+        "docs/research/b04-restoration.md",
+        "docs/research/b04-tables.md"
+      ]
+    },
+    {
+      "key": "EXP-02",
+      "title": "Benchmark module substitutions under common optimal-family outputs",
+      "kind": "benchmark",
+      "scope": "Goal: provide reproducible benchmark configurations auditing independent substitution axes, rather than ranking stacks with different mathematics. Requirements ALG-01/02/03/07, EXP-01/04/05 and RUN-04. Sources: modular architecture, performance-and-language.md and baselines.md. Inputs are executable analytic/scaling cases and existing registered implementations; outputs are raw runs and detailed final tables. Compare the two synthesis strategies first. Within a strategy change one LP/simplex variant, supported convex method (including Zoutendijk when separately implemented), exact set representation or equivalent conversion route at a time. New numerical adapters are prerequisites, not implemented here.",
+      "acceptance": [
+        "Run both agreed strategies on T-S01/02/03 with the same problem/objective/optimal-family scope, tolerances and witness request; independent verification checks analytic optimum, admissibility and family semantics rather than identical witness coordinates.",
+        "Keep strategy, LP/simplex variant, convex optimization method, set representation, operator/converter and selector as independent configuration fields. Record selected and rejected combinations with assumptions, including basis-diagnostic requirements and convex method differentiability/reformulation support.",
+        "Where two compatible adapters exist, demonstrate replacement without changing model/objective/frontend contracts; unavailable implementations are explicitly pending and produce no invented timing rows.",
+        "Sweep dimension/horizon/constraints/representation size with fixed seeds and saved raw repetitions; distinguish cold/warm runs, end-to-end latency and submodule work, and record resource/failure limits.",
+        "Compare original objective, residuals, completeness/inclusion evidence, output sizes and time/memory together; B04 canonical reproduction activates only after restoration and historical one-witness timings retain different output-scope labels."
+      ],
+      "dependencies": [
+        "OBS-04",
+        "OBS-05",
+        "SYN-03",
+        "SYN-04",
+        "OPT-04",
+        "OPT-06",
+        "OPT-08",
+        "OPT-09",
+        "GEO-03",
+        "INP-03",
+        "TEST-12",
+        "TEST-13"
+      ],
+      "files": [
+        "benchmarks/configurations/module-substitution/",
+        "benchmarks/tools/run_module_comparison/",
+        "docs/benchmarks/module-substitution-protocol.md",
+        "tests/integration/substitution_benchmark_contract.cpp"
+      ],
+      "test_ids": [
+        "T-X01",
+        "T-X02",
+        "T-L01",
+        "T-L02",
+        "T-C01",
+        "T-G02",
+        "T-EXP02: one-axis substitution protocol"
+      ],
+      "area": "experiments",
+      "phase": 3,
+      "requirements": [
+        "EXP-01",
+        "EXP-04",
+        "EXP-07"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/baselines.md",
+        "docs/research/b04-restoration.md",
+        "docs/research/b04-tables.md"
+      ]
+    },
+    {
+      "key": "EXP-03",
+      "title": "Add later exact-versus-approximate reachability comparison artifacts",
+      "kind": "later-extension",
+      "scope": "Goal: extend the completed two-strategy comparison protocol with separately implemented compatible inner/outer approximation methods. Requirements ALG-03/04/06, EXP-01/04/05 and RUN-04. Sources: set-representations-and-ellipsoidal-toolbox.md, modular architecture and baseline readiness notes. Inputs are explicitly related exact/reference and approximate sets plus realizability/inclusion evidence; outputs are quality/performance records and labelled final 2D figures. No new approximation algorithm, ET integration, nonlinear reachability proof or mandatory intermediate viewer is implemented by this ticket.",
+      "acceptance": [
+        "Schedule this extension after the first two optimization strategies pass their common family acceptance suite; approximation comparisons cannot replace that first comparison.",
+        "Every conversion/reduction/approximation declares exact/equivalent/inner/outer/heuristic direction, assumptions, budget and evidence. Smaller volume or finitely sampled support agreement alone cannot establish containment.",
+        "Where assumptions and evidence justify it, report outer-set objective lower bounds and realizable inner-set upper bounds; distinguish terminal reachability bounds from optimizer-family enclosure and retain controls for achievable witnesses.",
+        "Compare set quality, inclusion/support error under a stated test protocol, representation size and submodule timing; never demand exact and approximate sets have identical coordinates or call finite ellipsoidal directions an exact family.",
+        "Requested exact final 2D projections use supported query operators; enclosures and samples remain labelled, with query/export costs separated and analytically known low-dimensional inclusion cases serving as independent oracles."
+      ],
+      "dependencies": [
+        "EXP-02",
+        "VIZ-02",
+        "VIZ-03",
+        "APP-02",
+        "APP-03",
+        "APP-04",
+        "SYN-06",
+        "GEO-05",
+        "SYN-03",
+        "SYN-05"
+      ],
+      "files": [
+        "benchmarks/configurations/reachability-approximations/",
+        "src/artifacts/approximation_comparison.cpp",
+        "tests/integration/approximation_comparison.cpp",
+        "docs/benchmarks/approximation-comparison.md"
+      ],
+      "test_ids": [
+        "T-G02",
+        "T-V02",
+        "T-X02",
+        "T-APPROX01: analytic inclusion/objective-bound comparison"
+      ],
+      "area": "experiments",
+      "phase": 4,
+      "requirements": [
+        "EXP-01",
+        "EXP-04",
+        "EXP-07"
+      ],
+      "external_blockers": [],
+      "related_issues": [
+        7,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/baselines.md",
+        "docs/research/b04-restoration.md",
+        "docs/research/b04-tables.md"
+      ]
+    },
+    {
+      "key": "TEST-22",
+      "title": "Expand independent nonlinear replay and association tests",
+      "kind": "test",
+      "phase": 3,
+      "dependencies": [
+        "EXP-04",
+        "VIZ-04"
+      ],
+      "scope": "Expand replay adapter and artifact-association tests independently of the linear optimizers. Implementation tickets already ship minimum tests. B04-specific numeric reproduction requires canonical plant/control data; analytic toy plants are available now.",
+      "acceptance": [
+        "For x_next=x+u+u^2, check tied linear controls (0,1) and (0.5,0.5) produce nonlinear terminal states 2 and 1.5; use an independently computed sequence oracle.",
+        "Inject shifted controls, wrong plant/problem identity, missing hold convention and truncated history; produce named diagnostics rather than silently interpolated replay.",
+        "Round-trip replay artifacts without changing linear objective/optimality evidence; preserve nonlinear residuals, units, plant versions and integration limits separately.",
+        "Missing historical parameters leave B04 replay unavailable; no toy-plant result or selected best replay witness becomes a nonlinear global optimum."
+      ],
+      "files": [
+        "tests/unit/experiments/replay_adapter_test.cpp",
+        "tests/integration/replay_artifact_test.cpp"
+      ],
+      "requirements": [
+        "REV-02",
+        "EVD-01",
+        "EVD-02",
+        "EXP-04"
+      ],
+      "test_ids": [
+        "T-REPLAY01",
+        "T-V01",
+        "T-V02"
+      ],
+      "area": "testing",
+      "external_blockers": [],
+      "related_issues": [
+        6,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/b04-restoration.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "TEST-23",
+      "title": "Expand batch sweep isolation and provenance tests",
+      "kind": "test",
+      "phase": 2,
+      "dependencies": [
+        "RUN-02",
+        "OBS-04"
+      ],
+      "scope": "Expand independent scenario-sweep tests for job ownership, resource allocation, failures, cancellation and saved provenance. RUN-02 ships minimum tests before this expansion.",
+      "acceptance": [
+        "A barrier-controlled backend detects shared mutable workspaces across jobs; compare sequential/parallel mathematical answers under declared tolerances.",
+        "One failed or cancelled job cannot corrupt sibling results; whole-batch cancellation preserves each job outcome and genuine partial evidence.",
+        "Check deterministic job/result association and ordering, scenario/settings hashes, seed and algorithm identity under deliberately reordered completion.",
+        "Nested native threads and outer jobs obey the declared common resource policy; report admission-only or unsupported enforcement and test without wall-clock deadlines."
+      ],
+      "files": [
+        "tests/integration/execution/batch_sweep_test.cpp"
+      ],
+      "requirements": [
+        "REV-02",
+        "RUN-02",
+        "RUN-03",
+        "EXP-04"
+      ],
+      "test_ids": [
+        "T-R01",
+        "T-R02",
+        "T-I03"
+      ],
+      "area": "testing",
+      "external_blockers": [],
+      "related_issues": [
+        6,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/b04-restoration.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    },
+    {
+      "key": "REVIEW-10",
+      "title": "Review nonlinear replay adapters and linear-result associations",
+      "kind": "review",
+      "phase": 3,
+      "dependencies": [
+        "TEST-22",
+        "REVIEW-04",
+        "REVIEW-07"
+      ],
+      "scope": "Review replay implementation and final-artifact associations after code and independent tests exist. Validate simulation assumptions and the boundary between linear optimality and nonlinear evaluation.",
+      "acceptance": [
+        "Record reviewed commits, severity, file/line findings and reproduced timing/identity counterexamples; the implementer cannot self-sign off.",
+        "Audit plant/input identity, time/hold/integration conventions, objective and unit mappings; preserve historical non-executable limitations.",
+        "Confirm replay neither mutates primary families nor promotes sampled simulation into nonlinear/global/robust evidence.",
+        "Check replay workspaces and cost accounting remain independent adapters; linked blocking fixes need independent recheck."
+      ],
+      "files": [
+        "docs/reviews/nonlinear-replay.md"
+      ],
+      "requirements": [
+        "REV-03",
+        "EXP-04",
+        "EVD-01",
+        "EVD-02"
+      ],
+      "test_ids": [
+        "T-REPLAY01",
+        "T-V02"
+      ],
+      "area": "review",
+      "external_blockers": [],
+      "related_issues": [
+        6,
+        8
+      ],
+      "ready": false,
+      "sources": [
+        "docs/research/b04-restoration.md",
+        "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ]
+    }
+  ]
+}

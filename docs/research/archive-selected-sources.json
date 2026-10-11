@@ -165,6 +165,111 @@
       "bytes": 407188,
       "sha256": "0a3d87b03f2a8c5a7bd9e38660199b917a41a5050c0efd324489362a153e8f6d",
       "role": "Owner ellipsoidal-toolbox study notes, not executable library"
+    },
+    {
+      "path": "Scientific Research/Main_Hull_Shor.m",
+      "bytes": 556,
+      "sha256": "4638b8872b537e8c629a386543c42d41226a2ef64bbae290356ec6e0e9868e64",
+      "id": "A24",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Scientific Research/Simplex_Hull_Shor.m",
+      "bytes": 829,
+      "sha256": "cf401b763af706a582e411d4e3f17cd1bb7398bf1bd44fa6fa3e65637ee31034",
+      "id": "A25",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Scientific Research/Main_Hull.m",
+      "bytes": 1470,
+      "sha256": "a81bc5cc5247e7aa17370518a0c8ed2e11d404aa4c1c25cc44bf36a496741236",
+      "id": "A26",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Scientific Research/Simplex_Hull.m",
+      "bytes": 975,
+      "sha256": "d73e2de6c2a77b238d5fdd4ce5b423aea891a1aacf959cebed3d685cf4e4ee7c",
+      "id": "A27",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Scientific Research/LPHULL.m",
+      "bytes": 496,
+      "sha256": "3344b2b6042923b8b3c1e8608bfdfadc25ef3f1aefc626f62f036cb50d582cf5",
+      "id": "A28",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Scientific Research/QLPHULL.m",
+      "bytes": 1619,
+      "sha256": "663625d206758ad80a56dc0ef9f3ea66cbb18b3d374d46b4fc90c4bf19d95a65",
+      "id": "A29",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Scientific Research/Modified_SM.m",
+      "bytes": 1150,
+      "sha256": "5e0f29b0bed8a87f8ec477cb0f3fae55c66f0e3e3b28021c032b9891afa9ea6a",
+      "id": "A30",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Scientific Research/SMLP.m",
+      "bytes": 1770,
+      "sha256": "30a864308ffdbf83e14a186edfb16df4397d3182980cb88fdea545858160b9c1",
+      "id": "A31",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Scientific Research/quickhull.m",
+      "bytes": 2316,
+      "sha256": "6787ac407682391bf6837273b4c2e6175846da5ce21798a640c8ceb82c8c760b",
+      "id": "A32",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Публикации/Минимакс/Constrained/QLPHULL.m",
+      "bytes": 1778,
+      "sha256": "6ea9ee74cb376c644ab5441e7ca747b0ad5856d7c7c32e2518ec680502c8d7ae",
+      "id": "A33",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Конференция/ИТиС 2019/2/Main_Hull_mods.m",
+      "bytes": 1005,
+      "sha256": "af7e4aa80edbde2b4df6504f9500e10a26263c4221f8fac0b656bf9fc1672871",
+      "id": "A34",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Конференция/ICIE 2018/Snatch.m",
+      "bytes": 564,
+      "sha256": "1f0b2e8264712c3e562fd52d1cb478482121717959a83810edbc0fe70924fef2",
+      "id": "A35",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Конференция/ICIE 2018/Simplex_ctrl.m",
+      "bytes": 881,
+      "sha256": "c66ec82403145f6f8c17f55731fb25bdafe3bfd175046292b2df5727625eeef0",
+      "id": "A36",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Конференция/ICIE 2018/Simplex_lazy_ctrl.m",
+      "bytes": 1576,
+      "sha256": "0b5e37010412d5788e7e89ea5a1851209b8fb0894e7f59e0bccc0ebd92a6d3e4",
+      "id": "A37",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "path": "Конференция/ICIE 2018/SimplexIntersect.m",
+      "bytes": 1018,
+      "sha256": "b7171b4cf3af1fbf26fe483d0fbb416f84737f0f7bcb91aa99ea9b3dc1d44108",
+      "id": "A38",
+      "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
     }
   ]
 }
