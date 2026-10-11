@@ -270,6 +270,34 @@
       "sha256": "b7171b4cf3af1fbf26fe483d0fbb416f84737f0f7bcb91aa99ea9b3dc1d44108",
       "id": "A38",
       "role": "Algorithm source inspected for modular implementation planning; not executed or redistributed"
+    },
+    {
+      "id": "A39",
+      "path": "Семинар ИММ/Статья/1st.fig",
+      "sha256": "1120e70dbf3a300d1f8c9ee19d1082632c3adbb24f5ac445802954b164181f38",
+      "bytes": 1131239,
+      "role": "B04 saved nominal/nonlinear witnesses and frozen coordinates; inert MAT graphics"
+    },
+    {
+      "id": "A40",
+      "path": "Семинар ИММ/Статья/program.m",
+      "sha256": "581a91dbb1041973f9559a6cac07657279a5e3f40091f04606216be0f97bac46",
+      "bytes": 3819,
+      "role": "B04 nonlinear replay kernel; original U workspace unavailable"
+    },
+    {
+      "id": "A41",
+      "path": "Семинар ИММ/Статья/Shorikov_Kalev_Article_v4.pdf",
+      "sha256": "db1f29e55e9e3558b4f9eb4bd52c86931f210233d746a986610dab08102b3891",
+      "bytes": 858237,
+      "role": "B04 article with Table 2 and matching figures; private visual audit anchors"
+    },
+    {
+      "id": "A42",
+      "path": "Семинар ИММ/Статья/1st.png",
+      "sha256": "ccbe6aac3e9d265999b135a780cbd4fff060d8db574bc747f27e8216c824692d",
+      "bytes": 106169,
+      "role": "Companion first-witness phase plot; privately inspected"
     }
   ]
 }

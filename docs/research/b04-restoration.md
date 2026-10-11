@@ -30,7 +30,7 @@ A convex quadratic solver may minimize its square, preserving minimizers, but al
 
 ## Source recovery
 
-The supplied PDF has table/figure placeholders. The [published counterpart, R40](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019), DOI 10.1134/S0002338819020094, supplies Table 2; its nonlinear outcome rows are recorded in the manifest. The [local numerical tables](b04-tables.md) now also supply nonlinear parameters and visually checked policy labels. Full control histories remain unavailable.
+The supplied PDF has table/figure placeholders. The [published counterpart, R40](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019), DOI 10.1134/S0002338819020094, supplies Table 2; its nonlinear outcome rows are recorded in the manifest. The [local numerical tables](b04-tables.md) now also supply nonlinear parameters and visually checked policy labels. The later [saved-witness curation](b04-saved-witnesses.md) recovers three state histories and infers their effective actions under independently sourced B; original optimizer U rows and their mapping remain unavailable.
 
 L16's related adaptive demonstration uses [-1,1], but it is not canonical B04 evidence: its fitted control coefficients differ, and L28's uniform-grid branch has a documented mass-memory defect. Neither those bounds nor its nonlinear coefficients are imported into the historical scenario. The owner subsequently recalled that B04 most likely also used [-1,1]; this is recorded as a provisional hypothesis, while canonical confirmation remains open.
 
@@ -84,10 +84,10 @@ Initial queries select different complete witnesses for trajectory plots and num
 - Recover canonical numerical U_t, first-action convention and any omitted state bounds.
 - Resolve the terminal invariant inconsistency using the actual experiment model, with provenance for every changed coefficient.
 - Preserve B04-historical as a transcription record. Any assumed or corrected fully specified problem receives a separate ID and explicit change log.
-- Only then run constrained optimum/family comparisons. Recover control histories and nonlinear replay conventions before attempting Table 2 reproduction.
+- Only then run constrained optimum/family comparisons. Preserve the recovered witness/replay conventions while resolving original U rows, full constraints and generator authority before claiming complete historical reproduction.
 
 The historical 0.4-second runtime is contextual evidence, not a current performance target. The owner selected C++ for the main implementation; C++20 is the working standard. This restoration does not defer algorithm interfaces or ownership design.
 
 ## Larger archive follow-up
 
-The owner supplied a second archive location. The [follow-up search](archive-followup.md) recovered B04 tables locally and related nominal MATLAB implementations. They use different initial states, B coefficients or objectives; canonical B04 control bounds and a matching numerical project remain unresolved. The exact inconsistency above still applies to the displayed historical model.
+The owner supplied a second archive location. The [follow-up search](archive-followup.md) recovered B04 tables locally and related nominal MATLAB implementations. Subsequent [saved-witness evidence](b04-saved-witnesses.md) identifies three matching nominal/nonlinear pairs with changed x0/B, independently checked replay and an approximately 30.899136 nominal objective. The neighboring driver currently has T=12; exact T16 constraints, U rows and generating revision remain unresolved. The frozen saved norm 368.609780868 conflicts with printed 368.45, and replay ends at 99.99 seconds. The exact inconsistency above still applies to the displayed historical model; its manifest is unchanged.

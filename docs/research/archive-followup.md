@@ -27,7 +27,7 @@ A01 has initial state (1220.3,119500,440,45300), T=12, B=(2208/110,0,-1152/110,0
 
 A02 also declares T=16 and [-1,1], but computes the initial flows from a nonlinear model with a different initial mixture error and uses that same different B. A03's terminal objective omits the synchronization term; A02's reporting expressions multiply that term by zero. The nonlinear driver accumulates control increments. Those details must be explicit in any future scenario; they are not evidence that B04's canonical data have been recovered.
 
-No matching B04 numerical source was found in the searched loose code, inspected workspaces or selected ZIP contents. This is not proof of absence from all compressed archives or embedded Office/Simulink objects. Legacy Word extraction does not decode Equation Editor objects. Several RAR package directories were listed read-only; a complete extraction/audit of every archive was not performed.
+This initial search did not identify a matching B04 numerical source. A later bounded investigation recovered [three saved witness pairs and a matching replay kernel](b04-saved-witnesses.md), now registered as A39–A42 alongside A01. Exact T16 generating configuration and complete stage constraints remain unresolved. The initial search was not proof of absence from all compressed archives or embedded Office/Simulink objects. Legacy Word extraction does not decode Equation Editor objects, and the later report records remaining finite-coverage exclusions.
 
 ## Adaptive minimax: useful new evidence, with version limits
 
@@ -45,4 +45,4 @@ Keep separate ports for forward reachability, predecessor construction, terminal
 
 The zonotope script mixes propagation, generator reduction and visualization. Its reduction branch contains a two-dimensional construction while the active example is three-dimensional; it requires review before reuse. The ellipsoidal script encloses polytope vertices and references external functions such as ell_enclose; do not label its output an exact reachable-set implementation.
 
-Next priorities: identify a B04-matching driver/run; audit saved objective versions against publication rows; extract coherent dependency graphs from the recovered algorithms; review the local zonotope source and older Pascal assumptions. Public artifacts should continue to separate historical versions, independently verified claims and corrected scenarios.
+Next priorities: resolve the B04 saved run's exact T16 driver/U mapping and frozen discrepancy; audit other saved objective versions against publication rows; extract coherent dependency graphs from the recovered algorithms; review the local zonotope source and older Pascal assumptions. Public artifacts should continue to separate historical versions, independently verified claims and corrected scenarios.

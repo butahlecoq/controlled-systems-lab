@@ -65,7 +65,7 @@ Reported terminal optimizer: (1200.7,-22.929,450.2,-7.709); reported cost 30.899
 
 The physical meaning of negative working-stock balances must be retained from the source convention and distinguished from total tank mass.
 
-**Selected first, 2026-10-11.** The [restoration audit](b04-restoration.md) and [historical manifest](../../benchmarks/scenarios/b04-historical.json) distinguish supplied data, missing inputs and reported results. An independent exact-rational check shows that the reported terminal point violates a necessary invariant of the displayed model. The unrestricted terminal-plane objective minimum is approximately 160.880654, already above reported 30.899. Terminal-point rounding alone does not explain the gap; the actual numerical model must be recovered. No full B04 reproduction is claimed.
+**Selected first, 2026-10-11.** The [restoration audit](b04-restoration.md) and [historical manifest](../../benchmarks/scenarios/b04-historical.json) distinguish supplied data, missing inputs and reported results. An independent exact-rational check shows that the reported terminal point violates a necessary invariant of the displayed model. The unrestricted terminal-plane objective minimum is approximately 160.880654, already above reported 30.899. Terminal-point rounding alone does not explain the gap. The later [saved-witness report](b04-saved-witnesses.md) and [evidence record](evidence/b04-saved-witnesses.json) establish three matching nominal/nonlinear pairs under different x0/B, with nominal norm approximately 30.899136. The frozen norm disagrees with print, replay ends at 99.99 seconds, and canonical T16 constraints/U/generator authority remain unresolved. No full B04 reproduction is claimed.
 
 ## B05: adaptive optimal control
 
