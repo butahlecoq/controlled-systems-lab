@@ -124,9 +124,17 @@ arithmetic or portable binary compatibility. No performance claim is made.
 CORE-03's [data_tests.cpp](../../tests/unit/numeric/data_tests.cpp) and installed
 numeric client remain unchanged. They are the originating module's minimum
 acceptance tests; this separate expansion cannot establish their temporal test-first
-provenance by itself. Existing implementation records retain that evidence. New
-expansion tests can initially pass an existing correct API; no production defect
-or artificial failing implementation is implied by that initial green result.
+provenance by itself. The original CORE-03 implementation-time report records
+tests authored before implementation: an absent-header compile failure followed
+by a temporary declared scaffold that ran 8 cases with 8 failures and 61 failed
+assertions. The implemented module then passed 8 cases and 278 assertions. The
+later coarse descriptor test also had a recorded runtime failure before its
+implementation; final CORE-03 results were 10 cases and 316 assertions. These are
+attributed historical execution records, not a new TEST-01 red/green run or proof
+from commit timestamps. [CORE-03 PR #107](https://github.com/butahlecoq/controlled-systems-lab/pull/107)
+retains the public implementation and review context. New expansion tests can
+initially pass an existing correct API; no production defect or artificial failing
+implementation is implied by that initial green result.
 
 ## Verification recorded for this expansion
 
