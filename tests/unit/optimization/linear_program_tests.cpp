@@ -47,6 +47,7 @@ TEST_CASE("free fixed equality and empty dimensions preserve mathematical data")
     const auto z=accepted(evaluate_primal(accepted(make_linear_program(zero)),Vector{},tolerance,verifier));
     CHECK(z.objective == 7); CHECK(z.residuals.rows.violation == 1);
     zero.constraints={0,0,{0},{},{}}; zero.rows.clear();
+    zero.identity.program={"zero-unconstrained"};
     CHECK(accepted(evaluate_primal(accepted(make_linear_program(zero)),Vector{},tolerance,verifier)).residuals.rows.violation == 0);
     LinearProgramInput contradictory{{{"p"},{"infeasible"}},{0},0,{2,1,{0,1,2},{0,0},{1,1}},{{{},{}}},{{{},0},{1,{}}}};
     const auto c=accepted(make_linear_program(contradictory));
