@@ -65,4 +65,19 @@ python -O docs/research/tools/verify_docs.py
 
 The checker prints nine named passes for exact rational hull/clipping, support-gap, nonlinear endpoint and finite-action policy examples in the [reachability](../reachability-proof-audit.md) and [adaptive-policy](../adaptive-policy-proof-audit.md) reports. A failed comparison raises an error and returns a nonzero exit code even under optimized Python. Squared costs avoid irrational floating arithmetic. The continuum bounds, causal lower bound and tie analysis remain analytical proofs in the reports; checking finitely many literal points is not sampling-based certification.
 
-The documentation verifier also checks registered source/hash and anchor references, the ordered antecedent version/review disposition chains, report-section targets, and consistency with the nine public counterexample checks in [proof provenance](../proof-audit-provenance.json). It does not recover missing sources or re-audit the proofs. As before, it writes `docs/research/verification.json`; retain that generated snapshot only when intentionally publishing it.
+The documentation verifier also checks registered source/hash and anchor references, the ordered antecedent version/review disposition chains, report-section targets, and consistency with all 18 public literal checks in schema-2 [proof provenance](../proof-audit-provenance.json). It does not recover missing sources or re-audit the proofs. As before, it writes `docs/research/verification.json`; retain that generated snapshot only when intentionally publishing it.
+
+## Temporal-lift reference and provenance checks
+
+[check_temporal_lift.py](check_temporal_lift.py) uses Python 3 and the standard library only. It runs nine exact rational checks from the [reviewed temporal audit](../temporal-lift-source-audit.md), writes no files, and executes no archived code or optimizer:
+
+~~~text
+python -B -O docs/research/tools/check_temporal_lift.py
+python -B -O docs/research/tools/test_temporal_lift.py
+~~~
+
+The literals cover both affine LTV transitions, inverse recovery, the no-first-slew convention, changing absolute-input bounds, positive elapsed-time rate scaling, the fixed-one homogeneous slice, uncoupled recurrence error, terminal memory fibres, marginal-coverage insufficiency and four-state embedding. Analytic proofs own the continuous-history statements; finite reference checks are not full-family certification.
+
+The ten focused tests execute the optimized checker, reject an injected arithmetic error under `-O`, validate all three provenance chains, test LF/CRLF report identity, and reject content tampering, stale hashes, missing hash coverage, unsupported digest conventions, invalid code extensions and corrupted source/review/reference records. Corruptions affect deep-copied in-memory data only. The test loads the verifier's imports and validator definition through its AST so the snapshot-writing script entrypoint never runs during negative tests. Reports are never edited for a rejection test.
+
+Schema 2 retains the existing source IDs, anchors and review/fix/recheck records. It adds registered Python/Pascal line anchors, the nonblocking `clarification_requested` disposition, and a separate public-report digest map. The required `utf8-lf` convention hashes curated UTF-8 reports with CRLF/CR normalized to LF, matching committed LF blobs across platform checkouts. Original-source, navigation-extract and private antecedent/review digests remain raw byte identities. A matching public-report hash proves identity only. The provenance file and generated verification snapshot have no self-hash; updating a curated report requires refreshing its explicit digest.

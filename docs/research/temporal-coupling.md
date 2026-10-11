@@ -10,11 +10,11 @@ The derivations below justify specific extensions. They do not establish every h
 
 ## 1. What the inspected sources assume
 
-L01, PDF pages 1–4, specifies nonsingular A and compact convex polyhedral initial/control sets, with a separate admissibility condition u_t in P at each stage. Its original setup does not supply a general temporal-constraint operator or intermediate state-constraint treatment.
+L01, PDF pages 1–4, fixes A, B and P (LTI dynamics), a linear terminal objective, nonsingular A and compact convex polyhedral initial/control sets, with a separate admissibility condition u_t in P at each stage. Its original setup does not supply a general temporal-constraint operator or intermediate state-constraint treatment.
 
-L11, PDF pages 6–9, specifies affine-free linear discrete dynamics, nonsingular A_t, compact convex stagewise polyhedra X_t and U_t, and a convex terminal objective. Its forward definition enforces the next-state constraint. Its inverse-based backward construction uses A_t^{-1}. These pages do not specify a constraint coupling u_t and u_{t-1}. The phrase about adjacent controls on page 6 defines elapsed discretization time, not a slew bound.
+L11, PDF pages 6–9, specifies homogeneous linear discrete dynamics with four states and scalar input, nonsingular A_t, compact convex stagewise polyhedra X_t and U_t, and physical Euclidean distance as its terminal objective. Arbitrary finite dimensions, affine offsets and a general convex objective are authored extensions, not its literal formulation. Its forward definition enforces the next-state constraint. Its inverse-based backward construction uses A_t^{-1}. These pages do not specify a constraint coupling u_t and u_{t-1}. The phrase about adjacent controls on page 6 defines elapsed discretization time, not a slew bound.
 
-This is a focused assumptions check, not proof of absence of every temporal relation in every archive file. The source variable u also needs a physical interpretation before imposing actuator-rate limits: a command increment and an absolute actuator position are different coordinates.
+The [reviewed source audit](temporal-lift-source-audit.md) gives the owning-source hash/page/theorem crosswalk, corrected constrained recovery, saved-code limitations and ordered review disposition. This is a focused assumptions check, not proof of absence of every temporal relation in every archive file. The source variable u also needs a physical interpretation before imposing actuator-rate limits: a command increment and an absolute actuator position are different coordinates.
 
 ## 2. Linear temporal constraints preserve the joint convex problem
 
@@ -74,9 +74,9 @@ The second block of z_{t+1} is p_{t+1}=u_t, so this state constraint enforces th
 
 **Reverse equivalence.** Given an augmented feasible trajectory and increments, recover u_t=p_t+v_t=p_{t+1}. The augmented first block gives the original dynamics. The next-state constraint gives x_{t+1} in X_{t+1} and u_t in U_t. Since p_t=u_{t-1} by induction from p_0, v_t in D_t gives the original slew constraint. These maps are inverse, including all feasible histories, and preserve the objective. They therefore give a bijection of the optimal solution families.
 
-The block-triangular matrix satisfies det(widehat A_t)=det(A_t). Thus nonsingularity is preserved. The new state dimension is n+m; widehat B_t has full column rank because of its identity block. Compact convex polyhedral input and augmented state domains preserve the corresponding mathematical class. The initial previous control must be specified if the rate bound applies at t=0. If it applies only from t=1, choose a fixed bookkeeping p_0 and D_0=U_0-p_0, so the first action receives no new slew restriction.
+The block-triangular matrix satisfies det(widehat A_t)=det(A_t). Thus nonsingularity is preserved. The new state dimension is n+m; widehat B_t has full column rank because of its identity block. Compact convex polyhedral X_t, U_t and D_t give compact polyhedral augmented domains. Bounded reachable sets alone do not make an unrestricted state domain compact. Singleton initial memory and fixed-one homogeneous slices require equality/degeneracy support; input rank is not controllability. The native affine identity above needs a justified offset extension or fixed-one homogeneous augmentation before invoking either source's homogeneous formulas. Use the initial singleton S_0={(x_0,p_0)}; no U_-1 or automatic p_0 in U_0 requirement is introduced. The initial previous control must be specified if the rate bound applies at t=0. If it applies only from t=1, choose a fixed bookkeeping p_0 and D_0=U_0-p_0, so the first action receives no new slew restriction.
 
-For nonuniform sampling, distinguish a per-step increment bound from a physical rate bound: the latter scales the allowed increment by elapsed time between commands. Do not silently infer that time or a previous command from missing data.
+For nonuniform sampling, distinguish a per-step increment bound from a physical rate bound: the latter scales the allowed increment by positive, recorded elapsed time between commands. Do not silently infer that time or a previous command from missing data.
 
 The same increment-state matrix appears in [do-mpc's documented LQR reformulation](https://www.do-mpc.com/en/latest/_modules/do_mpc/controller/_lqr.html). That implementation concerns an input-rate penalty; it is an independent structural reference, not proof of hard-constraint handling or complete optimal-family recovery. The equivalence proof for hard constraints is the derivation above.
 
@@ -95,7 +95,7 @@ With a known augmented initial state and the increment formulation, the nominal 
 
 This is exact as a set identity: each feasible predecessor and independently admissible increment generates one augmented successor, and the intersection retains exactly those satisfying original state/control bounds. The augmented state contains the memory needed for the next increment constraint. Physical reachable sets are its projections; the optimal joint history relation is still needed for complete solution recovery.
 
-For terminal-only cost, the augmented terminal minimizer set may have many possible previous-control coordinates even when its physical-state projection is unique. Keep all compatible coordinates when recovering histories.
+For L11's original Euclidean-distance objective over a nonempty compact convex reachable set, the physical terminal minimizer is unique. Singleton physical terminal initialization is therefore sufficient for that criterion. After lifting, the objective ignores memory: keep every compatible terminal memory coordinate and the full transition relation when recovering histories. See the [reviewed recovery proof and examples](temporal-lift-source-audit.md#5-correct-forwardbackward-recovery-with-proof).
 
 ## 6. Algorithm and representation consequences
 
@@ -126,44 +126,11 @@ The first experiments therefore stay within the inspected original setting. Rese
 
 An inline Python fractions.Fraction calculation checked the affine LTV lifting in two stages with nonzero offsets and nonzero initial previous control, recovering the original controls and physical states exactly. An exact rational check also confirmed terminal intervals [7/4,2] versus [0,2] and squared-cost minima 49/16 versus the falsely admitted zero. These checks support the worked algebra/counterexample; they do not replace the general proof or reproduce an archival benchmark.
 
-The following standalone characterization reproduces the executed arithmetic checks; it is not a baseline solver:
+The maintained [standard-library reference checker](tools/check_temporal_lift.py) reproduces these examples with independent literal results and checks that remain active under optimized Python:
 
-~~~python
-from fractions import Fraction as Q
-import json
-
-def mm(a, v):
-    return [sum((q*x for q,x in zip(row,v)), Q(0)) for row in a]
-
-def add(*vectors):
-    return [sum(parts, Q(0)) for parts in zip(*vectors)]
-
-models = [
-    ([[Q(1),Q(1)],[Q(0),Q(2)]], [Q(1),Q(3)], [Q(1,3),Q(-1,7)]),
-    ([[Q(2),Q(0)],[Q(1),Q(1)]], [Q(-2),Q(1)], [Q(-1,2),Q(2,5)])
-]
-x = [Q(2,3),Q(-4,5)]
-p = Q(-1,4)
-steps = []
-for stage, ((a,b,offset),u) in enumerate(zip(models,[Q(1,5),Q(-1,10)])):
-    delta = u-p
-    original = add(mm(a,x),[q*u for q in b],offset)
-    ahat = [row+[q] for row,q in zip(a,b)] + [[Q(0),Q(0),Q(1)]]
-    lifted = add(mm(ahat,x+[p]),[q*delta for q in b+[Q(1)]],offset+[Q(0)])
-    assert lifted[:-1] == original and lifted[-1] == u
-    assert p+delta == u
-    steps.append({'stage':stage,'physical_state':[str(q) for q in original],
-                  'recovered_control':str(p+delta),'exact_lift_match':True})
-    x,p = original,u
-lo,hi = Q(1)-Q(1,4),Q(1)
-true_terminal = [Q(1)+lo,Q(1)+hi]
-naive_terminal = [Q(0),Q(2)]
-assert true_terminal == [Q(7,4),Q(2)]
-assert true_terminal[0]**2 == Q(49,16)
-assert abs(Q(-1)-Q(1)) > Q(1,4)
-print(json.dumps({'arithmetic':'exact rational','affine_ltv_lift_checks':steps,
-    'counterexample_true_terminal':[str(q) for q in true_terminal],
-    'counterexample_uncoupled_terminal':[str(q) for q in naive_terminal],
-    'counterexample_true_squared_cost':str(Q(49,16)),
-    'counterexample_uncoupled_false_squared_cost':'0'},indent=2))
+~~~text
+python -O docs/research/tools/check_temporal_lift.py
+python -O docs/research/tools/test_temporal_lift.py
 ~~~
+
+The two physical outputs are exactly `(2/5, -8/7)` and `(1/2, -31/70)`, with recovered controls `1/5` and `-1/10`. The [audit's check description](temporal-lift-source-audit.md#8-exact-reference-checks-and-limits) records the additional initial-memory, index, homogeneous-slice and completeness literals. These remain mathematical characterizations, not baseline solvers.
