@@ -22,3 +22,10 @@ set_target_properties(installed_registry_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_registry_client COMMAND installed_registry_client)
 set_tests_properties(installed_registry_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed registry client: retained custom-port fixture and exclusive workspaces passed")
+
+add_executable(installed_sets_client sets_client.cpp)
+target_link_libraries(installed_sets_client PRIVATE CSL::sets)
+set_target_properties(installed_sets_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_sets_client COMMAND installed_sets_client)
+set_tests_properties(installed_sets_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed sets client: retained H segment and elementary zero-dimensional cases passed")
