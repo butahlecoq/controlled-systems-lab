@@ -7,7 +7,7 @@ using namespace csl;
 using namespace csl::optimization;
 static_assert(!std::is_default_constructible_v<LinearProgram>);
 namespace {
-template<class T> T accepted(Result<T> result) {
+template<class T> T accepted(LPDataResult<T> result) {
     REQUIRE(std::holds_alternative<T>(result)); return std::get<T>(std::move(result));
 }
 LinearProgramInput triangle() {

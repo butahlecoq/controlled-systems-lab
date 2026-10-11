@@ -124,7 +124,7 @@ Diagnostics check_program_result(const ProgramResult& r,const LinearProgram& p,A
     }
     return {};
 }
-Result<DualEvaluation> evaluate_dual(const LinearProgram& p,const DualMultipliers& multipliers,NumericalPolicy policy,const Verifier& verifier) {
+LPDataResult<DualEvaluation> evaluate_dual(const LinearProgram& p,const DualMultipliers& multipliers,NumericalPolicy policy,const Verifier& verifier) {
     const ResidualContext context{p.identity(),verifier,policy.absolute_tolerance,policy.relative_tolerance};
     auto diagnostics=check_context(context,p); if(!diagnostics.empty()) return diagnostics;
     const auto m=p.rows().size(),n=p.variables().size();

@@ -42,7 +42,7 @@ struct ProgramAccess {
             input.identity,objective,input.offset,matrix,input.variables,input.rows})};
     }
 };
-Result<LinearProgram> make_linear_program(const LinearProgramInput& input) {
+LPDataResult<LinearProgram> make_linear_program(const LinearProgramInput& input) {
     if (input.identity.problem.value.empty() || input.identity.program.value.empty())
         return error("lp.identity","problem and program IDs must be nonempty");
     if (input.objective.size()!=input.constraints.cols || input.variables.size()!=input.constraints.cols ||
@@ -56,7 +56,7 @@ Result<LinearProgram> make_linear_program(const LinearProgramInput& input) {
     if (auto* d=std::get_if<Diagnostic>(&matrix)) return Diagnostics{*d};
     return ProgramAccess::create(input,std::get<numeric::VectorView>(objective),std::get<numeric::MatrixView>(matrix));
 }
-Result<PrimalEvaluation> evaluate_primal(const LinearProgram& p,std::span<const double> x,NumericalPolicy policy,const Verifier& verifier) {
+LPDataResult<PrimalEvaluation> evaluate_primal(const LinearProgram& p,std::span<const double> x,NumericalPolicy policy,const Verifier& verifier) {
     if (x.size()!=p.objective().size()) return error("lp.primal.shape","candidate dimension differs");
     if (!std::isfinite(policy.absolute_tolerance) || policy.absolute_tolerance<0 ||
         !std::isfinite(policy.relative_tolerance) || policy.relative_tolerance<0 ||
