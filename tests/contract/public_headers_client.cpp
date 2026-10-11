@@ -16,6 +16,7 @@
 #include <csl/problem/domains.hpp>
 #include <csl/problem/constraints.hpp>
 #include <csl/problem/initial_information.hpp>
+#include <csl/execution/executor.hpp>
 
 #include <iostream>
 #include <stdexcept>
