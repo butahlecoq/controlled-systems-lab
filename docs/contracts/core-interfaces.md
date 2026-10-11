@@ -1,6 +1,6 @@
-# Native interfaces, revision 1.2
+# Native interfaces, revision 1.3
 
-Date: 2026-10-11. CORE-01 / issue #11; MODEL-01 / issue #15 revision. This revision turns the [native design sketch](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md) into a compiled source contract in [contracts.hpp](../../include/csl/contracts.hpp). The [master specification](../superpowers/specs/2026-10-11-controlled-systems-master-design.md) remains the requirements authority. Integration review is required before downstream adapters depend on this revision.
+Date: 2026-10-11. CORE-01 / issue #11; MODEL-01 / issue #15 and OPT-02 / issue #18 revisions. This revision turns the [native design sketch](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md) into a compiled source contract in [contracts.hpp](../../include/csl/contracts.hpp). The [master specification](../superpowers/specs/2026-10-11-controlled-systems-master-design.md) remains the requirements authority. Integration review is required before downstream adapters depend on this revision.
 
 This delivery contains values, coarse abstract ports and small structural guards. Revision 1.1 adds scoped outcome claims, mathematical geometry operands and reference-bound geometry evidence following integration review. It does **not** implement optimization adapters, a registry, a problem validator, numerical synthesis, geometry, family construction or a scenario loader. The [isolated probes](../../probes/core-01/CMakeLists.txt) exercise selected dependencies directly. CORE-02 owns the product build; later module tickets own implementation. The [dependency decision](../architecture/decisions/0002-native-integrations.md) records pinned versions and licensing.
 
@@ -11,11 +11,19 @@ The preceding implementation exclusions describe the original CORE-01 delivery;
 subsequent modules retain their own documented scope. No operation/evidence port
 or numeric/registry interface changes in revision 1.2.
 
+Revision 1.3 makes the canonical LinearProgram an immutable validated handle,
+adds program-scoped bounds and structured numerical residuals, and gives the
+optional basis port typed snapshots/coordinates. LPWorkspace owns authoritative
+solve-attempt stamps. See [linear programs](linear-programs.md) for conventions,
+source migration, ownership, checks and limitations. Revision 1.2 observation
+maps, schedules and model semantics are unchanged. This revision implements no
+production native LP adapter or certificate verifier.
+
 ## Common rules
 
 - C++20, `double`, compatible in-process toolchains. Revision 1 is source-level compatibility, not a stable C++ binary/plugin ABI. No Eigen, HiGHS, JSON or test-library type occurs in the public header.
 - Problem, program, set, request, mathematical reference, module and representation IDs are different types. IDs are opaque strings; a future loader/artifact layer computes canonical identities. Changing run settings must not change mathematical problem identity. A `ProgramIdentity` combines a problem ID with the particular program/reformulation ID; multiple programs for one problem must not share that program ID.
-- Input aggregates are **unvalidated authored values**. Adapters must validate before numerical execution. `check_model_shape` and `check_nominal_profile` are deliberately narrow guards and do not create a `ValidatedProblem`. Passing them does not prove convexity, compactness, attainment, finite values, correct timestamps or adapter compatibility.
+- `LinearProgramInput` and other input aggregates are **unvalidated authored values**. The canonical `LinearProgram` is created only by `optimization::make_linear_program`, which validates and privately snapshots its authored input. Adapters must validate before numerical execution. `check_model_shape` and `check_nominal_profile` are deliberately narrow guards and do not create a `ValidatedProblem`. Passing them does not prove convexity, compactness, attainment, finite values, correct timestamps or adapter compatibility.
 - Construct published snapshots using `make_shared<const T>` and retain no mutable aliases. Models, set payloads, joint relations and resource policy may be shared immutably. Asynchronously retained problem data must retain its owner. `const&` arguments are borrowed only for the duration of the call.
 - In particular, `shared_ptr<const SystemModel>` still points to authored data and cannot eliminate surviving producer aliases. Use `model::snapshot` for a validated immutable executable model: it copies authored buffers into private numeric snapshots, even from rvalues. It does not validate the enclosing `Problem`.
 - Workspaces are noncopyable, are returned as `unique_ptr`, and have one owner. The owner can transfer the pointer to a worker. Neither concurrent use of the same workspace nor mutable backend-global configuration is permitted without an adapter's explicit contract. Noncopyability alone cannot prevent callers from aliasing a pointer; this remains an ownership precondition.
@@ -79,7 +87,7 @@ The three terminal forms are cᵀx+d, ½xᵀQx+qᵀx+c, and ||Lx−r||₂. Q mus
 | `SetApproximatorWorkspace` | Explicit inner/outer/heuristic relation, requested representation and size budget | Invalid equivalent-as-approximation requests are rejected; reported relation must meet the request. Budget is admission information until enforced by an adapter. Approximation of a reachable set is not automatically an approximation of its optimizer set. |
 | `LPWorkspace` / `LPBackend` | Minimize linear objective plus offset over CSR row and variable intervals, including zero-objective feasibility | Factory allocates independent native state. Sparse translation O(rows+cols+nnz); solver cost is backend/problem dependent. Primal may be absent on limit/failure. Mathematical status does not certify evidence. |
 | `ConvexWorkspace` / `ConvexBackend` | Revision 1 convex quadratic programs with full symmetric CSR Q and the same linear constraints | Independent port even when supplied by the same native library. Translation includes triangular storage conversion. General conic/SDP/nonconvex support requires a contract revision and separate capability. |
-| `BasisDiagnostics` | Optional secondary interface | Generic LP calls never require a basis. A specialized phase-I hull policy must resolve this capability before use; a generic feasibility policy is a different algorithm. |
+| `BasisDiagnostics` | Optional typed snapshot, last-pivot and basis-coordinate capabilities | Owning snapshots identify the program, actual workspace and attempt. Current checks compare the independently observed workspace stamp; generic LP calls require no basis. See [the basis contract](linear-programs.md#basis-and-pivot-data). |
 
 Set/operator metadata and evidence are declarations to be checked by registered compatible adapters; the header is not a proof system. Geometry ports return a successful set/query value, `Unsupported`, or `OperationStopped` (cancellation, limit or numerical failure, without a successful output/guarantee). A partial object cannot be returned as a successful equivalent conversion. Conversion and approximation return only set transforms; their result types cannot contain scalar/boolean query answers.
 
@@ -117,7 +125,7 @@ Evidence carries explicit applicable assumptions, support and an optional error 
 
 An `Unestablished` outcome is a reported status without supporting evidence. `NumericalCheck` can record, for example, residual checks on an infeasibility dual witness or an improving feasible ray under stated assumptions; small residuals do not certify the outcome. `SymbolicArgument` can cite a contradiction or unbounded-ray argument under explicit assumptions, but the text itself is not machine checked. `CertificateReference` stores a proposed certificate/verifier for future checking and cannot be labelled validated. Numerical infeasibility, symbolic support and an unsupported request remain distinguishable without manufacturing objective bounds. The same support alternatives apply to optimality and nonattainment, with evidence specific to the claimed outcome.
 
-`check_outcome_evidence` rejects a different problem/program identity and every validated request in this revision; it allows explicitly unestablished support. Cost is O(identity length), with no solve or evidence verification. Bounds retain their own independent evidence and native diagnostics remain available. Impossible adapter combinations, NaN bounds and results claiming proved optimality without suitable evidence must be rejected in downstream result validation. A nonzero native status must never be quietly converted to an empty feasible set.
+`check_outcome_evidence` rejects a different problem/program identity and every validated request in this revision; it allows explicitly unestablished support. Cost is O(identity length), with no solve or evidence verification. Program bounds now use `ProgramBoundEvidence` with the full `ProgramIdentity`, support and assumptions; synthesis bounds retain `ClaimEvidence` scoped to the original `ProblemId`. There is no implicit evidence conversion. Bounds retain their own independent evidence and native diagnostics remain available. Impossible adapter combinations, NaN bounds and results claiming proved optimality without suitable evidence must be rejected in downstream result validation. A nonzero native status must never be quietly converted to an empty feasible set.
 
 ## Joint family and claim-specific evidence
 

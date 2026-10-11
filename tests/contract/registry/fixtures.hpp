@@ -1,14 +1,19 @@
 #pragma once
 #include <csl/registry/registry.hpp>
+#include <csl/optimization/lp_backend.hpp>
 #include <cmath>
 #include <string>
 
 namespace registry_fixtures {
 using namespace csl;
 using namespace csl::registry;
-inline LinearProgram interval_lp(double coefficient) {
+inline LinearProgramInput interval_input(double coefficient) {
     return {{{"problem"}, {"interval"}}, {coefficient}, 2, {0,1,{0},{},{}}, {{-1,4}}, {}};
 }
+inline LinearProgram publish(LinearProgramInput input) {
+    return std::get<LinearProgram>(optimization::make_linear_program(input));
+}
+inline LinearProgram interval_lp(double coefficient) { return publish(interval_input(coefficient)); }
 inline ExecutionContext context() {
     return {std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}), {}, {}, {1e-8,1e-8}, "registry-test"};
 }
@@ -16,44 +21,41 @@ inline ExecutionContext context() {
 class EndpointWorkspace final : public LPWorkspace {
     std::size_t calls_{};
 public:
-    ProgramOutcome solve(const LinearProgram& p, const ExecutionContext&) override {
+    ProgramOutcome do_solve(const LinearProgram& p, const ExecutionContext&) override {
         ++calls_;
-        const double lower = *p.variables[0].lower, upper = *p.variables[0].upper;
-        const double lower_value = std::fma(p.objective[0],lower,p.offset);
-        const double upper_value = std::fma(p.objective[0],upper,p.offset);
+        const double lower = *p.variables()[0].lower, upper = *p.variables()[0].upper;
+        const double lower_value = std::fma(p.objective()[0],lower,p.offset());
+        const double upper_value = std::fma(p.objective()[0],upper,p.offset());
         const double x = lower_value <= upper_value ? lower : upper;
         const double value = lower_value <= upper_value ? lower_value : upper_value;
-        const ClaimEvidence evidence{p.identity.problem, Unestablished{}};
-        return ProgramResult{Termination::completed, {p.identity, MathematicalOutcome::optimal,
+        const ProgramBoundEvidence evidence{p.identity(), SymbolicArgument{"finite interval endpoint oracle", "affine objective on a finite interval"}, {}};
+        return ProgramResult{Termination::completed, {p.identity(), MathematicalOutcome::optimal,
             SymbolicArgument{"endpoint enumeration", "affine objective on finite interval"}, {}},
-            Vector{x}, {ObjectiveBound{value,evidence}, ObjectiveBound{value,evidence}}, std::to_string(calls_)};
+            Vector{x}, {ProgramObjectiveBound{value,evidence}, ProgramObjectiveBound{value,evidence}}, std::to_string(calls_)};
     }
 };
 class SignWorkspace final : public LPWorkspace {
     std::size_t calls_{};
 public:
-    ProgramOutcome solve(const LinearProgram& p, const ExecutionContext&) override {
+    ProgramOutcome do_solve(const LinearProgram& p, const ExecutionContext&) override {
         ++calls_;
-        const double x = p.objective[0] < 0 ? *p.variables[0].upper : *p.variables[0].lower;
-        const double value = std::fma(p.objective[0],x,p.offset);
-        const ClaimEvidence evidence{p.identity.problem, Unestablished{}};
-        return ProgramResult{Termination::completed, {p.identity, MathematicalOutcome::optimal,
+        const double x = p.objective()[0] < 0 ? *p.variables()[0].upper : *p.variables()[0].lower;
+        const double value = std::fma(p.objective()[0],x,p.offset());
+        const ProgramBoundEvidence evidence{p.identity(), SymbolicArgument{"finite interval endpoint oracle", "affine objective on a finite interval"}, {}};
+        return ProgramResult{Termination::completed, {p.identity(), MathematicalOutcome::optimal,
             SymbolicArgument{"coefficient sign", "affine objective on finite interval"}, {}},
-            Vector{x}, {ObjectiveBound{value,evidence}, ObjectiveBound{value,evidence}}, std::to_string(calls_)};
+            Vector{x}, {ProgramObjectiveBound{value,evidence}, ProgramObjectiveBound{value,evidence}}, std::to_string(calls_)};
     }
 };
 inline Capability interval_capability(const LinearProgram& p, const Requirements&) {
-    if (p.objective.size()!=1 || p.variables.size()!=1 || p.constraints.rows!=0 ||
-        p.constraints.cols!=1 || p.constraints.row_offsets!=std::vector<std::size_t>{0} ||
-        !p.constraints.values.empty() || !p.constraints.column_indices.empty() || !p.rows.empty() ||
-        !p.variables[0].lower || !p.variables[0].upper ||
-        !std::isfinite(*p.variables[0].lower) || !std::isfinite(*p.variables[0].upper) ||
-        *p.variables[0].lower>*p.variables[0].upper || !std::isfinite(p.objective[0]) || !std::isfinite(p.offset))
+    // The canonical program already guarantees consistent finite CSR/bounds.
+    if (p.objective().size()!=1 || p.constraints().rows()!=0 ||
+        !p.variables()[0].lower || !p.variables()[0].upper)
         return Diagnostics{{DiagnosticCode::unsupported,"lp.domain","requires one variable, finite interval and no rows"}};
-    const double coefficient = p.objective[0];
-    const double lower = *p.variables[0].lower, upper = *p.variables[0].upper;
-    const double lower_value = std::fma(coefficient,lower,p.offset);
-    const double upper_value = std::fma(coefficient,upper,p.offset);
+    const double coefficient = p.objective()[0];
+    const double lower = *p.variables()[0].lower, upper = *p.variables()[0].upper;
+    const double lower_value = std::fma(coefficient,lower,p.offset());
+    const double upper_value = std::fma(coefficient,upper,p.offset());
     if (!std::isfinite(coefficient*lower) || !std::isfinite(coefficient*upper) ||
         !std::isfinite(lower_value) || !std::isfinite(upper_value))
         return Diagnostics{{DiagnosticCode::unsupported,"lp.arithmetic","fixture requires finite endpoint products and objective values"}};
@@ -84,7 +86,7 @@ public:
     SynthesisOutcome solve(const Problem& problem, const ExecutionContext& context) override {
         const auto answer = std::get<ProgramResult>(lp_->run(context));
         return SynthesisResult{Termination::completed,{problem.id,MathematicalOutcome::undetermined,Unestablished{},{}},
-            answer.objective,{},{{problem.id,{}, {*answer.primal},answer.objective.upper->value}}, {}};
+            {},{},{{problem.id,{}, {*answer.primal},answer.objective.upper->value}}, {}};
     }
 };
 inline StrategyRegistration forward_registration(const Registry<LPPort>& lp, std::string id = "forward") {
@@ -113,7 +115,7 @@ inline StrategyRegistration forward_registration(const Registry<LPPort>& lp, std
 class ConvexFixture final : public ConvexWorkspace {
 public: ProgramOutcome solve(const ConvexProgram& r,const ExecutionContext&) override {
     const auto& p = std::get<QuadraticProgram>(r).linear;
-    return ProgramResult{Termination::resource_limit,{p.identity,MathematicalOutcome::undetermined,Unestablished{},{}}, {},{},p.identity.program.value};
+    return ProgramResult{Termination::resource_limit,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}}, {},{},p.identity().program.value};
 }};
 class GeometryFixture final : public SetOperatorWorkspace {
 public: OperationOutcome apply(const OperationRequest& r,const ExecutionContext&) override {
@@ -138,7 +140,10 @@ public: SynthesisOutcome solve(const Problem& p,const ExecutionContext&) overrid
         {{p.id,{stage.offset},{},std::get<LinearTerminal>(p.objective).offset}}, {}};
 }};
 class BasisFixture final : public BasisDiagnostics {
-public: std::string describe_basis() const override { return "fixture basis: column 0"; }
+public:
+    BasisCapabilities capabilities() const override { return {false,false,false}; }
+    BasisSnapshotResult snapshot() const override { return BasisUnavailable{BasisUnavailableReason::unsupported,"text fixture only"}; }
+    std::string describe_basis() const override { return "fixture basis: column 0"; }
 };
 
 struct AllPorts {

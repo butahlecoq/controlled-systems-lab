@@ -2,15 +2,18 @@
 
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
+#include <span>
 #include <memory>
 #include <optional>
 #include <stop_token>
 #include <string>
 #include <variant>
+#include <utility>
 #include <vector>
 
 namespace csl {
-// Revision 1.2. This is a source contract, not a stable binary ABI.
+// Revision 1.3. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
 struct ProgramIdentity { ProblemId problem; ProgramId program; bool operator==(const ProgramIdentity&) const = default; };
@@ -142,11 +145,29 @@ struct ContainmentResult { ContainmentDecision decision; std::optional<Vector> c
 struct ConversionRequest { GeometryRequestIdentity identity; SetHandle input; RepresentationId output; Assurance assurance; };
 struct ApproximationRequest { GeometryRequestIdentity identity; SetHandle input; RepresentationId output; SetRelation direction; std::size_t size_budget; Assurance assurance; };
 
-struct LinearProgram {
+struct LinearProgramInput {
     ProgramIdentity identity;
     Vector objective; double offset;
     SparseMatrix constraints;
     std::vector<Interval> variables, rows;
+};
+namespace numeric { class MatrixView; class VectorView; }
+namespace optimization { struct ProgramAccess; }
+class LinearProgram {
+public:
+    LinearProgram(const LinearProgram&) noexcept = default;
+    LinearProgram& operator=(const LinearProgram&) noexcept = default;
+    const ProgramIdentity& identity() const noexcept;
+    const numeric::VectorView& objective() const noexcept;
+    double offset() const noexcept;
+    const numeric::MatrixView& constraints() const noexcept;
+    std::span<const Interval> variables() const noexcept;
+    std::span<const Interval> rows() const noexcept;
+private:
+    struct Storage;
+    std::shared_ptr<const Storage> storage_;
+    explicit LinearProgram(std::shared_ptr<const Storage> storage) : storage_(std::move(storage)) {}
+    friend struct optimization::ProgramAccess;
 };
 struct QuadraticProgram { LinearProgram linear; SparseMatrix hessian; }; // full symmetric Q
 using ConvexProgram = std::variant<QuadraticProgram>; // conic forms require a revision
@@ -162,14 +183,26 @@ using ProgramOutcomeClaim = OutcomeClaim<ProgramIdentity>;
 using SynthesisOutcomeClaim = OutcomeClaim<ProblemId>;
 struct ObjectiveBound { double value; ClaimEvidence evidence; };
 struct ObjectiveEvidence { std::optional<ObjectiveBound> lower, upper; };
+struct ProgramBoundEvidence { ProgramIdentity subject; EvidenceSupport support; std::vector<std::string> assumptions; };
+struct ProgramObjectiveBound { double value; ProgramBoundEvidence evidence; };
+struct ProgramObjectiveEvidence { std::optional<ProgramObjectiveBound> lower, upper; };
+struct Verifier { ModuleId id; std::string version; };
+struct ResidualMeasure { double violation, scale; };
+// All checks use binary64 and violation <= absolute + relative * scale.
+struct ResidualContext { ProgramIdentity subject; Verifier verifier; double absolute_tolerance, relative_tolerance; };
+struct PrimalResiduals { ResidualContext context; ResidualMeasure rows, variables; };
+struct DualResiduals { ResidualContext context; std::optional<ResidualMeasure> stationarity, signs, complementarity; };
+struct ProgramResiduals { std::optional<PrimalResiduals> primal; std::optional<DualResiduals> dual; };
+
 enum class StopReason { cancelled, resource_limit, numerical_failure };
 struct OperationStopped { StopReason reason; std::string diagnostics; }; // no successful set/guarantee
 struct ProgramResult {
     Termination termination;
     ProgramOutcomeClaim outcome;
     std::optional<Vector> primal;
-    ObjectiveEvidence objective;
+    ProgramObjectiveEvidence objective;
     std::string raw_diagnostics;
+    ProgramResiduals residuals{};
 };
 struct Unsupported { Diagnostics diagnostics; };
 using ProgramOutcome = std::variant<ProgramResult, Unsupported>;
@@ -196,8 +229,41 @@ public:
     virtual ~ExclusiveWorkspace() = default;
 };
 struct BackendCapabilities { ModuleId id; std::string version; bool linear, convex_quadratic, basis_diagnostics; };
+class WorkspaceIdentity {
+    struct Token {};
+    std::shared_ptr<const Token> token_;
+    WorkspaceIdentity() : token_(std::make_shared<const Token>()) {}
+    friend class LPWorkspace;
+public:
+    bool operator==(const WorkspaceIdentity&) const = default;
+};
+class SolveStamp {
+    LinearProgram program_;
+    WorkspaceIdentity workspace_;
+    std::uint64_t attempt_;
+    SolveStamp(const LinearProgram& p, const WorkspaceIdentity& w, std::uint64_t a) noexcept
+        : program_(p), workspace_(w), attempt_(a) {}
+    friend class LPWorkspace;
+public:
+    const LinearProgram& program() const noexcept { return program_; }
+    const WorkspaceIdentity& workspace() const noexcept { return workspace_; }
+    std::uint64_t attempt() const noexcept { return attempt_; }
+    bool operator==(const SolveStamp& other) const noexcept {
+        return workspace_ == other.workspace_ && attempt_ == other.attempt_;
+    }
+};
+enum class SolveAttemptState { running, returned_result, unsupported, exception };
+struct SolveAttempt { SolveStamp stamp; SolveAttemptState state; };
 class LPWorkspace : public ExclusiveWorkspace {
-public: virtual ProgramOutcome solve(const LinearProgram&, const ExecutionContext&) = 0;
+    WorkspaceIdentity identity_;
+    std::uint64_t sequence_{};
+    std::optional<SolveAttempt> attempt_;
+public:
+    ProgramOutcome solve(const LinearProgram&, const ExecutionContext&);
+    const WorkspaceIdentity& workspace_identity() const noexcept { return identity_; }
+    const std::optional<SolveAttempt>& last_attempt() const noexcept { return attempt_; }
+protected:
+    virtual ProgramOutcome do_solve(const LinearProgram&, const ExecutionContext&) = 0;
 };
 class LPBackend {
 public:
@@ -215,7 +281,35 @@ public:
     virtual std::unique_ptr<ConvexWorkspace> make_workspace() const = 0;
 };
 // Basis is an optional separate port, never a requirement of LPWorkspace.
-class BasisDiagnostics { public: virtual ~BasisDiagnostics() = default; virtual std::string describe_basis() const = 0; };
+struct StructuralColumn { std::size_t index; bool operator==(const StructuralColumn&) const = default; };
+struct RowActivityColumn { std::size_t index; bool operator==(const RowActivityColumn&) const = default; };
+struct AuxiliaryColumn { std::size_t id; Vector coefficients; bool operator==(const AuxiliaryColumn&) const = default; };
+using BasisColumn = std::variant<StructuralColumn, RowActivityColumn, AuxiliaryColumn>;
+struct BasisReference { SolveStamp solve; std::uint64_t iteration; bool operator==(const BasisReference&) const = default; };
+struct PivotRecord {
+    BasisReference before, after;
+    std::vector<BasisColumn> before_basis;
+    BasisColumn entering, leaving;
+    std::size_t position;
+    double coefficient; // signed (B_before^-1 * entering)[position]
+};
+struct BasisSnapshot { BasisReference reference; std::vector<BasisColumn> columns; std::optional<PivotRecord> last_pivot; };
+struct BasisCoordinates { BasisReference reference; Vector values; };
+enum class BasisUnavailableReason { unsupported, not_solved, unavailable_result, stale_reference };
+struct BasisUnavailable { BasisUnavailableReason reason; std::string explanation; };
+struct BasisCapabilities { bool snapshot, pivots, coordinates; };
+using BasisSnapshotResult = std::variant<BasisSnapshot, BasisUnavailable>;
+using BasisCoordinatesResult = std::variant<BasisCoordinates, BasisUnavailable, Diagnostics>;
+class BasisDiagnostics {
+public:
+    virtual ~BasisDiagnostics() = default;
+    virtual BasisCapabilities capabilities() const = 0;
+    virtual BasisSnapshotResult snapshot() const = 0;
+    virtual BasisCoordinatesResult coordinates(const BasisReference&, std::span<const double>) const {
+        return BasisUnavailable{BasisUnavailableReason::unsupported, "basis coordinates unavailable"};
+    }
+    virtual std::string describe_basis() const { return {}; }
+};
 class SetOperatorWorkspace : public ExclusiveWorkspace {
 public: virtual OperationOutcome apply(const OperationRequest&, const ExecutionContext&) = 0;
 };
