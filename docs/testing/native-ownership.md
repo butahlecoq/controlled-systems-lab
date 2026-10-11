@@ -45,8 +45,11 @@ A promise gate prevents them from obtaining descriptors or reading values until
 all producer arrays and main-thread view handles have left scope. Before scope
 exit, producers overwrite/reallocate their arrays and clear CSR structure arrays.
 Workers then compute `[68,161]` from retained dense or CSR storage. Every future
-is joined through `get()` or its destructor; an RAII gate releases workers during
-exception unwinding before the futures join. No sleeps or elapsed-time limits
+is joined through `get()` or its destructor. All four future slots are allocated
+before constructing the gate or launching any worker, so a capacity allocation
+failure cannot destroy a temporary future whose worker is waiting on that gate.
+After launch, an RAII gate releases existing workers during setup exception
+unwinding before the stored futures join. No sleeps or elapsed-time limits
 control execution. Each output is owning: mutating one result to `[-500,161]`
 leaves the other three `[68,161]` results intact.
 

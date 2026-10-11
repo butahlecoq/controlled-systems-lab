@@ -140,6 +140,8 @@ TEST_CASE("CSR retained borrows preserve empty rows and explicit zero after move
 // All producer arrays and main-thread handles die before workers obtain their borrows.
 TEST_CASE("gated joined workers retain dense and CSR views after source owners die") {
     std::vector<std::future<Vector>> workers;
+    // Allocate before launch: a throwing push_back must not destroy a gated async temporary.
+    workers.reserve(4);
     WorkerGate gate;
     {
         Vector producer{1, 99, 2, 4, 3, 5, 99, 6};
