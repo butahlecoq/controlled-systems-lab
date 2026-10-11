@@ -1,6 +1,6 @@
 # Controlled Systems Lab: consolidated requirements and architecture specification
 
-Date: 2026-10-11. Version: 0.6. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
+Date: 2026-10-12. Version: 0.7. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
 
 ## Product intent
 
@@ -112,6 +112,7 @@ The catalog includes H/V polyhedra, boxes/parallelotopes, zonotopes, constrained
 | EXP-02 | C | Published experiments and figures/tables anchor baselines | Keep reported values separate from independently reproduced results and source variants |
 | EXP-03 | C | B04 first archival target; unresolved inputs remain explicit | Historical non-executable manifest cannot be silently promoted by guessed bounds or fitted matrices |
 | EXP-04 | C/P | Reproducible versioned artifacts | Scenario hashes, seeds, selection settings, module versions, resources and raw comparison data recorded |
+| EXP-09 | C | Publish inspectable HTML algorithm results as soon as execution is available | [Published-result policy](../../architecture/published-algorithm-results.md) and HTML-01 #123: versioned numerical/figure/performance report, raw repetitions and environment, accessible immutable URL linked from PR/issue; no invented timings or completeness claims |
 | REV-01 | C | English documentation and public scientific review | Trace assumptions/results to source IDs and review issues; preserve original hashes and avoid publishing unapproved raw archive content |
 | REV-02 | C | Separate module-test expansion tickets | Every implementation ships minimum acceptance tests; separate tickets add independently designed unit/contract suites for module seams and mathematical edge cases |
 | REV-03 | C | Separate rigorous code-review tickets | Review fixed implemented commits for standards, specification, mathematical assumptions, modular replacement, ownership and measured scalability; blocking findings need fixes and independent recheck |
@@ -181,6 +182,7 @@ Module unit tests are a required deliverable. Use mathematical answers, invarian
 | T-I02 | Unit/contract | Malformed dimensions, invalid stage counts, unknown fields and unsupported schema/capabilities produce actionable distinct diagnostics | INP-04/05, ALG-05 |
 | T-I03 | Artifact integration | Strategy change preserves scenario identity; omitted documented defaults resolve reproducibly and are saved; changing problem data changes identity | INP-03/05, EXP-04 |
 | T-B04 | Archival regression | Current historical manifest gives restoration diagnostics; later canonical reproduction compares sourced inputs, trajectories and original cost with explicit tolerances | EXP-02/03 |
+| T-HTML01 | Artifact integration + publication | Real analytic algorithm results and raw timings match standalone HTML; regeneration preserves numerical/status/evidence fields; rendered report and actual deployed URL are inspected | EXP-04/09 |
 
 At the first-slice boundary, every implemented capability has applicable unit/contract tests, T-S01/02/03 and T-V01/02 establish end-to-end semantics, T-X01 verifies the mandatory two-strategy comparison, T-I01/02/03 cover the primary scenario-file workflow, and integration/resource tests cover advertised execution behavior. Tests for later representations or certificate verifiers are added when those capabilities are implemented. Unsupported capabilities are tested as diagnostics now.
 
@@ -231,3 +233,5 @@ Subagents may propose contract changes but cannot silently alter accepted requir
 - Restore B04 canonical inputs separately; the provisional control interval stays labelled provisional until sourced or explicitly adopted as a new scenario.
 
 Changes to these open proposals do not reopen the confirmed C++ choice or silently change archival data. Stable requirement IDs and a dated change record should keep subsequent tickets/reviews traceable.
+
+- Version 0.7: owner requires published HTML numerical and performance artifacts whenever an algorithm produces results; EXP-09 and T-HTML01 add inspectable reports and public links, beginning with the reference LP adapter. All original backlog/scientific criteria remain unchanged.

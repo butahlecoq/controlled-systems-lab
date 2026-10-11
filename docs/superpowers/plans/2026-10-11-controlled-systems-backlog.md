@@ -8,7 +8,7 @@
 
 **Tech Stack:** C++20 and CMake proposed; matrix, LP, convex, test and parser dependencies are selected in CORE-01; VIZ-03 selects its scientific export adapter. Python is permitted for independent references and an external plotting adapter, not as the product algorithm core.
 
-**Spec:** [Master specification v0.6](../specs/2026-10-11-controlled-systems-master-design.md), [native contract sketch](../specs/2026-10-11-cpp-core-contracts-design.md), [scenario sketch](../specs/2026-10-11-scenario-files-design.md).
+**Spec:** [Master specification v0.7](../specs/2026-10-11-controlled-systems-master-design.md), [native contract sketch](../specs/2026-10-11-cpp-core-contracts-design.md), [scenario sketch](../specs/2026-10-11-scenario-files-design.md).
 
 ## Global Constraints
 
@@ -286,3 +286,7 @@ These paths are planning proposals, not existing APIs. CORE-01/02 settle names. 
 - [x] Check documentation links, archive hashes and Git whitespace before publication completion.
 
 No product code or product unit tests are delivered by this planning change. Implementation begins with CORE-01 after the published backlog is reviewed.
+
+## Additional owner-requested deliverables
+
+The original 94-ticket backlog retains its scope and dependencies. [HTML-01 #123](tickets/HTML-01.md) adds the owner-requested published HTML result/performance pipeline and first real reference-LP report. It depends on OPT-03 for that first run; later observability and figure-export modules extend it without delaying the initial report.
