@@ -1,6 +1,6 @@
 # Controlled Systems Lab: consolidated requirements and architecture specification
 
-Date: 2026-10-11. Version: 0.2. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
+Date: 2026-10-11. Version: 0.3. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
 
 ## Product intent
 
@@ -19,6 +19,7 @@ All newly authored artifacts are in English. Owner discussion is in Russian. The
 | Primary output | Owner selected all optimal solutions | Preserve a joint relation, not only one trajectory or stage marginals |
 | First family query | Owner selected different complete witnesses | Visual, numerical and runtime comparison of approaches |
 | First method comparison | Owner selected the two optimization approaches; reachable-set approximations later | Reachability/backward-recovery strategy versus direct joint-trajectory optimization |
+| Initial comparison presentation | Owner selected final results and trajectories as sufficient | Intermediate reachable sets, optimization-program dumps and step-by-step inspection are later features |
 | Objective modules | Recorded owner agreement | Linear, convex quadratic, weighted Euclidean residual terminal criteria first |
 | Temporal constraints | Owner requested representability, exclusion from first experiments | Future supported lifts/strategies; no default added couplings |
 | Verification | Recorded owner agreement | Numerical first; future claim-specific validated certificates |
@@ -99,6 +100,7 @@ The catalog includes H/V polyhedra, boxes/parallelotopes, zonotopes, constrained
 | RUN-03 | C/P | Shared resource policy, cancellation and partial evidence | Outer/backend threads share budget; cancellation reports incumbent/bounds where available; enforcement limitations recorded |
 | RUN-04 | C | Scalability claims must be measured for declared outputs | Record dimensions, representation size, memory, backend versions and output scope; changing language alone does not claim removal of exponential complexity |
 | EXP-01 | C | Compare methods visually, numerically and by time | Common scenario/objective/query/tolerance; controls/states, residuals, family evidence and separated setup/solve/query/verification timing |
+| EXP-06 | C | First comparison presents final results, controls and trajectories | Include objective/residual/family evidence and summary time/memory; intermediate-computation inspection/export is not required |
 | EXP-05 | C | First compare reachability/backward recovery with direct joint-trajectory optimization | Both strategies run the shared analytic acceptance cases with the same optimum and consistent complete-family semantics; approximation comparison is later |
 | EXP-02 | C | Published experiments and figures/tables anchor baselines | Keep reported values separate from independently reproduced results and source variants |
 | EXP-03 | C | B04 first archival target; unresolved inputs remain explicit | Historical non-executable manifest cannot be silently promoted by guessed bounds or fitted matrices |
@@ -110,6 +112,8 @@ The catalog includes H/V polyhedra, boxes/parallelotopes, zonotopes, constrained
 Use composition across model, problem, sets/geometry, optimization, reachability, synthesis, witnesses/verification, execution and experiment artifacts. Fuel physics and independent nonlinear plants are domain adapters. Plots/CLI/optional UI consume artifacts without duplicating algorithms.
 
 Problem data and immutable set payloads can be shared. Workspaces, caches with mutable state and warm starts belong to a solve/worker and cannot be concurrently borrowed without an explicit synchronization contract. Buffer views declare scalar/storage/stride/lifetime. Initially proposed double arithmetic is not validated arithmetic. Registry IDs remain extensible; closed small objective alternatives may use std::variant.
+
+The first comparison presents final optimal-family results, selected controls/trajectories, independent verification and summary timing/memory. Intermediate reachable-set inspection, generated-program dumps and step-by-step trace viewers are deferred. Required capability/failure explanations and evidence remain in the final result. Summary performance accounting does not require retaining every intermediate set or solver iteration.
 
 Public ports return common statuses and evidence while retaining raw backend diagnostics. Backend library containers stay behind adapters. Expected capability/math/numerical failures are represented in results; allocation/programming error policy will be settled in the implementation plan. A future C ABI is distinct from selecting registered native modules at runtime.
 
@@ -139,7 +143,7 @@ Module unit tests are a required deliverable. Use mathematical answers, invarian
 | T-R01 | Integration | Parallel independent runs use separate workspaces; compare mathematical results with sequential runs under explicit tolerance | RUN-02/03 |
 | T-R02 | Integration | Cancel at a supported boundary and exhaust a documented resource limit; preserve actual partial evidence without changing outcome claims | RUN-03, EVD-02 |
 | T-X01 | Integration + mathematical | Run both selected synthesis strategies on T-S01/02/03; check known optimal relations, objective and independently verified witnesses. Witness coordinates may differ. Backend/representation replacement has additional contract cases when implemented | ALG-01/03/07, SOL-01/02, EXP-01/05 |
-| T-X02 | Artifact integration | Round-trip supported versioned scenario/result metadata; collect setup/family/query/check times and selector/resource provenance | EXP-01/04 |
+| T-X02 | Artifact integration | Round-trip supported final scenario/result metadata; collect setup/family/query/check times and selector/resource provenance without requiring intermediate-set/program dumps | EXP-01/04/06 |
 | T-B04 | Archival regression | Current historical manifest gives restoration diagnostics; later canonical reproduction compares sourced inputs, trajectories and original cost with explicit tolerances | EXP-02/03 |
 
 At the first-slice boundary, every implemented capability has applicable unit/contract tests, T-S01/02/03 and T-V01/02 establish end-to-end semantics, T-X01 verifies the mandatory two-strategy comparison, and integration/resource tests cover advertised execution behavior. Tests for later representations or certificate verifiers are added when those capabilities are implemented. Unsupported capabilities are tested as diagnostics now.
@@ -176,6 +180,8 @@ Subagents may propose contract changes but cannot silently alter accepted requir
 
 - Version 0.1: consolidated conversation decisions, native design references, requirement/test IDs and subagent delivery boundaries.
 - Version 0.2: owner selected the initial two-optimization-strategy comparison and deferred reachable-set approximations; EXP-05 and T-X01 record its acceptance obligations.
+
+- Version 0.3: owner selected final results and trajectories as sufficient for the initial comparison; EXP-06 defers intermediate-computation inspection while preserving final evidence and performance summaries.
 
 ## Open decisions for the next review
 

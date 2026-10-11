@@ -160,6 +160,8 @@ A valid first implementation may combine one selected terminal optimizer with a 
 
 ## Witness queries, comparison and concurrency
 
+Owner decision: the first comparison needs final results and trajectories. Required output includes the family/evidence, selected controls/states, objective/residuals and summary time/memory. Intermediate reachable-set inspection, program dumps and detailed trace viewers are later features. Capability/failure explanations and numerical verification are still part of the final result.
+
 WitnessSelector asks the family for a requested number of different complete solutions using declared selection directions and, optionally, a recorded seed. Secondary optimization is an internal selection mechanism, not an additional first-release user-facing family query. Distinctness has a stated tolerance in control/trajectory coordinates. Failing to find another witness is not a singleton proof; return requested/returned/distinct counts and search diagnostics.
 
 TrajectoryVerifier independently evaluates initial conditions, all dynamics, constraints and the original terminal criterion from problem data. It reports absolute/relative tolerances and residuals. It does not reuse the family builder's feasibility flag as its own check. Witness checks cannot establish completeness; numeric objective checks do not prove global optimality without suitable independent bound evidence.
