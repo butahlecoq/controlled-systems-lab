@@ -58,3 +58,19 @@ Before implementing R01/R02/R24, audit each relevant theorem, supported set/poli
 R27: [MATLAB state-space models](https://www.mathworks.com/help/control/ug/state-space-models.html) and [ControlSystems.jl system construction](https://juliacontrol.github.io/ControlSystems.jl/stable/man/creating_systems/), checked 2026-10-11. Official notation and input/output construction reference; no new scientific advance claimed.
 
 R28: [Clarabel official documentation](https://clarabel.org/stable/), checked 2026-10-11. Native Rust/Julia implementations and language-interface information; backend candidate, not an adopted dependency.
+
+## Set representations and ellipsoidal follow-up
+
+Follow-up assessed 2026-10-11. See [architecture implications and reading limits](../architecture/set-representations-and-ellipsoidal-toolbox.md). These sources are separate from the unchanged local inventory L01–L31.
+
+| ID | Primary source | Date / reading depth |
+|---|---|---|
+| R29 | [Shorikov and Kalev, reachable-set computation using zonotopes](https://ceur-ws.org/Vol-1825/p13.pdf); [publisher record](https://ceur-ws.org/Vol-1825/) | Conference 2016; proceedings 10 April 2017, pp. 103–110; extracted paper/model/algorithm read, proof audit pending |
+| R30 | [Ellipsoidal Toolbox repository](https://github.com/SystemAnalysisDpt-CMC-MSU/ellipsoids); [calculus manual](https://systemanalysisdpt-cmc-msu.github.io/ellipsoids/doc/chap_ellcalc.html); [reachability manual](https://systemanalysisdpt-cmc-msu.github.io/ellipsoids/doc/chap_reach.html) | Foundational software; documentation inspected, no executable verification |
+| R31 | [Liu, Manzie and Dower, HJB ellipsoidal approximations](https://arxiv.org/abs/2401.06352) | Submitted 2024, revised 2025; abstract/metadata, linked journal DOI 10.1109/TAC.2024.3512619 |
+| R32 | [Kousik, Dai and Gao, ellipsotopes](https://arxiv.org/abs/2108.01750) | First submitted August 2021 outside strict window; revisions October 2021/2022; abstract/history |
+| R33 | [Bird et al., hybrid zonotopes](https://arxiv.org/abs/2106.14831) | First submitted June 2021 outside strict window; revisions 2022/2023; abstract/history |
+| R34 | [Siefert et al., hybrid-zonotope functional decomposition](https://arxiv.org/abs/2304.06827) | Submitted April 2023; abstract/metadata |
+| R35 | [Kochdumper and Althoff, constrained polynomial zonotopes](https://link.springer.com/article/10.1007/s00236-023-00437-5) | Published May 2023; abstract, introduction and definition overview; full proof audit pending |
+| R36 | [Kochdumper and Althoff, sparse polynomial zonotopes](https://arxiv.org/abs/1901.01780) | Submitted 2019/revised 2020, before window; abstract/metadata |
+| R37 | [Ellipsoidal Toolbox Python port, publisher release record](https://pypi.org/project/ellipsoidal-toolbox/) | Release 1.0.0, March 2026; project description/release metadata only; untested |

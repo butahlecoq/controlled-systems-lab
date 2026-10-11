@@ -123,11 +123,11 @@ Confirmed: optimal control planning without process disturbances. Proposed simpl
 
 The first solver can operate on nominal dynamics while the contracts retain external-input and observation channels. More complex problems should be rejected by this solver with supported-assumption metadata until compatible algorithms exist.
 
-Still open: first exact baseline, continuous versus finite controls for that baseline, criterion/guarantee details, and whether the interface returns one optimal plan or a representation of all optimal plans.
+Confirmed output: a representation of all optimal plans and consistent trajectories, with individual witness selection. Initially expose optimal families only. Still open: first exact baseline, continuous versus finite controls for that baseline and criterion/guarantee details.
 
 ## 7. C++ target and Python reference workflow
 
-Working proposal: use C++ as the main implementation target, with small Python references for mathematics and experiments. This is an ecosystem/integration judgement, not a measured language-speed ranking.
+Working proposal: use C++20 as the main implementation target, with small Python references for mathematics and experiments. This is an ecosystem/integration judgement, not a measured language-speed ranking.
 
 HiGHS supplies a C++ optimization library; cddlib supplies C polyhedral routines that can be wrapped behind a backend boundary. [HiGHS](https://highs.dev/), [cddlib](https://github.com/cddlib/cddlib). Numerical backends and their release/license constraints still require selection.
 
@@ -135,4 +135,4 @@ Rust remains a viable compiled alternative; Clarabel has a native Rust solver wi
 
 Before migrating any reference algorithm, stabilize its mathematical inputs/outputs and compare shared scenarios, trajectories, objectives, constraints and result evidence. Retain independent references after migration. Shared versioned scenario data avoids binding the mathematics to Python's object layout.
 
-Do not start by transcribing every Python implementation detail into C++ classes. Keep model data, sets, problems, solver workspaces and numerical adapters separate. C++ inheritance/template strategy, scalar/matrix types, ownership and build system will be designed when the mathematical contract is agreed.
+Do not start by transcribing every Python implementation detail into C++ classes. Keep model data, sets, problems, solver workspaces and numerical adapters separate. The [modular algorithm design](modular-algorithms-and-solution-sets.md) now proposes C++20/CMake, coarse runtime algorithm ports, templates inside kernels, immutable shared data and per-worker workspaces. These architecture decisions precede numerical benchmark validation.

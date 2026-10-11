@@ -79,3 +79,7 @@ ARCH-COMP25 provides common linear/hybrid verification examples and discusses CO
 | P3 | GPU, mixed uncertainty and nonlinear lifting | Workload evidence and proof audit appropriate to each claim |
 
 This preserves the research lineage while making advances assessable. The open-source interface should expose assumptions and results clearly enough for scientific reviewers to challenge any individual claim.
+
+## Set representation and architecture follow-up
+
+The [focused representation review](../architecture/set-representations-and-ellipsoidal-toolbox.md) adds ellipsoidal software/methods, ellipsotopes, hybrid and polynomial zonotope variants, with source dates and reading depth. The [modular algorithm design](../architecture/modular-algorithms-and-solution-sets.md) separates native representations, exact conversions, inner/outer approximations, numerical backends and synthesis strategies. The first output is an optimal solution family; complete-family scope must be preserved when evaluating alternative algorithms. Architecture contracts precede benchmark implementation.

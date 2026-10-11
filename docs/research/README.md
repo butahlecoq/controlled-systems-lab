@@ -8,7 +8,7 @@ Assessment date: 2026-10-11. Rolling literature window: 2021-10-11 through 2026-
 2. [Scientific foundations](scientific-foundations.md): the reusable mathematics.
 3. [Baselines](baselines.md) and [legacy audit](legacy-audit.md): experimental evidence and reproducibility gaps.
 4. [Recent research](recent-research.md) and [bibliography](bibliography.md): what to evaluate next.
-5. [Architecture](../architecture/initial-architecture.md) and [performance](../architecture/performance-and-language.md): design hypotheses.
+5. [Modular algorithms and optimal families](../architecture/modular-algorithms-and-solution-sets.md), [set representation review](../architecture/set-representations-and-ellipsoidal-toolbox.md), [architecture](../architecture/initial-architecture.md) and [performance](../architecture/performance-and-language.md): architecture before implementation.
 6. [Glossary](glossary.md) and [open questions](open-questions.md): shared vocabulary and decisions.
 
 ## Evidence conventions

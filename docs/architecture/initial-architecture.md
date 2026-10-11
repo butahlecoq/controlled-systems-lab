@@ -1,6 +1,6 @@
 # Initial architecture hypothesis
 
-Date: 2026-10-11. Status: discussion draft. No product implementation or language decision is approved by this document.
+Date: 2026-10-11. Status: discussion draft. No product implementation is approved by this document. The concrete working proposal is C++20; architecture contracts precede benchmark validation.
 
 ## Intended product
 
@@ -10,7 +10,7 @@ The core should be general within explicitly declared system classes. Fuel manag
 
 ## Selected first user workflow
 
-Owner selection, 2026-10-11: start with optimal control planning. The initial end-to-end interface should accept a model and constraints and return a control sequence, a corresponding trajectory, and an objective/quality evaluation. The result must identify feasibility and optimality evidence.
+Owner selection, 2026-10-11: start with optimal control planning. The initial end-to-end interface should accept a model and constraints and return a representation of all optimal control sequences and their consistent trajectories, with optimum/quality evidence and individual witness queries. The result must identify feasibility and optimality evidence.
 
 The owner subsequently selected nominal planning without process disturbances for the first solve, while retaining more general channels and observations in the model contract. The compiled implementation direction is C++ or Rust, with C++ proposed as the working target and Python allowed for verification. The first published baseline, supported control domains, and UI form remain open. Reachability supports this workflow; feedback control remains a later workflow.
 
@@ -22,7 +22,7 @@ The owner subsequently selected nominal planning without process disturbances fo
 | Language-neutral problem/result contracts plus one numerical implementation and optional bindings | Reusable interfaces, multiple numerical backends and frontends | Serialization, lifetime and compatibility rules require care | Recommended direction; keep execution in-process initially |
 | Distributed services for each mathematical operation | Operational isolation and remote scheduling | Expensive data transfer, failure modes and orchestration for tightly coupled math | Defer; distribute whole jobs or coarse subproblems only when justified |
 
-The recommended direction does not require a bespoke C++ core or a polyglot stack on day one. Choose one coherent reference implementation after baseline experiments, then expose stable contracts around it.
+Use the concrete [modular C++20 proposal](modular-algorithms-and-solution-sets.md) to define native algorithm ports, ownership and optimal-family outputs now. Baselines validate their mathematics and performance. Python references remain independent verification tools.
 
 ## Proposed modules
 
@@ -89,7 +89,7 @@ Keep these independent:
 
 A timeout can return a feasible incumbent with a valid bound. A completed local solve can lack global optimality. No feasible plan discovered is not a proof of infeasibility unless the search or certificate justifies it.
 
-Store selected trajectory/policy, objective, worst-case witness when available, constraint margins, solver statistics, set sizes, wall time, memory, backend versions, seed, problem hash and source baseline ID. Tie handling and returned number of optimizers must be explicit.
+Store the optimal solution family, completeness evidence, selected witness trajectory/policy, objective, worst-case witness when available, constraint margins, solver statistics, set sizes, wall time, memory, backend versions, seed, problem hash and source baseline ID. Tie handling, family coverage and finite versus implicit output must be explicit. Stage marginals alone do not preserve joint solutions.
 
 ## Algorithm extension contract
 
@@ -109,7 +109,7 @@ Adding a method should require an adapter, capability description, source refere
 
 **Reachability study:** define model and initial/control/uncertainty sets → choose existential or fixed-plan/robust semantics → select exact or approximation backend → compute a tube → inspect projections/support values → export guarantee and performance data.
 
-**Nominal terminal solve:** load B04 → validate objective/constraints → choose forward/backward set construction or direct sparse optimization → recover one consistent trajectory → independently evaluate dynamics, constraints and objective → compare with reported values.
+**Nominal terminal solve:** load B04 → validate objective/constraints → choose forward/backward set construction or direct sparse optimization → construct the optimal joint family and recover witnesses → independently evaluate dynamics, constraints, objective and family consistency → compare with reported values.
 
 **Finite-action minimax:** load B07 or B08 → stream control prefixes → propagate all modeled disturbances → reject robustly infeasible prefixes → compute a justified terminal worst case → retain incumbent and bounds → compare action plan, objective, margins and runtime.
 
@@ -137,8 +137,8 @@ adapters/         # later: domain and numerical integration
   ISSUE_TEMPLATE/ # scientific correction, reproduction, algorithm proposal
 ~~~
 
-Avoid naming directories after a programming language until selected. Keep archival raw files outside the public tracked set until release scope is agreed.
+The proposed native implementation is C++20 with separate module/adaptor build targets; see the concrete modular design. Keep archival raw files outside the public tracked set until release scope is agreed.
 
 ## Decisions still open
 
-C++ versus Rust preference, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, required guarantee strength, observation assumptions, output scope (one versus all optimal plans), and the first complete executable baseline. The first solve is nominal; the contracts remain general. The first workflow is selected: optimal control planning. Record these as decisions only after the owner discussion and benchmark evidence. See [interview agenda](../research/open-questions.md).
+Owner preference between C++ and Rust, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, required guarantee strength, observation assumptions, and the first complete executable baseline. The first solve is nominal and returns the optimal solution family; the contracts remain general. Architecture and language boundaries are discussed now, while benchmark evidence validates implementations. See [interview agenda](../research/open-questions.md).

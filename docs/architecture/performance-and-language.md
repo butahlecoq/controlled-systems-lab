@@ -10,7 +10,11 @@ The main structural costs are finite-action search (q^T plans), polytope vertex 
 
 The published low-dimensional fuel cases and reachability experiments are initial workload anchors. They do not yet establish whether the target is one large solve, many simultaneous experiments, or a deadline-bound feedback loop.
 
-Measure useful output: full exact sets, projections, one optimal trajectory, or a robust feasible policy are different tasks. Returning a projection faster than computing a full polytope is not a direct implementation speedup.
+The selected first output is an optimal solution family. Measure useful output: full joint families, exact reachable sets, projections, a selected trajectory, or a robust feasible policy are different tasks. Returning a projection faster than computing a full polytope is not a direct implementation speedup.
+
+## Working architecture before benchmarking
+
+Use the concrete [C++20 modular design](modular-algorithms-and-solution-sets.md) now: native library API, algorithm/backend ports, explicit set conversions and family-preserving outputs. Benchmarks evaluate these choices and alternative ecosystems; they are not a prerequisite for architecture.
 
 ## Language/system candidates
 
@@ -54,6 +58,8 @@ Cancellation should preserve an incumbent and its evidence. Checkpoint long sear
 Hard real-time control would require separate requirements for deadlines, allocation, compilation/warmup, worst-case timing and fallback control. The current study does not establish such requirements or any hard real-time guarantee.
 
 ## Proposed benchmark sequence
+
+The architecture contract and requested optimal-family semantics are defined first. The following sequence validates implementations.
 
 1. Restore B04 and one small minimax case (B07 or B08), resolving criterion/data ambiguities.
 2. Establish a mathematically transparent low-dimensional reference, including vertex worst-case checks.

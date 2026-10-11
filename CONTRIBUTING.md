@@ -14,4 +14,4 @@ New curated documentation and future software should be in English. Preserve ori
 
 Original papers, listings, raw extractions and personal source metadata remain local. Source IDs and hashes are public; reviewers can cite the published counterparts and request a precise transcription through an issue. Public availability of the repository does not establish a redistribution license for archival materials. Project licensing remains an owner decision.
 
-Changes to mathematical contracts or guarantee labels require a clear rationale and appropriate independent checks. Product implementation should follow the agreed design after the research owner selects the initial workflow.
+Changes to mathematical contracts or guarantee labels require a clear rationale and appropriate independent checks. The owner selected nominal planning with an optimal solution-family output. Product implementation follows the agreed architecture. New algorithms should integrate through the [modular ports](docs/architecture/modular-algorithms-and-solution-sets.md), with output completeness and set-conversion/approximation evidence recorded.

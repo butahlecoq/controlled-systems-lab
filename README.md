@@ -1,6 +1,6 @@
 # Controlled Systems Lab
 
-Public research repository: [butahlecoq/controlled-systems-lab](https://github.com/butahlecoq/controlled-systems-lab). Scientific review starts with [seven initial issues](https://github.com/butahlecoq/controlled-systems-lab/issues) and [contribution conventions](CONTRIBUTING.md).
+Public research repository: [butahlecoq/controlled-systems-lab](https://github.com/butahlecoq/controlled-systems-lab). Scientific review starts with [review issues](https://github.com/butahlecoq/controlled-systems-lab/issues) and [contribution conventions](CONTRIBUTING.md).
 
 Initial research assessment, 11 October 2026. Documentation is in English; source artifacts retain their original language.
 
@@ -16,7 +16,9 @@ This archive supports a general library for constrained discrete-time control, r
 | [Published baselines](docs/research/baselines.md) | Numerical experiments to reproduce and compare |
 | [Legacy implementation audit](docs/research/legacy-audit.md) | Source findings and isolated executable checks |
 | [Research developments, 2021–2026](docs/research/recent-research.md) | Relevant recent methods and software analogues |
-| [Initial architecture](docs/architecture/initial-architecture.md) | Proposed modules, contracts, and workflows |
+| [Modular algorithms and optimal families](docs/architecture/modular-algorithms-and-solution-sets.md) | Concrete C++20 ports, interchangeable solvers/geometry, complete solution relations |
+| [Set representations and Ellipsoidal Toolbox](docs/architecture/set-representations-and-ellipsoidal-toolbox.md) | Ellipsoidal methods, newer representations, recovered owner-authored zonotope paper |
+| [Initial architecture](docs/architecture/initial-architecture.md) | Broader modules, contracts, and workflows |
 | [Performance and language](docs/architecture/performance-and-language.md) | Parallelism, complexity, and language evaluation |
 | [Glossary](docs/research/glossary.md) | Shared mathematical and software vocabulary |
 | [Open questions](docs/research/open-questions.md) | Interview agenda and next research steps |
@@ -30,7 +32,7 @@ The archive's finite-action minimax solver enumerates control sequences; changin
 
 Published experiments are the starting baselines, as requested by the research owner. Their numbers are recorded as reported results, not new reproductions. Several source and implementation inconsistencies must be resolved before they become acceptance criteria.
 
-Updated direction: use a compiled main implementation (C++ or Rust), with C++ proposed as the working target and Python for initial verification/reference computations. The first user workflow is nominal optimal control planning without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md). This is an initial architecture hypothesis and research package, not an approved implementation specification.
+Updated direction: use a compiled main implementation (C++ or Rust), with C++20 proposed as the working target and Python for initial verification/reference computations. Architecture contracts are defined before numerical benchmark implementation. The first user workflow returns an optimal solution family for nominal planning without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md). This is an initial architecture hypothesis and research package, not an approved implementation specification.
 
 ## Evidence and preservation
 

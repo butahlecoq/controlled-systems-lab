@@ -63,7 +63,7 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Support function | Supremum of a directional linear functional over a set |
 | Support point | An attaining point for a support query when one exists |
 | Zonotope | Affine image of a box; compact generator representation |
-| Constrained zonotope | A zonotope representation with linear constraints on generators |
+| Constrained zonotope | Affine image of bounded generator factors subject to linear equality constraints |
 | Matrix zonotope | Zonotopic set of matrices, often representing uncertain models |
 | Ellipsoid | Set defined by a quadratic shape matrix and center; covariance and deterministic shape need different semantics |
 | Lazy representation | Stores operations symbolically until a query requires evaluation/materialization |
@@ -134,6 +134,32 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Checkpoint | Persisted state allowing supported work to resume consistently |
 | Determinism | Declared repeatability; bitwise equality and tolerance-level agreement are different |
 | Unsupported result | Clear rejection of an incompatible operation/problem, not a numerical failure |
+
+## Optimal families and algorithm composition
+
+| Term | Meaning |
+|---|---|
+| Optimal solution family | Representation of all supported feasible plans/trajectories attaining the primary optimum, with explicit coverage evidence |
+| Joint trajectory relation | Constraints linking all states and controls across the horizon; preserves temporal dependence |
+| Control fiber | Controls compatible with a specified state/trajectory condition in a joint relation |
+| Terminal minimizer set | All reachable terminal states attaining the terminal-cost minimum; not one selected point |
+| Optimal face | Face of a polyhedral feasible set exposed by an attained linear optimum |
+| Family completeness | Evidence that a representation covers every optimizer in the declared problem/plan class |
+| Witness selection | Extracting one consistent solution from a family using a declared selection rule |
+| Secondary optimization | Selecting among primary optimizers using another criterion without changing primary optimality |
+| Basis diagnostics | Optional LP data about basis/pivots/factorization, beyond primal objective and solution |
+| Phase-I simplex | Auxiliary LP procedure to establish feasibility using an artificial basis; historical hull routines reuse its information |
+| Algorithm strategy | Composition of mathematical operations and backend requirements into a solve method |
+| Equivalent conversion | Representation change preserving the same mathematical set under declared assumptions |
+| Set approximator | Algorithm producing a declared inner/outer enclosure of a reference set |
+| Operation registry | Extensible resolution of operation implementations from representations, capabilities and requested guarantees |
+| Ellipsoidal family | Collection of ellipsoids used through specified union/intersection and directional semantics; finite sampling need not be exact |
+| Ellipsotope | Generator-based convex representation combining ellipsoidal and zonotopic geometry; operation capabilities are representation-specific |
+| Hybrid zonotope | Generator representation with continuous and binary factors for nonconvex alternatives |
+| Polynomial zonotope | Polynomial generator expression retaining dependence between factors; generally nonconvex |
+| Constrained polynomial zonotope | Polynomial generator representation with equality constraints on factors |
+
+The first public workflow requests optimal families only. Separate feasible/near-optimal requests are future extensions. See the [modular architecture](../architecture/modular-algorithms-and-solution-sets.md) and [representation source review](../architecture/set-representations-and-ellipsoidal-toolbox.md).
 
 ## Notation policy
 
