@@ -224,7 +224,15 @@ TEST_CASE("prepared ownership survives producers and independent workspaces solv
             return std::pair{std::move(first),std::move(second)};
         });
     };
-    auto a = launch(left), b = launch(right);
+    auto a = launch(left);
+    auto b = [&] {
+        try { return launch(right); }
+        catch (...) {
+            // Release the first worker before its future joins during unwinding.
+            start.arrive_and_drop();
+            throw;
+        }
+    }();
     auto ar = a.get(), br = b.get();
     const auto p = triangle();
     cost(accepted(ar.first),p,-2); cost(accepted(ar.second),p,-2);
