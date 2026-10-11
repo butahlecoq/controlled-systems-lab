@@ -1,0 +1,193 @@
+#pragma once
+#include <csl/registry/registry.hpp>
+#include <cmath>
+#include <string>
+
+namespace registry_fixtures {
+using namespace csl;
+using namespace csl::registry;
+inline LinearProgram interval_lp(double coefficient) {
+    return {{{"problem"}, {"interval"}}, {coefficient}, 2, {0,1,{0},{},{}}, {{-1,4}}, {}};
+}
+inline ExecutionContext context() {
+    return {std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}), {}, {}, {1e-8,1e-8}, "registry-test"};
+}
+// Two real algorithms on the deliberately bounded one-variable finite interval domain.
+class EndpointWorkspace final : public LPWorkspace {
+    std::size_t calls_{};
+public:
+    ProgramOutcome solve(const LinearProgram& p, const ExecutionContext&) override {
+        ++calls_;
+        const double lower = *p.variables[0].lower, upper = *p.variables[0].upper;
+        const double lower_value = p.objective[0]*lower+p.offset;
+        const double upper_value = p.objective[0]*upper+p.offset;
+        const double x = lower_value <= upper_value ? lower : upper;
+        const double value = lower_value <= upper_value ? lower_value : upper_value;
+        const ClaimEvidence evidence{p.identity.problem, Unestablished{}};
+        return ProgramResult{Termination::completed, {p.identity, MathematicalOutcome::optimal,
+            SymbolicArgument{"endpoint enumeration", "affine objective on finite interval"}, {}},
+            Vector{x}, {ObjectiveBound{value,evidence}, ObjectiveBound{value,evidence}}, std::to_string(calls_)};
+    }
+};
+class SignWorkspace final : public LPWorkspace {
+    std::size_t calls_{};
+public:
+    ProgramOutcome solve(const LinearProgram& p, const ExecutionContext&) override {
+        ++calls_;
+        const double x = p.objective[0] < 0 ? *p.variables[0].upper : *p.variables[0].lower;
+        const double value = p.objective[0]*x+p.offset;
+        const ClaimEvidence evidence{p.identity.problem, Unestablished{}};
+        return ProgramResult{Termination::completed, {p.identity, MathematicalOutcome::optimal,
+            SymbolicArgument{"coefficient sign", "affine objective on finite interval"}, {}},
+            Vector{x}, {ObjectiveBound{value,evidence}, ObjectiveBound{value,evidence}}, std::to_string(calls_)};
+    }
+};
+inline Capability interval_capability(const LinearProgram& p, const Requirements&) {
+    if (p.objective.size()!=1 || p.variables.size()!=1 || p.constraints.rows!=0 ||
+        p.constraints.cols!=1 || p.constraints.row_offsets!=std::vector<std::size_t>{0} ||
+        !p.constraints.values.empty() || !p.constraints.column_indices.empty() || !p.rows.empty() ||
+        !p.variables[0].lower || !p.variables[0].upper ||
+        !std::isfinite(*p.variables[0].lower) || !std::isfinite(*p.variables[0].upper) ||
+        *p.variables[0].lower>*p.variables[0].upper || !std::isfinite(p.objective[0]) || !std::isfinite(p.offset))
+        return Diagnostics{{DiagnosticCode::unsupported,"lp.domain","requires one variable, finite interval and no rows"}};
+    return Offer{};
+}
+inline Registration<LPPort> endpoint_registration() {
+    return {{{"endpoint"}, "1.0"}, interval_capability,
+        [](const LinearProgram&) { return std::make_unique<EndpointWorkspace>(); }};
+}
+inline Registration<LPPort> sign_registration() {
+    return {{{"sign"}, "2.0"}, interval_capability,
+        [](const LinearProgram&) { return std::make_unique<SignWorkspace>(); }};
+}
+inline StrategyRequest strategy_request() {
+    const LinearStage stage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}};
+    Problem problem{{"problem"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,stage},{}}),
+        {0,1},KnownInitial{{0}},ContinuousDomain{{UniversalSet{1}}},{UniversalSet{1},UniversalSet{1}}, {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{3},2}};
+    return {problem,{{"forward"},{"endpoint"},{"unused-convex"},{"unused-hull"},{},{},{},{},{}}};
+}
+// Plumbing fixture only: forwards a bounded LP answer as an incumbent, never a full family.
+class ForwardFixture final : public SynthesisWorkspace {
+    std::unique_ptr<BoundWorkspace<LPPort>> lp_;
+public:
+    explicit ForwardFixture(std::unique_ptr<BoundWorkspace<LPPort>> lp) : lp_(std::move(lp)) {}
+    SynthesisOutcome solve(const Problem& problem, const ExecutionContext& context) override {
+        const auto answer = std::get<ProgramResult>(lp_->run(context));
+        return SynthesisResult{Termination::completed,{problem.id,MathematicalOutcome::undetermined,Unestablished{},{}},
+            answer.objective,{},{{problem.id,{}, {*answer.primal},answer.objective.upper->value}}, {}};
+    }
+};
+inline StrategyRegistration forward_registration(const Registry<LPPort>& lp, std::string id = "forward") {
+    const auto request = std::make_shared<const LinearProgram>(interval_lp(3));
+    return {{{std::move(id)},"fixture-1"},
+        [](const StrategyRequest& r,const Requirements& requirements) -> Capability {
+            auto diagnostics = check_nominal_profile(r.problem,false,requirements.output.assurance);
+            if (!diagnostics.empty()) return diagnostics;
+            if (!std::holds_alternative<LinearTerminal>(r.problem.objective))
+                return Diagnostics{{DiagnosticCode::unsupported,"objective","fixture requires a linear terminal objective"}};
+            return Offer{};
+        },
+        [&lp,request](const StrategyRequest& r,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+            auto checked = check_pipeline(select(lp,Method{r.configuration.lp,{}},*request));
+            if (auto* rejection = std::get_if<Rejection>(&checked)) return *rejection;
+            return compose_strategy(std::get<CheckedPipeline<LPPort>>(std::move(checked)),
+                [request](auto workers,const StrategyRequest&,const Requirements&) {
+                    (void)request; // Retains the borrowed LP until deferred snapshot finishes.
+                    return std::make_unique<ForwardFixture>(std::move(std::get<0>(workers)));
+                });
+        }};
+}
+
+// The following adapters exercise callable port plumbing only. Stopped/undetermined
+// outcomes deliberately make no mathematical-completeness claim.
+class ConvexFixture final : public ConvexWorkspace {
+public: ProgramOutcome solve(const ConvexProgram& r,const ExecutionContext&) override {
+    const auto& p = std::get<QuadraticProgram>(r).linear;
+    return ProgramResult{Termination::resource_limit,{p.identity,MathematicalOutcome::undetermined,Unestablished{},{}}, {},{},p.identity.program.value};
+}};
+class GeometryFixture final : public SetOperatorWorkspace {
+public: OperationOutcome apply(const OperationRequest& r,const ExecutionContext&) override {
+    return OperationStopped{StopReason::resource_limit,r.identity.request.value};
+}};
+class ConversionFixture final : public RepresentationConverterWorkspace {
+public: SetTransformOutcome convert(const ConversionRequest& r,const ExecutionContext&) override {
+    return OperationStopped{StopReason::resource_limit,r.output.value};
+}};
+class ApproximationFixture final : public SetApproximatorWorkspace {
+public: SetTransformOutcome approximate(const ApproximationRequest& r,const ExecutionContext&) override {
+    return OperationStopped{StopReason::resource_limit,std::to_string(r.size_budget)};
+}};
+class SelectorFixture final : public WitnessSelectorWorkspace {
+public: std::variant<WitnessSelection,Unsupported> select(const OptimalFamily&,const WitnessRequest& r,const ExecutionContext&) override {
+    return WitnessSelection{{{},r.count,{"selector-fixture"},r.seed},Termination::resource_limit,"fixture"};
+}};
+class StrategyFixture final : public SynthesisWorkspace {
+public: SynthesisOutcome solve(const Problem& p,const ExecutionContext&) override {
+    const auto& stage = std::get<LinearStage>(p.model->dynamics.stages);
+    return SynthesisResult{Termination::resource_limit,{p.id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+        {{p.id,{stage.offset},{},std::get<LinearTerminal>(p.objective).offset}}, {}};
+}};
+class BasisFixture final : public BasisDiagnostics {
+public: std::string describe_basis() const override { return "fixture basis: column 0"; }
+};
+
+struct AllPorts {
+    std::array<int,7> factories{};
+    Registry<LPPort> lp; Registry<ConvexPort> convex; Registry<GeometryPort> geometry;
+    Registry<ConversionPort> conversion; Registry<ApproximationPort> approximation;
+    Registry<SelectorPort> selector; Registry<StrategyPort> strategy;
+    LinearProgram lp_request = interval_lp(3);
+    ConvexProgram convex_request = QuadraticProgram{interval_lp(3),{1,1,{0,1},{0},{2}}};
+    SetHandle set{{1,{"poly"},SetProperty::yes,SetProperty::yes,SetProperty::yes},std::make_shared<const SetPayload>(),{"set"}};
+    GeometryRequestIdentity geometry_id{{"problem"},{"geometry-request"},{"ideal"}};
+    OperationRequest geometry_request{geometry_id,{"geometry"},SupportQuery{set,{1}},SetRelation::equivalent,Assurance::numerical};
+    ConversionRequest conversion_request{geometry_id,set,{"vertices"},Assurance::numerical};
+    ApproximationRequest approximation_request{geometry_id,set,{"box"},SetRelation::outer,17,Assurance::numerical};
+    SelectorRequest selector_request{{{"problem"},{{{1,1,0},1},{"joint"},std::make_shared<const JointRelationPayload>()},
+        FamilyTarget::partial_relation,{{{"problem"},Unestablished{}},{{"problem"},Unestablished{}},{{"problem"},Unestablished{}}}},
+        {3,0.1,{},42}};
+    StrategyRequest strategy_request_value = strategy_request();
+    AllPorts() {
+        auto e = endpoint_registration(); e.factory = [this](const LinearProgram&) { ++factories[0]; return std::make_unique<EndpointWorkspace>(); }; lp.add(e);
+        auto capability = [](const auto&,const Requirements&) -> Capability { return Offer{}; };
+        convex.add({{{"convex"},"fixture-1"},capability,[this](const ConvexProgram&) { ++factories[1]; return std::make_unique<ConvexFixture>(); }});
+        geometry.add({{{"geometry"},"fixture-1"},capability,[this](const OperationRequest&) { ++factories[2]; return std::make_unique<GeometryFixture>(); }});
+        conversion.add({{{"conversion"},"fixture-1"},capability,[this](const ConversionRequest&) { ++factories[3]; return std::make_unique<ConversionFixture>(); }});
+        approximation.add({{{"approximation"},"fixture-1"},capability,[this](const ApproximationRequest&) { ++factories[4]; return std::make_unique<ApproximationFixture>(); }});
+        selector.add({{{"selector"},"fixture-1"},capability,[this](const SelectorRequest&) { ++factories[5]; return std::make_unique<SelectorFixture>(); }});
+        strategy.add({{{"strategy"},"fixture-1"},[](const StrategyRequest& r,const Requirements&) -> Capability {
+            if (!std::holds_alternative<LinearTerminal>(r.problem.objective))
+                return Diagnostics{{DiagnosticCode::unsupported,"objective","plumbing fixture expects a linear objective"}};
+            return Offer{};
+        },[this](const StrategyRequest&) { ++factories[6]; return std::make_unique<StrategyFixture>(); }});
+    }
+    auto prepare(Requirements last = {}, Method method = {{"endpoint"},{}}, std::vector<Transition> transitions = {}) {
+        return prepare_pipeline(select(lp,std::move(method),lp_request),
+            select(convex,Method{{"convex"},{}},convex_request),
+            select(geometry,Method{{"geometry"},{}},geometry_request),
+            select(conversion,Method{{"conversion"},{}},conversion_request),
+            select(approximation,Method{{"approximation"},{}},approximation_request),
+            select(selector,Method{{"selector"},{}},selector_request),
+            select(strategy,Method{{"strategy"},{}},strategy_request_value,last,std::move(transitions)));
+    }
+};
+
+// An extension defined entirely outside the product header: no hull semantics.
+struct CounterRequest { int value; std::shared_ptr<int> snapshot_count; };
+class CounterWorkspace : public ExclusiveWorkspace {
+public: virtual int evaluate(const CounterRequest&) = 0;
+};
+struct CounterPort {
+    using Request = CounterRequest; using Workspace = CounterWorkspace;
+    static constexpr const char* name = "counter-fixture";
+    static Request snapshot(const Request& r) { ++*r.snapshot_count; return r; }
+    static int run(Workspace& w,const Request& r,const ExecutionContext&) { return w.evaluate(r); }
+};
+class CounterFixture final : public CounterWorkspace {
+    int base_, calls_{};
+public:
+    explicit CounterFixture(int base) : base_(base) {}
+    int evaluate(const CounterRequest& r) override { return base_ + r.value + ++calls_; }
+};
+} // namespace registry_fixtures
