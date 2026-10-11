@@ -10,6 +10,16 @@ namespace {
 OperationStopped arithmetic_failure() {
     return {StopReason::numerical_failure, "Nonrepresentable objective arithmetic or eigensolver failure."};
 }
+bool accumulate_product(double& total, double left, double right) {
+    const double product = left * right;
+    if (product == 0 && left != 0 && right != 0) return false;
+    total += product;
+    return true;
+}
+OperationStopped erased_product(const char* group) {
+    return {StopReason::numerical_failure,
+            std::string("objective.reformulation.") + group + ": nonzero coefficient product rounded to zero."};
+}
 Result<QuadraticChecks> check_quadratic(const numeric::MatrixView& Q, NumericalPolicy policy) {
     const auto n = Q.rows();
     if (n != 0 && n > static_cast<std::size_t>(std::numeric_limits<Eigen::Index>::max()) / n)
@@ -175,7 +185,8 @@ Result<NormSquareReformulation> square_residual_norm(const Objective& original) 
         for (std::size_t j = i; j < n; ++j) {
             double value = 0;
             for (std::size_t row = 0; row < residual->map.rows(); ++row)
-                value += residual->map(row, i) * residual->map(row, j);
+                if (!accumulate_product(value, residual->map(row, i), residual->map(row, j)))
+                    return erased_product("Q");
             value *= 2;
             if (!std::isfinite(value)) return arithmetic_failure();
             authored.Q.values[i * n + j] = value;
@@ -183,11 +194,13 @@ Result<NormSquareReformulation> square_residual_norm(const Objective& original) 
         }
         double value = 0;
         for (std::size_t row = 0; row < residual->map.rows(); ++row)
-            value += residual->map(row, i) * residual->target[row];
+            if (!accumulate_product(value, residual->map(row, i), residual->target[row]))
+                return erased_product("q");
         authored.linear[i] = -2 * value;
         if (!std::isfinite(authored.linear[i])) return arithmetic_failure();
     }
-    for (const double value : residual->target.values()) authored.offset += value * value;
+    for (const double value : residual->target.values())
+        if (!accumulate_product(authored.offset, value, value)) return erased_product("c");
     if (!std::isfinite(authored.offset)) return arithmetic_failure();
     auto squared = snapshot(authored, original.policy());
     if (const auto* error = std::get_if<Diagnostic>(&squared)) return *error;

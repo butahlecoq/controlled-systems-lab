@@ -196,6 +196,42 @@ TEST_CASE("PSD scaling cannot silently erase nonzero coefficients") {
                                                0, std::numeric_limits<double>::max()}}, {0, 0}, 0}));
 }
 
+// Nonzero products rounded to zero can flatten a criterion or erase its target.
+// Assert the failing coefficient group so a later c guard cannot hide a missing q guard.
+TEST_CASE("erased Q product is declined while the original nonconstant norm remains usable") {
+    auto original = accepted(snapshot(ResidualNormTerminal{{1, 1, {1e-200}}, {0}}));
+    CHECK(accepted(evaluate(original, Vector{1e200})) == 1);
+    auto result = square_residual_norm(original);
+    stopped(result);
+    CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.Q") != std::string::npos);
+    CHECK(accepted(evaluate(original, Vector{1e200})) == 1);
+    CHECK(accepted(evaluate(original, Vector{0})) == 0);
+}
+
+TEST_CASE("erased q product is declined even when the Q product is representable") {
+    auto original = accepted(snapshot(ResidualNormTerminal{{2, 1, {0x1p-520, 0}}, {0x1p-560, 1}}));
+    auto result = square_residual_norm(original);
+    stopped(result);
+    CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.q") != std::string::npos);
+    CHECK(accepted(evaluate(original, Vector{0})) == 1);
+}
+
+TEST_CASE("erased c product is declined while the original constant norm remains usable") {
+    auto original = accepted(snapshot(ResidualNormTerminal{{1, 0, {}}, {1e-200}}));
+    auto result = square_residual_norm(original);
+    stopped(result);
+    CHECK(std::get<OperationStopped>(result).diagnostics.find("objective.reformulation.c") != std::string::npos);
+    CHECK(accepted(evaluate(original, {})) == 1e-200);
+}
+
+// Rejecting all small coefficients would discard this exactly representable subnormal square.
+TEST_CASE("norm expansion retains representable subnormal products") {
+    auto record = accepted(square_residual_norm(accepted(snapshot(ResidualNormTerminal{{1, 1, {0x1p-520}}, {0}}))));
+    CHECK(std::get<QuadraticCoefficients>(record.squared().coefficients()).Q(0, 0) == 0x1p-1039);
+    CHECK(accepted(evaluate(record.original(), Vector{0x1p520})) == 1);
+    CHECK(accepted(evaluate(record.squared(), Vector{0x1p520})) == 1);
+}
+
 TEST_CASE("retained objectives and metadata survive producer destruction and move aliases") {
     auto quadratic = [] {
         TerminalObjective authored = QuadraticTerminal{{2, 2, {4, -2, -2, 10}}, {-2, -8}, 5};

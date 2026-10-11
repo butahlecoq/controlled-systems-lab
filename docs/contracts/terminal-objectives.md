@@ -131,8 +131,17 @@ no compensated/exact/interval arithmetic or promised rounding bound. Overflow
 and nonfinite results return `OperationStopped`, never a usable infinite/NaN
 cost. A finite norm may exist while its squared coefficients do not: r=`[1e200]`
 with zero L evaluates to `1e200`, but squaring fails. The original handle remains
-usable. Even a mathematically finite expanded value can fail when an intermediate
-overflows. Ordinary underflow/cancellation in cost evaluation is not certified.
+usable. Expansion also declines any Q, q or c product of nonzero inputs that
+rounds to zero, reporting `numerical_failure` with the affected coefficient group
+in the diagnostic. For L=`[1e-200]`, r=`[0]`, a zero Q would silently flatten the
+criterion, even though the original norm at x=`[1e200]` is 1. This transformation
+now fails and the original objective remains usable. Representable nonzero
+subnormal products are retained. The guard conservatively declines even a lost
+term whose eventual sum might be representable; it does not substitute scaling,
+repair coefficients, or provide a rounding/error bound. Even a mathematically
+finite expanded value can fail when an intermediate overflows. Partial loss of
+precision, cancellation and absorption of small terms into sums remain ordinary
+floating arithmetic. Underflow/cancellation in cost evaluation is not certified.
 Allocation failures and standard container length errors propagate as exceptions,
 as in the numeric layer.
 
