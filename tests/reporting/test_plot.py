@@ -1,5 +1,6 @@
 """Real pinned producer -> strict consumer -> offline bundle oracle."""
 import hashlib
+import csv
 import importlib.util
 import io
 import json
@@ -47,12 +48,41 @@ class PlotTests(unittest.TestCase):
             self.assertEqual(series["summary"],{"median":30,"min":10,"max":50,"count":5})
             bundle=render.render(view,root/view["report_id"],root/"figures")
             site.validate_bundle(bundle,allow_test=True)
+            self.assertIn('/tree/main/reports/algorithm-results/'+view['report_id'],(bundle/'index.html').read_text(encoding='utf-8'))
+            with self.assertRaises(ValueError): render.render(view,root/'bad-ref',root/'figures',artifact_ref='../bad')
             archive=site.make_zip(bundle,root/"offline.zip",allow_test=True)
             with zipfile.ZipFile(archive) as saved:
                 self.assertEqual(saved.read(view["report_id"]+"/latency.svg"),final)
                 self.assertEqual(len(saved.namelist()),14)
             self.assertIn(final.decode(),(bundle/"index.html").read_text(encoding="utf-8"))
             with self.assertRaises(ValueError): site.validate_bundle(bundle)
+            def corrupt(name,content):
+                (bundle/name).write_bytes(content)
+                manifest=data.parse_json((bundle/'manifest.json').read_text(encoding='utf-8'))
+                manifest['files'][name]=data.file_digest(bundle/name)
+                (bundle/'manifest.json').write_text(json.dumps(manifest),encoding='utf-8')
+            original=(bundle/'trials.csv').read_bytes()
+            for field,value in (("sequence","999"),("harness","exception"),("termination","numerical_failure"),("support","validated"),("validation_passed","False"),("row_residual","999"),("variable_residual","999"),("diagnostics","changed evidence")):
+                reader=csv.DictReader(io.StringIO(original.decode()));rows=list(reader);rows[0][field]=value
+                output=io.StringIO(newline='');writer=csv.DictWriter(output,fieldnames=reader.fieldnames);writer.writeheader();writer.writerows(rows)
+                corrupt('trials.csv',output.getvalue().encode())
+                with self.subTest(field=field),self.assertRaises(ValueError): site.validate_bundle(bundle,allow_test=True)
+                corrupt('trials.csv',original)
+            original=(bundle/'index.html').read_bytes()
+            for unsafe in (b'<meta http-equiv="refresh" content="0; URL=https://example.invalid/">',b'<img srcset="https://example.invalid/x 1x">'):
+                corrupt('index.html',original.replace(b'</body>',unsafe+b'</body>'))
+                with self.subTest(unsafe=unsafe),self.assertRaises(ValueError): site.validate_bundle(bundle,allow_test=True)
+                corrupt('index.html',original)
+            for old,new in ((b'>5.0<',b'>6.0<'),(b'&quot;outcome&quot;: &quot;optimal&quot;',b'&quot;outcome&quot;: &quot;infeasible&quot;'),(b'Outcome support: unestablished',b'Outcome support: validated')):
+                self.assertIn(old,original)
+                corrupt('index.html',original.replace(old,new,1))
+                with self.subTest(html=old),self.assertRaises(ValueError): site.validate_bundle(bundle,allow_test=True)
+                corrupt('index.html',original)
+            original=(bundle/'export.json').read_bytes();changed=json.loads(original)
+            changed['plot']['series']['public_run'][0]['values'][0]=999
+            corrupt('export.json',json.dumps(changed).encode())
+            with self.assertRaises(ValueError): site.validate_bundle(bundle,allow_test=True)
+            corrupt('export.json',original)
             summary=(bundle/"summary.csv").read_bytes()
             (bundle/"summary.csv").write_bytes(summary.replace(b",ns,",b",ms,",1))
             manifest=data.parse_json((bundle/"manifest.json").read_text(encoding="utf-8"))

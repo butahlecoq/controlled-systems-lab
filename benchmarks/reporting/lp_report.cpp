@@ -163,6 +163,7 @@ TrialRecord run_trial(const Fixture& f,std::stop_token cancellation) {
     TrialRecord record;
     record.timings[5].available=true; record.timings[5].start=now();
     try {
+      record_failure_unwind(record.timings[5],[&] {
         record.program=timed(record.timings[0],[&]{ const auto input=f.input; return accepted<LinearProgram>(optimization::make_linear_program(input)); });
         const auto plan=timed(record.timings[1],[&]{
             Registry<LPPort> registry;
@@ -182,14 +183,15 @@ TrialRecord run_trial(const Fixture& f,std::stop_token cancellation) {
         else { record.harness_status="unsupported"; record.diagnostics=std::get<Unsupported>(outcome).diagnostics; record.error=diagnostic_text(record.diagnostics); }
         timed(record.timings[4],[&]{verify(f,record);return true;});
         record.timings[5].end=now(); // Before workspace/plan destruction.
+      });
     } catch (const Rejected& error) {
         record.diagnostics=error.diagnostics;
         record.harness_status=std::any_of(record.diagnostics.begin(),record.diagnostics.end(),[](const auto& d){return d.code==DiagnosticCode::unsupported;})?"unsupported":"exception";
-        record.error=error.what();record.errors.push_back(record.error);record.timings[5].end=now();
+        record.error=error.what();record.errors.push_back(record.error);
     } catch (const std::exception& error) {
-        record.error=error.what(); record.errors.push_back(record.error); record.timings[5].end=now();
+        record.error=error.what(); record.errors.push_back(record.error);
     } catch (...) {
-        record.error="non-standard exception"; record.errors.push_back(record.error); record.timings[5].end=now();
+        record.error="non-standard exception"; record.errors.push_back(record.error);
     }
     return record;
 }
@@ -230,7 +232,7 @@ std::string trial_json(const Fixture& f,const TrialRecord& r,std::size_t round,s
         if(i) timings+=',';
         timings+=json_string(phases[i])+":";
         const auto& t=r.timings[i];
-        timings+=t.available?"{\"available\":true,\"start_tick\":"+json_string(std::to_string(t.start))+",\"end_tick\":"+json_string(std::to_string(t.end))+",\"duration_ns\":"+std::to_string(t.nanoseconds())+",\"unit\":\"ns\",\"scope\":"+json_string(phases[i])+"}":"{\"available\":false,\"reason\":\"phase not reached\"}";
+        timings+=t.available?"{\"available\":true,\"start_tick\":"+json_string(std::to_string(t.start))+",\"end_tick\":"+json_string(std::to_string(t.end))+",\"duration_ns\":"+std::to_string(t.nanoseconds())+",\"unit\":\"ns\",\"scope\":"+json_string(t.includes_unwind?"end_to_end_including_unwind":phases[i])+"}":"{\"available\":false,\"reason\":\"phase not reached\"}";
     }
     timings+='}';
     const auto actual=r.actual_version.empty()?"null":"{\"id\":\"csl.lp.highs\",\"version\":"+json_string(r.actual_version)+"}";
@@ -245,6 +247,6 @@ std::string build_info_json() {
 #else
     constexpr bool ndebug=false;
 #endif
-    return "{\"source_commit\":"+json_string(build::source_commit)+",\"compiler\":"+json_string(build::compiler)+",\"compiler_version\":"+json_string(build::compiler_version)+",\"generator\":"+json_string(build::generator)+",\"architecture\":"+json_string(build::architecture)+",\"configuration\":"+json_string(CSL_REPORT_CONFIG)+",\"cxx_standard\":20,\"ndebug\":"+(ndebug?"true":"false")+",\"configured_flags\":"+json_string(build::configured_flags)+",\"release_flags\":"+json_string(build::release_flags)+"}";
+    return "{\"source_commit\":"+json_string(build::source_commit)+",\"build_owner_sha256\":"+json_string(build::build_owner_sha256)+",\"compiler\":"+json_string(build::compiler)+",\"compiler_version\":"+json_string(build::compiler_version)+",\"generator\":"+json_string(build::generator)+",\"architecture\":"+json_string(build::architecture)+",\"configuration\":"+json_string(CSL_REPORT_CONFIG)+",\"cxx_standard\":20,\"ndebug\":"+(ndebug?"true":"false")+",\"configured_flags\":"+json_string(build::configured_flags)+",\"release_flags\":"+json_string(build::release_flags)+"}";
 }
 } // namespace csl::reporting

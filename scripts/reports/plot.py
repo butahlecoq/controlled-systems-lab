@@ -32,9 +32,7 @@ def plot(view,out):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     groups=data.aggregate(view)
-    series={}
-    for phase in ("public_run","end_to_end"):
-        series[phase]=[{"case_id":g["case_id"],"values":[t["timings"][phase]["duration_ns"] for t in view["payload"]["trials"] if t["case_id"]==g["case_id"] and t["timings"][phase]["available"]],"summary":g["phases"][phase]} for g in groups]
+    series=data.figure_series(view)
     with matplotlib.rc_context({"font.family":"DejaVu Sans","font.size":10,"svg.hashsalt":"csl-report-style-v1","svg.fonttype":"path"}):
         fig,axes=plt.subplots(1,2,figsize=(11,4.6),layout="constrained")
         try:

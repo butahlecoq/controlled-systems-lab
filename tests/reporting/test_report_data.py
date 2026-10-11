@@ -2,6 +2,8 @@
 import copy
 import importlib.util
 import json
+import hashlib
+import tempfile
 from pathlib import Path
 import sys
 import unittest
@@ -154,8 +156,80 @@ class RecordTests(unittest.TestCase):
         p["purpose"]="measurement"
         for trial in p["trials"]: trial["purpose"]="measurement"
         p["provenance"]["tracked_clean"]=True
-        p["provenance"]["build"]["configuration"]="Release"
+        p["provenance"]["build"].update(configuration="Release",source_commit="0"*40)
         self.assertFalse(self.data.publishable(self.data.seal(p)))
+
+    def test_functional_debug_identity_is_distinct_from_measurement_admission(self):
+        import collect_lp
+        header={"purpose":"test","build":{"source_commit":"a"*40,"configuration":"Debug","ndebug":False,"cxx_standard":20}}
+        collect_lp.verify_build_identity(header,"a"*40,functional=True)
+        with self.assertRaises(ValueError): collect_lp.verify_build_identity(header,"a"*40)
+        with self.assertRaises(ValueError): collect_lp.verify_build_identity(header,"b"*40,functional=True)
+        view=self.fixture();view["payload"]["provenance"]["build"].update(configuration="Debug",source_commit="0"*40)
+        self.data.validate_view(self.data.seal(view["payload"]))
+
+    def test_executable_b_cannot_borrow_same_commit_build_a_provenance(self):
+        import collect_lp
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);source=root/'source';build=root/'A';other=root/'B'
+            for path in (source,build,other): path.mkdir()
+            exe=build/'csl_lp_report.exe';exe.write_bytes(b'fake A; never executed')
+            foreign=other/exe.name;foreign.write_bytes(b'fake B; never executed')
+            paths={"source":source.as_posix(),"build":build.as_posix()};compiler={"path":"C:/compiler.exe","id":"LiteralCC","version":"1.2"}
+            target={"name":"csl_lp_report","type":"EXECUTABLE","artifacts":[{"path":exe.name}],"compileGroups":[{"language":"CXX","compileCommandFragments":[{"fragment":"-base -O2 -DNDEBUG"}]}]}
+            graph={"paths":paths,"configuration":"Release","cmake":{"generator":{"name":"Literal generator"}},"targets":[target,{**target,"name":"csl_report_support"}],"toolchains":{"toolchains":[{"language":"CXX","compiler":compiler}]}}
+            owner=hashlib.sha256((paths['source']+'\n'+paths['build']+'\n'+compiler['path']).encode()).hexdigest()
+            header={"build":{"configuration":"Release","compiler":"LiteralCC","compiler_version":"1.2","generator":"Literal generator","configured_flags":"-base","release_flags":"-O2 -DNDEBUG","build_owner_sha256":owner}}
+            collect_lp.verify_artifact(header,graph,build,exe,source)
+            with self.assertRaises(ValueError): collect_lp.verify_artifact(header,graph,build,foreign,source)
+            for field,value in (("compiler","DifferentCC"),("compiler_version","9.0"),("release_flags","-O0"),("build_owner_sha256","f"*64),("configuration","Debug")):
+                changed=copy.deepcopy(header);changed['build'][field]=value
+                with self.subTest(field=field),self.assertRaises(ValueError): collect_lp.verify_artifact(changed,graph,build,exe,source)
+            with self.assertRaises(ValueError): collect_lp.verify_artifact(header,graph,other,exe,source)
+            with self.assertRaises(ValueError): collect_lp.verify_artifact(header,graph,build,exe,other)
+
+    def test_success_requires_spans_actual_method_and_consistent_typed_iterations(self):
+        for mutate in (
+            lambda t:t.update(timings={p:{"available":False,"reason":"not observed"} for p in self.data.PHASES}),
+            lambda t:t['registry'].update(actual=None),
+            lambda t:t['native_iterations'].update(unit='ns'),
+            lambda t:t['native_iterations'].update(value=999),
+            lambda t:t['native_iterations'].update(value=False),
+            lambda t:t['native_iterations'].update(scope='end_to_end'),
+            lambda t:t['result'].update(raw_diagnostics=t['result']['raw_diagnostics'].replace('adapter.version=1.0.0','adapter.version=9.0.0')),
+        ):
+            view=self.fixture();mutate(view['payload']['trials'][0])
+            with self.subTest(mutate=mutate),self.assertRaises(ValueError): self.data.validate_view(self.data.seal(view['payload']))
+        view=self.fixture();trial=view['payload']['trials'][0]
+        trial['timings']={p:{"available":False,"reason":"not reached after failure"} for p in self.data.PHASES}
+        trial['validation']={"passed":False,"errors":["failed before phase observation"]}
+        retained=self.data.validate_view(self.data.seal(view['payload']))
+        self.assertFalse(self.data.aggregate(retained)[0]['valid'])
+
+    def test_synthetic_measurement_shape_cannot_hide_spans_or_change_source(self):
+        # Literal data only, no process execution or real measurement claim.
+        view=self.fixture();p=view['payload'];p['purpose']='measurement'
+        p['provenance']['build'].update(configuration='Release',source_commit='0'*40)
+        for trial in p['trials']: trial['purpose']='measurement'
+        shaped=self.data.validate_view(self.data.seal(p))
+        self.assertFalse(self.data.publishable(shaped))
+        self.assertEqual([g['matched'] for g in self.data.aggregate(shaped)],[5,5,5,5,5])
+        for mutation in ('missing spans','changed source','wrong attempt'):
+            changed=copy.deepcopy(p)
+            if mutation=='missing spans':
+                changed['trials'][0]['timings']={phase:{'available':False,'reason':'not observed'} for phase in self.data.PHASES}
+            elif mutation=='changed source': changed['provenance']['build']['source_commit']='b'*40
+            else: changed['trials'][0]['attempt']['number']=2
+            with self.subTest(mutation=mutation),self.assertRaises(ValueError): self.data.validate_view(self.data.seal(changed))
+
+    def test_unwind_inclusive_scope_is_visible_only_on_failed_trials(self):
+        view=self.fixture();p=view['payload'];trial=p['trials'][0]
+        trial['timings']['end_to_end']['scope']='end_to_end_including_unwind'
+        with self.assertRaises(ValueError): self.data.validate_view(self.data.seal(p))
+        trial['validation']={'passed':False,'errors':['controlled exceptional unwind']}
+        saved=self.data.validate_view(self.data.seal(p))
+        self.assertEqual(saved['payload']['trials'][0]['timings']['end_to_end']['scope'],'end_to_end_including_unwind')
+        self.assertIsNone(self.data.aggregate(saved)[0]['phases']['end_to_end'])
 
 
 if __name__ == "__main__":

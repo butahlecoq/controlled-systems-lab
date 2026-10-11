@@ -137,7 +137,7 @@ def sanitize(text,build):
     return text
 
 
-def file_api(build):
+def file_api(build,configuration="Release"):
     reply=Path(build)/".cmake/api/v1/reply"
     indices=sorted(reply.glob("index-*.json"))
     data.require(bool(indices),"CMake file API reply missing")
@@ -145,8 +145,8 @@ def file_api(build):
     def load(name):
         return data.parse_json(data.local_file(reply,name).read_text(encoding="utf-8"))
     codemodel=load(index["reply"]["codemodel-v2"]["jsonFile"])
-    configurations=[c for c in codemodel["configurations"] if c["name"]=="Release"]
-    data.require(len(configurations)==1,"Release codemodel required")
+    configurations=[c for c in codemodel["configurations"] if c["name"]==configuration]
+    data.require(len(configurations)==1,"actual configuration codemodel required")
     targets={t["id"]:load(t["jsonFile"]) for t in configurations[0]["targets"]}
     roots=[k for k,t in targets.items() if t["name"]=="csl_lp_report"]
     data.require(len(roots)==1,"report executable codemodel missing")
@@ -160,7 +160,7 @@ def file_api(build):
     names={t["name"] for t in chosen.values()}
     data.require({"csl_lp_report","csl_report_support","csl_highs_lp","highs","csl_optimization","csl_registry","csl_numeric","csl_contracts"}<=names,"incomplete dependency flags")
     toolchains=load(index["reply"]["toolchains-v1"]["jsonFile"])
-    return {"cmake":index["cmake"],"targets":list(chosen.values()),"toolchains":toolchains}
+    return {"cmake":index["cmake"],"configuration":configuration,"paths":codemodel["paths"],"targets":list(chosen.values()),"toolchains":toolchains}
 
 
 def machine_snapshot():
@@ -222,10 +222,41 @@ def save_json(path,value):
     Path(path).write_text(json.dumps(value,indent=2,ensure_ascii=False,allow_nan=False)+"\n",encoding="utf-8")
 
 
-def verify_build_identity(header,expected_commit):
+def verify_build_identity(header,expected_commit,functional=False):
     build=header["build"]
     data.require(build["source_commit"]==expected_commit,"stale executable source identity")
-    data.require(build["configuration"]=="Release" and build["ndebug"] is True and build["cxx_standard"]==20,"Release C++20 executable required")
+    data.require(build["cxx_standard"]==20 and type(build["ndebug"]) is bool,"C++20 build identity required")
+    if functional:
+        data.require(header["purpose"]=="test" and build["configuration"] in ("Debug","Release","RelWithDebInfo","MinSizeRel"),"configured functional build required")
+    else:
+        data.require(build["configuration"]=="Release" and build["ndebug"] is True,"Release C++20 executable required")
+
+
+def verify_artifact(header,graph,build,exe,source=ROOT):
+    """Bind the described executable to this actual configured source/build graph."""
+    paths=graph["paths"];identity=header["build"]
+    data.require(Path(paths["source"]).samefile(source) and Path(paths["build"]).samefile(build),"codemodel source/build owner differs")
+    data.require(identity["configuration"]==graph["configuration"],"artifact configuration differs")
+    targets={t["name"]:t for t in graph["targets"]}
+    target=targets["csl_lp_report"]
+    data.require(target["type"]=="EXECUTABLE","report target is not executable")
+    artifacts=[Path(paths["build"])/a["path"] for a in target["artifacts"]
+               if Path(a["path"]).name in ("csl_lp_report","csl_lp_report.exe")]
+    data.require(len(artifacts)==1 and artifacts[0].is_file() and artifacts[0].samefile(exe),"executable is not selected report artifact")
+    compilers=[t["compiler"] for t in graph["toolchains"]["toolchains"] if t["language"]=="CXX"]
+    data.require(len(compilers)==1,"actual C++ toolchain required")
+    compiler=compilers[0]
+    data.require((identity["compiler"],identity["compiler_version"])==(compiler["id"],compiler["version"]),"embedded compiler differs from actual toolchain")
+    data.require(identity["generator"]==graph["cmake"]["generator"]["name"],"embedded generator differs")
+    owner=sha_bytes((paths["source"]+'\n'+paths["build"]+'\n'+compiler["path"]).encode())
+    data.require(identity["build_owner_sha256"]==owner,"embedded source/build/compiler owner differs")
+    for name in ("csl_lp_report","csl_report_support"):
+        groups=[g for g in targets[name]["compileGroups"] if g["language"]=="CXX"]
+        data.require(bool(groups),"report compile groups missing")
+        for group in groups:
+            flags=' '.join(' '.join(f["fragment"] for f in group.get("compileCommandFragments",[])).split())
+            for field in (("configured_flags","release_flags") if graph["configuration"]=="Release" else ("configured_flags",)):
+                data.require(' '.join(identity[field].split()) in flags,"embedded flags differ from actual compile graph")
 
 
 def collect(args):
@@ -249,6 +280,7 @@ def collect(args):
     described=subprocess.run([str(args.exe),"--describe"],capture_output=True,timeout=30,check=True)
     header=events_from_bytes(described.stdout)[0]
     verify_build_identity(header,args.source_commit)
+    verify_artifact(header,api,build,args.exe)
     save_json(out/"scenarios.json",scenarios(header))
     note=args.concurrent_work_file.read_text(encoding="utf-8").strip()
     data.require(bool(note),"concurrent-work note required")

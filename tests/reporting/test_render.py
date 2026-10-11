@@ -26,6 +26,7 @@ class RenderTests(unittest.TestCase):
             self.renderer.render(view, out)
             html = (out / "index.html").read_text(encoding="utf-8")
             self.assertIn("TEST DATA", html)
+            self.assertIn("TEST DATA \u2014 functional or literal fixture",html)
             self.assertIn("&lt;script&gt;", html)
             self.assertNotIn("<script>", html)
             self.assertIn("unestablished", html)
@@ -39,6 +40,8 @@ class RenderTests(unittest.TestCase):
             self.assertEqual(rows[3]["outcome"], "infeasible")
             self.assertEqual(rows[3]["original_objective"], "")
             self.assertEqual(rows[0]["public_run_ns"], "10")
+            self.assertEqual({key:rows[0][key] for key in ("sequence","harness","termination","support","validation_passed","row_residual","variable_residual","end_to_end_scope")},
+                             {"sequence":"1","harness":"returned","termination":"completed","support":"unestablished","validation_passed":"True","row_residual":"0.0","variable_residual":"0.0","end_to_end_scope":"end_to_end"})
             self.assertEqual(self.renderer.csv_text("=cmd()"), "'=cmd()")
             with self.assertRaises(FileExistsError):
                 self.renderer.render(view, out)
@@ -80,7 +83,7 @@ class RenderTests(unittest.TestCase):
             root = Path(temp)/"bundle"
             root.mkdir()
             (root/"ok.json").write_text("{}")
-            self.assertEqual(data.local_file(root,"ok.json"),root/"ok.json")
+            self.assertTrue(data.local_file(root,"ok.json").samefile(root/"ok.json"))
             for name in ("../x","/x","C:/x","https://x","a\\b","a/../../x"):
                 with self.subTest(name=name), self.assertRaises(ValueError):
                     data.local_file(root,name)
@@ -108,6 +111,31 @@ class RenderTests(unittest.TestCase):
             site.validate_sidecar_hashes(root,p)
             (root/"raw-events.jsonl").write_bytes(b"different raw records")
             with self.assertRaises(ValueError): site.validate_sidecar_hashes(root,p)
+
+    def test_offline_generated_vocabulary_rejects_resource_attributes(self):
+        spec=importlib.util.spec_from_file_location("report_site",ROOT/"scripts/reports/site.py")
+        site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
+        for page in ('<meta http-equiv="refresh" content="0; URL=https://example.invalid/">',
+                     '<img srcset="https://example.invalid/image.png 1x">',
+                     '<video poster="https://example.invalid/x">', '<body background="https://example.invalid/x">',
+                     '<a href="#ok" ping="https://example.invalid/x">x</a>', '<input autofocus>',
+                     '<meta name="viewport" content="safe" http-equiv="refresh">'):
+            with self.subTest(page=page),self.assertRaises(ValueError): site.OfflineHTML(set()).feed(page)
+
+    def test_repository_fallback_ref_is_distinct_from_measured_source(self):
+        spec=importlib.util.spec_from_file_location("report_site",ROOT/"scripts/reports/site.py")
+        site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
+        view=data.load_view(ROOT/'tests/reporting/fixtures/view-v1.json')
+        catalog={"reports":[{"report_id":view['report_id'],"source_commit":"a"*40}]}
+        page=site.catalogue_index(catalog)
+        self.assertIn('/tree/main/reports/algorithm-results/'+view['report_id'],page)
+        self.assertIn('current main',page)
+        self.assertIn('a'*40,page)
+        for ref in ('../escape','https://bad','unknown-branch'):
+            with self.subTest(ref=ref),self.assertRaises(ValueError): site.catalogue_index({**catalog,'artifact_ref':ref})
+        fixed=site.catalogue_index({**catalog,'artifact_ref':'b'*40})
+        self.assertIn('/tree/'+'b'*40+'/reports/algorithm-results/',fixed)
+        self.assertIn('a'*40,fixed)
 
 
 if __name__ == "__main__":

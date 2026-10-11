@@ -75,3 +75,29 @@ TEST_CASE("preparation rejection retains diagnostic and never claims a solve") {
     CHECK(trial.error.find("highs.matrix")!=std::string::npos);
     CHECK(trial.error.find("1e-12")!=std::string::npos);
 }
+
+TEST_CASE("exceptional total explicitly records owner unwind while preserving the exception") {
+    Interval total;
+    total.available=true;
+    total.start=Clock::now().time_since_epoch().count();
+    bool destroyed=false;
+    struct Owner { bool& destroyed; ~Owner() { destroyed=true; } };
+    try {
+        record_failure_unwind(total,[&] {
+            Owner owner{destroyed};
+            throw std::runtime_error("controlled failure");
+        });
+        FAIL("failure must propagate");
+    } catch (const std::runtime_error& error) {
+        CHECK(std::string(error.what())=="controlled failure");
+    }
+    CHECK(destroyed);
+    CHECK(total.includes_unwind);
+    CHECK(total.end>=total.start);
+    const auto successful=run_trial(catalogue()[0],{});
+    CHECK_FALSE(successful.timings[5].includes_unwind);
+    auto bad=catalogue()[0];bad.input.identity.program={"unwind-preparation"};bad.input.constraints.values[0]=1e-13;
+    const auto failed=run_trial(bad,{});
+    CHECK(failed.timings[5].includes_unwind);
+    CHECK(trial_json(bad,failed,1,1,"test").find("end_to_end_including_unwind")!=std::string::npos);
+}

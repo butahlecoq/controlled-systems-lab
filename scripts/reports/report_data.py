@@ -231,7 +231,7 @@ def native_iterations(raw):
 def _validate_view(view):
     require(view["schema"] == SCHEMA, "unknown view schema")
     payload = view["payload"]
-    require(payload["purpose"] in PURPOSES, "unknown purpose")
+    require(payload["purpose"] in {"test","measurement"}, "saved views require test or measurement purpose")
     require(re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", payload["created_utc"]) is not None, "UTC timestamp required")
     require(view == seal(payload), "payload identity/hash mismatch")
     for name in ("provenance", "environment", "process", "profile"):
@@ -241,7 +241,10 @@ def _validate_view(view):
     require(re.fullmatch(r"[0-9a-f]{40}", provenance["source_commit"]) is not None, "source SHA required")
     require(type(provenance["tracked_clean"]) is bool and HEX.fullmatch(provenance["executable_sha256"]) is not None, "executable provenance")
     require(provenance["backend"] == {"id": "csl.lp.highs", "version": "1.0.0+highs.1.11.0"}, "backend identity")
-    require(provenance["build"]["configuration"] in ("Release", "TEST"), "Release provenance required")
+    configurations=("Release","Debug","RelWithDebInfo","MinSizeRel","TEST") if payload["purpose"]=="test" else ("Release",)
+    require(provenance["build"]["configuration"] in configurations, "configured provenance required")
+    if provenance["build"]["configuration"]!="TEST":
+        require(provenance["build"]["source_commit"]==provenance["source_commit"],"configured source identity differs")
     environment = payload["environment"]
     require(environment["scalar"] == "binary64" and environment["workspace_reuse"] is False, "unsupported measurement policy")
     require(environment["resources"] == {"total_threads":1,"outer_workers":1,"threads_per_worker":1,"memory_bytes":None}, "resource policy")
@@ -284,10 +287,13 @@ def _validate_view(view):
         require(trial["validation"]["passed"] == (len(trial["validation"]["errors"]) == 0), "validation errors inconsistent")
         for phase in PHASES:
             interval = trial["timings"][phase]
+            require(type(interval["available"]) is bool,"timing availability must be boolean")
             if not interval["available"]:
                 require(bool(interval["reason"]), "unavailable timing reason")
                 continue
-            require(interval["unit"] == "ns" and interval["scope"] == phase, "timing unit/scope mismatch")
+            scopes={phase}
+            if phase=="end_to_end" and not trial["validation"]["passed"]: scopes.add("end_to_end_including_unwind")
+            require(interval["unit"] == "ns" and interval["scope"] in scopes, "timing unit/scope mismatch")
             require(re.fullmatch(r"[0-9]+",interval["start_tick"]) is not None and re.fullmatch(r"[0-9]+",interval["end_tick"]) is not None, "clock tick integer string")
             start, end = int(interval["start_tick"]), int(interval["end_tick"])
             require(end >= start and integer(interval["duration_ns"]) == (end-start)*clock["period_num"]*1_000_000_000//clock["period_den"], "duration/tick mismatch")
@@ -311,7 +317,14 @@ def _validate_view(view):
             _residual(result["primal_residuals"],trial["identity"],("rows","variables"))
             _residual(result["dual_residuals"],trial["identity"],("stationarity","signs","complementarity"))
             require(isinstance(result["raw_diagnostics"],str), "raw diagnostics required")
+        metric=trial["native_iterations"]
+        require(type(metric["available"]) is bool,"iteration availability must be boolean")
+        if metric["available"]: integer(metric["value"])
+        expected_metric=native_iterations(result["raw_diagnostics"]) if result else {"available":False,"reason":"no returned native diagnostic"}
+        require(metric==expected_metric,"iteration metric differs from retained native diagnostics")
         if trial["validation"]["passed"]:
+            require(all(trial["timings"][p]["available"] for p in PHASES),"successful trial requires all measured phase spans")
+            require(trial["registry"]["actual"]==provenance["backend"],"successful trial requires actual method provenance")
             require(trial["harness"]["status"] == "returned" and reference_matches(trial,scenarios[key]), "inconsistent successful validation")
             require(trial["attempt"] == {"number":1,"state":"returned_result","workspace_reuse":False}, "current attempt mismatch")
             require(re.fullmatch(r"[0-9]+",trial["observation_token"]) is not None, "observation token required")
@@ -359,6 +372,31 @@ def aggregate(view):
                        "valid":valid,"phases":{p:statistics([t["timings"][p]["duration_ns"] for t in trials])
                             if valid and len(trials)>=5 and all(t["timings"][p]["available"] for t in trials) else None for p in PHASES}})
     return groups
+
+
+def figure_series(view):
+    groups=aggregate(view)
+    return {phase:[{"case_id":g["case_id"],"values":[t["timings"][phase]["duration_ns"] for t in view["payload"]["trials"] if t["case_id"]==g["case_id"] and t["timings"][phase]["available"]],"summary":g["phases"][phase]} for g in groups]
+            for phase in ("public_run","end_to_end")}
+
+
+def validate_figure_metadata(view,metadata):
+    require(metadata["schema"]=="csl.report-figure/1" and metadata["payload_sha256"]==view["payload_sha256"],"figure metadata subject/version differs")
+    require(metadata["unit"]=="ns" and metadata["series"]==figure_series(view),"figure series or units differ from saved records")
+    require(metadata["matplotlib"]=="3.11.2" and metadata["svg_policy"]=="csl.report.svg.mpl-3.11.2/1","figure producer/policy differs")
+
+
+def artifact_reference(ref):
+    require(isinstance(ref,str) and (ref=="main" or re.fullmatch(r"[0-9a-f]{40}",ref) is not None),"artifact reference must be current main or explicit commit SHA")
+    return "current main" if ref=="main" else "artifact commit "+ref
+
+
+def artifact_links(report_id,ref="main"):
+    label=artifact_reference(ref)
+    require(re.fullmatch(r"lp-\d{8}T\d{6}Z-[0-9a-f]{12}",report_id) is not None,"unsafe report identity")
+    base="https://github.com/butahlecoq/controlled-systems-lab/"
+    path="/reports/algorithm-results/"+report_id
+    return base+"tree/"+ref+path,base+"blob/"+ref+path+".zip",label
 
 
 def publishable(view):

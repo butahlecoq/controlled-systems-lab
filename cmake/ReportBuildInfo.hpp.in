@@ -1,6 +1,7 @@
 #pragma once
 namespace csl::reporting::build {
 inline constexpr const char* source_commit=R"CSL(@REPORT_SOURCE_COMMIT@)CSL";
+inline constexpr const char* build_owner_sha256=R"CSL(@REPORT_BUILD_OWNER@)CSL";
 inline constexpr const char* compiler=R"CSL(@CMAKE_CXX_COMPILER_ID@)CSL";
 inline constexpr const char* compiler_version=R"CSL(@CMAKE_CXX_COMPILER_VERSION@)CSL";
 inline constexpr const char* generator=R"CSL(@CMAKE_GENERATOR@)CSL";

@@ -24,6 +24,8 @@ python tests/reporting/test_smoke.py --exe build/html01/Release/csl_lp_report.ex
 
 The smoke executes each case once with `purpose=test`. Test discovery without `--exe` explicitly skips that smoke; it does not claim to have executed it. Plot tests explicitly skip without the separate Matplotlib environment. Native CTest and the reporting workflow together cover these distinct gates. Neither runs an accepted benchmark.
 
+Functional smoke validates the actual configured Debug or Release executable and matching CMake File API configuration. Debug/sanitizer execution remains functional coverage; measurement admission independently requires clean Release, NDEBUG and C++20. Physical file identity is used for artifact/path checks, including Windows short-name aliases.
+
 The implementation is committed and independently reviewed **before** accepted measurements. Configure and build that fixed clean source commit, then, only after measurement allocation:
 
 ```powershell
@@ -45,6 +47,8 @@ python scripts/reports/render.py --records build/html01/collection-001/records.j
 ```
 
 Linux equivalents use Ninja with `CMAKE_BUILD_TYPE=Release`, the native executable location and `report-env/bin/python`. All output destinations are new directories; export refuses to overwrite a bundle. The collector performs a final verbose build under clean-source checks before and after that build, checks the embedded executable commit/Release/NDEBUG identity, and retains the supplied build log plus that final build log and the complete CMake File API dependency graph. `SOURCE_ROOT`/`BUILD_ROOT` replace private checkout/build prefixes. A dirty or stale executable cannot produce a publishable report.
+
+Before any measurement/profile call, the supplied executable must be the selected `csl_lp_report` codemodel artifact in the actual configured source/build directory. Embedded configuration/compiler/version/generator and source/build/compiler-owner hash must match that graph. Embedded common and Release flags are checked against the actual report/support compile groups; the transitive compile/link/archive graph remains saved. A same-commit executable from build B cannot borrow build A's flags or provenance.
 
 The collector records CPU/OS/RAM and pre/post load observations, public-safe process CPU deltas where available, exact configured resources and commands, executable and sanitized build-provenance hashes. It does not dump the environment or process command lines. The configured native thread count is not an observed OS thread count. Unavailable observations carry reasons. A busy system must be disclosed; do not remove slow individual trials or stop unrelated work.
 
@@ -83,6 +87,8 @@ The process, instruction/data caches and native TLS may be warm. Every measured 
 
 End-to-end means **input-to-verified-result latency**, not application end-to-end. It excludes process startup, object destruction, JSON output/persistence and plotting. `public_run` includes translation/loading, native solve, logging and numerical work inside the adapter; native-only time and exclusive native/adapter decomposition are unavailable. The checksum observes completed work and is not a cryptographic input hash or mathematical certificate.
 
+The destruction exclusion applies to successful intervals. On a thrown operation the action's owners unwind before the failure boundary is stamped; that retained total explicitly has scope `end_to_end_including_unwind`. CSV exposes `end_to_end_scope`, and the HTML trial detail retains the exact phase objects. Such failed intervals never contribute to successful summaries or an accepted profile. This scope does not claim to isolate native cleanup or add it to successful latency.
+
 Record steady-clock integer boundaries, period and integer nanoseconds. A separate clock-read calibration records observed positive deltas, not guaranteed clock resolution. Zero intervals are legal at clock granularity and remain visible. Calibration, warmups and profile records never enter measured statistics.
 
 Groups retain all attempts, expected/matched/failed/unsupported/cancelled/missing counts. Any failed reference check or incomplete process invalidates the benchmark group; a filtered success subset is not summarized. Expected infeasible/unbounded outcomes are successful reference matches. At least five complete matching trials are needed for median/min/max. For literal TEST values `[10,20,30,40,50]`, these are 30/10/50 ns; four values `[10,20,30,40]` have median25. Range is not a confidence interval or percentile. Nested phases appear separately and are never summed or stacked into end-to-end.
@@ -110,6 +116,8 @@ A metric is `{available:true,value:...,unit:...,scope:...}` or `{available:false
 
 The complete literal fixture `tests/reporting/fixtures/view-v1.json` is conspicuously `purpose=test`, with synthetic source/build identity. Relabeling it as measurement does not create publishable provenance. Validators reject unknown schema versions, duplicate JSON keys, nonfinite values, changed hashes, wrong subjects, inconsistent success/reference/status, overlapping/reversed spans, mixed units, duplicate/out-of-order trials and inconsistent process counts. Failed but structurally valid results remain renderable. Corrupt input is an explicit error, never silently repaired.
 
+Every successful row requires all six observed phase spans, actual backend provenance and a returned current first attempt; configured source identity must agree with the saved source. Native iteration availability/value/unit/scope is typed and must agree with the recognized retained diagnostic prefix. Failed/stopped/Unsupported rows may retain unavailable phases with reasons. Infeasible/unbounded literal reference matches do not require invented objective candidates.
+
 Native iteration extraction recognizes only the exact `adapter.version=1.0.0+highs.1.11.0` / native1.11.0 prefix, before `native.log:`. Duplicate keys or a conflicting version fail. Arbitrary native log text is never interpreted as evidence or a runtime decomposition.
 
 ### Canonical bytes and file hashes
@@ -129,6 +137,10 @@ HTML has no JavaScript, web font, CDN or runtime network request. It escapes lab
 Reviewed bundles contain exactly thirteen files: `index.html`, `records.json`, `scenarios.json`, `raw-events.jsonl`, `profile.json`, `build-provenance.txt`, `process-stderr.txt`, `trials.csv`, `summary.csv`, `latency.svg`, `latency.png`, `export.json`, `manifest.json`. The manifest hashes the other twelve files. An adjacent ZIP contains these files under the report ID plus an offline index. Catalogue ZIP hashes are outside the ZIP.
 
 The site validator also binds raw/profile/build/stderr sidecars to their saved payload hashes and checks CSV durations, summaries and units against the saved records. Rehashing a changed CSV in the manifest does not bypass these checks. An aborted writer may leave an unterminated final JSON line: the collector preserves the raw bytes, uses only complete preceding events, and records missing trials. A complete malformed line is rejected.
+
+The pure `csl.report-document/1` projection is shared by export and site validation. Every emitted trial/summary CSV field, the complete deterministic HTML document and figure-series metadata are compared with saved records, independently of the manifest. An altered residual, support/status, diagnostic, displayed objective or figure series cannot be admitted by recomputing file hashes. The offline parser uses an explicit generated-tag/attribute vocabulary: only charset/viewport meta directives, generated drawing resources and approved relative/source/artifact links are accepted; meta refresh, srcset and unsupported resource attributes are rejected.
+
+Both bundle and catalogue provide repository artifact-tree and ZIP fallbacks separate from the measured source link. `render.py --artifact-ref main` (default) labels this as **current main**, which may advance and becomes available only after artifact publication. A controller may instead supply an existing 40-hex artifact commit; other references are rejected. The catalogue's optional `artifact_ref` must match bundle export metadata. No future/self-referential commit is invented, no measured source SHA is replaced, and these fallbacks are not proof of Pages availability. Artifact reference and document policy live in export metadata, outside the scientific payload hash.
 
 The orchestrator owns `reports/algorithm-results/catalog.json`, its deterministic index, immutable versioned bundles and publication. `site.py --catalog ... --check --out ...` validates inventory/hashes/records/links and stages only reviewed allowlisted files. TEST data cannot enter the publication path. The separate report workflow validates PRs without deployment and publishes main-only after validation; it does not run benchmarks or upload the repository wholesale. Pages settings remain an orchestrator action. A plausible URL, repository blob URL or green CI job is not proof of accessible deployment: open the actual Pages output URL, exact report, raw downloads and ZIP and compare the reviewed hashes before closing the report ticket.
 

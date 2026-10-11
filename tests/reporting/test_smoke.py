@@ -30,13 +30,16 @@ class SmokeTests(unittest.TestCase):
         self.assertEqual(events[-1]["emitted_trials"],5)
         build=next(parent for parent in Path(EXE).parents if (parent/"report-build-info.json").is_file())
         configured=data.parse_json((build/"report-build-info.json").read_text(encoding="utf-8"))
-        collect_lp.verify_build_identity(events[0],configured["source_commit"])
-        graph=collect_lp.file_api(build)
+        collect_lp.verify_build_identity(events[0],configured["source_commit"],functional=True)
+        graph=collect_lp.file_api(build,events[0]["build"]["configuration"])
+        collect_lp.verify_artifact(events[0],graph,build,EXE)
         targets={target["name"]:target for target in graph["targets"]}
         self.assertTrue(targets["highs"]["compileGroups"])
         self.assertTrue(targets["csl_lp_report"]["link"]["commandFragments"])
         self.assertTrue(all(targets[name]["artifacts"] for name in ("highs","csl_highs_lp","csl_lp_report")))
         with self.assertRaises(ValueError): collect_lp.verify_build_identity(events[0],"f"*40)
+        if events[0]["build"]["configuration"]=="Debug":
+            with self.assertRaises(ValueError): collect_lp.verify_build_identity(events[0],configured["source_commit"])
         view=collect_lp.test_view(events,EXE,completed.returncode,completed.stdout,completed.stderr)
         self.assertFalse(data.publishable(view))
         self.assertEqual([t["result"]["outcome"] for t in view["payload"]["trials"]],
