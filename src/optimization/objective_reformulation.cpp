@@ -7,6 +7,8 @@
 
 namespace csl::optimization {
 namespace {
+template<class... Handlers> struct Visitor : Handlers... { using Handlers::operator()...; };
+
 OperationStopped arithmetic_failure() {
     return {StopReason::numerical_failure, "Nonrepresentable objective arithmetic or eigensolver failure."};
 }
@@ -75,11 +77,10 @@ ObjectiveCoefficients Objective::coefficients() const { return storage_->coeffic
 ObjectivePolicy Objective::policy() const noexcept { return storage_->policy; }
 std::optional<QuadraticChecks> Objective::quadratic_checks() const { return storage_->checks; }
 std::size_t Objective::dimension() const noexcept {
-    return std::visit([](const auto& data) {
-        using T = std::decay_t<decltype(data)>;
-        if constexpr (std::is_same_v<T, LinearCoefficients>) return data.coefficients.size();
-        else if constexpr (std::is_same_v<T, QuadraticCoefficients>) return data.linear.size();
-        else return data.map.cols();
+    return std::visit(Visitor{
+        [](const LinearCoefficients& data) { return data.coefficients.size(); },
+        [](const QuadraticCoefficients& data) { return data.linear.size(); },
+        [](const ResidualCoefficients& data) { return data.map.cols(); }
     }, storage_->coefficients);
 }
 Result<Objective> snapshot(const TerminalObjective& authored, ObjectivePolicy policy) {
@@ -90,41 +91,42 @@ Result<Objective> snapshot(const TerminalObjective& authored, ObjectivePolicy po
         return Diagnostic{DiagnosticCode::invalid_input, "objective.policy", "Tolerances must be finite and nonnegative."};
     if (policy.assurance == Assurance::validated)
         return Diagnostic{DiagnosticCode::unsupported, "objective.assurance", "This module supplies numerical arithmetic only; validated evidence is unavailable."};
-    if (const auto* linear = std::get_if<LinearTerminal>(&authored)) {
-        auto vector = numeric::snapshot_vector(linear->coefficients);
-        if (const auto* error = std::get_if<Diagnostic>(&vector)) return *error;
-        if (!std::isfinite(linear->offset))
-            return Diagnostic{DiagnosticCode::invalid_input, "objective.offset", "Offset must be finite."};
-        return Objective{std::make_shared<const detail::ObjectiveStorage>(detail::ObjectiveStorage{
-            LinearCoefficients{std::get<numeric::VectorView>(vector), linear->offset}, policy, std::nullopt})};
-    }
-    if (const auto* quadratic = std::get_if<QuadraticTerminal>(&authored)) {
-        auto matrix = numeric::snapshot(quadratic->Q);
-        if (const auto* error = std::get_if<Diagnostic>(&matrix)) return *error;
-        auto linear = numeric::snapshot_vector(quadratic->linear);
-        if (const auto* error = std::get_if<Diagnostic>(&linear)) return *error;
-        if (quadratic->Q.rows != quadratic->Q.cols || quadratic->Q.cols != quadratic->linear.size())
-            return Diagnostic{DiagnosticCode::invalid_input, "objective.shape", "Quadratic matrix must be square and match the linear term."};
-        if (!std::isfinite(quadratic->offset))
-            return Diagnostic{DiagnosticCode::invalid_input, "objective.offset", "Offset must be finite."};
-        auto checks = check_quadratic(std::get<numeric::MatrixView>(matrix), policy.numerical);
-        if (const auto* error = std::get_if<Diagnostic>(&checks)) return *error;
-        if (const auto* stopped = std::get_if<OperationStopped>(&checks)) return *stopped;
-        return Objective{std::make_shared<const detail::ObjectiveStorage>(detail::ObjectiveStorage{
-            QuadraticCoefficients{std::get<numeric::MatrixView>(matrix), std::get<numeric::VectorView>(linear), quadratic->offset},
-            policy, std::get<QuadraticChecks>(checks)})};
-    }
-    if (const auto* residual = std::get_if<ResidualNormTerminal>(&authored)) {
-        auto map = numeric::snapshot(residual->map);
-        if (const auto* error = std::get_if<Diagnostic>(&map)) return *error;
-        auto target = numeric::snapshot_vector(residual->target);
-        if (const auto* error = std::get_if<Diagnostic>(&target)) return *error;
-        if (residual->map.rows != residual->target.size())
-            return Diagnostic{DiagnosticCode::invalid_input, "objective.shape", "Residual target must match map rows."};
-        return Objective{std::make_shared<const detail::ObjectiveStorage>(detail::ObjectiveStorage{
-            ResidualCoefficients{std::get<numeric::MatrixView>(map), std::get<numeric::VectorView>(target)}, policy, std::nullopt})};
-    }
-    return Diagnostic{DiagnosticCode::unsupported, "objective", "Objective kind is not implemented."};
+    return std::visit(Visitor{
+        [policy](const LinearTerminal& linear) -> Result<Objective> {
+            auto vector = numeric::snapshot_vector(linear.coefficients);
+            if (const auto* error = std::get_if<Diagnostic>(&vector)) return *error;
+            if (!std::isfinite(linear.offset))
+                return Diagnostic{DiagnosticCode::invalid_input, "objective.offset", "Offset must be finite."};
+            return Objective{std::make_shared<const detail::ObjectiveStorage>(detail::ObjectiveStorage{
+                LinearCoefficients{std::get<numeric::VectorView>(vector), linear.offset}, policy, std::nullopt})};
+        },
+        [policy](const QuadraticTerminal& quadratic) -> Result<Objective> {
+            auto matrix = numeric::snapshot(quadratic.Q);
+            if (const auto* error = std::get_if<Diagnostic>(&matrix)) return *error;
+            auto linear = numeric::snapshot_vector(quadratic.linear);
+            if (const auto* error = std::get_if<Diagnostic>(&linear)) return *error;
+            if (quadratic.Q.rows != quadratic.Q.cols || quadratic.Q.cols != quadratic.linear.size())
+                return Diagnostic{DiagnosticCode::invalid_input, "objective.shape", "Quadratic matrix must be square and match the linear term."};
+            if (!std::isfinite(quadratic.offset))
+                return Diagnostic{DiagnosticCode::invalid_input, "objective.offset", "Offset must be finite."};
+            auto checks = check_quadratic(std::get<numeric::MatrixView>(matrix), policy.numerical);
+            if (const auto* error = std::get_if<Diagnostic>(&checks)) return *error;
+            if (const auto* stopped = std::get_if<OperationStopped>(&checks)) return *stopped;
+            return Objective{std::make_shared<const detail::ObjectiveStorage>(detail::ObjectiveStorage{
+                QuadraticCoefficients{std::get<numeric::MatrixView>(matrix), std::get<numeric::VectorView>(linear), quadratic.offset},
+                policy, std::get<QuadraticChecks>(checks)})};
+        },
+        [policy](const ResidualNormTerminal& residual) -> Result<Objective> {
+            auto map = numeric::snapshot(residual.map);
+            if (const auto* error = std::get_if<Diagnostic>(&map)) return *error;
+            auto target = numeric::snapshot_vector(residual.target);
+            if (const auto* error = std::get_if<Diagnostic>(&target)) return *error;
+            if (residual.map.rows != residual.target.size())
+                return Diagnostic{DiagnosticCode::invalid_input, "objective.shape", "Residual target must match map rows."};
+            return Objective{std::make_shared<const detail::ObjectiveStorage>(detail::ObjectiveStorage{
+                ResidualCoefficients{std::get<numeric::MatrixView>(map), std::get<numeric::VectorView>(target)}, policy, std::nullopt})};
+        }
+    }, authored);
 }
 Result<double> evaluate(const Objective& objective, std::span<const double> point) {
     if (point.size() != objective.dimension())
@@ -133,37 +135,38 @@ Result<double> evaluate(const Objective& objective, std::span<const double> poin
         if (!std::isfinite(value))
             return Diagnostic{DiagnosticCode::invalid_input, "objective.point", "Point must be finite."};
     const auto data = objective.coefficients();
-    if (const auto* quadratic = std::get_if<QuadraticCoefficients>(&data)) {
-        double result = quadratic->offset;
-        for (std::size_t i = 0; i < point.size(); ++i) {
-            double row = 0;
-            for (std::size_t j = 0; j < point.size(); ++j) row += quadratic->Q(i, j) * point[j];
-            if (!std::isfinite(row)) return arithmetic_failure();
-            result += (0.5 * point[i]) * row;
-            result += quadratic->linear[i] * point[i];
+    return std::visit(Visitor{
+        [point](const QuadraticCoefficients& quadratic) -> Result<double> {
+            double result = quadratic.offset;
+            for (std::size_t i = 0; i < point.size(); ++i) {
+                double row = 0;
+                for (std::size_t j = 0; j < point.size(); ++j) row += quadratic.Q(i, j) * point[j];
+                if (!std::isfinite(row)) return arithmetic_failure();
+                result += (0.5 * point[i]) * row;
+                result += quadratic.linear[i] * point[i];
+            }
+            if (!std::isfinite(result)) return arithmetic_failure();
+            return result;
+        },
+        [point](const LinearCoefficients& linear) -> Result<double> {
+            double result = linear.offset;
+            for (std::size_t i = 0; i < point.size(); ++i) result += linear.coefficients[i] * point[i];
+            if (!std::isfinite(result))
+                return OperationStopped{StopReason::numerical_failure, "Nonfinite objective arithmetic."};
+            return result;
+        },
+        [point](const ResidualCoefficients& residual) -> Result<double> {
+            double norm = 0;
+            for (std::size_t row = 0; row < residual.map.rows(); ++row) {
+                double value = -residual.target[row];
+                for (std::size_t col = 0; col < point.size(); ++col) value += residual.map(row, col) * point[col];
+                norm = std::hypot(norm, value);
+            }
+            if (!std::isfinite(norm))
+                return OperationStopped{StopReason::numerical_failure, "Nonfinite residual arithmetic."};
+            return norm;
         }
-        if (!std::isfinite(result)) return arithmetic_failure();
-        return result;
-    }
-    if (const auto* linear = std::get_if<LinearCoefficients>(&data)) {
-        double result = linear->offset;
-        for (std::size_t i = 0; i < point.size(); ++i) result += linear->coefficients[i] * point[i];
-        if (!std::isfinite(result))
-            return OperationStopped{StopReason::numerical_failure, "Nonfinite objective arithmetic."};
-        return result;
-    }
-    if (const auto* residual = std::get_if<ResidualCoefficients>(&data)) {
-        double norm = 0;
-        for (std::size_t row = 0; row < residual->map.rows(); ++row) {
-            double value = -residual->target[row];
-            for (std::size_t col = 0; col < point.size(); ++col) value += residual->map(row, col) * point[col];
-            norm = std::hypot(norm, value);
-        }
-        if (!std::isfinite(norm))
-            return OperationStopped{StopReason::numerical_failure, "Nonfinite residual arithmetic."};
-        return norm;
-    }
-    return Diagnostic{DiagnosticCode::unsupported, "objective", "Objective kind is not implemented."};
+    }, data);
 }
 NormSquareReformulation::NormSquareReformulation(Objective original, Objective squared)
     : original_(original), squared_(squared) {}
