@@ -6,6 +6,7 @@
 #include <map>
 #include <stdexcept>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 namespace csl::registry {
@@ -140,6 +141,12 @@ template<class Port> class BoundWorkspace final : public ExclusiveWorkspace {
 public:
     auto run(const ExecutionContext& context) { return Port::run(*workspace_,*request_,context); }
     const BasisDiagnostics* basis() const { return basis_.get(); }
+    const WorkspaceIdentity& workspace_identity() const noexcept requires std::is_same_v<Port,LPPort> {
+        return workspace_->workspace_identity();
+    }
+    const std::optional<SolveAttempt>& last_attempt() const noexcept requires std::is_same_v<Port,LPPort> {
+        return workspace_->last_attempt();
+    }
 };
 namespace detail {
 template<class Port> struct CheckedEntry {

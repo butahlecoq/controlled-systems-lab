@@ -49,8 +49,9 @@ TEST_CASE("negative and zero coefficients and genuinely unsupported LPs") {
             CHECK(solved.primal == (coefficient < 0 ? std::optional<Vector>{{4}} : std::optional<Vector>{{-1}}));
             CHECK(solved.objective.upper->value == (coefficient < 0 ? -6 : 2));
         }
-        auto request = interval_lp(3);
-        request.variables[0].upper.reset();
+        auto input = interval_input(3);
+        input.variables[0].upper.reset();
+        const auto request = publish(input);
         auto result = prepare_pipeline(select(registry,Method{{id},{}},request));
         REQUIRE(std::holds_alternative<Rejection>(result));
         const auto& rejection = std::get<Rejection>(result);
@@ -67,14 +68,15 @@ TEST_CASE("bounded LP preflight rejects overflow and rounded unequal endpoint ti
     auto sign = sign_registration();
     sign.factory = [&](const LinearProgram&) { ++factories[1]; return std::make_unique<SignWorkspace>(); };
     registry.add(endpoint); registry.add(sign);
-    auto overflow = interval_lp(-std::numeric_limits<double>::max());
+    auto overflow = interval_input(-std::numeric_limits<double>::max());
     overflow.variables[0] = {2,3};
-    auto rounded_tie = interval_lp(-1); rounded_tie.offset = 1e20;
-    auto underflow = interval_lp(std::numeric_limits<double>::denorm_min());
+    auto rounded_tie = interval_input(-1); rounded_tie.offset = 1e20;
+    auto underflow = interval_input(std::numeric_limits<double>::denorm_min());
     underflow.variables[0] = {0,0.5}; underflow.offset = 0;
-    for (const auto& request : {overflow,rounded_tie,underflow}) {
+    for (const auto& input : {overflow,rounded_tie,underflow}) {
+        const auto request = publish(input);
         for (const auto& id : {"endpoint","sign"}) {
-            CAPTURE(std::string(id)); CAPTURE(request.objective[0]); CAPTURE(request.offset);
+            CAPTURE(std::string(id)); CAPTURE(request.objective()[0]); CAPTURE(request.offset());
             auto result = prepare_pipeline(select(registry,Method{{id},{}},request));
             CHECK(std::holds_alternative<Rejection>(result));
             if (!std::holds_alternative<Rejection>(result)) continue;
@@ -93,15 +95,16 @@ TEST_CASE("bounded LP preflight rejects overflow and rounded unequal endpoint ti
 TEST_CASE("constant objectives and degenerate intervals remain legitimate bounded LP inputs") {
     Registry<LPPort> registry;
     registry.add(endpoint_registration()); registry.add(sign_registration());
-    auto constant = interval_lp(0); constant.offset = 1e20;
-    auto degenerate = interval_lp(-1); degenerate.variables[0] = {4,4}; degenerate.offset = 1e20;
+    auto constant = interval_input(0); constant.offset = 1e20;
+    auto degenerate = interval_input(-1); degenerate.variables[0] = {4,4}; degenerate.offset = 1e20;
     for (const auto& id : {"endpoint","sign"}) {
-        for (const auto& request : {constant,degenerate}) {
+        for (const auto& input : {constant,degenerate}) {
+            const auto request = publish(input);
             auto result = prepare_pipeline(select(registry,Method{{id},{}},request));
             REQUIRE_FALSE(std::holds_alternative<Rejection>(result));
             auto workers = std::get<0>(result).create();
             const auto answer = std::get<ProgramResult>(std::get<0>(workers)->run(context()));
-            CHECK(answer.primal == (request.objective[0] == 0 ? std::optional<Vector>{{-1}} : std::optional<Vector>{{4}}));
+            CHECK(answer.primal == (request.objective()[0] == 0 ? std::optional<Vector>{{-1}} : std::optional<Vector>{{4}}));
             CHECK(answer.objective.upper->value == 1e20);
             CHECK(answer.outcome.value == MathematicalOutcome::optimal);
         }
@@ -112,11 +115,12 @@ TEST_CASE("snapshots retain full requests after source exit and workspaces mutat
     auto plan = [] {
         Registry<LPPort> registry;
         registry.add(endpoint_registration());
-        auto request = interval_lp(3);
+        auto input = interval_input(3);
+        const auto request = publish(input);
         auto result = prepare_pipeline(select(registry,Method{{"endpoint"},{}},request));
         auto prepared = std::get<PreparedPipeline<LPPort>>(std::move(result));
-        request.objective[0] = -200;
-        request.variables[0] = {100,200};
+        input.objective[0] = -200;
+        input.variables[0] = {100,200};
         return prepared;
     }();
     auto first = plan.create(), second = plan.create();
@@ -256,9 +260,9 @@ TEST_CASE("basis diagnostics observe their own LP workspace after the prepared p
         std::shared_ptr<std::vector<std::string>> destruction;
         explicit StatefulLP(std::shared_ptr<std::vector<std::string>> log) : destruction(std::move(log)) {}
         ~StatefulLP() override { destruction->push_back("workspace"); }
-        ProgramOutcome solve(const LinearProgram& p,const ExecutionContext&) override {
+        ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext&) override {
             ++calls;
-            return ProgramResult{Termination::completed,{p.identity,MathematicalOutcome::undetermined,Unestablished{},{}},
+            return ProgramResult{Termination::completed,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
                 {},{},std::to_string(calls)};
         }
     };
@@ -266,6 +270,11 @@ TEST_CASE("basis diagnostics observe their own LP workspace after the prepared p
         const StatefulLP& workspace;
         explicit BoundBasis(const StatefulLP& w) : workspace(w) {}
         ~BoundBasis() override { workspace.destruction->push_back("basis@"+std::to_string(workspace.calls)); }
+        BasisCapabilities capabilities() const override { return {true,false,false}; }
+        BasisSnapshotResult snapshot() const override {
+            if(!workspace.last_attempt()) return BasisUnavailable{BasisUnavailableReason::not_solved,"no attempt"};
+            return BasisSnapshot{{workspace.last_attempt()->stamp,0},{},{}};
+        }
         std::string describe_basis() const override { return "solve "+std::to_string(workspace.calls); }
     };
     struct ConnectBasis {
@@ -351,7 +360,8 @@ TEST_CASE("a custom port extends registry without product dispatch and freezes o
             [configuration](const CounterRequest&) { return std::make_unique<CounterFixture>(*configuration); }});
         CounterRequest request{20,snapshots};
         Registry<LPPort> lp; lp.add(endpoint_registration());
-        auto unsupported = interval_lp(3); unsupported.variables[0].upper.reset();
+        auto input = interval_input(3); input.variables[0].upper.reset();
+        const auto unsupported = publish(input);
         auto rejection = prepare_pipeline(select(registry,Method{{"counter"},{}},request),select(lp,Method{{"endpoint"},{}},unsupported));
         REQUIRE(std::holds_alternative<Rejection>(rejection));
         CHECK(std::get<Rejection>(rejection).provenance.actual->id.value == "endpoint");
