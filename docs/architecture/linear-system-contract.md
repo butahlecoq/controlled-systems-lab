@@ -1,6 +1,6 @@
 # General linear-system contract
 
-Date: 2026-10-11. Status: mathematical/interface discussion draft, not implemented classes.
+Date: 2026-10-11. Status: mathematical/interface contract. MODEL-01 implements the discrete affine and scheduled observation subset in [native source revision 1.2](../contracts/linear-model.md); broader problem/uncertainty capabilities remain separate.
 
 Owner direction: begin with optimal control planning without disturbances, while designing abstractions with bounded disturbances, adversarial inputs, partial/noisy observations and unconstrained variants in view. The owner selected C++ for the main implementation, with C++20 as the working standard and Python allowed for independent verification. Specific native types are proposed in the [C++ contracts draft](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md); numerical dependencies remain unselected.
 
@@ -54,6 +54,12 @@ $$
 
 Every observation channel must declare its timestamp, pre/post-decision availability and dependence on inputs. A controller cannot select u_t from an observation that itself depends on the not-yet-selected u_t without a separate well-posed algebraic-loop contract. A disturbance revealed before the action also changes the information pattern.
 
+In the implemented revision 1.2, C/Du/Dw/F/b are one constant record or records
+indexed by an explicit sample schedule. Each sample declares its state source
+stage, measurement event, availability event and optional joint u/w source stage.
+The one validated state-time grid supplies source and event timestamps. Authored
+sample order is retained; indexed records follow that order.
+
 Initial feedback convention:
 
 ~~~text
@@ -63,6 +69,22 @@ external input is realized under its declared information pattern
 state advances to x_(t+1)
 receive any post-decision / next-state measurements
 ~~~
+
+The native event clock orders before(k) < after(k) < before(k+1). Here after(k)
+follows transition completion and has physical time times[k+1]; before(k+1) is
+causally later at that same time. Both current-state feedthrough and next-state
+measurement may occur at after(k). Measurement before a source is released and
+availability before measurement are rejected, including reversed equal-time
+events. Delayed old-state and historical-input samples are explicit. Only
+before(T) exists at the terminal state; T=0 has no input/transition stage.
+
+No input source means zero Du/Dw and empty supplied input vectors. An explicit
+input source keeps its dependency even for zero maps. The stateless evaluator
+cannot prove that caller vectors came from those declared historical sources.
+Post-action/pre-transition events, between-grid sampling, pre-action disturbance
+revelation, independent u/w source stages and algebraic loops require a later
+contract. See [linear-model.md](../contracts/linear-model.md) for the full
+ownership, numerical-stop and source-migration rules.
 
 For an open-loop plan, u_(0:T-1) is selected before future observations. The observation model remains useful for simulation and later feedback, while a nominal planner with a known initial state need not call an estimator.
 

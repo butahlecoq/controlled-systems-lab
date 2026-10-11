@@ -1,6 +1,6 @@
 # C++20 core contracts: nominal optimal-family slice
 
-Date: 2026-10-11. Status: design sketch for owner and scientific review. The [C++ language direction](../../architecture/decisions/0001-cpp20-core.md) is accepted. CORE-01 now supplies [compiled native interface revision 1.1](../../contracts/core-interfaces.md) and [pinned dependency probes](../../architecture/decisions/0002-native-integrations.md), pending integration review. Revision 1.1 adds problem/program-bound outcome claims and neutral geometry operands with reference-bound evidence. The sketches below retain the broader intended design; they do not imply implemented numerical adapters or synthesis.
+Date: 2026-10-11. Status: design sketch for owner and scientific review. The [C++ language direction](../../architecture/decisions/0001-cpp20-core.md) is accepted. CORE-01 supplies the compiled contract and [pinned dependency probes](../../architecture/decisions/0002-native-integrations.md). [Native source revision 1.2](../../contracts/core-interfaces.md) incorporates MODEL-01's canonical observation providers and explicit schedules. Revision 1.1's problem/program-bound outcome and geometry evidence ports are unchanged. The sketches below retain the broader intended design; they do not imply implemented numerical adapters or synthesis.
 
 Requirements, test IDs and delivery boundaries are governed by the [consolidated specification](2026-10-11-controlled-systems-master-design.md). This document details its proposed native interfaces.
 
@@ -86,6 +86,26 @@ Matrix and Vector are owning values; immutable views declare scalar type, dimens
 The problem has T transitions/control stages and T+1 state stages. The validator checks shapes, timestamps, objective properties and domain metadata; it does not silently add compactness or invertibility assumptions. Empty temporal constraints mean no temporal coupling. Universal sets mean no restriction; the empty set means infeasibility. Missing observation channels do not imply full-state observation. Zero-dimensional external/control ports support nominal/autonomous special cases naturally.
 
 ObservationModel carries state/output maps, error and optional feedthrough maps, offsets and pre/post-decision timing. InformationPattern belongs to the problem and declares what is known when decisions are selected. A nominal planner uses known initial information without needing an estimator.
+
+The concrete [MODEL-01 module](../../contracts/linear-model.md) uses the canonical
+authored `SystemModel` rather than introducing a second authored vocabulary.
+Revision 1.2's `ObservationStage` contains C/Du/Dw/F/b, with a constant or
+sample-indexed provider. `ObservationSample` declares state source, measurement
+and availability events, and optional joint u/w source. All timestamps derive
+from one copied grid; events order before(k) < after(k) < before(k+1), with
+after(k) following transition completion. The latter two events share physical
+time but remain causally distinct. Sample order is preserved, delayed historical
+sources are explicit, and no inferred schedule migrates the old aggregate.
+
+`model::snapshot` validates and copies authored values into private immutable
+CORE-03 numeric views, including when producer aliases survive a move. Retained
+coefficient views outlive the model. Checked access returns values or diagnostics;
+evaluation additionally returns canonical numerical-failure stops for nonfinite
+intermediates from finite operands. Observation evaluation owns its output and
+returns source/event metadata, without proving input history or producing any
+evidence claim. Continuous coefficients are rejected without discretization.
+Problem admissibility and uncertainty remain separate; supported and unsupported
+clock cases and T=0 are specified in the module contract.
 
 ControlDomain supports a continuous set, finite catalogue or mixed domain as distinct alternatives. The initial strategy accepts continuous convex polyhedral sets only. Nonpolyhedral continuous domains are representable but require another compatible strategy. Hybrid modes/guards are a separate model extension.
 
