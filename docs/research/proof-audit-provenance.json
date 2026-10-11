@@ -1,0 +1,757 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-11",
+  "curation_issue": 109,
+  "scope": "Curation of already reviewed authored proofs; no new theorem audit or historical execution",
+  "digest_conventions": {
+    "original_sha256": "Registered original bytes",
+    "navigation_extract_sha256": "Private navigation text only; not typeset authority",
+    "antecedent_versions_sha256": "Private authored report versions; never public-report byte identities",
+    "artifact_sha256": "Private review/fix/recheck note bytes; content not republished"
+  },
+  "alias_crosswalk": {
+    "RP01": "A43",
+    "RP02": "A44",
+    "RP03": "A45"
+  },
+  "sources": [
+    {
+      "id": "L01",
+      "original_sha256": "b468f67e7464256a3212552f72588c223e295f70f40867894afb841387449872",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L01-01",
+          "kind": "pdf_pages",
+          "start": 1,
+          "end": 2,
+          "description": "Constant nonsingular A; compact convex initial/control sets"
+        },
+        {
+          "id": "L01-02",
+          "kind": "pdf_pages",
+          "start": 3,
+          "end": 4,
+          "description": "Lemmas 1-2; Theorem 1 on PDF p.4, printed p.118; vertex-feasibility problem"
+        }
+      ],
+      "navigation_extract_sha256": "97158870c6cb998b9d9e54eeede7ccc3093179d7c06597766bfe607802c4f86e"
+    },
+    {
+      "id": "L03",
+      "original_sha256": "4350cf20a2e458a9bd3cdb95e3ea8e306549b4b65d80fc5e3c5b89712d20dafb",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L03-01",
+          "kind": "ooxml_section_paragraph",
+          "section": "sections 3.1-3.4",
+          "description": "Section 3.4: paragraphs describing the two LP outcomes; Steps 2.2/3. OOXML formula loss prevents identifying the precise grouping LP"
+        }
+      ],
+      "navigation_extract_sha256": "0a2e71fccc755a89430a190c0f20590cc67452d89b3c4d1240b720b5939b5a0f"
+    },
+    {
+      "id": "L05",
+      "original_sha256": "dfc76d4d33dad578567f851ae8169a44af290d2e17ea826cec46271dde2d311d",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L05-01",
+          "kind": "pdf_pages",
+          "start": 3,
+          "end": 4,
+          "description": "Eqs.(1)-(7): model/approximation assumptions"
+        },
+        {
+          "id": "L05-02",
+          "kind": "pdf_pages",
+          "start": 5,
+          "end": 6,
+          "description": "Eqs.(8)-(9), full recurrence and constraint intersection"
+        },
+        {
+          "id": "L05-03",
+          "kind": "pdf_pages",
+          "start": 7,
+          "end": 8,
+          "description": "Current-hull supporting-hyperplane predicate"
+        },
+        {
+          "id": "L05-04",
+          "kind": "pdf_pages",
+          "start": 8,
+          "end": 11,
+          "description": "Eqs.(10)-(11), Table 1 (p.10) and figures"
+        },
+        {
+          "id": "L05-05",
+          "kind": "pdf_pages",
+          "start": 12,
+          "end": 12,
+          "description": "References [2]-[6]; exact [5]/[6] unrecovered"
+        }
+      ],
+      "navigation_extract_sha256": "43572d32d8025fe13750b56385c61b25a7459a33940a9263b1fc66930c1d209e"
+    },
+    {
+      "id": "L07",
+      "original_sha256": "6bc149e7e1c63d1cff262ffd861898d528a3eee2b1c0b591aebde91c607f89fc",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L07-01",
+          "kind": "pdf_pages",
+          "start": 14,
+          "end": 15,
+          "description": "Small-deviation assumption and omitted higher-order terms"
+        },
+        {
+          "id": "L07-02",
+          "kind": "pdf_pages",
+          "start": 30,
+          "end": 38,
+          "description": "Linear discretization"
+        },
+        {
+          "id": "L07-03",
+          "kind": "pdf_pages",
+          "start": 39,
+          "end": 39,
+          "description": "Numerical comparison and solver settings"
+        },
+        {
+          "id": "L07-04",
+          "kind": "pdf_pages",
+          "start": 44,
+          "end": 51,
+          "description": "Eqs.(3.1)-(3.8), hull/basis algorithm; Eq.(3.8) p.50"
+        },
+        {
+          "id": "L07-05",
+          "kind": "pdf_pages",
+          "start": 59,
+          "end": 60,
+          "description": "References"
+        }
+      ],
+      "antecedent_navigation_hash_text": "dd40acd632d6a911046429fecccea6f1fc8cf5e6ffff214a8880216b98a437445",
+      "navigation_identity_note": "The antecedent records 65 hexadecimal characters, not a valid SHA-256 digest. Preserved as recorded text, not asserted as a navigation-extract identity and not silently repaired. Original-byte authority is unchanged."
+    },
+    {
+      "id": "A43",
+      "original_sha256": "a90a3e404807238886122dfdfc91a5f18697949137a8d9744af7180508de848a",
+      "register": "docs/research/archive-selected-sources.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "A43-01",
+          "kind": "pdf_pages",
+          "start": 3,
+          "end": 4,
+          "description": "Recurrence/LP"
+        },
+        {
+          "id": "A43-02",
+          "kind": "pdf_pages",
+          "start": 5,
+          "end": 7,
+          "description": "Basis-point modification and its own classical-rule counterexample (pp.6-7)"
+        }
+      ],
+      "antecedent_alias": "RP01"
+    },
+    {
+      "id": "A44",
+      "original_sha256": "493917da7d8ac669a470a978780a2ca269ce9da1b594365f49c6ebd572388fd7",
+      "register": "docs/research/archive-selected-sources.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "A44-01",
+          "kind": "pdf_pages",
+          "start": 4,
+          "end": 5,
+          "description": "Eq.(7)"
+        },
+        {
+          "id": "A44-02",
+          "kind": "pdf_pages",
+          "start": 6,
+          "end": 7,
+          "description": "Section 4: incremental enlarged-hull membership and final recheck"
+        },
+        {
+          "id": "A44-03",
+          "kind": "pdf_pages",
+          "start": 10,
+          "end": 10,
+          "description": "References"
+        }
+      ],
+      "antecedent_alias": "RP02"
+    },
+    {
+      "id": "A45",
+      "original_sha256": "ce651337929ca727e8210bec8267a7ba543bd2e7fe6a8fc27fba598df6cbdef8",
+      "register": "docs/research/archive-selected-sources.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "A45-01",
+          "kind": "pdf_pages",
+          "start": 2,
+          "end": 5,
+          "description": "Eqs.(1.1)-(4.1); piecewise constant inputs and Eqs.(3.1)-(3.2) on p.3"
+        },
+        {
+          "id": "A45-02",
+          "kind": "pdf_pages",
+          "start": 6,
+          "end": 6,
+          "description": "Numerical figures"
+        }
+      ],
+      "antecedent_alias": "RP03"
+    },
+    {
+      "id": "L02",
+      "original_sha256": "cb2fe68b9fc3321f8009cb0b1a444aaceb9b614f9a94e1af671711b38d58c300",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L02-01",
+          "kind": "pdf_pages",
+          "start": 4,
+          "end": 5,
+          "description": "Eqs.(2.1)-(2.2); nominal information"
+        },
+        {
+          "id": "L02-02",
+          "kind": "pdf_pages",
+          "start": 8,
+          "end": 11,
+          "description": "Eqs.(3.3)-(3.7); bundle minimum and any-realization distinction"
+        },
+        {
+          "id": "L02-03",
+          "kind": "pdf_pages",
+          "start": 17,
+          "end": 18,
+          "description": "Theorem 4.2"
+        },
+        {
+          "id": "L02-04",
+          "kind": "pdf_pages",
+          "start": 19,
+          "end": 20,
+          "description": "Eqs.(4.11)-(4.14); Theorem 4.3"
+        }
+      ],
+      "navigation_extract_sha256": "fcbbcf4962ac2b6b04bdbefd6cf8499322645e948a1813a81255fd2d369a4c83"
+    },
+    {
+      "id": "L04",
+      "original_sha256": "6e07c9a2fac2d112885a495c9fe7f13acec9d990d947017b1701a4b95538cd5f",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L04-01",
+          "kind": "pdf_pages",
+          "start": 6,
+          "end": 7,
+          "description": "Eqs.(10)-(15), assumptions 1-2"
+        },
+        {
+          "id": "L04-02",
+          "kind": "pdf_pages",
+          "start": 8,
+          "end": 8,
+          "description": "Eq.(17): fixed plan min-max"
+        },
+        {
+          "id": "L04-03",
+          "kind": "pdf_pages",
+          "start": 9,
+          "end": 11,
+          "description": "Eqs.(18),(21), algorithm steps 1-5"
+        }
+      ],
+      "navigation_extract_sha256": "f60dcf4f941eb04d4c1d3118e8dfed71dc58585c22c1e0fa35a6fc90cc8bee1d"
+    },
+    {
+      "id": "L09",
+      "original_sha256": "bb32b230e600fd0871322768dbf42d181fa7a0a288b97c717659a6448e3b72aa",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L09-01",
+          "kind": "pdf_pages",
+          "start": 5,
+          "end": 6,
+          "description": "Eqs.(2.6)-(2.11), Assumption 1"
+        },
+        {
+          "id": "L09-02",
+          "kind": "pdf_pages",
+          "start": 6,
+          "end": 7,
+          "description": "Minimization prose and Eqs.(3.1)-(3.2); p.7 visibly min_u max_w"
+        },
+        {
+          "id": "L09-03",
+          "kind": "pdf_pages",
+          "start": 8,
+          "end": 10,
+          "description": "Eq.(4.1), step 4/Eq.(4.3), final finite minimum"
+        }
+      ],
+      "navigation_extract_sha256": "8356cb7b8cee91eb39a79f09f8f316ebeeec61a52edc4489cd824ca9030bc2e4"
+    },
+    {
+      "id": "L10",
+      "original_sha256": "146ec36e96be4c779158541420eac1e242825262b5981d47b61ba86a9e2126a8",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L10-01",
+          "kind": "pdf_pages",
+          "start": 5,
+          "end": 6,
+          "description": "Eqs.(6)-(12), Condition 1"
+        },
+        {
+          "id": "L10-02",
+          "kind": "pdf_pages",
+          "start": 7,
+          "end": 7,
+          "description": "Eq.(14)"
+        },
+        {
+          "id": "L10-03",
+          "kind": "pdf_pages",
+          "start": 9,
+          "end": 10,
+          "description": "Steps 2-6, Eq.(18); p.9 phase restriction reference (8), operand actually Eq.(7)"
+        }
+      ],
+      "navigation_extract_sha256": "e11f0aff79feb4b41b304b8705162c2394d803cd25dd3d102ffa7cf46056b3dd"
+    },
+    {
+      "id": "L13",
+      "original_sha256": "4556046bb893a9a7a8c7b8489673dc95315d8ea49bf37e787a59d897c8a7a70e",
+      "register": "docs/research/inventory.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "L13-01",
+          "kind": "pdf_pages",
+          "start": 4,
+          "end": 6,
+          "description": "Eqs.(10)-(17); full t-position information after Eq.(17)"
+        },
+        {
+          "id": "L13-02",
+          "kind": "pdf_pages",
+          "start": 7,
+          "end": 7,
+          "description": "Eqs.(18)-(19): first-action projection"
+        },
+        {
+          "id": "L13-03",
+          "kind": "pdf_pages",
+          "start": 8,
+          "end": 8,
+          "description": "Eq.(20), Task 2"
+        },
+        {
+          "id": "L13-04",
+          "kind": "pdf_pages",
+          "start": 9,
+          "end": 10,
+          "description": "Algorithms 1-3; nonlinear/sensor update"
+        }
+      ],
+      "navigation_extract_sha256": "4fbb7c056d2d754cf90f9e3242c5eee850a859212466d305123addb88b5df7f9"
+    },
+    {
+      "id": "A08",
+      "original_sha256": "06c2f750a2c7deb01dbc457185378b440f8ba134216d7ab0762b8b28229ba2d9",
+      "register": "docs/research/archive-selected-sources.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "A08-01",
+          "kind": "original_lines",
+          "start": 44,
+          "end": 45,
+          "description": "Four-state position initialization"
+        },
+        {
+          "id": "A08-02",
+          "kind": "original_lines",
+          "start": 47,
+          "end": 52,
+          "description": "Remaining-horizon solve and first-action/actuator accumulation"
+        },
+        {
+          "id": "A08-03",
+          "kind": "original_lines",
+          "start": 57,
+          "end": 65,
+          "description": "Deterministic nonlinear propagation and simulated state update"
+        },
+        {
+          "id": "A08-04",
+          "kind": "original_lines",
+          "start": 81,
+          "end": 81,
+          "description": "Reported cost: unsquared fuel-flow deviation"
+        },
+        {
+          "id": "A08-05",
+          "kind": "original_lines",
+          "start": 136,
+          "end": 136,
+          "description": "Reported cost and stock synchronization residual"
+        }
+      ]
+    },
+    {
+      "id": "A09",
+      "original_sha256": "59daeacc7727cb7ff5e0090368d76e401fa4d0c874ef359a97d6acb722467aa6",
+      "register": "docs/research/archive-selected-sources.json",
+      "availability": "local-only",
+      "anchors": [
+        {
+          "id": "A09-01",
+          "kind": "original_lines",
+          "start": 4,
+          "end": 4,
+          "description": "Remaining program catalog"
+        },
+        {
+          "id": "A09-02",
+          "kind": "original_lines",
+          "start": 8,
+          "end": 16,
+          "description": "Fixed-action uncertainty propagation and all-vertex containment rejection"
+        },
+        {
+          "id": "A09-03",
+          "kind": "original_lines",
+          "start": 32,
+          "end": 43,
+          "description": "Squared-flow criterion, fmincon and retained-vertex safeguard"
+        },
+        {
+          "id": "A09-04",
+          "kind": "original_lines",
+          "start": 48,
+          "end": 50,
+          "description": "One argmin sequence, no full tie family"
+        }
+      ]
+    }
+  ],
+  "audits": [
+    {
+      "id": "reachability-proof-audit",
+      "original_issue": 4,
+      "original_issue_status": "open",
+      "public_report": "docs/research/reachability-proof-audit.md",
+      "antecedent_versions_sha256": [
+        "5aa272e89df490a7be0edea329849e62116127e6a9e0e409c58b6f7a94782e54",
+        "a0dba68e107533fc6d190c8bf37fbc9d51bad02f3f65efa60f8164ccc775a7d5",
+        "3314352cda1c8599b3612f370a8830dfa102d21e9a59b624ec18b7b055704c20"
+      ],
+      "final_antecedent_sha256": "3314352cda1c8599b3612f370a8830dfa102d21e9a59b624ec18b7b055704c20",
+      "source_anchor_refs": [
+        "L01-01",
+        "L01-02",
+        "L03-01",
+        "L05-01",
+        "L05-02",
+        "L05-03",
+        "L05-04",
+        "L05-05",
+        "L07-01",
+        "L07-02",
+        "L07-03",
+        "L07-04",
+        "L07-05",
+        "A43-01",
+        "A43-02",
+        "A44-01",
+        "A44-02",
+        "A44-03",
+        "A45-01",
+        "A45-02"
+      ],
+      "review_events": [
+        {
+          "artifact": "review.md",
+          "artifact_sha256": "badd4fd3ce6f1a1e92148fc2ac68cf572d50f787373c16a96ab605989a51bd2a",
+          "kind": "independent_review",
+          "reviewed_version_sha256": "5aa272e89df490a7be0edea329849e62116127e6a9e0e409c58b6f7a94782e54",
+          "scope": "Initial report mathematical/source review; no implementation acceptance or issue closure",
+          "dispositions": {
+            "R4-C1": "changes_requested",
+            "R4-C2": "changes_requested"
+          }
+        },
+        {
+          "artifact": "fix-round1.md",
+          "artifact_sha256": "9e62f625ea39025fe0fc1ca31d9f004e34fb0ae3d231a024edb343dc6e0818f6",
+          "kind": "author_fix",
+          "reviewed_version_sha256": "5aa272e89df490a7be0edea329849e62116127e6a9e0e409c58b6f7a94782e54",
+          "scope": "Three paragraphs: result, equality proof opening, metric convention",
+          "dispositions": {
+            "R4-C1": "addressed",
+            "R4-C2": "addressed"
+          },
+          "result_version_sha256": "a0dba68e107533fc6d190c8bf37fbc9d51bad02f3f65efa60f8164ccc775a7d5"
+        },
+        {
+          "artifact": "recheck-round1.md",
+          "artifact_sha256": "f0cde941610b93fb81abbc7dbe379ffc06cf7260f77541120415cbc1863d100b",
+          "kind": "scoped_recheck",
+          "reviewed_version_sha256": "a0dba68e107533fc6d190c8bf37fbc9d51bad02f3f65efa60f8164ccc775a7d5",
+          "scope": "Only amended three paragraphs and immediate context; no fresh whole-report/source audit",
+          "dispositions": {
+            "R4-C1": "addressed",
+            "R4-C2": "addressed",
+            "R4-C3": "changes_requested"
+          }
+        },
+        {
+          "artifact": "fix-round2.md",
+          "artifact_sha256": "f024adc11010e91c16f6eebd1f79d445f1d57e90680e64cb19a8bd1cb18866ad",
+          "kind": "author_fix",
+          "reviewed_version_sha256": "a0dba68e107533fc6d190c8bf37fbc9d51bad02f3f65efa60f8164ccc775a7d5",
+          "scope": "One sentence distinguishing finite candidate set from its convex hull",
+          "dispositions": {
+            "R4-C3": "addressed"
+          },
+          "result_version_sha256": "3314352cda1c8599b3612f370a8830dfa102d21e9a59b624ec18b7b055704c20"
+        },
+        {
+          "artifact": "recheck-round2.md",
+          "artifact_sha256": "60bb82b39af5c2130f4f1d8e48f8d7311d91109a149521ad266db16104b2545d",
+          "kind": "scoped_recheck",
+          "reviewed_version_sha256": "3314352cda1c8599b3612f370a8830dfa102d21e9a59b624ec18b7b055704c20",
+          "scope": "Only the single amended sentence; approved, no outstanding correction; not issue closure",
+          "dispositions": {
+            "R4-C3": "addressed"
+          }
+        }
+      ],
+      "final_gate": "scoped amendments approved; original issue remains open"
+    },
+    {
+      "id": "adaptive-policy-proof-audit",
+      "original_issue": 5,
+      "original_issue_status": "open",
+      "public_report": "docs/research/adaptive-policy-proof-audit.md",
+      "antecedent_versions_sha256": [
+        "a7c282c61d323e61847d3e2830407c3503ed0bb80e8ec4a85b92c49171d3f70c",
+        "c8d473fd86666c4fc007af760f56e8ccfd0bc59b72cc9307528c5af1c3d1025f"
+      ],
+      "final_antecedent_sha256": "c8d473fd86666c4fc007af760f56e8ccfd0bc59b72cc9307528c5af1c3d1025f",
+      "source_anchor_refs": [
+        "L02-01",
+        "L02-02",
+        "L02-03",
+        "L02-04",
+        "L04-01",
+        "L04-02",
+        "L04-03",
+        "L09-01",
+        "L09-02",
+        "L09-03",
+        "L10-01",
+        "L10-02",
+        "L10-03",
+        "L13-01",
+        "L13-02",
+        "L13-03",
+        "L13-04",
+        "A08-01",
+        "A08-02",
+        "A08-03",
+        "A08-04",
+        "A08-05",
+        "A09-01",
+        "A09-02",
+        "A09-03",
+        "A09-04"
+      ],
+      "review_events": [
+        {
+          "artifact": "review.md",
+          "artifact_sha256": "31908da2401fdb96bfbdc6c2cab084eed56c03a8e15975cba198c74cf2963868",
+          "kind": "independent_review",
+          "reviewed_version_sha256": "a7c282c61d323e61847d3e2830407c3503ed0bb80e8ec4a85b92c49171d3f70c",
+          "scope": "Initial mathematical/source review; two medium findings; no implementation acceptance",
+          "dispositions": {
+            "R5-C1": "changes_requested",
+            "R5-C2": "changes_requested"
+          }
+        },
+        {
+          "artifact": "fix-round1.md",
+          "artifact_sha256": "e27b8304ba2cc7a88071fd9853aaf8ce4eb775e12459476caad57f1dcc272097",
+          "kind": "author_fix",
+          "reviewed_version_sha256": "a7c282c61d323e61847d3e2830407c3503ed0bb80e8ec4a85b92c49171d3f70c",
+          "scope": "Restricted predecessor regularity and L09 source-transcription dispute",
+          "dispositions": {
+            "R5-C1": "addressed",
+            "R5-C2": "disputed_on_primary_source"
+          },
+          "result_version_sha256": "c8d473fd86666c4fc007af760f56e8ccfd0bc59b72cc9307528c5af1c3d1025f"
+        },
+        {
+          "artifact": "source-dispute-check.md",
+          "artifact_sha256": "986617a9ada43d3c5f0593a131d1244a3d3797432df586687a90eda955c7c2f5",
+          "kind": "reviewer_withdrawal",
+          "reviewed_version_sha256": "a7c282c61d323e61847d3e2830407c3503ed0bb80e8ec4a85b92c49171d3f70c",
+          "scope": "Withdraws the original L09 single-maximum reading after original-source reinspection; not review of amended report",
+          "dispositions": {
+            "R5-C2": "withdrawn"
+          }
+        },
+        {
+          "artifact": "recheck-round1.md",
+          "artifact_sha256": "e539d80c7c75025e28d26048203eac4ef4140b0ae494b3ea1bfa57ad8c087190",
+          "kind": "scoped_recheck",
+          "reviewed_version_sha256": "c8d473fd86666c4fc007af760f56e8ccfd0bc59b72cc9307528c5af1c3d1025f",
+          "scope": "Amended predecessor/L09 paragraphs only; pass, no new breakage; unchanged proofs not re-audited",
+          "dispositions": {
+            "R5-C1": "addressed",
+            "R5-C2": "withdrawn"
+          }
+        }
+      ],
+      "final_gate": "scoped amendments approved; original issue remains open"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R4-C1",
+      "severity": "medium",
+      "disposition": "addressed",
+      "summary": "Certificates iff for unclipped hull equality; only sufficient after clipping",
+      "source_anchor_refs": [
+        "L01-02",
+        "L05-02"
+      ],
+      "report_section": "3. Equality for certified deletion and A44",
+      "audit": "reachability-proof-audit"
+    },
+    {
+      "id": "R4-C2",
+      "severity": "low",
+      "disposition": "addressed",
+      "summary": "Support metric uses the dual norm for the specified primal Hausdorff distance",
+      "source_anchor_refs": [
+        "L05-04"
+      ],
+      "report_section": "Metrics and the Table 1 discrepancy",
+      "audit": "reachability-proof-audit"
+    },
+    {
+      "id": "R4-C3",
+      "severity": "low",
+      "disposition": "addressed",
+      "summary": "Candidate set is finite; candidate hulls and specified constraint/control/initial sets are compact convex polytopes",
+      "source_anchor_refs": [
+        "L05-02"
+      ],
+      "report_section": "3. Equality for certified deletion and A44",
+      "audit": "reachability-proof-audit"
+    },
+    {
+      "id": "R5-C1",
+      "severity": "medium",
+      "disposition": "addressed",
+      "summary": "Closed safe/target sets; fixed finite actions; fixed nonempty compact disturbances; continuous transition; feasibility selector only",
+      "source_anchor_refs": [
+        "L13-02"
+      ],
+      "report_section": "Robust predecessor and supported feedback operands",
+      "audit": "adaptive-policy-proof-audit"
+    },
+    {
+      "id": "R5-C2",
+      "severity": "medium",
+      "disposition": "withdrawn",
+      "summary": "L09 p.7 Eq.(3.2) prints min_u max_w; reviewer misreading withdrawn, no historical erratum",
+      "source_anchor_refs": [
+        "L09-02"
+      ],
+      "report_section": "Reviewed corrections",
+      "audit": "adaptive-policy-proof-audit"
+    }
+  ],
+  "counterexample_checks": [
+    {
+      "name": "unclipped_hulls",
+      "audit": "reachability-proof-audit",
+      "report_section": "3. Equality for certified deletion and A44"
+    },
+    {
+      "name": "clipped_sets",
+      "audit": "reachability-proof-audit",
+      "report_section": "3. Equality for certified deletion and A44"
+    },
+    {
+      "name": "facet_support_gap",
+      "audit": "reachability-proof-audit",
+      "report_section": "4. Support-hyperplane wording: scoped counterexample, not an unconditional attribution"
+    },
+    {
+      "name": "nonlinear_endpoints",
+      "audit": "reachability-proof-audit",
+      "report_section": "Smooth counterexample to a nonlinear inclusion inference"
+    },
+    {
+      "name": "fixed_plan_squared_costs",
+      "audit": "adaptive-policy-proof-audit",
+      "report_section": "Causal-game value and strict counterexample"
+    },
+    {
+      "name": "replanning_squared_costs",
+      "audit": "adaptive-policy-proof-audit",
+      "report_section": "Causal-game value and strict counterexample"
+    },
+    {
+      "name": "replanning_tie_squared_costs",
+      "audit": "adaptive-policy-proof-audit",
+      "report_section": "Causal-game value and strict counterexample"
+    },
+    {
+      "name": "causal_squared_costs",
+      "audit": "adaptive-policy-proof-audit",
+      "report_section": "Causal-game value and strict counterexample"
+    },
+    {
+      "name": "feedback_vertex_and_interior_maxima",
+      "audit": "adaptive-policy-proof-audit",
+      "report_section": "Causal-game value and strict counterexample"
+    }
+  ],
+  "evidence_limits": [
+    "Exact literal arithmetic does not certify continuum maxima; see the analytical report proofs",
+    "Source availability is local-only; no original files, extracts, page images or private review transcripts are republished",
+    "Original #4/#5 remain open; historical implementations and nonlinear plant bounds remain uncertified",
+    "Review event order is the disposition chain; all dates are 2026-10-11, no finer event times are asserted"
+  ]
+}

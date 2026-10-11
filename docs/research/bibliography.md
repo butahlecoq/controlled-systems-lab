@@ -87,3 +87,15 @@ Follow-up assessed 2026-10-11. See [architecture implications and reading limits
 R40: [Kalev and Shorikov, optimal open-loop terminal fuel control](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019), 2019, pp. 166–176, DOI 10.1134/S0002338819020094. Published counterpart to L11; numerical section and tables inspected 2026-10-11.
 
 R29 follow-up: a local copy and editable English paper source were recovered as A21–A22 in the [larger-archive register](archive-selected-sources.json). This changes local availability, not the publication date or proof-audit status.
+
+## Local primary papers for the proof audits
+
+These permanent supplementary IDs refer to original bytes in the [selected-archive register](archive-selected-sources.json); they do not allocate external R identifiers. English titles are authored translations. This curation records the prior reviewed reading depth, without new publication-metadata verification.
+
+| ID / antecedent alias | Authorship and title | Reviewed anchors and limits |
+|---|---|---|
+| A43 / RP01 | V. V. Bulaev; A. F. Shorikov. *Modification of the general recurrent algebraic method for constructing reachability regions of linear discrete controlled systems* | PDF pp.3–7: recurrence, basis modification and counterexample |
+| A44 / RP02 | A. Yu. Goranov; A. F. Shorikov. *Modified recurrent method for constructing the reachability region of a linear discrete dynamic system* | PDF pp.4–7: Eq.(7), incremental membership and final recheck; not established as exact L05 references [5]/[6] |
+| A45 / RP03 | V. V. Bulaev; A. F. Shorikov. *Method of discretization of linear dynamic systems* | PDF pp.2–5: Eqs.(1.1)–(4.1), especially p.3 held inputs; printed 2016 DOI `10.17072/1993-0550-2016-2-67-73`, not newly verified metadata |
+
+See the [reachability audit](reachability-proof-audit.md) for source-specific claims and remaining proof obligations.

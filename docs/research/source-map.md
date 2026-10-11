@@ -63,3 +63,7 @@ No Pascal implementation, MATLAB project, full original environment, numerical i
 | L22–L24 | Duplicate provenance record | Missing distinct minimax adaptive implementation |
 
 Scientific interpretation is in [foundations](scientific-foundations.md); implementation findings are in [audit](legacy-audit.md).
+
+## Supplementary proof sources
+
+The [selected-archive register](archive-selected-sources.json) supplements this unchanged 31-entry inventory. A43–A45 are the permanent IDs for audit-local RP01–RP03, respectively; A39–A42 retain their B04 identities. The [reachability](reachability-proof-audit.md) and [adaptive-policy](adaptive-policy-proof-audit.md) reports cite source-specific anchors, with original-byte and authored-version identities in [proof provenance](proof-audit-provenance.json). Sources remain local-only.
