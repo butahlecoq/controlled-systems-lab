@@ -3,6 +3,9 @@
 /Свидетельства/
 /docs/research/extracted/
 /tmp/
+/build/
+/install/
+/cmake-build-*/
 __pycache__/
 *.py[cod]
 .env
