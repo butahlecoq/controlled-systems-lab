@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace csl {
-// Revision 1.1. This is a source contract, not a stable binary ABI.
+// Revision 1.2. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
 struct ProgramIdentity { ProblemId problem; ProgramId program; bool operator==(const ProgramIdentity&) const = default; };
@@ -34,8 +34,18 @@ struct LinearStage { Matrix A, B, E; Vector offset; };
 using Coefficients = std::variant<LinearStage, std::vector<LinearStage>>;
 enum class TimeDomain { discrete, continuous };
 struct Dynamics { Dimensions dimensions; TimeDomain time_domain; Coefficients stages; };
+// after_decision(k) follows transition k; before_decision(T) is terminal only.
 enum class ObservationTiming { before_decision, after_decision };
-struct Observation { Matrix state_map, control_map, error_map; Vector offset; ObservationTiming timing; };
+struct ObservationPoint { StageIndex stage; ObservationTiming timing; };
+struct ObservationStage { Matrix state_map, control_map, external_map, error_map; Vector offset; };
+// Indexed records follow authored sample order, not global transition index.
+using ObservationCoefficients = std::variant<ObservationStage, std::vector<ObservationStage>>;
+struct ObservationSample {
+    StageIndex state_stage;
+    ObservationPoint measured_at, available_at;
+    std::optional<StageIndex> input_stage;
+};
+struct Observation { ObservationCoefficients coefficients; std::vector<ObservationSample> schedule; };
 struct SystemModel { Dynamics dynamics; std::vector<Observation> observations; };
 
 enum class SetProperty { unknown, yes, no };

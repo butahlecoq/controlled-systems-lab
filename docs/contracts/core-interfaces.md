@@ -1,8 +1,15 @@
-# Native interfaces, revision 1.1
+# Native interfaces, revision 1.2
 
-Date: 2026-10-11. CORE-01 / issue #11. This revision turns the [native design sketch](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md) into a compiled source contract in [contracts.hpp](../../include/csl/contracts.hpp). The [master specification](../superpowers/specs/2026-10-11-controlled-systems-master-design.md) remains the requirements authority. Integration review is required before downstream adapters depend on this revision.
+Date: 2026-10-11. CORE-01 / issue #11; MODEL-01 / issue #15 revision. This revision turns the [native design sketch](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md) into a compiled source contract in [contracts.hpp](../../include/csl/contracts.hpp). The [master specification](../superpowers/specs/2026-10-11-controlled-systems-master-design.md) remains the requirements authority. Integration review is required before downstream adapters depend on this revision.
 
 This delivery contains values, coarse abstract ports and small structural guards. Revision 1.1 adds scoped outcome claims, mathematical geometry operands and reference-bound geometry evidence following integration review. It does **not** implement optimization adapters, a registry, a problem validator, numerical synthesis, geometry, family construction or a scenario loader. The [isolated probes](../../probes/core-01/CMakeLists.txt) exercise selected dependencies directly. CORE-02 owns the product build; later module tickets own implementation. The [dependency decision](../architecture/decisions/0002-native-integrations.md) records pinned versions and licensing.
+
+Revision 1.2 replaces the authored observation aggregate with canonical maps,
+constant/indexed providers and explicit source/measurement/availability schedules.
+MODEL-01 implements the separate [immutable discrete model module](linear-model.md).
+The preceding implementation exclusions describe the original CORE-01 delivery;
+subsequent modules retain their own documented scope. No operation/evidence port
+or numeric/registry interface changes in revision 1.2.
 
 ## Common rules
 
@@ -10,17 +17,51 @@ This delivery contains values, coarse abstract ports and small structural guards
 - Problem, program, set, request, mathematical reference, module and representation IDs are different types. IDs are opaque strings; a future loader/artifact layer computes canonical identities. Changing run settings must not change mathematical problem identity. A `ProgramIdentity` combines a problem ID with the particular program/reformulation ID; multiple programs for one problem must not share that program ID.
 - Input aggregates are **unvalidated authored values**. Adapters must validate before numerical execution. `check_model_shape` and `check_nominal_profile` are deliberately narrow guards and do not create a `ValidatedProblem`. Passing them does not prove convexity, compactness, attainment, finite values, correct timestamps or adapter compatibility.
 - Construct published snapshots using `make_shared<const T>` and retain no mutable aliases. Models, set payloads, joint relations and resource policy may be shared immutably. Asynchronously retained problem data must retain its owner. `const&` arguments are borrowed only for the duration of the call.
+- In particular, `shared_ptr<const SystemModel>` still points to authored data and cannot eliminate surviving producer aliases. Use `model::snapshot` for a validated immutable executable model: it copies authored buffers into private numeric snapshots, even from rvalues. It does not validate the enclosing `Problem`.
 - Workspaces are noncopyable, are returned as `unique_ptr`, and have one owner. The owner can transfer the pointer to a worker. Neither concurrent use of the same workspace nor mutable backend-global configuration is permitted without an adapter's explicit contract. Noncopyability alone cannot prevent callers from aliasing a pointer; this remains an ownership precondition.
 - Expected unsupported capabilities have their own `Unsupported` alternative; mathematical infeasibility is a `MathematicalOutcome` with evidence, never inferred from rejection. Invalid authored data uses field diagnostics. Allocation failures propagate `std::bad_alloc`; invalid internal invariants are programming defects. No exception is translated into infeasibility.
 - Pure guards do not need cancellation. Potentially expensive ports receive `ExecutionContext`; adapters must state cancellation granularity and native-call latency. Revision 1 supplies no timeout enforcement, scheduler or memory allocator.
 
 ## Numerical, model and problem values
 
-`Matrix` owns a contiguous row-major `rows * cols` buffer. `Vector` owns contiguous doubles. `SparseMatrix` owns CSR arrays: `row_offsets.size()==rows+1`, first offset zero, nondecreasing offsets, final offset `values.size()==column_indices.size()`, sorted unique column indices within each row and in range. Absent bounds mean negative/positive infinity on the respective side; a present endpoint must be finite and lower must not exceed upper. Adapters reject dimensions/indices outside their native integer range before narrowing. Dense copies cost O(rows*cols); CSR copies cost O(rows+nnz). Revision 1 exposes no retained strided view. Future CORE-03 views must explicitly specify layout, stride and lifetime.
+`Matrix` owns a contiguous row-major `rows * cols` buffer. `Vector` owns contiguous doubles. `SparseMatrix` owns CSR arrays: `row_offsets.size()==rows+1`, first offset zero, nondecreasing offsets, final offset `values.size()==column_indices.size()`, sorted unique column indices within each row and in range. Absent bounds mean negative/positive infinity on the respective side; a present endpoint must be finite and lower must not exceed upper. Adapters reject dimensions/indices outside their native integer range before narrowing. Dense copies cost O(rows*cols); CSR copies cost O(rows+nnz). These authored values are separate from CORE-03's [retained numeric snapshots](numeric-data.md), whose contract defines layout, stride and lifetime and which MODEL-01 uses internally.
 
 For n states, m controls and p external inputs, every `LinearStage` has A n×n, B n×m, E n×p and offset n. `check_model_shape` checks these shapes/storage without imposing invertibility. It scans coefficient descriptors, not matrix values: O(T) for LTV, O(1) for constant coefficients; diagnostic storage is O(number of failures). Constant coefficients are stored once. Zero-dimensional control/external ports are legal. A zero transition matrix is a valid model.
 
-There are T transitions and controls, states x0 through xT, and T+1 strictly increasing physical times. LTV has exactly T stages. State sets have T+1 entries, continuous control sets T entries; restrictions must be explicit, including universal/empty/singleton sets. Known initial data has n components. Observation maps, error maps, feedthrough and before/after-decision timing are separate from dynamics and information. Absence of observations does not grant knowledge. Full timing/observation/domain validation belongs to MODEL-01/02/03.
+There are T transitions and controls, states x0 through xT, and T+1 strictly increasing physical times. LTV has exactly T stages. State sets have T+1 entries, continuous control sets T entries; restrictions must be explicit, including universal/empty/singleton sets. Known initial data has n components. Observation maps, error maps, feedthrough and before/after-decision timing are separate from dynamics and information. Absence of observations does not grant knowledge. MODEL-01 implements model/time/observation validation; problem domains and information-pattern validation remain MODEL-02/03.
+
+### Revision 1.2 observation migration
+
+The former `Observation{state_map,control_map,error_map,offset,timing}` is replaced
+by `Observation{coefficients,schedule}`. `ObservationStage` owns state, control,
+**external** and error maps C/Du/Dw/F plus offset b. `ObservationCoefficients` is
+one constant stage or explicit stages indexed by sample, with exactly
+`schedule.size()` records. Each `ObservationSample` explicitly names
+`state_stage`, `measured_at`, `available_at` and optional joint `input_stage`.
+Each event is an `ObservationPoint{StageIndex,ObservationTiming}`. Channel output
+and error dimensions remain fixed. Schedule order is preserved, not sorted.
+
+This is an intentional source migration: callers must supply Dw and the schedule;
+there is no inferred timestamp or lossy legacy converter. Dynamics and
+`SystemModel` composition are unchanged. The source revision is not a stable ABI.
+
+The grid supplied to `model::snapshot` is the only timestamp source. Event order
+is before(k) < after(k) < before(k+1); after(k) follows transition completion at
+times[k+1], whereas before(k+1) is a later causal event at the same physical time.
+State x_s is released at after(s−1), except x0 at before(0); u_j/w_j are released
+at after(j). Measurement cannot precede a source release, and availability
+cannot precede measurement. Absent input_stage requires zero Du/Dw and empty
+evaluation inputs; an explicit stage preserves the dependency even for zero
+maps. At T only before(T) exists, and T=0 permits observations there without
+inputs. See [the complete model contract](linear-model.md) for bounds, derived
+timestamps, delayed samples, ownership, costs and unsupported clock extensions.
+
+Model evaluation returns an owning value (including event metadata for an
+observation), malformed-input `Diagnostic`, or canonical
+`OperationStopped{numerical_failure,...}` for nonfinite arithmetic from valid
+finite operands. It verifies neither supplied vector history nor estimation or
+optimization claims. The numeric module's result alias and existing operation
+ports remain unchanged.
 
 `Problem` separates model, admissibility, objective and information from `StrategyConfiguration`. Continuous, finite and mixed domains and initial uncertainty are distinct alternatives. Empty temporal constraints are representable. Temporal CSR columns use canonical joint coordinates (below). Continuous-time metadata is representable but rejected by the nominal guard; no discretization is performed. External disturbances/feedback are later profiles.
 
@@ -104,4 +145,8 @@ The [compiled caller example](../../probes/core-01/caller_example.cpp) shares on
 
 [Contract tests](../../probes/core-01/contract_tests.cpp) supply executable portions of T-M03 and T-V02. They cover shape/singular representation, unsupported profiles, temporal-empty handling, evidence identity, numerical/validated separation, incomplete relation coverage and resource admission. Revision 1.1 adds scoped outcome evidence without bounds/families, neutral geometry operand shapes, query scopes, conversion/approximation reference binding and error-bound metadata. Type checks prevent copying workspace objects or converting witness batches to families. All expensive module implementations and their full validation remain downstream. The isolated [probe README](../../probes/core-01/README.md) contains exact commands and observed platform results.
 
-Any change to this contract must revise this document and affected tests before integration. This revision intentionally does not close broader architecture issue #7: a concrete geometry integration and complete registry/capability implementation remain open.
+Revision 1.2 adds MODEL-01's immutable affine LTI/LTV evaluation and explicit
+observation schedule, with literal dynamics/feedthrough, causal-clock, rejection
+and lifetime tests plus an installed client. It does not close admissibility or
+the broader architecture obligations. Any change to this contract must revise
+this document and affected tests before integration.
