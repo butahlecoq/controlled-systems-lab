@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "inventory_date": "2026-10-12",
+  "collection": "owner-supplied Works folder",
+  "source_policy": "Private originals; public hashes and editorial observations only. Static inspection, no legacy execution. Supplements original L/A identities without replacing them.",
+  "sources": [
+    {
+      "id": "W01",
+      "relative_path": "ClosedLoopControl.py",
+      "bytes": 13453,
+      "sha256": "c9fe682fda1cc291c40daf7467f30d5a066e845a6f04a367057f153765d0328c",
+      "relationship": "L16/L22: embedded helper additions; not a complete optimizer family"
+    },
+    {
+      "id": "W02",
+      "relative_path": "Forecast.py",
+      "bytes": 1909,
+      "sha256": "a1b7b4cdf7e0a07e3b489133a0495a3350dfe450000dc2050941dac6d4e3015b",
+      "relationship": "Supplemental artifact; see works-followup.md for scope and evidence limits"
+    },
+    {
+      "id": "W03",
+      "relative_path": "LinClosedLoopControl.py",
+      "bytes": 13260,
+      "sha256": "6c2be47f1fbcec37a2f61a38c694bd5a2832c94ea1bb13d50125e561a7fdebc9",
+      "relationship": "Supplemental artifact; see works-followup.md for scope and evidence limits"
+    },
+    {
+      "id": "W04",
+      "relative_path": "LinearSystem.py",
+      "bytes": 5029,
+      "sha256": "2de04e7ae3b24e9d17432b6a468abe5a38819bc3f96688fbf2f9c09d7a41491a",
+      "relationship": "L28: uniform stock-memory variant; other coordinate discrepancy remains"
+    },
+    {
+      "id": "W05",
+      "relative_path": "Main_mod.py",
+      "bytes": 1670,
+      "sha256": "988ca23a5298ad56e13eff6a8e22c6e02f9d116058d63e5d8cd41af339c3dddf",
+      "relationship": "A15/A16: related Python variant; algebra/tolerance differences"
+    },
+    {
+      "id": "W06",
+      "relative_path": "Main_Shor.py",
+      "bytes": 1289,
+      "sha256": "8192d85d70615700ecb4da4e85381d4280cc15ffc27db4770092ec5067e2bc2e",
+      "relationship": "A24/A25: related Python variant; algebra/tolerance differences"
+    },
+    {
+      "id": "W07",
+      "relative_path": "MinimaxOpenLoopControl.ipynb",
+      "bytes": 13847,
+      "sha256": "882ebb911cd495d5f724836653f8eeca93ef94d91282d5158d623441f8adbacd",
+      "relationship": "Supplemental artifact; see works-followup.md for scope and evidence limits"
+    },
+    {
+      "id": "W08",
+      "relative_path": "MinimaxOpenLoopControl.py",
+      "bytes": 9601,
+      "sha256": "045d06a6f8652521d6f5b5394ee6c4150d54d25d20a347f98335ed1f75b88a74",
+      "relationship": "L19: identical named top-level definitions, reordered; not a repaired worst-case oracle"
+    },
+    {
+      "id": "W09",
+      "relative_path": "OpenLoopControl.py",
+      "bytes": 11086,
+      "sha256": "abf68dc0d493c5a90837a5cfe78929b8a972de2453465e5b11dad129fe75e4a4",
+      "relationship": "Supplemental artifact; see works-followup.md for scope and evidence limits"
+    },
+    {
+      "id": "W10",
+      "relative_path": "pred_data.xlsx",
+      "bytes": 210243,
+      "sha256": "b80533419ee7c38701f23bcf56cf49f3ff8bdba0cfdb21fd972672b23179e641",
+      "relationship": "Supplemental artifact; see works-followup.md for scope and evidence limits"
+    },
+    {
+      "id": "W11",
+      "relative_path": "pred_test.xlsx",
+      "bytes": 8756,
+      "sha256": "3b14ab7b79bd12940d8e985b04d5ad07348e51bfbb42f14f7f8f191d2e99d788",
+      "relationship": "Supplemental artifact; see works-followup.md for scope and evidence limits"
+    },
+    {
+      "id": "W12",
+      "relative_path": "ReachableSet.py",
+      "bytes": 6181,
+      "sha256": "42b988ad9118845ebe9a25b8698a47371eadb31a31026d65e71e91e9986f3fdf",
+      "relationship": "L26: one blank line removed; known behavior retained"
+    },
+    {
+      "id": "W13",
+      "relative_path": "Rendezvous-RL.ipynb",
+      "bytes": 10264,
+      "sha256": "78627f7fa1e0868e75c349c5d1b06f123fa3f08a12a97234e768456a260a506c",
+      "relationship": "Supplemental artifact; see works-followup.md for scope and evidence limits"
+    },
+    {
+      "id": "W14",
+      "relative_path": "VFEnumeration.py",
+      "bytes": 3837,
+      "sha256": "47f7c63b4e05a88a502e09f153b14f51a9404b7d7e823595fef0936c2b78e80a",
+      "relationship": "Supplemental artifact; see works-followup.md for scope and evidence limits"
+    }
+  ]
+}
