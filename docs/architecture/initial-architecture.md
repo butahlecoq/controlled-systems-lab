@@ -8,6 +8,12 @@ A convenient interface for defining controlled systems, computing reachable/cont
 
 The core should be general within explicitly declared system classes. Fuel management, flight mechanics and future applications supply physics, units and scenarios through domain adapters.
 
+## Selected first user workflow
+
+Owner selection, 2026-10-11: start with optimal control planning. The initial end-to-end interface should accept a model and constraints and return a control sequence, a corresponding trajectory, and an objective/quality evaluation. The result must identify feasibility and optimality evidence.
+
+This selection does not yet decide nominal versus robust/minimax uncertainty semantics, the first published baseline, supported control domains, implementation language, or UI form. Reachability supports this workflow; feedback control remains a later workflow.
+
 ## Architectural alternatives
 
 | Approach | Benefit | Cost | Initial assessment |
@@ -133,4 +139,4 @@ Avoid naming directories after a programming language until selected. Keep archi
 
 ## Decisions still open
 
-Language, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, required guarantee strength, observation assumptions and first complete executable scenario. Record these as decisions only after the owner discussion and benchmark evidence. See [interview agenda](../research/open-questions.md).
+Language, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, required guarantee strength, observation assumptions, nominal versus robust/minimax semantics, and the first complete executable baseline. The first workflow is selected: optimal control planning. Record these as decisions only after the owner discussion and benchmark evidence. See [interview agenda](../research/open-questions.md).

@@ -6,6 +6,7 @@ Date: 2026-10-11. Questions are recorded for later discussion; unanswered prefer
 
 - Build a convenient general interface for controlled systems, with scientific and algorithmic extensibility, performance and parallel scalability.
 - Use the supplied application experiments and published numerical outcomes as initial baselines.
+- First user workflow selected: optimal control planning. Given a model and constraints, obtain a control sequence, its corresponding trajectory, and an objective/quality evaluation. Nominal versus robust/minimax semantics and the first reproduction baseline remain undecided.
 - Keep all newly authored research/software artifacts in English; converse with the owner in Russian.
 - Do not assume Python. Language remains open; computational mathematics and actual end-to-end performance should guide selection.
 - The professor's earliest implementation was Pascal; archived MATLAB/Python artifacts are historical evidence.
@@ -17,6 +18,7 @@ The owner's baseline answer did not choose between one large solve, many experim
 
 | Priority | Question | Why it matters |
 |---|---|---|
+| 1 | Should the first control-planning solve use a known nominal model or immediately include bounded disturbances/minimax guarantees? | Defines uncertainty semantics and the first suitable benchmark |
 | 1 | Which supplied experiment should be our first complete reproduction: nominal B04, constrained minimax B07, four-step minimax B08, or adaptive B09? | Defines one concrete end-to-end result and missing inputs |
 | 1 | Can original MATLAB/Pascal projects, full control histories, OpenLoopControl.py, and the distinct minimax adaptive source be recovered? | Resolves reproduction and duplicate-folder gaps |
 | 1 | Which actual terminal criterion was used for L04/L13 numerical tables? | Printed Euclidean formulas and displayed state/cost rows disagree |
@@ -43,7 +45,7 @@ Ask one focused group at a time; update the glossary and architecture when answe
 
 **Performance evaluation:** representative original cases followed by independently varied scale factors; profile kernels/conversions/search; then measure language stacks, CPU parallelism and optional GPU/distributed work.
 
-**Interface design:** choose first user workflow after evidence and discussion; approve the implementation design before product coding.
+**Interface design:** refine the selected optimal-control planning workflow, agree its uncertainty and guarantee semantics, then approve the implementation design before product coding.
 
 ## Initial review topics
 
