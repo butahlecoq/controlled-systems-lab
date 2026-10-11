@@ -40,7 +40,11 @@ add_library(CSL::highs_lp ALIAS csl_highs_lp)
 set_target_properties(csl_highs_lp PROPERTIES EXPORT_NAME highs_lp CXX_EXTENSIONS OFF)
 target_link_libraries(csl_highs_lp PUBLIC CSL::optimization CSL::registry)
 include(cmake/HighsDependencies.cmake)
-foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp)
+add_library(csl_problem STATIC src/problem/domains.cpp src/problem/constraints.cpp src/problem/initial_information.cpp)
+add_library(CSL::problem ALIAS csl_problem)
+set_target_properties(csl_problem PROPERTIES EXPORT_NAME problem CXX_EXTENSIONS OFF)
+target_link_libraries(csl_problem PUBLIC CSL::model CSL::sets)
+foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem)
   target_compile_features(${target} PUBLIC cxx_std_20)
   target_include_directories(${target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -52,7 +56,7 @@ foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_mode
   endif()
 endforeach()
 
-install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp EXPORT CSLTargets
+install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem EXPORT CSLTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES include/csl/contracts.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl)
 install(FILES include/csl/adapters/lp/highs.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/adapters/lp)
@@ -62,6 +66,7 @@ install(FILES include/csl/registry/registry.hpp DESTINATION ${CMAKE_INSTALL_INCL
 install(FILES include/csl/sets/data.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/sets)
 install(FILES include/csl/model/linear_system.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/model)
 install(FILES include/csl/optimization/linear_program.hpp include/csl/optimization/lp_backend.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/optimization)
+install(FILES include/csl/problem/domains.hpp include/csl/problem/constraints.hpp include/csl/problem/initial_information.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/problem)
 install(EXPORT CSLTargets NAMESPACE CSL:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CSL)
 configure_package_config_file(cmake/CSLConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/CSLConfig.cmake
@@ -114,6 +119,12 @@ if(BUILD_TESTING)
   target_compile_definitions(public_headers_lp_first_client PRIVATE CSL_PUBLIC_HEADERS_LP_FIRST=1)
   set_target_properties(public_headers_lp_first_client PROPERTIES CXX_EXTENSIONS OFF)
   add_test(NAME public_headers_lp_first_client COMMAND public_headers_lp_first_client)
+  add_executable(problem_public_client tests/installed/problem_client.cpp)
+  target_link_libraries(problem_public_client PRIVATE CSL::problem)
+  add_test(NAME problem_public_client COMMAND problem_public_client)
+  add_executable(problem_tests tests/unit/problem/data_tests.cpp)
+  target_link_libraries(problem_tests PRIVATE CSL::problem doctest::doctest Threads::Threads)
+  add_test(NAME problem_tests COMMAND problem_tests)
   add_executable(model_tests tests/unit/model/linear_system_tests.cpp)
   target_link_libraries(model_tests PRIVATE CSL::model doctest::doctest Threads::Threads)
   add_test(NAME model_tests COMMAND model_tests)

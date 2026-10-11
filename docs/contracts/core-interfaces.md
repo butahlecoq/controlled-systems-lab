@@ -1,4 +1,4 @@
-# Native interfaces, revision 1.3.1
+# Native interfaces, revision 1.4
 
 Date: 2026-10-11. CORE-01 / issue #11; MODEL-01 / issue #15 and OPT-02 / issue #18 revisions. This revision turns the [native design sketch](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md) into a compiled source contract in [contracts.hpp](../../include/csl/contracts.hpp). The [master specification](../superpowers/specs/2026-10-11-controlled-systems-master-design.md) remains the requirements authority. Integration review is required before downstream adapters depend on this revision.
 
@@ -28,6 +28,28 @@ callers using inferred types need no change. LP alternatives remain `T` or
 or `OperationStopped`. No mathematical, evidence, ownership or runtime behavior
 changes in this source patch.
 
+Revision 1.4 adds explicit dimensions to the canonical finite catalogue and
+quantifiers to initial sets. `InitialInformation` names the existing point/set
+variant; `Problem::external` now holds optional known-sequence, exogenous or
+adversarial input alternatives. The [immutable problem-data module](problem-data.md)
+validates and retains these descriptions and optional full-history temporal CSR.
+This revision preserves source 1.3.1's `optimization::LPDataResult<T>` composition
+fix and all LP, evidence and solve-attempt interfaces.
+
+Migrate `FiniteDomain{catalogue}` to `FiniteDomain{dimension,catalogue}`. Mixed
+coordinates are `[continuous,discrete]`, with explicit discrete dimension d and
+continuous dimension m-d. Supply `InitialSet{set,SetQuantifier::existential}` or
+`universal`; omitted/unknown quantifiers are invalid at snapshot construction.
+There is no inferred quantifier for legacy set-initialized requests. Replace an
+old external set assignment with an explicitly selected known sequence or
+`ExogenousExternalInput{T_stage_sets,quantifier}` (or a separately identified
+adversarial declaration). Exogenous is a role, not a boundedness claim: yes/no/
+unknown metadata survives. Those stage sets denote a Cartesian product with one
+whole-sequence quantifier and no initial/external coupling; correlated or fixed-
+parameter inputs cannot be migrated by silently taking their marginals. Empty
+external optionals remain absent. The nominal guard and its conservative profile
+are unchanged; accepted data does not promise execution or feasibility.
+
 ## Common rules
 
 - C++20, `double`, compatible in-process toolchains. Revision 1 is source-level compatibility, not a stable C++ binary/plugin ABI. No Eigen, HiGHS, JSON or test-library type occurs in the public header.
@@ -45,7 +67,7 @@ changes in this source patch.
 
 For n states, m controls and p external inputs, every `LinearStage` has A n×n, B n×m, E n×p and offset n. `check_model_shape` checks these shapes/storage without imposing invertibility. It scans coefficient descriptors, not matrix values: O(T) for LTV, O(1) for constant coefficients; diagnostic storage is O(number of failures). Constant coefficients are stored once. Zero-dimensional control/external ports are legal. A zero transition matrix is a valid model.
 
-There are T transitions and controls, states x0 through xT, and T+1 strictly increasing physical times. LTV has exactly T stages. State sets have T+1 entries, continuous control sets T entries; restrictions must be explicit, including universal/empty/singleton sets. Known initial data has n components. Observation maps, error maps, feedthrough and before/after-decision timing are separate from dynamics and information. Absence of observations does not grant knowledge. MODEL-01 implements model/time/observation validation; problem domains and information-pattern validation remain MODEL-02/03.
+There are T transitions and controls, states x0 through xT, and T+1 strictly increasing physical times. LTV has exactly T stages. State sets have T+1 entries, continuous control sets T entries; restrictions must be explicit, including universal/empty/singleton sets. Known initial data has n components. Observation maps, error maps, feedthrough and before/after-decision timing are separate from dynamics and information. Absence of observations does not grant knowledge. MODEL-01 implements model/time/observation validation; MODEL-02 validates immutable domain/initial/external/temporal data, while complete-problem and strategy/information compatibility remain MODEL-03.
 
 ### Revision 1.2 observation migration
 

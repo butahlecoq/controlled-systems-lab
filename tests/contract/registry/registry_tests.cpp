@@ -413,8 +413,8 @@ TEST_CASE("T-M03 unsupported profiles stay capability rejection rather than infe
     CHECK(std::get<SynthesisResult>(std::get<PreparedStrategy>(forward).create()->run(context())).incumbents[0].original_objective == -1);
     std::vector<std::pair<StrategyRequest,std::string>> cases;
     auto modified = request; modified.configuration.strategy = {"inverse"}; cases.push_back({modified,"dynamics.inverse"});
-    modified = request; modified.problem.controls = FiniteDomain{{{0},{1}}}; cases.push_back({modified,"controls"});
-    modified = request; modified.problem.controls = MixedDomain{ContinuousDomain{{UniversalSet{1}}},FiniteDomain{{{0}}}}; cases.push_back({modified,"controls"});
+    modified = request; modified.problem.controls = FiniteDomain{1,{{0},{1}}}; cases.push_back({modified,"controls"});
+    modified = request; modified.problem.controls = MixedDomain{ContinuousDomain{{UniversalSet{0}}},FiniteDomain{1,{{0}}}}; cases.push_back({modified,"controls"});
     modified = request; modified.problem.information = InformationPattern::feedback; cases.push_back({modified,"information"});
     modified = request; modified.problem.temporal = TemporalConstraints{{1,1,{0,1},{0},{1}},{{0,1}}}; cases.push_back({modified,"temporal"});
     modified = request; auto continuous = std::make_shared<SystemModel>(*request.problem.model);
