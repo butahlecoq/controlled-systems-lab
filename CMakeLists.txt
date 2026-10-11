@@ -10,19 +10,26 @@ option(CSL_DEPENDENCY_PROBES "Build the isolated pinned native dependency probes
 add_library(csl_contracts STATIC src/contracts.cpp)
 add_library(CSL::contracts ALIAS csl_contracts)
 set_target_properties(csl_contracts PROPERTIES EXPORT_NAME contracts CXX_EXTENSIONS OFF)
-target_compile_features(csl_contracts PUBLIC cxx_std_20)
-target_include_directories(csl_contracts PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-if(MSVC)
-  target_compile_options(csl_contracts PRIVATE /W4 /WX /permissive-)
-else()
-  target_compile_options(csl_contracts PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
+add_library(csl_numeric STATIC src/numeric/data.cpp)
+add_library(CSL::numeric ALIAS csl_numeric)
+set_target_properties(csl_numeric PROPERTIES EXPORT_NAME numeric CXX_EXTENSIONS OFF)
+target_link_libraries(csl_numeric PUBLIC CSL::contracts)
+foreach(target IN ITEMS csl_contracts csl_numeric)
+  target_compile_features(${target} PUBLIC cxx_std_20)
+  target_include_directories(${target} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /W4 /WX /permissive-)
+  else()
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  endif()
+endforeach()
 
-install(TARGETS csl_contracts EXPORT CSLTargets
+install(TARGETS csl_contracts csl_numeric EXPORT CSLTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES include/csl/contracts.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl)
+install(FILES include/csl/numeric/data.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/numeric)
 install(EXPORT CSLTargets NAMESPACE CSL:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CSL)
 configure_package_config_file(cmake/CSLConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/CSLConfig.cmake
@@ -45,6 +52,9 @@ if(BUILD_TESTING)
   set_tests_properties(public_client PROPERTIES
     PASS_REGULAR_EXPRESSION "Public contract client: shape guards and literal affine fixture passed")
   find_package(Threads REQUIRED)
+  add_executable(numeric_tests tests/unit/numeric/data_tests.cpp)
+  target_link_libraries(numeric_tests PRIVATE CSL::numeric doctest::doctest Threads::Threads)
+  add_test(NAME numeric_tests COMMAND numeric_tests)
   add_executable(caller_example probes/core-01/caller_example.cpp)
   target_link_libraries(caller_example PRIVATE CSL::contracts Threads::Threads)
   add_test(NAME caller_example COMMAND caller_example)

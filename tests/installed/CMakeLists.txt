@@ -8,3 +8,10 @@ enable_testing()
 add_test(NAME installed_public_client COMMAND installed_public_client)
 set_tests_properties(installed_public_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Public contract client: shape guards and literal affine fixture passed")
+
+add_executable(installed_numeric_client numeric_client.cpp)
+target_link_libraries(installed_numeric_client PRIVATE CSL::numeric)
+set_target_properties(installed_numeric_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_numeric_client COMMAND installed_numeric_client)
+set_tests_properties(installed_numeric_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed numeric client: dense/CSR snapshots and retained literal fixture passed")
