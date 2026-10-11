@@ -74,3 +74,10 @@ Follow-up assessed 2026-10-11. See [architecture implications and reading limits
 | R35 | [Kochdumper and Althoff, constrained polynomial zonotopes](https://link.springer.com/article/10.1007/s00236-023-00437-5) | Published May 2023; abstract, introduction and definition overview; full proof audit pending |
 | R36 | [Kochdumper and Althoff, sparse polynomial zonotopes](https://arxiv.org/abs/1901.01780) | Submitted 2019/revised 2020, before window; abstract/metadata |
 | R37 | [Ellipsoidal Toolbox Python port, publisher release record](https://pypi.org/project/ellipsoidal-toolbox/) | Release 1.0.0, March 2026; project description/release metadata only; untested |
+
+## Temporal-constraint foundations
+
+| ID | Primary source | Reading depth / role |
+|---|---|---|
+| R38 | [Boyd and Vandenberghe, Convex Optimization](https://web.stanford.edu/~boyd/cvxbook/) | Foundational text, 2004; convexity/polyhedral formulation background. Applied derivations are recorded independently in [temporal coupling](temporal-coupling.md) |
+| R39 | [do-mpc LQR increment-state reformulation and source](https://www.do-mpc.com/en/latest/_modules/do_mpc/controller/_lqr.html) | Documented augmentation and source inspected; input-rate penalty example, not a certificate for hard constraints or complete-family recovery |

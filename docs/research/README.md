@@ -31,3 +31,7 @@ The inventory covers every file originally present in the workspace. Papers and 
 Literature selection focused on reachability, robust controllable sets, robust/adaptive MPC, data-driven uncertainty, and parallel optimization. Abstract-level reading is explicitly marked in the bibliography. Foundational software predating the window is included as an analogue, not counted as a new discovery.
 
 Reproduction tooling is in [tools](tools/README.md). It performs extraction, isolated characterization and an independent small discrete baseline check. The English curated documents summarize the archive; the extraction files intentionally preserve original language.
+
+## Follow-up proof notes
+
+[Temporal coupling](temporal-coupling.md) distinguishes reserved cross-step constraints from unchanged first archival experiments. It includes the joint convexity derivation, an exact slew-limit memory lift, a recurrence counterexample and algorithm-specific limits.

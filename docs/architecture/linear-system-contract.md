@@ -84,7 +84,7 @@ An input channel contributes a linear map and has a name/dimension. Its interpre
 
 Bounded disturbance and “second player” are not synonyms. An adversarial problem additionally specifies its objective, feasible actions, policy class and information. A general multi-player game can require more than the archive's minimax objective.
 
-The physical model should be reusable across different admissible sets and objectives. Constraints are problem data: x_t in X_t, u_t in U_t, w_t in W_t, with extensions for coupled/state-dependent admissibility. The initial supported robust algorithms may still require separate stagewise independent sets.
+The physical model should be reusable across different admissible sets and objectives. Constraints are problem data: x_t in X_t, u_t in U_t, w_t in W_t, with extensions for coupled/state-dependent admissibility. The first nominal archival experiments use original stagewise state/control constraints. Optional linear temporal constraints remain representable in ControlProblem but require an explicitly compatible strategy; see the [exact slew-lift proof and algorithm boundaries](../research/temporal-coupling.md). The initial supported robust algorithms may still require separate stagewise independent sets.
 
 ## 4. Natural special cases
 
@@ -123,7 +123,7 @@ Confirmed: optimal control planning without process disturbances. Proposed simpl
 
 The first solver uses continuous control actions on nominal dynamics while the contracts retain finite/mixed domain types, external-input and observation channels. Continuous controls do not imply continuous-time dynamics or convex admissibility. A first affine/polyhedral implementation remains the proposed initial solver class. More complex problems should be rejected by this solver with supported-assumption metadata until compatible algorithms exist.
 
-Confirmed output: a representation of all optimal plans and consistent trajectories, with individual witness selection. Initially expose optimal families only. Still open: first exact baseline, supported continuous-domain shapes/couplings and criterion/guarantee details.
+Confirmed output: a representation of all optimal plans and consistent trajectories, with individual witness selection. Initially expose optimal families only. Still open: first exact baseline, supported stagewise continuous-domain shapes and criterion/guarantee details.
 
 ## 7. C++ target and Python reference workflow
 

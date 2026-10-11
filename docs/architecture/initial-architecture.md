@@ -12,7 +12,7 @@ The core should be general within explicitly declared system classes. Fuel manag
 
 Owner selection, 2026-10-11: start with optimal control planning. The initial end-to-end interface should accept a model and constraints and return a representation of all optimal control sequences and their consistent trajectories, with optimum/quality evidence and individual witness queries. The result must identify feasibility and optimality evidence.
 
-The owner subsequently selected nominal planning without process disturbances for the first solve, while retaining more general channels and observations in the model contract. The compiled implementation direction is C++ or Rust, with C++ proposed as the working target and Python allowed for verification. Continuous actions are selected for the first solver; finite and mixed domains remain future extension points. The first published baseline, supported continuous-domain shapes/couplings, and UI form remain open. Reachability supports this workflow; feedback control remains a later workflow.
+The owner subsequently selected nominal planning without process disturbances for the first solve, while retaining more general channels and observations in the model contract. The compiled implementation direction is C++ or Rust, with C++ proposed as the working target and Python allowed for verification. Continuous actions are selected for the first solver; finite and mixed domains remain future extension points. The first published baseline, supported stagewise continuous-domain shapes, and UI form remain open. Temporal constraints are reserved in the problem contract but excluded from the first archival experiments. Reachability supports this workflow; feedback control remains a later workflow.
 
 ## Architectural alternatives
 
@@ -70,6 +70,8 @@ The detailed [linear-system contract](linear-system-contract.md) describes dynam
 ## Mathematical data contracts
 
 A model snapshot contains dimensions, stage indexing, A/B/E/c or supported evaluation callbacks, coordinate convention, time grid, scalar type, sparsity/layout, units metadata, and provenance. Matrices for transitions number T; state constraints number T+1. A constant model is a compact view over the same contract.
+
+Optional linear temporal constraints have their own problem-data contract and algorithm capability; baseline experiments keep them absent. See the [temporal-coupling proof and scope](../research/temporal-coupling.md).
 
 Control domains are distinct types: continuous set with declared convexity, finite catalogue, mixed-integer domain. Continuous control values are selected first; this is separate from the time domain and from hybrid dynamics with modes/guards. Uncertainty declares additive/model/measurement roles and stagewise-independent, correlated, fixed-parameter or statistical semantics. Converting a fixed unknown parameter into independent per-step errors must be an explicit conservative relaxation.
 

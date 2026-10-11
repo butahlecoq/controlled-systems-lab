@@ -20,6 +20,14 @@ Mixed controls combine discrete choices with continuous values and conditional c
 
 Future strategies must return their supported optimal relation/union and completeness evidence. Obtaining one optimum of a mixed-integer problem does not enumerate all optimal branches or the continuous families within them. Preserve equal-cost branches and temporal dependence. Leave these capabilities explicit and unsupported until the corresponding algorithms and theory have been reviewed.
 
+### Temporal constraints: reserved, excluded from first experiments
+
+Owner decision: preserve optional TemporalLinearConstraints in the general problem contract, while the first archival experiments use only their original stagewise state/control constraints. Do not introduce rate limits or other cross-step couplings by default. The initial baseline strategy declares stagewise-only support and rejects unsupported coupled requests; an empty temporal-constraint collection is the natural specialization.
+
+The [temporal-coupling note](../research/temporal-coupling.md) proves convexity/attainment under specified nominal affine/polyhedral assumptions, gives a counterexample to physical-state-only propagation, and constructs an exact increment-state lift for one-step slew limits. That lift preserves nonsingularity when the original A_t is nonsingular, using augmented state constraints to enforce absolute input bounds. This is not a blanket compatibility proof for all historical implementations or all temporal constraints.
+
+Future MemoryLift and joint-relation strategies declare which couplings they support, preserve original-to-auxiliary coordinate mappings, and record initial memory. Augmented dimension, intersections, representation class and numerical evidence must be checked. A new constrained study gets its own scenario ID and comparison record. Exact mathematical equivalence does not promise unchanged numerical cost or exact ordinary-zonotope closure.
+
 ## 1. What constitutes the result
 
 For nominal dynamics and a specified initial condition, let z=(x_0,...,x_T,u_0,...,u_{T-1}). Define F as the joint feasible relation containing dynamics, all state/control constraints and any temporal coupling. For terminal cost phi:
@@ -193,7 +201,7 @@ Share a total thread/memory budget between outer workers and BLAS/solver interna
 ## 6. First implementation slice after design agreement
 
 1. Agree model, set evidence, backend status and optimal-family query contracts, using the two-step integrator counterexample.
-2. Build one nominal affine/polyhedral pipeline returning a joint optimal relation, with independent witness verification. Keep continuous, finite and mixed domains representable; the first solver supports continuous actions under its declared convexity/domain assumptions.
+2. Build one nominal affine/polyhedral pipeline returning a joint optimal relation, with independent witness verification. Keep continuous, finite and mixed domains representable; the first baseline solver supports continuous actions and original stagewise constraints under its declared convexity/domain assumptions; new temporal couplings are excluded from these first experiments.
 3. Plug in a second LP implementation and a second representation/conversion strategy without changing the problem or frontend API.
 4. Compare exact generator propagation with a compatible ellipsoidal approximation, checking inclusion and objective bounds rather than demanding identical sets.
 5. Restore and reproduce an archived nominal experiment with both historical and new output scopes recorded. Profile conversions, reduction, optimization, queries and memory separately.
