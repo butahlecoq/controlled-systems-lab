@@ -4,11 +4,21 @@ Date: 2026-10-11. Status: concrete architecture proposal for discussion; no prod
 
 ## Decisions and implementation direction
 
-The owner requires architecture before numerical benchmarking, replaceable mathematical algorithms, and an initial result representing all optimal plans. The first workflow is nominal optimal control planning. Disturbance, observation and richer problem classes remain part of the [model contract](linear-system-contract.md).
+The owner requires architecture before numerical benchmarking, replaceable mathematical algorithms, and an initial result representing all optimal plans. The first workflow is nominal optimal control planning with continuous actions. Finite and mixed control domains remain explicit future extension points. Disturbance, observation and richer problem classes remain part of the [model contract](linear-system-contract.md).
 
 Use C++20 as the proposed compiled implementation target now, with a library API and CMake packaging. This is a design choice for review, not a benchmark result or an owner choice of C++ over Rust. Python remains an independent mathematical reference and an optional future binding. Benchmarks validate algorithms, integrations and performance within these boundaries; they do not postpone defining the boundaries. Rust is a possible alternative, but the design below makes concrete C++ ownership and extension choices.
 
 The first public request is an optimal solution family. Feasible sets are internal mathematical objects. Near-optimal output is a future explicit request, not the initial product requirement.
+
+## Continuous-first control domains and future finite/hybrid extensions
+
+Owner decision: first implement continuous control actions. Keep ContinuousDomain, FiniteDomain and MixedDomain as distinct domain contracts from the start. These are value domains, not a choice of continuous-time versus discrete-time dynamics. Convexity is an independently declared property; a continuous domain can be nonconvex. The proposed first solver uses affine discrete dynamics and compatible convex/polyhedral domains.
+
+For a finite action catalog {v_1,...,v_k}, a one-hot representation is u=sum_j delta_j v_j, sum_j delta_j=1, delta_j in {0,1}. Replacing these binary variables by continuous weights changes the problem to a convex-hull relaxation. A finite-horizon method may branch on discrete choices and solve continuous subproblems under each choice; a compatible mixed-integer formulation is another route. [HiGHS](https://highs.dev/) provides an LP/MIP backend candidate, not a general solver for arbitrary hybrid dynamics or a complete optimal-family extractor.
+
+Mixed controls combine discrete choices with continuous values and conditional constraints. Hybrid dynamics additionally need a mode variable, mode-dependent evolution, guards, permitted transitions and possibly resets. Keep that model extension separate from the control-domain extension. Neither is covered automatically by the initial continuous solver.
+
+Future strategies must return their supported optimal relation/union and completeness evidence. Obtaining one optimum of a mixed-integer problem does not enumerate all optimal branches or the continuous families within them. Preserve equal-cost branches and temporal dependence. Leave these capabilities explicit and unsupported until the corresponding algorithms and theory have been reviewed.
 
 ## 1. What constitutes the result
 
@@ -153,7 +163,7 @@ Share a total thread/memory budget between outer workers and BLAS/solver interna
 ## 6. First implementation slice after design agreement
 
 1. Agree model, set evidence, backend status and optimal-family query contracts, using the two-step integrator counterexample.
-2. Build one nominal affine/polyhedral pipeline returning a joint optimal relation, with independent witness verification. Keep both continuous and finite domains representable; support only declared domains in the first solver.
+2. Build one nominal affine/polyhedral pipeline returning a joint optimal relation, with independent witness verification. Keep continuous, finite and mixed domains representable; the first solver supports continuous actions under its declared convexity/domain assumptions.
 3. Plug in a second LP implementation and a second representation/conversion strategy without changing the problem or frontend API.
 4. Compare exact generator propagation with a compatible ellipsoidal approximation, checking inclusion and objective bounds rather than demanding identical sets.
 5. Restore and reproduce an archived nominal experiment with both historical and new output scopes recorded. Profile conversions, reduction, optimization, queries and memory separately.

@@ -121,9 +121,9 @@ Continuous-time ODE and discrete-time systems should share high-level responsibi
 
 Confirmed: optimal control planning without process disturbances. Proposed simplest initial instance: known initial state, affine/linear discrete dynamics, explicit admissible sets, a terminal criterion, and full-state information if observations are needed.
 
-The first solver can operate on nominal dynamics while the contracts retain external-input and observation channels. More complex problems should be rejected by this solver with supported-assumption metadata until compatible algorithms exist.
+The first solver uses continuous control actions on nominal dynamics while the contracts retain finite/mixed domain types, external-input and observation channels. Continuous controls do not imply continuous-time dynamics or convex admissibility. A first affine/polyhedral implementation remains the proposed initial solver class. More complex problems should be rejected by this solver with supported-assumption metadata until compatible algorithms exist.
 
-Confirmed output: a representation of all optimal plans and consistent trajectories, with individual witness selection. Initially expose optimal families only. Still open: first exact baseline, continuous versus finite controls for that baseline and criterion/guarantee details.
+Confirmed output: a representation of all optimal plans and consistent trajectories, with individual witness selection. Initially expose optimal families only. Still open: first exact baseline, supported continuous-domain shapes/couplings and criterion/guarantee details.
 
 ## 7. C++ target and Python reference workflow
 

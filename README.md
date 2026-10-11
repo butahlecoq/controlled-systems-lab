@@ -32,7 +32,7 @@ The archive's finite-action minimax solver enumerates control sequences; changin
 
 Published experiments are the starting baselines, as requested by the research owner. Their numbers are recorded as reported results, not new reproductions. Several source and implementation inconsistencies must be resolved before they become acceptance criteria.
 
-Updated direction: use a compiled main implementation (C++ or Rust), with C++20 proposed as the working target and Python for initial verification/reference computations. Architecture contracts are defined before numerical benchmark implementation. The first user workflow returns an optimal solution family for nominal planning without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md). This is an initial architecture hypothesis and research package, not an approved implementation specification.
+Updated direction: use a compiled main implementation (C++ or Rust), with C++20 proposed as the working target and Python for initial verification/reference computations. Architecture contracts are defined before numerical benchmark implementation. The first user workflow returns an optimal solution family for nominal planning with continuous actions and without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md). This is an initial architecture hypothesis and research package, not an approved implementation specification.
 
 ## Evidence and preservation
 

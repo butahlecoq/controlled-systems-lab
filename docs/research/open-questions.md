@@ -5,6 +5,7 @@ Date: 2026-10-11. Questions are recorded for later discussion; unanswered prefer
 ## Confirmed directions
 
 - Build a convenient general interface for controlled systems, with scientific and algorithmic extensibility, performance and parallel scalability.
+- First solver control domain: continuous actions. Preserve explicit finite and mixed control domains for future algorithms; hybrid dynamics are a separate future model capability. Continuous-domain convexity is an algorithm assumption, not implied by the word continuous.
 - Architecture and replaceable mathematical algorithms are primary. Define contracts before benchmark implementation. The first output represents all optimal plans and consistent trajectories; feasible and near-optimal families are not initial public requests.
 - Use the supplied application experiments and published numerical outcomes as initial baselines.
 - First user workflow selected: optimal control planning. Given a model and constraints, obtain a control sequence, its corresponding trajectory, and an objective/quality evaluation. The first solve will be nominal, without process disturbances. The model contract must nevertheless account for external/adversarial inputs and partial/noisy observation. The first reproduction baseline remains undecided.
@@ -27,7 +28,7 @@ The owner's baseline answer did not choose between one large solve, many experim
 | 2 | What typical/maximal dimensions, horizons, action counts and set complexities are expected? | Distinguishes numerical vs combinatorial bottlenecks |
 | 2 | Is the priority scientific experiments, offline synthesis, or online control with a deadline? | Determines scheduling, deployment and timing contracts |
 | 2 | Which guarantees are required: numerical feasibility, validated enclosure, global minimax, or probabilistic coverage? | Determines algorithms and evidence costs |
-| 2 | Are controls continuous, finite, mixed, or selectable by application? | Prevents invalid convexification |
+| 2 | Which continuous-domain shapes and temporal couplings should the first solver support? | Continuous actions are selected; distinguish convex polytopes/boxes from nonconvex domains and coupled constraints |
 | 2 | Are disturbances bounded independently each step, correlated, fixed unknown parameters, or statistical? | Determines reachable-set and minimax semantics |
 | 2 | Is full state observed? Are observation/model uncertainties estimated online? | Defines information pattern and estimator responsibilities |
 | 3 | What CPUs/GPUs, operating systems and deployment targets should be supported? | Guides backend/packaging choices |
