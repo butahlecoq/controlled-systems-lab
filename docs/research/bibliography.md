@@ -85,3 +85,5 @@ Follow-up assessed 2026-10-11. See [architecture implications and reading limits
 ## B04 publication recovery
 
 R40: [Kalev and Shorikov, optimal open-loop terminal fuel control](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019), 2019, pp. 166–176, DOI 10.1134/S0002338819020094. Published counterpart to L11; numerical section and tables inspected 2026-10-11.
+
+R29 follow-up: a local copy and editable English paper source were recovered as A21–A22 in the [larger-archive register](archive-selected-sources.json). This changes local availability, not the publication date or proof-audit status.

@@ -1,0 +1,170 @@
+{
+  "date": "2026-10-11",
+  "archive_root": "D:/work/PhD/PhD",
+  "scope": "Selected scientific sources from a read-only targeted follow-up; not a complete archive content audit",
+  "files_seen": 8982,
+  "non_library_source_candidates": 175,
+  "selected_sources": [
+    {
+      "id": "A01",
+      "path": "Семинар ИММ/Статья/ReachableSets.m",
+      "bytes": 8645,
+      "sha256": "e7010e0a830595029b9876b1511558514cec8398d2ffa290313a566ba6997558",
+      "role": "Nominal terminal-control example, T=12, different X0 and B"
+    },
+    {
+      "id": "A02",
+      "path": "Конференция/ICIE 2018/Adaptive_Correction.m",
+      "bytes": 3590,
+      "sha256": "1a2843343f360e2c8a456fda0451daddf3d6594f569ce8af1abf2db4e3cea734",
+      "role": "Adaptive nominal driver, T=16, different model and objective"
+    },
+    {
+      "id": "A03",
+      "path": "Конференция/ICIE 2018/OpenLoopControl.m",
+      "bytes": 4276,
+      "sha256": "e55761fae07a5934206b195d6e986db29e0287cc9b2833fc05ff8d8276ba5bcb",
+      "role": "Nominal forward/backward optimization and witness recovery"
+    },
+    {
+      "id": "A04",
+      "path": "Scientific Research/Zonotope.m",
+      "bytes": 2003,
+      "sha256": "23b52c42f62dc9a692ccb5252debe4f927692589c88cb9517b42f84a24f0364f",
+      "role": "Generator propagation and unfinished reduction experiment"
+    },
+    {
+      "id": "A05",
+      "path": "Scientific Research/ELL_OD.m",
+      "bytes": 1313,
+      "sha256": "779042de1ee4a920f523a8e2e4d8282d6c49c923c5917693bf3d0185b725b47f",
+      "role": "Ellipsoidal-enclosure experiment, external dependency not recovered"
+    },
+    {
+      "id": "A06",
+      "path": "Статьи/А.Ф. Шориков/btulshor.pas",
+      "bytes": 43261,
+      "sha256": "06fa90d5977ab49174abbf866899000f511fad46eac4a1e72388bbe27090a442",
+      "role": "Legacy Pascal module and algorithm interfaces"
+    },
+    {
+      "id": "A07",
+      "path": "Scientific Research/BTULSHOR/BTULSHOR.m",
+      "bytes": 592,
+      "sha256": "59c7849bb4ad79bd910f79343583de60552cb5a939d0bf19874a3e91a07bf004",
+      "role": "MATLAB translation/variant of old reachability algorithms"
+    },
+    {
+      "id": "A08",
+      "path": "Публикации/Минимакс/Adaptive_Samara/Minmaxclosedloop.m",
+      "bytes": 4525,
+      "sha256": "06c2f750a2c7deb01dbc457185378b440f8ba134216d7ab0762b8b28229ba2d9",
+      "role": "Previously missing distinct minimax adaptive driver"
+    },
+    {
+      "id": "A09",
+      "path": "Публикации/Минимакс/Adaptive_Samara/Minmaxopenloop.m",
+      "bytes": 1578,
+      "sha256": "59daeacc7727cb7ff5e0090368d76e401fa4d0c874ef359a97d6acb722467aa6",
+      "role": "Minimax open-loop routine with explicit vertex safeguard"
+    },
+    {
+      "id": "A10",
+      "path": "Публикации/Минимакс/Adaptive_Samara/results.mat",
+      "bytes": 1111167,
+      "sha256": "afb4c1b34aa4c6e9f6fdf3e31530e80e05962d9d5b83401fdb3665bd41adef4c",
+      "role": "Saved adaptive run, not matched to published row"
+    },
+    {
+      "id": "A11",
+      "path": "Публикации/Известия РАН. Теория и системы управления/Статья/ШориковАФ, КалевВИ, таблицы и рисунки.doc",
+      "bytes": 164864,
+      "sha256": "45d6d82e0447a3a1b988753b618097c20f9be56c30d2c2022789b8893a4f9de1",
+      "role": "B04 tables and figure captions recovered locally"
+    },
+    {
+      "id": "A12",
+      "path": "Публикации/Известия РАН. Теория и системы управления/Статья/ШориковАФ_КалевВИ_статья в Известия РАН.pdf",
+      "bytes": 760567,
+      "sha256": "8ade2a23baf0a99dd53022abb436f6d1975db3616487d8e7c97b3c2d4d7531af",
+      "role": "23-page B04 draft containing tables"
+    },
+    {
+      "id": "A13",
+      "path": "Публикации/Известия РАН. Теория и системы управления/Статья/ШориковАФ, КалевВИ, финальная версия.pdf",
+      "bytes": 765869,
+      "sha256": "6204bb614320fc4e2a0a282494d6fed266443ce49976d647f4a726688f7a1dda",
+      "role": "21-page B04 revision, same displayed coefficients"
+    },
+    {
+      "id": "A14",
+      "path": "Публикации/Известия РАН. Теория и системы управления/Статья/ШориковАФ, КалевВИ, последняя версия.pdf",
+      "bytes": 643860,
+      "sha256": "e04c2f1609e2580c8878ab7fb91bc41151ccc8e0cf1f5deac4cef9fd860ce147",
+      "role": "Byte-identical copy of supplied L11"
+    },
+    {
+      "id": "A15",
+      "path": "Scientific Research/Main_Hull_mod.m",
+      "bytes": 591,
+      "sha256": "b4ffe8e4cb06e9fc13df202afbd7cbd05a1e6853a6aa9a114ecf1ab03034b5eb",
+      "role": "Polyhedral reduction driver"
+    },
+    {
+      "id": "A16",
+      "path": "Scientific Research/Simplex_Hull_mod.m",
+      "bytes": 1131,
+      "sha256": "ec23c8b9984f0b475044320141d07b00823b47ae052ffbe6f9e9fa9e2551321a",
+      "role": "Specialized simplex/basis routine"
+    },
+    {
+      "id": "A17",
+      "path": "Scientific Research/GeoCalcLib-master/vertexEnumeration.m",
+      "bytes": 236,
+      "sha256": "d0f4ef259c0e33a48c0b2f56480e4a1c68df42a1783baf6e8110af8078e5fd19",
+      "role": "Alternate polyhedral backend candidate"
+    },
+    {
+      "id": "A18",
+      "path": "Конференция/ICIE 2018/VertexEnumeration.m",
+      "bytes": 2072,
+      "sha256": "0d70893bd42066ed311b6ab36aa203e9fdf8856863cc23d9b5e254e45a87bee6",
+      "role": "Double-description/conversion adapter"
+    },
+    {
+      "id": "A19",
+      "path": "Публикации/ЮУрГУ/CntrlTrMtrx.m",
+      "bytes": 4750,
+      "sha256": "b8f675653d052c18cb8726286dd42b0ab468871bdb51fd345c0edfaf2b23447a",
+      "role": "LTV discretization/transition operator module"
+    },
+    {
+      "id": "A20",
+      "path": "Публикации/ЮУрГУ/TestSouthUral.m",
+      "bytes": 2883,
+      "sha256": "d3946648e95f5127c875be3b5ec0d437249cc3bfcfcc6a4c291b5a276f6475b5",
+      "role": "Different six-state orbital-control application"
+    },
+    {
+      "id": "A21",
+      "path": "Конференция/УрГУПС 2016/p13.pdf",
+      "bytes": 391183,
+      "sha256": "8a70eddbd71571ea8443f92be1a799dc0ad6162fbfab902b88a931ab08981b4a",
+      "role": "Local copy of previously external zonotope publication R29"
+    },
+    {
+      "id": "A22",
+      "path": "Конференция/УрГУПС 2016/Статья в техе/Shorikov_Kalev_Paper.tex",
+      "bytes": 27104,
+      "sha256": "08d20e71e9f6537982822a12b0f54d49607113628398ac2b7678a54173a30e4f",
+      "role": "Editable English zonotope paper source"
+    },
+    {
+      "id": "A23",
+      "path": "Статьи/Мои переводы (я правда старался)/2. Ellipsoidal toolbox/2. Матчасть по эллипсоидальной библиотеке.docx",
+      "bytes": 407188,
+      "sha256": "0a3d87b03f2a8c5a7bd9e38660199b917a41a5050c0efd324489362a153e8f6d",
+      "role": "Owner ellipsoidal-toolbox study notes, not executable library"
+    }
+  ]
+}

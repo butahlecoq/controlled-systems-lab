@@ -39,3 +39,7 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 ## Selected first benchmark
 
 [B04 restoration](b04-restoration.md) records the owner-selected nominal scenario, its versioned historical manifest and an exact terminal-invariant audit. Source gaps and the model/result inconsistency remain explicit before implementation comparisons.
+
+## Larger local archive
+
+The [targeted follow-up search](archive-followup.md) records recovered MATLAB/Pascal algorithms, B04 tables, minimax adaptive run data and the local zonotope paper. Its selected-source register supplements the initial inventory.

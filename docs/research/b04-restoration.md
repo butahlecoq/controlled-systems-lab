@@ -87,3 +87,7 @@ Initial queries select different complete witnesses for trajectory plots and num
 - Only then run constrained optimum/family comparisons. Recover control histories and nonlinear replay conventions before attempting Table 2 reproduction.
 
 The historical 0.4-second runtime is contextual evidence, not a current performance target. The first implementation language remains the compiled C++/Rust direction; C++20 is still a working proposal. This restoration does not defer algorithm interfaces or ownership design.
+
+## Larger archive follow-up
+
+The owner supplied a second archive location. The [follow-up search](archive-followup.md) recovered B04 tables locally and related nominal MATLAB implementations. They use different initial states, B coefficients or objectives; canonical B04 control bounds and a matching numerical project remain unresolved. The exact inconsistency above still applies to the displayed historical model.

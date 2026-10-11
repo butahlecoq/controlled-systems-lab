@@ -291,5 +291,17 @@
     "Any additional state constraints not displayed in numerical example",
     "Complete witness histories and nonlinear replay/time convention"
   ],
-  "execution_gate": "Do not solve this manifest or compare against 30.899 until missing inputs and inconsistent model are resolved. A fully specified reference variant must use a distinct scenario ID."
+  "execution_gate": "Do not solve this manifest or compare against 30.899 until missing inputs and inconsistent model are resolved. A fully specified reference variant must use a distinct scenario ID.",
+  "archive_followup": {
+    "date": "2026-10-11",
+    "register": "docs/research/archive-selected-sources.json",
+    "recovered_B04_tables": "A11",
+    "related_nominal_algorithms": [
+      "A01",
+      "A02",
+      "A03"
+    ],
+    "canonical_inputs_resolved": false,
+    "note": "Related MATLAB variants differ in initial state, B and/or objective; do not import their [-1,1] interval into B04-historical."
+  }
 }

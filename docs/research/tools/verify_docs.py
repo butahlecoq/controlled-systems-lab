@@ -60,6 +60,16 @@ if reference["plans"] != 625 or reference["disturbance_box_corner_images_per_pla
 if not math.isclose(reference["computed_discrete_minimax"],
                     reference["computed_cost_of_reported_plan"],abs_tol=1e-8):
     errors.append("Published B08 plan does not match computed minimum")
+archive_register = json.loads((root/"docs/research/archive-selected-sources.json").read_text(encoding="utf-8"))
+archive_checked = 0
+for entry in archive_register["selected_sources"]:
+    p = Path(archive_register["archive_root"]) / entry["path"]
+    if p.exists():
+        archive_checked += 1
+        if hashlib.sha256(p.read_bytes()).hexdigest() != entry["sha256"]:
+            errors.append("Selected archive source hash changed: " + entry["id"])
+    else:
+        skipped.append("Selected archive source unavailable: " + entry["id"])
 b04_case = json.loads((root/"benchmarks/scenarios/b04-historical.json").read_text(encoding="utf-8"))
 b04_check = json.loads((root/"docs/research/b04-consistency.json").read_text(encoding="utf-8"))
 if b04_case["executable"] or b04_case["problem"]["controls"]["stage_sets"] is not None:
@@ -80,6 +90,7 @@ result = {
     "legacy_characterization_checks":len(characterization["checks"]),
     "baseline_reference_plans":reference["plans"],
     "b04_consistency_status":b04_check["status"],
+    "selected_archive_sources_checked":archive_checked,
     "errors":errors,"skipped":skipped,
     "limits":["External links were researched using browsing, not exhaustively HTTP-tested by this script.",
               "Markdown math/Mermaid rendering and all paper proofs are not automatically verified.",

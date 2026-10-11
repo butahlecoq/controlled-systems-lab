@@ -26,7 +26,7 @@ The immediate workflow compares alternative algorithms through complete witness 
 |---|---|---|
 | 1 | Can the original B04 MATLAB project or full numerical inputs be recovered? | B04 is selected; printed matrices violate the reported terminal-point invariant and numerical control bounds are missing |
 | 2 | Which later experiments should follow nominal B04: minimax B07/B08 or adaptive B09? | The selected initial solve is nominal; later workflows have different uncertainty/information assumptions |
-| 1 | Can original MATLAB/Pascal projects, full control histories, OpenLoopControl.py, and the distinct minimax adaptive source be recovered? | Resolves reproduction and duplicate-folder gaps |
+| 1 | Can a B04-matching project/run, full historical control histories and OpenLoopControl.py be recovered? | The larger archive recovered MATLAB/Pascal variants and a distinct minimax adaptive MATLAB source; canonical publication/run matching remains open |
 | 1 | Which actual terminal criterion was used for L04/L13 numerical tables? | Printed Euclidean formulas and displayed state/cost rows disagree |
 | 2 | Which other application domains should the interface serve first? | Validates generality beyond fuel-management assumptions |
 | 2 | What typical/maximal dimensions, horizons, action counts and set complexities are expected? | Distinguishes numerical vs combinatorial bottlenecks |
