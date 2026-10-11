@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace csl {
-// Revision 1.3.1. This is a source contract, not a stable binary ABI.
+// Revision 1.4. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
 struct ProgramIdentity { ProblemId problem; ProgramId program; bool operator==(const ProgramIdentity&) const = default; };
@@ -64,7 +64,9 @@ struct UniversalSet { std::size_t dimension; };
 struct Singleton { Vector point; };
 using AdmissibleSet = std::variant<EmptySet, UniversalSet, Singleton, SetHandle>;
 struct ContinuousDomain { std::vector<AdmissibleSet> stages; };
-struct FiniteDomain { std::vector<Vector> catalogue; };
+// Ordered stage-invariant choices, including an explicitly dimensioned empty catalogue.
+struct FiniteDomain { std::size_t dimension; std::vector<Vector> catalogue; };
+// Product coordinates are [continuous, discrete]; neither alternative denotes hybrid dynamics.
 struct MixedDomain { ContinuousDomain continuous; FiniteDomain discrete; };
 using ControlDomain = std::variant<ContinuousDomain, FiniteDomain, MixedDomain>;
 struct LinearTerminal { Vector coefficients; double offset; };
@@ -73,17 +75,33 @@ struct ResidualNormTerminal { Matrix map; Vector target; }; // ||Lx-r||_2, recta
 using TerminalObjective = std::variant<LinearTerminal, QuadraticTerminal, ResidualNormTerminal>;
 struct TemporalConstraints { SparseMatrix joint_map; std::vector<Interval> bounds; };
 struct KnownInitial { Vector point; };
-struct InitialSet { AdmissibleSet set; };
+enum class SetQuantifier { unspecified, existential, universal };
+struct InitialSet { AdmissibleSet set; SetQuantifier quantifier{SetQuantifier::unspecified}; };
+using InitialInformation = std::variant<KnownInitial, InitialSet>;
+struct KnownExternalSequence { std::vector<Vector> stages; };
+// T factors mean their Cartesian product; the quantifier scopes the whole sequence.
+// No correlation, fixed-parameter reuse or initial/external coupling is encoded.
+// At T=0 the product contains exactly the empty sequence. Boundedness is not implied.
+struct ExogenousExternalInput {
+    std::vector<AdmissibleSet> stages;
+    SetQuantifier quantifier{SetQuantifier::unspecified};
+};
+struct AdversarialExternalInput {
+    std::vector<AdmissibleSet> stages;
+    SetQuantifier quantifier{SetQuantifier::unspecified};
+    std::string semantics_reference; // Deferred objective/policy/information; cannot override product.
+};
+using ExternalInput = std::variant<KnownExternalSequence, ExogenousExternalInput, AdversarialExternalInput>;
 enum class InformationPattern { nominal_open_loop, feedback };
 struct Problem {
     ProblemId id;
     std::shared_ptr<const SystemModel> model;
     std::vector<double> times; // T+1 strictly increasing; controls indexed [0,T)
-    std::variant<KnownInitial, InitialSet> initial;
+    InitialInformation initial;
     ControlDomain controls;
     std::vector<AdmissibleSet> states; // T+1; use UniversalSet explicitly
     std::optional<TemporalConstraints> temporal;
-    std::optional<AdmissibleSet> external;
+    std::optional<ExternalInput> external; // absent requires a zero-dimensional external port
     InformationPattern information;
     TerminalObjective objective;
 };

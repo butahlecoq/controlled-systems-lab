@@ -40,11 +40,11 @@ TEST_CASE("T-M03: singular dynamics remain representable; inverse-only pipeline 
 TEST_CASE("T-M03: future profiles do not masquerade as infeasibility") {
     auto p = problem();
     SUBCASE("temporal") { p.temporal = TemporalConstraints{{1,3,{0,1},{0},{1}},{{0,1}}}; }
-    SUBCASE("finite") { p.controls = FiniteDomain{{{0},{1}}}; }
-    SUBCASE("mixed") { p.controls = MixedDomain{{{UniversalSet{1}}}, {{{0},{1}}}}; }
-    SUBCASE("initial uncertainty") { p.initial = InitialSet{UniversalSet{1}}; }
+    SUBCASE("finite") { p.controls = FiniteDomain{1,{{0},{1}}}; }
+    SUBCASE("mixed") { p.controls = MixedDomain{{{UniversalSet{0}}}, {1,{{0},{1}}}}; }
+    SUBCASE("initial uncertainty") { p.initial = InitialSet{UniversalSet{1},SetQuantifier::universal}; }
     SUBCASE("feedback") { p.information = InformationPattern::feedback; }
-    SUBCASE("external") { p.external = UniversalSet{1}; }
+    SUBCASE("external") { p.external = ExogenousExternalInput{{UniversalSet{0}},SetQuantifier::universal}; }
     SUBCASE("continuous") { auto model = *p.model; model.dynamics.time_domain = TimeDomain::continuous; p.model = std::make_shared<const SystemModel>(model); }
     auto rejected = check_nominal_profile(p, false, Assurance::numerical);
     REQUIRE(rejected.size() == 1);

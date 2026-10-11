@@ -69,3 +69,10 @@ set_target_properties(installed_highs_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_highs_client COMMAND installed_highs_client)
 set_tests_properties(installed_highs_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed HiGHS client: registered offset optimum and neutral evidence passed")
+
+add_executable(installed_problem_client problem_client.cpp)
+target_link_libraries(installed_problem_client PRIVATE CSL::problem)
+set_target_properties(installed_problem_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_problem_client COMMAND installed_problem_client)
+set_tests_properties(installed_problem_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed problem client: immutable domains and full-history literals passed")

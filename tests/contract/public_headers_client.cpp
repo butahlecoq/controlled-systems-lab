@@ -13,6 +13,9 @@
 #include <csl/registry/registry.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/adapters/lp/highs.hpp>
+#include <csl/problem/domains.hpp>
+#include <csl/problem/constraints.hpp>
+#include <csl/problem/initial_information.hpp>
 
 #include <iostream>
 #include <stdexcept>
