@@ -133,6 +133,11 @@ the native assessor would remove them. Explicit zero entries remain legal.
 
 Admission checks dimensions, nonzeros, start-array +1 extents and native derived
 factor counts before narrowing. For valid basis states, inactive dimension k<=n.
+When positive-dimensional authored A has no nonzero coefficient, admission
+conservatively includes one additional native row and one unit entry, even for
+the zero-Q route that does not need padding. This includes explicit zero CSR
+entries. Checked m+1, n+m+1, native start extents, nnz+1 and translated bytes
+precede model conversion and lazy native allocation; no extra variable is added.
 Factor initialization/recompute has capacity<=n; expansion doubles capacity only
 when c<=k+1, so `C=2(n+1)` bounds every capacity. Checked wide integer arithmetic
 covers C², n², n(n+1), triangular counts, container/index/byte limits and the
@@ -154,14 +159,28 @@ QP regularization is zero, nullspace limit4096, and use_warm_start=true; these
 audited settings are read back. No global scheduler reset is performed.
 
 Nonzero Q first solves a configured zero-cost feasibility LP with identical
-geometry. A rowless QP receives a private tautology `0=0`, avoiding the native
+geometry. If nonzero Q has no nonzero authored A coefficient, the private native
+models append the free row `-infinity < x0 < +infinity`, with one coefficient 1.
+This covers both rowless requests and authored all-zero equalities/bounded rows,
+including explicit zero CSR entries. Every original finite x satisfies the free
+row, so the feasible x-space and objective are unchanged; no regularization,
+variable, artificial finite bound or stronger feasible-set restriction is added.
+The nonzero entry is necessary: pinned Basis::build assumes that a transposed
+matrix with empty index storage has zero columns. A private zero row violated
+that assertion in Debug. Keeping at least one native row also avoids the native
 bounded-start Cholesky shortcut that cannot generally handle singular Q at zero
-regularization. The full QP then receives the current finite solution first and
+regularization. Presolve remains off. The full QP then receives the current finite solution first and
 valid basis second. Current flags, dimensions, warm-start setting, native absolute
 bound predicate and independently recomputed Ax are checked before QP run.
 Failure withholds QP execution; no hidden default native phase-I fallback is
-allowed. The private row is excluded from original residuals and has zero
-multiplier contribution. Zero-variable problems explicitly evaluate constant
+allowed. Authored Ax activities are recomputed from the original CSR; the extra
+private activity is checked separately as x0, including a nonzero phase-I start.
+Original primal residuals use only the authored rows. A native private-row dual
+must be finite and exactly zero before it can be discarded during original-space
+KKT mapping; otherwise dual evidence is withheld and native optimal cannot pass
+the numerical optimality gate. No private multiplier becomes original evidence.
+Contradictory authored `0=1` still stops as infeasible in phase I before QP.
+Zero-variable problems explicitly evaluate constant
 rows and objective, so native ModelEmpty cannot erase a contradiction.
 
 HighsConvexOptions exposes separate feasibility/simplex and QP iteration caps.
@@ -196,6 +215,8 @@ context/capture lifetime ends. Failed calls expose no stale earlier solution.
 | x fixed1e21, x² | finite x=1e21, cost1e42 |
 | contradictory rows; `-x`, x>=0; `x²-y`, y>=0 | infeasible; zero-Q unbounded; nonzero singular-Q unbounded |
 | no variables, constant7; constant `0>=1`; `0=0` | empty optimal point/cost7; infeasible; empty feasible point |
+| positive-variable QP with no A entries, authored `0=0`, redundant zero bounded rows or explicit zero CSR entries | unchanged x=3/cost0, original row geometry/residuals retained, assertion-enabled native execution |
+| positive-variable QP with authored `0=1`, implicit or explicit zero entry | infeasible/Unestablished in phase I; no QP execution |
 | O(n) zero-linear publication at4095/4096 vs4097/46341 | registered preparation accepts vs Unsupported; no large native solve |
 
 Tests also cover exact PSD/asymmetry policy, producer mutation/retained owners,
@@ -210,6 +231,7 @@ paths are not claimed to have been induced. CTest elapsed times are not benchmar
 Pinned implementation references: [factor capacity](https://github.com/ERGO-Code/HiGHS/blob/v1.11.0/highs/qpsolver/factor.hpp),
 [feasible start selection](https://github.com/ERGO-Code/HiGHS/blob/v1.11.0/highs/qpsolver/feasibility_highs.hpp),
 [QP dispatch](https://github.com/ERGO-Code/HiGHS/blob/v1.11.0/highs/qpsolver/a_quass.cpp),
+[basis matrix invariant](https://github.com/ERGO-Code/HiGHS/blob/v1.11.0/highs/qpsolver/basis.cpp),
 [native options](https://github.com/ERGO-Code/HiGHS/blob/v1.11.0/highs/lp_data/HighsOptions.h).
 These explain the chosen profile; executable public fixtures supply its runtime
 evidence. Numerical singular convergence outside the tested fixtures is not

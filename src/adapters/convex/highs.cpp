@@ -39,14 +39,18 @@ Diagnostics admission(const ConvexProgram& p) {
     const Wide n=q.variables().size(),m=q.rows().size();
     if(n>4096) return unsupported("highs.convex.variables","maximum_variables=4096; actual="+std::to_string(n));
     const auto csr=std::get<numeric::CsrInput>(q.constraints().descriptor());
-    const auto mn=add(m,n>0 && m==0?1:0),np=add(n,1);
+    // Reserve a private free row and its unit entry whenever effective A is empty.
+    // The zero-Q route does not use it; this conservative preflight still precedes translation.
+    const bool empty_a=std::none_of(csr.values.begin(),csr.values.end(),[](double value){return value!=0;});
+    const Wide padding=n>0 && empty_a?1:0;
+    const auto mn=add(m,padding),np=add(n,1),native_nnz=add(csr.values.size(),padding);
     const Wide limit=static_cast<Wide>(kHighsIInf);
-    if(!mn || !np) return unsupported("highs.convex.capacity","dimension addition overflow");
+    if(!mn || !np || !native_nnz) return unsupported("highs.convex.capacity","dimension or private-entry addition overflow");
     const auto mp=add(*mn,1),total=add(n,*mn),square=mul(n,n),twice_triangle=mul(n,*np),capacity=mul(2,*np);
     if(!mp || !total || !square || !twice_triangle || !capacity) return unsupported("highs.convex.capacity","derived extent overflow");
     const auto factor=mul(*capacity,*capacity);
     if(!factor) return unsupported("highs.convex.capacity","factor square overflow");
-    const Wide nnz=csr.values.size();
+    const Wide nnz=*native_nnz;
     for(Wide count:{n,*mn,*np,*mp,*total,nnz,*square,*twice_triangle,*twice_triangle/2,n?*factor:0})
         if(count>limit || !extent<double>(count) || !extent<HighsInt>(count))
             return unsupported("highs.convex.capacity","native integer/container/storage extent exceeded");
@@ -168,16 +172,28 @@ HighsModel translate(const ConvexProgram& p) {
     },q.objective().coefficients());
     for(const auto& b:q.variables()) { lp.col_lower_.push_back(b.lower.value_or(-kHighsInf)); lp.col_upper_.push_back(b.upper.value_or(kHighsInf)); }
     for(const auto& b:q.rows()) { lp.row_lower_.push_back(b.lower.value_or(-kHighsInf)); lp.row_upper_.push_back(b.upper.value_or(kHighsInf)); }
-    if(!hessian.value_.empty() && lp.num_row_==0) { lp.num_row_=1; lp.row_lower_.push_back(0); lp.row_upper_.push_back(0); }
-    auto& matrix=lp.a_matrix_; matrix.num_row_=lp.num_row_; matrix.num_col_=lp.num_col_; matrix.format_=MatrixFormat::kColwise;
     const auto csr=std::get<numeric::CsrInput>(q.constraints().descriptor());
+    const bool private_free_row=!hessian.value_.empty() &&
+        std::none_of(csr.values.begin(),csr.values.end(),[](double value){return value!=0;});
+    // -inf < x0 < +inf changes neither the feasible x-space nor the objective.
+    // Its unit entry avoids the pinned basis empty-transpose invariant; a zero
+    // row cannot do that, including when authored rows have only zero entries.
+    if(private_free_row) {++lp.num_row_;lp.row_lower_.push_back(-kHighsInf);lp.row_upper_.push_back(kHighsInf);}
+    auto& matrix=lp.a_matrix_; matrix.num_row_=lp.num_row_; matrix.num_col_=lp.num_col_; matrix.format_=MatrixFormat::kColwise;
     matrix.start_.assign(q.variables().size()+1,0);
     for(auto j:csr.column_indices) ++matrix.start_[j+1];
+    if(private_free_row) ++matrix.start_[1];
     for(std::size_t j=0;j<q.variables().size();++j) matrix.start_[j+1]+=matrix.start_[j];
-    auto next=matrix.start_; matrix.index_.resize(csr.values.size()); matrix.value_.resize(csr.values.size());
+    auto next=matrix.start_;
+    const auto native_entries=csr.values.size()+static_cast<std::size_t>(private_free_row); // checked in admission
+    matrix.index_.resize(native_entries);matrix.value_.resize(native_entries);
     for(std::size_t i=0;i<csr.rows;++i) for(auto k=csr.row_offsets[i];k<csr.row_offsets[i+1];++k) {
         const auto slot=static_cast<std::size_t>(next[csr.column_indices[k]]++);
         matrix.index_[slot]=static_cast<HighsInt>(i); matrix.value_[slot]=csr.values[k];
+    }
+    if(private_free_row) {
+        const auto slot=static_cast<std::size_t>(next[0]++);
+        matrix.index_[slot]=static_cast<HighsInt>(csr.rows);matrix.value_[slot]=1;
     }
     return model;
 }
@@ -193,9 +209,11 @@ bool feasible_start(const Highs& h,const HighsLp& lp,const ConvexProgram& p,doub
     };
     for(std::size_t j=0;j<n;++j) if(!feasible(s.col_value[j],lp.col_lower_[j],lp.col_upper_[j])) return false;
     const auto csr=std::get<numeric::CsrInput>(p.quadratic_program().constraints().descriptor());
+    if(m!=csr.rows && m!=csr.rows+1) return false;
     for(std::size_t i=0;i<m;++i) {
         double activity=0;
         if(i<csr.rows) for(auto k=csr.row_offsets[i];k<csr.row_offsets[i+1];++k) activity+=csr.values[k]*s.col_value[csr.column_indices[k]];
+        else activity=s.col_value[0]; // Private free row, separate from every authored activity.
         if(!std::isfinite(activity) || !feasible(s.row_value[i],lp.row_lower_[i],lp.row_upper_[i]) ||
             !feasible(activity,lp.row_lower_[i],lp.row_upper_[i]) || std::abs(activity-s.row_value[i])>tolerance) return false;
     }
@@ -232,7 +250,7 @@ bool passes(const ProgramResult& r,NumericalPolicy policy) {
         if(m->violation>policy.absolute_tolerance+policy.relative_tolerance*m->scale) return false;
     return true;
 }
-void candidate(ProgramResult& result,const ConvexProgram& p,const ExecutionContext& c,const HighsSolution& s,std::ostringstream& raw,bool allow_dual) {
+void candidate(ProgramResult& result,const ConvexProgram& p,const ExecutionContext& c,const HighsSolution& s,std::ostringstream& raw,bool allow_dual,bool private_free_row=false) {
     const auto& q=p.quadratic_program();
     if(!s.value_valid || !finite(s.col_value,q.variables().size())) return;
     result.primal=s.col_value;
@@ -241,6 +259,14 @@ void candidate(ProgramResult& result,const ConvexProgram& p,const ExecutionConte
     if(!e) { raw<<"\nprimal.checks_unavailable=original-space arithmetic"; return; }
     result.residuals.primal=e->residuals;
     raw<<"\nobjective.original="<<e->original_objective<<"\nobjective.solver="<<e->solver_objective;
+    if(private_free_row && allow_dual) {
+        // A free row has no lower/upper multiplier. Dropping a nonzero native
+        // value would change stationarity in original coordinates, so withhold it.
+        if(!s.dual_valid || s.row_dual.size()!=q.rows().size()+1 || !std::isfinite(s.row_dual.back()) || s.row_dual.back()!=0) {
+            raw<<"\ndual.unavailable=private free row multiplier is not zero";return;
+        }
+        raw<<"\ndual.private_free_row=0";
+    }
     DualMultipliers multipliers;
     bool zero_norm=false;
     if(p.reformulation()) {
@@ -318,7 +344,9 @@ class Workspace final : public ConvexWorkspace {
         }
         // Admission precedes model conversion and both lazy native constructors.
         auto model=translate(p); const bool qp=!model.hessian_.value_.empty();
-        raw<<"\nmodel.private_zero_row="<<(static_cast<std::size_t>(model.lp_.num_row_)!=q.rows().size()?"true":"false");
+        const bool private_free_row=static_cast<std::size_t>(model.lp_.num_row_)!=q.rows().size();
+        raw<<"\nmodel.private_free_row="<<(private_free_row?"true":"false")
+            <<"\nmodel.original_rows="<<q.rows().size()<<"\nmodel.native_rows="<<model.lp_.num_row_;
         try {
             if(qp) {
                 if(!feasibility_) feasibility_=std::make_unique<Highs>();
@@ -350,7 +378,7 @@ class Workspace final : public ConvexWorkspace {
                 if(api!=HighsStatus::kError && h.getInfo().valid) raw<<"\nphase.qp.iterations="<<h.getInfo().qp_iteration_count;
                 else raw<<"\nphase.qp.info=unavailable";
                 classify(result,api,qp_status);
-                if(api!=HighsStatus::kError) candidate(result,p,c,h.getSolution(),raw,true);
+                if(api!=HighsStatus::kError) candidate(result,p,c,h.getSolution(),raw,true,private_free_row);
             } else {
                 if(!solver_) solver_=std::make_unique<Highs>();
                 auto& h=*solver_; configure(h,c,options_,false); Callbacks callbacks(h,capture);

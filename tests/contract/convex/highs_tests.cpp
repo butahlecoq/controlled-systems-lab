@@ -71,13 +71,48 @@ TEST_CASE("native norm zero residual and constant norm preserve original rather 
         if(fixture==1) CHECK(r.raw_diagnostics.find("checked-componentwise-zero")!=std::string::npos);
     }
 }
+TEST_CASE("native zero geometry preserves authored rows and the original optimum") {
+    // Positive authored row counts must exercise the same empty-effective-A boundary.
+    for(int fixture:{1,2,3,0}) {
+        auto input=parabola();input.identity.program={"zero-geometry-"+std::to_string(fixture)};
+        input.variables={{1,5}}; // Feasibility starts at nonzero x; private activity cannot be assumed zero.
+        if(fixture==1) {input.constraints={1,1,{0,0},{},{}};input.rows={{0,0}};}
+        if(fixture==2) {input.constraints={3,1,{0,0,0,0},{},{}};input.rows={{-2,4},{0,0},{{},{}}};}
+        if(fixture==3) {input.constraints={2,1,{0,1,2},{0,0},{0,-0.0}};input.rows={{0,0},{-2,4}};}
+        const auto p=accepted(make_convex_program(input));auto [worker]=prepare(p).create();
+        const auto r=accepted(worker->run(context()));optimum(r,p,0);CHECK((*r.primal)[0]==doctest::Approx(3));
+        CHECK(p.quadratic_program().rows().size()==input.rows.size());
+        const auto csr=std::get<numeric::CsrInput>(p.quadratic_program().constraints().descriptor());
+        CHECK(csr.rows==input.rows.size());CHECK(csr.values.size()==input.constraints.values.size());
+        CHECK(std::vector<double>(csr.values.begin(),csr.values.end())==input.constraints.values);
+        REQUIRE(r.residuals.primal);CHECK(r.residuals.primal->rows.violation==0);
+        CHECK(r.residuals.primal->context.subject==p.identity());
+        CHECK(r.raw_diagnostics.find("start.valid=true")!=std::string::npos);
+        CHECK(r.raw_diagnostics.find("start.default_fallback=false")!=std::string::npos);
+        CHECK(r.raw_diagnostics.find("model.private_free_row=true")!=std::string::npos);
+        CHECK(r.raw_diagnostics.find("dual.private_free_row=0")!=std::string::npos);
+    }
+}
+TEST_CASE("native contradictory authored zero row stops as infeasible before QP") {
+    for(bool explicit_zero:{false,true}) {
+        auto input=parabola();input.identity.program={explicit_zero?"zero-equality-explicit-contradiction":"zero-equality-contradiction"};
+        input.constraints=explicit_zero?SparseMatrix{1,1,{0,1},{0},{0}}:SparseMatrix{1,1,{0,0},{},{}};
+        input.rows={{1,1}};
+        const auto p=accepted(make_convex_program(input));auto [worker]=prepare(p).create();const auto r=accepted(worker->run(context()));
+        CHECK(r.termination==Termination::completed);CHECK(r.outcome.value==MathematicalOutcome::infeasible);
+        CHECK(r.outcome.subject==p.identity());CHECK(std::holds_alternative<Unestablished>(r.outcome.support));
+        CHECK_FALSE(r.objective.lower);CHECK_FALSE(r.objective.upper);CHECK_FALSE(r.residuals.dual);
+        CHECK(r.raw_diagnostics.find("phase.qp.api_status=")==std::string::npos);
+        CHECK(p.quadratic_program().rows().size()==1);CHECK(p.quadratic_program().rows()[0].lower==1);
+    }
+}
 TEST_CASE("native singular semidefinite minimum returns one point in analytic continuum") {
     const auto p=accepted(make_convex_program({{{"native-convex"},{"singular"}},
         QuadraticTerminal{{2,2,{2,0,0,0}},{-2,0},1},{0,2,{0},{},{}},{{0,2},{0,1}},{},{}}));
     auto [worker]=prepare(p).create(); const auto r=accepted(worker->run(context()));
     optimum(r,p,0); CHECK((*r.primal)[0]==doctest::Approx(1));
     CHECK((*r.primal)[1]>=0); CHECK((*r.primal)[1]<=1);
-    CHECK(r.raw_diagnostics.find("model.private_zero_row=true")!=std::string::npos);
+    CHECK(r.raw_diagnostics.find("model.private_free_row=true")!=std::string::npos);
     CHECK(r.raw_diagnostics.find("start.default_fallback=false")!=std::string::npos);
 }
 TEST_CASE("native offdiagonal equality respects half Hessian convention and lower dimensional geometry") {
