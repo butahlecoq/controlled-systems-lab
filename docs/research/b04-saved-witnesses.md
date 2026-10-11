@@ -91,7 +91,7 @@ A40's exact replay convention is:
 3. Actions 1–15 are accumulated at samples 626, 1251, ..., 9376, interpreted as 6.25, 12.5, ..., 93.75 seconds (lines 24–25).
 4. Action 16 is forced at sample 10000, interpreted as **99.99 seconds**, not 100 seconds (lines 27–28). It changes final flows but cannot change final stocks.
 
-These times are inferred from the matching kernel; the FIG stores phase coordinates without a clock vector. Removing the last action from witness 1 changes its final flows by approximately `(19.91129648549213,-10.948454768662998)` while both terminal stocks stay unchanged. A physically aligned 100-second replay would be a separate variant; none is introduced here.
+These times are inferred from the matching kernel; the FIG stores phase coordinates without a clock vector. For witness 1, the final flows with the last action minus the final flows without it are approximately `(19.91129648549213,-10.948454768662998)`; both terminal-stock differences are zero. A physically aligned 100-second replay would be a separate variant; none is introduced here.
 
 The checker compares all 120000 scalar samples, with maximum diagonal residual 9.095e-13. Comparing every nominal replay with every saved nonlinear history gives this maximum absolute discrepancy matrix:
 
