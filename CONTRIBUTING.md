@@ -1,6 +1,6 @@
 # Scientific review and contributions
 
-This repository starts as a research dossier. Implementation language and product interface remain undecided. Read [the research index](docs/research/README.md), [foundations](docs/research/scientific-foundations.md) and [architecture hypothesis](docs/architecture/initial-architecture.md) first.
+This repository starts as a research dossier. The main implementation direction is C++ or Rust, with C++ proposed as the working target and Python allowed for verification. The product interface is still being designed. Read [the research index](docs/research/README.md), [foundations](docs/research/scientific-foundations.md) and [architecture hypothesis](docs/architecture/initial-architecture.md) first.
 
 Use issues for scientific corrections, reproduction reports and algorithm proposals. Cite an Lxx source identifier or a primary external reference, the formula/page, exact assumptions and a minimal example where possible. Distinguish a proven discrepancy, an interpretation question, a numerical observation and an implementation defect.
 

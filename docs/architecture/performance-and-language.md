@@ -1,8 +1,8 @@
 # Performance, parallelism and language evaluation
 
-Date: 2026-10-11. Language-neutral decision framework; no new performance benchmark has been run.
+Date: 2026-10-11. Initial comparison framework with updated owner direction; no new performance benchmark has been run.
 
-The owner explicitly leaves language open and prioritizes mathematical performance. Historical implementation languages include professor's Pascal, MATLAB experiments and archived Python listings. None constrains the new stack.
+Updated owner direction: prefer C++ or Rust for the main implementation, with Python acceptable for initial verification and references. C++ is proposed as the working target; the owner has not expressed a C++ versus Rust preference. Mathematical performance remains a priority. Historical implementation languages include professor's Pascal, MATLAB experiments and archived Python listings. None constrains the new stack.
 
 ## What will determine performance
 
@@ -65,4 +65,4 @@ Hard real-time control would require separate requirements for deadlines, alloca
 
 Report cold and warm runs, median/tail runtime, peak memory, actual workers/threads, failures, numerical residuals, bound gaps and representation size. Pin environment and hardware information. Store raw results and scenario hashes.
 
-Choose the initial stack after correctness and representative end-to-end profiling. Architectural contracts can be discussed now without committing to a language.
+Validate the proposed C++ stack through correctness and representative end-to-end profiling. Keep small Python mathematical references as independent oracles. Rust remains an alternative if owner preference or integration evidence favors it. See the [linear-system contract](linear-system-contract.md).

@@ -12,7 +12,7 @@ The core should be general within explicitly declared system classes. Fuel manag
 
 Owner selection, 2026-10-11: start with optimal control planning. The initial end-to-end interface should accept a model and constraints and return a control sequence, a corresponding trajectory, and an objective/quality evaluation. The result must identify feasibility and optimality evidence.
 
-This selection does not yet decide nominal versus robust/minimax uncertainty semantics, the first published baseline, supported control domains, implementation language, or UI form. Reachability supports this workflow; feedback control remains a later workflow.
+The owner subsequently selected nominal planning without process disturbances for the first solve, while retaining more general channels and observations in the model contract. The compiled implementation direction is C++ or Rust, with C++ proposed as the working target and Python allowed for verification. The first published baseline, supported control domains, and UI form remain open. Reachability supports this workflow; feedback control remains a later workflow.
 
 ## Architectural alternatives
 
@@ -64,6 +64,8 @@ flowchart TD
 ~~~
 
 Arrows show responsibilities that call or use one another, not mandatory remote service boundaries. Controller feedback naturally forms a runtime loop with measurements; the diagram summarizes dependency roles.
+
+The detailed [linear-system contract](linear-system-contract.md) describes dynamics, observation channels, timing, and natural special cases.
 
 ## Mathematical data contracts
 
@@ -139,4 +141,4 @@ Avoid naming directories after a programming language until selected. Keep archi
 
 ## Decisions still open
 
-Language, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, required guarantee strength, observation assumptions, nominal versus robust/minimax semantics, and the first complete executable baseline. The first workflow is selected: optimal control planning. Record these as decisions only after the owner discussion and benchmark evidence. See [interview agenda](../research/open-questions.md).
+C++ versus Rust preference, primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, required guarantee strength, observation assumptions, output scope (one versus all optimal plans), and the first complete executable baseline. The first solve is nominal; the contracts remain general. The first workflow is selected: optimal control planning. Record these as decisions only after the owner discussion and benchmark evidence. See [interview agenda](../research/open-questions.md).

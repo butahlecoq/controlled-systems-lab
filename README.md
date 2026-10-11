@@ -30,7 +30,7 @@ The archive's finite-action minimax solver enumerates control sequences; changin
 
 Published experiments are the starting baselines, as requested by the research owner. Their numbers are recorded as reported results, not new reproductions. Several source and implementation inconsistencies must be resolved before they become acceptance criteria.
 
-No implementation language is selected. Julia, C++, Rust with numerical libraries, and Python with compiled numerical kernels remain candidates. This is an initial architecture hypothesis and research package, not an approved implementation specification.
+Updated direction: use a compiled main implementation (C++ or Rust), with C++ proposed as the working target and Python for initial verification/reference computations. The first user workflow is nominal optimal control planning without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md). This is an initial architecture hypothesis and research package, not an approved implementation specification.
 
 ## Evidence and preservation
 

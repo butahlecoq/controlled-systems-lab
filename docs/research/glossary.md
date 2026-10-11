@@ -142,3 +142,5 @@ Use $E_t$ for the discrete disturbance channel in curated mathematics, and $E_c$
 Reserve $X_t$ for admissible state sets, $R_t$ for reachable sets, and $S_t$ for target/predecessor sets. Use $U_t$ for controls and $W_t$ for disturbance domains. Use T for transition count and $\tau$ for physical time.
 
 Do not translate historical “program” as “software program” when it means an open-loop plan. Do not use “exact,” “adaptive,” “robust,” or “optimal” without the relevant assumptions, policy class and numerical evidence.
+
+The [linear-system interface contract](../architecture/linear-system-contract.md) uses C for the observation map, consistent with common A/B/C/D state-space notation; earlier source derivations also use H for that role. Code fields should identify the semantic role explicitly.

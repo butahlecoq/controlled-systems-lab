@@ -10,6 +10,6 @@ Prepared 2026-10-11 for the public controlled-systems-lab repository. Separate i
 | [Q04](https://github.com/butahlecoq/controlled-systems-lab/issues/4) | Verify approximation inclusion and nonlinear residual validity | L05 volumes differ; clarify exact/inner/outer status and justified model-error bounds |
 | [Q05](https://github.com/butahlecoq/controlled-systems-lab/issues/5) | Review robust feedback information pattern and optimality claims | Separate fixed plans, shrinking-horizon replanning and globally optimized feedback; audit quantifier order |
 | [Q06](https://github.com/butahlecoq/controlled-systems-lab/issues/6) | Reproduce published experiments and define corrected references | Start from B04/B07/B08/B09; report rounding, objective, feasibility, bounds and historical-vs-corrected data separately |
-| [Q07](https://github.com/butahlecoq/controlled-systems-lab/issues/7) | Select implementation stack using compatible workload measurements | Language remains open; evaluate numerical architecture and complexity before language microbenchmarks |
+| [Q07](https://github.com/butahlecoq/controlled-systems-lab/issues/7) | Select implementation stack using compatible workload measurements | Owner prefers C++ or Rust, with Python references allowed; C++ proposed as working target. Validate numerical architecture and complexity on compatible workloads |
 
 Review conventions are in [CONTRIBUTING](../../CONTRIBUTING.md). All seven initial review items are published as linked GitHub issues.

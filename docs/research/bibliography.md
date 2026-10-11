@@ -52,3 +52,9 @@ A related 2016 reachable-set/fuel-control work using zonotopes appears in biblio
 ## Next reading depth
 
 Before implementing R01/R02/R24, audit each relevant theorem, supported set/policy assumptions, numerical method and benchmark inputs. Before adopting R09–R11, read the full latest versions and verify model-containment, noise, excitation, drift and residual assumptions. Archive implementation commit identifiers and licenses when an adapter is selected.
+
+## Additional interface and language references
+
+R27: [MATLAB state-space models](https://www.mathworks.com/help/control/ug/state-space-models.html) and [ControlSystems.jl system construction](https://juliacontrol.github.io/ControlSystems.jl/stable/man/creating_systems/), checked 2026-10-11. Official notation and input/output construction reference; no new scientific advance claimed.
+
+R28: [Clarabel official documentation](https://clarabel.org/stable/), checked 2026-10-11. Native Rust/Julia implementations and language-interface information; backend candidate, not an adopted dependency.
