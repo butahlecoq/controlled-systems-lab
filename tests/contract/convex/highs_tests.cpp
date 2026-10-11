@@ -50,6 +50,8 @@ TEST_CASE("registered quadratic interior and boundary optima retain original num
         auto [worker]=prepare(p).create();
         const auto r=accepted(worker->run(context()));
         optimum(r,p,upper==5?0:1);
+        CHECK(r.raw_diagnostics.find("native.version=1.11.0")!=std::string::npos);
+        CHECK(r.raw_diagnostics.find("Model status")!=std::string::npos);
         CHECK((*r.primal)[0]==doctest::Approx(upper==5?3:2));
         CHECK(worker->last_attempt()->stamp.program().identity()==p.identity());
         CHECK(worker->last_attempt()->stamp.attempt()==1);
