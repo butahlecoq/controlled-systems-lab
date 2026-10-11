@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(CSL VERSION 0.1.0 LANGUAGES CXX)
+project(CSL VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(GNUInstallDirs)
@@ -35,7 +35,12 @@ add_library(csl_optimization STATIC src/optimization/linear_program.cpp src/opti
 add_library(CSL::optimization ALIAS csl_optimization)
 set_target_properties(csl_optimization PROPERTIES EXPORT_NAME optimization CXX_EXTENSIONS OFF)
 target_link_libraries(csl_optimization PUBLIC CSL::numeric)
-foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization)
+add_library(csl_highs_lp STATIC src/adapters/lp/highs.cpp)
+add_library(CSL::highs_lp ALIAS csl_highs_lp)
+set_target_properties(csl_highs_lp PROPERTIES EXPORT_NAME highs_lp CXX_EXTENSIONS OFF)
+target_link_libraries(csl_highs_lp PUBLIC CSL::optimization CSL::registry)
+include(cmake/HighsDependencies.cmake)
+foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp)
   target_compile_features(${target} PUBLIC cxx_std_20)
   target_include_directories(${target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -47,9 +52,10 @@ foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_mode
   endif()
 endforeach()
 
-install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization EXPORT CSLTargets
+install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp EXPORT CSLTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES include/csl/contracts.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl)
+install(FILES include/csl/adapters/lp/highs.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/adapters/lp)
 install(FILES include/csl/numeric/data.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/numeric)
 install(FILES include/csl/optimization/objectives.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/optimization)
 install(FILES include/csl/registry/registry.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/registry)
@@ -78,6 +84,12 @@ if(BUILD_TESTING)
   set_tests_properties(public_client PROPERTIES
     PASS_REGULAR_EXPRESSION "Public contract client: shape guards and literal affine fixture passed")
   find_package(Threads REQUIRED)
+  add_executable(highs_public_client tests/installed/highs_client.cpp)
+  target_link_libraries(highs_public_client PRIVATE CSL::highs_lp)
+  add_test(NAME highs_public_client COMMAND highs_public_client)
+  add_executable(highs_lp_tests tests/contract/lp/highs_tests.cpp)
+  target_link_libraries(highs_lp_tests PRIVATE CSL::highs_lp doctest::doctest Threads::Threads)
+  add_test(NAME highs_lp_tests COMMAND highs_lp_tests)
   add_executable(optimization_public_client tests/installed/optimization_client.cpp)
   target_link_libraries(optimization_public_client PRIVATE CSL::optimization CSL::registry)
   add_test(NAME optimization_public_client COMMAND optimization_public_client)
