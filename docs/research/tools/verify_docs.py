@@ -18,7 +18,7 @@ for entry in inventory:
             errors.append("Original hash changed: "+entry["id"])
     else:
         skipped.append("Original unavailable in public checkout: "+entry["id"])
-    if originals_checked and entry.get("extracted_text") and not (root/entry["extracted_text"]).exists():
+    if p.exists() and entry.get("extracted_text") and not (root/entry["extracted_text"]).exists():
         errors.append("Missing local extraction: "+entry["id"])
 if len(inventory) != 31 or sum(r.get("pages",0) for r in inventory) != 226:
     errors.append("Unexpected inventory count/page total")

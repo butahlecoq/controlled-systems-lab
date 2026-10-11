@@ -1,4 +1,6 @@
-# Controlled Systems Research Workspace
+# Controlled Systems Lab
+
+Public research repository: [butahlecoq/controlled-systems-lab](https://github.com/butahlecoq/controlled-systems-lab). Scientific review starts with [seven initial issues](https://github.com/butahlecoq/controlled-systems-lab/issues) and [contribution conventions](CONTRIBUTING.md).
 
 Initial research assessment, 11 October 2026. Documentation is in English; source artifacts retain their original language.
 
