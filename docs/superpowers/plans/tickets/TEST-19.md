@@ -1,5 +1,7 @@
 # TEST-19: Expand historical optimizer and hull-variant differential tests
 
+GitHub: [#57](https://github.com/butahlecoq/controlled-systems-lab/issues/57).
+
 ## Purpose and scope
 
 Expand independent tests for phase-I, within-solve basis classification, grouping, recursive reduction, warm starts and Pascal-derived Zoutendijk projection. Each implementation already ships minimum acceptance tests.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-04, OPT-06, OPT-07, OPT-09, OPT-11, OPT-12, GEO-06.
+Blocked by [OPT-04 #29](https://github.com/butahlecoq/controlled-systems-lab/issues/29), [OPT-06 #37](https://github.com/butahlecoq/controlled-systems-lab/issues/37), [OPT-07 #38](https://github.com/butahlecoq/controlled-systems-lab/issues/38), [OPT-09 #39](https://github.com/butahlecoq/controlled-systems-lab/issues/39), [OPT-11 #45](https://github.com/butahlecoq/controlled-systems-lab/issues/45), [OPT-12 #46](https://github.com/butahlecoq/controlled-systems-lab/issues/46), [GEO-06 #23](https://github.com/butahlecoq/controlled-systems-lab/issues/23).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

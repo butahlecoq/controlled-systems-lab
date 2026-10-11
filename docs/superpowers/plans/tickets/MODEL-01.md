@@ -1,5 +1,7 @@
 # MODEL-01: Define affine LTI/LTV models and separate observations
 
+GitHub: [#15](https://github.com/butahlecoq/controlled-systems-lab/issues/15).
+
 ## Purpose and scope
 
 Construct reusable immutable dynamics and observation models with explicit time and input roles.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-03.
+Blocked by [CORE-03 #13](https://github.com/butahlecoq/controlled-systems-lab/issues/13).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

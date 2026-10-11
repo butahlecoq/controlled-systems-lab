@@ -1,5 +1,7 @@
 # GEO-02: Compute polyhedral affine images and Minkowski sums
 
+GitHub: [#40](https://github.com/butahlecoq/controlled-systems-lab/issues/40).
+
 ## Purpose and scope
 
 Provide exact mathematical affine/sum operations used by forward propagation.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-01, OPT-05.
+Blocked by [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16), [OPT-05 #30](https://github.com/butahlecoq/controlled-systems-lab/issues/30).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

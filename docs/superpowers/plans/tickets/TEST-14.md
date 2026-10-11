@@ -1,5 +1,7 @@
 # TEST-14: Expand independent trajectory verification and evidence isolation tests
 
+GitHub: [#58](https://github.com/butahlecoq/controlled-systems-lab/issues/58).
+
 ## Purpose and scope
 
 Test numerical verifier, original objective recomputation and evidence binding (EVD-01/02/03). Limit: witness feasibility never certifies global optimality, inclusion or complete optimizer coverage.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-06, CORE-01, OPT-01, MODEL-03.
+Blocked by [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [CORE-01 #11](https://github.com/butahlecoq/controlled-systems-lab/issues/11), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

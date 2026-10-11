@@ -1,5 +1,7 @@
 # VIZ-02: Support selectable fuel-state 2D plots with explicit projection guarantees
 
+GitHub: [#91](https://github.com/butahlecoq/controlled-systems-lab/issues/91).
+
 ## Purpose and scope
 
 Goal: add a final PlotRequest accepting coordinate pairs, with trajectory-pair views available immediately and mathematical set projections only on explicit request. Requirements EXP-01/06, ALG-03/04/05 and reserved SOL-06 projection capability, refined by the owner's fuel 2D projection request. Sources: set-representation review and B04 restoration. Inputs name state/control relation, stage when applicable, coordinate pair and required guarantee; outputs bind projected data to the same problem, stage and set/family identity. Exclude all-stage intermediate reachable-set viewers and automatic full-dimensional vertex materialization.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by VIZ-01, OBS-03, CORE-01, GEO-05.
+Blocked by [VIZ-01 #87](https://github.com/butahlecoq/controlled-systems-lab/issues/87), [OBS-03 #79](https://github.com/butahlecoq/controlled-systems-lab/issues/79), [CORE-01 #11](https://github.com/butahlecoq/controlled-systems-lab/issues/11), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

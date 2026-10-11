@@ -1,5 +1,7 @@
 # OPT-03: Integrate a reference native LP adapter
 
+GitHub: [#21](https://github.com/butahlecoq/controlled-systems-lab/issues/21).
+
 ## Purpose and scope
 
 Run geometry and recovery LPs through the native dependency selected by CORE-01.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-02, CORE-04.
+Blocked by [OPT-02 #18](https://github.com/butahlecoq/controlled-systems-lab/issues/18), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

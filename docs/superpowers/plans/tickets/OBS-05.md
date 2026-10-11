@@ -1,5 +1,7 @@
 # OBS-05: Export detailed module computation tables and raw performance records
 
+GitHub: [#86](https://github.com/butahlecoq/controlled-systems-lab/issues/86).
+
 ## Purpose and scope
 
 Goal: generate readable final scientific tables from ComparisonArtifact without accessing solver workspaces. Requirements EXP-01/02/04/06 and RUN-04 plus updated owner detailed submodule timings. Inputs are OBS-04 artifacts; outputs are versioned machine-readable raw records and shareable tables in documented text/CSV formats. Rows distinguish strategy, LP/simplex variant, convex optimizer including Zoutendijk if implemented, representation/operator, operation and stage/query aggregation. Exclude mandatory intermediate-computation UI and avoid selecting a language binding or table-library dependency in this ticket.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OBS-04.
+Blocked by [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

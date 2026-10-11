@@ -1,5 +1,7 @@
 # RUN-01: Execute isolated workspaces with budgets and cancellation
 
+GitHub: [#25](https://github.com/butahlecoq/controlled-systems-lab/issues/25).
+
 ## Purpose and scope
 
 Share immutable inputs while controlling mutable solver resources and partial results.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-04.
+Blocked by [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

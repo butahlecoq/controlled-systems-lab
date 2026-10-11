@@ -1,5 +1,7 @@
 # TEST-13: Expand backward recovery and distinct witness-selection tests
 
+GitHub: [#77](https://github.com/butahlecoq/controlled-systems-lab/issues/77).
+
 ## Purpose and scope
 
 Test reachability/backward-family recovery and complete witness selection (SOL-01/02/04/05, EXP-05). Limit: failure to discover another witness proves no uniqueness, and selected trajectories prove no completeness.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-03, SYN-05, SYN-01, SYN-02, SYN-04.
+Blocked by [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), [SYN-01 #53](https://github.com/butahlecoq/controlled-systems-lab/issues/53), [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

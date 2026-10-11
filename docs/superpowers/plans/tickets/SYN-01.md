@@ -1,5 +1,7 @@
 # SYN-01: Propagate nominal reachable sets with stage constraints
 
+GitHub: [#53](https://github.com/butahlecoq/controlled-systems-lab/issues/53).
+
 ## Purpose and scope
 
 Compute the nominal tube for selected exact set operations and preserve recovery information.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-02, GEO-04, MODEL-03.
+Blocked by [GEO-02 #40](https://github.com/butahlecoq/controlled-systems-lab/issues/40), [GEO-04 #41](https://github.com/butahlecoq/controlled-systems-lab/issues/41), [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

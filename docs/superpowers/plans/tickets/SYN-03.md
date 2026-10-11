@@ -1,5 +1,7 @@
 # SYN-03: Build optimal families by reachability and backward recovery
 
+GitHub: [#66](https://github.com/butahlecoq/controlled-systems-lab/issues/66).
+
 ## Purpose and scope
 
 Implement the historical-method-based strategy with complete joint-history semantics.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-01, SYN-02, GEO-05, OPT-02.
+Blocked by [SYN-01 #53](https://github.com/butahlecoq/controlled-systems-lab/issues/53), [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51), [OPT-02 #18](https://github.com/butahlecoq/controlled-systems-lab/issues/18).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

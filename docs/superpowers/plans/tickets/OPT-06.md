@@ -1,5 +1,7 @@
 # OPT-06: Add basis-reuse hull classification as a replaceable method
 
+GitHub: [#37](https://github.com/butahlecoq/controlled-systems-lab/issues/37).
+
 ## Purpose and scope
 
 Use completed phase-I basis information to classify multiple hull candidates without changing the HullReducer interface.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-04, OPT-05.
+Blocked by [OPT-04 #29](https://github.com/butahlecoq/controlled-systems-lab/issues/29), [OPT-05 #30](https://github.com/butahlecoq/controlled-systems-lab/issues/30).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

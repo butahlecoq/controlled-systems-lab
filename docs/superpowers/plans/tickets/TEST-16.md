@@ -1,5 +1,7 @@
 # TEST-16: Expand scenario-file and comparison-artifact contracts
 
+GitHub: [#84](https://github.com/butahlecoq/controlled-systems-lab/issues/84).
+
 ## Purpose and scope
 
 Test authored inputs, resolved defaults, problem identity and aligned two-strategy exports (INP-01/02/03/04/05, EXP-02/03/04/05/06). Limit: B04 restoration remains separate; historical reported values are not executable oracles.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by INP-01, INP-03, OBS-04, OBS-01, SYN-03, SYN-04, SYN-06.
+Blocked by [INP-01 #44](https://github.com/butahlecoq/controlled-systems-lab/issues/44), [INP-03 #72](https://github.com/butahlecoq/controlled-systems-lab/issues/72), [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [OBS-01 #49](https://github.com/butahlecoq/controlled-systems-lab/issues/49), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

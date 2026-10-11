@@ -1,5 +1,7 @@
 # APP-01: Define inner and outer approximation policies and evidence
 
+GitHub: [#24](https://github.com/butahlecoq/controlled-systems-lab/issues/24).
+
 ## Purpose and scope
 
 Expose approximation as a separate registered operation with a reference set, direction and budget.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-01, CORE-04.
+Blocked by [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

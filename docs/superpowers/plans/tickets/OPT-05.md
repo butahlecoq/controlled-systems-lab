@@ -1,5 +1,7 @@
 # OPT-05: Reduce hulls with independent membership LPs
 
+GitHub: [#30](https://github.com/butahlecoq/controlled-systems-lab/issues/30).
+
 ## Purpose and scope
 
 Deliver a baseline HullReducer that retains the same convex hull and original point identity.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-03, GEO-01.
+Blocked by [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

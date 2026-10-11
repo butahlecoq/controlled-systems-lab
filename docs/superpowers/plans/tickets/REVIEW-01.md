@@ -1,5 +1,7 @@
 # REVIEW-01: Deep review of core composition, native contracts and ownership
 
+GitHub: [#59](https://github.com/butahlecoq/controlled-systems-lab/issues/59).
+
 ## Purpose and scope
 
 Inspect implemented C++20 foundations/model/problem/public ports for generality and module depth (MOD-01..09, ALG-07, RUN-01/02). Review architectural/code behavior, not document-only proposals. Scientific limit: no claim of support for future problem classes without implementation/capability evidence.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-03, CORE-04, MODEL-01, MODEL-03, TEST-01, TEST-02, TEST-03.
+Blocked by [CORE-03 #13](https://github.com/butahlecoq/controlled-systems-lab/issues/13), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14), [MODEL-01 #15](https://github.com/butahlecoq/controlled-systems-lab/issues/15), [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28), [TEST-01 #19](https://github.com/butahlecoq/controlled-systems-lab/issues/19), [TEST-02 #26](https://github.com/butahlecoq/controlled-systems-lab/issues/26), [TEST-03 #47](https://github.com/butahlecoq/controlled-systems-lab/issues/47).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

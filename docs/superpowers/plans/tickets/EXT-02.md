@@ -1,5 +1,7 @@
 # EXT-02: Preserve all optimal branches for finite and mixed control domains
 
+GitHub: [#76](https://github.com/butahlecoq/controlled-systems-lab/issues/76).
+
 ## Purpose and scope
 
 Provide separate finite/minimax and compatible mixed-domain strategies with complete tie/branch semantics.
@@ -17,7 +19,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-02, SYN-05, SYN-06, EXT-01.
+Blocked by [MODEL-02 #20](https://github.com/butahlecoq/controlled-systems-lab/issues/20), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [EXT-01 #62](https://github.com/butahlecoq/controlled-systems-lab/issues/62).
 
 Related scientific/architecture issues: [#3](https://github.com/butahlecoq/controlled-systems-lab/issues/3), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

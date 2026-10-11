@@ -1,5 +1,7 @@
 # TEST-10: Expand reachability and nominal predecessor mathematical tests
 
+GitHub: [#65](https://github.com/butahlecoq/controlled-systems-lab/issues/65).
+
 ## Purpose and scope
 
 Test exact nominal propagation and predecessor module composition (ALG-03/05, MOD-05, SOL-01). Limit: existential nominal reachability does not establish robust feedback or preserve histories by itself.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-01, GEO-05, GEO-02, GEO-03, GEO-04, MODEL-01.
+Blocked by [SYN-01 #53](https://github.com/butahlecoq/controlled-systems-lab/issues/53), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51), [GEO-02 #40](https://github.com/butahlecoq/controlled-systems-lab/issues/40), [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31), [GEO-04 #41](https://github.com/butahlecoq/controlled-systems-lab/issues/41), [MODEL-01 #15](https://github.com/butahlecoq/controlled-systems-lab/issues/15).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

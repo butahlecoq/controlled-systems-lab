@@ -1,5 +1,7 @@
 # TEST-23: Expand batch sweep isolation and provenance tests
 
+GitHub: [#88](https://github.com/butahlecoq/controlled-systems-lab/issues/88).
+
 ## Purpose and scope
 
 Expand independent scenario-sweep tests for job ownership, resource allocation, failures, cancellation and saved provenance. RUN-02 ships minimum tests before this expansion.
@@ -17,7 +19,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by RUN-02, OBS-04.
+Blocked by [RUN-02 #80](https://github.com/butahlecoq/controlled-systems-lab/issues/80), [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83).
 
 Related scientific/architecture issues: [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

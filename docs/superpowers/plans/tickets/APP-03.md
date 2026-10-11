@@ -1,5 +1,7 @@
 # APP-03: Implement zonotope reduction and enclosure adapters
 
+GitHub: [#42](https://github.com/butahlecoq/controlled-systems-lab/issues/42).
+
 ## Purpose and scope
 
 Control generator growth with explicit enclosure direction and selectable algorithms.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by APP-01, GEO-07.
+Blocked by [APP-01 #24](https://github.com/butahlecoq/controlled-systems-lab/issues/24), [GEO-07 #32](https://github.com/butahlecoq/controlled-systems-lab/issues/32).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

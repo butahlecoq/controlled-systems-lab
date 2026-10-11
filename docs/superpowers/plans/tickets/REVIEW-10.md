@@ -1,5 +1,7 @@
 # REVIEW-10: Review nonlinear replay adapters and linear-result associations
 
+GitHub: [#103](https://github.com/butahlecoq/controlled-systems-lab/issues/103).
+
 ## Purpose and scope
 
 Review replay implementation and final-artifact associations after code and independent tests exist. Validate simulation assumptions and the boundary between linear optimality and nonlinear evaluation.
@@ -17,7 +19,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by TEST-22, REVIEW-04, REVIEW-07.
+Blocked by [TEST-22 #97](https://github.com/butahlecoq/controlled-systems-lab/issues/97), [REVIEW-04 #85](https://github.com/butahlecoq/controlled-systems-lab/issues/85), [REVIEW-07 #101](https://github.com/butahlecoq/controlled-systems-lab/issues/101).
 
 Related scientific/architecture issues: [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

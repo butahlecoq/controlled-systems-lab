@@ -1,5 +1,7 @@
 # VIZ-01: Prepare backend-neutral final control and state plot data
 
+GitHub: [#87](https://github.com/butahlecoq/controlled-systems-lab/issues/87).
+
 ## Purpose and scope
 
 Goal: define a PlotData adapter that consumes final comparison artifacts and independently verified complete witnesses. Requirements SOL-04/05, EXP-01/06, EVD-01/02. Sources: modular architecture and B04 tables/restoration. Outputs carry state/control coordinates, units, stage/time axes, method/witness identities, known bounds/targets, objective and evidence labels. Rendering is outside synthesis/geometry/optimization; no frontend, Python binding or interactive intermediate viewer is selected here.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OBS-04, SYN-05, MODEL-01, SYN-06.
+Blocked by [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), [MODEL-01 #15](https://github.com/butahlecoq/controlled-systems-lab/issues/15), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

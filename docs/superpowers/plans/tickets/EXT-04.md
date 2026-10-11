@@ -1,5 +1,7 @@
 # EXT-04: Add initial-set semantics and observation-based control workflows
 
+GitHub: [#68](https://github.com/butahlecoq/controlled-systems-lab/issues/68).
+
 ## Purpose and scope
 
 Keep uncertain initial information, estimation and feedback distinct from nominal point-initialized planning.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-02, SYN-06, EXT-01.
+Blocked by [MODEL-02 #20](https://github.com/butahlecoq/controlled-systems-lab/issues/20), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [EXT-01 #62](https://github.com/butahlecoq/controlled-systems-lab/issues/62).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

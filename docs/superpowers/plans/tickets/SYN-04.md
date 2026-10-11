@@ -1,5 +1,7 @@
 # SYN-04: Build optimal families by direct joint-trajectory optimization
 
+GitHub: [#67](https://github.com/butahlecoq/controlled-systems-lab/issues/67).
+
 ## Purpose and scope
 
 Solve the sparse full-trajectory program and construct its optimal relation behind the common synthesis interface.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-03, OPT-08, SYN-02.
+Blocked by [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

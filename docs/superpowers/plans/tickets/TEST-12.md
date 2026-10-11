@@ -1,5 +1,7 @@
 # TEST-12: Expand direct joint-trajectory family tests
 
+GitHub: [#74](https://github.com/butahlecoq/controlled-systems-lab/issues/74).
+
 ## Purpose and scope
 
 Test direct sparse feasible-relation assembly and supported optimal-family construction (SOL-01/02/03, EXP-05). Limit: exact symbolic family identities on fixtures do not validate arbitrary floating-point completeness.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-04, SYN-02, OPT-03, OPT-08.
+Blocked by [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

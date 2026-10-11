@@ -1,5 +1,7 @@
 # GEO-01: Represent exact polyhedral and elementary sets
 
+GitHub: [#16](https://github.com/butahlecoq/controlled-systems-lab/issues/16).
+
 ## Purpose and scope
 
 Provide immutable H/V set data and empty/singleton/universal cases with explicit evidence.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-03.
+Blocked by [CORE-03 #13](https://github.com/butahlecoq/controlled-systems-lab/issues/13).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

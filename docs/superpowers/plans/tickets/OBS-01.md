@@ -1,5 +1,7 @@
 # OBS-01: Define versioned module and operation statistics artifacts
 
+GitHub: [#49](https://github.com/butahlecoq/controlled-systems-lab/issues/49).
+
 ## Purpose and scope
 
 Goal: extend final-result observability for detailed submodule computation times. Requirements EXP-01/04/06, RUN-04, ALG-01/03/04/05; the owner's updated detailed timing request extends the summary accounting in the consolidated specification. Sources: C++ contracts, modular architecture and performance-and-language.md. Propose RunStatistics, OperationSpan and ModuleIdentity value contracts in artifacts/execution. A span identifies run, parent/task, module/algorithm/backend and pinned version, operation, stage/query, input/output representation and size, requested/applied guarantee, status/evidence, clock metric and duration. No intermediate-set retention, solver iteration dump or interactive trace viewer is required. Contract review must settle schema versioning and bounded collection behavior before producers and exporters implement it.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-01, MODEL-03, RUN-01, CORE-04.
+Blocked by [CORE-01 #11](https://github.com/butahlecoq/controlled-systems-lab/issues/11), [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28), [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

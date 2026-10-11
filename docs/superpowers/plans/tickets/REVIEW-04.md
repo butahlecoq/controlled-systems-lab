@@ -1,5 +1,7 @@
 # REVIEW-04: Deep review of numerical verification and scientific evidence claims
 
+GitHub: [#85](https://github.com/butahlecoq/controlled-systems-lab/issues/85).
+
 ## Purpose and scope
 
 Inspect independent verifier, evidence schema, objective transformations and problem binding (EVD-01/02/03). Scientific limit: small residuals, solver success, sample agreement and historical cost agreement cannot certify completeness, global optimality or nonlinear global performance.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-06, OPT-01, OBS-04, TEST-14, TEST-04.
+Blocked by [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [TEST-14 #58](https://github.com/butahlecoq/controlled-systems-lab/issues/58), [TEST-04 #27](https://github.com/butahlecoq/controlled-systems-lab/issues/27).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

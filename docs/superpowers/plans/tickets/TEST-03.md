@@ -1,5 +1,7 @@
 # TEST-03: Expand problem validation and whole-pipeline capability tests
 
+GitHub: [#47](https://github.com/butahlecoq/controlled-systems-lab/issues/47).
+
 ## Purpose and scope
 
 Test problem composition, reusable models and early capability diagnostics (MOD-05/06/07/08/09, ALG-04/05). Limit: future disturbance/feedback/finite/hybrid/temporal/arithmetic capabilities are representable or rejected; this suite does not implement them.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-03, CORE-04, MODEL-01, GEO-01.
+Blocked by [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14), [MODEL-01 #15](https://github.com/butahlecoq/controlled-systems-lab/issues/15), [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

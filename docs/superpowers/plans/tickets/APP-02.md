@@ -1,5 +1,7 @@
 # APP-02: Implement box and parallelotope approximations
 
+GitHub: [#33](https://github.com/butahlecoq/controlled-systems-lab/issues/33).
+
 ## Purpose and scope
 
 Add simple-set enclosure adapters under declared assumptions.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by APP-01, OPT-03.
+Blocked by [APP-01 #24](https://github.com/butahlecoq/controlled-systems-lab/issues/24), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

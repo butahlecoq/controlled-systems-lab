@@ -1,5 +1,7 @@
 # CORE-02: Build and run a portable C++20 client with test support
 
+GitHub: [#12](https://github.com/butahlecoq/controlled-systems-lab/issues/12).
+
 ## Purpose and scope
 
 Deliver a native client and test entry point that builds selected modules without backend-private headers.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-01.
+Blocked by [CORE-01 #11](https://github.com/butahlecoq/controlled-systems-lab/issues/11).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

@@ -1,5 +1,7 @@
 # OPT-09: Implement the Pascal-derived Zoutendijk projection method
 
+GitHub: [#39](https://github.com/butahlecoq/controlled-systems-lab/issues/39).
+
 ## Purpose and scope
 
 Add a feasible-direction adapter for Euclidean projection onto a supported linearly constrained set, using A06 ZODENTEK as source evidence.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-04, OPT-08.
+Blocked by [OPT-04 #29](https://github.com/butahlecoq/controlled-systems-lab/issues/29), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

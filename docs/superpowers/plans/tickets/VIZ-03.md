@@ -1,5 +1,7 @@
 # VIZ-03: Export standalone scientific final-result figures
 
+GitHub: [#96](https://github.com/butahlecoq/controlled-systems-lab/issues/96).
+
 ## Purpose and scope
 
 Goal: render PlotData and performance-table records with standard scientific plotting tools into standalone vector figures and raster previews. Requirements EXP-01/02/04/06. Choose and document a plotting/export adapter after dependency review; a standalone external plotting tool is allowed and does not select public language bindings. Inputs are saved artifacts and PlotRequest; outputs include control/state figures, selected 2D pair figures and detailed timing charts/tables. Plotting/export stays outside solver logic, and interactive intermediate viewing is optional future scope.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by VIZ-01, VIZ-02, OBS-05, CORE-01.
+Blocked by [VIZ-01 #87](https://github.com/butahlecoq/controlled-systems-lab/issues/87), [VIZ-02 #91](https://github.com/butahlecoq/controlled-systems-lab/issues/91), [OBS-05 #86](https://github.com/butahlecoq/controlled-systems-lab/issues/86), [CORE-01 #11](https://github.com/butahlecoq/controlled-systems-lab/issues/11).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

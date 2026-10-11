@@ -1,5 +1,7 @@
 # APP-04: Implement ellipsoidal approximation and reference comparison
 
+GitHub: [#34](https://github.com/butahlecoq/controlled-systems-lab/issues/34).
+
 ## Purpose and scope
 
 Add directional ellipsoidal enclosures and an optional external Ellipsoidal Toolbox comparison adapter.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by APP-01, OPT-08.
+Blocked by [APP-01 #24](https://github.com/butahlecoq/controlled-systems-lab/issues/24), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

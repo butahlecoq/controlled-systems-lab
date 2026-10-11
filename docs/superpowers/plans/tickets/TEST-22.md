@@ -1,5 +1,7 @@
 # TEST-22: Expand independent nonlinear replay and association tests
 
+GitHub: [#97](https://github.com/butahlecoq/controlled-systems-lab/issues/97).
+
 ## Purpose and scope
 
 Expand replay adapter and artifact-association tests independently of the linear optimizers. Implementation tickets already ship minimum tests. B04-specific numeric reproduction requires canonical plant/control data; analytic toy plants are available now.
@@ -17,7 +19,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by EXP-04, VIZ-04.
+Blocked by [EXP-04 #56](https://github.com/butahlecoq/controlled-systems-lab/issues/56), [VIZ-04 #92](https://github.com/butahlecoq/controlled-systems-lab/issues/92).
 
 Related scientific/architecture issues: [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

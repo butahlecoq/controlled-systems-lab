@@ -1,5 +1,7 @@
 # RUN-02: Run independent scenario sweeps within one resource budget
 
+GitHub: [#80](https://github.com/butahlecoq/controlled-systems-lab/issues/80).
+
 ## Purpose and scope
 
 Scale independent scenarios/seeds/configurations with bounded output and reproducible provenance.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by RUN-01, INP-02.
+Blocked by [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25), [INP-02 #75](https://github.com/butahlecoq/controlled-systems-lab/issues/75).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

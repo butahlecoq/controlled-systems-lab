@@ -1,5 +1,7 @@
 # TEST-04: Expand objective evaluation and justified reformulation tests
 
+GitHub: [#27](https://github.com/butahlecoq/controlled-systems-lab/issues/27).
+
 ## Purpose and scope
 
 Test the linear, convex-quadratic and rectangular residual-norm modules independently of solvers (OPT-01/02). Limit: convexity is checked under the declared numerical policy; a numerical PSD check is not a validated certificate.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-01.
+Blocked by [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

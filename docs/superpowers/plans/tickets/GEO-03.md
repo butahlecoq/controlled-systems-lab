@@ -1,5 +1,7 @@
 # GEO-03: Convert H and V descriptions with equality and ray support
 
+GitHub: [#31](https://github.com/butahlecoq/controlled-systems-lab/issues/31).
+
 ## Purpose and scope
 
 Register a reviewed H/V conversion adapter that handles the declared set class.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-01, OPT-03, CORE-04.
+Blocked by [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

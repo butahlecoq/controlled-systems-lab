@@ -1,5 +1,7 @@
 # OPT-04: Implement the archival phase-I feasibility kernel
 
+GitHub: [#29](https://github.com/butahlecoq/controlled-systems-lab/issues/29).
+
 ## Purpose and scope
 
 Implement the professor-associated phase-I procedure for the equality/nonnegative feasibility tasks used by hull and recovery modules.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-02, OPT-03.
+Blocked by [OPT-02 #18](https://github.com/butahlecoq/controlled-systems-lab/issues/18), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

@@ -1,5 +1,7 @@
 # OPT-08: Integrate convex-program interfaces and a reference adapter
 
+GitHub: [#22](https://github.com/butahlecoq/controlled-systems-lab/issues/22).
+
 ## Purpose and scope
 
 Solve supported terminal convex programs through a registered QP/conic adapter.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-01, CORE-04.
+Blocked by [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

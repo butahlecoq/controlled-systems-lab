@@ -1,5 +1,7 @@
 # EXT-03: Add temporal-constraint strategies and exact memory lifts
 
+GitHub: [#73](https://github.com/butahlecoq/controlled-systems-lab/issues/73).
+
 ## Purpose and scope
 
 Support reviewed linear cross-stage constraints through joint relations and specific memory augmentations.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-02, SYN-04, [#9](https://github.com/butahlecoq/controlled-systems-lab/issues/9).
+Blocked by [MODEL-02 #20](https://github.com/butahlecoq/controlled-systems-lab/issues/20), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [#9](https://github.com/butahlecoq/controlled-systems-lab/issues/9).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

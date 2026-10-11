@@ -1,5 +1,7 @@
 # GEO-04: Intersect state sets and remove redundant inequalities
 
+GitHub: [#41](https://github.com/butahlecoq/controlled-systems-lab/issues/41).
+
 ## Purpose and scope
 
 Apply state constraints without losing newly created intersection vertices.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-03, OPT-03.
+Blocked by [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

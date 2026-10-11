@@ -1,5 +1,7 @@
 # TEST-07: Expand barycentric membership and hull reduction tests
 
+GitHub: [#48](https://github.com/butahlecoq/controlled-systems-lab/issues/48).
+
 ## Purpose and scope
 
 Test hull membership, redundancy removal and recovery independently of optional phase-I basis reuse (ALG-02). Limit: tolerances report numerical membership; hull preservation is established for analytic fixtures, not inferred from successful simplex pivots.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-05, OPT-03, GEO-01.
+Blocked by [OPT-05 #30](https://github.com/butahlecoq/controlled-systems-lab/issues/30), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

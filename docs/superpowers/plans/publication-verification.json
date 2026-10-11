@@ -1,0 +1,1131 @@
+{
+  "date": "2026-10-11",
+  "status": "passed",
+  "repository": "https://github.com/butahlecoq/controlled-systems-lab",
+  "spec_version": "0.6",
+  "issues_created": 94,
+  "implementation_contract_artifact_experiment_tickets": 61,
+  "test_tickets": 23,
+  "review_tickets": 10,
+  "existing_research_issues_preserved": 10,
+  "full_prerequisite_edges": 335,
+  "native_blocking_edges": 183,
+  "native_issues_checked": 94,
+  "native_graph_verification_time": "2026-10-11T16:21:54.963792+00:00",
+  "native_closure_equivalent": true,
+  "acyclic": true,
+  "later_phase_dependency_leaks": 0,
+  "unknown_requirement_ids": 0,
+  "scope_acceptance_dependency_delivery_mismatches": [],
+  "label_mismatches": [],
+  "missing_native_edges": [],
+  "unexpected_native_edges": [],
+  "initial_ready_tickets": [
+    "CORE-01"
+  ],
+  "body_comparison": "All structured content compared after normalizing line endings and optional title preamble",
+  "verified_native_edges": [
+    {
+      "edge": "CORE-02|CORE-01",
+      "blocked_issue": 12,
+      "blocking_issue": 11,
+      "blocking_global_id": 5802765983
+    },
+    {
+      "edge": "CORE-03|CORE-02",
+      "blocked_issue": 13,
+      "blocking_issue": 12,
+      "blocking_global_id": 5802766209
+    },
+    {
+      "edge": "CORE-04|CORE-03",
+      "blocked_issue": 14,
+      "blocking_issue": 13,
+      "blocking_global_id": 5802768957
+    },
+    {
+      "edge": "MODEL-01|CORE-03",
+      "blocked_issue": 15,
+      "blocking_issue": 13,
+      "blocking_global_id": 5802768957
+    },
+    {
+      "edge": "GEO-01|CORE-03",
+      "blocked_issue": 16,
+      "blocking_issue": 13,
+      "blocking_global_id": 5802768957
+    },
+    {
+      "edge": "OPT-01|CORE-03",
+      "blocked_issue": 17,
+      "blocking_issue": 13,
+      "blocking_global_id": 5802768957
+    },
+    {
+      "edge": "OPT-02|CORE-03",
+      "blocked_issue": 18,
+      "blocking_issue": 13,
+      "blocking_global_id": 5802768957
+    },
+    {
+      "edge": "TEST-01|CORE-03",
+      "blocked_issue": 19,
+      "blocking_issue": 13,
+      "blocking_global_id": 5802768957
+    },
+    {
+      "edge": "MODEL-02|MODEL-01",
+      "blocked_issue": 20,
+      "blocking_issue": 15,
+      "blocking_global_id": 5802769457
+    },
+    {
+      "edge": "MODEL-02|GEO-01",
+      "blocked_issue": 20,
+      "blocking_issue": 16,
+      "blocking_global_id": 5802769718
+    },
+    {
+      "edge": "OPT-03|OPT-02",
+      "blocked_issue": 21,
+      "blocking_issue": 18,
+      "blocking_global_id": 5802770317
+    },
+    {
+      "edge": "OPT-03|CORE-04",
+      "blocked_issue": 21,
+      "blocking_issue": 14,
+      "blocking_global_id": 5802769199
+    },
+    {
+      "edge": "OPT-08|OPT-01",
+      "blocked_issue": 22,
+      "blocking_issue": 17,
+      "blocking_global_id": 5802770026
+    },
+    {
+      "edge": "OPT-08|CORE-04",
+      "blocked_issue": 22,
+      "blocking_issue": 14,
+      "blocking_global_id": 5802769199
+    },
+    {
+      "edge": "GEO-06|GEO-01",
+      "blocked_issue": 23,
+      "blocking_issue": 16,
+      "blocking_global_id": 5802769718
+    },
+    {
+      "edge": "APP-01|GEO-01",
+      "blocked_issue": 24,
+      "blocking_issue": 16,
+      "blocking_global_id": 5802769718
+    },
+    {
+      "edge": "APP-01|CORE-04",
+      "blocked_issue": 24,
+      "blocking_issue": 14,
+      "blocking_global_id": 5802769199
+    },
+    {
+      "edge": "RUN-01|CORE-04",
+      "blocked_issue": 25,
+      "blocking_issue": 14,
+      "blocking_global_id": 5802769199
+    },
+    {
+      "edge": "TEST-02|MODEL-01",
+      "blocked_issue": 26,
+      "blocking_issue": 15,
+      "blocking_global_id": 5802769457
+    },
+    {
+      "edge": "TEST-04|OPT-01",
+      "blocked_issue": 27,
+      "blocking_issue": 17,
+      "blocking_global_id": 5802770026
+    },
+    {
+      "edge": "MODEL-03|MODEL-02",
+      "blocked_issue": 28,
+      "blocking_issue": 20,
+      "blocking_global_id": 5802770871
+    },
+    {
+      "edge": "MODEL-03|OPT-01",
+      "blocked_issue": 28,
+      "blocking_issue": 17,
+      "blocking_global_id": 5802770026
+    },
+    {
+      "edge": "MODEL-03|CORE-04",
+      "blocked_issue": 28,
+      "blocking_issue": 14,
+      "blocking_global_id": 5802769199
+    },
+    {
+      "edge": "OPT-04|OPT-03",
+      "blocked_issue": 29,
+      "blocking_issue": 21,
+      "blocking_global_id": 5802771125
+    },
+    {
+      "edge": "OPT-05|OPT-03",
+      "blocked_issue": 30,
+      "blocking_issue": 21,
+      "blocking_global_id": 5802771125
+    },
+    {
+      "edge": "OPT-05|GEO-01",
+      "blocked_issue": 30,
+      "blocking_issue": 16,
+      "blocking_global_id": 5802769718
+    },
+    {
+      "edge": "GEO-03|GEO-01",
+      "blocked_issue": 31,
+      "blocking_issue": 16,
+      "blocking_global_id": 5802769718
+    },
+    {
+      "edge": "GEO-03|OPT-03",
+      "blocked_issue": 31,
+      "blocking_issue": 21,
+      "blocking_global_id": 5802771125
+    },
+    {
+      "edge": "GEO-07|GEO-01",
+      "blocked_issue": 32,
+      "blocking_issue": 16,
+      "blocking_global_id": 5802769718
+    },
+    {
+      "edge": "GEO-07|OPT-03",
+      "blocked_issue": 32,
+      "blocking_issue": 21,
+      "blocking_global_id": 5802771125
+    },
+    {
+      "edge": "APP-02|APP-01",
+      "blocked_issue": 33,
+      "blocking_issue": 24,
+      "blocking_global_id": 5802771943
+    },
+    {
+      "edge": "APP-02|OPT-03",
+      "blocked_issue": 33,
+      "blocking_issue": 21,
+      "blocking_global_id": 5802771125
+    },
+    {
+      "edge": "APP-04|APP-01",
+      "blocked_issue": 34,
+      "blocking_issue": 24,
+      "blocking_global_id": 5802771943
+    },
+    {
+      "edge": "APP-04|OPT-08",
+      "blocked_issue": 34,
+      "blocking_issue": 22,
+      "blocking_global_id": 5802771394
+    },
+    {
+      "edge": "TEST-05|OPT-03",
+      "blocked_issue": 35,
+      "blocking_issue": 21,
+      "blocking_global_id": 5802771125
+    },
+    {
+      "edge": "TEST-05|RUN-01",
+      "blocked_issue": 35,
+      "blocking_issue": 25,
+      "blocking_global_id": 5802772579
+    },
+    {
+      "edge": "TEST-06|OPT-08",
+      "blocked_issue": 36,
+      "blocking_issue": 22,
+      "blocking_global_id": 5802771394
+    },
+    {
+      "edge": "TEST-06|RUN-01",
+      "blocked_issue": 36,
+      "blocking_issue": 25,
+      "blocking_global_id": 5802772579
+    },
+    {
+      "edge": "OPT-06|OPT-04",
+      "blocked_issue": 37,
+      "blocking_issue": 29,
+      "blocking_global_id": 5802773659
+    },
+    {
+      "edge": "OPT-06|OPT-05",
+      "blocked_issue": 37,
+      "blocking_issue": 30,
+      "blocking_global_id": 5802773957
+    },
+    {
+      "edge": "OPT-07|OPT-05",
+      "blocked_issue": 38,
+      "blocking_issue": 30,
+      "blocking_global_id": 5802773957
+    },
+    {
+      "edge": "OPT-09|OPT-04",
+      "blocked_issue": 39,
+      "blocking_issue": 29,
+      "blocking_global_id": 5802773659
+    },
+    {
+      "edge": "OPT-09|OPT-08",
+      "blocked_issue": 39,
+      "blocking_issue": 22,
+      "blocking_global_id": 5802771394
+    },
+    {
+      "edge": "GEO-02|OPT-05",
+      "blocked_issue": 40,
+      "blocking_issue": 30,
+      "blocking_global_id": 5802773957
+    },
+    {
+      "edge": "GEO-04|GEO-03",
+      "blocked_issue": 41,
+      "blocking_issue": 31,
+      "blocking_global_id": 5802774229
+    },
+    {
+      "edge": "APP-03|APP-01",
+      "blocked_issue": 42,
+      "blocking_issue": 24,
+      "blocking_global_id": 5802771943
+    },
+    {
+      "edge": "APP-03|GEO-07",
+      "blocked_issue": 42,
+      "blocking_issue": 32,
+      "blocking_global_id": 5802774517
+    },
+    {
+      "edge": "SYN-06|MODEL-03",
+      "blocked_issue": 43,
+      "blocking_issue": 28,
+      "blocking_global_id": 5802773404
+    },
+    {
+      "edge": "INP-01|MODEL-03",
+      "blocked_issue": 44,
+      "blocking_issue": 28,
+      "blocking_global_id": 5802773404
+    },
+    {
+      "edge": "OPT-11|OPT-05",
+      "blocked_issue": 45,
+      "blocking_issue": 30,
+      "blocking_global_id": 5802773957
+    },
+    {
+      "edge": "OPT-11|RUN-01",
+      "blocked_issue": 45,
+      "blocking_issue": 25,
+      "blocking_global_id": 5802772579
+    },
+    {
+      "edge": "OPT-12|OPT-05",
+      "blocked_issue": 46,
+      "blocking_issue": 30,
+      "blocking_global_id": 5802773957
+    },
+    {
+      "edge": "OPT-12|RUN-01",
+      "blocked_issue": 46,
+      "blocking_issue": 25,
+      "blocking_global_id": 5802772579
+    },
+    {
+      "edge": "TEST-03|MODEL-03",
+      "blocked_issue": 47,
+      "blocking_issue": 28,
+      "blocking_global_id": 5802773404
+    },
+    {
+      "edge": "TEST-07|OPT-05",
+      "blocked_issue": 48,
+      "blocking_issue": 30,
+      "blocking_global_id": 5802773957
+    },
+    {
+      "edge": "OBS-01|MODEL-03",
+      "blocked_issue": 49,
+      "blocking_issue": 28,
+      "blocking_global_id": 5802773404
+    },
+    {
+      "edge": "OBS-01|RUN-01",
+      "blocked_issue": 49,
+      "blocking_issue": 25,
+      "blocking_global_id": 5802772579
+    },
+    {
+      "edge": "OPT-10|OPT-09",
+      "blocked_issue": 50,
+      "blocking_issue": 39,
+      "blocking_global_id": 5802777253
+    },
+    {
+      "edge": "GEO-05|GEO-04",
+      "blocked_issue": 51,
+      "blocking_issue": 41,
+      "blocking_global_id": 5802777812
+    },
+    {
+      "edge": "GEO-08|GEO-02",
+      "blocked_issue": 52,
+      "blocking_issue": 40,
+      "blocking_global_id": 5802777528
+    },
+    {
+      "edge": "GEO-08|GEO-03",
+      "blocked_issue": 52,
+      "blocking_issue": 31,
+      "blocking_global_id": 5802774229
+    },
+    {
+      "edge": "SYN-01|GEO-02",
+      "blocked_issue": 53,
+      "blocking_issue": 40,
+      "blocking_global_id": 5802777528
+    },
+    {
+      "edge": "SYN-01|GEO-04",
+      "blocked_issue": 53,
+      "blocking_issue": 41,
+      "blocking_global_id": 5802777812
+    },
+    {
+      "edge": "SYN-01|MODEL-03",
+      "blocked_issue": 53,
+      "blocking_issue": 28,
+      "blocking_global_id": 5802773404
+    },
+    {
+      "edge": "EXT-05|SYN-06",
+      "blocked_issue": 54,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "EXT-06|SYN-06",
+      "blocked_issue": 55,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "EXT-06|APP-01",
+      "blocked_issue": 55,
+      "blocking_issue": 24,
+      "blocking_global_id": 5802771943
+    },
+    {
+      "edge": "EXP-04|SYN-06",
+      "blocked_issue": 56,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "TEST-19|OPT-06",
+      "blocked_issue": 57,
+      "blocking_issue": 37,
+      "blocking_global_id": 5802776745
+    },
+    {
+      "edge": "TEST-19|OPT-07",
+      "blocked_issue": 57,
+      "blocking_issue": 38,
+      "blocking_global_id": 5802777006
+    },
+    {
+      "edge": "TEST-19|OPT-09",
+      "blocked_issue": 57,
+      "blocking_issue": 39,
+      "blocking_global_id": 5802777253
+    },
+    {
+      "edge": "TEST-19|OPT-11",
+      "blocked_issue": 57,
+      "blocking_issue": 45,
+      "blocking_global_id": 5802778923
+    },
+    {
+      "edge": "TEST-19|OPT-12",
+      "blocked_issue": 57,
+      "blocking_issue": 46,
+      "blocking_global_id": 5802779194
+    },
+    {
+      "edge": "TEST-19|GEO-06",
+      "blocked_issue": 57,
+      "blocking_issue": 23,
+      "blocking_global_id": 5802771668
+    },
+    {
+      "edge": "TEST-14|SYN-06",
+      "blocked_issue": 58,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "REVIEW-01|TEST-01",
+      "blocked_issue": 59,
+      "blocking_issue": 19,
+      "blocking_global_id": 5802770600
+    },
+    {
+      "edge": "REVIEW-01|TEST-02",
+      "blocked_issue": 59,
+      "blocking_issue": 26,
+      "blocking_global_id": 5802772858
+    },
+    {
+      "edge": "REVIEW-01|TEST-03",
+      "blocked_issue": 59,
+      "blocking_issue": 47,
+      "blocking_global_id": 5802779562
+    },
+    {
+      "edge": "OBS-02|OBS-01",
+      "blocked_issue": 60,
+      "blocking_issue": 49,
+      "blocking_global_id": 5802780484
+    },
+    {
+      "edge": "SYN-02|OPT-08",
+      "blocked_issue": 61,
+      "blocking_issue": 22,
+      "blocking_global_id": 5802771394
+    },
+    {
+      "edge": "SYN-02|GEO-05",
+      "blocked_issue": 61,
+      "blocking_issue": 51,
+      "blocking_global_id": 5802780984
+    },
+    {
+      "edge": "EXT-01|SYN-01",
+      "blocked_issue": 62,
+      "blocking_issue": 53,
+      "blocking_global_id": 5802781569
+    },
+    {
+      "edge": "TEST-08|GEO-02",
+      "blocked_issue": 63,
+      "blocking_issue": 40,
+      "blocking_global_id": 5802777528
+    },
+    {
+      "edge": "TEST-08|GEO-05",
+      "blocked_issue": 63,
+      "blocking_issue": 51,
+      "blocking_global_id": 5802780984
+    },
+    {
+      "edge": "TEST-09|GEO-02",
+      "blocked_issue": 64,
+      "blocking_issue": 40,
+      "blocking_global_id": 5802777528
+    },
+    {
+      "edge": "TEST-09|GEO-05",
+      "blocked_issue": 64,
+      "blocking_issue": 51,
+      "blocking_global_id": 5802780984
+    },
+    {
+      "edge": "TEST-10|SYN-01",
+      "blocked_issue": 65,
+      "blocking_issue": 53,
+      "blocking_global_id": 5802781569
+    },
+    {
+      "edge": "TEST-10|GEO-05",
+      "blocked_issue": 65,
+      "blocking_issue": 51,
+      "blocking_global_id": 5802780984
+    },
+    {
+      "edge": "SYN-03|SYN-01",
+      "blocked_issue": 66,
+      "blocking_issue": 53,
+      "blocking_global_id": 5802781569
+    },
+    {
+      "edge": "SYN-03|SYN-02",
+      "blocked_issue": 66,
+      "blocking_issue": 61,
+      "blocking_global_id": 5802787170
+    },
+    {
+      "edge": "SYN-04|MODEL-03",
+      "blocked_issue": 67,
+      "blocking_issue": 28,
+      "blocking_global_id": 5802773404
+    },
+    {
+      "edge": "SYN-04|SYN-02",
+      "blocked_issue": 67,
+      "blocking_issue": 61,
+      "blocking_global_id": 5802787170
+    },
+    {
+      "edge": "EXT-04|SYN-06",
+      "blocked_issue": 68,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "EXT-04|EXT-01",
+      "blocked_issue": 68,
+      "blocking_issue": 62,
+      "blocking_global_id": 5802787441
+    },
+    {
+      "edge": "TEST-11|SYN-02",
+      "blocked_issue": 69,
+      "blocking_issue": 61,
+      "blocking_global_id": 5802787170
+    },
+    {
+      "edge": "REVIEW-02|TEST-04",
+      "blocked_issue": 70,
+      "blocking_issue": 27,
+      "blocking_global_id": 5802773121
+    },
+    {
+      "edge": "REVIEW-02|TEST-05",
+      "blocked_issue": 70,
+      "blocking_issue": 35,
+      "blocking_global_id": 5802775276
+    },
+    {
+      "edge": "REVIEW-02|TEST-06",
+      "blocked_issue": 70,
+      "blocking_issue": 36,
+      "blocking_global_id": 5802775526
+    },
+    {
+      "edge": "REVIEW-02|TEST-07",
+      "blocked_issue": 70,
+      "blocking_issue": 48,
+      "blocking_global_id": 5802779850
+    },
+    {
+      "edge": "REVIEW-02|TEST-08",
+      "blocked_issue": 70,
+      "blocking_issue": 63,
+      "blocking_global_id": 5802787718
+    },
+    {
+      "edge": "REVIEW-02|TEST-09",
+      "blocked_issue": 70,
+      "blocking_issue": 64,
+      "blocking_global_id": 5802787986
+    },
+    {
+      "edge": "SYN-05|SYN-03",
+      "blocked_issue": 71,
+      "blocking_issue": 66,
+      "blocking_global_id": 5802788544
+    },
+    {
+      "edge": "SYN-05|SYN-04",
+      "blocked_issue": 71,
+      "blocking_issue": 67,
+      "blocking_global_id": 5802788796
+    },
+    {
+      "edge": "INP-03|INP-01",
+      "blocked_issue": 72,
+      "blocking_issue": 44,
+      "blocking_global_id": 5802778664
+    },
+    {
+      "edge": "INP-03|SYN-04",
+      "blocked_issue": 72,
+      "blocking_issue": 67,
+      "blocking_global_id": 5802788796
+    },
+    {
+      "edge": "INP-03|SYN-06",
+      "blocked_issue": 72,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "EXT-03|SYN-04",
+      "blocked_issue": 73,
+      "blocking_issue": 67,
+      "blocking_global_id": 5802788796
+    },
+    {
+      "edge": "EXT-03|#9",
+      "blocked_issue": 73,
+      "blocking_issue": 9,
+      "blocking_global_id": 5801712947
+    },
+    {
+      "edge": "TEST-12|SYN-04",
+      "blocked_issue": 74,
+      "blocking_issue": 67,
+      "blocking_global_id": 5802788796
+    },
+    {
+      "edge": "INP-02|INP-01",
+      "blocked_issue": 75,
+      "blocking_issue": 44,
+      "blocking_global_id": 5802778664
+    },
+    {
+      "edge": "INP-02|SYN-05",
+      "blocked_issue": 75,
+      "blocking_issue": 71,
+      "blocking_global_id": 5802789843
+    },
+    {
+      "edge": "INP-02|SYN-06",
+      "blocked_issue": 75,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "INP-02|RUN-01",
+      "blocked_issue": 75,
+      "blocking_issue": 25,
+      "blocking_global_id": 5802772579
+    },
+    {
+      "edge": "EXT-02|SYN-05",
+      "blocked_issue": 76,
+      "blocking_issue": 71,
+      "blocking_global_id": 5802789843
+    },
+    {
+      "edge": "EXT-02|SYN-06",
+      "blocked_issue": 76,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "EXT-02|EXT-01",
+      "blocked_issue": 76,
+      "blocking_issue": 62,
+      "blocking_global_id": 5802787441
+    },
+    {
+      "edge": "TEST-13|SYN-05",
+      "blocked_issue": 77,
+      "blocking_issue": 71,
+      "blocking_global_id": 5802789843
+    },
+    {
+      "edge": "TEST-15|RUN-01",
+      "blocked_issue": 78,
+      "blocking_issue": 25,
+      "blocking_global_id": 5802772579
+    },
+    {
+      "edge": "TEST-15|SYN-05",
+      "blocked_issue": 78,
+      "blocking_issue": 71,
+      "blocking_global_id": 5802789843
+    },
+    {
+      "edge": "OBS-03|OBS-02",
+      "blocked_issue": 79,
+      "blocking_issue": 60,
+      "blocking_global_id": 5802783654
+    },
+    {
+      "edge": "OBS-03|SYN-05",
+      "blocked_issue": 79,
+      "blocking_issue": 71,
+      "blocking_global_id": 5802789843
+    },
+    {
+      "edge": "RUN-02|INP-02",
+      "blocked_issue": 80,
+      "blocking_issue": 75,
+      "blocking_global_id": 5802791348
+    },
+    {
+      "edge": "TEST-21|EXT-02",
+      "blocked_issue": 81,
+      "blocking_issue": 76,
+      "blocking_global_id": 5802791644
+    },
+    {
+      "edge": "TEST-21|EXT-03",
+      "blocked_issue": 81,
+      "blocking_issue": 73,
+      "blocking_global_id": 5802790784
+    },
+    {
+      "edge": "TEST-21|EXT-04",
+      "blocked_issue": 81,
+      "blocking_issue": 68,
+      "blocking_global_id": 5802789043
+    },
+    {
+      "edge": "TEST-21|EXT-05",
+      "blocked_issue": 81,
+      "blocking_issue": 54,
+      "blocking_global_id": 5802781852
+    },
+    {
+      "edge": "TEST-21|EXT-06",
+      "blocked_issue": 81,
+      "blocking_issue": 55,
+      "blocking_global_id": 5802782171
+    },
+    {
+      "edge": "TEST-21|OPT-10",
+      "blocked_issue": 81,
+      "blocking_issue": 50,
+      "blocking_global_id": 5802780744
+    },
+    {
+      "edge": "REVIEW-03|TEST-10",
+      "blocked_issue": 82,
+      "blocking_issue": 65,
+      "blocking_global_id": 5802788242
+    },
+    {
+      "edge": "REVIEW-03|TEST-11",
+      "blocked_issue": 82,
+      "blocking_issue": 69,
+      "blocking_global_id": 5802789341
+    },
+    {
+      "edge": "REVIEW-03|TEST-12",
+      "blocked_issue": 82,
+      "blocking_issue": 74,
+      "blocking_global_id": 5802791072
+    },
+    {
+      "edge": "REVIEW-03|TEST-13",
+      "blocked_issue": 82,
+      "blocking_issue": 77,
+      "blocking_global_id": 5802791941
+    },
+    {
+      "edge": "OBS-04|OBS-03",
+      "blocked_issue": 83,
+      "blocking_issue": 79,
+      "blocking_global_id": 5802792519
+    },
+    {
+      "edge": "OBS-04|INP-01",
+      "blocked_issue": 83,
+      "blocking_issue": 44,
+      "blocking_global_id": 5802778664
+    },
+    {
+      "edge": "OBS-04|SYN-06",
+      "blocked_issue": 83,
+      "blocking_issue": 43,
+      "blocking_global_id": 5802778342
+    },
+    {
+      "edge": "TEST-16|INP-03",
+      "blocked_issue": 84,
+      "blocking_issue": 72,
+      "blocking_global_id": 5802790134
+    },
+    {
+      "edge": "TEST-16|OBS-04",
+      "blocked_issue": 84,
+      "blocking_issue": 83,
+      "blocking_global_id": 5802793576
+    },
+    {
+      "edge": "REVIEW-04|OBS-04",
+      "blocked_issue": 85,
+      "blocking_issue": 83,
+      "blocking_global_id": 5802793576
+    },
+    {
+      "edge": "REVIEW-04|TEST-14",
+      "blocked_issue": 85,
+      "blocking_issue": 58,
+      "blocking_global_id": 5802783065
+    },
+    {
+      "edge": "REVIEW-04|TEST-04",
+      "blocked_issue": 85,
+      "blocking_issue": 27,
+      "blocking_global_id": 5802773121
+    },
+    {
+      "edge": "OBS-05|OBS-04",
+      "blocked_issue": 86,
+      "blocking_issue": 83,
+      "blocking_global_id": 5802793576
+    },
+    {
+      "edge": "VIZ-01|OBS-04",
+      "blocked_issue": 87,
+      "blocking_issue": 83,
+      "blocking_global_id": 5802793576
+    },
+    {
+      "edge": "TEST-23|RUN-02",
+      "blocked_issue": 88,
+      "blocking_issue": 80,
+      "blocking_global_id": 5802792788
+    },
+    {
+      "edge": "TEST-23|OBS-04",
+      "blocked_issue": 88,
+      "blocking_issue": 83,
+      "blocking_global_id": 5802793576
+    },
+    {
+      "edge": "TEST-17|OBS-05",
+      "blocked_issue": 89,
+      "blocking_issue": 86,
+      "blocking_global_id": 5802798457
+    },
+    {
+      "edge": "REVIEW-06|INP-02",
+      "blocked_issue": 90,
+      "blocking_issue": 75,
+      "blocking_global_id": 5802791348
+    },
+    {
+      "edge": "REVIEW-06|VIZ-01",
+      "blocked_issue": 90,
+      "blocking_issue": 87,
+      "blocking_global_id": 5802798743
+    },
+    {
+      "edge": "REVIEW-06|TEST-16",
+      "blocked_issue": 90,
+      "blocking_issue": 84,
+      "blocking_global_id": 5802793872
+    },
+    {
+      "edge": "VIZ-02|VIZ-01",
+      "blocked_issue": 91,
+      "blocking_issue": 87,
+      "blocking_global_id": 5802798743
+    },
+    {
+      "edge": "VIZ-04|VIZ-01",
+      "blocked_issue": 92,
+      "blocking_issue": 87,
+      "blocking_global_id": 5802798743
+    },
+    {
+      "edge": "VIZ-04|EXP-04",
+      "blocked_issue": 92,
+      "blocking_issue": 56,
+      "blocking_global_id": 5802782453
+    },
+    {
+      "edge": "EXP-01|OBS-05",
+      "blocked_issue": 93,
+      "blocking_issue": 86,
+      "blocking_global_id": 5802798457
+    },
+    {
+      "edge": "EXP-02|OBS-05",
+      "blocked_issue": 94,
+      "blocking_issue": 86,
+      "blocking_global_id": 5802798457
+    },
+    {
+      "edge": "EXP-02|OPT-06",
+      "blocked_issue": 94,
+      "blocking_issue": 37,
+      "blocking_global_id": 5802776745
+    },
+    {
+      "edge": "EXP-02|OPT-09",
+      "blocked_issue": 94,
+      "blocking_issue": 39,
+      "blocking_global_id": 5802777253
+    },
+    {
+      "edge": "EXP-02|INP-03",
+      "blocked_issue": 94,
+      "blocking_issue": 72,
+      "blocking_global_id": 5802790134
+    },
+    {
+      "edge": "EXP-02|TEST-12",
+      "blocked_issue": 94,
+      "blocking_issue": 74,
+      "blocking_global_id": 5802791072
+    },
+    {
+      "edge": "EXP-02|TEST-13",
+      "blocked_issue": 94,
+      "blocking_issue": 77,
+      "blocking_global_id": 5802791941
+    },
+    {
+      "edge": "REVIEW-05|TEST-15",
+      "blocked_issue": 95,
+      "blocking_issue": 78,
+      "blocking_global_id": 5802792244
+    },
+    {
+      "edge": "REVIEW-05|TEST-17",
+      "blocked_issue": 95,
+      "blocking_issue": 89,
+      "blocking_global_id": 5802799272
+    },
+    {
+      "edge": "REVIEW-05|TEST-23",
+      "blocked_issue": 95,
+      "blocking_issue": 88,
+      "blocking_global_id": 5802799006
+    },
+    {
+      "edge": "VIZ-03|VIZ-02",
+      "blocked_issue": 96,
+      "blocking_issue": 91,
+      "blocking_global_id": 5802799802
+    },
+    {
+      "edge": "VIZ-03|OBS-05",
+      "blocked_issue": 96,
+      "blocking_issue": 86,
+      "blocking_global_id": 5802798457
+    },
+    {
+      "edge": "TEST-22|VIZ-04",
+      "blocked_issue": 97,
+      "blocking_issue": 92,
+      "blocking_global_id": 5802800071
+    },
+    {
+      "edge": "TEST-18|VIZ-03",
+      "blocked_issue": 98,
+      "blocking_issue": 96,
+      "blocking_global_id": 5802801224
+    },
+    {
+      "edge": "EXP-03|EXP-02",
+      "blocked_issue": 99,
+      "blocking_issue": 94,
+      "blocking_global_id": 5802800631
+    },
+    {
+      "edge": "EXP-03|VIZ-03",
+      "blocked_issue": 99,
+      "blocking_issue": 96,
+      "blocking_global_id": 5802801224
+    },
+    {
+      "edge": "EXP-03|APP-02",
+      "blocked_issue": 99,
+      "blocking_issue": 33,
+      "blocking_global_id": 5802774771
+    },
+    {
+      "edge": "EXP-03|APP-03",
+      "blocked_issue": 99,
+      "blocking_issue": 42,
+      "blocking_global_id": 5802778064
+    },
+    {
+      "edge": "EXP-03|APP-04",
+      "blocked_issue": 99,
+      "blocking_issue": 34,
+      "blocking_global_id": 5802775036
+    },
+    {
+      "edge": "TEST-20|GEO-08",
+      "blocked_issue": 100,
+      "blocking_issue": 52,
+      "blocking_global_id": 5802781276
+    },
+    {
+      "edge": "TEST-20|EXP-03",
+      "blocked_issue": 100,
+      "blocking_issue": 99,
+      "blocking_global_id": 5802803025
+    },
+    {
+      "edge": "REVIEW-07|TEST-17",
+      "blocked_issue": 101,
+      "blocking_issue": 89,
+      "blocking_global_id": 5802799272
+    },
+    {
+      "edge": "REVIEW-07|TEST-18",
+      "blocked_issue": 101,
+      "blocking_issue": 98,
+      "blocking_global_id": 5802802765
+    },
+    {
+      "edge": "REVIEW-07|TEST-16",
+      "blocked_issue": 101,
+      "blocking_issue": 84,
+      "blocking_global_id": 5802793872
+    },
+    {
+      "edge": "REVIEW-07|REVIEW-03",
+      "blocked_issue": 101,
+      "blocking_issue": 82,
+      "blocking_global_id": 5802793323
+    },
+    {
+      "edge": "REVIEW-07|REVIEW-04",
+      "blocked_issue": 101,
+      "blocking_issue": 85,
+      "blocking_global_id": 5802798165
+    },
+    {
+      "edge": "REVIEW-08|TEST-19",
+      "blocked_issue": 102,
+      "blocking_issue": 57,
+      "blocking_global_id": 5802782757
+    },
+    {
+      "edge": "REVIEW-08|TEST-20",
+      "blocked_issue": 102,
+      "blocking_issue": 100,
+      "blocking_global_id": 5802803302
+    },
+    {
+      "edge": "REVIEW-10|TEST-22",
+      "blocked_issue": 103,
+      "blocking_issue": 97,
+      "blocking_global_id": 5802802489
+    },
+    {
+      "edge": "REVIEW-10|REVIEW-07",
+      "blocked_issue": 103,
+      "blocking_issue": 101,
+      "blocking_global_id": 5802803568
+    },
+    {
+      "edge": "REVIEW-09|TEST-21",
+      "blocked_issue": 104,
+      "blocking_issue": 81,
+      "blocking_global_id": 5802793030
+    },
+    {
+      "edge": "REVIEW-09|REVIEW-08",
+      "blocked_issue": 104,
+      "blocking_issue": 102,
+      "blocking_global_id": 5802803846
+    }
+  ],
+  "limits": [
+    "Planning/publication checks only; planned C++ product code and module unit tests are not implemented.",
+    "Scientific algorithm proofs and canonical historical reproduction require their own implementation/review evidence."
+  ]
+}

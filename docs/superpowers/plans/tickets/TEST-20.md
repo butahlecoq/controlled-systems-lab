@@ -1,5 +1,7 @@
 # TEST-20: Expand exact structured-set and approximation contract tests
 
+GitHub: [#100](https://github.com/butahlecoq/controlled-systems-lab/issues/100).
+
 ## Purpose and scope
 
 Test the implemented zonotope/constrained-zonotope operations and box, parallelotope, zonotope and ellipsoidal approximations against independent low-dimensional inclusion oracles. Each adapter ships its own minimum tests first.
@@ -17,7 +19,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-07, GEO-08, APP-02, APP-03, APP-04, EXP-03.
+Blocked by [GEO-07 #32](https://github.com/butahlecoq/controlled-systems-lab/issues/32), [GEO-08 #52](https://github.com/butahlecoq/controlled-systems-lab/issues/52), [APP-02 #33](https://github.com/butahlecoq/controlled-systems-lab/issues/33), [APP-03 #42](https://github.com/butahlecoq/controlled-systems-lab/issues/42), [APP-04 #34](https://github.com/butahlecoq/controlled-systems-lab/issues/34), [EXP-03 #99](https://github.com/butahlecoq/controlled-systems-lab/issues/99).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

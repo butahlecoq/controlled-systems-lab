@@ -1,5 +1,7 @@
 # REVIEW-06: Deep review of scenario workflow, application independence and provenance
 
+GitHub: [#90](https://github.com/butahlecoq/controlled-systems-lab/issues/90).
+
 ## Purpose and scope
 
 Inspect scenario loader/templates, thin frontend, domain adapters and versioned experiment artifacts (INP-01..05, MOD-01/09, EXP-02/03/04). Scientific limit: a custom fuel scenario is not restored B04; changing data creates a new identified experiment.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by INP-01, INP-03, INP-02, VIZ-01, OBS-04, TEST-16.
+Blocked by [INP-01 #44](https://github.com/butahlecoq/controlled-systems-lab/issues/44), [INP-03 #72](https://github.com/butahlecoq/controlled-systems-lab/issues/72), [INP-02 #75](https://github.com/butahlecoq/controlled-systems-lab/issues/75), [VIZ-01 #87](https://github.com/butahlecoq/controlled-systems-lab/issues/87), [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [TEST-16 #84](https://github.com/butahlecoq/controlled-systems-lab/issues/84).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

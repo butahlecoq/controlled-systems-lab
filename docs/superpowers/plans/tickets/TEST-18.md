@@ -1,5 +1,7 @@
 # TEST-18: Verify fuel-case 2D projection data and visual artifacts
 
+GitHub: [#98](https://github.com/butahlecoq/controlled-systems-lab/issues/98).
+
 ## Purpose and scope
 
 Test mandatory fuel-case visualization through generic coordinate projection/export adapters (EXP-01 plus proposed T-PLOT01). Cover final optimal-family/terminal projections and trajectories; intermediate projections only when explicitly supplied. Limit: projection/samples cannot prove full-family coverage or historical reproduction.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-05, VIZ-02, VIZ-03, VIZ-01, OBS-04.
+Blocked by [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51), [VIZ-02 #91](https://github.com/butahlecoq/controlled-systems-lab/issues/91), [VIZ-03 #96](https://github.com/butahlecoq/controlled-systems-lab/issues/96), [VIZ-01 #87](https://github.com/butahlecoq/controlled-systems-lab/issues/87), [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

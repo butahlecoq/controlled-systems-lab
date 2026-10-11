@@ -1,5 +1,7 @@
 # GEO-06: Add a separate two-dimensional QuickHull adapter
 
+GitHub: [#23](https://github.com/butahlecoq/controlled-systems-lab/issues/23).
+
 ## Purpose and scope
 
 Provide a geometric 2D hull alternative for exact projected clouds and method comparison.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-01.
+Blocked by [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

@@ -1,5 +1,7 @@
 # SYN-02: Construct the entire terminal minimizer relation
 
+GitHub: [#61](https://github.com/butahlecoq/controlled-systems-lab/issues/61).
+
 ## Purpose and scope
 
 Return supported full terminal argmin sets and optimum evidence, including nonunique convex minima.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-08, GEO-05.
+Blocked by [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

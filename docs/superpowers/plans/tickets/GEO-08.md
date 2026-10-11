@@ -1,5 +1,7 @@
 # GEO-08: Provide lazy support queries and controlled materialization
 
+GitHub: [#52](https://github.com/butahlecoq/controlled-systems-lab/issues/52).
+
 ## Purpose and scope
 
 Let set callers query support and affine/projection expressions without mandatory full vertex enumeration.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-02, GEO-03, CORE-04.
+Blocked by [GEO-02 #40](https://github.com/butahlecoq/controlled-systems-lab/issues/40), [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

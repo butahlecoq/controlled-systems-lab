@@ -1,5 +1,7 @@
 # GEO-05: Project joint polyhedra and compute nominal predecessors
 
+GitHub: [#51](https://github.com/butahlecoq/controlled-systems-lab/issues/51).
+
 ## Purpose and scope
 
 Compute existential preimages/projections with explicit coordinate maps and no global invertibility restriction.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-03, GEO-04.
+Blocked by [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31), [GEO-04 #41](https://github.com/butahlecoq/controlled-systems-lab/issues/41).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

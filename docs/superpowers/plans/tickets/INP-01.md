@@ -1,5 +1,7 @@
 # INP-01: Load and validate versioned scenario files
 
+GitHub: [#44](https://github.com/butahlecoq/controlled-systems-lab/issues/44).
+
 ## Purpose and scope
 
 Accept short user-authored scenarios and optional run settings without C++ edits.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-03.
+Blocked by [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

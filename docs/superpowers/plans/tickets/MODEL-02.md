@@ -1,5 +1,7 @@
 # MODEL-02: Represent control domains, constraints and initial information
 
+GitHub: [#20](https://github.com/butahlecoq/controlled-systems-lab/issues/20).
+
 ## Purpose and scope
 
 Build problems with explicit stagewise constraints and natural general-model special cases.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-01, GEO-01.
+Blocked by [MODEL-01 #15](https://github.com/butahlecoq/controlled-systems-lab/issues/15), [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

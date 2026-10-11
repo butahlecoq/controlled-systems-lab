@@ -1,5 +1,7 @@
 # REVIEW-08: Review optimizer variants, structured sets and approximation scalability
 
+GitHub: [#102](https://github.com/butahlecoq/controlled-systems-lab/issues/102).
+
 ## Purpose and scope
 
 Perform independent standards and specification reviews of the later optimizer/representation adapters, proof assumptions, module seams and measured output costs.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by TEST-19, TEST-20, EXP-03.
+Blocked by [TEST-19 #57](https://github.com/butahlecoq/controlled-systems-lab/issues/57), [TEST-20 #100](https://github.com/butahlecoq/controlled-systems-lab/issues/100), [EXP-03 #99](https://github.com/butahlecoq/controlled-systems-lab/issues/99).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

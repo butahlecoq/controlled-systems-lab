@@ -1,5 +1,7 @@
 # GEO-07: Add zonotope and constrained-zonotope exact operations
 
+GitHub: [#32](https://github.com/butahlecoq/controlled-systems-lab/issues/32).
+
 ## Purpose and scope
 
 Register generator-based representations and their supported exact operations with dependency-preserving factors.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-01, CORE-04, OPT-03.
+Blocked by [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

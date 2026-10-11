@@ -1,5 +1,7 @@
 # OPT-10: Extend feasible directions to declared smooth convex objectives
 
+GitHub: [#50](https://github.com/butahlecoq/controlled-systems-lab/issues/50).
+
 ## Purpose and scope
 
 Add a reviewed differentiable-convex feasible-direction adapter without treating generic callbacks as certified convex programs.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-09.
+Blocked by [OPT-09 #39](https://github.com/butahlecoq/controlled-systems-lab/issues/39).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

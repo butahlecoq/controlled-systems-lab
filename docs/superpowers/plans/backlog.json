@@ -137,7 +137,13 @@
       "ready": true,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
-      ]
+      ],
+      "github": {
+        "id": 5802765983,
+        "number": 11,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/11"
+      },
+      "blocking_dependencies": []
     },
     {
       "key": "CORE-02",
@@ -175,6 +181,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802766209,
+        "number": 12,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/12"
+      },
+      "blocking_dependencies": [
+        "CORE-01"
       ]
     },
     {
@@ -212,6 +226,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802768957,
+        "number": 13,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/13"
+      },
+      "blocking_dependencies": [
+        "CORE-02"
       ]
     },
     {
@@ -251,6 +273,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802769199,
+        "number": 14,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/14"
+      },
+      "blocking_dependencies": [
+        "CORE-03"
       ]
     },
     {
@@ -293,6 +323,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/linear-system-contract.md"
+      ],
+      "github": {
+        "id": 5802769457,
+        "number": 15,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/15"
+      },
+      "blocking_dependencies": [
+        "CORE-03"
       ]
     },
     {
@@ -334,6 +372,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/linear-system-contract.md"
+      ],
+      "github": {
+        "id": 5802770871,
+        "number": 20,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/20"
+      },
+      "blocking_dependencies": [
+        "MODEL-01",
+        "GEO-01"
       ]
     },
     {
@@ -376,6 +423,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/linear-system-contract.md"
+      ],
+      "github": {
+        "id": 5802773404,
+        "number": 28,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/28"
+      },
+      "blocking_dependencies": [
+        "MODEL-02",
+        "OPT-01",
+        "CORE-04"
       ]
     },
     {
@@ -415,6 +472,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ],
+      "github": {
+        "id": 5802769718,
+        "number": 16,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/16"
+      },
+      "blocking_dependencies": [
+        "CORE-03"
       ]
     },
     {
@@ -455,6 +520,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802770026,
+        "number": 17,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/17"
+      },
+      "blocking_dependencies": [
+        "CORE-03"
       ]
     },
     {
@@ -494,6 +567,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802770317,
+        "number": 18,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/18"
+      },
+      "blocking_dependencies": [
+        "CORE-03"
       ]
     },
     {
@@ -533,6 +614,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802771125,
+        "number": 21,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/21"
+      },
+      "blocking_dependencies": [
+        "OPT-02",
+        "CORE-04"
       ]
     },
     {
@@ -572,6 +662,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802773659,
+        "number": 29,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/29"
+      },
+      "blocking_dependencies": [
+        "OPT-03"
       ]
     },
     {
@@ -612,6 +710,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802773957,
+        "number": 30,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/30"
+      },
+      "blocking_dependencies": [
+        "OPT-03",
+        "GEO-01"
       ]
     },
     {
@@ -651,6 +758,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802776745,
+        "number": 37,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/37"
+      },
+      "blocking_dependencies": [
+        "OPT-04",
+        "OPT-05"
       ]
     },
     {
@@ -689,6 +805,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802777006,
+        "number": 38,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/38"
+      },
+      "blocking_dependencies": [
+        "OPT-05"
       ]
     },
     {
@@ -729,6 +853,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802771394,
+        "number": 22,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/22"
+      },
+      "blocking_dependencies": [
+        "OPT-01",
+        "CORE-04"
       ]
     },
     {
@@ -769,6 +902,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802777253,
+        "number": 39,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/39"
+      },
+      "blocking_dependencies": [
+        "OPT-04",
+        "OPT-08"
       ]
     },
     {
@@ -807,6 +949,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802780744,
+        "number": 50,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/50"
+      },
+      "blocking_dependencies": [
+        "OPT-09"
       ]
     },
     {
@@ -845,6 +995,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ],
+      "github": {
+        "id": 5802777528,
+        "number": 40,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/40"
+      },
+      "blocking_dependencies": [
+        "OPT-05"
       ]
     },
     {
@@ -885,6 +1043,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ],
+      "github": {
+        "id": 5802774229,
+        "number": 31,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/31"
+      },
+      "blocking_dependencies": [
+        "GEO-01",
+        "OPT-03"
       ]
     },
     {
@@ -925,6 +1092,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ],
+      "github": {
+        "id": 5802777812,
+        "number": 41,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/41"
+      },
+      "blocking_dependencies": [
+        "GEO-03"
       ]
     },
     {
@@ -966,6 +1141,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ],
+      "github": {
+        "id": 5802780984,
+        "number": 51,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/51"
+      },
+      "blocking_dependencies": [
+        "GEO-04"
       ]
     },
     {
@@ -1003,6 +1186,14 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ],
+      "github": {
+        "id": 5802771668,
+        "number": 23,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/23"
+      },
+      "blocking_dependencies": [
+        "GEO-01"
       ]
     },
     {
@@ -1045,6 +1236,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ],
+      "github": {
+        "id": 5802774517,
+        "number": 32,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/32"
+      },
+      "blocking_dependencies": [
+        "GEO-01",
+        "OPT-03"
       ]
     },
     {
@@ -1086,6 +1286,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/set-representations-and-ellipsoidal-toolbox.md"
+      ],
+      "github": {
+        "id": 5802781276,
+        "number": 52,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/52"
+      },
+      "blocking_dependencies": [
+        "GEO-02",
+        "GEO-03"
       ]
     },
     {
@@ -1125,6 +1334,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802771943,
+        "number": 24,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/24"
+      },
+      "blocking_dependencies": [
+        "GEO-01",
+        "CORE-04"
       ]
     },
     {
@@ -1161,6 +1379,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802774771,
+        "number": 33,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/33"
+      },
+      "blocking_dependencies": [
+        "APP-01",
+        "OPT-03"
       ]
     },
     {
@@ -1198,6 +1425,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802778064,
+        "number": 42,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/42"
+      },
+      "blocking_dependencies": [
+        "APP-01",
+        "GEO-07"
       ]
     },
     {
@@ -1236,6 +1472,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802775036,
+        "number": 34,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/34"
+      },
+      "blocking_dependencies": [
+        "APP-01",
+        "OPT-08"
       ]
     },
     {
@@ -1275,6 +1520,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802781569,
+        "number": 53,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/53"
+      },
+      "blocking_dependencies": [
+        "GEO-02",
+        "GEO-04",
+        "MODEL-03"
       ]
     },
     {
@@ -1316,6 +1571,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802787170,
+        "number": 61,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/61"
+      },
+      "blocking_dependencies": [
+        "OPT-08",
+        "GEO-05"
       ]
     },
     {
@@ -1360,6 +1624,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802788544,
+        "number": 66,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/66"
+      },
+      "blocking_dependencies": [
+        "SYN-01",
+        "SYN-02"
       ]
     },
     {
@@ -1401,6 +1674,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802788796,
+        "number": 67,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/67"
+      },
+      "blocking_dependencies": [
+        "MODEL-03",
+        "SYN-02"
       ]
     },
     {
@@ -1439,6 +1721,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802789843,
+        "number": 71,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/71"
+      },
+      "blocking_dependencies": [
+        "SYN-03",
+        "SYN-04"
       ]
     },
     {
@@ -1478,6 +1769,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802778342,
+        "number": 43,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/43"
+      },
+      "blocking_dependencies": [
+        "MODEL-03"
       ]
     },
     {
@@ -1520,6 +1819,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802778664,
+        "number": 44,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/44"
+      },
+      "blocking_dependencies": [
+        "MODEL-03"
       ]
     },
     {
@@ -1562,6 +1869,17 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802791348,
+        "number": 75,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/75"
+      },
+      "blocking_dependencies": [
+        "INP-01",
+        "SYN-05",
+        "SYN-06",
+        "RUN-01"
       ]
     },
     {
@@ -1601,6 +1919,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802790134,
+        "number": 72,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/72"
+      },
+      "blocking_dependencies": [
+        "INP-01",
+        "SYN-04",
+        "SYN-06"
       ]
     },
     {
@@ -1639,6 +1967,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802772579,
+        "number": 25,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/25"
+      },
+      "blocking_dependencies": [
+        "CORE-04"
       ]
     },
     {
@@ -1677,6 +2013,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802792788,
+        "number": 80,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/80"
+      },
+      "blocking_dependencies": [
+        "INP-02"
       ]
     },
     {
@@ -1717,6 +2061,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802787441,
+        "number": 62,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/62"
+      },
+      "blocking_dependencies": [
+        "SYN-01"
       ]
     },
     {
@@ -1760,6 +2112,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802791644,
+        "number": 76,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/76"
+      },
+      "blocking_dependencies": [
+        "SYN-05",
+        "SYN-06",
+        "EXT-01"
       ]
     },
     {
@@ -1801,6 +2163,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802790784,
+        "number": 73,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/73"
+      },
+      "blocking_dependencies": [
+        "SYN-04"
       ]
     },
     {
@@ -1842,6 +2212,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802789043,
+        "number": 68,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/68"
+      },
+      "blocking_dependencies": [
+        "SYN-06",
+        "EXT-01"
       ]
     },
     {
@@ -1881,6 +2260,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802781852,
+        "number": 54,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/54"
+      },
+      "blocking_dependencies": [
+        "SYN-06"
       ]
     },
     {
@@ -1918,6 +2305,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802782171,
+        "number": 55,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/55"
+      },
+      "blocking_dependencies": [
+        "SYN-06",
+        "APP-01"
       ]
     },
     {
@@ -1959,6 +2355,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802778923,
+        "number": 45,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/45"
+      },
+      "blocking_dependencies": [
+        "OPT-05",
+        "RUN-01"
       ]
     },
     {
@@ -2002,6 +2407,15 @@
       "sources": [
         "docs/research/algorithm-module-inventory.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802779194,
+        "number": 46,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/46"
+      },
+      "blocking_dependencies": [
+        "OPT-05",
+        "RUN-01"
       ]
     },
     {
@@ -2046,6 +2460,14 @@
         "docs/research/baselines.md",
         "docs/research/b04-restoration.md",
         "docs/research/b04-tables.md"
+      ],
+      "github": {
+        "id": 5802782453,
+        "number": 56,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/56"
+      },
+      "blocking_dependencies": [
+        "SYN-06"
       ]
     },
     {
@@ -2095,6 +2517,19 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802782757,
+        "number": 57,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/57"
+      },
+      "blocking_dependencies": [
+        "OPT-06",
+        "OPT-07",
+        "OPT-09",
+        "OPT-11",
+        "OPT-12",
+        "GEO-06"
       ]
     },
     {
@@ -2142,6 +2577,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802803302,
+        "number": 100,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/100"
+      },
+      "blocking_dependencies": [
+        "GEO-08",
+        "EXP-03"
       ]
     },
     {
@@ -2187,6 +2631,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802803846,
+        "number": 102,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/102"
+      },
+      "blocking_dependencies": [
+        "TEST-19",
+        "TEST-20"
       ]
     },
     {
@@ -2236,6 +2689,19 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802793030,
+        "number": 81,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/81"
+      },
+      "blocking_dependencies": [
+        "EXT-02",
+        "EXT-03",
+        "EXT-04",
+        "EXT-05",
+        "EXT-06",
+        "OPT-10"
       ]
     },
     {
@@ -2277,6 +2743,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802804396,
+        "number": 104,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/104"
+      },
+      "blocking_dependencies": [
+        "TEST-21",
+        "REVIEW-08"
       ]
     },
     {
@@ -2319,6 +2794,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802770600,
+        "number": 19,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/19"
+      },
+      "blocking_dependencies": [
+        "CORE-03"
       ]
     },
     {
@@ -2360,6 +2843,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802772858,
+        "number": 26,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/26"
+      },
+      "blocking_dependencies": [
+        "MODEL-01"
       ]
     },
     {
@@ -2403,6 +2894,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802779562,
+        "number": 47,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/47"
+      },
+      "blocking_dependencies": [
+        "MODEL-03"
       ]
     },
     {
@@ -2442,6 +2941,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802773121,
+        "number": 27,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/27"
+      },
+      "blocking_dependencies": [
+        "OPT-01"
       ]
     },
     {
@@ -2483,6 +2990,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802775276,
+        "number": 35,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/35"
+      },
+      "blocking_dependencies": [
+        "OPT-03",
+        "RUN-01"
       ]
     },
     {
@@ -2524,6 +3040,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802775526,
+        "number": 36,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/36"
+      },
+      "blocking_dependencies": [
+        "OPT-08",
+        "RUN-01"
       ]
     },
     {
@@ -2565,6 +3090,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802779850,
+        "number": 48,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/48"
+      },
+      "blocking_dependencies": [
+        "OPT-05"
       ]
     },
     {
@@ -2609,6 +3142,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802787718,
+        "number": 63,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/63"
+      },
+      "blocking_dependencies": [
+        "GEO-02",
+        "GEO-05"
       ]
     },
     {
@@ -2652,6 +3194,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802787986,
+        "number": 64,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/64"
+      },
+      "blocking_dependencies": [
+        "GEO-02",
+        "GEO-05"
       ]
     },
     {
@@ -2697,6 +3248,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802788242,
+        "number": 65,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/65"
+      },
+      "blocking_dependencies": [
+        "SYN-01",
+        "GEO-05"
       ]
     },
     {
@@ -2742,6 +3302,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802789341,
+        "number": 69,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/69"
+      },
+      "blocking_dependencies": [
+        "SYN-02"
       ]
     },
     {
@@ -2786,6 +3354,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802791072,
+        "number": 74,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/74"
+      },
+      "blocking_dependencies": [
+        "SYN-04"
       ]
     },
     {
@@ -2832,6 +3408,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802791941,
+        "number": 77,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/77"
+      },
+      "blocking_dependencies": [
+        "SYN-05"
       ]
     },
     {
@@ -2874,6 +3458,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802783065,
+        "number": 58,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/58"
+      },
+      "blocking_dependencies": [
+        "SYN-06"
       ]
     },
     {
@@ -2919,6 +3511,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802792244,
+        "number": 78,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/78"
+      },
+      "blocking_dependencies": [
+        "RUN-01",
+        "SYN-05"
       ]
     },
     {
@@ -2969,6 +3570,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802793872,
+        "number": 84,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/84"
+      },
+      "blocking_dependencies": [
+        "INP-03",
+        "OBS-04"
       ]
     },
     {
@@ -3013,6 +3623,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802799272,
+        "number": 89,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/89"
+      },
+      "blocking_dependencies": [
+        "OBS-05"
       ]
     },
     {
@@ -3060,6 +3678,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802802765,
+        "number": 98,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/98"
+      },
+      "blocking_dependencies": [
+        "VIZ-03"
       ]
     },
     {
@@ -3106,6 +3732,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802783374,
+        "number": 59,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/59"
+      },
+      "blocking_dependencies": [
+        "TEST-01",
+        "TEST-02",
+        "TEST-03"
       ]
     },
     {
@@ -3163,6 +3799,19 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802789587,
+        "number": 70,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/70"
+      },
+      "blocking_dependencies": [
+        "TEST-04",
+        "TEST-05",
+        "TEST-06",
+        "TEST-07",
+        "TEST-08",
+        "TEST-09"
       ]
     },
     {
@@ -3213,6 +3862,17 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802793323,
+        "number": 82,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/82"
+      },
+      "blocking_dependencies": [
+        "TEST-10",
+        "TEST-11",
+        "TEST-12",
+        "TEST-13"
       ]
     },
     {
@@ -3257,6 +3917,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802798165,
+        "number": 85,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/85"
+      },
+      "blocking_dependencies": [
+        "OBS-04",
+        "TEST-14",
+        "TEST-04"
       ]
     },
     {
@@ -3307,6 +3977,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802800904,
+        "number": 95,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/95"
+      },
+      "blocking_dependencies": [
+        "TEST-15",
+        "TEST-17",
+        "TEST-23"
       ]
     },
     {
@@ -3353,6 +4033,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802799524,
+        "number": 90,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/90"
+      },
+      "blocking_dependencies": [
+        "INP-02",
+        "VIZ-01",
+        "TEST-16"
       ]
     },
     {
@@ -3404,6 +4094,18 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802803568,
+        "number": 101,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/101"
+      },
+      "blocking_dependencies": [
+        "TEST-17",
+        "TEST-18",
+        "TEST-16",
+        "REVIEW-03",
+        "REVIEW-04"
       ]
     },
     {
@@ -3450,6 +4152,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802780484,
+        "number": 49,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/49"
+      },
+      "blocking_dependencies": [
+        "MODEL-03",
+        "RUN-01"
       ]
     },
     {
@@ -3495,6 +4206,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802783654,
+        "number": 60,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/60"
+      },
+      "blocking_dependencies": [
+        "OBS-01"
       ]
     },
     {
@@ -3547,6 +4266,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802792519,
+        "number": 79,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/79"
+      },
+      "blocking_dependencies": [
+        "OBS-02",
+        "SYN-05"
       ]
     },
     {
@@ -3598,6 +4326,16 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802793576,
+        "number": 83,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/83"
+      },
+      "blocking_dependencies": [
+        "OBS-03",
+        "INP-01",
+        "SYN-06"
       ]
     },
     {
@@ -3640,6 +4378,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802798457,
+        "number": 86,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/86"
+      },
+      "blocking_dependencies": [
+        "OBS-04"
       ]
     },
     {
@@ -3686,6 +4432,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802798743,
+        "number": 87,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/87"
+      },
+      "blocking_dependencies": [
+        "OBS-04"
       ]
     },
     {
@@ -3731,6 +4485,14 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802799802,
+        "number": 91,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/91"
+      },
+      "blocking_dependencies": [
+        "VIZ-01"
       ]
     },
     {
@@ -3774,6 +4536,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802801224,
+        "number": 96,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/96"
+      },
+      "blocking_dependencies": [
+        "VIZ-02",
+        "OBS-05"
       ]
     },
     {
@@ -3821,6 +4592,15 @@
       "ready": false,
       "sources": [
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802800071,
+        "number": 92,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/92"
+      },
+      "blocking_dependencies": [
+        "VIZ-01",
+        "EXP-04"
       ]
     },
     {
@@ -3866,6 +4646,14 @@
         "docs/research/baselines.md",
         "docs/research/b04-restoration.md",
         "docs/research/b04-tables.md"
+      ],
+      "github": {
+        "id": 5802800349,
+        "number": 93,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/93"
+      },
+      "blocking_dependencies": [
+        "OBS-05"
       ]
     },
     {
@@ -3926,6 +4714,19 @@
         "docs/research/baselines.md",
         "docs/research/b04-restoration.md",
         "docs/research/b04-tables.md"
+      ],
+      "github": {
+        "id": 5802800631,
+        "number": 94,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/94"
+      },
+      "blocking_dependencies": [
+        "OBS-05",
+        "OPT-06",
+        "OPT-09",
+        "INP-03",
+        "TEST-12",
+        "TEST-13"
       ]
     },
     {
@@ -3981,6 +4782,18 @@
         "docs/research/baselines.md",
         "docs/research/b04-restoration.md",
         "docs/research/b04-tables.md"
+      ],
+      "github": {
+        "id": 5802803025,
+        "number": 99,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/99"
+      },
+      "blocking_dependencies": [
+        "EXP-02",
+        "VIZ-03",
+        "APP-02",
+        "APP-03",
+        "APP-04"
       ]
     },
     {
@@ -4024,6 +4837,14 @@
       "sources": [
         "docs/research/b04-restoration.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802802489,
+        "number": 97,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/97"
+      },
+      "blocking_dependencies": [
+        "VIZ-04"
       ]
     },
     {
@@ -4066,6 +4887,15 @@
       "sources": [
         "docs/research/b04-restoration.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802799006,
+        "number": 88,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/88"
+      },
+      "blocking_dependencies": [
+        "RUN-02",
+        "OBS-04"
       ]
     },
     {
@@ -4108,7 +4938,17 @@
       "sources": [
         "docs/research/b04-restoration.md",
         "docs/architecture/modular-algorithms-and-solution-sets.md"
+      ],
+      "github": {
+        "id": 5802804135,
+        "number": 103,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/103"
+      },
+      "blocking_dependencies": [
+        "TEST-22",
+        "REVIEW-07"
       ]
     }
-  ]
+  ],
+  "native_dependency_policy": "Transitive reduction of implementation prerequisites; full dependencies remain in issue bodies and the manifest. External scientific blockers are preserved."
 }

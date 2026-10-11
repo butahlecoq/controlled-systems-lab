@@ -1,5 +1,7 @@
 # OPT-07: Add ordered and grouped hull reduction strategies
 
+GitHub: [#38](https://github.com/butahlecoq/controlled-systems-lab/issues/38).
+
 ## Purpose and scope
 
 Expose the archive ordering/grouping methods inspired by divide-and-conquer as distinct HullReducer adapters.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-05.
+Blocked by [OPT-05 #30](https://github.com/butahlecoq/controlled-systems-lab/issues/30).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

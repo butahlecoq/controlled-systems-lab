@@ -1,5 +1,7 @@
 # REVIEW-07: Deep review of fuel projections, timing tables and comparison validity
 
+GitHub: [#101](https://github.com/butahlecoq/controlled-systems-lab/issues/101).
+
 ## Purpose and scope
 
 Inspect mandatory projection visualizations and detailed submodule timing observability for the first two-strategy comparison (EXP-01/04/05 plus new observability requirements). This supersedes earlier summary-only scope for these deliverables. Scientific limit: a 2D view loses dependencies and cannot establish family completeness or higher-dimensional inclusion.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by VIZ-02, VIZ-03, OBS-03, OBS-04, VIZ-01, TEST-17, TEST-18, TEST-16, REVIEW-03, REVIEW-04.
+Blocked by [VIZ-02 #91](https://github.com/butahlecoq/controlled-systems-lab/issues/91), [VIZ-03 #96](https://github.com/butahlecoq/controlled-systems-lab/issues/96), [OBS-03 #79](https://github.com/butahlecoq/controlled-systems-lab/issues/79), [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [VIZ-01 #87](https://github.com/butahlecoq/controlled-systems-lab/issues/87), [TEST-17 #89](https://github.com/butahlecoq/controlled-systems-lab/issues/89), [TEST-18 #98](https://github.com/butahlecoq/controlled-systems-lab/issues/98), [TEST-16 #84](https://github.com/butahlecoq/controlled-systems-lab/issues/84), [REVIEW-03 #82](https://github.com/butahlecoq/controlled-systems-lab/issues/82), [REVIEW-04 #85](https://github.com/butahlecoq/controlled-systems-lab/issues/85).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

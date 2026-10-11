@@ -1,5 +1,7 @@
 # REVIEW-02: Deep review of geometry algorithms and interchangeable backends
 
+GitHub: [#70](https://github.com/butahlecoq/controlled-systems-lab/issues/70).
+
 ## Purpose and scope
 
 Inspect implemented polyhedral geometry, hull/recovery, conversions, registry and LP/convex adapters (ALG-01..07, OPT-01/02). Scientific limit: numerical exact formulas do not certify rounding; later zonotope/ellipsoid/approximation capabilities remain deferred.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-02, GEO-03, GEO-04, GEO-05, CORE-04, OPT-03, OPT-08, OPT-05, OPT-01, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08, TEST-09.
+Blocked by [GEO-02 #40](https://github.com/butahlecoq/controlled-systems-lab/issues/40), [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31), [GEO-04 #41](https://github.com/butahlecoq/controlled-systems-lab/issues/41), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [OPT-05 #30](https://github.com/butahlecoq/controlled-systems-lab/issues/30), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [TEST-04 #27](https://github.com/butahlecoq/controlled-systems-lab/issues/27), [TEST-05 #35](https://github.com/butahlecoq/controlled-systems-lab/issues/35), [TEST-06 #36](https://github.com/butahlecoq/controlled-systems-lab/issues/36), [TEST-07 #48](https://github.com/butahlecoq/controlled-systems-lab/issues/48), [TEST-08 #63](https://github.com/butahlecoq/controlled-systems-lab/issues/63), [TEST-09 #64](https://github.com/butahlecoq/controlled-systems-lab/issues/64).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

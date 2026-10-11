@@ -1,5 +1,7 @@
 # OBS-02: Implement nested and parallel timing with explicit wall and CPU semantics
 
+GitHub: [#60](https://github.com/butahlecoq/controlled-systems-lab/issues/60).
+
 ## Purpose and scope
 
 Goal: supply a lightweight ExecutionContext timing collector for OBS-01. Requirements RUN-02/03/04 and EXP-01/04. Inputs are scoped module/operation spans and worker/task relationships; output is timing data and correctly defined aggregates. Use a monotonic wall clock, optional CPU clock with process/thread scope explicitly stated, and an injectable clock for tests. Keep the disabled collector cheap. Do not enforce platform-specific CPU or peak-memory counters where unavailable, or claim parent/child times are additive.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OBS-01, RUN-01.
+Blocked by [OBS-01 #49](https://github.com/butahlecoq/controlled-systems-lab/issues/49), [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

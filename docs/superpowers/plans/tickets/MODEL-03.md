@@ -1,5 +1,7 @@
 # MODEL-03: Validate complete problems and strategy assumptions
 
+GitHub: [#28](https://github.com/butahlecoq/controlled-systems-lab/issues/28).
+
 ## Purpose and scope
 
 Validate mathematical inputs separately from configured strategy support.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-02, OPT-01, CORE-04.
+Blocked by [MODEL-02 #20](https://github.com/butahlecoq/controlled-systems-lab/issues/20), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

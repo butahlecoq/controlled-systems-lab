@@ -1,5 +1,7 @@
 # TEST-05: Run reusable LP adapter contracts on every selected backend
 
+GitHub: [#35](https://github.com/butahlecoq/controlled-systems-lab/issues/35).
+
 ## Purpose and scope
 
 Test LP port, backend status translation and optional simplex diagnostics (ALG-01/02, SOL-03). Limit: tests only claim bounds/rays/certificates actually supported by each adapter; passing examples do not verify arbitrary backend correctness.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-03, OPT-02, RUN-01.
+Blocked by [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [OPT-02 #18](https://github.com/butahlecoq/controlled-systems-lab/issues/18), [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

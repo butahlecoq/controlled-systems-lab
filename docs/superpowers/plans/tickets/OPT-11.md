@@ -1,5 +1,7 @@
 # OPT-11: Add a recursive split-and-merge hull strategy
 
+GitHub: [#45](https://github.com/butahlecoq/controlled-systems-lab/issues/45).
+
 ## Purpose and scope
 
 Implement a new hull-level divide-and-conquer strategy using hull(hull(P1) union hull(P2)). The archive supports ordered/grouped filtering and a separate 2D QuickHull; this recursive LP-backed strategy is a new extension. Reuse the hull port and selected membership backend.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-05, RUN-01.
+Blocked by [OPT-05 #30](https://github.com/butahlecoq/controlled-systems-lab/issues/30), [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

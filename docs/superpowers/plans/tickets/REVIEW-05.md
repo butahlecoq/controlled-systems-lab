@@ -1,5 +1,7 @@
 # REVIEW-05: Deep review of per-worker execution and measured scalability
 
+GitHub: [#95](https://github.com/butahlecoq/controlled-systems-lab/issues/95).
+
 ## Purpose and scope
 
 Inspect immutable sharing, per-worker state, cancellation/resource contracts and scaling behavior (RUN-01..04). Scientific limit: measured ranges do not imply polynomial complexity, hard real-time guarantees or scalable enumeration of exponential output.
@@ -20,7 +22,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by RUN-01, OPT-03, OPT-08, SYN-03, SYN-04, OBS-02, TEST-15, TEST-17, RUN-02, TEST-23.
+Blocked by [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [OBS-02 #60](https://github.com/butahlecoq/controlled-systems-lab/issues/60), [TEST-15 #78](https://github.com/butahlecoq/controlled-systems-lab/issues/78), [TEST-17 #89](https://github.com/butahlecoq/controlled-systems-lab/issues/89), [RUN-02 #80](https://github.com/butahlecoq/controlled-systems-lab/issues/80), [TEST-23 #88](https://github.com/butahlecoq/controlled-systems-lab/issues/88).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

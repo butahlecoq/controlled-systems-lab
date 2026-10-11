@@ -1,5 +1,7 @@
 # SYN-06: Verify trajectories and evidence independently
 
+GitHub: [#43](https://github.com/butahlecoq/controlled-systems-lab/issues/43).
+
 ## Purpose and scope
 
 Recompute original problem residuals and verify evidence bindings without trusting the synthesis result flag.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-03, OPT-01.
+Blocked by [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

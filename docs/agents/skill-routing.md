@@ -36,4 +36,4 @@ Use independent worktrees and one mutable workspace per solve/worker. A shared c
 
 Before reporting a speed difference, check the timed work and failure count, use tuned release configurations on both sides, alternate at least five repetitions, report median/range and end-to-end relevance, and identify the limiter from profiling outside the reported run. Distinguish historical published timings from measured results. Windows counters/profilers may replace Unix command examples while measuring the same quantities.
 
-Matt `wait-what` asks for a clear explanation with context and simple technical English. Use stable glossary terms and concrete statements. We do not claim formal compliance with a controlled-English certification.
+Matt `wait-what` asks for a clear explanation with context and simple technical English. Use stable glossary terms and concrete statements.

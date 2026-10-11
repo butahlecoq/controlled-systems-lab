@@ -1,5 +1,7 @@
 # OBS-03: Instrument mathematical ports and expose substitutions and rejected capabilities
 
+GitHub: [#79](https://github.com/butahlecoq/controlled-systems-lab/issues/79).
+
 ## Purpose and scope
 
 Goal: instrument coarse mathematical boundaries using OBS-02 without embedding plotting or solver internals in shared contracts. Requirements ALG-01/02/03/04/05/07, EXP-01 and RUN-04. Sources: modular architecture and native contracts. Cover propagation/intersection, hull or redundancy reduction, conversion, approximation when implemented, LP/convex calls, terminal optimization, predecessor/recovery, family construction and witness queries. A decorator/helper maps registered identity and operation requests/results to spans. This ticket observes existing modules; it does not implement simplex, Zoutendijk, geometry algorithms or new approximations.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OBS-02, CORE-04, MODEL-03, GEO-01, OPT-02, OPT-08, SYN-03, SYN-04, SYN-05.
+Blocked by [OBS-02 #60](https://github.com/butahlecoq/controlled-systems-lab/issues/60), [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14), [MODEL-03 #28](https://github.com/butahlecoq/controlled-systems-lab/issues/28), [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16), [OPT-02 #18](https://github.com/butahlecoq/controlled-systems-lab/issues/18), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

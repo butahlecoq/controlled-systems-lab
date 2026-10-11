@@ -1,5 +1,7 @@
 # EXT-05: Discretize continuous models through an explicit model adapter
 
+GitHub: [#54](https://github.com/butahlecoq/controlled-systems-lab/issues/54).
+
 ## Purpose and scope
 
 Allow later continuous-time input with explicit physical times and input-hold/integration semantics.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-01, SYN-06.
+Blocked by [MODEL-01 #15](https://github.com/butahlecoq/controlled-systems-lab/issues/15), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

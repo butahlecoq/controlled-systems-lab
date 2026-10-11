@@ -1,5 +1,7 @@
 # CORE-01: Fix public contracts and choose compatible native dependencies
 
+GitHub: [#11](https://github.com/butahlecoq/controlled-systems-lab/issues/11).
+
 ## Purpose and scope
 
 Publish a small interface revision for model, sets, programs, families, evidence and execution. Choose matrix, LP, convex, parser, test and build integrations before adapter work starts.

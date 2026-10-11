@@ -1,5 +1,7 @@
 # EXP-01: Present B04 historical tables alongside restoration diagnostics
 
+GitHub: [#93](https://github.com/butahlecoq/controlled-systems-lab/issues/93).
+
 ## Purpose and scope
 
 Goal: add provenance-labelled B04 reported table rows and restoration status to final comparison exports. Requirements EXP-02/03/04 and T-B04. Sources: b04-tables.md, baselines.md, b04-restoration.md, archive-selected-sources.json and b04-historical.json. Inputs are checked source transcriptions and measured artifacts when available; outputs separate historical reported values, evaluations at printed coordinates and independently reproduced results. Canonical model/control recovery is a separate module/ticket, not work to be guessed by this exporter.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OBS-05.
+Blocked by [OBS-05 #86](https://github.com/butahlecoq/controlled-systems-lab/issues/86).
 
 Related scientific/architecture issues: [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6), [#10](https://github.com/butahlecoq/controlled-systems-lab/issues/10). These are not additional blockers.
 

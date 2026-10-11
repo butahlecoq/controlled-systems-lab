@@ -1,5 +1,7 @@
 # REVIEW-09: Review extension quantifiers, information patterns and native scalability
 
+GitHub: [#104](https://github.com/butahlecoq/controlled-systems-lab/issues/104).
+
 ## Purpose and scope
 
 Review the explicitly implemented future profiles and their scientific assumptions. Separate representability from algorithm support; do not broaden a finite demonstration into general robust, feedback or hybrid completeness.
@@ -17,7 +19,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by TEST-21, REVIEW-08.
+Blocked by [TEST-21 #81](https://github.com/butahlecoq/controlled-systems-lab/issues/81), [REVIEW-08 #102](https://github.com/butahlecoq/controlled-systems-lab/issues/102).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

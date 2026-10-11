@@ -1,5 +1,7 @@
 # TEST-02: Expand affine model and observation contract tests
 
+GitHub: [#26](https://github.com/butahlecoq/controlled-systems-lab/issues/26).
+
 ## Purpose and scope
 
 Test compositional immutable LTI/LTV dynamics, zero-dimensional channels and pre/post-decision observation semantics (MOD-01/02/03/04/09). Limit: model representability does not imply initial nominal strategy support.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-01, CORE-03.
+Blocked by [MODEL-01 #15](https://github.com/butahlecoq/controlled-systems-lab/issues/15), [CORE-03 #13](https://github.com/butahlecoq/controlled-systems-lab/issues/13).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

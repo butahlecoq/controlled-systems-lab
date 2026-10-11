@@ -1,5 +1,7 @@
 # OPT-12: Add optional cross-query LP warm starts
 
+GitHub: [#46](https://github.com/butahlecoq/controlled-systems-lab/issues/46).
+
 ## Purpose and scope
 
 Add compatible-backend warm starts as an optional workspace optimization. The archival basis-reuse method reuses classifications within one completed solve; it does not establish this new cross-query feature.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-02, OPT-03, OPT-05, RUN-01.
+Blocked by [OPT-02 #18](https://github.com/butahlecoq/controlled-systems-lab/issues/18), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [OPT-05 #30](https://github.com/butahlecoq/controlled-systems-lab/issues/30), [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

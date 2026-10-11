@@ -1,5 +1,7 @@
 # TEST-11: Expand terminal minimizer-set construction tests
 
+GitHub: [#69](https://github.com/butahlecoq/controlled-systems-lab/issues/69).
+
 ## Purpose and scope
 
 Test entire supported terminal minimizer sets and attainment/capability outcomes (OPT-01/02, SOL-02/03). Limit: unsupported nonpolyhedral minimizer relations are rejected; no numerical uniqueness/completeness claim comes from one optimizer.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-02, OPT-01, OPT-08, OPT-03, GEO-05.
+Blocked by [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

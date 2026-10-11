@@ -1,5 +1,7 @@
 # SYN-05: Extract different complete witnesses without changing optimality
 
+GitHub: [#71](https://github.com/butahlecoq/controlled-systems-lab/issues/71).
+
 ## Purpose and scope
 
 Select controls and their consistent trajectories from either family through one query interface.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-03, SYN-04.
+Blocked by [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

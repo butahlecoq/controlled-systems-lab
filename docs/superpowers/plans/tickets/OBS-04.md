@@ -1,5 +1,7 @@
 # OBS-04: Record reproducible comparison runs and instrumentation overhead
 
+GitHub: [#83](https://github.com/butahlecoq/controlled-systems-lab/issues/83).
+
 ## Purpose and scope
 
 Goal: make ComparisonRunner produce a versioned final artifact for the two agreed strategies on one immutable scenario. Requirements EXP-01/04/05/06, RUN-04, INP-03/05. Sources: consolidated specification, performance-and-language.md and baselines.md. Inputs are resolved run configurations, common witness requests and verifier output; output preserves per-repetition data, outcome/evidence, timing/resources and environment. Bind frontend/CLI later through the same runner. Exclude hard real-time claims and historical-runtime pass thresholds.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OBS-03, INP-01, SYN-03, SYN-04, SYN-05, SYN-06.
+Blocked by [OBS-03 #79](https://github.com/butahlecoq/controlled-systems-lab/issues/79), [INP-01 #44](https://github.com/butahlecoq/controlled-systems-lab/issues/44), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

@@ -1,5 +1,7 @@
 # TEST-17: Verify detailed submodule timing tables and accounting
 
+GitHub: [#89](https://github.com/butahlecoq/controlled-systems-lab/issues/89).
+
 ## Purpose and scope
 
 Test mandatory user-requested observability: detailed per-submodule timing across both strategies, workers and final reports (EXP-01/04 plus proposed T-TIM01). This extends earlier summary-only docs. Limit: synthetic-clock correctness does not establish speed or hard real-time performance.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OBS-02, OBS-03, OBS-04, OBS-05.
+Blocked by [OBS-02 #60](https://github.com/butahlecoq/controlled-systems-lab/issues/60), [OBS-03 #79](https://github.com/butahlecoq/controlled-systems-lab/issues/79), [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [OBS-05 #86](https://github.com/butahlecoq/controlled-systems-lab/issues/86).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

@@ -1,5 +1,7 @@
 # TEST-01: Expand native buffer, ownership and build-boundary tests
 
+GitHub: [#19](https://github.com/butahlecoq/controlled-systems-lab/issues/19).
+
 ## Purpose and scope
 
 Test C++20 owning values/views, storage/stride conventions and native module boundaries (RUN-01/02, ALG-07). Limit: memory-safety tooling and compile probes support declared platforms; they do not establish a portable C++ ABI.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-02, CORE-03, CORE-01.
+Blocked by [CORE-02 #12](https://github.com/butahlecoq/controlled-systems-lab/issues/12), [CORE-03 #13](https://github.com/butahlecoq/controlled-systems-lab/issues/13), [CORE-01 #11](https://github.com/butahlecoq/controlled-systems-lab/issues/11).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

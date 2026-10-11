@@ -1,5 +1,7 @@
 # TEST-06: Run reusable convex adapter contracts with singular objectives
 
+GitHub: [#36](https://github.com/butahlecoq/controlled-systems-lab/issues/36).
+
 ## Purpose and scope
 
 Test convex backend capabilities, objective mappings and numerical status evidence (OPT-01/02, ALG-01, SOL-03). Limit: this covers supported convex minimization; it supplies no convex-maximization or minimax guarantee.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OPT-08, OPT-01, RUN-01.
+Blocked by [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

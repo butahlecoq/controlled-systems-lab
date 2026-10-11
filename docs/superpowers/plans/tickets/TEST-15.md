@@ -1,5 +1,7 @@
 # TEST-15: Expand execution isolation, cancellation and resource-policy tests
 
+GitHub: [#78](https://github.com/butahlecoq/controlled-systems-lab/issues/78).
+
 ## Purpose and scope
 
 Test immutable inputs, exclusive mutable worker state and partial-result/resource behavior (RUN-02/03/04). Limit: concurrency tools support listed platforms and budgets are only enforced where adapters declare enforcement.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by RUN-01, OPT-03, OPT-08, SYN-03, SYN-04, SYN-05.
+Blocked by [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

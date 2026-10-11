@@ -19,3 +19,5 @@ Twenty-one PDFs were text-extracted, along with DOCX, legacy Word piece-table te
 Full original MATLAB/Pascal implementations, all published nonlinear simulations, all proofs and every rendered mathematical expression remain outside this initial verification. The B08 computation uses rounded displayed data and floating-point arithmetic.
 
 The initial public release contains curated documents, inventory/provenance, research utilities, characterization/reference JSON and review templates. Original articles/listings, raw extractions and temporary PDF images are excluded by .gitignore.
+
+The [implementation backlog](../superpowers/plans/2026-10-11-controlled-systems-backlog.md) has a separate [independent plan review](../superpowers/plans/backlog-review.md) and [GitHub publication record](../superpowers/plans/publication-verification.json). These verify ticket content, scope, dependency ordering and tracker publication; they do not execute the planned product tests. Module test and code-review tickets remain future work.

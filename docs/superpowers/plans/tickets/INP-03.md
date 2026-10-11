@@ -1,5 +1,7 @@
 # INP-03: Publish simple executable templates with known answers
 
+GitHub: [#72](https://github.com/butahlecoq/controlled-systems-lab/issues/72).
+
 ## Purpose and scope
 
 Give users a small selectable template catalogue and instructions for their own files.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by INP-01, SYN-04, SYN-06.
+Blocked by [INP-01 #44](https://github.com/butahlecoq/controlled-systems-lab/issues/44), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

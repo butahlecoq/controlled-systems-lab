@@ -1,5 +1,7 @@
 # TEST-21: Expand declared extension profiles with independent quantifier oracles
 
+GitHub: [#81](https://github.com/butahlecoq/controlled-systems-lab/issues/81).
+
 ## Purpose and scope
 
 Add profile-specific mathematical tests only for the implemented extension demonstrations. Robust fixed plans, information-based policies, mixed controls and discretization retain separate capability suites; this does not certify a universal hybrid solver.
@@ -17,7 +19,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by EXT-01, EXT-02, EXT-03, EXT-04, EXT-05, EXT-06, OPT-10.
+Blocked by [EXT-01 #62](https://github.com/butahlecoq/controlled-systems-lab/issues/62), [EXT-02 #76](https://github.com/butahlecoq/controlled-systems-lab/issues/76), [EXT-03 #73](https://github.com/butahlecoq/controlled-systems-lab/issues/73), [EXT-04 #68](https://github.com/butahlecoq/controlled-systems-lab/issues/68), [EXT-05 #54](https://github.com/butahlecoq/controlled-systems-lab/issues/54), [EXT-06 #55](https://github.com/butahlecoq/controlled-systems-lab/issues/55), [OPT-10 #50](https://github.com/butahlecoq/controlled-systems-lab/issues/50).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

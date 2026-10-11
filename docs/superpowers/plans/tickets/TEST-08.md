@@ -1,5 +1,7 @@
 # TEST-08: Expand exact polyhedral operation tests with degenerate cases
 
+GitHub: [#63](https://github.com/butahlecoq/controlled-systems-lab/issues/63).
+
 ## Purpose and scope
 
 Test supported H/V polyhedral affine image, sum, intersection, support and preimage/projection operations (ALG-03/05). Limit: mathematically exact formulas executed in double are numerical evidence, not validated inclusion.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by GEO-02, GEO-03, GEO-04, GEO-05, GEO-01, OPT-03.
+Blocked by [GEO-02 #40](https://github.com/butahlecoq/controlled-systems-lab/issues/40), [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31), [GEO-04 #41](https://github.com/butahlecoq/controlled-systems-lab/issues/41), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51), [GEO-01 #16](https://github.com/butahlecoq/controlled-systems-lab/issues/16), [OPT-03 #21](https://github.com/butahlecoq/controlled-systems-lab/issues/21).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

@@ -1,5 +1,7 @@
 # OPT-01: Evaluate and reformulate structured terminal objectives
 
+GitHub: [#17](https://github.com/butahlecoq/controlled-systems-lab/issues/17).
+
 ## Purpose and scope
 
 Support linear, convex quadratic and affine residual-norm criteria with independent original-cost evaluation.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-03.
+Blocked by [CORE-03 #13](https://github.com/butahlecoq/controlled-systems-lab/issues/13).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

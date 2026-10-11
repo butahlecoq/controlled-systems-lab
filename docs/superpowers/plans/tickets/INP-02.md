@@ -1,5 +1,7 @@
 # INP-02: Select scenarios and run method profiles from a native CLI
 
+GitHub: [#75](https://github.com/butahlecoq/controlled-systems-lab/issues/75).
+
 ## Purpose and scope
 
 Provide a simple launcher for choosing a scenario, validating it and running the two selected methods.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by INP-01, SYN-05, SYN-06, RUN-01.
+Blocked by [INP-01 #44](https://github.com/butahlecoq/controlled-systems-lab/issues/44), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

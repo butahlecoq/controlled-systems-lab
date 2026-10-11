@@ -1,5 +1,7 @@
 # EXP-03: Add later exact-versus-approximate reachability comparison artifacts
 
+GitHub: [#99](https://github.com/butahlecoq/controlled-systems-lab/issues/99).
+
 ## Purpose and scope
 
 Goal: extend the completed two-strategy comparison protocol with separately implemented compatible inner/outer approximation methods. Requirements ALG-03/04/06, EXP-01/04/05 and RUN-04. Sources: set-representations-and-ellipsoidal-toolbox.md, modular architecture and baseline readiness notes. Inputs are explicitly related exact/reference and approximate sets plus realizability/inclusion evidence; outputs are quality/performance records and labelled final 2D figures. No new approximation algorithm, ET integration, nonlinear reachability proof or mandatory intermediate viewer is implemented by this ticket.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by EXP-02, VIZ-02, VIZ-03, APP-02, APP-03, APP-04, SYN-06, GEO-05, SYN-03, SYN-05.
+Blocked by [EXP-02 #94](https://github.com/butahlecoq/controlled-systems-lab/issues/94), [VIZ-02 #91](https://github.com/butahlecoq/controlled-systems-lab/issues/91), [VIZ-03 #96](https://github.com/butahlecoq/controlled-systems-lab/issues/96), [APP-02 #33](https://github.com/butahlecoq/controlled-systems-lab/issues/33), [APP-03 #42](https://github.com/butahlecoq/controlled-systems-lab/issues/42), [APP-04 #34](https://github.com/butahlecoq/controlled-systems-lab/issues/34), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

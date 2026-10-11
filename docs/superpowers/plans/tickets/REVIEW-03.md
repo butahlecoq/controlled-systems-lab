@@ -1,5 +1,7 @@
 # REVIEW-03: Rigorous review of both strategies and complete optimal-family semantics
 
+GitHub: [#82](https://github.com/butahlecoq/controlled-systems-lab/issues/82).
+
 ## Purpose and scope
 
 Inspect reachability/backward recovery and direct joint optimization as distinct strategies (SOL-01..05, EXP-05). Scientific limit: theoretical completeness, numerical evidence and archival fidelity are distinct; a returned optimizer or finite sample is insufficient.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-03, SYN-04, SYN-02, SYN-01, SYN-05, TEST-10, TEST-11, TEST-12, TEST-13.
+Blocked by [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61), [SYN-01 #53](https://github.com/butahlecoq/controlled-systems-lab/issues/53), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), [TEST-10 #65](https://github.com/butahlecoq/controlled-systems-lab/issues/65), [TEST-11 #69](https://github.com/butahlecoq/controlled-systems-lab/issues/69), [TEST-12 #74](https://github.com/butahlecoq/controlled-systems-lab/issues/74), [TEST-13 #77](https://github.com/butahlecoq/controlled-systems-lab/issues/77).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

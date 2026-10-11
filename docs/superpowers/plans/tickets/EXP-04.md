@@ -1,5 +1,7 @@
 # EXP-04: Implement an independent nonlinear replay adapter
 
+GitHub: [#56](https://github.com/butahlecoq/controlled-systems-lab/issues/56).
+
 ## Purpose and scope
 
 Implement replay of complete controls on an independently specified plant. Start with an analytic nonlinear toy plant; accept B04 only when its plant parameters and timing conventions are sourced. This is simulation, with no nonlinear optimization claim.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by MODEL-01, OPT-01, SYN-06.
+Blocked by [MODEL-01 #15](https://github.com/butahlecoq/controlled-systems-lab/issues/15), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43).
 
 Related scientific/architecture issues: [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6), [#10](https://github.com/butahlecoq/controlled-systems-lab/issues/10). These are not additional blockers.
 

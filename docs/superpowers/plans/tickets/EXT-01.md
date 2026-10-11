@@ -1,5 +1,7 @@
 # EXT-01: Add fixed-plan disturbance reachability and global worst-case reference
 
+GitHub: [#62](https://github.com/butahlecoq/controlled-systems-lab/issues/62).
+
 ## Purpose and scope
 
 Support declared independent bounded process disturbances and a justified worst-case objective oracle.
@@ -16,7 +18,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by SYN-01, OPT-01, GEO-03.
+Blocked by [SYN-01 #53](https://github.com/butahlecoq/controlled-systems-lab/issues/53), [OPT-01 #17](https://github.com/butahlecoq/controlled-systems-lab/issues/17), [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31).
 
 Related scientific/architecture issues: [#3](https://github.com/butahlecoq/controlled-systems-lab/issues/3), [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

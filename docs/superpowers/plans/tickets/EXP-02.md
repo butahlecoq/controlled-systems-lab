@@ -1,5 +1,7 @@
 # EXP-02: Benchmark module substitutions under common optimal-family outputs
 
+GitHub: [#94](https://github.com/butahlecoq/controlled-systems-lab/issues/94).
+
 ## Purpose and scope
 
 Goal: provide reproducible benchmark configurations auditing independent substitution axes, rather than ranking stacks with different mathematics. Requirements ALG-01/02/03/07, EXP-01/04/05 and RUN-04. Sources: modular architecture, performance-and-language.md and baselines.md. Inputs are executable analytic/scaling cases and existing registered implementations; outputs are raw runs and detailed final tables. Compare the two synthesis strategies first. Within a strategy change one LP/simplex variant, supported convex method (including Zoutendijk when separately implemented), exact set representation or equivalent conversion route at a time. New numerical adapters are prerequisites, not implemented here.
@@ -18,7 +20,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by OBS-04, OBS-05, SYN-03, SYN-04, OPT-04, OPT-06, OPT-08, OPT-09, GEO-03, INP-03, TEST-12, TEST-13.
+Blocked by [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [OBS-05 #86](https://github.com/butahlecoq/controlled-systems-lab/issues/86), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [OPT-04 #29](https://github.com/butahlecoq/controlled-systems-lab/issues/29), [OPT-06 #37](https://github.com/butahlecoq/controlled-systems-lab/issues/37), [OPT-08 #22](https://github.com/butahlecoq/controlled-systems-lab/issues/22), [OPT-09 #39](https://github.com/butahlecoq/controlled-systems-lab/issues/39), [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31), [INP-03 #72](https://github.com/butahlecoq/controlled-systems-lab/issues/72), [TEST-12 #74](https://github.com/butahlecoq/controlled-systems-lab/issues/74), [TEST-13 #77](https://github.com/butahlecoq/controlled-systems-lab/issues/77).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 

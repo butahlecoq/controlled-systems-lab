@@ -1,5 +1,7 @@
 # TEST-09: Expand geometry registry, conversion and guarantee contract tests
 
+GitHub: [#64](https://github.com/butahlecoq/controlled-systems-lab/issues/64).
+
 ## Purpose and scope
 
 Test extensible registrations, equivalent H/V routes and future approximation metadata (ALG-03/04/06/07). Limit: approximation algorithms remain deferred; fake inner/outer operators test contract enforcement only.
@@ -19,7 +21,7 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Dependencies
 
-Blocked by CORE-04, GEO-03, GEO-02, GEO-04, GEO-05.
+Blocked by [CORE-04 #14](https://github.com/butahlecoq/controlled-systems-lab/issues/14), [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31), [GEO-02 #40](https://github.com/butahlecoq/controlled-systems-lab/issues/40), [GEO-04 #41](https://github.com/butahlecoq/controlled-systems-lab/issues/41), [GEO-05 #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51).
 
 Related scientific/architecture issues: [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8). These are not additional blockers.
 
