@@ -172,6 +172,8 @@ Parallelize independent configurations, runs or set queries first. Do not treat 
 
 ## Intended usage
 
+Owner decision: selectable scenario files are the primary user input. Users create custom files from supplied templates without writing C++. A proposed ScenarioLoader translates versioned authored data into the same model/problem contracts used by native callers; it performs input validation before capability checks. Optional run settings are resolved separately from mathematical scenario identity. A CLI is the proposed initial launcher, not a second implementation of scientific algorithms. See the [scenario-file design sketch](2026-10-11-scenario-files-design.md).
+
 This is illustrative user flow, not an existing callable API. The analytic example is usable as a future acceptance oracle without claiming to reproduce B04.
 
 ~~~cpp

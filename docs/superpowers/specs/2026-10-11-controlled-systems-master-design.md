@@ -1,6 +1,6 @@
 # Controlled Systems Lab: consolidated requirements and architecture specification
 
-Date: 2026-10-11. Version: 0.3. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
+Date: 2026-10-11. Version: 0.4. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
 
 ## Product intent
 
@@ -20,6 +20,7 @@ All newly authored artifacts are in English. Owner discussion is in Russian. The
 | First family query | Owner selected different complete witnesses | Visual, numerical and runtime comparison of approaches |
 | First method comparison | Owner selected the two optimization approaches; reachable-set approximations later | Reachability/backward-recovery strategy versus direct joint-trajectory optimization |
 | Initial comparison presentation | Owner selected final results and trajectories as sufficient | Intermediate reachable sets, optimization-program dumps and step-by-step inspection are later features |
+| Primary input workflow | Owner selected selectable scenario files; users create custom files from supplied templates | Basic cases require no C++ code; make the authored form simple and extensible |
 | Objective modules | Recorded owner agreement | Linear, convex quadratic, weighted Euclidean residual terminal criteria first |
 | Temporal constraints | Owner requested representability, exclusion from first experiments | Future supported lifts/strategies; no default added couplings |
 | Verification | Recorded owner agreement | Numerical first; future claim-specific validated certificates |
@@ -28,7 +29,7 @@ All newly authored artifacts are in English. Owner discussion is in Russian. The
 | Testing | Owner explicitly requested module unit tests | Include unit, contract, mathematical and integration acceptance evidence |
 | Delivery through subagents | Owner proposed specification -> tickets -> subagent implementation | Fix dependencies/ownership before parallel implementation |
 | Library API, CMake, double, initial polyhedral strategy | Assistant proposals | Review with owner; do not label them prior owner decisions |
-| Specific matrix/solver/test libraries, deployment targets and UI | Open | Select through later implementation planning and integration checks |
+| Specific matrix/solver/test libraries, deployment targets, file syntax and launch interface | Open | Scenario-file input is confirmed; CLI/library packaging and any later graphical interface remain proposals |
 
 The accepted language decision is [ADR 0001](../../architecture/decisions/0001-cpp20-core.md). Concrete native interfaces are in the subordinate [C++ contracts draft](2026-10-11-cpp-core-contracts-design.md). Earlier research/architecture notes remain supporting evidence; this document is the requirements entry point. If a supporting note conflicts with a confirmed requirement, record and reconcile the discrepancy before implementing it.
 
@@ -119,6 +120,28 @@ Public ports return common statuses and evidence while retaining raw backend dia
 
 The [native contract document](2026-10-11-cpp-core-contracts-design.md) specifies illustrative types, ownership, result/family semantics and an intended user flow. Code fences are design sketches and have not been compiled.
 
+## Scenario-file workflow
+
+Owner decision: users choose among supplied scenario files or create their own from templates. The project supplies the templates, documentation and validation; users supply custom problem data. Basic supported tasks must not require writing or compiling C++.
+
+| ID | Status | Requirement | Acceptance criterion |
+|---|---|---|---|
+| INP-01 | C | Scenario files are the primary experiment input | Select an existing file or copy/edit a documented template and run the supported task without product-code changes |
+| INP-02 | C | Provide simple templates and an extensible authored form | Minimal supported case is short; optional features do not impose empty disturbance/observation/advanced sections |
+| INP-03 | P | Separate mathematical scenario from run configuration, within one file if convenient | Changing strategy does not change mathematical problem identity; resolved run settings are recorded independently |
+| INP-04 | P | Validate authored input before expensive work | Syntax/shape/schema errors identify the field and expected value; unsupported capabilities are reported separately; unknown fields cannot silently disappear |
+| INP-05 | P | Document, version and record resolved defaults | Optional omissions have explicit stable meanings; a run stores the resolved problem/settings and external-data hashes where used |
+
+Proposed user flow: choose a file -> validate it -> resolve the requested/default comparison configuration -> run the two selected strategies -> obtain final families, controls/trajectories, verification and summary performance. A thin CLI is the proposed first launcher; the input schema must also be usable by later interfaces and the native library.
+
+A scenario describes dynamics, initial information, horizon, admissible sets and the primary criterion. Optional run settings describe methods, witness selection, numerical tolerances and resources. A simple file can contain both without requiring the user to manage multiple files. The default comparison profile is proposed to select the two agreed strategies; advanced backend selection remains optional. Requested capabilities must still be checked.
+
+Provide a small template catalog with explanations of dimensions, stage indexing, units and objective conventions: a minimal LTI case, a state-constrained case, and an LTV case, covering the three initial objective forms. Start every published executable template from complete, verified data. Keep the unresolved historical B04 record labelled non-executable; it is not a ready-to-run user template.
+
+Constant coefficients and bounds should be entered once. Stage-varying values have an explicit separate form. Small matrices can be inline; optional external matrix data can be added under a documented reference/layout contract when needed. Common domain shapes should have concise named forms such as a box, with general polyhedral data available as an advanced form. Defaults must not invent control bounds, targets, uncertainty semantics or full-state observation. If a nominal profile omits external inputs, observations or state restrictions, its resolved meaning is documented and recorded.
+
+File syntax (for example YAML versus JSON) and the concrete schema are still proposals. The [scenario-file design sketch](2026-10-11-scenario-files-design.md) illustrates the intended authoring experience; it is not a parser or an accepted schema. Existing archival JSON manifests do not automatically define the future user-facing format.
+
 ## Test specification
 
 Module unit tests are a required deliverable. Use mathematical answers, invariants and independent checks, not tests that merely repeat implementation formulas. Each implementation ticket declares relevant test IDs and adds meaningful cases for its own supported capabilities. A common adapter contract suite can be reused by every compatible backend.
@@ -144,9 +167,12 @@ Module unit tests are a required deliverable. Use mathematical answers, invarian
 | T-R02 | Integration | Cancel at a supported boundary and exhaust a documented resource limit; preserve actual partial evidence without changing outcome claims | RUN-03, EVD-02 |
 | T-X01 | Integration + mathematical | Run both selected synthesis strategies on T-S01/02/03; check known optimal relations, objective and independently verified witnesses. Witness coordinates may differ. Backend/representation replacement has additional contract cases when implemented | ALG-01/03/07, SOL-01/02, EXP-01/05 |
 | T-X02 | Artifact integration | Round-trip supported final scenario/result metadata; collect setup/family/query/check times and selector/resource provenance without requiring intermediate-set/program dumps | EXP-01/04/06 |
+| T-I01 | Input integration | Every executable template loads, validates and runs its supported task without C++ edits; the unresolved B04 record retains its restoration diagnostics | INP-01/02, EXP-03 |
+| T-I02 | Unit/contract | Malformed dimensions, invalid stage counts, unknown fields and unsupported schema/capabilities produce actionable distinct diagnostics | INP-04/05, ALG-05 |
+| T-I03 | Artifact integration | Strategy change preserves scenario identity; omitted documented defaults resolve reproducibly and are saved; changing problem data changes identity | INP-03/05, EXP-04 |
 | T-B04 | Archival regression | Current historical manifest gives restoration diagnostics; later canonical reproduction compares sourced inputs, trajectories and original cost with explicit tolerances | EXP-02/03 |
 
-At the first-slice boundary, every implemented capability has applicable unit/contract tests, T-S01/02/03 and T-V01/02 establish end-to-end semantics, T-X01 verifies the mandatory two-strategy comparison, and integration/resource tests cover advertised execution behavior. Tests for later representations or certificate verifiers are added when those capabilities are implemented. Unsupported capabilities are tested as diagnostics now.
+At the first-slice boundary, every implemented capability has applicable unit/contract tests, T-S01/02/03 and T-V01/02 establish end-to-end semantics, T-X01 verifies the mandatory two-strategy comparison, T-I01/02/03 cover the primary scenario-file workflow, and integration/resource tests cover advertised execution behavior. Tests for later representations or certificate verifiers are added when those capabilities are implemented. Unsupported capabilities are tested as diagnostics now.
 
 Property tests may add random low-dimensional examples with fixed reproducible seeds; compare to independent analytic/exhaustive reference cases where possible. Sanitizer/race-check tooling should cover native ownership/concurrency when supported by the selected compiler platform. The test framework and CI matrix remain planning choices. Performance studies report measurements rather than fragile wall-clock unit-test thresholds.
 
@@ -182,12 +208,13 @@ Subagents may propose contract changes but cannot silently alter accepted requir
 - Version 0.2: owner selected the initial two-optimization-strategy comparison and deferred reachable-set approximations; EXP-05 and T-X01 record its acceptance obligations.
 
 - Version 0.3: owner selected final results and trajectories as sufficient for the initial comparison; EXP-06 defers intermediate-computation inspection while preserving final evidence and performance summaries.
+- Version 0.4: owner selected scenario-file input and user-authored scenarios based on supplied simple templates; input requirements, glossary distinctions and validation tests added.
 
 ## Open decisions for the next review
 
 - Accept the proposed first polyhedral nominal slice and its supported complete-family construction; distinguish mathematical exactness from numerical evidence.
 - Select the first matrix, LP, convex solver, CMake packaging and test integrations without exposing their internal types in the public contract.
-- Decide the first user interface and supported compiler/OS distribution targets; no real-time deadline is currently specified.
+- Review the scenario-file form, syntax and proposed CLI launcher; select supported compiler/OS distribution targets. No real-time deadline is currently specified.
 - Choose compatible backends/representations for the two selected optimization strategies and realistic scale ranges using the supplied experiments. Reachable-set approximation comparison is a later slice.
 - Restore B04 canonical inputs separately; the provisional control interval stays labelled provisional until sourced or explicitly adopted as a new scenario.
 

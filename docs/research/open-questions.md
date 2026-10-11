@@ -12,6 +12,7 @@ Date: 2026-10-11. Questions are recorded for later discussion; unanswered prefer
 - First optimal-family operation: obtain different consistent complete control sequences and their trajectories, for visual, numerical and runtime comparison of methods. Membership/projections and user-facing secondary optimization remain later query priorities.
 - First method comparison: historical reachability/backward recovery versus direct joint-trajectory optimization, both returning supported optimal families. Reachable-set approximation comparison is deferred.
 - Initial comparison presentation: final results, selected controls/trajectories, quality/evidence and summary performance suffice. Intermediate computation inspection is deferred.
+- Primary experiment input: selectable scenario files. Users create custom scenarios from supplied templates; make common cases simple and expose advanced features gradually. Concrete file syntax and the proposed CLI launcher remain design choices.
 - First objective modules: explicit linear, convex quadratic and weighted Euclidean terminal forms. General user functions remain a future extension. Preserve each archival objective/weight convention and evaluate original objective values after any solver reformulation.
 - Use the supplied application experiments and published numerical outcomes as initial baselines.
 - First user workflow selected: optimal control planning. Given a model and constraints, obtain a control sequence, its corresponding trajectory, and an objective/quality evaluation. The first solve will be nominal, without process disturbances. The model contract must nevertheless account for external/adversarial inputs and partial/noisy observation. B04 is selected as the first end-to-end reproduction baseline; its canonical inputs need restoration and its displayed model/result inconsistency must be resolved.
@@ -39,7 +40,7 @@ The immediate workflow compares alternative algorithms through complete witness 
 | 2 | Are disturbances bounded independently each step, correlated, fixed unknown parameters, or statistical? | Determines reachable-set and minimax semantics |
 | 2 | Is full state observed? Are observation/model uncertainties estimated online? | Defines information pattern and estimator responsibilities |
 | 3 | What CPUs/GPUs, operating systems and deployment targets should be supported? | Guides backend/packaging choices |
-| 3 | Should the first convenient interface be a library, CLI/notebook, desktop tool, or web UI? | Separates computational core from presentation |
+| 3 | Which scenario-file syntax and launch interface best fit scientific users? | File-based input is selected; concrete schema, CLI packaging and later UI remain design questions |
 | 3 | Which archival materials may be redistributed publicly, and under what license? | Defines public source release independently of new documentation |
 
 Ask one focused group at a time; update the glossary and architecture when answers change the domain model.

@@ -18,6 +18,7 @@ This archive supports a general library for constrained discrete-time control, r
 | [Research developments, 2021–2026](docs/research/recent-research.md) | Relevant recent methods and software analogues |
 | [Consolidated specification](docs/superpowers/specs/2026-10-11-controlled-systems-master-design.md) | Conversation decisions, requirement IDs, acceptance tests and future subagent work breakdown |
 | [C++ core contracts](docs/superpowers/specs/2026-10-11-cpp-core-contracts-design.md) | Draft native interfaces, ownership, extension boundaries and first usage scenarios |
+| [Scenario-file design](docs/superpowers/specs/2026-10-11-scenario-files-design.md) | Simple user-authored inputs, templates, validation and optional run settings |
 | [Language decision](docs/architecture/decisions/0001-cpp20-core.md) | Accepted C++ direction and its consequences |
 | [Modular algorithms and optimal families](docs/architecture/modular-algorithms-and-solution-sets.md) | Concrete C++20 ports, interchangeable solvers/geometry, complete solution relations |
 | [Set representations and Ellipsoidal Toolbox](docs/architecture/set-representations-and-ellipsoidal-toolbox.md) | Ellipsoidal methods, newer representations, recovered owner-authored zonotope paper |

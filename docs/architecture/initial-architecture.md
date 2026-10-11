@@ -12,7 +12,7 @@ The core should be general within explicitly declared system classes. Fuel manag
 
 Owner selection, 2026-10-11: start with optimal control planning. The initial end-to-end interface should accept a model and constraints and return a representation of all optimal control sequences and their consistent trajectories, with optimum/quality evidence and individual witness queries. The result must identify feasibility and optimality evidence.
 
-The owner subsequently selected nominal planning without process disturbances for the first solve, while retaining more general channels and observations in the model contract. The owner selected C++ for the main implementation, with C++20 as the working standard and Python allowed for independent verification. Continuous actions are selected for the first solver; finite and mixed domains remain future extension points. B04 is selected as the first published baseline; its [canonical inputs and model/result consistency](../research/b04-restoration.md) need restoration. Supported stagewise continuous-domain shapes and UI form remain open. Temporal constraints are reserved in the problem contract but excluded from the first archival experiments. Reachability supports this workflow; feedback control remains a later workflow.
+The owner subsequently selected nominal planning without process disturbances for the first solve, while retaining more general channels and observations in the model contract. The owner selected C++ for the main implementation, with C++20 as the working standard and Python allowed for independent verification. Continuous actions are selected for the first solver; finite and mixed domains remain future extension points. B04 is selected as the first published baseline; its [canonical inputs and model/result consistency](../research/b04-restoration.md) need restoration. The owner selected scenario files as the primary input, with simple supplied templates for user-authored cases; concrete syntax and launch interface remain open. Supported stagewise continuous-domain shapes remain open. Temporal constraints are reserved in the problem contract but excluded from the first archival experiments. Reachability supports this workflow; feedback control remains a later workflow.
 
 ## Architectural alternatives
 
@@ -39,7 +39,7 @@ Use the concrete [modular C++20 proposal](modular-algorithms-and-solution-sets.m
 | Simulation | Independent plant evolution, integrators, disturbance realization and measurement generation | Certification of all disturbances from one simulation |
 | Execution | Resource budgets, task scheduling, cancellation, checkpoints | Mathematical admissibility or approximation direction |
 | Experiments and artifacts | Scenario manifests, result traces, provenance, benchmark comparisons | Solver internals |
-| Interfaces | Library API first; CLI/notebooks; optional web frontend later | Duplicated scientific algorithms |
+| Interfaces | Scenario-file workflow over native library; proposed CLI; optional UI later | Duplicated scientific algorithms |
 
 Numerical backend adapters supply LP/QP/SOCP/MIP/global optimization and polyhedral routines behind geometry/synthesis. They translate statuses and residuals into common result fields. A solver success flag alone is not the controller guarantee.
 
@@ -145,4 +145,4 @@ The selected native implementation target is C++20; separate module/adaptor buil
 
 ## Decisions still open
 
-Primary user interface, additional application domains, typical dimensions/horizons, timing/resource requirements, specific future certificate requirements, observation assumptions, and restoration of the selected B04 baseline to an executable consistent specification. The first solve is nominal and returns the optimal solution family; the contracts remain general. Architecture and language boundaries are discussed now, while benchmark evidence validates implementations. See [interview agenda](../research/open-questions.md).
+Scenario-file syntax and launch interface, additional application domains, typical dimensions/horizons, timing/resource requirements, specific future certificate requirements, observation assumptions, and restoration of the selected B04 baseline to an executable consistent specification. The first solve is nominal and returns the optimal solution family; the contracts remain general. Architecture and language boundaries are discussed now, while benchmark evidence validates implementations. See [interview agenda](../research/open-questions.md).

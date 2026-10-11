@@ -117,7 +117,11 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Domain adapter | Physical-model/application integration into the common problem contract |
 | Backend | Numerical/set implementation behind a shared interface |
 | Capability | Declared supported operation/problem property and associated assumptions |
-| Problem manifest | Serializable, versioned definition of a scenario and its numerical settings |
+| Scenario | Identified mathematical problem instance: model, initial information, horizon, constraints and objective, independent of the selected solution algorithm |
+| Scenario template | Documented example from which a user creates their own scenario |
+| Run configuration | Selected algorithms, witness request, numerical settings and resource policy for solving a scenario |
+| Scenario document | Versioned description of a scenario, optionally accompanied by separately identified run settings |
+| Problem manifest | Recorded scenario definition with provenance and any separately identified run settings; avoid using this term for solver configuration alone |
 | Solver workspace | Mutable per-solve/worker state, distinct from immutable problem data |
 | Certificate | Evidence for a specific feasibility, inclusion or optimality claim; identify what it certifies |
 | Validated numerics | Numerical procedures accounting for rounding/truncation to justify bounds |
