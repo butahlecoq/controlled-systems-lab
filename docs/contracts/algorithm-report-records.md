@@ -360,3 +360,9 @@ evidence but is never copied as the published page. Catalogue scope/limit text m
 match the adapter projection; it cannot add claims. A staged result is not a public
 URL: source artifacts still require review and the main Pages workflow must publish
 the integrated catalogue before the live URL check can pass.
+
+## Registered non-LP report publication
+
+Registered result kinds keep their native payload schema and scientific meaning. The site adapter validates the producer bundle and emits one shared `csl.algorithm-report-envelope/1` containing the report identity, kind, native payload schema, payload digest, provenance, measured scope, evidence limits, and typed payload. It renders the public HTML from validated typed records under the shared safe-link policy; producer HTML is not trusted as the scientific view.
+
+Each staged registered report also has a `csl.algorithm-report-publication-manifest/1`. Its exact file inventory and SHA-256 values cover the rendered page, checked figures, evidence files, and serialized envelope. The manifest itself is excluded from its own file list. The offline ZIP contains the same envelope and manifest bytes as the staged directory and uses deterministic, uncompressed entries. Adapters remain explicit registrations; an unknown native payload schema is rejected before output is created.

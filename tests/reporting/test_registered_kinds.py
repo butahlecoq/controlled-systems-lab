@@ -36,6 +36,7 @@ class RegisteredKindTests(unittest.TestCase):
             item = registered.adapt(target)
             (root / (rid + '.zip')).write_bytes(registered.offline_zip(target,item))
             reports.append({'report_id':rid, 'report_kind':kind, 'payload_sha256':item.payload_sha256,
+                'payload_schema':item.payload_schema,
                 'source_commit':item.source_commit, 'measured_scope':item.measured_scope,
                 'evidence_limits':item.evidence_limits, 'zip_sha256':hashlib.sha256((root/(rid+'.zip')).read_bytes()).hexdigest()})
         catalogue={'schema':'csl.algorithm-report-catalog/3','artifact_ref':'main','reports':reports}
@@ -122,6 +123,25 @@ class RegisteredKindTests(unittest.TestCase):
                 with zipfile.ZipFile(out/(report['report_id']+'.zip')) as archive:
                     self.assertIn(report['report_id']+'/records.json',archive.namelist())
                     self.assertIn('Measured scope',archive.read('index.html').decode())
+                    rid=report['report_id']
+                    envelope=json.loads((out/rid/'report-envelope.json').read_text(encoding='utf-8'))
+                    manifest=json.loads((out/rid/'publication-manifest.json').read_text(encoding='utf-8'))
+                    self.assertEqual(envelope['schema'],'csl.algorithm-report-envelope/1')
+                    self.assertEqual(envelope['payload_schema'],
+                        'csl.hull-benchmark-records/1' if report['report_kind']=='opt05-hull' else 'csl.geo03-hv-report/1')
+                    self.assertEqual((envelope['report_id'],envelope['report_kind'],envelope['payload_sha256']),
+                        (rid,report['report_kind'],report['payload_sha256']))
+                    self.assertEqual(registered._digest(envelope['payload']),envelope['payload_sha256'])
+                    self.assertEqual(manifest['schema'],'csl.algorithm-report-publication-manifest/1')
+                    self.assertEqual((manifest['report_id'],manifest['report_kind']),
+                        (rid,report['report_kind']))
+                    self.assertEqual(manifest['files']['report-envelope.json'],
+                        hashlib.sha256((out/rid/'report-envelope.json').read_bytes()).hexdigest())
+                    self.assertEqual(archive.read(rid+'/report-envelope.json'),
+                        (out/rid/'report-envelope.json').read_bytes())
+                    self.assertEqual(archive.read(rid+'/publication-manifest.json'),
+                        (out/rid/'publication-manifest.json').read_bytes())
+                    self.assertTrue(site.validate_publication_manifest(out/rid,report))
 
     def test_real_stage_rejects_tampered_file_and_unregistered_kind(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -132,6 +152,7 @@ class RegisteredKindTests(unittest.TestCase):
             (root/'index.html').write_text(site.catalogue_index(catalogue),encoding='utf-8')
             with self.assertRaises(ValueError):
                 site.stage(root/'catalog.json',Path(temp)/'bad-stage',check=True)
+            self.assertFalse((Path(temp)/'bad-stage').exists())
 
     def test_real_stage_rejects_unregistered_file_and_duplicate_id(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -147,6 +168,27 @@ class RegisteredKindTests(unittest.TestCase):
             (root/'catalog.json').write_text(json.dumps(catalogue),encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'duplicate'):
                 site.stage(root/'catalog.json',Path(temp)/'dupe-stage',check=False)
+
+    def test_publication_envelope_and_manifest_reject_tampering(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)/'input';root.mkdir()
+            catalogue=self.publication(root)
+            out=site.stage(root/'catalog.json',Path(temp)/'stage',check=True)
+            report=catalogue['reports'][2]
+            report_dir=out/report['report_id']
+            envelope_path=report_dir/'report-envelope.json'
+            envelope=json.loads(envelope_path.read_text(encoding='utf-8'))
+            envelope['payload']['trials'][0]['elapsed_ns'] += 1
+            envelope_path.write_text(json.dumps(envelope),encoding='utf-8')
+            with self.assertRaisesRegex(ValueError,'manifest file hash mismatch'):
+                site.validate_publication_manifest(report_dir,report)
+            # Recompute the outer file hash to prove the payload digest is also enforced.
+            manifest_path=report_dir/'publication-manifest.json'
+            manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+            manifest['files']['report-envelope.json']=hashlib.sha256(envelope_path.read_bytes()).hexdigest()
+            manifest_path.write_text(json.dumps(manifest),encoding='utf-8')
+            with self.assertRaisesRegex(ValueError,'payload hash mismatch'):
+                site.validate_publication_manifest(report_dir,report)
 
     def test_real_stage_rejects_hash_consistent_unsafe_svg(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -175,6 +217,7 @@ class RegisteredKindTests(unittest.TestCase):
             (root/'catalog.json').write_text(json.dumps(catalogue),encoding='utf-8')
             with self.assertRaises(ValueError):
                 site.stage(root/'catalog.json',Path(temp)/'bad-stage',check=True)
+            self.assertFalse((Path(temp)/'bad-stage').exists())
 
 
 if __name__ == '__main__':

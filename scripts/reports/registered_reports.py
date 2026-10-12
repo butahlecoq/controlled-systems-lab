@@ -24,6 +24,7 @@ class PublicationRecord:
     measured_scope: str
     evidence_limits: str
     files: tuple[str, ...] = ()
+    payload_schema: str = ""
 
 
 def _json(path):
@@ -70,7 +71,7 @@ def _adapt_payload(record):
             for field,fn in (("median_ns",lambda xs:statistics.median(xs)),("min_ns",min),("max_ns",max)):
                 if row.get(field)!=fn([t["elapsed_ns"] for t in group]): raise ValueError("OPT-05 timing summary differs from trials")
             if row.get("median_lp_calls")!=statistics.median([t["lp_calls"] for t in group]): raise ValueError("OPT-05 LP-call summary differs from trials")
-        return PublicationRecord("opt05-hull", rid, _digest(record), record.get("code_commit", ""), "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices", "No comparator; " + limits)
+        return PublicationRecord("opt05-hull", rid, _digest(record), record.get("code_commit", ""), "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices", "No comparator; " + limits, payload_schema=schema)
     if schema == "csl.geo03-hv-report/1":
         payload = record.get("payload")
         if not isinstance(payload, dict) or _digest(payload) != record.get("payload_sha256"):
@@ -109,7 +110,7 @@ def _adapt_payload(record):
             raise ValueError("GEO-03 full report source commit required")
         if not isinstance(record.get("report_id"), str) or not re.fullmatch(r"geo03-\d{8}-[0-9a-f]{12}", record["report_id"]):
             raise ValueError("unsafe GEO-03 report ID")
-        return PublicationRecord("geo03-hv", record["report_id"], record["payload_sha256"], source, "56 measured trials across four bounded 2D fixtures in both conversion directions", "; ".join(limits))
+        return PublicationRecord("geo03-hv", record["report_id"], record["payload_sha256"], source, "56 measured trials across four bounded 2D fixtures in both conversion directions", "; ".join(limits), payload_schema=schema)
     raise ValueError("unregistered report schema")
 
 
@@ -157,7 +158,7 @@ def adapt(bundle):
         relative = Path(name)
         if relative.is_absolute() or ".." in relative.parts or any(part.is_symlink() for part in [bundle, *(bundle / Path(*relative.parts[:i]) for i in range(1, len(relative.parts)))]) or not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError("unsafe or tampered registered bundle file: " + name)
-    return PublicationRecord(result.kind, result.report_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)))
+    return PublicationRecord(result.kind, result.report_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema)
 
 
 def render_page(bundle, publication):
@@ -179,13 +180,88 @@ def render_page(bundle, publication):
             escape(publication.source_commit) + '</code></p><p><a href="latency.svg">Checked latency SVG</a></p><ul><li>' + '</li><li>'.join(links) + '</li></ul></body></html>')
 
 
+def _json_bytes(value):
+    return (json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
+
+
+def publication_envelope(bundle, publication):
+    record = _json(Path(bundle) / "records.json")
+    payload = record["payload"] if publication.kind == "geo03-hv" else record
+    return {
+        "schema": "csl.algorithm-report-envelope/1",
+        "report_id": publication.report_id,
+        "report_kind": publication.kind,
+        "payload_schema": publication.payload_schema,
+        "payload_sha256": publication.payload_sha256,
+        "source_commit": publication.source_commit,
+        "measured_scope": publication.measured_scope,
+        "evidence_limits": publication.evidence_limits,
+        "payload": payload,
+    }
+
+
+def publication_artifacts(bundle, publication):
+    bundle = Path(bundle)
+    files = {name: (bundle / name).read_bytes() for name in publication.files if name != "index.html"}
+    files["index.html"] = render_page(bundle, publication).encode("utf-8")
+    files["report-envelope.json"] = _json_bytes(publication_envelope(bundle, publication))
+    files["publication-manifest.json"] = _json_bytes({
+        "schema": "csl.algorithm-report-publication-manifest/1",
+        "report_id": publication.report_id,
+        "report_kind": publication.kind,
+        "files": {name: hashlib.sha256(files[name]).hexdigest() for name in sorted(files)},
+    })
+    return files
+
+
+def validate_publication_manifest(report_dir, expected):
+    report_dir = Path(report_dir)
+    try:
+        if report_dir.is_symlink():
+            raise ValueError("publication directory is a symlink")
+        manifest = _json(report_dir / "publication-manifest.json")
+        envelope = _json(report_dir / "report-envelope.json")
+        actual = set()
+        for path in report_dir.rglob("*"):
+            if path.is_symlink():
+                raise ValueError("publication files cannot be symlinks")
+            if path.is_file() and path.name != "publication-manifest.json":
+                actual.add(path.relative_to(report_dir).as_posix())
+        if manifest.get("schema") != "csl.algorithm-report-publication-manifest/1" or manifest.get("report_id") != expected.get("report_id") or manifest.get("report_kind") != expected.get("report_kind"):
+            raise ValueError("publication manifest identity/schema mismatch")
+        entries = manifest.get("files")
+        if not isinstance(entries, dict) or set(entries) != actual:
+            raise ValueError("publication manifest inventory mismatch")
+        for name, digest in entries.items():
+            relative = Path(name)
+            if relative.is_absolute() or ".." in relative.parts or not isinstance(digest, str):
+                raise ValueError("publication manifest contains an unsafe entry")
+            path = report_dir / relative
+            if not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+                raise ValueError("publication manifest file hash mismatch")
+        fields = ("report_id", "report_kind", "payload_schema", "payload_sha256", "source_commit", "measured_scope", "evidence_limits")
+        if envelope.get("schema") != "csl.algorithm-report-envelope/1" or any(envelope.get(field) != expected.get(field) for field in fields):
+            raise ValueError("publication envelope identity/schema mismatch")
+        if _digest(envelope.get("payload")) != expected.get("payload_sha256"):
+            raise ValueError("publication envelope payload hash mismatch")
+        if not isinstance(envelope.get("payload"), dict) or envelope["payload"].get("schema") != expected.get("payload_schema"):
+            raise ValueError("publication envelope payload schema mismatch")
+        return True
+    except (OSError, KeyError, TypeError, AttributeError, json.JSONDecodeError) as error:
+        raise ValueError("publication manifest or envelope is malformed") from error
+
+
 def offline_zip(bundle, publication):
     bundle=Path(bundle)
-    page=render_page(bundle,publication).encode("utf-8")
+    files=publication_artifacts(bundle,publication)
     buffer=io.BytesIO()
-    with zipfile.ZipFile(buffer,"w",compression=zipfile.ZIP_DEFLATED) as archive:
-        entries=[("index.html",page)]+[(publication.report_id+"/"+name,(bundle/name).read_bytes()) for name in publication.files if name!="index.html"]
+    with zipfile.ZipFile(buffer,"w",compression=zipfile.ZIP_STORED) as archive:
+        entries=[("index.html",files["index.html"])]+[(publication.report_id+"/"+name,files[name]) for name in sorted(files)]
         for name,content in entries:
-            info=zipfile.ZipInfo(name,date_time=(2026,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED;info.external_attr=0o100644<<16
+            info=zipfile.ZipInfo(name,date_time=(2026,1,1,0,0,0))
+            info.create_system=3
+            info.flag_bits=0
+            info.compress_type=zipfile.ZIP_STORED
+            info.external_attr=0o100644<<16
             archive.writestr(info,content)
     return buffer.getvalue()

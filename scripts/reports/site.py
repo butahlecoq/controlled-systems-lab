@@ -186,6 +186,8 @@ def stage(catalog_path,out,check=True,allow_test=False):
     artifact_ref=catalogue.get("artifact_ref","main");data.artifact_reference(artifact_ref)
     ids=set()
     registered_records={}
+    registered_artifacts={}
+    registered_archives={}
     for report in catalogue["reports"]:
         rid=report["report_id"]
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
@@ -195,12 +197,16 @@ def stage(catalog_path,out,check=True,allow_test=False):
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
             data.require(report.get("payload_sha256")==item.payload_sha256 and report.get("source_commit")==item.source_commit,"registered catalogue provenance mismatch")
             data.require(report.get("measured_scope")==item.measured_scope and report.get("evidence_limits")==item.evidence_limits,"registered scope/evidence differs from typed records")
+            data.require(report.get("payload_schema")==item.payload_schema,"registered catalogue payload schema differs")
             generated_page=registered.render_page(root/rid,item)
-            OfflineHTML(set(item.files)).feed(generated_page)
+            OfflineHTML(set(item.files)|{"report-envelope.json","publication-manifest.json"}).feed(generated_page)
             data.validate_svg((root/rid/"latency.svg").read_bytes())
+            artifacts=registered.publication_artifacts(root/rid,item)
             archive_bytes=registered.offline_zip(root/rid,item)
             data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"registered generated ZIP digest differs")
             registered_records[rid]=item
+            registered_artifacts[rid]=artifacts
+            registered_archives[rid]=archive_bytes
             continue
         if catalogue["schema"]=="csl.algorithm-report-catalog/3":
             data.require(report.get("report_kind") in ("lp","convex"),"unknown catalogue kind")
@@ -227,12 +233,15 @@ def stage(catalog_path,out,check=True,allow_test=False):
             (out/rid).mkdir()
             if rid in registered_records:
                 item=registered_records[rid]
-                for name in item.files:
-                    if name=="index.html": continue
-                    source=root/rid/name;destination=out/rid/name
-                    destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,destination)
-                (out/rid/"index.html").write_text(registered.render_page(root/rid,item),encoding="utf-8")
-                (out/(rid+".zip")).write_bytes(registered.offline_zip(root/rid,item))
+                for name,content in registered_artifacts[rid].items():
+                    destination=out/rid/name
+                    destination.parent.mkdir(parents=True,exist_ok=True)
+                    destination.write_bytes(content)
+                expected={"report_id":item.report_id,"report_kind":item.kind,"payload_schema":item.payload_schema,
+                    "payload_sha256":item.payload_sha256,"source_commit":item.source_commit,
+                    "measured_scope":item.measured_scope,"evidence_limits":item.evidence_limits}
+                data.require(registered.validate_publication_manifest(out/rid,expected),"generated publication manifest failed validation")
+                (out/(rid+".zip")).write_bytes(registered_archives[rid])
             else:
                 for name in FILES: shutil.copyfile(data.local_file(root/rid,name),out/rid/name)
                 shutil.copyfile(data.local_file(root,rid+".zip"),out/(rid+".zip"))
@@ -246,6 +255,10 @@ def stage(catalog_path,out,check=True,allow_test=False):
     shutil.copyfile(catalog_path,out/"catalog.json")
     (out/"index.html").write_text(index,encoding="utf-8")
     return out
+
+
+def validate_publication_manifest(report_dir, expected):
+    return registered.validate_publication_manifest(report_dir,expected)
 
 
 def main():
