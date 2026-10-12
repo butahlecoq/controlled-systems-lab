@@ -62,7 +62,7 @@ def main():
  except (ValueError,RuntimeError,subprocess.CalledProcessError) as error:p.error(str(error))
  out=a.out.resolve();out.mkdir(parents=True)
  before=sha(exe.read_bytes());command=[str(exe),'--repetitions',str(a.repetitions),'--warmups',str(a.warmups)]
- try:proc=subprocess.run(command,capture_output=True,text=True,timeout=600,check=False);code=proc.returncode;stdout=proc.stdout;stderr=proc.stderr;aborted=False
+ try:proc=subprocess.run(command,capture_output=True,text=True,timeout=600,check=False,cwd=build);code=proc.returncode;stdout=proc.stdout;stderr=proc.stderr;aborted=False
  except subprocess.TimeoutExpired as error:code=None;stdout=error.stdout.decode(errors='replace') if isinstance(error.stdout,bytes) else (error.stdout or '');stderr=error.stderr.decode(errors='replace') if isinstance(error.stderr,bytes) else (error.stderr or '');aborted=True
  if sha(exe.read_bytes())!=before:raise SystemExit('executable changed during collection')
  try:provenance.require_clean_tracked_tree()
