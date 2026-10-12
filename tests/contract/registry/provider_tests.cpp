@@ -87,9 +87,10 @@ public:
         auto workers=accepted(generated_.prepare(interval_lp(-2))).create();
         const auto lp=std::get<ProgramResult>(std::get<0>(workers)->run(context));
         const auto id=problem.identity();
+        const double control=lp.primal->at(0);
         return SynthesisResult{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
-            {{{id,{{static_cast<double>(fixed)}},{*lp.primal},lp.objective.upper->value},
-                {id,SymbolicArgument{"fixture", "bounded LP sample"}}}}, {}};
+            {{{id,{{0},{control}},{*lp.primal},3*control+2},
+                {id,SymbolicArgument{"fixture", "x0=0, u0=4, x1=x0+u0=4; control is unconstrained; counter="+std::to_string(fixed)}}}}, {}};
     }
 };
 TEST_CASE("mixed fixed and generated strategy owns both after enclosing preparation") {
@@ -116,8 +117,9 @@ TEST_CASE("mixed fixed and generated strategy owns both after enclosing preparat
     CHECK(prepared.provenance()[1].actual->id.value=="counter");
     CHECK(prepared.provenance()[2].actual->id.value=="endpoint");
     const auto result=std::get<SynthesisResult>(prepared.create()->run(context()));
-    REQUIRE(result.incumbents.size()==1);CHECK(result.incumbents[0].witness.states==std::vector<Vector>{{31}});
-    CHECK(result.incumbents[0].witness.controls==std::vector<Vector>{{4}});CHECK(result.incumbents[0].witness.original_objective==-6);
+    REQUIRE(result.incumbents.size()==1);CHECK(result.incumbents[0].witness.states==std::vector<Vector>{{0},{4}});
+    CHECK(result.incumbents[0].witness.controls==std::vector<Vector>{{4}});CHECK(result.incumbents[0].witness.original_objective==14);
+    CHECK(std::get<SymbolicArgument>(result.incumbents[0].feasibility.support).assumptions=="x0=0, u0=4, x1=x0+u0=4; control is unconstrained; counter=31");
 }
 TEST_CASE("later outer dependency rejection snapshots neither fixed data nor generated callbacks") {
     struct CopyProbe {
