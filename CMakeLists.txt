@@ -87,6 +87,8 @@ set_target_properties(csl_verification PROPERTIES EXPORT_NAME verification CXX_E
 target_link_libraries(csl_verification PUBLIC CSL::resolved_problem CSL::optimization CSL::registry)
 if(CSL_BUILD_SYN06_REPORT)
   add_executable(csl_syn06_verifier_report reports/algorithm-results/tooling/syn06/verifier_driver.cpp)
+  target_compile_features(csl_syn06_verifier_report PRIVATE cxx_std_20)
+  target_compile_definitions(csl_syn06_verifier_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
   target_link_libraries(csl_syn06_verifier_report PRIVATE CSL::verification)
 endif()
 include(cmake/JsonDependencies.cmake)

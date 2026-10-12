@@ -10,6 +10,11 @@
 #include <variant>
 #include <vector>
 #include <algorithm>
+#include <array>
+#include <cmath>
+#include <iomanip>
+#include <sstream>
+#include <string_view>
 
 namespace {
 using namespace csl;
@@ -56,41 +61,121 @@ const char* status(CheckStatus value) {
 std::uint64_t consume(const TrajectoryReport& report) {
     std::uint64_t token=static_cast<std::uint64_t>(report.feasibility)*17u+
         static_cast<std::uint64_t>(report.objective)*29u+
+        static_cast<std::uint64_t>(report.optimality)*37u+
         static_cast<std::uint64_t>(report.completeness)*31u+
+        static_cast<std::uint64_t>(report.validated)*41u+
         report.residuals.size();
     if(report.recomputed_objective) token^=std::bit_cast<std::uint64_t>(*report.recomputed_objective);
     for(const auto& residual:report.residuals) {
+        for(const auto character:residual.field)token=token*1099511628211ULL ^ static_cast<unsigned char>(character);
         token=token*1099511628211ULL ^ std::bit_cast<std::uint64_t>(residual.measure.violation);
+        token=token*1099511628211ULL ^ std::bit_cast<std::uint64_t>(residual.measure.scale);
+        token=token*1099511628211ULL ^ std::bit_cast<std::uint64_t>(residual.tolerance);
         token^=static_cast<std::uint64_t>(residual.satisfied);
     }
     return token;
 }
 
-void emit_case(const problem::ResolvedProblem& problem,const char* label,
+struct ExpectedResidual {std::string_view field;double violation,scale;bool satisfied;};
+constexpr std::array<ExpectedResidual,10> valid_residuals{{
+    {"initial[0]",0,0,true},{"states[0].singleton[0]",0,0,true},
+    {"states[2].singleton[0]",0,1,true},{"controls[0].inequalities[0]",0,1,true},
+    {"controls[0].inequalities[1]",0,0.25,true},{"dynamics[0][0]",0,0.25,true},
+    {"controls[1].inequalities[0]",0,1,true},{"controls[1].inequalities[1]",0,0.75,true},
+    {"dynamics[1][0]",0,1,true},{"objective",0,1,true}}};
+constexpr std::array<ExpectedResidual,10> violating_residuals{{
+    {"initial[0]",0,0,true},{"states[0].singleton[0]",0,0,true},
+    {"states[2].singleton[0]",0,1,true},{"controls[0].inequalities[0]",0,1,true},
+    {"controls[0].inequalities[1]",0,0.25,true},{"dynamics[0][0]",0,0.25,true},
+    {"controls[1].inequalities[0]",0.25,1.25,false},
+    {"controls[1].inequalities[1]",0,1.25,true},
+    {"dynamics[1][0]",0.5,1.5,false},{"objective",0,1,true}}};
+
+bool expected_report(const TrajectoryReport& report,bool violating) {
+    if(report.bindings!=CheckStatus::numerical_pass ||
+       report.feasibility!=(violating?CheckStatus::violation:CheckStatus::numerical_pass) ||
+       report.objective!=CheckStatus::numerical_pass || report.optimality!=CheckStatus::unsupported ||
+       report.completeness!=CheckStatus::unsupported || report.validated!=CheckStatus::unsupported ||
+       report.recomputed_objective!=1.0 || report.termination!=Termination::completed ||
+       report.residuals.size()!=valid_residuals.size())return false;
+    const auto& expected=violating?violating_residuals:valid_residuals;
+    for(std::size_t i=0;i<expected.size();++i) {
+        const auto& actual=report.residuals[i];const auto& literal=expected[i];
+        if(actual.field!=literal.field || actual.measure.violation!=literal.violation ||
+           actual.measure.scale!=literal.scale || actual.satisfied!=literal.satisfied ||
+           std::abs(actual.tolerance-(1e-8+1e-8*literal.scale))>1e-20)return false;
+    }
+    return true;
+}
+
+std::string json_string(const std::string& value) {
+    std::string encoded="\"";
+    constexpr char hex[]="0123456789abcdef";
+    for(unsigned char c:value) {
+        if(c=='"'||c=='\\') {encoded+='\\';encoded+=static_cast<char>(c);}
+        else if(c<0x20) {encoded+="\\u00";encoded+=hex[c>>4];encoded+=hex[c&15];}
+        else encoded+=static_cast<char>(c);
+    }
+    return encoded+'"';
+}
+
+std::string residual_json(const TrajectoryReport& report) {
+    std::ostringstream out;out<<std::setprecision(17)<<'[';
+    for(std::size_t i=0;i<report.residuals.size();++i) {
+        if(i)out<<',';
+        const auto& r=report.residuals[i];
+        out<<"{\"field\":"<<json_string(r.field)<<",\"violation\":"<<r.measure.violation
+           <<",\"scale\":"<<r.measure.scale<<",\"tolerance\":"<<r.tolerance
+           <<",\"satisfied\":"<<(r.satisfied?"true":"false")<<'}';
+    }
+    out<<']';return out.str();
+}
+
+bool emit_case(const problem::ResolvedProblem& problem,const char* label,
                TrajectoryRequest request,std::uint64_t batch,std::uint64_t warmups,std::uint64_t trials) {
-    const auto expected=std::string(label)=="valid"?CheckStatus::numerical_pass:CheckStatus::violation;
+    const bool violating=std::string_view(label)=="violating";
     for(std::uint64_t round=0;round<warmups+trials;++round) {
         const auto begin=std::chrono::steady_clock::now();
-        std::uint64_t token=0;
+        std::uint64_t token=0,attempted=0,checked=0,failures=0;
         TrajectoryReport last;
         for(std::uint64_t iteration=0;iteration<batch;++iteration) {
-            last=verify_trajectory(problem,request);
-            token^=consume(last)+(iteration*0x9e3779b97f4a7c15ULL);
+            ++attempted;
+            try {
+                last=verify_trajectory(problem,request);
+                ++checked;
+                token^=consume(last)+(iteration*0x9e3779b97f4a7c15ULL);
+                if(!expected_report(last,violating)) {
+                    ++failures;
+                    std::cout<<"{\"event\":\"call_failure\",\"fixture\":\""<<label
+                             <<"\",\"round\":"<<round<<",\"iteration\":"<<iteration
+                             <<",\"reason\":\"literal oracle mismatch\",\"residuals\":"
+                             <<residual_json(last)<<"}\n";
+                }
+            } catch(const std::exception& error) {
+                ++failures;
+                std::cout<<"{\"event\":\"call_failure\",\"fixture\":\""<<label
+                         <<"\",\"round\":"<<round<<",\"iteration\":"<<iteration
+                         <<",\"reason\":"<<json_string(error.what())<<"}\n";
+                break;
+            }
         }
         const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now()-begin).count();
-        if(last.bindings!=CheckStatus::numerical_pass || last.feasibility!=expected ||
-            last.objective!=CheckStatus::numerical_pass || last.completeness!=CheckStatus::unsupported ||
-            last.recomputed_objective!=1.0 || last.termination!=Termination::completed || elapsed<=0)
-            throw std::runtime_error("verifier output differs from literal fixture oracle");
         std::cout<<"{\"event\":\"trial\",\"fixture\":\""<<label<<"\",\"round\":"<<round
             <<",\"warmup\":"<<(round<warmups?"true":"false")
-            <<",\"batch\":"<<batch<<",\"elapsed_ns\":"<<elapsed
+            <<",\"batch\":"<<batch<<",\"attempted_calls\":"<<attempted
+            <<",\"checked_calls\":"<<checked<<",\"failures\":"<<failures
+            <<",\"elapsed_ns\":"<<elapsed
             <<",\"bindings\":\""<<status(last.bindings)<<"\",\"feasibility\":\""<<status(last.feasibility)
-            <<"\",\"objective\":\""<<status(last.objective)<<"\",\"completeness\":\""<<status(last.completeness)
-            <<"\",\"recomputed_objective\":1,\"residual_count\":"<<last.residuals.size()
+            <<"\",\"objective\":\""<<status(last.objective)<<"\",\"optimality\":\""<<status(last.optimality)
+            <<"\",\"completeness\":\""<<status(last.completeness)<<"\",\"validated\":\""<<status(last.validated)
+            <<"\",\"recomputed_objective\":"<<(last.recomputed_objective?*last.recomputed_objective:0)
+            <<",\"residual_count\":"<<last.residuals.size()<<",\"residuals\":"<<residual_json(last)
             <<",\"observation_token\":"<<token<<"}\n";
+        std::cout.flush();
+        if(failures || attempted!=batch || checked!=batch || elapsed<=0)return false;
     }
+    return true;
 }
 } // namespace
 
@@ -113,12 +198,12 @@ int main(int argc,char** argv) {
                 std::chrono::steady_clock::now()-begin).count());
         }
         std::ranges::sort(timer_samples);
-        std::cout<<"{\"event\":\"header\",\"schema\":\"csl.syn06-verifier-raw/1\",\"batch\":"<<batch
+        std::cout<<"{\"event\":\"header\",\"schema\":\"csl.syn06-verifier-raw/2\",\"batch\":"<<batch
             <<",\"warmups\":"<<warmups<<",\"trials_per_fixture\":"<<trials
             <<",\"timer_overhead_median_ns\":"<<timer_samples[timer_samples.size()/2]<<"}\n";
-        emit_case(problem,"valid",request,batch,warmups,trials);
+        if(!emit_case(problem,"valid",request,batch,warmups,trials))return 2;
         request.witness.controls[1][0]=1.25;
-        emit_case(problem,"violating",request,batch,warmups,trials);
+        if(!emit_case(problem,"violating",request,batch,warmups,trials))return 2;
         return 0;
     } catch(const std::exception& error) {
         std::cerr<<error.what()<<'\n';return 1;

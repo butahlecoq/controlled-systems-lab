@@ -13,6 +13,7 @@ from html import escape
 import importlib.util
 import io
 import json
+import math
 from pathlib import Path
 import re
 import statistics
@@ -25,16 +26,19 @@ site = importlib.util.module_from_spec(_site_spec)
 _site_spec.loader.exec_module(site)
 
 SOURCE_FILES = frozenset({
-    "README.md", "build-log.txt", "build-provenance.json", "index.html", "latency.svg",
+    "README.md", "build-graph.json", "build-log.txt", "build-provenance.json",
+    "configure-log.txt", "index.html", "latency.svg",
     "measurement-command.txt", "pilot.json", "pilot-raw.jsonl", "process-stderr.txt",
     "profile.json", "profile-raw.jsonl", "raw-events.jsonl", "records.json", "summary.csv", "trials.csv",
-    "verifier_driver.cpp",
+    "verifier-driver.bin", "verifier_driver.cpp",
 })
 SOURCE_INVENTORY = SOURCE_FILES | {"manifest.json", "bundle.zip"}
 TRIAL_FIELDS = ("fixture", "round", "warmup", "batch", "elapsed_ns", "bindings",
-                "feasibility", "objective", "completeness", "recomputed_objective",
-                "residual_count", "observation_token")
-SUMMARY_FIELDS = ("fixture", "trials", "failures", "batch", "median_elapsed_ns",
+                "feasibility", "objective", "optimality", "completeness", "validated",
+                "recomputed_objective", "residual_count", "attempted_calls", "checked_calls",
+                "failures", "observation_token")
+RAW_TRIAL_FIELDS = TRIAL_FIELDS + ("residuals",)
+SUMMARY_FIELDS = ("fixture", "trials", "attempted_calls", "checked_calls", "failures", "batch", "median_elapsed_ns",
                   "min_elapsed_ns", "max_elapsed_ns")
 FIXTURES = ("valid", "violating")
 SCOPE = "Original-data numerical verification of two literal two-stage integrator witnesses"
@@ -86,12 +90,42 @@ def expected_fixture() -> dict:
     }
 
 
+def expected_residuals(fixture: str) -> list[dict]:
+    require(fixture in FIXTURES, "unknown SYN-06 fixture")
+    rows = [
+        ("initial[0]", 0, 0), ("states[0].singleton[0]", 0, 0),
+        ("states[2].singleton[0]", 0, 1), ("controls[0].inequalities[0]", 0, 1),
+        ("controls[0].inequalities[1]", 0, 0.25), ("dynamics[0][0]", 0, 0.25),
+        ("controls[1].inequalities[0]", 0.25 if fixture == "violating" else 0,
+         1.25 if fixture == "violating" else 1),
+        ("controls[1].inequalities[1]", 0, 1.25 if fixture == "violating" else 0.75),
+        ("dynamics[1][0]", 0.5 if fixture == "violating" else 0,
+         1.5 if fixture == "violating" else 1),
+        ("objective", 0, 1),
+    ]
+    return [{"field": field, "violation": violation, "scale": scale,
+             "tolerance": 1e-8 + 1e-8 * scale, "satisfied": violation <= 1e-8 + 1e-8 * scale}
+            for field, violation, scale in rows]
+
+
+def check_residuals(actual: object, fixture: str) -> None:
+    expected = expected_residuals(fixture)
+    require(isinstance(actual, list) and len(actual) == len(expected), "SYN-06 named residual count differs")
+    for row, literal in zip(actual, expected):
+        require(isinstance(row, dict) and set(row) == set(literal) and
+                row["field"] == literal["field"] and row["violation"] == literal["violation"] and
+                row["scale"] == literal["scale"] and row["satisfied"] is literal["satisfied"] and
+                type(row["tolerance"]) in (int, float) and math.isfinite(row["tolerance"]) and
+                math.isclose(row["tolerance"], literal["tolerance"], rel_tol=0, abs_tol=1e-20),
+                "SYN-06 named residual differs from literal fixture")
+
+
 def raw_projection(raw: bytes, batch: int, warmups: int, repetitions: int) -> list[dict]:
     lines = raw.decode("utf-8").splitlines()
     require(len(lines) == 1 + len(FIXTURES) * (warmups + repetitions), "raw event count differs")
     events = [report_data.parse_json(line) for line in lines]
     header = events[0]
-    require(header.get("event") == "header" and header.get("schema") == "csl.syn06-verifier-raw/1" and
+    require(header.get("event") == "header" and header.get("schema") == "csl.syn06-verifier-raw/2" and
             header.get("batch") == batch and header.get("warmups") == warmups and
             header.get("trials_per_fixture") == repetitions and
             type(header.get("timer_overhead_median_ns")) is int and header["timer_overhead_median_ns"] >= 0,
@@ -100,18 +134,22 @@ def raw_projection(raw: bytes, batch: int, warmups: int, repetitions: int) -> li
     for index, event in enumerate(events[1:]):
         fixture = FIXTURES[index // (warmups + repetitions)]
         round_index = index % (warmups + repetitions)
-        require(set(event) == set(TRIAL_FIELDS) | {"event"} and event["event"] == "trial" and
+        require(set(event) == set(RAW_TRIAL_FIELDS) | {"event"} and event["event"] == "trial" and
                 event["fixture"] == fixture and event["round"] == round_index and
                 event["warmup"] is (round_index < warmups) and event["batch"] == batch and
+                event["attempted_calls"] == batch and event["checked_calls"] == batch and
+                event["failures"] == 0 and
                 type(event["elapsed_ns"]) is int and event["elapsed_ns"] > 0 and
                 event["bindings"] == "numerical_pass" and
                 event["feasibility"] == ("numerical_pass" if fixture == "valid" else "violation") and
-                event["objective"] == "numerical_pass" and event["completeness"] == "unsupported" and
+                event["objective"] == "numerical_pass" and event["optimality"] == "unsupported" and
+                event["completeness"] == "unsupported" and event["validated"] == "unsupported" and
                 event["recomputed_objective"] == 1 and event["residual_count"] == 10 and
                 type(event["observation_token"]) is int and event["observation_token"] >= 0,
                 "raw verifier result differs from analytic fixture")
+        check_residuals(event["residuals"], fixture)
         if round_index >= warmups:
-            measured.append({field: event[field] for field in TRIAL_FIELDS})
+            measured.append({field: event[field] for field in RAW_TRIAL_FIELDS})
     require(len({t["observation_token"] for t in measured if t["fixture"] == "valid"}) == 1 and
             len({t["observation_token"] for t in measured if t["fixture"] == "violating"}) == 1 and
             measured[0]["observation_token"] != measured[-1]["observation_token"],
@@ -125,7 +163,10 @@ def summarize(trials: list[dict], batch: int) -> list[dict]:
         group = [t for t in trials if t["fixture"] == fixture]
         values = [t["elapsed_ns"] for t in group]
         require(len(values) == 7, "seven measured repetitions required per fixture")
-        result.append({"fixture": fixture, "trials": len(values), "failures": 0, "batch": batch,
+        result.append({"fixture": fixture, "trials": len(values),
+                       "attempted_calls": sum(t["attempted_calls"] for t in group),
+                       "checked_calls": sum(t["checked_calls"] for t in group),
+                       "failures": sum(t["failures"] for t in group), "batch": batch,
                        "median_elapsed_ns": statistics.median(values),
                        "min_elapsed_ns": min(values), "max_elapsed_ns": max(values)})
     return result
@@ -147,21 +188,39 @@ def svg(summary: list[dict]) -> str:
 def page(record: dict, figure: str) -> str:
     payload = record["payload"]
     rows = ''.join('<tr><td>' + escape(row["fixture"]) + '</td><td>' + str(row["trials"]) +
+                   '</td><td>' + str(row["checked_calls"]) + '</td><td>' + str(row["failures"]) +
                    '</td><td>' + f'{row["median_elapsed_ns"] / row["batch"]:.2f}' +
                    '</td><td>' + f'{row["min_elapsed_ns"] / row["batch"]:.2f}' +
                    '</td><td>' + f'{row["max_elapsed_ns"] / row["batch"]:.2f}' +
                    '</td></tr>' for row in payload["summary"])
+    status_rows = ''.join('<tr><td>' + escape(fixture) + '</td>' +
+                          ''.join('<td>' + escape(str(payload["status_profiles"][fixture][name])) + '</td>'
+                                  for name in ("bindings", "feasibility", "objective", "optimality", "completeness", "validated")) +
+                          '<td>' + str(payload["status_profiles"][fixture]["recomputed_objective"]) + '</td></tr>'
+                          for fixture in FIXTURES)
+    residual_rows = ''.join('<tr><td>' + escape(fixture) + '</td><td>' + escape(row["field"]) + '</td><td>' +
+                            str(row["violation"]) + '</td><td>' + str(row["scale"]) + '</td><td>' +
+                            format(row["tolerance"], '.17g') + '</td><td>' + str(row["satisfied"]).lower() +
+                            '</td></tr>' for fixture in FIXTURES for row in payload["residual_profiles"][fixture])
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>SYN-06 verifier results</title>'
             '</head><body><h1>SYN-06 original-data trajectory verification</h1><p>Source commit <code>' +
             escape(payload["source_commit"]) + '</code>. ' + escape(SCOPE) + '.</p><p>' + escape(LIMITS) +
             '.</p><h2>Saved Release timings</h2><p>Seven measured batches of ' + str(payload["batch"]) +
             ' calls per fixture, after seven warmup batches. Each interval contains '
-            '<code>verify_trajectory</code>, report assignment and consumption of every returned report; resolution and setup '
+            '<code>verify_trajectory</code>, per-call literal checks, report assignment and consumption '
+            'of every returned report; resolution and setup '
             'are outside. Values are batch elapsed time divided by calls, in nanoseconds per call. '
             'No comparator or speedup is claimed.</p><table><thead><tr><th>Witness</th><th>Trials</th>'
+            '<th>Checked calls</th><th>Failures</th>'
             '<th>Median ns/call</th><th>Min ns/call</th><th>Max ns/call</th></tr></thead><tbody>' +
             rows + '</tbody></table><figure aria-label="Verifier timings">' + figure +
-            '</figure><h2>Analytic outputs</h2><p>The valid witness passes original transitions, domains '
+            '</figure><h2>Observed claim scopes</h2><table><thead><tr><th>Witness</th><th>Bindings</th>'
+            '<th>Feasibility</th><th>Objective</th><th>Optimality</th><th>Completeness</th>'
+            '<th>Validated</th><th>Recomputed objective</th></tr></thead><tbody>' + status_rows +
+            '</tbody></table><h2>Named original-data residuals</h2><table><thead><tr><th>Witness</th>'
+            '<th>Field</th><th>Violation</th><th>Scale</th><th>Tolerance</th><th>Satisfied</th>'
+            '</tr></thead><tbody>' + residual_rows + '</tbody></table><h2>Analytic outputs</h2>'
+            '<p>The valid witness passes original transitions, domains '
             'and objective. The deliberately altered final control violates an original domain and transition. '
             'Both retain unsupported optimal-family completeness and validated-proof claims.</p><p>Hardware, '
             'compiler, pilot, timer overhead, and separate process CPU and memory observations are in the raw '
@@ -176,7 +235,7 @@ def csv_bytes(fields: tuple[str, ...], rows: list[dict]) -> bytes:
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
     writer.writeheader()
-    writer.writerows(rows)
+    writer.writerows({field: row[field] for field in fields} for row in rows)
     return stream.getvalue().encode("utf-8")
 
 
@@ -189,7 +248,7 @@ def validate(bundle: Path) -> registered.PublicationRecord:
             all(path.is_file() and not path.is_symlink() for path in bundle.iterdir()),
             "SYN-06 exact source inventory differs")
     manifest = read_json(local(bundle, "manifest.json"))
-    require(manifest.get("schema") == "csl.syn06-source-manifest/1" and
+    require(manifest.get("schema") == "csl.syn06-source-manifest/2" and
             manifest.get("report_id") == bundle.name and set(manifest.get("files", {})) == SOURCE_FILES,
             "SYN-06 source manifest differs")
     for name, expected in manifest["files"].items():
@@ -201,7 +260,7 @@ def validate(bundle: Path) -> registered.PublicationRecord:
     require(local(bundle, "bundle.zip").read_bytes() == native, "SYN-06 native ZIP differs")
     record = read_json(local(bundle, "records.json"))
     payload = record.get("payload")
-    require(isinstance(payload, dict) and record.get("schema") == "csl.syn06-verifier-report/1" and
+    require(isinstance(payload, dict) and record.get("schema") == "csl.syn06-verifier-report/2" and
             record.get("report_id") == bundle.name and payload.get("schema") == record["schema"] and
             record.get("payload_sha256") == digest(payload), "SYN-06 record envelope differs")
     source = payload.get("source_commit")
@@ -219,20 +278,59 @@ def validate(bundle: Path) -> registered.PublicationRecord:
     trials = raw_projection(raw, batch, warmups, repetitions)
     require(payload.get("trials") == trials and payload.get("summary") == summarize(trials, batch),
             "SYN-06 saved trial/summary projection differs")
+    profile_fields = ("bindings", "feasibility", "objective", "optimality", "completeness",
+                      "validated", "recomputed_objective")
+    expected_statuses = {fixture: {field: next(t for t in trials if t["fixture"] == fixture)[field]
+                                   for field in profile_fields} for fixture in FIXTURES}
+    expected_residual_profiles = {fixture: next(t for t in trials if t["fixture"] == fixture)["residuals"]
+                                  for fixture in FIXTURES}
+    require(payload.get("status_profiles") == expected_statuses and
+            payload.get("residual_profiles") == expected_residual_profiles,
+            "SYN-06 status/residual profiles differ from raw trials")
     require(local(bundle, "trials.csv").read_bytes() == csv_bytes(TRIAL_FIELDS, trials) and
             local(bundle, "summary.csv").read_bytes() == csv_bytes(SUMMARY_FIELDS, payload["summary"]),
             "SYN-06 CSV differs from validated records")
-    for name, key in (("build-provenance.json", "build_sha256"), ("build-log.txt", "build_log_sha256"),
+    for name, key in (("build-provenance.json", "build_sha256"),
+                      ("build-graph.json", "build_graph_sha256"),
+                      ("configure-log.txt", "configure_log_sha256"),
+                      ("build-log.txt", "build_log_sha256"),
                       ("pilot.json", "pilot_sha256"),
                       ("profile.json", "profile_sha256"), ("process-stderr.txt", "stderr_sha256"),
                       ("measurement-command.txt", "command_sha256")):
         require(payload.get(key) == digest_bytes(local(bundle, name).read_bytes()),
                 "SYN-06 sidecar digest differs: " + name)
     build = read_json(local(bundle, "build-provenance.json"))
+    graph = read_json(local(bundle, "build-graph.json"))
     driver = local(bundle, "verifier_driver.cpp")
-    require(build.get("source_commit") == source and build.get("configuration") == "Release" and
-            build.get("driver_sha256") == digest_bytes(driver.read_bytes()),
+    binary = local(bundle, "verifier-driver.bin")
+    targets = graph.get("targets", {})
+    required = {"csl_syn06_verifier_report", "csl_verification", "csl_resolved_problem"}
+    require(build.get("schema") == "csl.syn06-build-provenance/2" and
+            build.get("source_commit") == source and build.get("configuration") == "Release" and
+            build.get("clean_source_before_build") is True and
+            build.get("verifier_core_commit") == "edf2b200209f4312b0d00a522a7a0b2e26a96d65" and
+            build.get("driver_sha256") == digest_bytes(driver.read_bytes()) and
+            build.get("binary_sha256") == digest_bytes(binary.read_bytes()) and
+            graph.get("schema") == "csl.syn06-build-graph/1" and
+            graph.get("source_commit") == source and graph.get("configuration") == "Release" and
+            graph.get("source_tree") == build.get("source_tree") and
+            graph.get("binary_sha256") == build.get("binary_sha256") and
+            isinstance(targets, dict) and required <= set(targets) and
+            "csl_verification" in targets["csl_syn06_verifier_report"].get("dependencies", []) and
+            any(str(path).endswith("verifier_driver.cpp")
+                for path in targets["csl_syn06_verifier_report"].get("sources", [])),
             "SYN-06 build provenance differs")
+    for name, target in targets.items():
+        for group in target.get("compile_groups", []):
+            flags = group.get("flags", "")
+            require(group.get("language_standard") == "c++20" and
+                    re.search(r"(?:/D|-D)NDEBUG\b", flags) and
+                    re.search(r"(?:-std:c\+\+20|-std=c\+\+20|/std:c\+\+20)", flags),
+                    "SYN-06 Release/NDEBUG/C++20 graph differs: " + name)
+    for name in ("build-provenance.json", "build-graph.json", "configure-log.txt", "build-log.txt"):
+        text = local(bundle, name).read_text(encoding="utf-8")
+        require(re.search(r"[A-Za-z]:[\\/]Users[\\/]|[\\/]\.codex[\\/]worktrees[\\/]", text, re.I) is None,
+                "private workspace path in saved provenance: " + name)
     pilot = read_json(local(bundle, "pilot.json"))
     pilot_lines = local(bundle, "pilot-raw.jsonl").read_bytes().decode("utf-8").splitlines()
     require(len(pilot_lines) == 15, "SYN-06 pilot raw event count differs")
@@ -246,8 +344,11 @@ def validate(bundle: Path) -> registered.PublicationRecord:
         for fixture, measured in zip(FIXTURES, (group[2], group[4])):
             require(measured.get("event") == "trial" and measured.get("fixture") == fixture and
                     measured.get("round") == 1 and measured.get("warmup") is False and
+                    measured.get("attempted_calls") == pilot_batch and
+                    measured.get("checked_calls") == pilot_batch and measured.get("failures") == 0 and
                     type(measured.get("elapsed_ns")) is int and measured["elapsed_ns"] > 0,
                     "SYN-06 pilot measured event differs")
+            check_residuals(measured.get("residuals"), fixture)
             pilot_observations.append({"fixture": fixture, "batch": pilot_batch,
                                        "elapsed_ns": measured["elapsed_ns"]})
     require(pilot.get("selected_batch") == batch and isinstance(pilot.get("observations"), list) and
@@ -263,9 +364,11 @@ def validate(bundle: Path) -> registered.PublicationRecord:
             profile.get("max_observed_cpu_seconds", 0) > 0 and
             profile.get("max_observed_resident_bytes", 0) > 0,
             "SYN-06 limiter profile differs")
+    profile_batch = int(profile["command"][0])
+    raw_projection(local(bundle, "profile-raw.jsonl").read_bytes(), profile_batch, 1, 1)
     require(local(bundle, "process-stderr.txt").read_bytes() == b"" and
             local(bundle, "measurement-command.txt").read_text(encoding="utf-8") ==
-            f"{batch} 7 7 (Release driver; cwd repository root)\n",
+            f"{batch} 7 7 (Release driver; cwd SOURCE_ROOT)\n",
             "SYN-06 process or command sidecar differs")
     figure = local(bundle, "latency.svg").read_bytes()
     report_data.validate_svg(figure)
