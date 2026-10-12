@@ -12,6 +12,10 @@ set_target_properties(installed_conversion_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_conversion_client COMMAND installed_conversion_client)
 set_tests_properties(installed_conversion_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed Qhull conversion client: registered square conversion and literal vertices passed")
+add_executable(installed_polyhedral_intersection_client polyhedral_intersection_client.cpp)
+target_link_libraries(installed_polyhedral_intersection_client PRIVATE CSL::polyhedral)
+set_target_properties(installed_polyhedral_intersection_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_polyhedral_intersection_client COMMAND installed_polyhedral_intersection_client)
 set_tests_properties(installed_input_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed input client: owning scenario, literal identity and original cost passed")
 add_executable(installed_convex_client convex_client.cpp)
