@@ -27,10 +27,26 @@ struct FixedBoundWorkspace final : LPWorkspace {
     EvidenceSupport support;
     explicit FixedBoundWorkspace(EvidenceSupport evidence) : support(std::move(evidence)) {}
 protected:
+    static bool is_expected_implication_program(const LinearProgram& p) {
+        if (p.identity().problem.value != "geo04:bounded" ||
+            p.identity().program.value != "halfspace-2" || p.offset() != 0.0 ||
+            p.objective().size() != 2 || p.objective()[0] != 0.0 || p.objective()[1] != -1.0 ||
+            p.variables().size() != 2 || p.rows().size() != 3) return false;
+        const auto csr = std::get<numeric::CsrInput>(p.constraints().descriptor());
+        if (csr.rows != 3 || csr.cols != 2 || csr.row_offsets.size() != 4 ||
+            csr.column_indices.size() != 3 || csr.values.size() != 3 ||
+            csr.row_offsets[0] != 0 || csr.row_offsets[1] != 1 ||
+            csr.row_offsets[2] != 2 || csr.row_offsets[3] != 3 ||
+            csr.column_indices[0] != 0 || csr.values[0] != 1.0 ||
+            csr.column_indices[1] != 0 || csr.values[1] != -1.0 ||
+            csr.column_indices[2] != 1 || csr.values[2] != 1.0) return false;
+        return !p.rows()[0].lower && p.rows()[0].upper == 1.0 &&
+            !p.rows()[1].lower && p.rows()[1].upper == 0.0 &&
+            p.rows()[2].lower == 0.0 && p.rows()[2].upper == 0.0;
+    }
     ProgramOutcome do_solve(const LinearProgram& p, const ExecutionContext&) override {
-        // This test oracle supplies the analytically known lower bound 0 for
-        // the equality-implied y<=0 row; other rows receive no bound.
-        if (p.identity().program.value != "halfspace-2")
+        // Only the expected implication LP receives the analytic lower bound.
+        if (!is_expected_implication_program(p))
             return ProgramResult{Termination::completed,
                 {p.identity(), MathematicalOutcome::optimal, Unestablished{}, {}}, {}, {}, "no bound"};
         ProgramResult r{Termination::completed,
@@ -83,11 +99,36 @@ TEST_CASE("H intersection discovers new vertices when no input corner is feasibl
     REQUIRE(std::holds_alternative<sets::VRepresentation>(vrep));
     const auto& v = std::get<sets::VRepresentation>(vrep);
     REQUIRE(v.vertices.rows() == 8);
+    const std::array<std::array<double,2>,8> expected{{
+        {{1.0,0.5}}, {{1.0,-0.5}}, {{-1.0,0.5}}, {{-1.0,-0.5}},
+        {{0.5,1.0}}, {{-0.5,1.0}}, {{0.5,-1.0}}, {{-0.5,-1.0}}
+    }};
+    std::array<bool,8> matched{};
     for (std::size_t i = 0; i < v.vertices.rows(); ++i) {
+        std::size_t match_count = 0;
+        std::size_t match_index = 0;
+        for (std::size_t j = 0; j < expected.size(); ++j) {
+            if (std::abs(v.vertices(i,0) - expected[j][0]) <= 1e-7 &&
+                std::abs(v.vertices(i,1) - expected[j][1]) <= 1e-7) {
+                ++match_count;
+                match_index = j;
+            }
+        }
+        CHECK(match_count == 1);
+        if (match_count == 1) {
+            CHECK_FALSE(matched[match_index]);
+            matched[match_index] = true;
+        }
+        for (std::size_t j = 0; j < i; ++j) {
+            const bool distinct = std::abs(v.vertices(i,0) - v.vertices(j,0)) > 1e-7 ||
+                std::abs(v.vertices(i,1) - v.vertices(j,1)) > 1e-7;
+            CHECK(distinct);
+        }
         CHECK(std::abs(v.vertices(i,0)) <= 1.0 + 1e-7);
         CHECK(std::abs(v.vertices(i,1)) <= 1.0 + 1e-7);
         CHECK(std::abs(v.vertices(i,0)) + std::abs(v.vertices(i,1)) <= 1.5 + 1e-7);
     }
+    for (const bool found : matched) CHECK(found);
 }
 
 TEST_CASE("H intersection retains empty results and affine equalities") {
@@ -149,4 +190,28 @@ TEST_CASE("halfspace deletion requires a supported implication bound and preserv
     const auto& conservative = std::get<geometry::polyhedral::HalfspaceReduction>(unverified);
     CHECK(conservative.removed_inequalities.empty());
     CHECK(conservative.retained_inequalities == std::vector<std::size_t>{0,1,2});
+}
+
+TEST_CASE("analytic LP fixture rejects a matching ID with malformed implication rows") {
+    const auto make_program = [](SparseMatrix rows, Vector objective,
+            std::vector<Interval> row_bounds) {
+        auto result = optimization::make_linear_program({{{"geo04:bounded"},{"halfspace-2"}},
+            std::move(objective), 0.0, std::move(rows), std::vector<Interval>(2),
+            std::move(row_bounds)});
+        return take(std::move(result));
+    };
+    const EvidenceSupport support = NumericalCheck{0.0, 0.0, 0.0, {"test.lp-bound"}};
+    const std::array<LinearProgram,2> malformed{{
+        // Candidate y<=0 leaked into the implication constraints.
+        make_program({4,2,{0,1,2,3,4},{0,0,1,1},{1,-1,1,1}}, {0,-1},
+            {{ {},1.0 },{{},0.0},{{},0.0},{0.0,0.0}}),
+        // Equality y=0 was omitted, so y<=0 is not implied by the remaining rows.
+        make_program({2,2,{0,1,2},{0,0},{1,-1}}, {0,-1}, {{ {},1.0 },{{},0.0}})
+    }};
+    for (const auto& program : malformed) {
+        FixedBoundWorkspace oracle{support};
+        const auto result = oracle.solve(program, {});
+        REQUIRE(std::holds_alternative<ProgramResult>(result));
+        CHECK_FALSE(std::get<ProgramResult>(result).objective.lower.has_value());
+    }
 }
