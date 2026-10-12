@@ -32,12 +32,16 @@ Run from the repository root in a Visual Studio developer PowerShell with Python
 cmake -S reports/algorithm-results/opt05-hull-20261012-d1c211c2/harness -B build-opt05-harness -G "Visual Studio 17 2022" -A x64 -DCSL_ROOT="$PWD" -DCMAKE_PREFIX_PATH="$PWD/build"
 cmake --build build-opt05-harness --config Release --target csl_hull_measure --parallel 4 --verbose
 python reports/algorithm-results/opt05-hull-20261012-d1c211c2/collect.py --exe build-opt05-harness/Release/csl_hull_measure.exe --out reports/algorithm-results/opt05-hull-20261012-d1c211c2/evidence/reproduced
+cmake -S . -B build-opt05-results -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON
+cmake --build build-opt05-results --config Release --target hull_reducer_test --parallel 4
 ctest --test-dir build-opt05-results -C Release -R hull_reducer_test --output-on-failure --no-tests=error
 python reports/algorithm-results/opt05-hull-20261012-d1c211c2/render_saved.py --records reports/algorithm-results/opt05-hull-20261012-d1c211c2/records.json --out reports/algorithm-results/opt05-hull-20261012-d1c211c2
 python reports/algorithm-results/opt05-hull-20261012-d1c211c2/validate_report.py
 ```
 
-The benchmark collector runs a new measurement; rendering and validation are offline and do not invoke the solver. The commands above describe reproduction, not a claim that every command ran in this exact order during collection. Recorded execution evidence: Release build succeeded; collector accepted 21/21 trials and retained 3 warmups; `ctest ... -R hull_reducer_test ...` passed 1/1 (0.02 s); saved-record rendering and consistency validation are run when assembling this report.
+The benchmark collector runs a new measurement; rendering and validation are offline and do not invoke the solver. The CMake test configuration fetches the pinned project dependencies and builds the `hull_reducer_test` target in Release before CTest runs it. The commands above describe reproduction, not a claim that every command ran in this exact order during collection. Recorded execution evidence: Release harness build succeeded; collector accepted 21/21 trials and retained 3 warmups; the recorded `ctest ... -R hull_reducer_test ...` run passed 1/1 (0.02 s); saved-record rendering and consistency validation are run when assembling this report.
+
+The report validator also checks every field in both accepted and root-level trial and summary CSV files against `records.json`. Run its corruption checks with `python -m unittest reports.algorithm-results.opt05-hull-20261012-d1c211c2.test_validate_report`; they mutate a trial or summary value in both CSV copies and require validation to reject it.
 
 `profile/target-process-samples.csv` and `.json` are exported target-process-only summaries from a distinct `/Zi` symbol-enabled run. Raw system-wide ETL and symbolized all-process exports are intentionally excluded. Raw reducer-profile JSONL and exact profiler command/evidence remain in `profile/`.
 

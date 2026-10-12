@@ -21,7 +21,30 @@ def sha256(path: Path) -> str:
 
 def report_files() -> list[Path]:
     excluded = {"manifest.sha256", "bundle.zip", "bundle.zip.sha256"}
-    return sorted(p for p in ROOT.rglob("*") if p.is_file() and p.name not in excluded)
+    return sorted(
+        p for p in ROOT.rglob("*")
+        if p.is_file() and p.name not in excluded and "__pycache__" not in p.parts and p.suffix != ".pyc"
+    )
+
+
+def validate_csv(path: Path, expected_rows: list[dict[str, object]]) -> None:
+    with path.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        rows = list(reader)
+        expected_headers = list(expected_rows[0]) if expected_rows else []
+        assert reader.fieldnames == expected_headers, (
+            f"{path.name} headers mismatch: expected {expected_headers}, got {reader.fieldnames}"
+        )
+    assert len(rows) == len(expected_rows), (
+        f"{path.name} row count mismatch: expected {len(expected_rows)}, got {len(rows)}"
+    )
+    for row_number, (actual, expected) in enumerate(zip(rows, expected_rows), start=2):
+        assert set(actual) == set(expected), f"{path.name}:{row_number} has unexpected or missing columns"
+        for field, expected_value in expected.items():
+            assert actual[field] == str(expected_value), (
+                f"{path.name}:{row_number} {field} mismatch: "
+                f"expected {expected_value!s}, got {actual[field]!r}"
+            )
 
 
 def main() -> None:
@@ -35,9 +58,30 @@ def main() -> None:
     warmups = [t for t in trials if t["warmup"]]
     assert len(measured) == 21 and len(warmups) == 3
     assert all(t["verified"] and t["status"] == "complete" for t in measured)
-    with (ROOT / "trials.csv").open(newline="", encoding="utf-8") as stream:
-        csv_trials = list(csv.DictReader(stream))
-    assert len(csv_trials) == len(trials), "trial CSV row count mismatch"
+    trial_fields = (
+        "case_id", "round", "points", "warmup", "elapsed_ns", "status", "verified",
+        "lp_calls", "attempts", "removed", "retained",
+    )
+    outcome_fields = (
+        "feasible", "infeasible", "unsupported", "stopped", "numerical_failure", "malformed_result",
+    )
+    expected_trial_rows = [
+        {
+            **{field: trial[field] for field in trial_fields},
+            **{field: trial["outcomes"][field] for field in outcome_fields},
+        }
+        for trial in trials
+    ]
+    validate_csv(ROOT / "trials.csv", expected_trial_rows)
+    summary_fields = (
+        "case_id", "points", "attempts", "successes", "failures", "median_ns", "min_ns",
+        "max_ns", "median_lp_calls",
+    )
+    expected_summary_rows = [
+        {field: summary[field] for field in summary_fields}
+        for summary in records["summary"]
+    ]
+    validate_csv(ROOT / "summary.csv", expected_summary_rows)
     for summary in records["summary"]:
         rows = [t for t in measured if t["case_id"] == summary["case_id"]]
         values = [t["elapsed_ns"] for t in rows]
@@ -45,8 +89,8 @@ def main() -> None:
         assert statistics.median(values) == summary["median_ns"]
         assert min(values) == summary["min_ns"] and max(values) == summary["max_ns"]
         assert all(t["lp_calls"] == summary["median_lp_calls"] for t in rows)
-    assert (ROOT / "summary.csv").read_bytes() == (ROOT / "evidence/accepted-002/summary.csv").read_bytes()
-    assert (ROOT / "trials.csv").read_bytes() == (ROOT / "evidence/accepted-002/trials.csv").read_bytes()
+    validate_csv(ROOT / "evidence/accepted-002/summary.csv", expected_summary_rows)
+    validate_csv(ROOT / "evidence/accepted-002/trials.csv", expected_trial_rows)
 
     temp = ROOT / ".render-check"
     temp.mkdir(exist_ok=True)
