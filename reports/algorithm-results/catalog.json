@@ -6,15 +6,21 @@
       "report_id": "lp-20261012T000346Z-ee5e9193b7a5",
       "payload_sha256": "ee5e9193b7a55bbec9f85f805ca74e7e1f5e9b9d22199e5fffeab4ef72515501",
       "source_commit": "6780941b80fd1e94d6b5a6c5142822d5273bfa3f",
-      "zip_sha256": "4a59e312cdfdfd3fb38abbc4ceac8991a9d41a76689b8bc926fe061aaa5027c6",
-      "report_kind": "lp"
+      "zip_sha256": "609982b5642d8d104f66d1020c4d54c3923b5c3703dc8f367c28fd6643898a72",
+      "report_kind": "lp",
+      "measured_scope": "Five analytic LP microfixtures",
+      "evidence_limits": "Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates",
+      "payload_schema": "csl.algorithm-report-view/1"
     },
     {
       "report_id": "convex-20261012T041854Z-4d54a407c9b2",
       "report_kind": "convex",
       "payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f",
       "source_commit": "cc3d91b579d1bfbb07fb6159b6709a08cd15fa10",
-      "zip_sha256": "46581b40d1f9cf6a30b05937eda2c4d89d336d4ba25c0ed4130dd908aafe9b40"
+      "zip_sha256": "91072b1b73e9c5311ca0d7fa0362147fe087b55466f976b7b04d86dbef45466f",
+      "measured_scope": "Nine analytic convex microfixtures",
+      "evidence_limits": "Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates",
+      "payload_schema": "csl.algorithm-report-view/2"
     },
     {
       "report_id": "opt05-hull-20261012-d1c211c2",
@@ -23,7 +29,8 @@
       "source_commit": "d1c211c2763989a9cf3e39a8acaf609c5cf33a07",
       "measured_scope": "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices",
       "evidence_limits": "No comparator; binary64 numerical checks; not exact arithmetic or a validated global certificate",
-      "zip_sha256": "2cd7440d9343394d023f715bcbcfa06c15766ee39ae4714b0f093ba2da47d08e"
+      "zip_sha256": "7053594a614dcb182df8687ed0121a5ba5bd31fa7e0a64588545200e53e352bf",
+      "payload_schema": "csl.hull-benchmark-records/1"
     },
     {
       "report_id": "geo03-20261012-37c3fb484e0d",
@@ -32,7 +39,8 @@
       "source_commit": "ba83547b3495cc8017f720702083bcf76c71fb30",
       "measured_scope": "56 measured trials across four bounded 2D fixtures in both conversion directions",
       "evidence_limits": "contract fixtures only; no accepted workload-size baseline; bounded H/V cases only; no available competing adapter; numerical checks are not validated global certificates; no inner conversion phase timing; A17/A18 lineage not audited",
-      "zip_sha256": "4e004bd8a17b344edd8e86990f25f65ccba841576ea16836e074507d42f887ca"
+      "zip_sha256": "33dc400855575e1b9f0defb96232d1b603f4073ae7576b100af7081340315bb2",
+      "payload_schema": "csl.geo03-hv-report/1"
     }
   ]
 }
