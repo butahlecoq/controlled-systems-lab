@@ -45,6 +45,17 @@ def sha256_bytes(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
 
+def finalize_payload(payload: dict, timestamp: str) -> str:
+    unsigned = {key: value for key, value in payload.items()
+                if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
+    digest = sha256_bytes(json.dumps(unsigned, sort_keys=True, separators=(",", ":"), allow_nan=False).encode())
+    report_id = f"geo04-{timestamp}-{digest[:12]}"
+    payload["report_id"] = report_id
+    payload["payload_sha256"] = digest
+    payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+    return report_id
+
+
 def git(*args: str) -> str:
     return subprocess.check_output(["git", *args], text=True, encoding="utf-8").strip()
 
@@ -360,13 +371,8 @@ def main() -> int:
                                      "LP query internal phase timings and OS-observed thread counts unavailable"]},
         "trials": trials, "summary": summarize(trials, all_passed),
     }
-    raw_payload = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
-    digest = hashlib.sha256(raw_payload).hexdigest()
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    report_id = f"geo04-{stamp}-{digest[:12]}"
-    payload["report_id"] = report_id
-    payload["payload_sha256"] = digest
-    payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+    report_id = finalize_payload(payload, stamp)
     (out / "records.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
     (out / "collection-status.json").write_text(json.dumps({"schema":"csl.geo04-collection-status/1",
         "state":payload["collection"]["state"],"return_code":return_code,"aborted_or_timed_out":aborted,

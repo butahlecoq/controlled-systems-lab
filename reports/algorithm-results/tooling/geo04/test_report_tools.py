@@ -220,6 +220,13 @@ class ReportToolTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "phase summary numeric types are invalid"):
                     render.validate(payload)
 
+    def test_collector_finalized_payload_passes_renderer_using_declared_hash_scope(self):
+        payload = valid_payload("placeholder")
+        payload["report_id"] = None
+        report_id = collect.finalize_payload(payload, "20261013T120000Z")
+        self.assertEqual(payload["report_id"], report_id)
+        render.validate(payload)
+
     def test_offline_export_uses_saved_records_only_and_packages_required_files(self):
         payload = valid_payload("geo04-offline-test")
         unsigned = {key:value for key,value in payload.items() if key!="report_id"}
