@@ -51,18 +51,9 @@ struct FiniteSet {
 
 bool conversion_residual_admissible(const sets::HRepresentation& input,
         const std::vector<Vector>& vertices, NumericalPolicy policy, double reported_residual) {
-    long double coefficient_norm=0.0L,bound_norm=0.0L;
-    for(std::size_t row=0;row<input.inequalities.rows();++row) {
-        bound_norm=std::hypot(bound_norm,static_cast<long double>(input.upper_bounds[row]));
-        for(std::size_t column=0;column<input.inequalities.cols();++column)
-            coefficient_norm=std::hypot(coefficient_norm,static_cast<long double>(input.inequalities(row,column)));
-    }
-    for(std::size_t row=0;row<input.equalities.rows();++row) {
-        bound_norm=std::hypot(bound_norm,static_cast<long double>(input.equality_values[row]));
-        for(std::size_t column=0;column<input.equalities.cols();++column)
-            coefficient_norm=std::hypot(coefficient_norm,static_cast<long double>(input.equalities(row,column)));
-    }
-    long double residual_scale=std::max(1.0L,bound_norm);
+    long double maximum_allowed=static_cast<long double>(policy.absolute_tolerance)+
+        static_cast<long double>(policy.relative_tolerance);
+    if(!std::isfinite(maximum_allowed)) return false;
     const auto check_row=[&](const numeric::MatrixView& matrix,const numeric::VectorView& bounds,
             std::size_t row,std::span<const double> point,bool equality) {
         long double activity=0.0L;
@@ -73,24 +64,19 @@ bool conversion_residual_admissible(const sets::HRepresentation& input,
         const long double allowed=static_cast<long double>(policy.absolute_tolerance)+
             static_cast<long double>(policy.relative_tolerance)*scale;
         if(!std::isfinite(activity)||!std::isfinite(allowed)) return false;
-        residual_scale=std::max(residual_scale,scale);
+        maximum_allowed=std::max(maximum_allowed,allowed);
         const long double residual=equality ? std::abs(activity-bound) : std::max(0.0L,activity-bound);
         return residual<=allowed;
     };
     for(const auto& point:vertices) {
         if(point.size()!=input.inequalities.cols()) return false;
-        long double point_norm=0.0L;
-        for(const double coordinate:point) point_norm=std::hypot(point_norm,static_cast<long double>(coordinate));
-        residual_scale=std::max(residual_scale,coefficient_norm*point_norm);
         for(std::size_t row=0;row<input.inequalities.rows();++row)
             if(!check_row(input.inequalities,input.upper_bounds,row,point,false)) return false;
         for(std::size_t row=0;row<input.equalities.rows();++row)
             if(!check_row(input.equalities,input.equality_values,row,point,true)) return false;
     }
-    const long double maximum_allowed=static_cast<long double>(policy.absolute_tolerance)+
-        static_cast<long double>(policy.relative_tolerance)*residual_scale;
     return std::isfinite(static_cast<long double>(reported_residual)) &&
-        std::isfinite(residual_scale) && std::isfinite(maximum_allowed) &&
+        std::isfinite(maximum_allowed) &&
         static_cast<long double>(reported_residual)<=maximum_allowed;
 }
 

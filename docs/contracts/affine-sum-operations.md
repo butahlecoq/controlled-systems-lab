@@ -19,9 +19,9 @@ the module checks every returned vertex against each original H row using the
 row scale `max(1, abs(activity), abs(bound))` and the caller comparison
 `residual <= absolute_tolerance + relative_tolerance * scale`. It also requires
 the provider's reported `max_residual` to be no larger than the largest
-caller-compatible threshold over those rows (or the base threshold when there
-are no rows). Here the provider's residual is interpreted as the raw maximum
-inequality violation or equality residual in original H-row units; providers
+caller-compatible threshold among those vertex-row checks (or the base
+threshold when there are no rows). Here the provider's residual is interpreted
+as the raw maximum inequality violation or equality residual in original H-row units; providers
 with other residual semantics are rejected by this operation. This is a
 conservative local check, not a proof that the converter enumerated every
 vertex. The module selects no converter, LP backend, or hull reducer

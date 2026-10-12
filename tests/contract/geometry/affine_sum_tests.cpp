@@ -103,6 +103,11 @@ Registration<ConversionPort> make_inaccurate_conversion_registration() {
         [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
         [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request,2.0,0.0); }};
 }
+Registration<ConversionPort> make_duplicate_row_residual_registration() {
+    return {{{"test.conversion.duplicate-row-residual"},"1"},
+        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
+        [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request,1.0,2.5e-8); }};
+}
 class SubnormalResidualHullWorkspace final : public geometry::HullReducerWorkspace {
 public:
     geometry::HullReductionResult reduce(const geometry::PointCloud& cloud,LPWorkspace&,
@@ -289,6 +294,21 @@ TEST_CASE("public geometry operation rejects an H-to-V vertex outside H rows des
     conversion_requirements.output.relation=SetRelation::equivalent;
     selected.conversion=provider(make_inaccurate_conversion_registration(),conversion_requirements);
     const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"inaccurate-conversion"),std::move(selected));
+    CHECK(std::holds_alternative<Unsupported>(result));
+}
+
+TEST_CASE("public geometry operation applies reported conversion residual threshold per H row") {
+    auto h=take(sets::make_h({{"h-interval-duplicate-rows"},1,{}},
+        {take(numeric::snapshot(Matrix{4,1,{-1,1,-1,1}})),
+         take(numeric::snapshot_vector(Vector{0,1,0,1})),
+         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    auto selected=dependencies(false,false);
+    Requirements conversion_requirements;
+    conversion_requirements.output.representation={"csl.polyhedron.v"};
+    conversion_requirements.output.relation=SetRelation::equivalent;
+    selected.conversion=provider(make_duplicate_row_residual_registration(),conversion_requirements);
+    const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"duplicate-row-conversion-residual"),
+        std::move(selected));
     CHECK(std::holds_alternative<Unsupported>(result));
 }
 
