@@ -158,3 +158,175 @@ The orchestrator owns `reports/algorithm-results/catalog.json`, its deterministi
 | saved plot series | VIZ-03 adapter input with units/evidence/nonadditivity |
 
 OBS-04 overhead comparisons, strategy orchestration and family/query semantics remain future work. When their authoritative artifact exists, add an adapter to this small rendering view and retire the bootstrap collector as appropriate. The HTML renderer remains saved-data-only.
+
+## Convex view2 and the registered numerical reporter
+
+`csl_convex_report` is a private C++20 reporting client of the actual registered
+`ConvexPort` / `csl.convex.highs` adapter. It publishes the existing immutable
+ConvexProgram, prepares a registry plan, creates one exclusive workspace and
+runs it once. It does not introduce another objective, QP, PSD or solver
+implementation. The report retains the original identity and canonical solver
+identity, norm-square transformation and coefficient snapshot. Weights belong
+in the authored residual map. There is no mixed-objective squaring operation.
+
+The fixed native profile is HiGHS 1.11.0, adapter
+`1.0.0+highs.1.11.0`, archive
+`2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275`.
+It uses the adapter's existing numerical binary64 profile, one configured
+thread, presolve/parallel off, zero QP regularization and a 4096-variable
+nullspace limit. No solver option or admission policy is changed by reporting.
+Public tolerances are absolute and relative `1e-8`. Positive-semidefiniteness
+and original-space KKT residuals are numerical checks, not validated proofs.
+
+### Independent analytic fixtures
+
+All objectives use the canonical `0.5*x'Q*x+q'x+c` convention. Every case has
+its own ProgramId. Norm cases also have a different squared ProgramId. Empty
+rows retain their authored dimensions and CSR offsets.
+
+| Case | Original problem | Independent minimizer / outcome | Original / solver minimum |
+|---|---|---|---|
+| quadratic-boundary | `(x-3)^2`, `0<=x<=2` | decreasing on the interval, `x=2`; upper multiplier2 | 1 / 1 |
+| quadratic-equality | `2x²+2xy+2y²-8x-10y+17`, free variables, `x+y=2` | substitute `y=2-x`: `2x²-2x+5`; `(0.5,1.5)`; gradient `(-3,-3)` | 4.5 / 4.5 |
+| norm-positive | `sqrt((x-3)^2+16)`, `0<=x<=2` | `x=2`; original upper multiplier `1/sqrt(17)` | sqrt(17) / 17 |
+| norm-zero | `abs(x-3)`, `0<=x<=5` | `x=3`, zero residual; no division by the norm | 0 / 0 |
+| norm-constant | `||(0,0)x-(3,4)||`, `0<=x<=1` | every point of `[0,1]` | 5 / 25 |
+| quadratic-face | `(x-1)^2`, `0<=x<=2`, `0<=y<=1` | complete analytic segment `(1,t)`, `t` in `[0,1]` | 0 / 0 |
+| quadratic-zero-row | `(x-3)^2`, `1<=x<=5`, authored `0=0` | `x=3`; the row is redundant | 0 / 0 |
+| quadratic-zero-contradiction | same quadratic/bounds, authored `0=1` | infeasible | unavailable |
+| quadratic-unbounded | `x²-y`, free x, `y>=0` | along `(0,t)`, cost `-t` tends to minus infinity | unavailable |
+
+The three squared norm snapshots have `(Q,q,c)` equal to `(2,-6,25)`,
+`(2,-6,9)`, and `(0,-0,25)`. Signed zero is retained in canonical binary64
+hashing. The driver independently checks case formulas, literal points or
+coordinate predicates, original constraints, costs and all five available
+original-space residual measures: rows, variables, stationarity, signs and
+complementarity. It never requires one selected free coordinate or a particular
+iteration count. The analytic description of a minimizer set is a fixture
+oracle; the returned native witness does not represent that whole set.
+
+Results keep termination, mathematical outcome and `Unestablished` support
+separate. Candidate costs may exist on a stopped/nonoptimal result; they are
+not minima. Certificates, justified bounds, basis and optimizer families remain
+unavailable. Zero-variable wrapper programs, bad dimensions/nonfinite data,
+pre-cancellation, typed admission rejection and native iteration limits are
+functional checks outside the nine-case measurement catalogue.
+
+### Native phase observations
+
+View2 fixes the private `csl.convex-native-phases/1` policy. `native_phases`
+contains exactly `feasibility`, `qp`, and `linear`. Each has `execution`,
+`iterations`, and `elapsed` records. This is a report projection of retained
+source-bound diagnostics, not a new native capability.
+
+| Execution state | Evidence | Iterations when not explicitly available |
+|---|---|---|
+| observed_return | complete trusted API/model status pair after the native call | null / native_info_unavailable |
+| known_not_called | independently established pre-entry, wrapper, pre-call stop, earlier-phase exit, invalid start, or nonselected route | null / phase_not_called |
+| unknown | exception, interrupted observation or absent boundary evidence | null / execution_unknown |
+
+Returned statuses do not establish successful mathematics. A `time_limit`
+entry is a configured remaining budget before a stop poll; it never proves a
+call or supplies elapsed time. A normally returned cancelled/resource-limit,
+undetermined result with a configured phase but no returned pair and no setup
+error can prove the pre-call stop. An exception or setup error cannot use that
+inference. Fully observed earlier phases survive later failures. Explicit
+`native_run=false`, constant-wrapper and invalid-QP-start markers are checked
+against the route and any conflicting returned evidence.
+
+The parser rejects duplicate keys, half pairs, contradictory info/counts,
+negative/overflowed counts, error-status counts and forged projections. Only
+the prefix before the exact `native.log` delimiter is evidence; log-body text
+cannot create a phase observation. An explicit trusted count0 remains
+available0, distinct from unknown or unavailable info. Every native elapsed
+record is `{available:false,value:null,unit:"ns",reason:"not_exposed_by_adapter"}`,
+including known non-calls. There is no invented phase-I/QP duration or sum of
+unlike iteration counts. JSON, CSV and HTML retain every state, reason, status,
+availability and null value.
+
+Completed nonzero-Hessian cases require observed feasibility and QP returns,
+except the contradictory row which requires observed infeasible feasibility
+and a proved uncalled QP. The constant norm uses the observed linear route.
+A reached QP requires the adapter's valid-start/no-default-fallback evidence.
+Unknown or stopped relevant work cannot enter a successful measured group.
+
+### Version dispatch, ownership and compatibility
+
+LP remains view1/events1/profile1/document1 with unchanged payload hashes and
+deterministic historical projection. Convex uses
+`csl.convex-report-events/1`, `csl.convex-profile/1`,
+`csl.algorithm-report-view/2` with `report_kind:"convex"`, and document policy2.
+Its report ID starts `convex-`, followed by the UTC timestamp and payload hash.
+Unknown kind/version combinations reject. Convex scenarios serialize existing
+objective variants with dense shapes, CSR geometry, bounds, original/solver
+identities and literal references. Saved validation never implements a second
+general numerical objective engine.
+
+The shared noninstalled report runtime owns timing, exception-unwind handling,
+JSON primitives, process counters and the bounded typed CLI. The LP and convex
+report records and mathematical checks remain distinct. The shared Python
+collector accepts only fixed immutable LP/convex profiles. Fresh provenance
+includes the runtime/support/executable compiler flags, complete reachable
+native/objective/numeric link graph and actual physical source/build/executable
+ownership. Legacy LP records legitimately predate the shared runtime target;
+that historical graph is not silently rewritten.
+
+Convex saved validation recomputes phase projections and checks original and
+solver costs and residual values against retained native diagnostics. Raw
+sidecars reconstruct the saved event view; separate-profile source, catalogue,
+counts and assessment must agree. Warmups and failed/partial records are
+retained and validated, with failed warmups blocking publication. Complete
+CSV and HTML projections reject corruption even after hashes are refreshed.
+
+A mixed `csl.algorithm-report-catalog/2` adds `report_kind` to each entry.
+Catalogue1 remains LP-only with byte-compatible staging. A controller can add a
+convex entry and annotate the old LP entry without changing the existing
+thirteen-file LP bundle, ZIP or public URLs. There is no automatic migration or
+rewrite of published scientific bytes. Both kinds use the same thirteen-file
+bundle inventory and strict local-file/SVG/HTML boundary. Plotting retains the
+pinned Matplotlib producer, exact owned-prolog normalization, disabled metadata,
+final-byte hashes and two separate inclusive panels.
+
+### Functional code, later measurement and publication gates
+
+Configure the noninstalled reporters with `-DCSL_BUILD_REPORTS=ON`. With both
+that option and BUILD_TESTING off, reporting targets and their Python test
+requirements are absent. Functional commands include:
+
+```text
+cmake -S . -B build/convex-report -DCSL_BUILD_REPORTS=ON
+cmake --build build/convex-report --config Release --parallel 4
+ctest --test-dir build/convex-report -C Release --output-on-failure --no-tests=error
+python tests/reporting/test_convex_report.py --exe build/convex-report/Release/csl_convex_report.exe
+python -m unittest discover -s tests/reporting -p "test_*.py"
+```
+
+The last command uses the separately pinned plotting environment when testing
+actual figures. `--describe` and bounded `--smoke` are catalogue/functional
+operations, never benchmark evidence. The collector rejects Debug measurement
+while permitting honest Debug functional smoke. Ordinary tests do not invoke
+accepted measurement, profile or clock calibration.
+
+Only after fixed-code review and an explicit measurement window does the
+controller authorize `collect_convex.py` with one warmup per case, seven
+round-robin repetitions and a separate 1000-round profile: 9 excluded warmups,
+63 measured trials and 9000 separately profiled operations. The collector's
+final clean Release build occurs before timers; record preceding compilation,
+load and warm state. Keep all failures and outliers. Native inner-phase timing
+and inner limiting mechanism remain unresolved. Process CPU deltas and lifetime
+peak memory apply to the separate profile, not individual calls.
+
+All six existing interval scopes remain: input publication, preparation,
+workspace creation, public run, independent verification and end-to-end.
+Public run includes lazy setup, feasibility, QP/simplex, logging and in-run
+checks. Successful end-to-end ends before owner destruction; failure intervals
+explicitly include actual unwinding. JSON construction follows numerical timing.
+The profile's nested end-to-end total is not added to component totals.
+
+Plot, render and site regeneration read saved records and never invoke a solver.
+Fresh export durations/manifests may differ; scientific records and final figure
+bytes are preserved when reusing saved figures. Stage1 synthetic records are
+visibly TEST DATA and cannot be published. Actual convex measurement, independent
+artifact review, its own desktop/narrow/full-scroll/expanded diagnostic QA and
+verified live URLs remain separate later gates. No old LP screenshot or green
+CTest result satisfies those numerical/publication obligations.

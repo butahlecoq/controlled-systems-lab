@@ -1,5 +1,4 @@
 #include "lp_report.hpp"
-#include "ReportBuildInfo.hpp"
 #include <csl/adapters/lp/highs.hpp>
 #include <algorithm>
 #include <bit>
@@ -12,50 +11,7 @@
 
 namespace csl::reporting {
 namespace {
-constexpr std::array<const char*,6> phases{"input_publication","registration_preparation","workspace_creation","public_run","independent_verification","end_to_end"};
-Clock::rep now() { return Clock::now().time_since_epoch().count(); }
-std::string diagnostic_text(const Diagnostics& diagnostics) {
-    std::string out;
-    for(const auto& d:diagnostics) out+=d.field+": "+d.explanation+"\n";
-    return out;
-}
-struct Rejected : std::runtime_error {
-    Diagnostics diagnostics;
-    explicit Rejected(Diagnostics d):std::runtime_error(diagnostic_text(d)),diagnostics(std::move(d)) {}
-};
-template<class F> auto timed(Interval& span, F&& action) {
-    span.available=true; span.start=now();
-    try { auto value=action(); span.end=now(); return value; }
-    catch (...) { span.end=now(); throw; }
-}
-template<class T, class... Rest> T accepted(std::variant<T,Rest...> value) {
-    if (auto* result=std::get_if<T>(&value)) return std::move(*result);
-    auto diagnostics=std::visit([](const auto& alternative)->Diagnostics {
-        if constexpr(std::is_same_v<std::decay_t<decltype(alternative)>,Diagnostics>) return alternative;
-        else if constexpr(requires {alternative.diagnostics;}) return alternative.diagnostics;
-        else return {};
-    },value);
-    throw Rejected(std::move(diagnostics));
-}
-bool close(double a, double b) { return std::isfinite(a) && std::isfinite(b) && std::abs(a-b)<=1e-8+1e-8*std::max(std::abs(a),std::abs(b)); }
-bool passes(const ResidualMeasure& m, const ResidualContext& c) {
-    return std::isfinite(m.violation) && std::isfinite(m.scale) && m.violation>=0 && m.scale>=0 &&
-        m.violation<=c.absolute_tolerance+c.relative_tolerance*m.scale;
-}
-void check(TrialRecord& r, bool condition, const char* error) { if (!condition) r.errors.emplace_back(error); }
-void observe(std::uint64_t& token, std::uint64_t value) { token ^= value; token *= UINT64_C(1099511628211); }
-std::uint64_t observe(const ProgramOutcome& outcome) {
-    std::uint64_t token=UINT64_C(14695981039346656037);
-    observe(token,outcome.index());
-    if (const auto* r=std::get_if<ProgramResult>(&outcome)) {
-        observe(token,static_cast<std::uint64_t>(r->termination));
-        observe(token,static_cast<std::uint64_t>(r->outcome.value));
-        if (r->primal) for (double x:*r->primal) observe(token,std::bit_cast<std::uint64_t>(x));
-        observe(token,r->residuals.primal.has_value()); observe(token,r->residuals.dual.has_value());
-        observe(token,r->raw_diagnostics.size());
-    }
-    return token;
-}
+void check(TrialRecord& r,bool condition,const char* error) { if(!condition) r.errors.emplace_back(error); }
 void verify(const Fixture& f, TrialRecord& r) {
     if (!r.result) { r.errors.emplace_back("no returned ProgramResult"); return; }
     const auto& result=*r.result;
@@ -106,46 +62,7 @@ void verify(const Fixture& f, TrialRecord& r) {
         check(r,d.context.subject==f.input.identity && d.stationarity && d.signs && passes(*d.stationarity,d.context) && passes(*d.signs,d.context),"stationarity/sign residual check failed");
     }
 }
-const char* outcome_name(MathematicalOutcome value) {
-    switch(value) {
-    case MathematicalOutcome::optimal:return "optimal";
-    case MathematicalOutcome::infeasible:return "infeasible";
-    case MathematicalOutcome::unbounded:return "unbounded";
-    case MathematicalOutcome::infimum_not_attained:return "infimum_not_attained";
-    case MathematicalOutcome::undetermined:return "undetermined";
-    }
-    throw std::logic_error("unknown outcome");
 }
-const char* termination_name(Termination value) {
-    switch(value) {
-    case Termination::completed:return "completed";
-    case Termination::cancelled:return "cancelled";
-    case Termination::resource_limit:return "resource_limit";
-    case Termination::numerical_failure:return "numerical_failure";
-    }
-    throw std::logic_error("unknown termination");
-}
-std::string identity_json(const ProgramIdentity& id) { return "{\"problem\":"+json_string(id.problem.value)+",\"program\":"+json_string(id.program.value)+"}"; }
-template<class Range, class F> std::string array(const Range& values,F f) {
-    std::string out="["; bool first=true;
-    for (const auto& value:values) { if (!first) out+=','; first=false; out+=f(value); }
-    return out+"]";
-}
-std::string numbers(const Vector& values) { return array(values,[](double x){return json_number(x);}); }
-std::string optional_number(const std::optional<double>& value) { return value ? json_number(*value) : "null"; }
-std::string measure(const ResidualMeasure& value) { return "{\"violation\":"+json_number(value.violation)+",\"scale\":"+json_number(value.scale)+"}"; }
-std::string context(const ResidualContext& c) { return "{\"subject\":"+identity_json(c.subject)+",\"verifier\":{\"id\":"+json_string(c.verifier.id.value)+",\"version\":"+json_string(c.verifier.version)+"},\"absolute_tolerance\":"+json_number(c.absolute_tolerance)+",\"relative_tolerance\":"+json_number(c.relative_tolerance)+"}"; }
-std::string primal_json(const std::optional<PrimalResiduals>& p) {
-    return p ? "{\"context\":"+context(p->context)+",\"rows\":"+measure(p->rows)+",\"variables\":"+measure(p->variables)+"}" : "null";
-}
-std::string dual_json(const std::optional<DualResiduals>& d) {
-    if (!d) return "null";
-    const auto optional=[](const std::optional<ResidualMeasure>& m){return m ? measure(*m) : "null";};
-    return "{\"context\":"+context(d->context)+",\"stationarity\":"+optional(d->stationarity)+",\"signs\":"+optional(d->signs)+",\"complementarity\":"+optional(d->complementarity)+"}";
-}
-}
-
-std::int64_t Interval::nanoseconds() const { return std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::duration(end-start)).count(); }
 
 const std::vector<Fixture>& catalogue() {
     static const std::vector<Fixture> values{
@@ -196,23 +113,6 @@ TrialRecord run_trial(const Fixture& f,std::stop_token cancellation) {
     return record;
 }
 
-std::string json_string(const std::string& text) {
-    constexpr char hex[]="0123456789abcdef";
-    std::string out="\"";
-    for (unsigned char c:text) {
-        switch(c) {
-        case '"':out+="\\\"";break; case '\\':out+="\\\\";break;
-        case '\n':out+="\\n";break;case '\r':out+="\\r";break;case '\t':out+="\\t";break;
-        default:if(c<32) {out+="\\u00";out+=hex[c>>4];out+=hex[c&15];} else out+=static_cast<char>(c);
-        }
-    }
-    return out+'"';
-}
-std::string json_number(double value) {
-    if (!std::isfinite(value)) throw std::invalid_argument("cannot serialize nonfinite binary64");
-    std::ostringstream out;out.imbue(std::locale::classic());out<<std::setprecision(std::numeric_limits<double>::max_digits10)<<value;
-    auto text=out.str(); if (text.find_first_of(".eE")==std::string::npos) text+=".0";return text;
-}
 std::string catalogue_json() {
     return array(catalogue(),[](const Fixture& f){
         const auto& a=f.input.constraints;
@@ -227,26 +127,6 @@ std::string trial_json(const Fixture& f,const TrialRecord& r,std::size_t round,s
         const auto& value=*r.result;
         result="{\"termination\":"+json_string(termination_name(value.termination))+",\"outcome\":"+json_string(outcome_name(value.outcome.value))+",\"support\":{\"kind\":"+json_string(std::holds_alternative<Unestablished>(value.outcome.support)?"unestablished":"unsupported-projection")+"},\"primal\":"+(value.primal?numbers(*value.primal):"null")+",\"original_objective\":"+optional_number(r.objective)+",\"objective_unavailable_reason\":"+(r.objective?"null":json_string("no finite evaluated objective"))+",\"bounds\":{\"lower\":null,\"upper\":null},\"family\":{\"available\":false,\"reason\":\"point only\"},\"primal_residuals\":"+primal_json(value.residuals.primal)+",\"dual_residuals\":"+dual_json(value.residuals.dual)+",\"raw_diagnostics\":"+json_string(value.raw_diagnostics)+"}";
     }
-    std::string timings="{";
-    for (std::size_t i=0;i<phases.size();++i) {
-        if(i) timings+=',';
-        timings+=json_string(phases[i])+":";
-        const auto& t=r.timings[i];
-        timings+=t.available?"{\"available\":true,\"start_tick\":"+json_string(std::to_string(t.start))+",\"end_tick\":"+json_string(std::to_string(t.end))+",\"duration_ns\":"+std::to_string(t.nanoseconds())+",\"unit\":\"ns\",\"scope\":"+json_string(t.includes_unwind?"end_to_end_including_unwind":phases[i])+"}":"{\"available\":false,\"reason\":\"phase not reached\"}";
-    }
-    timings+='}';
-    const auto actual=r.actual_version.empty()?"null":"{\"id\":\"csl.lp.highs\",\"version\":"+json_string(r.actual_version)+"}";
-    std::string attempt="null";
-    if(r.attempt) attempt="{\"number\":"+std::to_string(r.attempt->stamp.attempt())+",\"state\":"+json_string(r.attempt->state==SolveAttemptState::returned_result?"returned_result":r.attempt->state==SolveAttemptState::unsupported?"unsupported":r.attempt->state==SolveAttemptState::exception?"exception":"running")+",\"workspace_reuse\":false}";
-    const auto diagnostics=array(r.diagnostics,[](const auto& d){return "{\"code\":"+std::to_string(static_cast<int>(d.code))+",\"field\":"+json_string(d.field)+",\"explanation\":"+json_string(d.explanation)+"}";});
-    return "{\"case_id\":"+json_string(f.id)+",\"round\":"+std::to_string(round)+",\"sequence\":"+std::to_string(sequence)+",\"purpose\":"+json_string(purpose)+",\"identity\":"+identity_json(f.input.identity)+",\"registry\":{\"requested\":\"csl.lp.highs\",\"actual\":"+actual+"},\"attempt\":"+attempt+",\"timings\":"+timings+",\"observation_token\":"+json_string(std::to_string(r.observation))+",\"harness\":{\"status\":"+json_string(r.harness_status)+",\"error\":"+(r.error.empty()?"null":json_string(r.error))+",\"diagnostics\":"+diagnostics+"},\"result\":"+result+",\"validation\":{\"passed\":"+(r.passed()?"true":"false")+",\"errors\":"+array(r.errors,[](const auto& x){return json_string(x);})+"}}";
-}
-std::string build_info_json() {
-#ifdef NDEBUG
-    constexpr bool ndebug=true;
-#else
-    constexpr bool ndebug=false;
-#endif
-    return "{\"source_commit\":"+json_string(build::source_commit)+",\"build_owner_sha256\":"+json_string(build::build_owner_sha256)+",\"compiler\":"+json_string(build::compiler)+",\"compiler_version\":"+json_string(build::compiler_version)+",\"generator\":"+json_string(build::generator)+",\"architecture\":"+json_string(build::architecture)+",\"configuration\":"+json_string(CSL_REPORT_CONFIG)+",\"cxx_standard\":20,\"ndebug\":"+(ndebug?"true":"false")+",\"configured_flags\":"+json_string(build::configured_flags)+",\"release_flags\":"+json_string(build::release_flags)+"}";
+    return trial_envelope(f.id,f.input.identity,"csl.lp.highs",r,result,round,sequence,purpose);
 }
 } // namespace csl::reporting
