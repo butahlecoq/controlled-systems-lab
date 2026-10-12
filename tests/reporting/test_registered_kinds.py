@@ -274,7 +274,10 @@ class RegisteredKindTests(unittest.TestCase):
                     with zipfile.ZipFile(first/(rid+'.zip')) as archive:
                         self.assertEqual(archive.read(rid+'/report-envelope.json'),(first/rid/'report-envelope.json').read_bytes())
                         self.assertEqual(archive.read(rid+'/publication-manifest.json'),(first/rid/'publication-manifest.json').read_bytes())
-            for rid in ('opt05-hull-20261012-d1c211c2','geo03-20261012-37c3fb484e0d'):
+            for report in catalogue['reports']:
+                if report['report_kind'] not in ('opt05-hull','geo03-hv'):
+                    continue
+                rid=report['report_id']
                 page=(first/rid/'index.html').read_text(encoding='utf-8')
                 self.assertIn('records.json',page)
                 self.assertIn('trials.csv',page)
