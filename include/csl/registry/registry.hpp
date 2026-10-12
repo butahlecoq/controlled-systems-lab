@@ -143,6 +143,20 @@ template<class Port> class BoundWorkspace final : public ExclusiveWorkspace {
     }
 public:
     auto run(const ExecutionContext& context) { return Port::run(*workspace_,*request_,context); }
+    template<class... Dependencies>
+        requires requires(typename Port::Workspace& workspace, const typename Port::Request& request,
+                          const ExecutionContext& context, Dependencies&&... dependencies) {
+            Port::run(workspace, request, context,
+                      std::forward<Dependencies>(dependencies)...);
+        }
+    auto run_with(const ExecutionContext& context, Dependencies&&... dependencies) {
+        return Port::run(*workspace_,*request_,context,
+                         std::forward<Dependencies>(dependencies)...);
+    }
+    ProgramOutcome solve_dependency(const LinearProgram& program, const ExecutionContext& context)
+        requires std::is_same_v<Port,LPPort> {
+        return workspace_->solve(program,context);
+    }
     const BasisDiagnostics* basis() const { return basis_.get(); }
     const WorkspaceIdentity& workspace_identity() const noexcept requires std::is_same_v<Port,LPPort> {
         return workspace_->workspace_identity();
@@ -156,6 +170,19 @@ public:
     const std::optional<ConvexSolveAttempt>& last_attempt() const noexcept requires std::is_same_v<Port,ConvexPort> {
         return workspace_->last_attempt();
     }
+};
+
+// A borrowed solver view for typed dependency composition. It forwards every
+// generated LP through a registry-selected LP workspace without exposing that
+// owned workspace or coupling the consumer to a concrete backend.
+class LPWorkspaceView final : public LPWorkspace {
+    BoundWorkspace<LPPort>& provider_;
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext& context) override {
+        return provider_.solve_dependency(program,context);
+    }
+public:
+    explicit LPWorkspaceView(BoundWorkspace<LPPort>& provider) : provider_(provider) {}
 };
 namespace detail {
 template<class Port> struct CheckedEntry {
