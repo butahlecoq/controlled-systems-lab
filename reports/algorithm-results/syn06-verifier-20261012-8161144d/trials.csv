@@ -1,0 +1,15 @@
+fixture,round,warmup,batch,elapsed_ns,bindings,feasibility,objective,optimality,completeness,validated,recomputed_objective,residual_count,attempted_calls,checked_calls,failures,observation_token
+valid,7,False,41000,119531800,numerical_pass,numerical_pass,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11831436384050810056
+valid,8,False,41000,112588800,numerical_pass,numerical_pass,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11831436384050810056
+valid,9,False,41000,130254300,numerical_pass,numerical_pass,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11831436384050810056
+valid,10,False,41000,136439900,numerical_pass,numerical_pass,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11831436384050810056
+valid,11,False,41000,129038300,numerical_pass,numerical_pass,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11831436384050810056
+valid,12,False,41000,114253500,numerical_pass,numerical_pass,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11831436384050810056
+valid,13,False,41000,117594700,numerical_pass,numerical_pass,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11831436384050810056
+violating,7,False,41000,110214700,numerical_pass,violation,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11512679602420744288
+violating,8,False,41000,122325000,numerical_pass,violation,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11512679602420744288
+violating,9,False,41000,111810400,numerical_pass,violation,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11512679602420744288
+violating,10,False,41000,108313400,numerical_pass,violation,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11512679602420744288
+violating,11,False,41000,111393200,numerical_pass,violation,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11512679602420744288
+violating,12,False,41000,110709800,numerical_pass,violation,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11512679602420744288
+violating,13,False,41000,110793400,numerical_pass,violation,numerical_pass,unsupported,unsupported,unsupported,1,10,41000,41000,0,11512679602420744288

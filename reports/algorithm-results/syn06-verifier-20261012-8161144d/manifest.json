@@ -1,0 +1,25 @@
+{
+  "files": {
+    "README.md": "bd5d8d8b17e06159f876b14b794f55225bda31000cbc47da7ebe642ca8433cf7",
+    "build-graph.json": "39a9cabded08e0b05c42380ef4b09fa66ff99654337811841746378484742bfd",
+    "build-log.txt": "09b2d9a3e4096271999e36028290440cef302420232cc8cab0bd3b96d3b0955b",
+    "build-provenance.json": "d6b917f93982b49a16fbd96c803054f9c23ee1b42ccbbe6c9165d860af1d7f84",
+    "configure-log.txt": "051f3427f84e7658e62e6b4e9b128d7988e9b7dcb3ec3757b22f4e353b5cd42e",
+    "index.html": "b02aeb30233e0bc347a6dedf6ba9cb4e8c8011b421c1350c5a9367671f625c1e",
+    "latency.svg": "d8661973da40a7a59d66bc6c2d558374634909fea08ecae346c37ddf1a9d3cfe",
+    "measurement-command.txt": "905a2f35907c9a7fa251a2a23d821679933afaa67bc31ef951f9d51210db5924",
+    "pilot-raw.jsonl": "d71d96ab1c70cc6688b56d15fd4774a5d87c7b48e71770fa6511dcf2392f3cda",
+    "pilot.json": "012b160b81d2aa25612d5f01bbea42c4f6be813f4d7e995f3dda4098ef1c4727",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile-raw.jsonl": "14ad07f1fef164d8c48d790770f04486508f05ead9e86dec8c631afdd8adba34",
+    "profile.json": "9564ea84d914075d7f474f1107d83078fcb70f003e854c8f6cae4734f0952f8b",
+    "raw-events.jsonl": "d21b107a34ba2d119e43fd93c9c3f46015c7ca4448cc2b11bb6d3ee1c3a7df04",
+    "records.json": "70cf8c545799a29bc7013504efacfb03aa3a97e258ee2c29b9dc3f425578ead3",
+    "summary.csv": "fc7f7dd2d34d014d6284f98081c62a0287506d81a99e1bd6a6292f8aca2c1130",
+    "trials.csv": "0fe8b0be3e862c3bedb957d3a5173273ccc053d2de53d218e2b9f818c87cfb3d",
+    "verifier-driver.bin": "ad3abf99f7891aa6708c0d88c83db7d9700323f16c80644bdd37a458f92d15e8",
+    "verifier_driver.cpp": "32e67886df434cb2374a46fb4c9dbfaf4857443d5cf52619077cbaa296c3c31e"
+  },
+  "report_id": "syn06-verifier-20261012-8161144d",
+  "schema": "csl.syn06-source-manifest/2"
+}
