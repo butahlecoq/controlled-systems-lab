@@ -1,5 +1,6 @@
 """Explicit boundary adapters for validated non-LP report records."""
 from dataclasses import dataclass
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -26,6 +27,7 @@ class PublicationRecord:
     files: tuple[str, ...] = ()
     payload_schema: str = ""
     native_payload_sha256: str = ""
+    source_report_id: str = ""
 
 
 def _json(path):
@@ -75,7 +77,7 @@ def _adapt_payload(record):
             for field,fn in (("median_ns",lambda xs:statistics.median(xs)),("min_ns",min),("max_ns",max)):
                 if row.get(field)!=fn([t["elapsed_ns"] for t in group]): raise ValueError("OPT-05 timing summary differs from trials")
             if row.get("median_lp_calls")!=statistics.median([t["lp_calls"] for t in group]): raise ValueError("OPT-05 LP-call summary differs from trials")
-        return PublicationRecord("opt05-hull", rid, _digest(record), record.get("code_commit", ""), "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices", "No comparator; " + limits, payload_schema=schema)
+        return PublicationRecord("opt05-hull", rid, _digest(record), code_commit, "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices", "No comparator; " + limits, payload_schema=schema, source_report_id=rid)
     if schema == "csl.geo03-hv-report/1":
         payload = record.get("payload")
         if not isinstance(payload, dict) or _digest(payload) != record.get("payload_sha256"):
@@ -116,7 +118,7 @@ def _adapt_payload(record):
             raise ValueError("unsafe GEO-03 report ID")
         if not record["report_id"].endswith(record["payload_sha256"][:12]):
             raise ValueError("GEO-03 report ID does not match payload digest")
-        return PublicationRecord("geo03-hv", record["report_id"], record["payload_sha256"], source, "56 measured trials across four bounded 2D fixtures in both conversion directions", "; ".join(limits), payload_schema=schema)
+        return PublicationRecord("geo03-hv", record["report_id"], record["payload_sha256"], source, "56 measured trials across four bounded 2D fixtures in both conversion directions", "; ".join(limits), payload_schema=schema, source_report_id=record["report_id"])
     raise ValueError("unregistered report schema")
 
 
@@ -131,7 +133,12 @@ def adapt_payload(record):
 
 def adapt(bundle):
     bundle = Path(bundle)
-    result = adapt_payload(_json(bundle / "records.json"))
+    if bundle.is_symlink():
+        raise ValueError("registered source bundle cannot be a symlink")
+    record = _json(bundle / "records.json")
+    result = adapt_payload(record)
+    if bundle.name != (result.source_report_id or result.report_id):
+        raise ValueError("registered source bundle identity mismatch")
     if result.kind == "opt05-hull":
         listed = {}
         for line in (bundle / "manifest.sha256").read_text(encoding="utf-8").splitlines():
@@ -164,9 +171,68 @@ def adapt(bundle):
         relative = Path(name)
         if relative.is_absolute() or ".." in relative.parts or any(part.is_symlink() for part in [bundle, *(bundle / Path(*relative.parts[:i]) for i in range(1, len(relative.parts)))]) or not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError("unsafe or tampered registered bundle file: " + name)
+    _validate_saved_csv(bundle, record, result.kind)
     if result.kind == "opt05-hull":
         _validate_opt05_bundle_zip(bundle, listed)
-    return PublicationRecord(result.kind, result.report_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema)
+    public_id = _publication_id(bundle, result.source_report_id, actual_files)
+    return PublicationRecord(result.kind, public_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema, source_report_id=result.source_report_id)
+
+
+def _publication_id(bundle, source_id, source_files):
+    # Source files contain no publication output, so hashing the full validated
+    # inventory, including native manifests/ZIPs, introduces no digest cycle.
+    # This module owns the staged page, envelope, manifest and offline ZIP.
+    publisher_source = Path(__file__).read_text(encoding="utf-8").replace("\r\n", "\n").encode("utf-8")
+    identity = {
+        "schema": "csl.registered-publication-identity/1",
+        "source_report_id": source_id,
+        "source_files": {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(source_files)},
+        "publisher_sha256": hashlib.sha256(publisher_source).hexdigest(),
+    }
+    return source_id.rsplit("-", 1)[0] + "-" + _digest(identity)
+
+
+def _validate_saved_csv(bundle, record, kind):
+    if kind == "opt05-hull":
+        trial_fields = ("case_id", "round", "points", "warmup", "elapsed_ns", "status", "verified", "lp_calls", "attempts", "removed", "retained")
+        outcome_fields = ("feasible", "infeasible", "unsupported", "stopped", "numerical_failure", "malformed_result")
+        trials = [{**{field: trial[field] for field in trial_fields},
+                   **{field: trial["outcomes"][field] for field in outcome_fields}}
+                  for trial in record["trials"]]
+        summary_fields = ("case_id", "points", "attempts", "successes", "failures", "median_ns", "min_ns", "max_ns", "median_lp_calls")
+        summary = [{field: row[field] for field in summary_fields} for row in record["summary"]]
+        _compare_csv(bundle / "trials.csv", trial_fields + outcome_fields, trials)
+        _compare_csv(bundle / "summary.csv", summary_fields, summary)
+        return
+    payload = record["payload"]
+    trials = payload["trials"]
+    trial_fields = ("fixture", "direction", "round", "converter_id", "converter_version", "lp_backend_id", "lp_backend_version", "ambient_dimension", "input_representation", "output_representation", "input_inequalities", "input_equalities", "input_vertices", "input_rays", "preparation_ns", "workspace_creation_ns", "run_ns", "total_ns", "output_inequalities", "output_equalities", "output_vertices", "output_rays", "oracle_checks", "oracle_passed")
+    summary_fields = ("fixture", "direction", "trials", "failures", "all_oracles_passed") + tuple(f"{metric}_{stat}_ns" for metric in ("preparation_ns", "workspace_creation_ns", "run_ns", "total_ns") for stat in ("median", "min", "max", "range"))
+    summary = []
+    for row in payload["summary"]:
+        flat = {field: row[field] for field in summary_fields[:5]}
+        for metric in ("preparation_ns", "workspace_creation_ns", "run_ns", "total_ns"):
+            for stat in ("median", "min", "max", "range"):
+                flat[f"{metric}_{stat}_ns"] = row[metric][stat]
+        summary.append(flat)
+    _compare_csv(bundle / "trials.csv", trial_fields, trials)
+    _compare_csv(bundle / "summary.csv", summary_fields, summary)
+
+
+def _compare_csv(path, fields, expected_rows):
+    try:
+        with path.open(newline="", encoding="utf-8-sig") as stream:
+            reader = csv.DictReader(stream)
+            if reader.fieldnames != list(fields):
+                raise ValueError(f"{path.name} headers differ from validated records")
+            actual_rows = list(reader)
+    except (OSError, UnicodeError, csv.Error) as error:
+        raise ValueError(f"invalid registered {path.name}") from error
+    if len(actual_rows) != len(expected_rows):
+        raise ValueError(f"{path.name} row count differs from validated records")
+    for actual, expected in zip(actual_rows, expected_rows):
+        if set(actual) != set(fields) or any(actual.get(field) != str(expected[field]) for field in fields):
+            raise ValueError(f"{path.name} differs from validated records")
 
 
 def _validate_opt05_bundle_zip(bundle, listed):
@@ -232,6 +298,8 @@ def publication_envelope(bundle, publication):
     }
     if publication.kind in ("lp", "convex"):
         envelope["native_payload_sha256"] = publication.native_payload_sha256
+    if publication.source_report_id:
+        envelope["source_report_id"] = publication.source_report_id
     return envelope
 
 
@@ -293,6 +361,8 @@ def validate_publication_manifest(report_dir, expected):
             raise ValueError("publication envelope identity/schema mismatch")
         if expected.get("native_payload_sha256", "") != envelope.get("native_payload_sha256", ""):
             raise ValueError("publication envelope native payload hash mismatch")
+        if expected.get("source_report_id", "") != envelope.get("source_report_id", ""):
+            raise ValueError("publication envelope source identity mismatch")
         if _digest(envelope.get("payload")) != expected.get("payload_sha256"):
             raise ValueError("publication envelope payload hash mismatch")
         if not isinstance(envelope.get("payload"), dict) or envelope["payload"].get("schema") != expected.get("payload_schema"):
