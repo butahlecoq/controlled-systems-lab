@@ -31,6 +31,22 @@ FIXTURES = {
 }
 EXPECTED_ROWS = {(name, direction) for name in FIXTURES for direction in ("H-to-V", "V-to-H")}
 TIMING_FIELDS = ("preparation_ns", "workspace_creation_ns", "run_ns", "total_ns")
+LINEAGE_AUDIT = {
+    "status": "source-level review; executable equivalence not established",
+    "contract_reference": "docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18",
+    "sources": {
+        "A17": {
+            "path": "Scientific Research/GeoCalcLib-master/vertexEnumeration.m",
+            "sha256": "d0f4ef259c0e33a48c0b2f56480e4a1c68df42a1783baf6e8110af8078e5fd19",
+            "finding": "thin wrapper delegates to external libgeocalc; its algorithm and guarantees are not established by the archived wrapper",
+        },
+        "A18": {
+            "path": "Конференция/ICIE 2018/VertexEnumeration.m",
+            "sha256": "0d70893bd42066ed311b6ab36aa203e9fdf8856863cc23d9b5e254e45a87bee6",
+            "finding": "homogenization, rank completion, randomized initial basis, inverse-based ray updates, and epsilon-policy division; not the Qhull polar-facet algorithm",
+        },
+    },
+}
 
 
 def canonical(value: object) -> bytes:
@@ -140,6 +156,7 @@ def render_html(report: dict, summary: list[dict], svg: str) -> str:
 <div class="note"><strong>Interpretation:</strong> descriptive microbenchmark only. These fixtures exercise the current contract; no accepted workload-size baseline exists, so these measurements do not predict representative user workloads, scaling, or application-level latency. Floating-point membership/support checks are numerical oracles, not validated global certificates.</div>
 <p>Report <code>{html.escape(report['report_id'])}</code>; schema <code>{SCHEMA}</code>; generated {html.escape(p['created_utc'])}. Runtime base commit <code>{html.escape(p['runtime_source_commit'])}</code>; report/harness commit <code>{html.escape(p['report_source_commit'])}</code>.</p>
 <h2>Measured adapter</h2><p><code>{CONVERTER['id']}@{CONVERTER['version']}</code>; selected LP backend <code>{LP['id']}@{LP['version']}</code>. Native Qhull {p['environment']['native_dependencies']['qhull']}; HiGHS {p['environment']['native_dependencies']['highs']}.</p>
+<h2>A17/A18 source-level lineage</h2><p>Archived source review: A17 ({html.escape(LINEAGE_AUDIT['sources']['A17']['path'])}, SHA-256 <code>{LINEAGE_AUDIT['sources']['A17']['sha256']}</code>) is a thin wrapper delegating to external <code>libgeocalc</code>; its internal algorithm and guarantees are not established by that wrapper. A18 ({html.escape(LINEAGE_AUDIT['sources']['A18']['path'])}, SHA-256 <code>{LINEAGE_AUDIT['sources']['A18']['sha256']}</code>) uses homogenization, rank completion, randomized basis selection and inverse-based ray updates with its own epsilon policy. The current Qhull polar-facet adapter is not claimed to port either source. <strong>Executable equivalence is not established.</strong> See <code>{html.escape(LINEAGE_AUDIT['contract_reference'])}</code>.</p>
 <h2>Workload</h2><p>{p['measurement']['repetitions']} measured trials per case, {p['measurement']['warmups']} excluded warmup per case, eight cases interleaved forward/reverse by round; all {p['measurement']['expected_trials']} measured conversions completed and passed their independent checks.</p>
 <table><thead><tr><th>Fixture</th><th>Space</th><th>Input inequalities/equalities</th><th>Vertices/rays</th><th>Analytic set</th></tr></thead><tbody>{fixture_rows}</tbody></table>
 <h2>Conversion time</h2><p>Timed region: <code>RepresentationConverterWorkspace::run</code>, after input creation, selection/preparation and worker creation; those stages are reported separately in raw trials. End-to-end below is the measured harness pipeline from registration/input creation through conversion return, before independent verification and destruction.</p>{svg}
@@ -147,7 +164,7 @@ def render_html(report: dict, summary: list[dict], svg: str) -> str:
 <p>All timings use a steady clock and are reported as descriptive samples. Range is min–max, not a confidence interval. Setup phases are nested/exclusive only as defined in raw timing boundaries; they must not be summed to infer a different boundary.</p>
 <h2>Limiter evidence</h2><p>{html.escape(p['limiter_profile']['finding'])} Profile duration and profiled operations are separate from the reported trials. The bundle contains the sanitized target-process module summary; the host-wide ETW trace is retained locally and is not redistributed.</p>
 <h2>Environment and build</h2><pre>{html.escape(json.dumps(p['environment'],indent=2,ensure_ascii=False))}</pre><p>Build log, source/dependency hashes, exact commands, environment snapshots, raw JSONL, full CSV trials, summary and profile evidence are linked in the bundle.</p>
-<h2>Limitations</h2><ul><li>Only 2D square, simplex, embedded segment and singleton contract fixtures are measured; all have at most four vertices.</li><li>Ray-bearing V inputs, unbounded sets, empty sets, higher-dimensional sets and large facet counts are unsupported by the selected bounded-only adapter and were excluded from timing.</li><li>No comparison adapter is available in this report; no speedup or rank claim is made.</li><li>The selected implementation uses binary64 reductions, LP prerequisite checks and Qhull 8.0.2. Support/equivalence evidence remains numerical and non-certified.</li><li>No conversion decomposition into LP, affine reduction and Qhull substage timings is exposed. ETW was resolved to modules but not functions, so it cannot identify a per-stage algorithmic limiter.</li><li>Historical A17/A18 lineage and executable equivalence are not audited here.</li></ul>
+<h2>Limitations</h2><ul><li>Only 2D square, simplex, embedded segment and singleton contract fixtures are measured; all have at most four vertices.</li><li>Ray-bearing V inputs, unbounded sets, empty sets, higher-dimensional sets and large facet counts are unsupported by the selected bounded-only adapter and were excluded from timing.</li><li>No comparison adapter is available in this report; no speedup or rank claim is made.</li><li>The selected implementation uses binary64 reductions, LP prerequisite checks and Qhull 8.0.2. Support/equivalence evidence remains numerical and non-certified.</li><li>No conversion decomposition into LP, affine reduction and Qhull substage timings is exposed. ETW was resolved to modules but not functions, so it cannot identify a per-stage algorithmic limiter.</li><li>The A17/A18 audit is limited to archived source text and inventory digests; it does not establish executable equivalence or historical numerical guarantees.</li></ul>
 <h2>Raw data and offline bundle</h2><ul><li><a href="records.json">Versioned report records</a></li><li><a href="raw-events.jsonl">Raw trial records</a></li><li><a href="trials.csv">Trial table</a></li><li><a href="summary.csv">Summary table</a></li><li><a href="scenarios.json">Analytic fixture definitions</a></li><li><a href="profile.txt">External CPU sample profile notes</a></li></ul>
 </body></html>'''
 
@@ -173,7 +190,8 @@ def write_artifacts(out: Path, rows: list[dict], args: argparse.Namespace, env: 
         "scenarios":FIXTURES,"trials":rows,"summary":summaries,
         "limiter_profile":{"profiled_operations":args.profile_operations,"method":"Windows Performance Recorder CPU ETW sampling; separate untimed executable mode; independent oracle omitted, output representation/status consumed",
                            "finding":args.profile_finding,"trace_redistributed":False,"profile_summary_file":"profile.txt"},
-        "scope_limitations":["contract fixtures only; no accepted workload-size baseline","bounded H/V cases only","no available competing adapter","numerical checks are not validated global certificates","no inner conversion phase timing","A17/A18 lineage not audited"]
+        "lineage_audit":LINEAGE_AUDIT,
+        "scope_limitations":["contract fixtures only; no accepted workload-size baseline","bounded H/V cases only","no available competing adapter","numerical checks are not validated global certificates","no inner conversion phase timing","A17/A18 audit covers source lineage only; executable equivalence is not established"]
     }
     digest=hashlib.sha256(canonical(payload)).hexdigest()
     report_id=f"geo03-{created[:10].replace('-','')}-{digest[:12]}"
@@ -201,7 +219,7 @@ def write_artifacts(out: Path, rows: list[dict], args: argparse.Namespace, env: 
     svg=svg_chart(summaries)
     (out/"latency.svg").write_text(svg,encoding="utf-8")
     (out/"index.html").write_text(render_html(wrapper,summaries,svg),encoding="utf-8")
-    (out/"README.md").write_text(f"# {report_id}\n\nOffline GEO-03 H/V contract-fixture report. Open `index.html`; raw numerical measurements and validation inputs are beside it.\n\nSchema: `{SCHEMA}`. Runtime base: `{args.runtime_commit}`. Report/harness source: `{args.report_commit}`. No competing adapter, speedup, production-size, or certified-global-equivalence claim is made.\n",encoding="utf-8")
+    (out/"README.md").write_text(f"# {report_id}\n\nOffline GEO-03 H/V contract-fixture report. Open `index.html`; raw numerical measurements and validation inputs are beside it.\n\nSchema: `{SCHEMA}`. Runtime base: `{args.runtime_commit}`. Report/harness source: `{args.report_commit}`. The saved payload includes a source-level A17/A18 lineage audit; executable equivalence is not established. No competing adapter, speedup, production-size, or certified-global-equivalence claim is made.\n",encoding="utf-8")
     manifest={"schema":"csl.geo03-report-manifest/1","report_id":report_id,
               "files":{p.name:sha(p) for p in sorted(out.iterdir()) if p.is_file() and p.name!="manifest.json"}}
     (out/"manifest.json").write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n",encoding="utf-8")

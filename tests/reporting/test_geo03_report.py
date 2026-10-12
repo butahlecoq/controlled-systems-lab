@@ -7,6 +7,7 @@ import json
 import shutil
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 
@@ -43,6 +44,54 @@ class Geo03ReportCsvProjectionTests(unittest.TestCase):
 
     def test_saved_report_and_csv_projections_validate(self) -> None:
         VALIDATOR.validate(self.source)
+
+    def test_saved_report_audits_archival_lineage_without_equivalence_claim(self) -> None:
+        wrapper = json.loads((self.source / "records.json").read_text(encoding="utf-8"))
+        payload = wrapper["payload"]
+        audit = payload["lineage_audit"]
+        self.assertEqual(audit["status"], "source-level review; executable equivalence not established")
+        self.assertEqual(audit["contract_reference"], "docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18")
+        self.assertEqual(audit["sources"], {
+            "A17": {
+                "path": "Scientific Research/GeoCalcLib-master/vertexEnumeration.m",
+                "sha256": "d0f4ef259c0e33a48c0b2f56480e4a1c68df42a1783baf6e8110af8078e5fd19",
+                "finding": "thin wrapper delegates to external libgeocalc; its algorithm and guarantees are not established by the archived wrapper",
+            },
+            "A18": {
+                "path": "Конференция/ICIE 2018/VertexEnumeration.m",
+                "sha256": "0d70893bd42066ed311b6ab36aa203e9fdf8856863cc23d9b5e254e45a87bee6",
+                "finding": "homogenization, rank completion, randomized initial basis, inverse-based ray updates, and epsilon-policy division; not the Qhull polar-facet algorithm",
+            },
+        })
+        self.assertNotIn("A17/A18 lineage not audited", payload["scope_limitations"])
+        html = (self.source / "index.html").read_text(encoding="utf-8")
+        self.assertIn("A17/A18 source-level lineage", html)
+        self.assertIn("Executable equivalence is not established", html)
+        VALIDATOR.validate(self.source)
+
+    def test_resealed_false_lineage_claim_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            report = self.copy_report(temp)
+            wrapper_path = report / "records.json"
+            wrapper = json.loads(wrapper_path.read_text(encoding="utf-8"))
+            wrapper["payload"]["lineage_audit"]["status"] = "executable equivalence established"
+            payload_digest = hashlib.sha256(VALIDATOR.canonical(wrapper["payload"])).hexdigest()
+            wrapper["payload_sha256"] = payload_digest
+            report_id = f"geo03-{wrapper['payload']['created_utc'][:10].replace('-', '')}-{payload_digest[:12]}"
+            wrapper["report_id"] = report_id
+            wrapper_path.write_text(json.dumps(wrapper, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+
+            manifest_path = report / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["report_id"] = report_id
+            manifest["files"]["records.json"] = hashlib.sha256(wrapper_path.read_bytes()).hexdigest()
+            manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            with zipfile.ZipFile(report.parent / f"{report_id}.zip", "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                for path in sorted(report.iterdir()):
+                    archive.write(path, path.name)
+
+            with self.assertRaisesRegex(AssertionError, "A17/A18 source lineage audit"):
+                VALIDATOR.validate(report)
 
     def test_modified_trial_csv_is_rejected_after_manifest_rehash(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

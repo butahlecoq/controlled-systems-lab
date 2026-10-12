@@ -44,6 +44,22 @@ FIXTURES = {
     "singleton": {"inequalities": 0, "equalities": 2, "vertices": 1, "oracle_checks": {"H-to-V": 3, "V-to-H": 12}},
 }
 DIRECTIONS = ("H-to-V", "V-to-H")
+EXPECTED_LINEAGE_AUDIT = {
+    "status": "source-level review; executable equivalence not established",
+    "contract_reference": "docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18",
+    "sources": {
+        "A17": {
+            "path": "Scientific Research/GeoCalcLib-master/vertexEnumeration.m",
+            "sha256": "d0f4ef259c0e33a48c0b2f56480e4a1c68df42a1783baf6e8110af8078e5fd19",
+            "finding": "thin wrapper delegates to external libgeocalc; its algorithm and guarantees are not established by the archived wrapper",
+        },
+        "A18": {
+            "path": "Конференция/ICIE 2018/VertexEnumeration.m",
+            "sha256": "0d70893bd42066ed311b6ab36aa203e9fdf8856863cc23d9b5e254e45a87bee6",
+            "finding": "homogenization, rank completion, randomized initial basis, inverse-based ray updates, and epsilon-policy division; not the Qhull polar-facet algorithm",
+        },
+    },
+}
 
 
 def require(condition: bool, message: str) -> None:
@@ -178,6 +194,8 @@ def validate(root: Path) -> None:
     require(len(trials) == repetitions * len(FIXTURES) * len(DIRECTIONS), "saved trial count mismatch")
     require(measure["emitted_trials"] == len(trials) and measure["expected_trials"] == len(trials), "measurement trial count mismatch")
     require(measure["failures"] == 0 and measure["process_return_code"] == 0, "measurement contains failures")
+    require(payload.get("lineage_audit") == EXPECTED_LINEAGE_AUDIT, "A17/A18 source lineage audit differs from reviewed archive evidence")
+    require("A17/A18 lineage not audited" not in payload["scope_limitations"], "stale lineage limitation contradicts the audit")
     literal_scenarios = payload_scenario_literal()
     require(payload["scenarios"] == literal_scenarios, "scenario metadata differs from independent fixture definitions")
     require(json.loads((root / "scenarios.json").read_text(encoding="utf-8")) == literal_scenarios, "scenario sidecar differs from independent fixture definitions")
@@ -198,6 +216,7 @@ def validate(root: Path) -> None:
 
     html = (root / "index.html").read_text(encoding="utf-8")
     require("<svg" in html and "<!doctype html>" in html.lower(), "standalone HTML/SVG missing")
+    require("A17/A18 source-level lineage" in html and "Executable equivalence is not established" in html, "HTML omits bounded lineage conclusion")
     require(re.search(r'(?:href|src)=["\']https?://', html, re.I) is None, "HTML has external resource")
     require(payload["limiter_profile"]["profiled_operations"] > 0, "separate limiter profile is missing")
     require((root / "profile.txt").stat().st_size > 0, "limiter profile notes are missing")
