@@ -308,6 +308,7 @@ def validate(bundle: Path) -> registered.PublicationRecord:
     require(build.get("schema") == "csl.syn06-build-provenance/2" and
             build.get("source_commit") == source and build.get("configuration") == "Release" and
             build.get("clean_source_before_build") is True and
+            build.get("clean_source_after_build") is True and
             build.get("verifier_core_commit") == "edf2b200209f4312b0d00a522a7a0b2e26a96d65" and
             build.get("driver_sha256") == digest_bytes(driver.read_bytes()) and
             build.get("binary_sha256") == digest_bytes(binary.read_bytes()) and

@@ -13,6 +13,7 @@
 #include <array>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 #include <sstream>
 #include <string_view>
 
@@ -103,6 +104,7 @@ bool expected_report(const TrajectoryReport& report,bool violating) {
         const auto& actual=report.residuals[i];const auto& literal=expected[i];
         if(actual.field!=literal.field || actual.measure.violation!=literal.violation ||
            actual.measure.scale!=literal.scale || actual.satisfied!=literal.satisfied ||
+           !std::isfinite(actual.tolerance) ||
            std::abs(actual.tolerance-(1e-8+1e-8*literal.scale))>1e-20)return false;
     }
     return true;
@@ -121,18 +123,27 @@ std::string json_string(const std::string& value) {
 
 std::string residual_json(const TrajectoryReport& report) {
     std::ostringstream out;out<<std::setprecision(17)<<'[';
+    const auto number=[&out](double value) {
+        if(std::isfinite(value))out<<value;
+        else out<<"null";
+    };
     for(std::size_t i=0;i<report.residuals.size();++i) {
         if(i)out<<',';
         const auto& r=report.residuals[i];
-        out<<"{\"field\":"<<json_string(r.field)<<",\"violation\":"<<r.measure.violation
-           <<",\"scale\":"<<r.measure.scale<<",\"tolerance\":"<<r.tolerance
-           <<",\"satisfied\":"<<(r.satisfied?"true":"false")<<'}';
+        out<<"{\"field\":"<<json_string(r.field)<<",\"violation\":";
+        number(r.measure.violation);
+        out<<",\"scale\":";
+        number(r.measure.scale);
+        out<<",\"tolerance\":";
+        number(r.tolerance);
+        out<<",\"satisfied\":"<<(r.satisfied?"true":"false")<<'}';
     }
     out<<']';return out.str();
 }
 
 bool emit_case(const problem::ResolvedProblem& problem,const char* label,
-               TrajectoryRequest request,std::uint64_t batch,std::uint64_t warmups,std::uint64_t trials) {
+               TrajectoryRequest request,std::uint64_t batch,std::uint64_t warmups,std::uint64_t trials,
+               bool inject_transient_nan=false) {
     const bool violating=std::string_view(label)=="violating";
     for(std::uint64_t round=0;round<warmups+trials;++round) {
         const auto begin=std::chrono::steady_clock::now();
@@ -142,6 +153,8 @@ bool emit_case(const problem::ResolvedProblem& problem,const char* label,
             ++attempted;
             try {
                 last=verify_trajectory(problem,request);
+                if(inject_transient_nan && !violating && round==0 && iteration==0)
+                    last.residuals[0].tolerance=std::numeric_limits<double>::quiet_NaN();
                 ++checked;
                 token^=consume(last)+(iteration*0x9e3779b97f4a7c15ULL);
                 if(!expected_report(last,violating)) {
@@ -181,7 +194,9 @@ bool emit_case(const problem::ResolvedProblem& problem,const char* label,
 
 int main(int argc,char** argv) {
     try {
-        if(argc!=4) throw std::invalid_argument("usage: csl_syn06_verifier_report BATCH WARMUPS TRIALS");
+        const bool self_test=argc==5 && std::string_view(argv[4])=="--self-test-transient-nan";
+        if(argc!=4 && !self_test)
+            throw std::invalid_argument("usage: csl_syn06_verifier_report BATCH WARMUPS TRIALS [--self-test-transient-nan]");
         const auto batch=parse_count(argv[1]);
         const auto warmups=parse_count(argv[2]);
         const auto trials=parse_count(argv[3]);
@@ -201,6 +216,11 @@ int main(int argc,char** argv) {
         std::cout<<"{\"event\":\"header\",\"schema\":\"csl.syn06-verifier-raw/2\",\"batch\":"<<batch
             <<",\"warmups\":"<<warmups<<",\"trials_per_fixture\":"<<trials
             <<",\"timer_overhead_median_ns\":"<<timer_samples[timer_samples.size()/2]<<"}\n";
+        if(self_test) {
+            if(batch!=2 || warmups!=1 || trials!=1)
+                throw std::invalid_argument("self-test requires 2 1 1");
+            return emit_case(problem,"valid",request,batch,warmups,trials,true)?3:0;
+        }
         if(!emit_case(problem,"valid",request,batch,warmups,trials))return 2;
         request.witness.controls[1][0]=1.25;
         if(!emit_case(problem,"violating",request,batch,warmups,trials))return 2;

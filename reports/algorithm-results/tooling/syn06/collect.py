@@ -247,6 +247,10 @@ def collect(build: Path, source_commit: str, cmake: Path, generator: str,
                          "--target", "csl_syn06_verifier_report"]
         built_stdout, built_stderr = journal.capture("build", build_command)
         graph, executable = build_graph(build, ROOT, source_commit)
+        postbuild_head, _ = journal.capture("postbuild-head", ["git", "rev-parse", "HEAD"])
+        postbuild_status, _ = journal.capture("postbuild-status", ["git", "status", "--porcelain"])
+        if postbuild_head.decode("ascii").strip() != source_commit or postbuild_status:
+            raise CollectionFailure("source changed during configure/build; evidence: " + str(journal.path))
         pilot_record, pilot_raw = pilot(executable, journal)
         batch = pilot_record["selected_batch"]
         profile_record, profile_raw = profile_run(executable, max(batch, 100000), source_commit, journal)
@@ -272,6 +276,7 @@ def collect(build: Path, source_commit: str, cmake: Path, generator: str,
             "source_tree": graph["source_tree"], "verifier_core_commit":
                 "edf2b200209f4312b0d00a522a7a0b2e26a96d65",
             "configuration": "Release", "clean_source_before_build": True,
+            "clean_source_after_build": True,
             "driver_sha256": report.digest_bytes(report_driver.read_bytes()),
             "binary_sha256": graph["binary_sha256"],
             "cmake_cache_sha256": report.digest_bytes((build / "CMakeCache.txt").read_bytes()),

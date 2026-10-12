@@ -1,3 +1,0 @@
-fixture,trials,attempted_calls,checked_calls,failures,batch,median_elapsed_ns,min_elapsed_ns,max_elapsed_ns
-valid,7,287000,287000,0,41000,119531800,112588800,136439900
-violating,7,287000,287000,0,41000,110793400,108313400,122325000

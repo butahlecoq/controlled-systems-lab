@@ -5,8 +5,10 @@ import csv
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -48,6 +50,21 @@ def rehash_record(bundle: Path, name: str, key: str, altered: bytes) -> None:
 
 
 class Syn06ReportTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "nt", "saved native executable is the Windows Release artifact")
+    def test_native_transient_nan_is_counted_even_when_final_report_is_finite(self):
+        executable = source_bundle() / "verifier-driver.bin"
+        result = subprocess.run([str(executable), "2", "1", "1", "--self-test-transient-nan"],
+                                capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        events = [json.loads(line) for line in result.stdout.splitlines()]
+        failures = [event for event in events if event["event"] == "call_failure"]
+        self.assertEqual([(event["fixture"], event["round"], event["iteration"])
+                          for event in failures], [("valid", 0, 0)])
+        trial = next(event for event in events if event["event"] == "trial")
+        self.assertEqual((trial["attempted_calls"], trial["checked_calls"], trial["failures"]),
+                         (2, 2, 1))
+        self.assertEqual(trial["residuals"][0]["tolerance"], 1e-8)
+
     def test_saved_bundle_and_public_zip_preserve_validated_evidence(self):
         source = source_bundle()
         expected = syn06.catalogue_entry(source)
@@ -116,14 +133,15 @@ class Syn06ReportTests(unittest.TestCase):
                 syn06.validate(bundle)
 
     def test_rehashed_false_build_claim_cannot_be_published(self):
-        with tempfile.TemporaryDirectory() as directory:
-            bundle = Path(directory) / source_bundle().name
-            shutil.copytree(source_bundle(), bundle)
-            build = json.loads((bundle / "build-provenance.json").read_text(encoding="utf-8"))
-            build["clean_source_before_build"] = False
-            rehash_record(bundle, "build-provenance.json", "build_sha256", syn06.json_bytes(build))
-            with self.assertRaisesRegex(ValueError, "build provenance"):
-                syn06.validate(bundle)
+        for field in ("clean_source_before_build", "clean_source_after_build"):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                bundle = Path(directory) / source_bundle().name
+                shutil.copytree(source_bundle(), bundle)
+                build = json.loads((bundle / "build-provenance.json").read_text(encoding="utf-8"))
+                build[field] = False
+                rehash_record(bundle, "build-provenance.json", "build_sha256", syn06.json_bytes(build))
+                with self.assertRaisesRegex(ValueError, "build provenance"):
+                    syn06.validate(bundle)
 
     def test_rehashed_private_path_cannot_be_published(self):
         with tempfile.TemporaryDirectory() as directory:
