@@ -4,23 +4,25 @@
   "reports": [
     {
       "report_id": "lp-20261012T000346Z-ee5e9193b7a5",
-      "payload_sha256": "ee5e9193b7a55bbec9f85f805ca74e7e1f5e9b9d22199e5fffeab4ef72515501",
+      "payload_sha256": "e6b70ff30fe8d8149876470edff62cd55c9de35cbc41edc314726033e2d8778d",
       "source_commit": "6780941b80fd1e94d6b5a6c5142822d5273bfa3f",
-      "zip_sha256": "609982b5642d8d104f66d1020c4d54c3923b5c3703dc8f367c28fd6643898a72",
+      "zip_sha256": "c0dc593c9b30304314a0a1d3206d2a47134815b43f158b84ae2c56f9b869087d",
       "report_kind": "lp",
       "measured_scope": "Five analytic LP microfixtures",
       "evidence_limits": "Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates",
-      "payload_schema": "csl.algorithm-report-view/1"
+      "payload_schema": "csl.algorithm-report-view/1",
+      "native_payload_sha256": "ee5e9193b7a55bbec9f85f805ca74e7e1f5e9b9d22199e5fffeab4ef72515501"
     },
     {
       "report_id": "convex-20261012T041854Z-4d54a407c9b2",
       "report_kind": "convex",
-      "payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f",
+      "payload_sha256": "f1bd431e5a241923f95d0c20617d2017374599c54d04392c7107c3d5b62b9e0a",
       "source_commit": "cc3d91b579d1bfbb07fb6159b6709a08cd15fa10",
-      "zip_sha256": "91072b1b73e9c5311ca0d7fa0362147fe087b55466f976b7b04d86dbef45466f",
+      "zip_sha256": "c946f845340a7baf948ea904460c5ab10e5f2f7eb6c2cba5bc3c7965fbfc6ae3",
       "measured_scope": "Nine analytic convex microfixtures",
       "evidence_limits": "Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates",
-      "payload_schema": "csl.algorithm-report-view/2"
+      "payload_schema": "csl.algorithm-report-view/2",
+      "native_payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f"
     },
     {
       "report_id": "opt05-hull-20261012-d1c211c2",
