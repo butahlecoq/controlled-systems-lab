@@ -1,7 +1,7 @@
 {
   "schema": "csl.geo03-hv-report/1",
-  "report_id": "geo03-20261012-37c3fb484e0d",
-  "payload_sha256": "37c3fb484e0da72e4710cdc8f1e5ebe27b906c2ecd3b3396c43f67d0b8e4196c",
+  "report_id": "geo03-20261012-3c12ca125831",
+  "payload_sha256": "3c12ca12583170423a81142c8f4b743cf88a16e463267d6864ddda4b56bd9044",
   "payload": {
     "schema": "csl.geo03-hv-report/1",
     "created_utc": "2026-10-12T11:00:07Z",
@@ -1958,7 +1958,23 @@
       "no available competing adapter",
       "numerical checks are not validated global certificates",
       "no inner conversion phase timing",
-      "A17/A18 lineage not audited"
-    ]
+      "A17/A18 audit covers source lineage only; executable equivalence is not established"
+    ],
+    "lineage_audit": {
+      "status": "source-level review; executable equivalence not established",
+      "contract_reference": "docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18",
+      "sources": {
+        "A17": {
+          "path": "Scientific Research/GeoCalcLib-master/vertexEnumeration.m",
+          "sha256": "d0f4ef259c0e33a48c0b2f56480e4a1c68df42a1783baf6e8110af8078e5fd19",
+          "finding": "thin wrapper delegates to external libgeocalc; its algorithm and guarantees are not established by the archived wrapper"
+        },
+        "A18": {
+          "path": "Конференция/ICIE 2018/VertexEnumeration.m",
+          "sha256": "0d70893bd42066ed311b6ab36aa203e9fdf8856863cc23d9b5e254e45a87bee6",
+          "finding": "homogenization, rank completion, randomized initial basis, inverse-based ray updates, and epsilon-policy division; not the Qhull polar-facet algorithm"
+        }
+      }
+    }
   }
 }
