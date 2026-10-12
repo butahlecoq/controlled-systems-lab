@@ -1,0 +1,382 @@
+"""Explicit boundary adapters for validated non-LP report records."""
+from dataclasses import dataclass
+import csv
+import hashlib
+import json
+from pathlib import Path
+import re
+from html import escape
+import io
+import statistics
+import zipfile
+
+
+OPT_TOP_FILES = {"README.md", "analyze_profile.py", "collect.py", "index.html", "latency.svg", "records.json", "render_saved.py", "summary.csv", "test_validate_report.py", "trials.csv", "validate_report.py"}
+OPT_NESTED_FILES = {"evidence/accepted-001/build-log-sanitized.txt", "evidence/accepted-001/concurrent-work.txt", "evidence/accepted-001/process-stderr.txt", "evidence/accepted-001/process-stdout.jsonl", "evidence/accepted-001/records.json", "evidence/accepted-001/summary.csv", "evidence/accepted-001/trials.csv", "evidence/accepted-002/build-log-sanitized.txt", "evidence/accepted-002/build-provenance.json", "evidence/accepted-002/concurrent-work.txt", "evidence/accepted-002/hull_measure.cpp", "evidence/accepted-002/process-stderr.txt", "evidence/accepted-002/process-stdout.jsonl", "evidence/accepted-002/records.json", "evidence/accepted-002/summary.csv", "evidence/accepted-002/trials.csv", "harness/CMakeLists.txt", "harness/hull_measure.cpp", "profile/README.md", "profile/final/profile-stderr.txt", "profile/final/profile-summary.jsonl", "profile/profile-stderr.txt", "profile/raw-profile.jsonl", "profile/target-process-samples.csv", "profile/target-process-samples.json"}
+GEO_FILES = {"README.md", "build-provenance.txt", "environment.json", "index.html", "latency.svg", "measurement-command.txt", "process-stderr.txt", "profile.txt", "raw-driver-output.csv", "raw-events.jsonl", "records.json", "scenarios.json", "summary.csv", "trials.csv"}
+
+
+@dataclass(frozen=True)
+class PublicationRecord:
+    kind: str
+    report_id: str
+    payload_sha256: str
+    source_commit: str
+    measured_scope: str
+    evidence_limits: str
+    files: tuple[str, ...] = ()
+    payload_schema: str = ""
+    native_payload_sha256: str = ""
+    source_report_id: str = ""
+
+
+def _json(path):
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def _digest(value):
+    return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def _adapt_payload(record):
+    if not isinstance(record, dict):
+        raise ValueError("report record must be an object")
+    schema = record.get("schema")
+    rid = record.get("report_id")
+    if schema == "csl.hull-benchmark-records/1":
+        if not re.fullmatch(r"opt05-hull-\d{8}-[0-9a-f]{8}", str(rid)):
+            raise ValueError("unsafe OPT-05 report ID")
+        trials = record.get("trials")
+        if not isinstance(trials, list) or any(not isinstance(t, dict) for t in trials):
+            raise ValueError("OPT-05 trials must be objects")
+        measured = [t for t in trials if not t.get("warmup")]
+        if len(measured) != 21 or any(t.get("status") != "complete" or t.get("verified") is not True for t in measured):
+            raise ValueError("OPT-05 requires 21 verified measured trials")
+        from collections import Counter
+        if Counter(t["case_id"] for t in measured) != {"grid-25": 7, "grid-81": 7, "grid-169": 7}:
+            raise ValueError("OPT-05 case trial groups differ")
+        expected_points={"grid-25":25,"grid-81":81,"grid-169":169}
+        summary_keys=[row.get("case_id") for row in record.get("summary", []) if isinstance(row,dict)]
+        if len(summary_keys)!=3 or set(summary_keys)!=set(expected_points):
+            raise ValueError("OPT-05 summary must contain each expected case exactly once")
+        if any(row.get("points")!=expected_points.get(row.get("case_id")) for row in record.get("summary",[])) or any(t.get("points")!=expected_points.get(t.get("case_id")) for t in measured):
+            raise ValueError("OPT-05 point count differs from named case")
+        code_commit = record.get("code_commit", "")
+        if not re.fullmatch(r"[0-9a-f]{40}", str(code_commit)) or record.get("fixture", {}).get("oracle") is None:
+            raise ValueError("OPT-05 source/fixture evidence missing")
+        if rid.rsplit("-", 1)[1] != code_commit[:8]:
+            raise ValueError("OPT-05 report ID does not match source commit")
+        summary = record.get("summary")
+        limits = record.get("fixture", {}).get("assurance", "")
+        if not isinstance(summary, list) or not summary or any(not isinstance(row, dict) for row in summary) or not isinstance(limits, str) or "not exact arithmetic" not in limits:
+            raise ValueError("OPT-05 assurance boundary missing")
+        for row in summary:
+            group=[t for t in measured if t.get("case_id")==row.get("case_id")]
+            if len(group)!=7 or row.get("attempts")!=len(group) or row.get("successes")!=sum(t.get("status")=="complete" for t in group) or row.get("failures")!=sum(t.get("status")!="complete" for t in group):
+                raise ValueError("OPT-05 summary group differs from trials")
+            for field,fn in (("median_ns",lambda xs:statistics.median(xs)),("min_ns",min),("max_ns",max)):
+                if row.get(field)!=fn([t["elapsed_ns"] for t in group]): raise ValueError("OPT-05 timing summary differs from trials")
+            if row.get("median_lp_calls")!=statistics.median([t["lp_calls"] for t in group]): raise ValueError("OPT-05 LP-call summary differs from trials")
+        return PublicationRecord("opt05-hull", rid, _digest(record), code_commit, "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices", "No comparator; " + limits, payload_schema=schema, source_report_id=rid)
+    if schema == "csl.geo03-hv-report/1":
+        payload = record.get("payload")
+        if not isinstance(payload, dict) or _digest(payload) != record.get("payload_sha256"):
+            raise ValueError("GEO-03 payload digest mismatch")
+        measurement = payload.get("measurement")
+        if not isinstance(measurement, dict) or payload.get("schema") != schema or measurement.get("emitted_trials") != 56:
+            raise ValueError("GEO-03 measured trial scope mismatch")
+        trials = payload.get("trials")
+        summary = payload.get("summary")
+        if not isinstance(trials, list) or any(not isinstance(t, dict) for t in trials) or not isinstance(summary, list) or any(not isinstance(t, dict) for t in summary):
+            raise ValueError("GEO-03 trials and summary must be object lists")
+        if measurement.get("failures") != 0 or any(t.get("failures") != 0 for t in summary):
+            raise ValueError("GEO-03 contains failed trials")
+        from collections import Counter
+        groups = Counter((t.get("fixture"), t.get("direction")) for t in trials)
+        expected_groups={(fixture,direction) for fixture in ("embedded-segment","simplex","singleton","square") for direction in ("H-to-V","V-to-H")}
+        summary_keys=[(row.get("fixture"),row.get("direction")) for row in summary]
+        if len(trials) != 56 or set(groups)!=expected_groups or set(groups.values()) != {7} or any(t.get("oracle_passed") != "true" for t in trials):
+            raise ValueError("GEO-03 requires eight seven-trial oracle-passing groups")
+        if len(summary_keys)!=8 or set(summary_keys)!=expected_groups:
+            raise ValueError("GEO-03 summary must contain each fixture/direction group exactly once")
+        limits = payload.get("scope_limitations")
+        if not isinstance(limits, list) or not limits:
+            raise ValueError("GEO-03 scope limitations required")
+        for row in summary:
+            group=[t for t in trials if (t.get("fixture"),t.get("direction"))==(row.get("fixture"),row.get("direction"))]
+            if len(group)!=7 or row.get("trials")!=7:
+                raise ValueError("GEO-03 summary group differs from trials")
+            for metric in ("run_ns","total_ns","preparation_ns","workspace_creation_ns"):
+                values=[t[metric] for t in group]
+                measured_stats=row.get(metric)
+                if not isinstance(measured_stats,dict) or measured_stats.get("median")!=statistics.median(values) or measured_stats.get("min")!=min(values) or measured_stats.get("max")!=max(values):
+                    raise ValueError("GEO-03 timing summary differs from trials")
+        source = payload.get("report_source_commit")
+        if not isinstance(source, str) or not re.fullmatch(r"[0-9a-f]{40}", source):
+            raise ValueError("GEO-03 full report source commit required")
+        if not isinstance(record.get("report_id"), str) or not re.fullmatch(r"geo03-\d{8}-[0-9a-f]{12}", record["report_id"]):
+            raise ValueError("unsafe GEO-03 report ID")
+        if not record["report_id"].endswith(record["payload_sha256"][:12]):
+            raise ValueError("GEO-03 report ID does not match payload digest")
+        return PublicationRecord("geo03-hv", record["report_id"], record["payload_sha256"], source, "56 measured trials across four bounded 2D fixtures in both conversion directions", "; ".join(limits), payload_schema=schema, source_report_id=record["report_id"])
+    raise ValueError("unregistered report schema")
+
+
+def adapt_payload(record):
+    try:
+        return _adapt_payload(record)
+    except ValueError:
+        raise
+    except (KeyError, TypeError, AttributeError, IndexError) as error:
+        raise ValueError("malformed registered report payload") from error
+
+
+def adapt(bundle):
+    bundle = Path(bundle)
+    if bundle.is_symlink():
+        raise ValueError("registered source bundle cannot be a symlink")
+    record = _json(bundle / "records.json")
+    result = adapt_payload(record)
+    if bundle.name != (result.source_report_id or result.report_id):
+        raise ValueError("registered source bundle identity mismatch")
+    if result.kind == "opt05-hull":
+        listed = {}
+        for line in (bundle / "manifest.sha256").read_text(encoding="utf-8").splitlines():
+            match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9_./-]+)", line)
+            if not match:
+                raise ValueError("invalid OPT-05 manifest entry")
+            listed[match.group(2)] = match.group(1)
+    else:
+        manifest = _json(bundle / "manifest.json")
+        if manifest.get("schema") != "csl.geo03-report-manifest/1" or manifest.get("report_id") != result.report_id:
+            raise ValueError("GEO-03 manifest identity mismatch")
+        listed = manifest.get("files", {})
+    if result.kind == "opt05-hull":
+        allowed=OPT_TOP_FILES|OPT_NESTED_FILES
+        if not set(listed)<=allowed or not set(OPT_TOP_FILES)-{"test_validate_report.py"}<=set(listed) or not OPT_NESTED_FILES<=set(listed):
+            raise ValueError("OPT-05 registered inventory pattern mismatch")
+        expected_files=set(listed)|{"manifest.sha256","bundle.zip","bundle.zip.sha256"}
+    elif set(listed) != GEO_FILES:
+        raise ValueError("registered bundle inventory mismatch")
+    else:
+        expected_files=set(listed)|{"manifest.json"}
+    actual_files=set()
+    for path in bundle.rglob("*"):
+        if path.is_symlink(): raise ValueError("symlinks are forbidden in registered bundle")
+        if path.is_file(): actual_files.add(path.relative_to(bundle).as_posix())
+    if actual_files != expected_files:
+        raise ValueError("registered bundle has missing or unregistered files")
+    for name, expected in listed.items():
+        path = bundle / name
+        relative = Path(name)
+        if relative.is_absolute() or ".." in relative.parts or any(part.is_symlink() for part in [bundle, *(bundle / Path(*relative.parts[:i]) for i in range(1, len(relative.parts)))]) or not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            raise ValueError("unsafe or tampered registered bundle file: " + name)
+    _validate_saved_csv(bundle, record, result.kind)
+    if result.kind == "opt05-hull":
+        _validate_opt05_bundle_zip(bundle, listed)
+    public_id = _publication_id(bundle, result.source_report_id, actual_files)
+    return PublicationRecord(result.kind, public_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema, source_report_id=result.source_report_id)
+
+
+def _publication_id(bundle, source_id, source_files):
+    # Source files contain no publication output, so hashing the full validated
+    # inventory, including native manifests/ZIPs, introduces no digest cycle.
+    # This module owns the staged page, envelope, manifest and offline ZIP.
+    publisher_source = Path(__file__).read_text(encoding="utf-8").replace("\r\n", "\n").encode("utf-8")
+    identity = {
+        "schema": "csl.registered-publication-identity/1",
+        "source_report_id": source_id,
+        "source_files": {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(source_files)},
+        "publisher_sha256": hashlib.sha256(publisher_source).hexdigest(),
+    }
+    return source_id.rsplit("-", 1)[0] + "-" + _digest(identity)
+
+
+def _validate_saved_csv(bundle, record, kind):
+    if kind == "opt05-hull":
+        trial_fields = ("case_id", "round", "points", "warmup", "elapsed_ns", "status", "verified", "lp_calls", "attempts", "removed", "retained")
+        outcome_fields = ("feasible", "infeasible", "unsupported", "stopped", "numerical_failure", "malformed_result")
+        trials = [{**{field: trial[field] for field in trial_fields},
+                   **{field: trial["outcomes"][field] for field in outcome_fields}}
+                  for trial in record["trials"]]
+        summary_fields = ("case_id", "points", "attempts", "successes", "failures", "median_ns", "min_ns", "max_ns", "median_lp_calls")
+        summary = [{field: row[field] for field in summary_fields} for row in record["summary"]]
+        _compare_csv(bundle / "trials.csv", trial_fields + outcome_fields, trials)
+        _compare_csv(bundle / "summary.csv", summary_fields, summary)
+        return
+    payload = record["payload"]
+    trials = payload["trials"]
+    trial_fields = ("fixture", "direction", "round", "converter_id", "converter_version", "lp_backend_id", "lp_backend_version", "ambient_dimension", "input_representation", "output_representation", "input_inequalities", "input_equalities", "input_vertices", "input_rays", "preparation_ns", "workspace_creation_ns", "run_ns", "total_ns", "output_inequalities", "output_equalities", "output_vertices", "output_rays", "oracle_checks", "oracle_passed")
+    summary_fields = ("fixture", "direction", "trials", "failures", "all_oracles_passed") + tuple(f"{metric}_{stat}_ns" for metric in ("preparation_ns", "workspace_creation_ns", "run_ns", "total_ns") for stat in ("median", "min", "max", "range"))
+    summary = []
+    for row in payload["summary"]:
+        flat = {field: row[field] for field in summary_fields[:5]}
+        for metric in ("preparation_ns", "workspace_creation_ns", "run_ns", "total_ns"):
+            for stat in ("median", "min", "max", "range"):
+                flat[f"{metric}_{stat}_ns"] = row[metric][stat]
+        summary.append(flat)
+    _compare_csv(bundle / "trials.csv", trial_fields, trials)
+    _compare_csv(bundle / "summary.csv", summary_fields, summary)
+
+
+def _compare_csv(path, fields, expected_rows):
+    try:
+        with path.open(newline="", encoding="utf-8-sig") as stream:
+            reader = csv.DictReader(stream)
+            if reader.fieldnames != list(fields):
+                raise ValueError(f"{path.name} headers differ from validated records")
+            actual_rows = list(reader)
+    except (OSError, UnicodeError, csv.Error) as error:
+        raise ValueError(f"invalid registered {path.name}") from error
+    if len(actual_rows) != len(expected_rows):
+        raise ValueError(f"{path.name} row count differs from validated records")
+    for actual, expected in zip(actual_rows, expected_rows):
+        if set(actual) != set(fields) or any(actual.get(field) != str(expected[field]) for field in fields):
+            raise ValueError(f"{path.name} differs from validated records")
+
+
+def _validate_opt05_bundle_zip(bundle, listed):
+    archive_path = bundle / "bundle.zip"
+    checksum_path = bundle / "bundle.zip.sha256"
+    try:
+        sidecar = checksum_path.read_text(encoding="ascii")
+        match = re.fullmatch(r"([0-9a-f]{64})  bundle\.zip\n?", sidecar)
+        if match is None or hashlib.sha256(archive_path.read_bytes()).hexdigest() != match.group(1):
+            raise ValueError("OPT-05 bundle ZIP checksum mismatch")
+        expected_names = {f"{bundle.name}/{name}" for name in set(listed) | {"manifest.sha256"}}
+        with zipfile.ZipFile(archive_path) as archive:
+            names = archive.namelist()
+            if len(names) != len(set(names)) or set(names) != expected_names:
+                raise ValueError("OPT-05 bundle ZIP inventory mismatch")
+            if archive.testzip() is not None:
+                raise ValueError("OPT-05 bundle ZIP content mismatch")
+            for name in listed:
+                if archive.read(f"{bundle.name}/{name}") != (bundle / name).read_bytes():
+                    raise ValueError("OPT-05 bundle ZIP content mismatch: " + name)
+            if archive.read(f"{bundle.name}/manifest.sha256") != (bundle / "manifest.sha256").read_bytes():
+                raise ValueError("OPT-05 bundle ZIP content mismatch: manifest.sha256")
+    except (OSError, zipfile.BadZipFile, KeyError, RuntimeError) as error:
+        raise ValueError("invalid OPT-05 bundle ZIP") from error
+
+
+def render_page(bundle, publication):
+    """Render the publication view from validated typed data, never producer HTML."""
+    bundle = Path(bundle)
+    links = [f'<a href="{escape(name, quote=True)}">{escape(name)}</a>' for name in publication.files if name in {"records.json", "trials.csv", "summary.csv", "latency.svg"}]
+    record=json.loads((bundle/"records.json").read_text(encoding="utf-8"))
+    if publication.kind=="geo03-hv": record=record["payload"]
+    if publication.kind=="opt05-hull":
+        rows=''.join('<tr><td>'+escape(str(row["case_id"]))+'</td><td>'+str(row["points"])+'</td><td>'+str(row["attempts"])+'</td><td>'+str(row["failures"])+'</td><td>'+f'{row["median_ns"]:,}'+'</td><td>'+f'{row["min_ns"]:,}'+'</td><td>'+f'{row["max_ns"]:,}'+'</td><td>'+str(row["median_lp_calls"])+'</td></tr>' for row in record["summary"])
+        table='<table><thead><tr><th>Case</th><th>Points</th><th>Attempts</th><th>Failures</th><th>Median ns</th><th>Min ns</th><th>Max ns</th><th>Median LP calls</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    else:
+        rows=''.join('<tr><td>'+escape(row["fixture"])+'</td><td>'+escape(row["direction"])+'</td><td>'+str(row["trials"])+'</td><td>'+str(row["failures"])+'</td>'+''.join('<td>'+f'{row[metric][key]:,}'+'</td>' for metric in ("run_ns","total_ns") for key in ("median","min","max"))+'</tr>' for row in record["summary"])
+        table='<table><thead><tr><th>Fixture</th><th>Direction</th><th>Trials</th><th>Failures</th>'+''.join('<th>'+metric.replace("_ns", "")+' '+key+' ns</th>' for metric in ("run_ns","total_ns") for key in ("median","min","max"))+'</tr></thead><tbody>'+rows+'</tbody></table>'
+    return ('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>' + escape(publication.report_id) +
+            '</title></head><body><h1>' + escape(publication.kind) + ' measurement report</h1><p><code>' +
+            escape(publication.report_id) + '</code></p><h2>Measured scope</h2><p>' + escape(publication.measured_scope) +
+            '</p><h2>Saved measurements</h2>'+table+'<h2>Evidence limits</h2><p>' + escape(publication.evidence_limits) + '</p><p>Source commit <code>' +
+            escape(publication.source_commit) + '</code></p><p><a href="latency.svg">Checked latency SVG</a></p><ul><li>' + '</li><li>'.join(links) + '</li></ul></body></html>')
+
+
+def _json_bytes(value):
+    return (json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
+
+
+def publication_envelope(bundle, publication):
+    record = _json(Path(bundle) / "records.json")
+    payload = record if publication.kind in ("lp", "convex", "opt05-hull") else record["payload"]
+    envelope = {
+        "schema": "csl.algorithm-report-envelope/1",
+        "report_id": publication.report_id,
+        "report_kind": publication.kind,
+        "payload_schema": publication.payload_schema,
+        "payload_sha256": publication.payload_sha256,
+        "source_commit": publication.source_commit,
+        "measured_scope": publication.measured_scope,
+        "evidence_limits": publication.evidence_limits,
+        "payload": payload,
+    }
+    if publication.kind in ("lp", "convex"):
+        envelope["native_payload_sha256"] = publication.native_payload_sha256
+    if publication.source_report_id:
+        envelope["source_report_id"] = publication.source_report_id
+    return envelope
+
+
+def publication_artifacts(bundle, publication, page_bytes=None):
+    bundle = Path(bundle)
+    files = {name: (bundle / name).read_bytes() for name in publication.files if name != "index.html"}
+    files["index.html"] = page_bytes if page_bytes is not None else render_page(bundle, publication).encode("utf-8")
+    files["report-envelope.json"] = _json_bytes(publication_envelope(bundle, publication))
+    files["publication-manifest.json"] = _json_bytes({
+        "schema": "csl.algorithm-report-publication-manifest/1",
+        "report_id": publication.report_id,
+        "report_kind": publication.kind,
+        "files": {name: hashlib.sha256(files[name]).hexdigest() for name in sorted(files)},
+    })
+    return files
+
+
+def publication_zip(report_id, files):
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_STORED) as archive:
+        entries = [("index.html", files["index.html"])] + [(report_id + "/" + name, files[name]) for name in sorted(files)]
+        for name, content in entries:
+            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+            info.create_system = 3
+            info.flag_bits = 0
+            info.compress_type = zipfile.ZIP_STORED
+            info.external_attr = 0o100644 << 16
+            archive.writestr(info, content)
+    return buffer.getvalue()
+
+
+def validate_publication_manifest(report_dir, expected):
+    report_dir = Path(report_dir)
+    try:
+        if report_dir.is_symlink():
+            raise ValueError("publication directory is a symlink")
+        manifest = _json(report_dir / "publication-manifest.json")
+        envelope = _json(report_dir / "report-envelope.json")
+        actual = set()
+        for path in report_dir.rglob("*"):
+            if path.is_symlink():
+                raise ValueError("publication files cannot be symlinks")
+            if path.is_file() and path.name != "publication-manifest.json":
+                actual.add(path.relative_to(report_dir).as_posix())
+        if manifest.get("schema") != "csl.algorithm-report-publication-manifest/1" or manifest.get("report_id") != expected.get("report_id") or manifest.get("report_kind") != expected.get("report_kind"):
+            raise ValueError("publication manifest identity/schema mismatch")
+        entries = manifest.get("files")
+        if not isinstance(entries, dict) or set(entries) != actual:
+            raise ValueError("publication manifest inventory mismatch")
+        for name, digest in entries.items():
+            relative = Path(name)
+            if relative.is_absolute() or ".." in relative.parts or not isinstance(digest, str):
+                raise ValueError("publication manifest contains an unsafe entry")
+            path = report_dir / relative
+            if not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+                raise ValueError("publication manifest file hash mismatch")
+        fields = ("report_id", "report_kind", "payload_schema", "payload_sha256", "source_commit", "measured_scope", "evidence_limits")
+        if envelope.get("schema") != "csl.algorithm-report-envelope/1" or any(envelope.get(field) != expected.get(field) for field in fields):
+            raise ValueError("publication envelope identity/schema mismatch")
+        if expected.get("native_payload_sha256", "") != envelope.get("native_payload_sha256", ""):
+            raise ValueError("publication envelope native payload hash mismatch")
+        if expected.get("source_report_id", "") != envelope.get("source_report_id", ""):
+            raise ValueError("publication envelope source identity mismatch")
+        if _digest(envelope.get("payload")) != expected.get("payload_sha256"):
+            raise ValueError("publication envelope payload hash mismatch")
+        if not isinstance(envelope.get("payload"), dict) or envelope["payload"].get("schema") != expected.get("payload_schema"):
+            raise ValueError("publication envelope payload schema mismatch")
+        if expected.get("report_kind") in ("lp", "convex"):
+            payload = envelope["payload"]
+            if payload.get("payload_sha256") != expected.get("native_payload_sha256"):
+                raise ValueError("publication native payload hash mismatch")
+        return True
+    except (OSError, KeyError, TypeError, AttributeError, json.JSONDecodeError) as error:
+        raise ValueError("publication manifest or envelope is malformed") from error
+
+
+def offline_zip(bundle, publication):
+    bundle=Path(bundle)
+    files=publication_artifacts(bundle,publication)
+    return publication_zip(publication.report_id,files)

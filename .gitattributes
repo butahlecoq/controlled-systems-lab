@@ -1,0 +1,4 @@
+# Registered report bundles and fixtures carry hashes over exact source bytes,
+# including CRLF. Preserve them verbatim; their captured log whitespace is evidence.
+tests/reporting/fixtures/registered/** -text whitespace=-blank-at-eol,-blank-at-eof
+reports/algorithm-results/** -text whitespace=-blank-at-eol,-blank-at-eof

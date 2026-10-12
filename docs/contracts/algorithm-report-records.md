@@ -343,3 +343,40 @@ only with its genuine scenario/configuration binding. Public-run timing retains
 its wrapper/native/translation/check scope, and missing native observations stay
 explicitly unavailable. OBS01 adds no native diagnostic parser or performance
 publication gate exemption.
+
+## Registered non-LP publication adapters
+
+The shared Pages publisher accepts catalogue schema `csl.algorithm-report-catalog/3`
+for mixed LP, convex, OPT-05 and GEO-03 catalogues. LP/convex retain their existing
+validated view schemas and bundle projections. New report kinds are admitted only
+through `scripts/reports/registered_reports.py` adapters for
+`csl.hull-benchmark-records/1` (`opt05-hull`) and `csl.geo03-hv-report/1`
+(`geo03-hv`). The adapters validate their native source identity, typed trial and
+summary coherence, explicit file inventory, manifest hashes and safe paths before
+staging. The shared renderer projects measured tables, evidence limits and links
+from those validated records, then the same `site.stage` operation emits their
+offline ZIPs and catalogue links. Producer HTML is retained as hash-checked source
+evidence but is never copied as the published page. Catalogue scope/limit text must
+match the adapter projection; it cannot add claims. A staged result is not a public
+URL: source artifacts still require review and the main Pages workflow must publish
+the integrated catalogue before the live URL check can pass.
+
+For registered kinds, the native `records.json.report_id` and source directory stay
+unchanged. The schema-3 catalogue and publication envelope carry that identity as
+`source_report_id`; their `report_id` is the public destination. The public suffix is
+the full SHA-256 of a canonical identity record containing every validated native
+source file hash, the native source ID, and the SHA-256 of the publisher module that
+generates the staged page, envelope, manifest and ZIP. Publisher source line endings
+are normalized to LF before hashing. This lets another measurement,
+an updated evidence file, or changed publisher output use a different immutable URL
+without rewriting the original numerical archive. The repository source-tree fallback
+uses `source_report_id`; the repository ZIP and public page/download links use
+`report_id`.
+Both native `trials.csv` and `summary.csv` must match the complete typed rows in
+`records.json`, even when their manifest and archive checksums are internally valid.
+
+## Shared four-kind publication envelope
+
+Every report in a schema-3 mixed catalogue—LP, convex, OPT-05 and GEO-03—uses the same versioned `csl.algorithm-report-envelope/1` and `csl.algorithm-report-publication-manifest/1`. The envelope records the report identity and kind, native payload schema and digest, provenance, measured scope, evidence limits, and typed payload. LP/convex scope is derived from the validated scenario inventory, their evidence-limit policy is fixed by report kind, and schema-3 catalogue values must match both. LP and convex preserve their existing view payloads and validated saved-data HTML projection. OPT-05 and GEO-03 use explicit adapters in `scripts/reports/registered_reports.py` and retain their method-specific payloads; their published HTML is rendered from validated typed records rather than producer HTML. Every generated page follows the shared safe-link and HTML escaping policy.
+
+The manifest records the exact staged file inventory and SHA-256 values, including the staged page, figures, evidence files and serialized envelope. The manifest itself is excluded from its own file list. The offline ZIP contains the same envelope and manifest bytes as the staged directory and uses deterministic, uncompressed entries. Schema-1/2 catalogues remain readable under their existing publication path; schema-3 rows require the common envelope metadata. An unknown native payload schema is rejected before output is created.
