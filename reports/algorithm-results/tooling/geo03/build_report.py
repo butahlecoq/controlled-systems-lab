@@ -74,8 +74,7 @@ def environment_snapshot(before: dict, after: dict) -> dict:
         "total_processor_utilization_percent_snapshot_after": after["total_processor_utilization_percent"],
         "processor_queue_length_snapshot_before": before["processor_queue_length"],
         "processor_queue_length_snapshot_after": after["processor_queue_length"],
-        "top_processes_snapshot_before": before["top_processes"],
-        "top_processes_snapshot_after": after["top_processes"],
+        "competing_process_snapshot": "process names are omitted from this public artifact; system CPU and queue snapshots are included",
         "cmake_version": cmake_out.splitlines()[0] if cmake_code == 0 and cmake_out else "unavailable",
         "build_configuration": "Release",
         "compiler": "MSVC 19.44.35215.0 (Visual Studio 17 2022 x64)",
@@ -86,8 +85,7 @@ def environment_snapshot(before: dict, after: dict) -> dict:
 def load_snapshot() -> dict:
     processor = ps_json("Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor | Where-Object Name -eq '_Total' | Select-Object -First 1 PercentProcessorTime | ConvertTo-Json -Compress")
     queue = ps_json("Get-CimInstance Win32_PerfFormattedData_PerfOS_System | Select-Object -First 1 ProcessorQueueLength | ConvertTo-Json -Compress")
-    processes = ps_json("Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 ProcessName,CPU,WorkingSet64 | ConvertTo-Json -Compress")
-    return {"total_processor_utilization_percent":processor,"processor_queue_length":queue,"top_processes":processes}
+    return {"total_processor_utilization_percent":processor,"processor_queue_length":queue}
 
 
 def summarize(rows: list[dict]) -> list[dict]:
@@ -219,7 +217,7 @@ def collect(args: argparse.Namespace) -> None:
     before=load_snapshot()
     status,stdout,stderr=run_text([str(args.exe),"--repetitions",str(args.repetitions),"--warmups",str(args.warmups)])
     after=load_snapshot()
-    args.command=[str(args.exe),"--repetitions",str(args.repetitions),"--warmups",str(args.warmups)]
+    args.command=[args.exe.name,"--repetitions",str(args.repetitions),"--warmups",str(args.warmups)]
     if status: raise SystemExit(f"measurement executable failed with {status}; preserve stderr and partial stdout before retry")
     rows=list(csv.DictReader(stdout.splitlines()))
     if len(rows)!=args.repetitions*len(EXPECTED_ROWS): raise SystemExit(f"expected {args.repetitions*len(EXPECTED_ROWS)} measured rows, got {len(rows)}")
