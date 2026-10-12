@@ -72,6 +72,12 @@ bytes are hashed and checked. Paths are relative artifact references without
 absolute roots, drive prefixes, traversal or empty components; serialization
 never opens them. Consumers select their own attachment root.
 
+V3 requires stated support for retained objective bounds and checks each
+incumbent's full-history shape against the run coordinates. When reading a V2
+record, an `Unestablished` bound is dropped rather than promoted to supported
+evidence. If a V2 stop scope refers to such a bound, migration is rejected
+because rewriting the historical retained scope would invent provenance.
+
 Every metric is exactly `{state:"available", value:...}` or
 `{state:"unavailable", value:null, reason, detail}`. Available zero is retained.
 Missing duration, iteration count, native execution observation or memory count

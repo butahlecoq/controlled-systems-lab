@@ -1,5 +1,6 @@
 #include <csl/registry/registry.hpp>
 #include <cmath>
+#include <algorithm>
 
 namespace csl::registry {
 std::variant<WitnessSelection,Unsupported> SelectorPort::run(Workspace& workspace,const Request& request,
@@ -40,22 +41,27 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     if (const auto* stopped=std::get_if<ScopedOperationStopped>(&answer.stop)) source_stop=*stopped;
     if (const auto* rejected=std::get_if<ScopedRequestRejection>(&answer.stop)) source_stop=*rejected;
     const bool inverted_bounds=answer.objective.lower.has_value() && answer.objective.upper.has_value() &&
+        supported_synthesis_bound(*answer.objective.lower,id) &&
+        supported_synthesis_bound(*answer.objective.upper,id) &&
         answer.objective.lower->value>answer.objective.upper->value;
+    const bool lower_exceeds_incumbent=answer.objective.lower.has_value() &&
+        supported_synthesis_bound(*answer.objective.lower,id) &&
+        std::any_of(answer.incumbents.begin(),answer.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
+            return supported_feasible_incumbent(incumbent,expected) &&
+                incumbent.witness.original_objective<answer.objective.lower->value;
+        });
     auto retained=std::move(answer);
     if (!check_outcome_evidence(retained.outcome,id,request.family.assurance).empty())
         retained.outcome={id,MathematicalOutcome::undetermined,Unestablished{}, {}};
-    if (retained.objective.lower &&
-        (retained.objective.lower->evidence.problem!=id || !std::isfinite(retained.objective.lower->value)))
+    if (retained.objective.lower && !supported_synthesis_bound(*retained.objective.lower,id))
         retained.objective.lower.reset();
-    if (retained.objective.upper &&
-        (retained.objective.upper->evidence.problem!=id || !std::isfinite(retained.objective.upper->value)))
+    if (retained.objective.upper && !supported_synthesis_bound(*retained.objective.upper,id))
         retained.objective.upper.reset();
     if (inverted_bounds) {
         retained.objective.lower.reset(); retained.objective.upper.reset();
-    }
+    } else if (lower_exceeds_incumbent) retained.objective.lower.reset();
     std::erase_if(retained.incumbents,[&](const FeasibleIncumbent& incumbent) {
-        return incumbent.witness.problem!=id || !std::isfinite(incumbent.witness.original_objective) ||
-            incumbent.feasibility.problem!=id || std::holds_alternative<Unestablished>(incumbent.feasibility.support);
+        return !supported_feasible_incumbent(incumbent,expected);
     });
     if (retained.family && !check_family_evidence(*retained.family,id,request.family.assurance).empty())
         retained.family.reset();

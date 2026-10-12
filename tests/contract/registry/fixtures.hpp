@@ -90,7 +90,7 @@ public:
         const auto answer = std::get<ProgramResult>(lp_->run(context));
         const auto id=problem.identity();
         return SynthesisResult{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},
-            {},{},{{{id,{}, {*answer.primal},answer.objective.upper->value},
+            {},{},{{{id,{{0},{answer.primal->at(0)}}, {*answer.primal},answer.objective.upper->value},
                 {id,SymbolicArgument{"fixture LP point", "bounded scalar interval"}}}}, {}};
     }
 };
@@ -143,7 +143,7 @@ public: SynthesisResult solve(const csl::problem::ResolvedProblem& p,const Famil
     const auto& stage = std::get<LinearStage>(raw->model->dynamics.stages);
     const auto id=p.identity();
     SynthesisResult result{Termination::resource_limit,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
-        {{{id,{stage.offset},{},std::get<LinearTerminal>(raw->objective).offset},
+        {{{id,{{0},stage.offset},{{0}},std::get<LinearTerminal>(raw->objective).offset},
             {id,SymbolicArgument{"fixture state", "single stage"}}}}, {}};
     result.stop=ScopedOperationStopped{{StopReason::resource_limit,"fixture"},
         RequestProvenance{{"fixture/strategy"},"strategy",{"strategy"},std::string{"fixture-1"},

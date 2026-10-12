@@ -234,21 +234,55 @@ std::variant<OptimalFamily,Diagnostics> FamilyPublisher::publish(FamilyIdentity 
     if (!diagnostics.empty()) return diagnostics;
     return proposed;
 }
+bool supported_synthesis_bound(const ObjectiveBound& bound,const ProblemId& problem) {
+    return bound.evidence.problem==problem && std::isfinite(bound.value) &&
+        !std::holds_alternative<Unestablished>(bound.evidence.support);
+}
+bool supported_feasible_incumbent(const FeasibleIncumbent& incumbent,const FamilyIdentity& expected) {
+    const auto& witness=incumbent.witness;
+    const auto& coordinates=expected.coordinates;
+    if (witness.problem!=expected.problem || incumbent.feasibility.problem!=expected.problem ||
+        std::holds_alternative<Unestablished>(incumbent.feasibility.support) ||
+        !std::isfinite(witness.original_objective) ||
+        coordinates.horizon==std::numeric_limits<std::size_t>::max() ||
+        witness.states.size()!=coordinates.horizon+1 || witness.controls.size()!=coordinates.horizon)
+        return false;
+    const auto finite_dimension=[](const Vector& values,std::size_t dimension) {
+        return values.size()==dimension &&
+            std::all_of(values.begin(),values.end(),[](double value){return std::isfinite(value);});
+    };
+    return std::all_of(witness.states.begin(),witness.states.end(),[&](const Vector& state){
+            return finite_dimension(state,coordinates.dimensions.state);}) &&
+        std::all_of(witness.controls.begin(),witness.controls.end(),[&](const Vector& control){
+            return finite_dimension(control,coordinates.dimensions.control);});
+}
 Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIdentity& expected) {
     Diagnostics diagnostics=check_outcome_evidence(result.outcome,expected.problem,expected.request.assurance);
     auto add=[&](DiagnosticCode code,std::string field,std::string explanation) {
         diagnostics.push_back({code,std::move(field),std::move(explanation)});
     };
     for (const auto* bound : {&result.objective.lower,&result.objective.upper})
-        if (*bound && ((*bound)->evidence.problem!=expected.problem || !std::isfinite((*bound)->value)))
-            add(DiagnosticCode::evidence_mismatch,"result.objective","A retained bound needs a finite value and matching problem identity");
+        if (*bound && !supported_synthesis_bound(**bound,expected.problem))
+            add(DiagnosticCode::evidence_mismatch,"result.objective","A retained bound needs finite value, matching problem and stated support");
     if (result.objective.lower && result.objective.upper && result.objective.lower->value>result.objective.upper->value)
         add(DiagnosticCode::invalid_claim,"result.objective","Lower bound exceeds upper bound");
     for (const auto& incumbent:result.incumbents)
-        if (incumbent.witness.problem!=expected.problem || !std::isfinite(incumbent.witness.original_objective) ||
-            incumbent.feasibility.problem!=expected.problem ||
-            std::holds_alternative<Unestablished>(incumbent.feasibility.support))
-            add(DiagnosticCode::evidence_mismatch,"result.incumbents","An incumbent has the wrong problem or a nonfinite objective");
+        if (!supported_feasible_incumbent(incumbent,expected))
+            add(DiagnosticCode::evidence_mismatch,"result.incumbents",
+                "An incumbent needs matching problem, supported feasibility and a finite full history in canonical dimensions");
+    if (result.outcome.value==MathematicalOutcome::infeasible &&
+        std::any_of(result.incumbents.begin(),result.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
+            return supported_feasible_incumbent(incumbent,expected);
+        }))
+        add(DiagnosticCode::invalid_claim,"result.outcome.infeasible",
+            "A supported feasible incumbent contradicts an infeasibility claim");
+    if (result.objective.lower && supported_synthesis_bound(*result.objective.lower,expected.problem) &&
+        std::any_of(result.incumbents.begin(),result.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
+            return supported_feasible_incumbent(incumbent,expected) &&
+                incumbent.witness.original_objective<result.objective.lower->value;
+        }))
+        add(DiagnosticCode::invalid_claim,"result.objective.lower",
+            "A supported feasible incumbent has objective below the claimed lower bound");
     if (result.family) {
         const auto& identity=result.family->identity();
         if (identity.problem!=expected.problem || identity.request!=expected.request ||

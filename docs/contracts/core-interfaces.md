@@ -187,6 +187,8 @@ Canonical joint order is `[x0, ..., xT, u0, ..., u(T-1)]`: state block k starts 
 
 If a workspace reports infeasibility, unboundedness or an unattained infimum alongside a valid candidate family, the port retains the candidate and changes the mathematical outcome to `undetermined` in the contract-rejected result. A claimed infeasibility with an independently supported feasible incumbent is handled the same way. The original contradiction remains in the contract diagnostics; artifact publication rejects any unsanitized combination.
 
+The port requires each retained incumbent to have supported feasibility, finite T+1 state and T control histories in the resolved coordinate dimensions, and a finite objective. It rejects a supported lower objective bound greater than any supported feasible incumbent objective; this comparison uses the bound as stated, without inventing a rounding margin. A finite number with `Unestablished` support is not retained as an objective bound. `SymbolicArgument` records the stated argument and assumptions but is not itself a machine-checked proof; numerical support likewise remains scoped to its numerical policy. Rejected malformed histories and unsupported or contradictory bounds are removed while valid evidence survives.
+
 ## Execution, configuration and caller example
 
 `StrategyConfiguration` has independent IDs for strategy, LP, convex method, hull policy, geometry operator, converter, approximation policy, selector and representation. The registry resolves selected methods and checks their declared capability and dependency requirements; individual strategies remain responsible for the mathematical profiles they offer.

@@ -226,7 +226,10 @@ TEST_CASE("historical v2 candidate remains unestablished under scoped feasibilit
     const auto historical=fixture_v2_text();
     REQUIRE(historical.find("csl.run-statistics/2")!=std::string::npos);
     const auto restored=accepted(ar::decode_run(historical,integrator_problem()));
-    const auto& family=std::get<ar::SynthesisFinal>(restored.description().final).family->family;
+    const auto& final=std::get<ar::SynthesisFinal>(restored.description().final);
+    CHECK_FALSE(final.objective.lower.has_value());
+    CHECK_FALSE(final.objective.upper.has_value());
+    const auto& family=final.family->family;
     CHECK(std::holds_alternative<Unestablished>(std::get<CandidateFamily>(family.outcome()).feasibility));
     CHECK(accepted(ar::encode_run(restored)).find("csl.run-statistics/3")!=std::string::npos);
 }
@@ -581,6 +584,103 @@ TEST_CASE("strategy boundary preserves a candidate through contradictory-status 
     auto illegal=record;
     std::get<ar::SynthesisFinal>(illegal.final).outcome.value=MathematicalOutcome::infeasible;
     CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_run({problem,illegal})));
+}
+TEST_CASE("strategy boundary retains a feasible incumbent against a no-family infeasibility claim") {
+    auto record=accepted(ar::decode_run(fixture_text())).description();
+    const auto& source=std::get<ar::SynthesisFinal>(record.final);
+    REQUIRE(source.family.has_value());
+    const auto identity=source.family->family.identity();
+    const auto incumbents_count=source.incumbents.size();
+    struct Contradictory final:SynthesisWorkspace {
+        SynthesisResult result;
+        explicit Contradictory(SynthesisResult value):result(std::move(value)){}
+        SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override{return result;}
+    } workspace{SynthesisResult{Termination::completed,
+        {record.problem,MathematicalOutcome::infeasible,SymbolicArgument{"synthetic contradiction","fixture"},{}},
+        source.objective,{},source.incumbents,{}}};
+    const auto problem=integrator_problem();
+    registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version};
+    const ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{}, {},
+        identity.request.numerical,"synthetic-v3-no-family"};
+    auto observed=registry::StrategyPort::run(workspace,request,context);
+    REQUIRE(std::holds_alternative<SynthesisResult>(observed));
+    const auto& result=std::get<SynthesisResult>(observed);
+    CHECK(result.termination==Termination::contract_rejected);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.family.has_value());
+    CHECK(result.incumbents.size()==incumbents_count);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+    const auto& failure=std::get<ContractValidationFailure>(result.stop);
+    CHECK(failure.retained.incumbents==incumbents_count);
+    CHECK(std::any_of(failure.diagnostics.begin(),failure.diagnostics.end(),[](const Diagnostic& diagnostic){
+        return diagnostic.field=="result.outcome.infeasible";
+    }));
+    record.selection.reset();
+    record.final=ar::project_final(result);
+    const auto owner=accepted(ar::publish_run({problem,record}));
+    const auto restored=accepted(ar::decode_run(accepted(ar::encode_run(owner)),problem));
+    const auto& final=std::get<ar::SynthesisFinal>(restored.description().final);
+    CHECK(final.termination==Termination::contract_rejected);
+    CHECK(final.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(final.family.has_value());
+    CHECK(final.incumbents.size()==incumbents_count);
+    auto illegal=record;
+    std::get<ar::SynthesisFinal>(illegal.final).outcome.value=MathematicalOutcome::infeasible;
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_run({problem,illegal})));
+}
+TEST_CASE("strategy boundary sanitizes contradictory bounds and malformed incumbent histories before v3 publication") {
+    const auto problem=integrator_problem();
+    for (const int case_id:{0,1,2}) {
+        auto record=accepted(ar::decode_run(fixture_text())).description();
+        const auto& source=std::get<ar::SynthesisFinal>(record.final);
+        REQUIRE(source.family.has_value());
+        const auto identity=source.family->family.identity();
+        SynthesisResult raw{Termination::completed,
+            {record.problem,MathematicalOutcome::undetermined,Unestablished{},{}},
+            source.objective,{},source.incumbents,{}};
+        if (case_id==0) {
+            REQUIRE(raw.objective.lower.has_value());
+            raw.objective.lower->value=10;
+            raw.objective.upper.reset();
+        } else if (case_id==1) {
+            raw.incumbents[0].witness.states.pop_back();
+        } else {
+            REQUIRE(raw.objective.lower.has_value());
+            raw.objective.lower->evidence.support=Unestablished{};
+        }
+        auto illegal=record;
+        illegal.selection.reset();
+        illegal.final=ar::project_final(raw);
+        CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_run({problem,illegal})));
+        struct Fixture final:SynthesisWorkspace {
+            SynthesisResult value;
+            explicit Fixture(SynthesisResult result):value(std::move(result)){}
+            SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override{return value;}
+        } workspace{std::move(raw)};
+        registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version};
+        const ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{}, {},
+            identity.request.numerical,"synthetic-v3-evidence"};
+        auto observed=registry::StrategyPort::run(workspace,request,context);
+        REQUIRE(std::holds_alternative<SynthesisResult>(observed));
+        const auto& result=std::get<SynthesisResult>(observed);
+        CHECK(result.termination==Termination::contract_rejected);
+        if (case_id==1) {
+            CHECK(result.incumbents.size()==1);
+            REQUIRE(result.objective.lower.has_value());
+            CHECK(result.objective.lower->value==0);
+        } else {
+            CHECK(result.incumbents.size()==2);
+            CHECK_FALSE(result.objective.lower.has_value());
+        }
+        record.selection.reset();
+        record.final=ar::project_final(result);
+        const auto owner=accepted(ar::publish_run({problem,record}));
+        const auto restored=accepted(ar::decode_run(accepted(ar::encode_run(owner)),problem));
+        const auto& final=std::get<ar::SynthesisFinal>(restored.description().final);
+        CHECK(final.termination==Termination::contract_rejected);
+        CHECK(final.objective.lower.has_value()==(case_id==1));
+        CHECK(final.incumbents.size()==(case_id==1?1u:2u));
+    }
 }
 TEST_CASE("late request rejection retains bounds incumbent evidence and candidate relation") {
     auto record=accepted(ar::decode_run(fixture_text())).description();

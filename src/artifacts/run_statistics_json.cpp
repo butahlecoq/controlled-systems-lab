@@ -448,6 +448,21 @@ ArtifactResult<RunStatistics> read_run(const Json& j) {
         // Only the explicitly unestablished case can be migrated without invention.
         auto& final=current.at("final");
         if(final.at("kind")=="synthesis") {
+            // V2 allowed finite numbers labelled as bounds without support. They
+            // cannot become mathematical bounds in V3. Drop only that unsupported
+            // payload; a stopped V2 record whose retained scope refers to it
+            // needs a reviewed migration rather than an invented scope rewrite.
+            auto& value=final.at("value");
+            auto& objective=value.at("objective");
+            for(const char* side:{"lower","upper"}) {
+                auto& bound=objective.at(side);
+                if(!bound.is_null()&&std::holds_alternative<Unestablished>(
+                    get<ClaimEvidence>(bound.at("evidence")).support)) {
+                    require(value.at("stop").at("kind")=="none","schema.migration.objective",
+                        "V2 stopped record has unsupported bounds and cannot be migrated without changing its retained scope");
+                    bound=nullptr;
+                }
+            }
             auto& family=final.at("value").at("family");
             if(!family.is_null()&&family.at("family").at("outcome").at("kind")=="candidate") {
                 auto& feasibility=family.at("family").at("outcome").at("value").at("feasibility");

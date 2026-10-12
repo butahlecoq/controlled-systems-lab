@@ -397,7 +397,7 @@ TEST_CASE("strategy snapshots copy mutable model aliases and authored objective 
     }();
     auto workers = plan.create();
     const auto solved = std::get<SynthesisResult>(std::get<0>(workers)->run(context()));
-    CHECK(solved.incumbents[0].witness.states == std::vector<Vector>{{0}});
+    CHECK(solved.incumbents[0].witness.states == std::vector<Vector>{{0},{0}});
     CHECK(solved.incumbents[0].witness.original_objective == 2);
 }
 

@@ -295,10 +295,10 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
             }
             if(s->family){const auto& f=*s->family;
                 const auto& identity=f.family.identity();
-                const auto& relation=std::visit([](const auto& product)->const JointRelation&{return product.relation;},f.family.outcome());
+                const auto* relation=std::visit([](const auto& product)->const JointRelation*{return &product.relation;},f.family.outcome());
                 const auto strategy_version=std::find_if(input.configuration.description().modules.begin(),input.configuration.description().modules.end(),[&](const auto& module){return module.role=="strategy"&&module.implementation.id==identity.strategy&&module.implementation.version==identity.strategy_version;});
                 if(identity.problem!=input.problem||identity.coordinates.horizon!=input.horizon||identity.coordinates.dimensions.state!=input.dimensions.state||identity.coordinates.dimensions.control!=input.dimensions.control||identity.coordinates.dimensions.external!=input.dimensions.external||
-                    relation.coordinates!=identity.coordinates||relation.representation!=identity.request.representation||relation.payload||
+                    relation->coordinates!=identity.coordinates||relation->representation!=identity.request.representation||relation->payload||
                     identity.request.objective!=input.problem||identity.request.numerical!=input.configuration.description().numerical||
                     identity.request.assurance!=input.configuration.description().output.assurance||identity.request.representation!=input.configuration.description().output.representation||
                     identity.request.target!=input.configuration.description().output.family||identity.request.profile.empty()||
@@ -307,7 +307,11 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
                 for(const auto& step:identity.lineage)if(step.request.value.empty()||step.input.value.empty()||step.output.value.empty()||step.module.value.empty()||step.version.empty())return reject("run.final.family.lineage","Incomplete transformation identity");
                 if(const auto* p=std::get_if<ExternalFamilyPayload>(&f.payload);p&&!attachment_role(p->attachment,AttachmentRole::family))return reject("run.final.family.attachment","Missing family-role attachment");
             }
-            FamilyIdentity expected{};expected.problem=input.problem;expected.request.assurance=input.configuration.description().output.assurance;
+            FamilyIdentity expected{};expected.problem=input.problem;
+            expected.request.assurance=input.configuration.description().output.assurance;
+            if(input.horizon>std::numeric_limits<std::size_t>::max())
+                return reject("run.horizon","Horizon exceeds this platform's coordinate size");
+            expected.coordinates={input.dimensions,static_cast<std::size_t>(input.horizon)};
             if(s->family)expected=s->family->family.identity();
             const SynthesisResult checked{s->termination,s->outcome,s->objective,s->family?std::optional<OptimalFamily>{s->family->family}:std::nullopt,s->incumbents,{},s->stop};
             if(!check_synthesis_result(checked,expected).empty())return reject("run.final.synthesis.evidence","Unsupported or contradictory synthesis evidence");

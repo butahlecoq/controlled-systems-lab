@@ -554,6 +554,8 @@ public:
 Diagnostics check_model_shape(const Dynamics&, std::size_t horizon);
 Diagnostics check_nominal_profile(const Problem&, bool requires_inverse, Assurance);
 Diagnostics check_family_evidence(const OptimalFamily&, const ProblemId&, Assurance);
+bool supported_synthesis_bound(const ObjectiveBound&, const ProblemId&);
+bool supported_feasible_incumbent(const FeasibleIncumbent&, const FamilyIdentity&);
 Diagnostics check_synthesis_result(const SynthesisResult&, const FamilyIdentity&);
 Diagnostics check_resources(const ResourcePolicy&);
 Diagnostics check_outcome_evidence(const ProgramOutcomeClaim&, const ProgramIdentity&, Assurance);

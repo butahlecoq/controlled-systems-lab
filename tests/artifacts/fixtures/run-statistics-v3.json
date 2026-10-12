@@ -106,8 +106,11 @@
           "evidence": {
             "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
             "support": {
-              "kind": "unestablished",
-              "value": {}
+              "kind": "symbolic_argument",
+              "value": {
+                "reference": "Terminal cost is 0*x2+0, so every feasible history has cost 0; lower bound 0.",
+                "assumptions": "Literal two-step model; text is provenance, not checked proof."
+              }
             }
           }
         },
@@ -116,8 +119,11 @@
           "evidence": {
             "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
             "support": {
-              "kind": "unestablished",
-              "value": {}
+              "kind": "symbolic_argument",
+              "value": {
+                "reference": "History u=(0,1) is feasible with cost 0; hence upper bound 0.",
+                "assumptions": "Literal dynamics, controls in [0,1]; text is provenance, not checked proof."
+              }
             }
           }
         }
