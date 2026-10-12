@@ -66,7 +66,12 @@ The smoke should report one trial per fixture, all with `passed` and
 Pin the algorithm code source commit and preserve a sanitized build-provenance
 file automatically generated from the CMake File API and final verbose build,
 including compiler and version, C++ standard, Release/NDEBUG flags, dependency
-graph, executable hash, and source identity. Record an operator note about concurrent work and host load. For
+graph, executable hash, and source identity. The provenance binds the complete
+Git tracked tree at the code-source commit and records its tree object ID. It
+allows only the declared report-harness paths between that commit and the
+harness commit, so implementation changes anywhere in the repository—including
+Qhull, HiGHS, and shared numeric code—fail validation. Dependency pin files are
+hashed separately. Record an operator note about concurrent work and host load. For
 reproducibility, use at least seven measured repetitions and one excluded
 warmup, forward/reverse fixture order, and a clean Release executable. Example:
 

@@ -31,6 +31,14 @@ EXPECTED = {
     "essential_rows_highs": {"inputs": {"A": [[1,0],[-1,0],[0,1]], "b": [1,0,0], "E": [[0,1]], "f": [0]},
                              "inequalities": 3, "equalities": 1, "reduction_status": "incomplete", "lp_calls": 3, "removed_inequalities": []},
 }
+HARNESS_PATH_ALLOWLIST = {
+    "CMakeLists.txt",
+    "reports/algorithm-results/tooling/geo04/README.md",
+    "reports/algorithm-results/tooling/geo04/collect.py",
+    "reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp",
+    "reports/algorithm-results/tooling/geo04/render.py",
+    "reports/algorithm-results/tooling/geo04/test_report_tools.py",
+}
 
 
 def sha256_bytes(value: bytes) -> str:
@@ -39,6 +47,28 @@ def sha256_bytes(value: bytes) -> str:
 
 def git(*args: str) -> str:
     return subprocess.check_output(["git", *args], text=True, encoding="utf-8").strip()
+
+
+def validate_source_tree_delta(changed_paths: list[str]) -> None:
+    unexpected = sorted(set(changed_paths) - HARNESS_PATH_ALLOWLIST)
+    if unexpected:
+        raise ValueError(f"tracked source tree changed outside the report harness allowlist: {unexpected}")
+
+
+def vertices_match_expected(points: list, expected_points: list, tolerance: float = 1e-7) -> bool:
+    if len(points) != len(expected_points):
+        return False
+    consumed: set[int] = set()
+    for point in points:
+        if len(point) != 2:
+            return False
+        match = next((index for index, candidate in enumerate(expected_points)
+                      if index not in consumed and all(abs(float(actual)-float(wanted)) <= tolerance
+                                                       for actual, wanted in zip(point, candidate))), None)
+        if match is None:
+            return False
+        consumed.add(match)
+    return len(consumed) == len(expected_points)
 
 
 def redact_paths(value, source_root: Path, build: Path):
@@ -64,12 +94,10 @@ def build_provenance(build: Path, exe: Path, source_commit: str, harness_commit:
     clean_tracked()
     if git("rev-parse", "HEAD") != harness_commit:
         raise ValueError("harness commit does not match current checkout")
-    production_paths = ["include/csl/geometry/polyhedral_intersection.hpp",
-                        "src/geometry/polyhedral/intersection.cpp",
-                        "src/geometry/polyhedral/halfspace_reducer.cpp"]
-    diff = subprocess.run(["git", "diff", "--quiet", source_commit, harness_commit, "--", *production_paths], check=False)
-    if diff.returncode != 0:
-        raise ValueError("GEO-04 production source differs from the selected code-source commit")
+    changed_paths = git("diff", "--name-only", source_commit, harness_commit).splitlines()
+    validate_source_tree_delta(changed_paths)
+    source_tree_oid = git("rev-parse", f"{source_commit}^{{tree}}")
+    harness_tree_oid = git("rev-parse", f"{harness_commit}^{{tree}}")
     reply = build / ".cmake" / "api" / "v1" / "reply"
     indices = sorted(reply.glob("index-*.json"))
     if not indices:
@@ -121,7 +149,9 @@ def build_provenance(build: Path, exe: Path, source_commit: str, harness_commit:
         raise ValueError("CMake source/build path ownership differs from this collection")
     cmake_version = index.get("cmake", {}).get("version", {})
     return {"source_commit": source_commit, "harness_commit": harness_commit, "tracked_clean": True,
-            "code_source_files_unchanged_since_source_commit": production_paths,
+            "tracked_tree_binding": {"scope": "complete tracked repository tree", "source_tree_oid": source_tree_oid,
+                                     "harness_tree_oid": harness_tree_oid, "allowed_harness_delta": sorted(HARNESS_PATH_ALLOWLIST),
+                                     "actual_changed_paths": changed_paths},
             "executable": {"name": exe.name, "sha256": hashlib.sha256(exe.read_bytes()).hexdigest()},
             "cmake": {"version": cmake_version, "generator": index.get("cmake", {}).get("generator", {}).get("name")},
             "configuration": "Release", "cxx_standard": "20", "compiler": cxx[0],
@@ -259,10 +289,7 @@ def main() -> int:
         if "vertices" in expected_case:
             points = row["vertices_json"]
             expected_points = expected_case["vertices"]
-            matches = [sum(len(point)==2 and all(abs(float(a)-float(b)) <= 1e-7 for a,b in zip(point,candidate))
-                           for candidate in expected_points) for point in points]
-            distinct = len({(round(float(point[0]),7),round(float(point[1]),7)) for point in points}) == len(points)
-            if len(points) != len(expected_points) or any(count != 1 for count in matches) or not distinct:
+            if not vertices_match_expected(points, expected_points):
                 row["status"] = "oracle_failed"
                 row["oracle_passed"] = False
         if row["scenario"] == "essential_rows_highs" and not (

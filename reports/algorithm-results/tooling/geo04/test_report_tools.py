@@ -60,6 +60,30 @@ def valid_payload(report_id: str) -> dict:
 
 
 class ReportToolTests(unittest.TestCase):
+    def test_source_identity_rejects_changes_to_any_dependency_implementation(self):
+        for changed in ("src/adapters/polyhedral/qhull.cpp", "src/adapters/lp/highs.cpp", "src/numeric/data.cpp"):
+            with self.subTest(changed=changed):
+                with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
+                    collect.validate_source_tree_delta([changed])
+
+    def test_source_identity_allows_only_declared_report_harness_paths(self):
+        collect.validate_source_tree_delta([
+            "CMakeLists.txt",
+            "reports/algorithm-results/tooling/geo04/collect.py",
+        ])
+
+    def test_collector_oracle_rejects_duplicate_replacing_missing_vertex_within_tolerance(self):
+        expected = collect.EXPECTED["crossing_octagon"]["vertices"]
+        actual = [point[:] for point in expected]
+        actual[1] = [1, 0.50000009]
+        self.assertFalse(collect.vertices_match_expected(actual, expected))
+
+    def test_renderer_oracle_rejects_duplicate_replacing_missing_vertex_within_tolerance(self):
+        expected = collect.EXPECTED["crossing_octagon"]["vertices"]
+        actual = [point[:] for point in expected]
+        actual[1] = [1, 0.50000009]
+        self.assertFalse(render.vertices_match_expected(actual, expected))
+
     def test_failure_invalidates_all_phase_summaries_instead_of_filtering_successes(self):
         rows = [trial(scenario) for scenario in collect.SCENARIOS]
         rows.append({**trial("crossing_octagon", "failed"), "repetition": 1})
@@ -84,6 +108,17 @@ class ReportToolTests(unittest.TestCase):
         tampered["trials"][0]["vertices_json"][0][0] = 9.0
         with self.assertRaisesRegex(ValueError, "digest mismatch"):
             render.validate(tampered)
+
+    def test_renderer_oracle_rejects_resigned_duplicate_vertex_substitution(self):
+        payload = valid_payload("geo04-resigned-substitution")
+        points = copy.deepcopy(payload["trials"][0]["vertices_json"])
+        points[1] = [1, 0.50000009]
+        payload["trials"][0]["vertices_json"] = points
+        unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
+        payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        with self.assertRaisesRegex(ValueError, "saved vertex coordinates fail independent literal oracle"):
+            render.validate(payload)
 
     def test_offline_export_uses_saved_records_only_and_packages_required_files(self):
         payload = valid_payload("geo04-offline-test")

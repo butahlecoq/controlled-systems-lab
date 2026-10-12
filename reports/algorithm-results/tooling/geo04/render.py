@@ -15,6 +15,22 @@ FILES = ("records.json", "collection-status.json", "raw-events.jsonl", "raw-driv
          "measurement-command.txt", "build-provenance.txt", "concurrent-work.txt", "profile-evidence.txt", "scenarios.json", "environment.json")
 
 
+def vertices_match_expected(points: list, expected_points: list, tolerance: float = 1e-7) -> bool:
+    if len(points) != len(expected_points):
+        return False
+    consumed: set[int] = set()
+    for point in points:
+        if len(point) != 2:
+            return False
+        match = next((index for index, candidate in enumerate(expected_points)
+                      if index not in consumed and all(abs(float(actual)-float(wanted)) <= tolerance
+                                                       for actual, wanted in zip(point, candidate))), None)
+        if match is None:
+            return False
+        consumed.add(match)
+    return len(consumed) == len(expected_points)
+
+
 def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -50,9 +66,7 @@ def validate(payload: dict) -> None:
         if "vertices" in case and trial.get("vertices_json") != case["vertices"]:
             points = trial.get("vertices_json", [])
             expected = case["vertices"]
-            if len(points) != len(expected) or any(not any(
-                len(point)==2 and all(abs(float(a)-float(b)) <= 1e-7 for a,b in zip(point, candidate))
-                for candidate in expected) for point in points):
+            if not vertices_match_expected(points, expected):
                 raise ValueError("saved vertex coordinates fail independent literal oracle")
         if trial["scenario"] == "essential_rows_highs" and not (
             trial["reduction_status"] == "incomplete" and trial["lp_calls"] == 3 and
