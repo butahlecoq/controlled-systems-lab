@@ -73,11 +73,48 @@ class RegisteredKindTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'point count differs'):
             registered.adapt_payload(wrong_points)
 
+    def test_opt05_report_id_is_bound_to_source_commit(self):
+        record=json.loads((FIXTURES/'opt05-hull-20261012-d1c211c2'/'records.json').read_text())
+        record['code_commit']='a'*40
+        with self.assertRaisesRegex(ValueError,'report ID does not match source commit'):
+            registered.adapt_payload(record)
+
+    def test_opt05_embedded_zip_hash_and_contents_are_validated(self):
+        source=FIXTURES/'opt05-hull-20261012-d1c211c2'
+        with tempfile.TemporaryDirectory() as temp:
+            bundle=Path(temp)/source.name
+            shutil.copytree(source,bundle)
+            archive_path=bundle/'bundle.zip'
+            original=archive_path.read_bytes()
+            archive_path.write_bytes(original+b'corrupt')
+            with self.assertRaisesRegex(ValueError,'bundle ZIP checksum mismatch'):
+                registered.adapt(bundle)
+
+            archive_path.write_bytes(original)
+            with zipfile.ZipFile(archive_path) as archive:
+                entries=[(item,archive.read(item.filename)) for item in archive.infolist()]
+            with zipfile.ZipFile(archive_path,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
+                for item,content in entries:
+                    if item.filename.endswith('/README.md'):
+                        content+=b'\nchanged after packaging'
+                    archive.writestr(item,content)
+            digest=hashlib.sha256(archive_path.read_bytes()).hexdigest()
+            (bundle/'bundle.zip.sha256').write_text(digest+'  bundle.zip\n',encoding='ascii',newline='\n')
+            with self.assertRaisesRegex(ValueError,'bundle ZIP content mismatch'):
+                registered.adapt(bundle)
+
     def test_geo03_rejects_missing_or_duplicate_summary_group(self):
         record=json.loads((FIXTURES/'geo03-20261012-37c3fb484e0d'/'records.json').read_text())
         missing=copy.deepcopy(record);missing['payload']['summary'].pop();missing['payload_sha256']=registered._digest(missing['payload'])
         with self.assertRaisesRegex(ValueError,'summary must contain'):
             registered.adapt_payload(missing)
+
+    def test_geo03_report_id_is_bound_to_payload_digest(self):
+        record=json.loads((FIXTURES/'geo03-20261012-37c3fb484e0d'/'records.json').read_text())
+        record['payload']['scope_limitations'].append('Changed evidence under a reused ID')
+        record['payload_sha256']=registered._digest(record['payload'])
+        with self.assertRaisesRegex(ValueError,'report ID does not match payload digest'):
+            registered.adapt_payload(record)
 
     def test_geo03_adapter_preserves_native_payload_digest_and_limitations(self):
         result = registered.adapt(FIXTURES / 'geo03-20261012-37c3fb484e0d')
@@ -250,19 +287,25 @@ class RegisteredKindTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)/'input';root.mkdir()
             catalogue=self.publication(root)
-            rid='geo03-20261012-37c3fb484e0d'
-            records_path=root/rid/'records.json'
+            original_rid='geo03-20261012-37c3fb484e0d'
+            records_path=root/original_rid/'records.json'
             record=json.loads(records_path.read_text(encoding='utf-8'))
             record['payload']['scope_limitations'].append('<script>alert(1)</script>')
             record['payload_sha256']=registered._digest(record['payload'])
+            rid='geo03-20261012-'+record['payload_sha256'][:12]
+            record['report_id']=rid
             records_path.write_text(json.dumps(record,indent=2)+'\n',encoding='utf-8')
-            source_manifest=json.loads((root/rid/'manifest.json').read_text(encoding='utf-8'))
+            source_manifest=json.loads((root/original_rid/'manifest.json').read_text(encoding='utf-8'))
             source_manifest['files']['records.json']=hashlib.sha256(records_path.read_bytes()).hexdigest()
-            (root/rid/'manifest.json').write_text(json.dumps(source_manifest,indent=2)+'\n',encoding='utf-8')
+            source_manifest['report_id']=rid
+            (root/original_rid/'manifest.json').write_text(json.dumps(source_manifest,indent=2)+'\n',encoding='utf-8')
+            (root/original_rid).rename(root/rid)
+            (root/(original_rid+'.zip')).rename(root/(rid+'.zip'))
             item=registered.adapt(root/rid)
             archive=registered.offline_zip(root/rid,item)
             (root/(rid+'.zip')).write_bytes(archive)
-            report=next(row for row in catalogue['reports'] if row['report_id']==rid)
+            report=next(row for row in catalogue['reports'] if row['report_id']==original_rid)
+            report['report_id']=rid
             report['payload_sha256']=item.payload_sha256
             report['evidence_limits']=item.evidence_limits
             report['zip_sha256']=hashlib.sha256(archive).hexdigest()

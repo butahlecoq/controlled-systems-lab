@@ -59,8 +59,11 @@ def _adapt_payload(record):
             raise ValueError("OPT-05 summary must contain each expected case exactly once")
         if any(row.get("points")!=expected_points.get(row.get("case_id")) for row in record.get("summary",[])) or any(t.get("points")!=expected_points.get(t.get("case_id")) for t in measured):
             raise ValueError("OPT-05 point count differs from named case")
-        if not re.fullmatch(r"[0-9a-f]{40}", str(record.get("code_commit", ""))) or record.get("fixture", {}).get("oracle") is None:
+        code_commit = record.get("code_commit", "")
+        if not re.fullmatch(r"[0-9a-f]{40}", str(code_commit)) or record.get("fixture", {}).get("oracle") is None:
             raise ValueError("OPT-05 source/fixture evidence missing")
+        if rid.rsplit("-", 1)[1] != code_commit[:8]:
+            raise ValueError("OPT-05 report ID does not match source commit")
         summary = record.get("summary")
         limits = record.get("fixture", {}).get("assurance", "")
         if not isinstance(summary, list) or not summary or any(not isinstance(row, dict) for row in summary) or not isinstance(limits, str) or "not exact arithmetic" not in limits:
@@ -111,6 +114,8 @@ def _adapt_payload(record):
             raise ValueError("GEO-03 full report source commit required")
         if not isinstance(record.get("report_id"), str) or not re.fullmatch(r"geo03-\d{8}-[0-9a-f]{12}", record["report_id"]):
             raise ValueError("unsafe GEO-03 report ID")
+        if not record["report_id"].endswith(record["payload_sha256"][:12]):
+            raise ValueError("GEO-03 report ID does not match payload digest")
         return PublicationRecord("geo03-hv", record["report_id"], record["payload_sha256"], source, "56 measured trials across four bounded 2D fixtures in both conversion directions", "; ".join(limits), payload_schema=schema)
     raise ValueError("unregistered report schema")
 
@@ -159,7 +164,33 @@ def adapt(bundle):
         relative = Path(name)
         if relative.is_absolute() or ".." in relative.parts or any(part.is_symlink() for part in [bundle, *(bundle / Path(*relative.parts[:i]) for i in range(1, len(relative.parts)))]) or not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError("unsafe or tampered registered bundle file: " + name)
+    if result.kind == "opt05-hull":
+        _validate_opt05_bundle_zip(bundle, listed)
     return PublicationRecord(result.kind, result.report_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema)
+
+
+def _validate_opt05_bundle_zip(bundle, listed):
+    archive_path = bundle / "bundle.zip"
+    checksum_path = bundle / "bundle.zip.sha256"
+    try:
+        sidecar = checksum_path.read_text(encoding="ascii")
+        match = re.fullmatch(r"([0-9a-f]{64})  bundle\.zip\n?", sidecar)
+        if match is None or hashlib.sha256(archive_path.read_bytes()).hexdigest() != match.group(1):
+            raise ValueError("OPT-05 bundle ZIP checksum mismatch")
+        expected_names = {f"{bundle.name}/{name}" for name in set(listed) | {"manifest.sha256"}}
+        with zipfile.ZipFile(archive_path) as archive:
+            names = archive.namelist()
+            if len(names) != len(set(names)) or set(names) != expected_names:
+                raise ValueError("OPT-05 bundle ZIP inventory mismatch")
+            if archive.testzip() is not None:
+                raise ValueError("OPT-05 bundle ZIP content mismatch")
+            for name in listed:
+                if archive.read(f"{bundle.name}/{name}") != (bundle / name).read_bytes():
+                    raise ValueError("OPT-05 bundle ZIP content mismatch: " + name)
+            if archive.read(f"{bundle.name}/manifest.sha256") != (bundle / "manifest.sha256").read_bytes():
+                raise ValueError("OPT-05 bundle ZIP content mismatch: manifest.sha256")
+    except (OSError, zipfile.BadZipFile, KeyError, RuntimeError) as error:
+        raise ValueError("invalid OPT-05 bundle ZIP") from error
 
 
 def render_page(bundle, publication):
