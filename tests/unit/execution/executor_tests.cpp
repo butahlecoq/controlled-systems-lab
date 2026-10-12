@@ -12,11 +12,25 @@
 #include <cstdlib>
 #include <new>
 
-// One thread-local public-boundary allocation fault; all other allocations use
-// the ordinary malloc/free lifetime. Never enabled on a worker or test reporter.
-namespace allocation_fault { thread_local bool next{}; }
+// Target a caller-sized metadata copy rather than the next arbitrary allocation:
+// MSVC Debug containers allocate small iterator proxies in noexcept constructors.
+// All other allocations use ordinary malloc/free; faults stay on the caller lane.
+namespace allocation_fault {
+thread_local std::size_t minimum_size{};
+thread_local bool injected{};
+struct ScopedFailure {
+    explicit ScopedFailure(std::size_t minimum) noexcept { minimum_size=minimum; injected=false; }
+    ScopedFailure(const ScopedFailure&)=delete;
+    ScopedFailure& operator=(const ScopedFailure&)=delete;
+    ~ScopedFailure() { minimum_size=0; }
+};
+}
 void* operator new(std::size_t size) {
-    if (allocation_fault::next) { allocation_fault::next=false; throw std::bad_alloc{}; }
+    if (allocation_fault::minimum_size && size>=allocation_fault::minimum_size) {
+        allocation_fault::minimum_size=0;
+        allocation_fault::injected=true;
+        throw std::bad_alloc{};
+    }
     if (auto* p=std::malloc(size ? size : 1)) return p;
     throw std::bad_alloc{};
 }
@@ -439,12 +453,19 @@ TEST_CASE("geometry selector and custom outcomes retain their distinct public ty
 }
 TEST_CASE("prework allocation failure releases busy state without invoking a factory") {
     auto e=executor();auto counts=std::make_shared<Counts>();std::vector<LPTask> tasks{task("allocation-boundary",3,counts)};auto ctx=context(*e);
+    // Construct outside the fault window; freezing this public context must copy
+    // an owned non-SSO string before any workspace factory can run.
+    ctx.run_id.assign(4096,'r');
     bool threw=false;
-    allocation_fault::next=true;
-    try{(void)e->run<reg::LPPort>(tasks,ctx,ex::Mode::sequential);}catch(const std::bad_alloc&){threw=true;}
-    allocation_fault::next=false;
-    CHECK(threw);CHECK(counts->created==0);
-    auto batch=run(*e,tasks,ctx);literal(batch.tasks[0],-1,-1);CHECK(counts->destroyed==1);
+    {
+        allocation_fault::ScopedFailure failure(ctx.run_id.size());
+        try{(void)e->run<reg::LPPort>(tasks,ctx,ex::Mode::sequential);}catch(const std::bad_alloc&){threw=true;}
+    }
+    CHECK(allocation_fault::injected);CHECK(threw);
+    CHECK(counts->created==0);CHECK(counts->invoked==0);CHECK(counts->destroyed==0);
+    auto batch=run(*e,tasks,ctx);CHECK(batch.run_id==ctx.run_id);
+    literal(batch.tasks[0],-1,-1);
+    CHECK(counts->created==1);CHECK(counts->invoked==1);CHECK(counts->destroyed==1);
 }
 TEST_CASE("zero and unknown reservation accounting and duplicate task validation") {
     auto e=executor();auto counts=std::make_shared<Counts>();
