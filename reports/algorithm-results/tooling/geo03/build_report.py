@@ -70,6 +70,8 @@ def environment_snapshot(before: dict, after: dict) -> dict:
         "processor": processor,
         "logical_processors": os.cpu_count(),
         "physical_memory": memory,
+        "total_processor_utilization_percent_snapshot_before": before["total_processor_utilization_percent"],
+        "total_processor_utilization_percent_snapshot_after": after["total_processor_utilization_percent"],
         "processor_queue_length_snapshot_before": before["processor_queue_length"],
         "processor_queue_length_snapshot_after": after["processor_queue_length"],
         "top_processes_snapshot_before": before["top_processes"],
@@ -82,9 +84,10 @@ def environment_snapshot(before: dict, after: dict) -> dict:
 
 
 def load_snapshot() -> dict:
-    load = ps_json("(Get-Counter '\\System\\Processor Queue Length').CounterSamples | Select-Object -First 1 CookedValue | ConvertTo-Json -Compress")
+    processor = ps_json("Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor | Where-Object Name -eq '_Total' | Select-Object -First 1 PercentProcessorTime | ConvertTo-Json -Compress")
+    queue = ps_json("Get-CimInstance Win32_PerfFormattedData_PerfOS_System | Select-Object -First 1 ProcessorQueueLength | ConvertTo-Json -Compress")
     processes = ps_json("Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 ProcessName,CPU,WorkingSet64 | ConvertTo-Json -Compress")
-    return {"processor_queue_length":load,"top_processes":processes}
+    return {"total_processor_utilization_percent":processor,"processor_queue_length":queue,"top_processes":processes}
 
 
 def summarize(rows: list[dict]) -> list[dict]:
