@@ -5,6 +5,14 @@ finite point clouds using any existing `LPWorkspace`. Input point positions are
 stable identities. The module does not depend on HiGHS or phase-I basis
 diagnostics.
 
+When the LP solver is selected through `LPPort`, use
+`registry::RegisteredLPQueryRunner` as the reducer's `LPWorkspace` dependency.
+It owns the frozen provider and re-admits each generated membership program
+before creating a request-specific workspace. Admission rejections create no
+LP workspace and make the reduction incomplete. Per-query records retain the
+program identity, provider provenance, and bounded outcome metadata. This path
+is sequential and forwards the caller's `ExecutionContext` unchanged.
+
 For candidate `p` and the other currently retained points `v_i`, each query
 solves
 
@@ -26,8 +34,12 @@ completed results make the reduction `incomplete`; an unsupported request
 terminates further calls. A `complete` reduction means all candidates reached
 completed, correctly bound LP results, not that retained points are proven to
 be precisely the extreme vertices: an LP backend's unestablished infeasibility
-claim leaves the candidate retained. `lp_calls` counts actual solver
-invocations and `attempts` preserves each candidate's returned outcome.
+claim leaves the candidate retained. `lp_calls` counts calls to the supplied
+`LPWorkspace` dependency and `attempts` preserves each candidate's outcome.
+With `RegisteredLPQueryRunner`, this includes requests rejected during provider
+preflight or stopped before solver creation; count `LPQueryCompleted`,
+`LPQueryStopped` and `LPQuerySolverUnsupported` records to distinguish
+workspace-backed calls from admission rejections and preflight stops.
 
 The algorithm handles empty and singleton clouds without LP calls, and accepts
 zero-dimensional, duplicated and lower-dimensional clouds. It preserves the

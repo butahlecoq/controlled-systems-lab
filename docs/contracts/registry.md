@@ -36,10 +36,21 @@ LP-membership reducer; another reducer registers its own workspace under a
 different method identity. Its `run_with(context, dependency...)` is available
 only when that port declares the matching typed `run` signature. The hull port
 accepts an `LPWorkspace` dependency rather than selecting a concrete solver.
-When the LP implementation is itself selected through `LPPort`,
-`LPWorkspaceView` borrows its bound workspace and forwards generated membership
-programs to that provider without exposing the provider's owned native workspace.
-The view must not outlive the corresponding `BoundWorkspace<LPPort>`.
+For generated LP requests, `registry::RegisteredLPQueryRunner` instead owns a
+`PreparedProvider<LPPort>` by value. It calls `prepare(concrete_request)` for
+each query, creates no workspace on rejection, and creates a request-specific
+exclusive workspace for each admitted synchronous solve. Its closed query
+records retain the concrete program identity, provider provenance, and one
+closed outcome: admission rejection, pre-execution cancellation/deadline,
+solver rejection, completed result (including returned subject identity), or
+non-completed termination reason. They do not retain solver vectors.
+The runner forwards the caller's `ExecutionContext` and remains sequential; it
+does not create a nested executor.
+
+`LPWorkspaceView` remains a low-level borrowed adapter for a caller-owned
+`BoundWorkspace<LPPort>` and forwards direct solves without per-query
+`PreparedProvider` admission. It is not the registered generated-request path
+and must not outlive its corresponding `BoundWorkspace<LPPort>`.
 
 `select(registry, method, request, requirements, transitions)` borrows a complete
 typed request. `prepare_pipeline(selection...)` returns either a rejection or a

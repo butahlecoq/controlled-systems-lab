@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/geometry/hull_reducer.hpp>
+#include <csl/registry/provider.hpp>
 #include <limits>
 
 using namespace csl;
@@ -112,9 +113,212 @@ private:
     std::unique_ptr<LPWorkspace> delegate_;
     std::shared_ptr<std::size_t> calls_;
 };
+
+class RecordingLPWorkspace final : public LPWorkspace {
+public:
+    RecordingLPWorkspace(std::unique_ptr<LPWorkspace> delegate,
+            std::shared_ptr<std::vector<WorkspaceIdentity>> identities,
+            std::shared_ptr<std::size_t> solves)
+        : delegate_(std::move(delegate)), identities_(std::move(identities)), solves_(std::move(solves)) {}
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext& context) override {
+        ++*solves_;
+        identities_->push_back(workspace_identity());
+        return delegate_->solve(program, context);
+    }
+private:
+    std::unique_ptr<LPWorkspace> delegate_;
+    std::shared_ptr<std::vector<WorkspaceIdentity>> identities_;
+    std::shared_ptr<std::size_t> solves_;
+};
 } // namespace
 
-TEST_CASE("hull reducer registry selection composes with an independently supplied LP workspace") {
+TEST_CASE("registered hull queries preflight each LP and retain provider identity after registry exit") {
+    auto capability_calls = std::make_shared<std::size_t>(0);
+    auto factory_calls = std::make_shared<std::size_t>(0);
+    auto solve_calls = std::make_shared<std::size_t>(0);
+    auto workspace_identities = std::make_shared<std::vector<WorkspaceIdentity>>();
+    auto provider = [&] {
+        auto highs_result = adapters::lp::make_highs_registration();
+        REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(highs_result));
+        auto highs = std::get<registry::Registration<registry::LPPort>>(std::move(highs_result));
+        registry::Registry<registry::LPPort> lp_registry;
+        auto factory = highs.factory;
+        REQUIRE_FALSE(lp_registry.add({{{"test.per-query-lp"}, "3.2"},
+            [capability_calls](const LinearProgram&, const registry::Requirements&) -> registry::Capability {
+                ++*capability_calls;
+                return registry::Offer{};
+            },
+            [factory = std::move(factory), factory_calls, solve_calls, workspace_identities](const LinearProgram& request) {
+                ++*factory_calls;
+                return std::make_unique<RecordingLPWorkspace>(factory(request), workspace_identities, solve_calls);
+            }}));
+        auto result = registry::prepare_provider(registry::select_provider(lp_registry,
+            registry::Method{{"test.per-query-lp"}, std::nullopt}));
+        REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(result));
+        return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(result));
+    }();
+
+    registry::Registry<registry::HullReducerPort> reducers;
+    REQUIRE_FALSE(reducers.add(geometry::make_lp_hull_reducer_registration()));
+    const geometry::PointCloud cloud{{"provider-hull"}, {{0.0}, {1.0}, {0.5}}};
+    auto prepared_reducer = registry::prepare_pipeline(registry::select(reducers,
+        registry::Method{{"csl.hull.lp-membership"}, std::nullopt}, cloud));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::HullReducerPort>>(prepared_reducer));
+    auto reducer_workspaces = std::get<registry::PreparedPipeline<registry::HullReducerPort>>(
+        std::move(prepared_reducer)).create();
+    registry::RegisteredLPQueryRunner runner(std::move(provider));
+    const auto result = std::get<0>(reducer_workspaces)->run_with(ExecutionContext{}, runner);
+
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& reduction = std::get<geometry::HullReduction>(result);
+    CHECK(reduction.status == geometry::ReductionStatus::complete);
+    CHECK(reduction.retained == std::vector<std::size_t>{0, 1});
+    CHECK(reduction.lp_calls == 3);
+    CHECK(*capability_calls == 3);
+    CHECK(*factory_calls == 3);
+    CHECK(*solve_calls == 3);
+    REQUIRE(runner.records().size() == 3);
+    REQUIRE(std::holds_alternative<registry::LPQueryCompleted>(runner.records()[0]));
+    CHECK(std::get<registry::LPQueryCompleted>(runner.records()[0]).request.program.value == "hull-membership-0");
+    CHECK(std::get<registry::LPQueryCompleted>(runner.records()[0]).returned_subject.program.value == "hull-membership-0");
+    CHECK(std::get<registry::LPQueryCompleted>(runner.records()[0]).provider.actual->id.value == "test.per-query-lp");
+    CHECK(std::get<registry::LPQueryCompleted>(runner.records()[0]).provider.actual->version == "3.2");
+    CHECK(std::get<registry::LPQueryCompleted>(runner.records()[2]).request.program.value == "hull-membership-2");
+    REQUIRE(workspace_identities->size() == 3);
+    CHECK_FALSE((*workspace_identities)[0] == (*workspace_identities)[1]);
+    CHECK_FALSE((*workspace_identities)[1] == (*workspace_identities)[2]);
+}
+
+TEST_CASE("provider capacity rejection creates no LP workspace for the incompatible hull query") {
+    auto capability_calls = std::make_shared<std::size_t>(0);
+    auto factory_calls = std::make_shared<std::size_t>(0);
+    auto solve_calls = std::make_shared<std::size_t>(0);
+    auto provider = [&] {
+        auto highs_result = adapters::lp::make_highs_registration();
+        REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(highs_result));
+        auto highs = std::get<registry::Registration<registry::LPPort>>(std::move(highs_result));
+        registry::Registry<registry::LPPort> lp_registry;
+        auto factory = highs.factory;
+        REQUIRE_FALSE(lp_registry.add({{{"test.minimum-membership-capacity"}, "1"},
+            [capability_calls](const LinearProgram& request, const registry::Requirements&) -> registry::Capability {
+                ++*capability_calls;
+                if (request.objective().size() < 5)
+                    return Diagnostics{{DiagnosticCode::unsupported, "test.membership_capacity",
+                        "requires at least five membership weights"}};
+                return registry::Offer{};
+            },
+            [factory = std::move(factory), factory_calls, solve_calls](const LinearProgram& request) {
+                ++*factory_calls;
+                return std::make_unique<CountingLPWorkspace>(factory(request), solve_calls);
+            }}));
+        auto result = registry::prepare_provider(registry::select_provider(lp_registry,
+            registry::Method{{"test.minimum-membership-capacity"}, std::nullopt}));
+        REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(result));
+        return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(result));
+    }();
+
+    registry::Registry<registry::HullReducerPort> reducers;
+    REQUIRE_FALSE(reducers.add(geometry::make_lp_hull_reducer_registration()));
+    const geometry::PointCloud cloud{{"rejected-provider-hull"},
+        {{0,0}, {1,0}, {1,1}, {0,1}, {0.5,0.5}, {0.5,0.5}, {0.5,0.5}}};
+    auto prepared_reducer = registry::prepare_pipeline(registry::select(reducers,
+        registry::Method{{"csl.hull.lp-membership"}, std::nullopt}, cloud));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::HullReducerPort>>(prepared_reducer));
+    auto reducer_workspaces = std::get<registry::PreparedPipeline<registry::HullReducerPort>>(
+        std::move(prepared_reducer)).create();
+    registry::RegisteredLPQueryRunner runner(std::move(provider));
+    const auto result = std::get<0>(reducer_workspaces)->run_with(ExecutionContext{}, runner);
+
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& reduction = std::get<geometry::HullReduction>(result);
+    CHECK(reduction.status == geometry::ReductionStatus::incomplete);
+    CHECK(reduction.retained == std::vector<std::size_t>{0, 1, 2, 3, 6});
+    CHECK(reduction.lp_calls == 7);
+    CHECK(reduction.attempts.size() == 7);
+    CHECK(reduction.attempts.back().outcome == geometry::MembershipOutcome::unsupported);
+    CHECK(*capability_calls == 7);
+    CHECK(*factory_calls == 6);
+    CHECK(*solve_calls == 6);
+    REQUIRE(runner.records().size() == 7);
+    CHECK(std::holds_alternative<registry::LPQueryRejected>(runner.records().back()));
+    const auto& rejected = std::get<registry::LPQueryRejected>(runner.records().back());
+    CHECK(rejected.request.program.value == "hull-membership-6");
+    CHECK(rejected.rejection.provenance.actual->id.value == "test.minimum-membership-capacity");
+    CHECK(rejected.rejection.diagnostics[0].field == "test.membership_capacity");
+}
+
+TEST_CASE("registered hull queries preserve cancellation deadline and backend resource outcomes") {
+    auto capability_calls = std::make_shared<std::size_t>(0);
+    auto factory_calls = std::make_shared<std::size_t>(0);
+    auto provider = [&] {
+        registry::Registry<registry::LPPort> lp_registry;
+        REQUIRE_FALSE(lp_registry.add({{{"test.stopped-lp"}, "1"},
+            [capability_calls](const LinearProgram&, const registry::Requirements&) -> registry::Capability {
+                ++*capability_calls;
+                return registry::Offer{};
+            },
+            [factory_calls](const LinearProgram&) -> std::unique_ptr<LPWorkspace> {
+                ++*factory_calls;
+                return std::make_unique<LimitedWorkspace>();
+            }}));
+        auto result = registry::prepare_provider(registry::select_provider(lp_registry,
+            registry::Method{{"test.stopped-lp"}, std::nullopt}));
+        REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(result));
+        return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(result));
+    }();
+
+    registry::Registry<registry::HullReducerPort> reducers;
+    REQUIRE_FALSE(reducers.add(geometry::make_lp_hull_reducer_registration()));
+    const geometry::PointCloud cloud{{"stopped-provider-hull"}, {{0.0}, {1.0}}};
+    auto prepared_reducer = registry::prepare_pipeline(registry::select(reducers,
+        registry::Method{{"csl.hull.lp-membership"}, std::nullopt}, cloud));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::HullReducerPort>>(prepared_reducer));
+    auto reducer_workspaces = std::get<registry::PreparedPipeline<registry::HullReducerPort>>(
+        std::move(prepared_reducer)).create();
+    auto& reducer = *std::get<0>(reducer_workspaces);
+
+    std::stop_source stop_source;
+    stop_source.request_stop();
+    ExecutionContext cancelled_context;
+    cancelled_context.cancellation = stop_source.get_token();
+    registry::RegisteredLPQueryRunner cancelled_runner(provider);
+    const auto cancelled = reducer.run_with(cancelled_context, cancelled_runner);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(cancelled));
+    CHECK(std::get<geometry::HullReduction>(cancelled).status == geometry::ReductionStatus::incomplete);
+    CHECK(std::get<geometry::HullReduction>(cancelled).attempts[0].outcome == geometry::MembershipOutcome::stopped);
+    REQUIRE(cancelled_runner.records().size() == 1);
+    REQUIRE(std::holds_alternative<registry::LPQueryNotRun>(cancelled_runner.records()[0]));
+    CHECK(std::get<registry::LPQueryNotRun>(cancelled_runner.records()[0]).reason ==
+        registry::LPQueryNotRunReason::cancelled);
+
+    ExecutionContext deadline_context;
+    deadline_context.deadline = std::chrono::steady_clock::now() - std::chrono::milliseconds{1};
+    registry::RegisteredLPQueryRunner deadline_runner(provider);
+    const auto deadline = reducer.run_with(deadline_context, deadline_runner);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(deadline));
+    CHECK(std::get<geometry::HullReduction>(deadline).status == geometry::ReductionStatus::incomplete);
+    REQUIRE(deadline_runner.records().size() == 1);
+    REQUIRE(std::holds_alternative<registry::LPQueryNotRun>(deadline_runner.records()[0]));
+    CHECK(std::get<registry::LPQueryNotRun>(deadline_runner.records()[0]).reason ==
+        registry::LPQueryNotRunReason::deadline);
+    CHECK(*capability_calls == 0);
+    CHECK(*factory_calls == 0);
+
+    registry::RegisteredLPQueryRunner limited_runner(provider);
+    const auto limited = reducer.run_with(ExecutionContext{}, limited_runner);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(limited));
+    CHECK(std::get<geometry::HullReduction>(limited).status == geometry::ReductionStatus::incomplete);
+    CHECK(std::get<geometry::HullReduction>(limited).attempts[0].outcome == geometry::MembershipOutcome::stopped);
+    REQUIRE(limited_runner.records().size() == 1);
+    REQUIRE(std::holds_alternative<registry::LPQueryStopped>(limited_runner.records()[0]));
+    CHECK(std::get<registry::LPQueryStopped>(limited_runner.records()[0]).reason ==
+        registry::LPQueryStopReason::resource_limit);
+    CHECK(*capability_calls == 1);
+    CHECK(*factory_calls == 1);
+}
+
+TEST_CASE("hull reducer selects alternative reducers and per-query registered LP providers") {
     using Port = registry::HullReducerPort;
     std::size_t reducer_calls = 0;
     registry::Registry<Port> reducers;
@@ -132,10 +336,6 @@ TEST_CASE("hull reducer registry selection composes with an independently suppli
     auto highs_result = adapters::lp::make_highs_registration();
     REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(highs_result));
     auto highs = std::get<registry::Registration<registry::LPPort>>(std::move(highs_result));
-    auto seed_result = optimization::make_linear_program({{{"registered-lp"},{"seed"}}, {}, 0,
-        {0,0,{0},{},{ }}, {}, {}});
-    REQUIRE(std::holds_alternative<LinearProgram>(seed_result));
-    const auto seed = std::get<LinearProgram>(std::move(seed_result));
     registry::Registry<registry::LPPort> lp_providers;
     auto add_counting_provider = [&](const char* method, const std::shared_ptr<std::size_t>& calls) {
         auto factory = highs.factory;
@@ -160,16 +360,17 @@ TEST_CASE("hull reducer registry selection composes with an independently suppli
     auto workspaces = prepared.create();
     auto& registered_reducer = *std::get<0>(workspaces);
 
-    const auto first_lp_prepared_result = registry::prepare_pipeline(registry::select(lp_providers,
-        registry::Method{{"test.lp-first"}, std::nullopt}, seed));
-    REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::LPPort>>(first_lp_prepared_result));
-    auto first_lp_prepared = std::get<registry::PreparedPipeline<registry::LPPort>>(first_lp_prepared_result);
-    auto first_lp_workspaces = first_lp_prepared.create();
-    registry::LPWorkspaceView selected_lp(*std::get<0>(first_lp_workspaces));
+    auto first_lp_provider_result = registry::prepare_provider(registry::select_provider(lp_providers,
+        registry::Method{{"test.lp-first"}, std::nullopt}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(first_lp_provider_result));
+    registry::RegisteredLPQueryRunner selected_lp(
+        std::get<registry::PreparedProvider<registry::LPPort>>(std::move(first_lp_provider_result)));
     auto outcome = registered_reducer.run_with(ExecutionContext{}, selected_lp);
     REQUIRE(std::holds_alternative<geometry::HullReduction>(outcome));
     CHECK(reducer_calls == 0);
     CHECK(*first_lp_calls == 5);
+    REQUIRE(selected_lp.records().size() == 5);
+    CHECK(std::get<registry::LPQueryCompleted>(selected_lp.records()[0]).provider.actual->id.value == "test.lp-first");
     const auto& result = std::get<geometry::HullReduction>(outcome);
     CHECK(result.status == geometry::ReductionStatus::complete);
     CHECK(prepared.provenance()[0].actual->id.value == "csl.hull.lp-membership");
@@ -180,16 +381,17 @@ TEST_CASE("hull reducer registry selection composes with an independently suppli
     auto alternative = std::get<registry::PreparedPipeline<Port>>(alternative_result).create();
     auto& substituted_reducer = *std::get<0>(alternative);
 
-    const auto second_lp_prepared_result = registry::prepare_pipeline(registry::select(lp_providers,
-        registry::Method{{"test.lp-second"}, std::nullopt}, seed));
-    REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::LPPort>>(second_lp_prepared_result));
-    auto second_lp_prepared = std::get<registry::PreparedPipeline<registry::LPPort>>(second_lp_prepared_result);
-    auto second_lp_workspaces = second_lp_prepared.create();
-    registry::LPWorkspaceView second_lp(*std::get<0>(second_lp_workspaces));
+    auto second_lp_provider_result = registry::prepare_provider(registry::select_provider(lp_providers,
+        registry::Method{{"test.lp-second"}, std::nullopt}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(second_lp_provider_result));
+    registry::RegisteredLPQueryRunner second_lp(
+        std::get<registry::PreparedProvider<registry::LPPort>>(std::move(second_lp_provider_result)));
     auto second = substituted_reducer.run_with(ExecutionContext{}, second_lp);
     REQUIRE(std::holds_alternative<geometry::HullReduction>(second));
     CHECK(reducer_calls == 1);
     CHECK(*second_lp_calls == 5);
+    REQUIRE(second_lp.records().size() == 5);
+    CHECK(std::get<registry::LPQueryCompleted>(second_lp.records()[0]).provider.actual->id.value == "test.lp-second");
     auto independent_lp = highs_workspace();
     for (std::size_t point = 0; point < cloud.points.size(); ++point)
         CHECK(independent_membership(*independent_lp, cloud,
