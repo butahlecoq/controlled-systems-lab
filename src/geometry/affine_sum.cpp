@@ -49,6 +49,51 @@ struct FiniteSet {
     std::vector<std::string> assumptions;
 };
 
+bool conversion_residual_admissible(const sets::HRepresentation& input,
+        const std::vector<Vector>& vertices, NumericalPolicy policy, double reported_residual) {
+    long double coefficient_norm=0.0L,bound_norm=0.0L;
+    for(std::size_t row=0;row<input.inequalities.rows();++row) {
+        bound_norm=std::hypot(bound_norm,static_cast<long double>(input.upper_bounds[row]));
+        for(std::size_t column=0;column<input.inequalities.cols();++column)
+            coefficient_norm=std::hypot(coefficient_norm,static_cast<long double>(input.inequalities(row,column)));
+    }
+    for(std::size_t row=0;row<input.equalities.rows();++row) {
+        bound_norm=std::hypot(bound_norm,static_cast<long double>(input.equality_values[row]));
+        for(std::size_t column=0;column<input.equalities.cols();++column)
+            coefficient_norm=std::hypot(coefficient_norm,static_cast<long double>(input.equalities(row,column)));
+    }
+    long double residual_scale=std::max(1.0L,bound_norm);
+    const auto check_row=[&](const numeric::MatrixView& matrix,const numeric::VectorView& bounds,
+            std::size_t row,std::span<const double> point,bool equality) {
+        long double activity=0.0L;
+        for(std::size_t column=0;column<point.size();++column)
+            activity+=static_cast<long double>(matrix(row,column))*static_cast<long double>(point[column]);
+        const long double bound=static_cast<long double>(bounds[row]);
+        const long double scale=std::max({1.0L,std::abs(activity),std::abs(bound)});
+        const long double allowed=static_cast<long double>(policy.absolute_tolerance)+
+            static_cast<long double>(policy.relative_tolerance)*scale;
+        if(!std::isfinite(activity)||!std::isfinite(allowed)) return false;
+        residual_scale=std::max(residual_scale,scale);
+        const long double residual=equality ? std::abs(activity-bound) : std::max(0.0L,activity-bound);
+        return residual<=allowed;
+    };
+    for(const auto& point:vertices) {
+        if(point.size()!=input.inequalities.cols()) return false;
+        long double point_norm=0.0L;
+        for(const double coordinate:point) point_norm=std::hypot(point_norm,static_cast<long double>(coordinate));
+        residual_scale=std::max(residual_scale,coefficient_norm*point_norm);
+        for(std::size_t row=0;row<input.inequalities.rows();++row)
+            if(!check_row(input.inequalities,input.upper_bounds,row,point,false)) return false;
+        for(std::size_t row=0;row<input.equalities.rows();++row)
+            if(!check_row(input.equalities,input.equality_values,row,point,true)) return false;
+    }
+    const long double maximum_allowed=static_cast<long double>(policy.absolute_tolerance)+
+        static_cast<long double>(policy.relative_tolerance)*residual_scale;
+    return std::isfinite(static_cast<long double>(reported_residual)) &&
+        std::isfinite(residual_scale) && std::isfinite(maximum_allowed) &&
+        static_cast<long double>(reported_residual)<=maximum_allowed;
+}
+
 OperationOutcome operation_error(Unsupported failure) { return OperationOutcome{std::move(failure)}; }
 OperationOutcome operation_stop(OperationStopped stop) { return OperationOutcome{std::move(stop)}; }
 
@@ -61,6 +106,7 @@ std::variant<FiniteSet, OperationOutcome> finite_vertices(const SetHandle& handl
     auto data = std::get<sets::SetData>(std::move(imported));
     const auto metadata = data.metadata();
     const auto representation = data.representation();
+    const auto* input_h=std::get_if<sets::HRepresentation>(&representation);
     FiniteSet result{metadata->set.dimension, metadata->coordinate_labels, {}, {}};
     if (std::holds_alternative<sets::EmptyRepresentation>(representation)) return result;
     if (const auto* singleton = std::get_if<sets::SingletonRepresentation>(&representation)) {
@@ -145,6 +191,10 @@ std::variant<FiniteSet, OperationOutcome> finite_vertices(const SetHandle& handl
         }
         result.points.push_back(std::move(point));
     }
+    if(!input_h || !conversion_residual_admissible(*input_h,result.points,context.numerical,
+            conversion_check->max_residual))
+        return operation_error(unsupported("affine-sum.conversion.residual",
+            "H-to-V vertices or reported maximum residual exceed the caller-compatible row-scaled policy."));
     result.assumptions = transformed.evidence.assumptions;
     result.assumptions.emplace_back("H-to-V conversion evidence is numerical and conditional on the selected converter");
     return result;
@@ -355,16 +405,9 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             if (stopped(context)) return OperationStopped{stop_reason(context), "Stopped while checking hull reduction evidence."};
             return unsupported("affine-sum.hull.result", "Selected hull reducer returned incomplete or inconsistent reduction evidence.", DiagnosticCode::invalid_claim);
         }
-        // A tolerance-valid reduction with nonzero reconstruction residual is
-        // not an exact hull reduction. Keep every generated candidate instead
-        // of silently converting the affine/sum operation into an approximation.
-        const bool accepted_reduction=max_residual==0.0;
         std::vector<std::size_t> output_indices;
-        if (accepted_reduction) output_indices=reduction.retained;
-        else {
-            output_indices.resize(cloud.points.size());
-            std::iota(output_indices.begin(),output_indices.end(),std::size_t{0});
-        }
+        output_indices.resize(cloud.points.size());
+        std::iota(output_indices.begin(),output_indices.end(),std::size_t{0});
         std::vector<double> retained_values;
         if (result_id_dimension != 0 && output_indices.size() > std::numeric_limits<std::size_t>::max()/result_id_dimension)
             return unsupported("affine-sum.capacity", "Retained cloud storage overflows size_t.");
@@ -381,7 +424,8 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
 
         std::vector<std::string> assumptions{
             "binary64 affine and sum arithmetic; selected hull reduction validated against caller tolerance",
-            accepted_reduction ? "selected hull reduction used" : "nonzero-residual hull removals were not used; all generated candidates were retained",
+            "all generated candidates retained because numerical convex-combination certificates do not establish exact redundancy across supported platforms",
+            "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
             "numerical equivalent relation is not exact or validated set inclusion and has no global error bound",
             "finite and mixed action catalogues are not accepted by this SetHandle operation",
             "selected hull reducer: " + identity(dependencies_.hull.provenance()),
@@ -398,7 +442,7 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         },request_.operation);
         GeometryEvidence evidence{{request_.identity,inputs},GeometryClaimScope::set_relation,
             NumericalCheck{context.numerical.absolute_tolerance,context.numerical.relative_tolerance,
-                accepted_reduction ? max_residual : 0.0,{"csl.geometry.affine-sum"}},
+                max_residual,{"csl.geometry.affine-sum"}},
             std::move(assumptions),{}};
         if(auto errors=check_geometry_evidence(evidence,request_);!errors.empty()) return Unsupported{std::move(errors)};
         return OperationResult{std::get<sets::SetData>(std::move(output)).as_handle(),SetRelation::equivalent,std::move(evidence)};

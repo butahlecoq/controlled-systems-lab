@@ -44,7 +44,7 @@ int main() {
     const auto data=take(sets::from_handle(result.output));
     const auto representation=data.representation();
     const auto* output=std::get_if<sets::VRepresentation>(&representation);
-    if(!output||output->vertices.rows()!=2||output->vertices.cols()!=1)return 3;
+    if(!output||output->vertices.rows()!=4||output->vertices.cols()!=1)return 3;
     double low=output->vertices(0,0),high=low;
     for(std::size_t i=1;i<output->vertices.rows();++i) {
         low=std::min(low,output->vertices(i,0));

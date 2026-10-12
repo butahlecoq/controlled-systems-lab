@@ -14,7 +14,17 @@ and zero-dimensional representations retain their mathematical definitions.
 Positive-dimensional universal sets and unbounded V sets are unsupported. H
 representations require a caller-selected `ConversionPort` whose concrete
 request is admitted at operation time and whose result is an equivalent finite
-V representation. The module selects no converter, LP backend, or hull reducer
+V representation with `NumericalCheck` support. Before consuming its vertices,
+the module checks every returned vertex against each original H row using the
+row scale `max(1, abs(activity), abs(bound))` and the caller comparison
+`residual <= absolute_tolerance + relative_tolerance * scale`. It also requires
+the provider's reported `max_residual` to be no larger than the largest
+caller-compatible threshold over those rows (or the base threshold when there
+are no rows). Here the provider's residual is interpreted as the raw maximum
+inequality violation or equality residual in original H-row units; providers
+with other residual semantics are rejected by this operation. This is a
+conservative local check, not a proof that the converter enumerated every
+vertex. The module selects no converter, LP backend, or hull reducer
 implicitly. Generated hull queries go through `RegisteredLPQueryRunner`, which
 prepares each request against the frozen selected LP provider before creating
 its request-specific workspace.
@@ -43,16 +53,24 @@ Candidate coordinates are computed in binary64. The selected hull reducer
 returns candidate indices and convex-combination removal evidence; this module
 checks full candidate coverage, index validity, acyclicity, nonnegative finite
 weights, normalization, and reconstruction against the execution tolerance
-before publishing retained vertices. Reduction must be complete. Unsupported,
-stopped, failed, malformed, or numerically inconsistent dependencies do not
-produce a successful set result.
+before publishing the operation result. Reduction must be complete, but no
+candidate is discarded: floating-point convex-combination evidence does not
+establish exact redundancy on all supported platforms, including platforms
+where `long double` has binary64 precision. The returned V representation thus
+retains the full generated candidate cloud. `NumericalCheck.max_residual`
+reports the maximum reconstruction residual from attempted reducer removals
+after conversion to its binary64 field; it describes attempted work, not an
+applied output reduction or an error bound, and it never authorizes discarding
+a candidate. Unsupported, stopped, failed, malformed, or numerically
+inconsistent dependencies do not produce a successful set result.
 
 The result uses `SetRelation::equivalent` with `NumericalCheck` evidence under
 the caller's tolerance. This is an algorithmic numerical relation only. It is
 not exact arithmetic, validated set inclusion, a global Hausdorff/error bound,
-or a proof of exact extreme-vertex enumeration. In particular, nearly
-dependent candidates may be merged within tolerance, and binary64 overflow is
-reported as failure. Validated assurance is rejected.
+or a proof of exact extreme-vertex enumeration. Candidate coordinates still
+use binary64 arithmetic, and H-to-V conversion still relies on the selected
+provider's numerical completeness assumptions. Binary64 overflow is reported
+as failure. Validated assurance is rejected.
 
 `max_candidates` is an optional admission limit on the generated cloud, not an
 intrinsic dimension restriction. Products and coordinate storage are checked

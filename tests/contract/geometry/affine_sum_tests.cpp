@@ -71,10 +71,47 @@ public:
              Unestablished{}, {"test conversion without numerical verification"},{}}};
     }
 };
+class HighResidualConversionWorkspace final : public RepresentationConverterWorkspace {
+    ConversionRequest request_;
+public:
+    explicit HighResidualConversionWorkspace(ConversionRequest request) : request_(std::move(request)) {}
+    SetTransformOutcome convert(const ConversionRequest&,const ExecutionContext&) override {
+        const auto output=take(sets::make_v({{"high-residual-conversion-output"},1,{}},
+            {take(numeric::snapshot(Matrix{2,1,{0,2}})),
+             take(numeric::snapshot(Matrix{0,1,{}}))})).as_handle();
+        return OperationResult{output,SetRelation::equivalent,
+            {{request_.identity,{request_.input.id}},GeometryClaimScope::set_relation,
+             NumericalCheck{0.0,0.0,1e100,{"test.high-residual"}},
+             {"incorrect finite vertices with a reported large residual"},{}}};
+    }
+};
 Registration<ConversionPort> make_unestablished_conversion_registration() {
     return {{{"test.conversion.unestablished"},"1"},
         [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
         [](const ConversionRequest& request) { return std::make_unique<UnestablishedConversionWorkspace>(request); }};
+}
+Registration<ConversionPort> make_high_residual_conversion_registration() {
+    return {{{"test.conversion.high-residual"},"1"},
+        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
+        [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request); }};
+}
+class SubnormalResidualHullWorkspace final : public geometry::HullReducerWorkspace {
+public:
+    geometry::HullReductionResult reduce(const geometry::PointCloud& cloud,LPWorkspace&,
+            const ExecutionContext&) override {
+        REQUIRE(cloud.points.size()==3);
+        REQUIRE(cloud.points[0][0]==0.0);
+        REQUIRE(cloud.points[1][0]==std::numeric_limits<double>::denorm_min());
+        REQUIRE(cloud.points[2][0]==std::numeric_limits<double>::denorm_min());
+        return geometry::HullReduction{geometry::ReductionStatus::complete,{1,2},
+            {{0,{{1,0.5},{2,0.5}},{{"subnormal-hull"},{"test-program"}},
+                {1e-8,1e-8,0.0,{"test.subnormal"}}}},0,{}};
+    }
+};
+Registration<HullReducerPort> make_subnormal_hull_registration() {
+    return {{{"test.hull.subnormal"},"1"},
+        [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
+        [](const geometry::PointCloud&) { return std::make_unique<SubnormalResidualHullWorkspace>(); }};
 }
 Registration<HullReducerPort> make_keep_all_hull_registration() {
     return {{{"test.hull.keep-all"},"1"},
@@ -188,7 +225,7 @@ TEST_CASE("rectangular and singular affine maps retain their actual ambient spac
     CHECK(support(result.output,{1})==doctest::Approx(7));
     const auto rep=take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
-    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==1);
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==4);
 }
 
 TEST_CASE("selected H conversion preserves explicit equalities and infeasible empty sets") {
@@ -221,6 +258,19 @@ TEST_CASE("public geometry operation rejects H-to-V vertices without numerical e
     CHECK(std::holds_alternative<Unsupported>(result));
 }
 
+TEST_CASE("public geometry operation rejects H-to-V output with residual outside caller policy") {
+    auto h=take(sets::make_h({{"h-interval-high-residual"},1,{}},
+        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
+         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    auto selected=dependencies(false,false);
+    Requirements conversion_requirements;
+    conversion_requirements.output.representation={"csl.polyhedron.v"};
+    conversion_requirements.output.relation=SetRelation::equivalent;
+    selected.conversion=provider(make_high_residual_conversion_registration(),conversion_requirements);
+    const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"high-residual-conversion"),std::move(selected));
+    CHECK(std::holds_alternative<Unsupported>(result));
+}
+
 TEST_CASE("public geometry operation preserves near-extreme support under loose reducer tolerance") {
     const auto interval=vertices("near-endpoint-interval",1,{0,1e-6},2);
     auto selected=dependencies();
@@ -236,6 +286,22 @@ TEST_CASE("public geometry operation preserves near-extreme support under loose 
     const auto rep=take(sets::from_handle(completed.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
     CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==2);
+}
+
+TEST_CASE("public geometry operation retains a zero endpoint despite subnormal product underflow") {
+    const double tiny=std::numeric_limits<double>::denorm_min();
+    const auto cloud=vertices("subnormal-candidates",1,{0,tiny,tiny},3);
+    auto selected=dependencies();
+    selected.hull=provider(make_subnormal_hull_registration());
+    const auto result=run(request(AffineImage{cloud,{1,1,{1}},{0}},"subnormal-hull-residual"),
+        std::move(selected));
+    REQUIRE(std::holds_alternative<OperationResult>(result));
+    const auto& completed=std::get<OperationResult>(result);
+    CHECK(completed.relation==SetRelation::equivalent);
+    CHECK(support(completed.output,{-1})==doctest::Approx(0.0));
+    const auto rep=take(sets::from_handle(completed.output)).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==3);
 }
 
 TEST_CASE("empty singleton and R0 definitions survive image and sum") {
