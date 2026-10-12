@@ -182,6 +182,21 @@ class ReportToolTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "collection counts or scenario/repetition matrix"):
             render.validate(payload)
 
+    def test_renderer_rejects_resigned_phase_summaries_inconsistent_with_trial_rows(self):
+        payload = valid_payload("geo04-fabricated-phase-summary")
+        for row in payload["trials"]:
+            for phase in collect.PHASES:
+                row[phase] = 0
+        for group in payload["summary"].values():
+            for stat in group["phases"].values():
+                stat.update({"median": 999_999_999, "min": 999_999_999, "max": 999_999_999,
+                             "range": 0, "successful_trials": 7, "trials_excluded_from_summary": 0})
+        unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
+        payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        with self.assertRaisesRegex(ValueError, "phase summary differs from saved trial timings"):
+            render.validate(payload)
+
     def test_offline_export_uses_saved_records_only_and_packages_required_files(self):
         payload = valid_payload("geo04-offline-test")
         unsigned = {key:value for key,value in payload.items() if key!="report_id"}

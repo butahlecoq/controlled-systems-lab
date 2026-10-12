@@ -11,6 +11,7 @@ import zipfile
 from pathlib import Path
 
 SCHEMA = "csl.geo04-polyhedral-report/1"
+PHASES = ("intersection_ns", "prepare_ns", "workspace_ns", "conversion_run_ns", "lp_workspace_ns", "reduction_ns", "total_ns")
 CATALOG_VERSION = "geo04-analytic-v1"
 PINNED_EXPECTED = {
     "crossing_octagon": {"inputs": {"left_A": [[1,0],[-1,0],[0,1],[0,-1]], "left_b": [1,1,1,1],
@@ -77,6 +78,10 @@ def validate(payload: dict) -> None:
         for key in ("inequalities", "equalities"):
             if key in case and trial[key] != case[key]:
                 raise ValueError(f"unexpected {key} for {trial['scenario']}")
+        for phase in PHASES:
+            value = trial.get(phase)
+            if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                raise ValueError("trial phase durations must be nonnegative integer nanoseconds")
         if "vertices" in case and trial.get("vertices_json") != case["vertices"]:
             points = trial.get("vertices_json", [])
             expected = case["vertices"]
@@ -113,6 +118,23 @@ def validate(payload: dict) -> None:
         passed = sum(trial["status"] == "passed" and trial["oracle_passed"] for trial in rows)
         if summary["attempts"] != len(rows) or summary["passed"] != passed or summary["failures"] != len(rows)-passed:
             raise ValueError("scenario summary counts differ from saved trials")
+        accepted = [row for row in rows if collection["state"] == "complete" and row["status"] == "passed" and row["oracle_passed"]]
+        phases = summary.get("phases", {})
+        if set(phases) != set(PHASES):
+            raise ValueError("scenario summary phase set is incomplete or unexpected")
+        for phase in PHASES:
+            values = sorted(row[phase] for row in accepted)
+            expected_stat = {
+                "unit": "ns",
+                "successful_trials": len(values),
+                "median": (values[(len(values)-1)//2] + values[len(values)//2]) // 2 if values else None,
+                "min": min(values) if values else None,
+                "max": max(values) if values else None,
+                "range": max(values)-min(values) if values else None,
+                "trials_excluded_from_summary": len(rows)-len(values),
+            }
+            if phases[phase] != expected_stat:
+                raise ValueError("phase summary differs from saved trial timings")
     if collection["state"] == "complete":
         if (set(trial_keys) != expected_keys or collection.get("failures") != 0 or
             collection.get("process_return_code") != 0 or collection.get("aborted_or_timed_out") or collection.get("parse_error") or
