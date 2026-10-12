@@ -11,6 +11,7 @@ import zipfile
 from pathlib import Path
 
 SCHEMA = "csl.geo04-polyhedral-report/1"
+PAYLOAD_HASH_SCOPE = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
 PHASES = ("intersection_ns", "prepare_ns", "workspace_ns", "conversion_run_ns", "lp_workspace_ns", "reduction_ns", "total_ns")
 CATALOG_VERSION = "geo04-analytic-v1"
 PINNED_EXPECTED = {
@@ -56,7 +57,7 @@ def validate(payload: dict) -> None:
     claimed = payload.get("payload_sha256")
     unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
     actual = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
-    if claimed != actual or payload.get("payload_hash_scope") != "canonical JSON payload excluding report_id and payload_sha256":
+    if claimed != actual or payload.get("payload_hash_scope") != PAYLOAD_HASH_SCOPE:
         raise ValueError("saved record payload digest mismatch")
     scenarios = payload.get("expected", {})
     if payload.get("inputs", {}).get("scenario_catalog_version") != CATALOG_VERSION or scenarios != PINNED_EXPECTED:

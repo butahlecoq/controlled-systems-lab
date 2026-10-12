@@ -117,7 +117,7 @@ class ReportToolTests(unittest.TestCase):
         payload["trials"][0]["detail"] = "<script>alert(1)</script>"
         unsigned = {key:value for key,value in payload.items() if key!="report_id"}
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
-        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
         render.validate(payload)
         page = render.render_html(payload)
         self.assertIn("&lt;script&gt;", page)
@@ -136,7 +136,7 @@ class ReportToolTests(unittest.TestCase):
         payload["trials"][0]["vertices_json"] = points
         unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
-        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
         with self.assertRaisesRegex(ValueError, "saved vertex coordinates fail independent literal oracle"):
             render.validate(payload)
 
@@ -153,7 +153,7 @@ class ReportToolTests(unittest.TestCase):
         payload["inputs"]["scenario_catalog_sha256"] = hashlib.sha256(json.dumps(payload["expected"],sort_keys=True,separators=(",", ":")).encode()).hexdigest()
         unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
-        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
         with self.assertRaisesRegex(ValueError, "scenario catalog differs from pinned catalog"):
             render.validate(payload)
 
@@ -164,7 +164,7 @@ class ReportToolTests(unittest.TestCase):
             payload = valid_payload("geo04-collector-catalog-drift")
             unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
             payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
-            payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+            payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
             with self.assertRaisesRegex(ValueError, "scenario catalog differs from pinned catalog"):
                 render.validate(payload)
         finally:
@@ -178,7 +178,7 @@ class ReportToolTests(unittest.TestCase):
         payload["summary"] = collect.summarize(payload["trials"], True)
         unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
-        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
         with self.assertRaisesRegex(ValueError, "collection counts or scenario/repetition matrix"):
             render.validate(payload)
 
@@ -193,7 +193,7 @@ class ReportToolTests(unittest.TestCase):
                              "range": 0, "successful_trials": 7, "trials_excluded_from_summary": 0})
         unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
-        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
         with self.assertRaisesRegex(ValueError, "phase summary differs from saved trial timings"):
             render.validate(payload)
 
@@ -202,7 +202,7 @@ class ReportToolTests(unittest.TestCase):
         payload["summary"]["unexpected"] = copy.deepcopy(payload["summary"]["crossing_octagon"])
         unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
-        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
         with self.assertRaisesRegex(ValueError, "summary scenario keys differ from pinned scenario set"):
             render.validate(payload)
 
@@ -216,7 +216,7 @@ class ReportToolTests(unittest.TestCase):
                 payload["summary"]["crossing_octagon"]["phases"]["intersection_ns"][field] = value
                 unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
                 payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
-                payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+                payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
                 with self.assertRaisesRegex(ValueError, "phase summary numeric types are invalid"):
                     render.validate(payload)
 
@@ -227,11 +227,21 @@ class ReportToolTests(unittest.TestCase):
         self.assertEqual(payload["report_id"], report_id)
         render.validate(payload)
 
+    def test_finalized_digest_matches_the_exact_declared_exclusion_scope(self):
+        payload = valid_payload(None)
+        scope = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
+        collect.finalize_payload(payload, "20261013T120000Z")
+        self.assertEqual(payload["payload_hash_scope"], scope)
+        excluded = {"report_id", "payload_sha256", "payload_hash_scope"}
+        canonical = {key:value for key,value in payload.items() if key not in excluded}
+        expected = hashlib.sha256(json.dumps(canonical,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
+        self.assertEqual(payload["payload_sha256"], expected)
+
     def test_offline_export_uses_saved_records_only_and_packages_required_files(self):
         payload = valid_payload("geo04-offline-test")
         unsigned = {key:value for key,value in payload.items() if key!="report_id"}
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
-        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory); collection = root / "collection"; collection.mkdir()
             (collection / "records.json").write_text(json.dumps(payload),encoding="utf-8")

@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "scripts" / "report
 import collector_common
 
 SCHEMA = "csl.geo04-polyhedral-report/1"
+PAYLOAD_HASH_SCOPE = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
 PHASES = ("intersection_ns", "prepare_ns", "workspace_ns", "conversion_run_ns", "lp_workspace_ns", "reduction_ns", "total_ns")
 FIELDS = ("scenario", "repetition", "status", "detail", *PHASES, "lp_calls", "lp_results", "lp_optimal",
           "lp_bounds", "lp_supported_bounds", "reduction_status", "inequalities", "equalities", "vertices", "oracle_checks", "vertices_json", "oracle_passed")
@@ -52,7 +53,7 @@ def finalize_payload(payload: dict, timestamp: str) -> str:
     report_id = f"geo04-{timestamp}-{digest[:12]}"
     payload["report_id"] = report_id
     payload["payload_sha256"] = digest
-    payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+    payload["payload_hash_scope"] = PAYLOAD_HASH_SCOPE
     return report_id
 
 
