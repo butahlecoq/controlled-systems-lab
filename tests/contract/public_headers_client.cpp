@@ -3,11 +3,13 @@
 #ifdef CSL_PUBLIC_HEADERS_LP_FIRST
 #include <csl/optimization/linear_program.hpp>
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/optimization/phase_one.hpp>
 #include <csl/optimization/objectives.hpp>
 #else
 #include <csl/optimization/objectives.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/optimization/phase_one.hpp>
 #endif
 #include <csl/model/linear_system.hpp>
 #include <csl/registry/registry.hpp>
