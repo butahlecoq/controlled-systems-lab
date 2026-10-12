@@ -92,7 +92,8 @@ struct NativeQhull {
     NativeQhull() { if (!out||!err) throw std::runtime_error("Unable to create private Qhull diagnostic streams."); }
     ~NativeQhull() {
         if (started) { qh_freeqhull(&qh,!qh_ALL); int current{},total{}; qh_memfreeshort(&qh,&current,&total); }
-        if (out) std::fclose(out); if (err) std::fclose(err);
+        if (out) std::fclose(out);
+        if (err) std::fclose(err);
     }
 };
 struct Facets { std::vector<Eigen::VectorXd> normals; std::vector<double> offsets; std::string error; };
