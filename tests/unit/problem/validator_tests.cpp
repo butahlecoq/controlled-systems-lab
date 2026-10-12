@@ -52,7 +52,7 @@ class Forward final : public SynthesisWorkspace {
     std::unique_ptr<BoundWorkspace<LPPort>> control_;
 public:
     explicit Forward(std::unique_ptr<BoundWorkspace<LPPort>> control):control_(std::move(control)) {}
-    SynthesisOutcome solve(const ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& c) override {
+    SynthesisResult solve(const ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& c) override {
         const auto& p=*problem.description();
         const auto u=*accepted(control_->run(c)).primal;
         const auto model=accepted(model::snapshot(*p.model,p.times));

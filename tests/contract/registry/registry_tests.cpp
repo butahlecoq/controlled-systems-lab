@@ -561,7 +561,7 @@ TEST_CASE("runtime strategy extension adds a different typed dependency tuple wi
     struct CustomStrategy final : SynthesisWorkspace {
         std::unique_ptr<BoundWorkspace<CounterPort>> counter;
         explicit CustomStrategy(std::unique_ptr<BoundWorkspace<CounterPort>> w) : counter(std::move(w)) {}
-        SynthesisOutcome solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext& c) override {
+        SynthesisResult solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext& c) override {
             const auto id=p.identity();
             SynthesisResult result{Termination::resource_limit,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
                 {{{id,{}, {},static_cast<double>(counter->run(c))},
@@ -664,7 +664,7 @@ TEST_CASE("runtime builder observes retained requirements and request after ever
                 requirements.output.family == FamilyTarget::partial_relation &&
                 requirements.output.completeness == Completeness::unestablished ? "partial/unestablished" : "lost profile",
                 std::get<LinearTerminal>(request.problem.description()->objective).offset == 2 ? "original request" : "lost request"} {}
-        SynthesisOutcome solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext&) override {
+        SynthesisResult solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext&) override {
             SynthesisResult result{Termination::resource_limit,
                 {p.identity(),MathematicalOutcome::undetermined,Unestablished{},configuration_},{},{},{},{}};
             result.stop=ScopedOperationStopped{{StopReason::resource_limit,"profile fixture"},
@@ -706,7 +706,7 @@ TEST_CASE("runtime builder observes retained requirements and request after ever
 TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retained evidence distinct") {
     class Synthetic final : public SynthesisWorkspace {
     public:
-        SynthesisOutcome solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
             const ExecutionContext&) override {
             const auto id=problem.identity();
             const ClaimEvidence support{id,SymbolicArgument{"synthetic fixture assertion","literal fixture only"}};
@@ -725,6 +725,15 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
                     {false,false,1,false}};
                 return result;
             }
+            if (request.profile=="user-cancel" || request.profile=="deadline") {
+                const auto reason=request.profile=="deadline"?StopReason::deadline_expired:StopReason::cancelled;
+                result.termination=Termination::cancelled;
+                result.spans.push_back({0,{},ModuleId{"synthetic"},0,1});
+                result.stop=ScopedOperationStopped{{reason,"synthetic stop"},
+                    RequestProvenance{{"generated/step/3"},"strategy",{"synthetic"},std::string{"1"},
+                        ModuleId{"synthetic"},std::string{"1"}}, {false,false,1,false}};
+                return result;
+            }
             if (request.target==FamilyTarget::candidate_relaxation) {
                 result.family=OptimalFamily{identity,CandidateFamily{relation,HeuristicRelationEvidence{"synthetic"},support}};
             } else if (request.target==FamilyTarget::partial_relation) {
@@ -735,6 +744,9 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
                 result.family=OptimalFamily{identity,CompleteOptimalFamily{relation,{support,{}},
                     {identity,NumericalCoverageEvidence{"unreviewed",request.numerical,{"fixture"},""}},
                     Assurance::numerical}};
+                if (request.profile=="lineage-mismatch")
+                    result.family->identity.lineage.push_back({{"generated/transform/1"},{"input/set"},
+                        {"output/set"},{"converter"},"2"});
             }
             return result;
         }
@@ -759,11 +771,17 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
         REQUIRE(result.incumbents.size()==1);
         CHECK(result.incumbents[0].witness.original_objective==5);
         CHECK(result.incumbents[0].feasibility.problem==request.problem.identity());
-        if (target==FamilyTarget::exact_optimal_relation) {
+        if (target!=FamilyTarget::candidate_relaxation) {
             CHECK(result.termination==Termination::operation_rejected);
             CHECK_FALSE(result.family.has_value());
             REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
             CHECK(std::get<ScopedRequestRejection>(result.stop).retained.incumbents==1);
+            if (target==FamilyTarget::partial_relation) {
+                const auto& diagnostics=std::get<ScopedRequestRejection>(result.stop).diagnostics;
+                CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const auto& value){
+                    return value.field=="family.partial.optimality" && value.code==DiagnosticCode::unsupported;
+                }));
+            }
         } else {
             CHECK(result.termination==Termination::completed);
             REQUIRE(result.family.has_value());
@@ -787,4 +805,34 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
     CHECK(rejection.completed_lineage[0].request.value=="transform/4");
     CHECK(rejection.retained.incumbents==1);
     CHECK(result.incumbents[0].witness.original_objective==5);
+    request.family.profile="lineage-mismatch";
+    request.family.target=FamilyTarget::exact_optimal_relation;
+    Requirements exact;exact.output.family=FamilyTarget::exact_optimal_relation;
+    auto malformed=registry.prepare(request,exact);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(malformed));
+    auto mismatch=std::get<PreparedStrategy>(std::move(malformed)).create()->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(mismatch));
+    const auto& rejected=std::get<SynthesisResult>(mismatch);
+    CHECK(rejected.termination==Termination::operation_rejected);
+    CHECK_FALSE(rejected.family.has_value());
+    const auto& diagnostic=std::get<ScopedRequestRejection>(rejected.stop).diagnostics;
+    CHECK(std::any_of(diagnostic.begin(),diagnostic.end(),[](const auto& value){
+        return value.field=="family.completeness.binding";
+    }));
+    request.family.target=FamilyTarget::candidate_relaxation;
+    for (const auto& [profile,reason]:{
+        std::pair{"user-cancel",StopReason::cancelled},
+        std::pair{"deadline",StopReason::deadline_expired}}) {
+        request.family.profile=profile;
+        auto prepared=registry.prepare(request);
+        REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+        auto stopped=std::get<PreparedStrategy>(std::move(prepared)).create()->run(context());
+        REQUIRE(std::holds_alternative<SynthesisResult>(stopped));
+        const auto& value=std::get<SynthesisResult>(stopped);
+        CHECK(value.termination==Termination::cancelled);
+        REQUIRE(std::holds_alternative<ScopedOperationStopped>(value.stop));
+        CHECK(std::get<ScopedOperationStopped>(value.stop).stop.reason==reason);
+        CHECK(value.incumbents[0].witness.original_objective==5);
+        CHECK(value.spans.size()==1);
+    }
 }

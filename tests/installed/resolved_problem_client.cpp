@@ -12,7 +12,7 @@ template<class T,class... R> T accepted(std::variant<T,R...> result) {
 }
 class Forward final:public SynthesisWorkspace {
 public:
-    SynthesisOutcome solve(const ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext&) override {
+    SynthesisResult solve(const ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext&) override {
         const auto& p=*problem.description();
         const auto model=accepted(model::snapshot(*p.model,p.times));
         const auto x0=std::get<KnownInitial>(p.initial).point;

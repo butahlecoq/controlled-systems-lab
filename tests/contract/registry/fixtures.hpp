@@ -86,7 +86,7 @@ class ForwardFixture final : public SynthesisWorkspace {
     std::unique_ptr<BoundWorkspace<LPPort>> lp_;
 public:
     explicit ForwardFixture(std::unique_ptr<BoundWorkspace<LPPort>> lp) : lp_(std::move(lp)) {}
-    SynthesisOutcome solve(const csl::problem::ResolvedProblem& problem, const FamilyRequest&, const ExecutionContext& context) override {
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem, const FamilyRequest&, const ExecutionContext& context) override {
         const auto answer = std::get<ProgramResult>(lp_->run(context));
         const auto id=problem.identity();
         return SynthesisResult{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},
@@ -138,7 +138,7 @@ public: std::variant<WitnessSelection,Unsupported> select(const OptimalFamily&,c
     return WitnessSelection{{{},r.count,{"selector-fixture"},r.seed},Termination::resource_limit,"fixture"};
 }};
 class StrategyFixture final : public SynthesisWorkspace {
-public: SynthesisOutcome solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext&) override {
+public: SynthesisResult solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext&) override {
     const auto raw=p.description();
     const auto& stage = std::get<LinearStage>(raw->model->dynamics.stages);
     const auto id=p.identity();

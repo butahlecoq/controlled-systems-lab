@@ -135,7 +135,7 @@ install(FILES include/csl/sets/data.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/
 install(FILES include/csl/model/linear_system.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/model)
 install(FILES include/csl/optimization/linear_program.hpp include/csl/optimization/lp_backend.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/optimization)
 install(FILES include/csl/problem/domains.hpp include/csl/problem/constraints.hpp include/csl/problem/initial_information.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/problem)
-install(FILES include/csl/problem/validator.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/problem)
+install(FILES include/csl/problem/resolved_problem.hpp include/csl/problem/validator.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/problem)
 install(FILES include/csl/execution/executor.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/execution)
 install(FILES include/csl/artifacts/run_statistics.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/artifacts)
 install(FILES include/csl/execution/observability.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/execution)

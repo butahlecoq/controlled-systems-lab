@@ -340,7 +340,7 @@ class TwoCalls final : public SynthesisWorkspace {
 public:
     TwoCalls(std::unique_ptr<reg::BoundWorkspace<reg::LPPort>> lp,std::shared_ptr<StrategyAudit> audit)
         : lp_(std::move(lp)),audit_(std::move(audit)) {}
-    SynthesisOutcome solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& ctx) override {
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& ctx) override {
         std::vector<SolveStamp> stamps;
         auto answer=std::get<ProgramResult>(lp_->run(ctx));stamps.push_back(lp_->last_attempt()->stamp);
         if (!ctx.cancellation.stop_requested()) {

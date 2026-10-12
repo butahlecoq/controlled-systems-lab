@@ -10,9 +10,8 @@ using namespace csl;
 class FixtureWorkspace final : public SynthesisWorkspace {
 public:
     explicit FixtureWorkspace(ModuleId strategy) : strategy_(std::move(strategy)) {}
-    SynthesisOutcome solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) override {
-        return Unsupported{{{DiagnosticCode::unsupported, strategy_.value,
-            "Contract fixture: synthesis adapter is not implemented"}}};
+    SynthesisResult solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) override {
+        throw std::logic_error("Unsupported contract fixture has no executable solve");
     }
 private:
     ModuleId strategy_;
@@ -63,15 +62,9 @@ int main() {
     const auto resolved=std::get<problem::ResolvedProblem>(std::move(resolution));
     const FamilyRequest request{"nominal_open_loop",resolved.identity(),FamilyTarget::candidate_relaxation,
         context.numerical,Assurance::numerical,{"joint/polyhedral"},{}};
-    auto run = [resolved,request,context](std::unique_ptr<SynthesisWorkspace> workspace) {
-        return workspace->solve(resolved,request,context);
-    };
-    auto a = std::async(std::launch::async,run,std::move(first));
-    auto b = std::async(std::launch::async,run,std::move(second));
     for (auto* strategy : {&reachability,&joint}) {
         auto diagnostics = strategy->check_capabilities(resolved,request);
         for (const auto& d : diagnostics) std::cout << d.field << ": " << d.explanation << '\n';
     }
-    if (!std::holds_alternative<Unsupported>(a.get()) || !std::holds_alternative<Unsupported>(b.get())) return 3;
-    std::cout << "Two exclusive workspaces completed fixture calls. No solver/family result was produced.\n";
+    std::cout << "Two exclusive fixture workspaces exist. No solver/family result was produced.\n";
 }

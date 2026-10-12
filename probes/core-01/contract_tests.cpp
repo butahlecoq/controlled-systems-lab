@@ -102,7 +102,12 @@ TEST_CASE("T-V02: partial or relaxed relations cannot claim full optimal-family 
         f.outcome=CandidateFamily{relation,FeasibleCandidateEvidence{claim},claim};
         CHECK(f.target()==FamilyTarget::candidate_relaxation);
     }
-    CHECK(check_family_evidence(f,{"test/singular"},Assurance::numerical).empty());
+    const auto checked=check_family_evidence(f,{"test/singular"},Assurance::numerical);
+    if (f.target()==FamilyTarget::partial_relation) {
+        REQUIRE_FALSE(checked.empty());
+        CHECK(checked[0].code==DiagnosticCode::unsupported);
+        CHECK(checked[0].field=="family.partial.optimality");
+    } else CHECK(checked.empty());
 }
 TEST_CASE("T-V02: a numerical check alone cannot establish completeness") {
     auto f = family();

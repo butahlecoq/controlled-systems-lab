@@ -219,7 +219,7 @@ private:
     explicit ConvexProgram(std::shared_ptr<const Storage> storage) : storage_(std::move(storage)) {}
     friend struct optimization::ConvexAccess;
 };
-enum class Termination { completed, cancelled, deadline_expired, resource_limit, numerical_failure, operation_rejected };
+enum class Termination { completed, cancelled, resource_limit, numerical_failure, operation_rejected };
 enum class MathematicalOutcome { optimal, infeasible, unbounded, infimum_not_attained, undetermined };
 template<class Subject> struct OutcomeClaim {
     Subject subject;
@@ -521,7 +521,7 @@ struct StrategyConfiguration {
     RepresentationId representation;
 };
 class SynthesisWorkspace : public ExclusiveWorkspace {
-public: virtual SynthesisOutcome solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) = 0;
+public: virtual SynthesisResult solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) = 0;
 };
 class SynthesisStrategy {
 public:

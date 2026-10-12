@@ -839,7 +839,6 @@
         "cancelled",
         "resource_limit",
         "numerical_failure",
-        "deadline_expired",
         "operation_rejected"
       ]
     },

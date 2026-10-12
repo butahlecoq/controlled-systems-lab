@@ -82,7 +82,7 @@ class GeneratedFixture final : public SynthesisWorkspace {
     PreparedProvider<LPPort> generated_;
 public:
     GeneratedFixture(std::unique_ptr<BoundWorkspace<CounterPort>> f,PreparedProvider<LPPort> p):fixed_(std::move(f)),generated_(std::move(p)){}
-    SynthesisOutcome solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& context) override {
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& context) override {
         const auto fixed=fixed_->run(context);
         auto workers=accepted(generated_.prepare(interval_lp(-2))).create();
         const auto lp=std::get<ProgramResult>(std::get<0>(workers)->run(context));

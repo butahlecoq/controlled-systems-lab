@@ -32,21 +32,11 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     const FamilyIdentity expected{id,request.family,request.problem.constraints().coordinates(),
         request.configuration.strategy,request.strategy_version,{}};
     auto answer=workspace.solve(request.problem,request.family,context);
-    auto* result=std::get_if<SynthesisResult>(&answer);
-    if (!result) {
-        auto diagnostics=std::get<Unsupported>(std::move(answer)).diagnostics;
-        SynthesisResult rejected{Termination::operation_rejected,
-            {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{}};
-        rejected.stop=ScopedRequestRejection{{{id.value+"/strategy-run"},StrategyPort::name,
-            request.configuration.strategy,request.strategy_version,request.configuration.strategy,request.strategy_version},
-            std::move(diagnostics),{},RetainedEvidenceScope{}};
-        return rejected;
-    }
-    auto diagnostics=check_synthesis_result(*result,expected);
+    auto diagnostics=check_synthesis_result(answer,expected);
     if (diagnostics.empty()) return answer;
     // Preserve independently bound evidence while refusing to publish a malformed
     // or unsupported family claim. This copy has never been published to callers.
-    auto retained=*result;
+    auto retained=answer;
     if (retained.objective.lower &&
         (retained.objective.lower->evidence.problem!=id || !std::isfinite(retained.objective.lower->value)))
         retained.objective.lower.reset();
@@ -64,15 +54,16 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     if (retained.family && !check_family_evidence(*retained.family,id,request.family.assurance).empty())
         retained.family.reset();
     if (retained.family) {
-        auto identity=retained.family->identity;
-        identity.lineage.clear();
-        if (identity!=expected) retained.family.reset();
+        const auto& identity=retained.family->identity;
+        if (identity.problem!=expected.problem || identity.request!=expected.request ||
+            identity.coordinates!=expected.coordinates || identity.strategy!=expected.strategy ||
+            identity.strategy_version!=expected.strategy_version) retained.family.reset();
     }
     if (retained.family && retained.family->target()==FamilyTarget::exact_optimal_relation) retained.family.reset();
     const RetainedEvidenceScope scope{retained.objective.lower.has_value(),retained.objective.upper.has_value(),
         retained.incumbents.size(),retained.family.has_value()};
     std::vector<TransformStepIdentity> lineage;
-    if (result->family) lineage=result->family->identity.lineage;
+    if (answer.family) lineage=answer.family->identity.lineage;
     retained.termination=Termination::operation_rejected;
     retained.stop=ScopedRequestRejection{{{id.value+"/strategy-result"},StrategyPort::name,
         request.configuration.strategy,request.strategy_version,request.configuration.strategy,request.strategy_version},

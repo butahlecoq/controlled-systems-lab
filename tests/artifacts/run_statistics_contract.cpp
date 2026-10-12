@@ -452,18 +452,19 @@ TEST_CASE("artifact publication refuses an unreviewed complete family") {
     REQUIRE(std::holds_alternative<ar::ArtifactError>(refused));
     CHECK(std::get<ar::ArtifactError>(refused).path=="run.final.synthesis.evidence");
 }
-TEST_CASE("partial family scope and optimal-membership evidence survive round trip") {
+TEST_CASE("unchecked partial optimality cannot enter a published run") {
     auto record=accepted(ar::decode_run(fixture_text())).description();
     auto& final=std::get<ar::SynthesisFinal>(record.final);
     REQUIRE(final.family.has_value());
     const auto relation=std::get<CandidateFamily>(final.family->family.outcome).relation;
     const ClaimEvidence supported{record.problem,SymbolicArgument{"analytic endpoints","two-step integrator"}};
     final.family->family.outcome=PartialOptimalFamily{relation,{supported,final.objective},{supported,"direct substitution"},{"two endpoint histories"}};
-    const auto owner=accepted(ar::publish_run({integrator_problem(),record}));
-    const auto restored=accepted(ar::decode_run(accepted(ar::encode_run(owner))));
-    const auto& partial=std::get<PartialOptimalFamily>(std::get<ar::SynthesisFinal>(restored.description().final).family->family.outcome);
+    const auto& partial=std::get<PartialOptimalFamily>(final.family->family.outcome);
     CHECK(partial.known_scope.description=="two endpoint histories");
     CHECK(partial.optimal_subset.procedure=="direct substitution");
+    const auto rejected=ar::publish_run({integrator_problem(),record});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected));
+    CHECK(std::get<ar::ArtifactError>(rejected).path=="run.final.synthesis.evidence");
     std::get<PartialOptimalFamily>(final.family->family.outcome).known_scope.description.clear();
     CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_run({integrator_problem(),record})));
 }

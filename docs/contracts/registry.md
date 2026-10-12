@@ -32,7 +32,9 @@ convex factories can call the existing backend's `make_workspace()`; their
 factories return the same exclusive mathematical workspace interfaces.
 `StrategyPort::run` checks the numerical policy against the prepared family
 request before invoking the workspace and validates family/outcome identity on
-return. A late provider rejection belongs in `SynthesisResult` with scoped
+return. `SynthesisWorkspace::solve` returns `SynthesisResult` only; the port's
+`SynthesisOutcome` can report top-level `Unsupported` only before that call.
+A late provider rejection belongs in `SynthesisResult` with scoped
 request provenance and retained evidence.
 
 GEO-02 adds `HullReducerPort` (`hull-reducer`) as a separately selectable

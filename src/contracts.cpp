@@ -2,6 +2,7 @@
 #include <limits>
 #include <cmath>
 #include <utility>
+#include <set>
 namespace csl {
 namespace {
 template<class... Visitors> struct Overloaded : Visitors... { using Visitors::operator()...; };
@@ -135,6 +136,14 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
         result.push_back({DiagnosticCode::unsupported,"assurance","Numerical checks, symbolic arguments and unchecked certificate references are not validated evidence"});
     if (family.identity.problem != expected)
         result.push_back({DiagnosticCode::evidence_mismatch,"family.problem","Family does not belong to expected problem"});
+    std::set<std::string> transformation_requests;
+    for (const auto& step:family.identity.lineage) {
+        if (step.request.value.empty() || step.input.value.empty() || step.output.value.empty() ||
+            step.module.value.empty() || step.version.empty() ||
+            !transformation_requests.insert(step.request.value).second)
+            result.push_back({DiagnosticCode::invalid_claim,"family.lineage",
+                "Ordered transformation lineage requires distinct nonempty request and input/output/module/version identities"});
+    }
     std::visit(Overloaded{
         [&](const CompleteOptimalFamily& complete) {
             if (complete.relation.coordinates != family.identity.coordinates ||
@@ -159,6 +168,8 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 std::holds_alternative<Unestablished>(partial.optimal_subset.every_history_optimal.support) ||
                 std::holds_alternative<NumericalCheck>(partial.optimal_subset.every_history_optimal.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.partial.optimality","An inner subset is not known optimal without scoped optimal-membership support"});
+            result.push_back({DiagnosticCode::unsupported,"family.partial.optimality",
+                "No reviewed verifier can establish that every history in a partial relation is optimal"});
         },
         [&](const CandidateFamily& candidate) {
             if (candidate.relation.coordinates != family.identity.coordinates || candidate.feasibility.problem != expected)
@@ -186,7 +197,7 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
     };
     for (const auto* bound : {&result.objective.lower,&result.objective.upper})
         if (*bound && ((*bound)->evidence.problem!=expected.problem || !std::isfinite((*bound)->value)))
-            add(DiagnosticCode::evidence_mismatch,"result.objective","A retained bound has the wrong problem or a nonfinite value");
+            add(DiagnosticCode::evidence_mismatch,"result.objective","A retained bound needs a finite value and matching problem identity");
     if (result.objective.lower && result.objective.upper && result.objective.lower->value>result.objective.upper->value)
         add(DiagnosticCode::invalid_claim,"result.objective","Lower bound exceeds upper bound");
     for (const auto& incumbent:result.incumbents)
@@ -195,9 +206,10 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
             std::holds_alternative<Unestablished>(incumbent.feasibility.support))
             add(DiagnosticCode::evidence_mismatch,"result.incumbents","An incumbent has the wrong problem or a nonfinite objective");
     if (result.family) {
-        auto identity=result.family->identity;
-        identity.lineage.clear();
-        if (identity!=expected)
+        const auto& identity=result.family->identity;
+        if (identity.problem!=expected.problem || identity.request!=expected.request ||
+            identity.coordinates!=expected.coordinates || identity.strategy!=expected.strategy ||
+            identity.strategy_version!=expected.strategy_version)
             add(DiagnosticCode::evidence_mismatch,"family.identity","Family identity differs from the prepared problem, request, coordinates or strategy");
         auto family_diagnostics=check_family_evidence(*result.family,expected.problem,expected.request.assurance);
         diagnostics.insert(diagnostics.end(),family_diagnostics.begin(),family_diagnostics.end());
@@ -231,14 +243,14 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
         }
     } else if (std::holds_alternative<ScopedRequestRejection>(result.stop))
         add(DiagnosticCode::invalid_claim,"result.stop","ScopedRequestRejection requires operation_rejected termination");
-    if (result.termination==Termination::cancelled || result.termination==Termination::deadline_expired ||
-        result.termination==Termination::resource_limit || result.termination==Termination::numerical_failure) {
+    if (result.termination==Termination::cancelled || result.termination==Termination::resource_limit ||
+        result.termination==Termination::numerical_failure) {
         if (!std::holds_alternative<ScopedOperationStopped>(result.stop))
             add(DiagnosticCode::invalid_claim,"result.stop","Cancelled, deadline and resource stops require scoped stop evidence");
         else {
         const auto reason=std::get<ScopedOperationStopped>(result.stop).stop.reason;
-        if ((result.termination==Termination::cancelled && reason!=StopReason::cancelled) ||
-            (result.termination==Termination::deadline_expired && reason!=StopReason::deadline_expired) ||
+        if ((result.termination==Termination::cancelled && reason!=StopReason::cancelled &&
+                reason!=StopReason::deadline_expired) ||
             (result.termination==Termination::resource_limit && reason!=StopReason::resource_limit) ||
             (result.termination==Termination::numerical_failure && reason!=StopReason::numerical_failure))
             add(DiagnosticCode::invalid_claim,"result.stop.reason","Execution termination and scoped stop reason differ");
@@ -251,7 +263,8 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
             stopped.retained.partial_or_candidate_family!=observed.partial_or_candidate_family)
             add(DiagnosticCode::evidence_mismatch,"result.stop.retained","Scoped stop must name its source, diagnostics and actual retained payload");
         }
-    }
+    } else if (std::holds_alternative<ScopedOperationStopped>(result.stop))
+        add(DiagnosticCode::invalid_claim,"result.stop","ScopedOperationStopped requires a matching stopped termination");
     return diagnostics;
 }
 Diagnostics check_resources(const ResourcePolicy& r) {
