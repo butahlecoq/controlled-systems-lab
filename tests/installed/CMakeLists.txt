@@ -101,3 +101,10 @@ set_target_properties(installed_phase_one_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_phase_one_client COMMAND installed_phase_one_client)
 set_tests_properties(installed_phase_one_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed phase one client: signed coefficients, original basis and numerical evidence passed")
+
+add_executable(installed_run_statistics_client run_statistics_client.cpp)
+target_link_libraries(installed_run_statistics_client PRIVATE CSL::artifacts)
+set_target_properties(installed_run_statistics_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_run_statistics_client COMMAND installed_run_statistics_client)
+set_tests_properties(installed_run_statistics_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed statistics client: immutable identities and portable lifetime round trip passed")

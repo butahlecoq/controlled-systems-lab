@@ -22,6 +22,8 @@
 #include <csl/execution/executor.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/adapters/convex/highs.hpp>
+#include <csl/artifacts/run_statistics.hpp>
+#include <csl/execution/observability.hpp>
 
 #include <iostream>
 #include <stdexcept>

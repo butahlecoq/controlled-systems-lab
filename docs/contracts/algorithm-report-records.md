@@ -330,3 +330,16 @@ visibly TEST DATA and cannot be published. Actual convex measurement, independen
 artifact review, its own desktop/narrow/full-scroll/expanded diagnostic QA and
 verified live URLs remain separate later gates. No old LP screenshot or green
 CTest result satisfies those numerical/publication obligations.
+
+## Scenario statistics alongside historical algorithm reports
+
+The additive [run-statistics format](run-statistics.md), `csl.run-statistics/1`,
+binds actual MODEL03 problem identity to an independently resolved execution
+configuration. Standalone LP/convex bootstrap records keep their real program
+identities, schema kinds, provenance and existing readers. They do not acquire
+invented scenario IDs, strategy selections or configuration pins. No published
+v1/v2 payload is rewritten; a future scenario runner may reference raw artifacts
+only with its genuine scenario/configuration binding. Public-run timing retains
+its wrapper/native/translation/check scope, and missing native observations stay
+explicitly unavailable. OBS01 adds no native diagnostic parser or performance
+publication gate exemption.
