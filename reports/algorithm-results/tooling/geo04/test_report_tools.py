@@ -197,6 +197,29 @@ class ReportToolTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "phase summary differs from saved trial timings"):
             render.validate(payload)
 
+    def test_renderer_rejects_resigned_summary_with_unpinned_scenario(self):
+        payload = valid_payload("geo04-extra-summary-scenario")
+        payload["summary"]["unexpected"] = copy.deepcopy(payload["summary"]["crossing_octagon"])
+        unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
+        payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        with self.assertRaisesRegex(ValueError, "summary scenario keys differ from pinned scenario set"):
+            render.validate(payload)
+
+    def test_renderer_rejects_boolean_phase_statistics_that_compare_equal_to_integers(self):
+        for field, value in (("min", True), ("trials_excluded_from_summary", False)):
+            with self.subTest(field=field):
+                payload = valid_payload(f"geo04-bool-phase-{field}")
+                for row in payload["trials"]:
+                    row["intersection_ns"] = 1
+                payload["summary"] = collect.summarize(payload["trials"], True)
+                payload["summary"]["crossing_octagon"]["phases"]["intersection_ns"][field] = value
+                unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
+                payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
+                payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+                with self.assertRaisesRegex(ValueError, "phase summary numeric types are invalid"):
+                    render.validate(payload)
+
     def test_offline_export_uses_saved_records_only_and_packages_required_files(self):
         payload = valid_payload("geo04-offline-test")
         unsigned = {key:value for key,value in payload.items() if key!="report_id"}

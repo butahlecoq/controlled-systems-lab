@@ -64,9 +64,9 @@ def validate(payload: dict) -> None:
     catalog_hash = hashlib.sha256(json.dumps(PINNED_EXPECTED,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
     if catalog_hash != payload.get("inputs", {}).get("scenario_catalog_sha256"):
         raise ValueError("scenario catalog hash mismatch")
-    for key in ("crossing_octagon", "empty_intersection", "affine_equality", "essential_rows_highs"):
-        if key not in payload.get("summary", {}):
-            raise ValueError(f"missing scenario summary: {key}")
+    summary_payload = payload.get("summary", {})
+    if set(summary_payload) != set(PINNED_SCENARIOS):
+        raise ValueError("summary scenario keys differ from pinned scenario set")
     for trial in payload.get("trials", []):
         if trial["scenario"] not in payload["summary"]:
             raise ValueError("trial references unknown scenario")
@@ -114,8 +114,11 @@ def validate(payload: dict) -> None:
         raise ValueError("collection counts or scenario/repetition matrix are inconsistent")
     for scenario in PINNED_SCENARIOS:
         rows = [trial for trial in trials if trial["scenario"] == scenario]
-        summary = payload["summary"][scenario]
+        summary = summary_payload[scenario]
         passed = sum(trial["status"] == "passed" and trial["oracle_passed"] for trial in rows)
+        if any(not isinstance(summary.get(key), int) or isinstance(summary.get(key), bool)
+               for key in ("attempts", "passed", "failures")):
+            raise ValueError("scenario summary counts must be integers")
         if summary["attempts"] != len(rows) or summary["passed"] != passed or summary["failures"] != len(rows)-passed:
             raise ValueError("scenario summary counts differ from saved trials")
         accepted = [row for row in rows if collection["state"] == "complete" and row["status"] == "passed" and row["oracle_passed"]]
@@ -133,7 +136,18 @@ def validate(payload: dict) -> None:
                 "range": max(values)-min(values) if values else None,
                 "trials_excluded_from_summary": len(rows)-len(values),
             }
-            if phases[phase] != expected_stat:
+            actual_stat = phases[phase]
+            if not isinstance(actual_stat, dict):
+                raise ValueError("phase summary numeric types are invalid")
+            count_fields = ("successful_trials", "trials_excluded_from_summary")
+            metric_fields = ("median", "min", "max", "range")
+            if any(not isinstance(actual_stat.get(key), int) or isinstance(actual_stat.get(key), bool)
+                   for key in count_fields) or any(
+                       actual_stat.get(key) is not None and
+                       (not isinstance(actual_stat.get(key), int) or isinstance(actual_stat.get(key), bool))
+                       for key in metric_fields):
+                raise ValueError("phase summary numeric types are invalid")
+            if actual_stat != expected_stat:
                 raise ValueError("phase summary differs from saved trial timings")
     if collection["state"] == "complete":
         if (set(trial_keys) != expected_keys or collection.get("failures") != 0 or
