@@ -93,22 +93,26 @@ def profile_run(executable: Path, batch: int, source_commit: str, journal: Journ
     import psutil
     command = [str(executable), str(batch), "1", "1"]
     start = time.perf_counter_ns()
-    with subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
-        observer = psutil.Process(process.pid)
-        samples = []
-        while process.poll() is None:
-            try:
-                cpu = observer.cpu_times()
-                memory = observer.memory_info()
-                samples.append({"elapsed_ns": time.perf_counter_ns()-start,
-                                "process_cpu_seconds": cpu.user+cpu.system,
-                                "resident_bytes": memory.rss})
-            except psutil.NoSuchProcess:
-                break
-            time.sleep(0.01)
-        stdout, stderr = process.communicate()
-        (journal.path / "profile.stdout").write_bytes(stdout)
-        (journal.path / "profile.stderr").write_bytes(stderr)
+    stdout_path = journal.path / "profile.stdout"
+    stderr_path = journal.path / "profile.stderr"
+    with stdout_path.open("wb") as output, stderr_path.open("wb") as errors:
+        with subprocess.Popen(command, cwd=ROOT, stdout=output, stderr=errors) as process:
+            observer = psutil.Process(process.pid)
+            samples = []
+            while process.poll() is None:
+                try:
+                    cpu = observer.cpu_times()
+                    memory = observer.memory_info()
+                    samples.append({"elapsed_ns": time.perf_counter_ns()-start,
+                                    "process_cpu_seconds": cpu.user+cpu.system,
+                                    "resident_bytes": memory.rss})
+                except psutil.NoSuchProcess:
+                    break
+                time.sleep(0.01)
+            process.wait()
+        output.flush()
+        errors.flush()
+        stdout, stderr = stdout_path.read_bytes(), stderr_path.read_bytes()
         journal.phases.append({"phase": "profile", "return_code": process.returncode,
                                "stdout_sha256": report.digest_bytes(stdout),
                                "stderr_sha256": report.digest_bytes(stderr),
