@@ -205,8 +205,8 @@ def main() -> int:
     parser.add_argument("--warmups", type=int, default=1)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    if args.repetitions < 5 or args.warmups < 1:
-        parser.error("accepted measurements require at least 5 repetitions and 1 warmup")
+    if args.repetitions < 7 or args.warmups < 1:
+        parser.error("accepted measurements require at least 7 repetitions and 1 warmup")
     if args.out.exists():
         parser.error(f"refusing to overwrite existing collection: {args.out}")
     build = args.build_dir.resolve()
@@ -312,6 +312,9 @@ def main() -> int:
             row["oracle_passed"] = False
     all_passed = return_code == 0 and not aborted and parse_error is None and len(trials) == args.repetitions * len(SCENARIOS) and all(
         row["status"] == "passed" and row["oracle_passed"] for row in trials)
+    expected_trial_count = args.repetitions * len(SCENARIOS)
+    failed_trial_count = sum(not (row["status"] == "passed" and row["oracle_passed"]) for row in trials)
+    total_failure_count = expected_trial_count - len(trials) + failed_trial_count
     payload = {
         "schema": SCHEMA, "report_id": None,
         "algorithm": {"id": "GEO-04", "api": "CSL public polyhedral intersection and halfspace-reduction APIs",
@@ -323,8 +326,8 @@ def main() -> int:
         "drivers": {"converter": {"id": "csl.conversion.qhull", "version": "1.0.0+qhull.8.0.2"},
                     "lp_backend": {"id": "csl.lp.highs", "version": "1.0.0+highs.1.11.0"}},
         "collection": {"state": "complete" if all_passed else "failed", "process_return_code": return_code,
-                       "aborted_or_timed_out": aborted, "parse_error": parse_error, "expected_trials": args.repetitions*len(SCENARIOS),
-                       "actual_trials": len(trials), "failures": sum(not (x["status"] == "passed" and x["oracle_passed"]) for x in trials),
+                       "aborted_or_timed_out": aborted, "parse_error": parse_error, "expected_trials": expected_trial_count,
+                       "actual_trials": len(trials), "failures": total_failure_count, "measured_repetitions": args.repetitions,
                        "warmups_per_scenario": args.warmups, "order": "forward on even repetitions, reverse on odd repetitions",
                        "fresh_input_workspace_and_provider_per_trial": True,
                        "timings": "steady-clock nanoseconds; phase intervals as named in driver CSV",

@@ -10,6 +10,7 @@ import copy
 import sys
 import unittest
 from pathlib import Path
+import geo04_catalog
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -30,20 +31,22 @@ def trial(scenario: str, status: str = "passed") -> dict:
 
 def valid_trials() -> list[dict]:
     rows = []
-    for scenario in collect.SCENARIOS:
-        case = collect.EXPECTED[scenario]
-        row = trial(scenario)
-        row.update({"lp_calls": 3 if scenario == "essential_rows_highs" else 0,
-                    "lp_results": 3 if scenario == "essential_rows_highs" else 0,
-                    "lp_optimal": 1 if scenario == "essential_rows_highs" else 0,
-                    "lp_bounds": 0, "lp_supported_bounds": 0,
-                    "reduction_status": case.get("reduction_status", "not_applicable"),
-                    "vertices_json": case.get("vertices", []),
-                    "inequalities": case["inequalities"], "equalities": case.get("equalities", 0),
-                    "vertices": len(case.get("vertices", []))})
-        row["scenario_sha256"] = hashlib.sha256(json.dumps(case,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
-        row["input_sha256"] = hashlib.sha256(json.dumps(case["inputs"],sort_keys=True,separators=(",", ":")).encode()).hexdigest()
-        rows.append(row)
+    for repetition in range(7):
+        for scenario in collect.SCENARIOS:
+            case = collect.EXPECTED[scenario]
+            row = trial(scenario)
+            row["repetition"] = repetition
+            row.update({"lp_calls": 3 if scenario == "essential_rows_highs" else 0,
+                        "lp_results": 3 if scenario == "essential_rows_highs" else 0,
+                        "lp_optimal": 1 if scenario == "essential_rows_highs" else 0,
+                        "lp_bounds": 0, "lp_supported_bounds": 0,
+                        "reduction_status": case.get("reduction_status", "not_applicable"),
+                        "vertices_json": copy.deepcopy(case.get("vertices", [])),
+                        "inequalities": case["inequalities"], "equalities": case.get("equalities", 0),
+                        "vertices": len(case.get("vertices", []))})
+            row["scenario_sha256"] = hashlib.sha256(json.dumps(case,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+            row["input_sha256"] = hashlib.sha256(json.dumps(case["inputs"],sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+            rows.append(row)
     return rows
 
 
@@ -52,7 +55,8 @@ def valid_payload(report_id: str) -> dict:
     expected = collect.EXPECTED
     payload = {"schema": render.SCHEMA, "report_id": report_id,
         "algorithm": {"id": "GEO-04", "source_commit": "abc", "harness_commit": "def"},
-        "collection": {"state": "complete", "expected_trials": len(rows), "actual_trials": len(rows), "failures": 0},
+        "collection": {"state": "complete", "expected_trials": len(rows), "actual_trials": len(rows), "failures": 0,
+                       "measured_repetitions": 7, "process_return_code": 0, "aborted_or_timed_out": False, "parse_error": None},
         "expected": expected,
         "inputs": {"scenario_catalog_version": render.CATALOG_VERSION,
                    "scenario_catalog_sha256": hashlib.sha256(json.dumps(expected,sort_keys=True,separators=(",", ":")).encode()).hexdigest()},
@@ -151,6 +155,31 @@ class ReportToolTests(unittest.TestCase):
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
         payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
         with self.assertRaisesRegex(ValueError, "scenario catalog differs from pinned catalog"):
+            render.validate(payload)
+
+    def test_renderer_oracle_is_independent_of_collector_catalog_drift(self):
+        original = copy.deepcopy(geo04_catalog.EXPECTED)
+        try:
+            geo04_catalog.EXPECTED["crossing_octagon"]["vertices"][1] = [1, 0.50000009]
+            payload = valid_payload("geo04-collector-catalog-drift")
+            unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
+            payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
+            payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+            with self.assertRaisesRegex(ValueError, "scenario catalog differs from pinned catalog"):
+                render.validate(payload)
+        finally:
+            geo04_catalog.EXPECTED.clear()
+            geo04_catalog.EXPECTED.update(original)
+
+    def test_renderer_rejects_resigned_complete_report_missing_a_scenario(self):
+        payload = valid_payload("geo04-missing-scenario")
+        payload["trials"] = [row for row in payload["trials"] if row["scenario"] != "empty_intersection"]
+        payload["collection"].update({"expected_trials": 21, "actual_trials": 21, "failures": 0})
+        payload["summary"] = collect.summarize(payload["trials"], True)
+        unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
+        payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        with self.assertRaisesRegex(ValueError, "collection counts or scenario/repetition matrix"):
             render.validate(payload)
 
     def test_offline_export_uses_saved_records_only_and_packages_required_files(self):

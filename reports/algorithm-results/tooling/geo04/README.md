@@ -76,7 +76,10 @@ fail validation. Thus implementation changes anywhere in the repository—
 including Qhull, HiGHS, and shared numeric code—fail validation. Dependency
 pin files are hashed separately. The renderer also checks the payload against
 the versioned `geo04_catalog.py` scenario catalog before trusting any oracle or
-catalog digest. Record an operator note about concurrent work and host load. For
+catalog digest; its literal oracle is maintained independently in `render.py`.
+It also requires the full scenario/repetition matrix, matching summary counts,
+and a failure count that includes missing trials. Record an operator note about
+concurrent work and host load. For
 reproducibility, use at least seven measured repetitions and one excluded
 warmup, forward/reverse fixture order, and a clean Release executable. Example:
 

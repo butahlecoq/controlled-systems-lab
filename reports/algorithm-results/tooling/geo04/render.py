@@ -9,9 +9,20 @@ import json
 import shutil
 import zipfile
 from pathlib import Path
-from geo04_catalog import CATALOG_VERSION, EXPECTED as PINNED_EXPECTED
 
 SCHEMA = "csl.geo04-polyhedral-report/1"
+CATALOG_VERSION = "geo04-analytic-v1"
+PINNED_EXPECTED = {
+    "crossing_octagon": {"inputs": {"left_A": [[1,0],[-1,0],[0,1],[0,-1]], "left_b": [1,1,1,1],
+                                     "right_A": [[1,1],[1,-1],[-1,1],[-1,-1]], "right_b": [1.5]*4},
+                         "vertices": [[1,.5],[1,-.5],[-1,.5],[-1,-.5],[.5,1],[-.5,1],[.5,-1],[-.5,-1]], "inequalities": 8, "equalities": 0},
+    "empty_intersection": {"inputs": {"left_A": [[1,0]], "left_b": [0], "right_A": [[-1,0]], "right_b": [-1]}, "vertices": [], "inequalities": 2},
+    "affine_equality": {"inputs": {"A": [[1,0],[-1,0]], "b": [2,0], "E": [[0,1]], "f": [1]},
+                        "vertices": [[0,1],[2,1]], "inequalities": 4, "equalities": 2},
+    "essential_rows_highs": {"inputs": {"A": [[1,0],[-1,0],[0,1]], "b": [1,0,0], "E": [[0,1]], "f": [0]},
+                             "inequalities": 3, "equalities": 1, "reduction_status": "incomplete", "lp_calls": 3, "removed_inequalities": []},
+}
+PINNED_SCENARIOS = tuple(PINNED_EXPECTED)
 FILES = ("records.json", "collection-status.json", "raw-events.jsonl", "raw-driver-output.csv", "process-stderr.txt",
          "measurement-command.txt", "build-provenance.txt", "concurrent-work.txt", "profile-evidence.txt", "scenarios.json", "environment.json")
 
@@ -77,13 +88,37 @@ def validate(payload: dict) -> None:
             trial["inequalities"] == 3 and trial["equalities"] == 1
         ):
             raise ValueError("saved HiGHS reduction evidence differs from the supported-bound contract")
-    if payload["collection"]["state"] == "complete":
-        expected_trials = payload["collection"].get("expected_trials")
-        if expected_trials != len(payload.get("trials", [])) or any(
-            trial["status"] != "passed" or not trial["oracle_passed"] for trial in payload["trials"]
-        ):
+    collection = payload["collection"]
+    trials = payload.get("trials", [])
+    repetitions = collection.get("measured_repetitions")
+    expected_trials = collection.get("expected_trials")
+    actual_trials = collection.get("actual_trials")
+    if collection.get("state") not in ("complete", "failed"):
+        raise ValueError("unknown collection state")
+    if any(not isinstance(value, int) or isinstance(value, bool)
+           for value in (repetitions, expected_trials, actual_trials, collection.get("failures"))):
+        raise ValueError("collection counts must be integers")
+    failed_rows = sum(trial["status"] != "passed" or not trial["oracle_passed"] for trial in trials)
+    expected_failure_count = expected_trials - len(trials) + failed_rows
+    trial_keys = [(trial["scenario"], trial["repetition"]) for trial in trials]
+    expected_keys = {(scenario, repetition) for scenario in PINNED_SCENARIOS
+                     for repetition in range(repetitions if isinstance(repetitions, int) and repetitions > 0 else 0)}
+    if (not isinstance(repetitions, int) or repetitions < 7 or expected_trials != repetitions * len(PINNED_SCENARIOS) or
+        actual_trials != len(trials) or len(set(trial_keys)) != len(trial_keys) or
+        any(key not in expected_keys for key in trial_keys) or collection.get("failures") != expected_failure_count):
+        raise ValueError("collection counts or scenario/repetition matrix are inconsistent")
+    for scenario in PINNED_SCENARIOS:
+        rows = [trial for trial in trials if trial["scenario"] == scenario]
+        summary = payload["summary"][scenario]
+        passed = sum(trial["status"] == "passed" and trial["oracle_passed"] for trial in rows)
+        if summary["attempts"] != len(rows) or summary["passed"] != passed or summary["failures"] != len(rows)-passed:
+            raise ValueError("scenario summary counts differ from saved trials")
+    if collection["state"] == "complete":
+        if (set(trial_keys) != expected_keys or collection.get("failures") != 0 or
+            collection.get("process_return_code") != 0 or collection.get("aborted_or_timed_out") or collection.get("parse_error") or
+            any(trial["status"] != "passed" or not trial["oracle_passed"] for trial in trials)):
             raise ValueError("complete report has missing or failed trials")
-    if payload["collection"]["state"] != "complete":
+    if collection["state"] != "complete":
         if any(value["median"] is not None for group in payload["summary"].values() for value in group["phases"].values()):
             raise ValueError("failed report must not summarize a filtered success subset")
 
