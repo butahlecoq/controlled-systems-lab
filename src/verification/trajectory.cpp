@@ -1,5 +1,6 @@
 #include <csl/verification/trajectory.hpp>
 #include <csl/optimization/linear_program.hpp>
+#include <csl/optimization/lp_backend.hpp>
 #include <algorithm>
 #include <bit>
 #include <cmath>
@@ -142,8 +143,11 @@ public:
             unavailable(field,"membership provider rejected the concrete query");return;
         }
         const auto& result=std::get<ProgramResult>(outcome);
-        if(result.outcome.subject!=program.identity()) {unavailable(field,"membership outcome program identity mismatch");return;}
         if(result.termination!=Termination::completed)stop(result.termination,"membership provider stopped");
+        if(auto diagnostics=optimization::check_program_result(result,program,Assurance::numerical);!diagnostics.empty()) {
+            report_.diagnostics.insert(report_.diagnostics.end(),diagnostics.begin(),diagnostics.end());
+            unavailable(field,"membership provider returned malformed or misbound evidence");return;
+        }
         boundary();
         if(!result.primal||result.primal->size()!=cols||result.outcome.value!=MathematicalOutcome::optimal) {
             unavailable(field,"no completed numerical membership witness; backend nonmembership is not independently verified");return;
