@@ -1,0 +1,229 @@
+{
+  "schema": "csl.report-export/1",
+  "document_policy": "csl.report-document/1",
+  "artifact_ref": "main",
+  "payload_sha256": "ee5e9193b7a55bbec9f85f805ca74e7e1f5e9b9d22199e5fffeab4ef72515501",
+  "render_ns": 77362900,
+  "scope": "validation-complete through saved-data HTML/CSV/raw-file export; excludes this metadata, manifest and ZIP",
+  "figure_files": {
+    "latency.svg": "88cd4433e9f6f4b206fe70a287c8ff900e20393cae530d3a0764fdda2b304c51",
+    "latency.png": "128647a9b64c2d252d7b16d3ffa178ada9d13db168f83a02756f8247ec8cf3eb"
+  },
+  "svg_policy": "csl.report.svg.mpl-3.11.2/1",
+  "plot": {
+    "schema": "csl.report-figure/1",
+    "payload_sha256": "ee5e9193b7a55bbec9f85f805ca74e7e1f5e9b9d22199e5fffeab4ef72515501",
+    "series": {
+      "public_run": [
+        {
+          "case_id": "offset-triangle",
+          "values": [
+            186900,
+            190200,
+            179400,
+            172800,
+            186500,
+            176000,
+            187500
+          ],
+          "summary": {
+            "median": 186500,
+            "min": 172800,
+            "max": 190200,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "scalar-positive",
+          "values": [
+            111000,
+            102900,
+            109000,
+            105000,
+            110900,
+            115100,
+            107700
+          ],
+          "summary": {
+            "median": 109000,
+            "min": 102900,
+            "max": 115100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "scalar-negative",
+          "values": [
+            110100,
+            103200,
+            102600,
+            100500,
+            100900,
+            108200,
+            103200
+          ],
+          "summary": {
+            "median": 103200,
+            "min": 100500,
+            "max": 110100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "contradictory-rows",
+          "values": [
+            185600,
+            168700,
+            166100,
+            163800,
+            165900,
+            170200,
+            171500
+          ],
+          "summary": {
+            "median": 168700,
+            "min": 163800,
+            "max": 185600,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "free-unbounded",
+          "values": [
+            121100,
+            117300,
+            106200,
+            110600,
+            112800,
+            107200,
+            117500
+          ],
+          "summary": {
+            "median": 112800,
+            "min": 106200,
+            "max": 121100,
+            "count": 7
+          }
+        }
+      ],
+      "end_to_end": [
+        {
+          "case_id": "offset-triangle",
+          "values": [
+            193000,
+            196300,
+            186000,
+            177900,
+            192000,
+            182700,
+            193800
+          ],
+          "summary": {
+            "median": 192000,
+            "min": 177900,
+            "max": 196300,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "scalar-positive",
+          "values": [
+            116700,
+            108000,
+            114300,
+            110900,
+            116700,
+            120700,
+            113100
+          ],
+          "summary": {
+            "median": 114300,
+            "min": 108000,
+            "max": 120700,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "scalar-negative",
+          "values": [
+            115800,
+            107600,
+            107100,
+            105100,
+            105300,
+            114300,
+            108500
+          ],
+          "summary": {
+            "median": 107600,
+            "min": 105100,
+            "max": 115800,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "contradictory-rows",
+          "values": [
+            191100,
+            174600,
+            171800,
+            169000,
+            171600,
+            175400,
+            176500
+          ],
+          "summary": {
+            "median": 174600,
+            "min": 169000,
+            "max": 191100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "free-unbounded",
+          "values": [
+            127300,
+            122500,
+            111100,
+            115900,
+            117900,
+            112500,
+            124000
+          ],
+          "summary": {
+            "median": 117900,
+            "min": 111100,
+            "max": 127300,
+            "count": 7
+          }
+        }
+      ]
+    },
+    "unit": "ns",
+    "matplotlib": "3.11.2",
+    "svg_policy": "csl.report.svg.mpl-3.11.2/1",
+    "plot_ns": 582974800,
+    "scope": "saved-data plotting including imports/figure creation and SVG/PNG write; excludes metadata serialization",
+    "files": {
+      "latency.svg": "88cd4433e9f6f4b206fe70a287c8ff900e20393cae530d3a0764fdda2b304c51",
+      "latency.png": "128647a9b64c2d252d7b16d3ffa178ada9d13db168f83a02756f8247ec8cf3eb"
+    },
+    "packages": {
+      "matplotlib": "3.11.2",
+      "numpy": "2.5.4",
+      "contourpy": "1.4.0",
+      "cycler": "0.12.1",
+      "fonttools": "4.66.1",
+      "kiwisolver": "1.5.1",
+      "packaging": "26.3",
+      "pillow": "12.3.0",
+      "pyparsing": "3.3.3",
+      "python-dateutil": "2.9.0.post0",
+      "six": "1.17.0"
+    }
+  },
+  "packaging": {
+    "available": false,
+    "reason": "not timed by renderer"
+  }
+}

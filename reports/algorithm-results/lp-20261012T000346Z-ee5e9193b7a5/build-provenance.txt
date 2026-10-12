@@ -1,0 +1,2476 @@
+Change Dir: 'BUILD_ROOT'
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" csl_lp_report.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:4 /v:n
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+Сборка начата 12.10.2026 3:00:49.
+
+     1>Проект "BUILD_ROOT\csl_lp_report.vcxproj" в узле 1 (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\csl_lp_report.vcxproj" (1) выполняет сборку "BUILD_ROOT\ZERO_CHECK.vcxproj" (2) в узле 1 (целевые объекты по умолчанию).
+     2>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       FinalizeBuildStatus:
+         Файл "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+     2>Сборка проекта "BUILD_ROOT\ZERO_CHECK.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\csl_lp_report.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_contracts.vcxproj" (3) в узле 1 (целевые объекты по умолчанию).
+     3>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\csl_lp_report.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_highs_lp.vcxproj" (5) в узле 3 (целевые объекты по умолчанию).
+     5>Проект "BUILD_ROOT\csl_highs_lp.vcxproj" (5) выполняет сборку "BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj" (9) в узле 3 (целевые объекты по умолчанию).
+     9>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "highs.dir\Release\highs.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "highs.dir\Release\highs.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     3>ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_contracts.vcxproj -> BUILD_ROOT\Release\csl_contracts.lib
+       FinalizeBuildStatus:
+         Файл "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate".
+     3>Сборка проекта "BUILD_ROOT\csl_contracts.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\csl_lp_report.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_numeric.vcxproj" (4) в узле 4 (целевые объекты по умолчанию).
+     4>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\csl_lp_report.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_registry.vcxproj" (7) в узле 4 (целевые объекты по умолчанию).
+     7>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     9>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     7>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_registry.vcxproj -> BUILD_ROOT\Release\csl_registry.lib
+     9>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     7>FinalizeBuildStatus:
+         Файл "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild" удаляется.
+     9>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     7>FinalizeBuildStatus:
+         Обращение к "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate".
+     7>Сборка проекта "BUILD_ROOT\csl_registry.vcxproj" завершена (целевые объекты по умолчанию).
+     4>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+     9>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     4>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     9>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     4>Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_numeric.vcxproj -> BUILD_ROOT\Release\csl_numeric.lib
+     9>ClCompile:
+         Для всех выходных данных обновления не требуется.
+       ResourceCompile:
+         Для всех выходных данных обновления не требуется.
+     4>FinalizeBuildStatus:
+         Файл "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate".
+     4>Сборка проекта "BUILD_ROOT\csl_numeric.vcxproj" завершена (целевые объекты по умолчанию).
+     9>Lib:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\csl_lp_report.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_optimization.vcxproj" (6) в узле 2 (целевые объекты по умолчанию).
+     6>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+     9>Lib:
+         highs.vcxproj -> BUILD_ROOT\Release\bin\highs.lib
+     6>ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_optimization.vcxproj -> BUILD_ROOT\Release\csl_optimization.lib
+     9>FinalizeBuildStatus:
+         Файл "highs.dir\Release\highs.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "highs.dir\Release\highs.tlog\highs.lastbuildstate".
+     9>Сборка проекта "BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj" завершена (целевые объекты по умолчанию).
+     6>FinalizeBuildStatus:
+         Файл "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_optimization.dir\Release\csl_optimization.tlog\csl_optimization.lastbuildstate".
+     6>Сборка проекта "BUILD_ROOT\csl_optimization.vcxproj" завершена (целевые объекты по умолчанию).
+     5>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_highs_lp.vcxproj -> BUILD_ROOT\Release\csl_highs_lp.lib
+       FinalizeBuildStatus:
+         Файл "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_highs_lp.dir\Release\csl_highs_lp.tlog\csl_highs_lp.lastbuildstate".
+     5>Сборка проекта "BUILD_ROOT\csl_highs_lp.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\csl_lp_report.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_report_support.vcxproj" (8) в узле 2 (целевые объекты по умолчанию).
+     8>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_report_support.dir\Release\csl_repo.EA053C28.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_report_support.dir\Release\csl_repo.EA053C28.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\benchmarks\reporting /I"BUILD_ROOT\report-generated" /ISOURCE_ROOT\include /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CSL_REPORT_CONFIG=\"Release\"" /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_report_support.dir\Release\\" /scanDependencies "csl_report_support.dir\Release\\" /Fo"csl_report_support.dir\Release\\" /Fd"BUILD_ROOT\Release\csl_report_support.pdb" /external:W4 /Gd /TP /errorReport:queue SOURCE_ROOT\benchmarks\reporting\lp_report.cpp
+         lp_report.cpp
+       ClCompile:
+         Компиляция…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\benchmarks\reporting /I"BUILD_ROOT\report-generated" /ISOURCE_ROOT\include /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CSL_REPORT_CONFIG=\"Release\"" /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_report_support.dir\Release\\" /Fo"csl_report_support.dir\Release\\" /Fd"BUILD_ROOT\Release\csl_report_support.pdb" /sourceDependencies "csl_report_support.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue SOURCE_ROOT\benchmarks\reporting\lp_report.cpp
+         lp_report.cpp
+       Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"BUILD_ROOT\Release\csl_report_support.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_report_support.dir\Release\lp_report.obj
+         csl_report_support.dir\Release\process_counters.obj
+         csl_report_support.vcxproj -> BUILD_ROOT\Release\csl_report_support.lib
+       FinalizeBuildStatus:
+         Файл "csl_report_support.dir\Release\csl_repo.EA053C28.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_report_support.dir\Release\csl_repo.EA053C28.tlog\csl_report_support.lastbuildstate".
+     8>Сборка проекта "BUILD_ROOT\csl_report_support.vcxproj" завершена (целевые объекты по умолчанию).
+     1>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_lp_report.dir\Release\csl_lp_report.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_lp_report.dir\Release\csl_lp_report.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"BUILD_ROOT\Release\csl_lp_report.exe" /INCREMENTAL:NO /NOLOGO Release\csl_report_support.lib Release\csl_highs_lp.lib Release\csl_optimization.lib Release\csl_numeric.lib Release\csl_registry.lib Release\csl_contracts.lib Release\bin\highs.lib Psapi.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"BUILD_ROOT/Release/csl_lp_report.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"BUILD_ROOT/Release/csl_lp_report.lib" /MACHINE:X64  /machine:x64 csl_lp_report.dir\Release\lp_report_main.obj
+         csl_lp_report.vcxproj -> BUILD_ROOT\Release\csl_lp_report.exe
+       FinalizeBuildStatus:
+         Файл "csl_lp_report.dir\Release\csl_lp_report.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_lp_report.dir\Release\csl_lp_report.tlog\csl_lp_report.lastbuildstate".
+     1>Сборка проекта "BUILD_ROOT\csl_lp_report.vcxproj" завершена (целевые объекты по умолчанию).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:04.26
+
+
+FINAL VERIFIED BUILD
+Change Dir: 'BUILD_ROOT'
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" ALL_BUILD.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:4 /v:n
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+Сборка начата 12.10.2026 3:03:28.
+
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" в узле 1 (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\ZERO_CHECK.vcxproj" (2) в узле 1 (целевые объекты по умолчанию).
+     2>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       FinalizeBuildStatus:
+         Файл "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+     2>Сборка проекта "BUILD_ROOT\ZERO_CHECK.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_contracts.vcxproj" (6) в узле 2 (целевые объекты по умолчанию).
+     6>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_contracts.vcxproj -> BUILD_ROOT\Release\csl_contracts.lib
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_highs_lp.vcxproj" (11) в узле 1 (целевые объекты по умолчанию).
+    11>Проект "BUILD_ROOT\csl_highs_lp.vcxproj" (11) выполняет сборку "BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj" (22) в узле 4 (целевые объекты по умолчанию).
+    22>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "highs.dir\Release\highs.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "highs.dir\Release\highs.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     6>FinalizeBuildStatus:
+         Файл "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate".
+     6>Сборка проекта "BUILD_ROOT\csl_contracts.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_execution.vcxproj" (10) в узле 2 (целевые объекты по умолчанию).
+    10>Проект "BUILD_ROOT\csl_execution.vcxproj" (10) выполняет сборку "BUILD_ROOT\csl_registry.vcxproj" (14) в узле 2 (целевые объекты по умолчанию).
+    14>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\contract_tests.vcxproj" (5) в узле 3 (целевые объекты по умолчанию).
+     5>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "contract_tests.dir\Release\contract_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "contract_tests.dir\Release\contract_tests.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    14>Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_registry.vcxproj -> BUILD_ROOT\Release\csl_registry.lib
+     5>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+    14>FinalizeBuildStatus:
+         Файл "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate".
+    14>Сборка проекта "BUILD_ROOT\csl_registry.vcxproj" завершена (целевые объекты по умолчанию).
+     5>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    10>PrepareForBuild:
+         Создание каталога "csl_execution.dir\Release\".
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_execution.dir\Release\csl_execution.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_execution.dir\Release\csl_execution.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_execution.dir\Release\csl_execution.tlog\unsuccessfulbuild".
+    22>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     5>Link:
+         Для всех выходных данных обновления не требуется.
+         contract_tests.vcxproj -> BUILD_ROOT\Release\contract_tests.exe
+    22>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    10>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    22>ClCompile:
+         Для всех выходных данных обновления не требуется.
+         Для всех выходных данных обновления не требуется.
+         Для всех выходных данных обновления не требуется.
+         Для всех выходных данных обновления не требуется.
+       ResourceCompile:
+         Для всех выходных данных обновления не требуется.
+    10>SetModuleDependencies:
+         Создание каталога "csl_execution.dir\Release\csl_execution_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+    22>Lib:
+         Для всех выходных данных обновления не требуется.
+    10>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_execution.dir\Release\\" /scanDependencies "csl_execution.dir\Release\\" /Fo"csl_execution.dir\Release\\" /Fd"BUILD_ROOT\Release\csl_execution.pdb" /external:W4 /Gd /TP /errorReport:queue SOURCE_ROOT\src\execution\executor.cpp
+    22>Lib:
+         highs.vcxproj -> BUILD_ROOT\Release\bin\highs.lib
+     5>FinalizeBuildStatus:
+         Файл "contract_tests.dir\Release\contract_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "contract_tests.dir\Release\contract_tests.tlog\contract_tests.lastbuildstate".
+     5>Сборка проекта "BUILD_ROOT\contract_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    22>FinalizeBuildStatus:
+         Файл "highs.dir\Release\highs.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "highs.dir\Release\highs.tlog\highs.lastbuildstate".
+    22>Сборка проекта "BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\public_client.vcxproj" (38) в узле 1 (целевые объекты по умолчанию).
+    38>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "public_client.dir\Release\public_client.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "public_client.dir\Release\public_client.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\affine_dynamics_tests.vcxproj" (3) в узле 1 (целевые объекты по умолчанию).
+     3>Проект "BUILD_ROOT\affine_dynamics_tests.vcxproj" (3) выполняет сборку "BUILD_ROOT\csl_numeric.vcxproj" (9) в узле 4 (целевые объекты по умолчанию).
+     9>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    10>SetModuleDependencies:
+         executor.cpp
+     9>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+    38>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+     9>Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_numeric.vcxproj -> BUILD_ROOT\Release\csl_numeric.lib
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\registry_public_client.vcxproj" (41) в узле 3 (целевые объекты по умолчанию).
+    41>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "registry_public_client.dir\Release\registry.9CE36B25.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "registry_public_client.dir\Release\registry.9CE36B25.tlog\unsuccessfulbuild".
+     9>FinalizeBuildStatus:
+         Файл "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate".
+     9>Сборка проекта "BUILD_ROOT\csl_numeric.vcxproj" завершена (целевые объекты по умолчанию).
+    41>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    38>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    41>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\caller_example.vcxproj" (4) в узле 4 (целевые объекты по умолчанию).
+     4>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    41>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+     4>InitializeBuildStatus:
+         Создание "caller_example.dir\Release\caller_example.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "caller_example.dir\Release\caller_example.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    41>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     4>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+    41>Link:
+         Для всех выходных данных обновления не требуется.
+         registry_public_client.vcxproj -> BUILD_ROOT\Release\registry_public_client.exe
+     4>Link:
+         Для всех выходных данных обновления не требуется.
+         caller_example.vcxproj -> BUILD_ROOT\Release\caller_example.exe
+       FinalizeBuildStatus:
+         Файл "caller_example.dir\Release\caller_example.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "caller_example.dir\Release\caller_example.tlog\caller_example.lastbuildstate".
+     4>Сборка проекта "BUILD_ROOT\caller_example.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_objectives.vcxproj" (12) в узле 4 (целевые объекты по умолчанию).
+    12>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+     3>Проект "BUILD_ROOT\affine_dynamics_tests.vcxproj" (3) выполняет сборку "BUILD_ROOT\csl_sets.vcxproj" (8) в узле 3 (целевые объекты по умолчанию).
+     8>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    12>InitializeBuildStatus:
+         Создание "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild".
+     8>InitializeBuildStatus:
+         Создание "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild".
+    12>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\public_headers_client.vcxproj" (40) в узле 2 (целевые объекты по умолчанию).
+    40>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+     8>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    40>InitializeBuildStatus:
+         Создание "public_headers_client.dir\Release\public_h.C1EB0052.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "public_headers_client.dir\Release\public_h.C1EB0052.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\public_headers_lp_first_client.vcxproj" (39) в узле 3 (целевые объекты по умолчанию).
+    39>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    12>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    39>InitializeBuildStatus:
+         Создание "public_headers_lp_first_client.dir\Release\public_h.0CCDAA7B.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "public_headers_lp_first_client.dir\Release\public_h.0CCDAA7B.tlog\unsuccessfulbuild".
+    40>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    39>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    12>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    40>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "public_headers_client.dir\Release\\" /scanDependencies "public_headers_client.dir\Release\\" /Fo"public_headers_client.dir\Release\\" /Fd"public_headers_client.dir\Release\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue SOURCE_ROOT\tests\contract\public_headers_client.cpp
+    12>ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_objectives.vcxproj -> BUILD_ROOT\Release\csl_objectives.lib
+    39>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    38>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    39>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D CSL_PUBLIC_HEADERS_LP_FIRST=1 /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "public_headers_lp_first_client.dir\Release\\" /scanDependencies "public_headers_lp_first_client.dir\Release\\" /Fo"public_headers_lp_first_client.dir\Release\\" /Fd"public_headers_lp_first_client.dir\Release\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue SOURCE_ROOT\tests\contract\public_headers_client.cpp
+    12>FinalizeBuildStatus:
+         Файл "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_objectives.dir\Release\csl_objectives.tlog\csl_objectives.lastbuildstate".
+    12>Сборка проекта "BUILD_ROOT\csl_objectives.vcxproj" завершена (целевые объекты по умолчанию).
+     8>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_sets.vcxproj -> BUILD_ROOT\Release\csl_sets.lib
+    40>SetModuleDependencies:
+         public_headers_client.cpp
+    38>Link:
+         Для всех выходных данных обновления не требуется.
+     8>FinalizeBuildStatus:
+         Файл "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_sets.dir\Release\csl_sets.tlog\csl_sets.lastbuildstate".
+    38>Link:
+         public_client.vcxproj -> BUILD_ROOT\Release\public_client.exe
+     8>Сборка проекта "BUILD_ROOT\csl_sets.vcxproj" завершена (целевые объекты по умолчанию).
+    38>FinalizeBuildStatus:
+         Файл "public_client.dir\Release\public_client.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "public_client.dir\Release\public_client.tlog\public_client.lastbuildstate".
+    39>SetModuleDependencies:
+         public_headers_client.cpp
+    38>Сборка проекта "BUILD_ROOT\public_client.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\objective_reformulation_tests.vcxproj" (32) в узле 3 (целевые объекты по умолчанию).
+    32>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "objective_reformulation_tests.dir\Release\objectiv.52B24E0F.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "objective_reformulation_tests.dir\Release\objectiv.52B24E0F.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\numeric_tests.vcxproj" (29) в узле 1 (целевые объекты по умолчанию).
+    29>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "numeric_tests.dir\Release\numeric_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "numeric_tests.dir\Release\numeric_tests.tlog\unsuccessfulbuild".
+    41>FinalizeBuildStatus:
+         Файл "registry_public_client.dir\Release\registry.9CE36B25.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "registry_public_client.dir\Release\registry.9CE36B25.tlog\registry_public_client.lastbuildstate".
+    41>Сборка проекта "BUILD_ROOT\registry_public_client.vcxproj" завершена (целевые объекты по умолчанию).
+    29>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    32>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    29>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    32>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    29>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    10>ClCompile:
+         Компиляция…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_execution.dir\Release\\" /Fo"csl_execution.dir\Release\\" /Fd"BUILD_ROOT\Release\csl_execution.pdb" /sourceDependencies "csl_execution.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue SOURCE_ROOT\src\execution\executor.cpp
+    32>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    29>ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Link:
+         Для всех выходных данных обновления не требуется.
+    32>Link:
+         Для всех выходных данных обновления не требуется.
+    29>Link:
+         numeric_tests.vcxproj -> BUILD_ROOT\Release\numeric_tests.exe
+    32>Link:
+         objective_reformulation_tests.vcxproj -> BUILD_ROOT\Release\objective_reformulation_tests.exe
+    29>FinalizeBuildStatus:
+         Файл "numeric_tests.dir\Release\numeric_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "numeric_tests.dir\Release\numeric_tests.tlog\numeric_tests.lastbuildstate".
+    29>Сборка проекта "BUILD_ROOT\numeric_tests.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\sets_public_client.vcxproj" (43) в узле 2 (целевые объекты по умолчанию).
+    43>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "sets_public_client.dir\Release\sets_pub.659B6CA0.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "sets_public_client.dir\Release\sets_pub.659B6CA0.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    32>FinalizeBuildStatus:
+         Файл "objective_reformulation_tests.dir\Release\objectiv.52B24E0F.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "objective_reformulation_tests.dir\Release\objectiv.52B24E0F.tlog\objective_reformulation_tests.lastbuildstate".
+    32>Сборка проекта "BUILD_ROOT\objective_reformulation_tests.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\sets_tests.vcxproj" (44) в узле 2 (целевые объекты по умолчанию).
+    44>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "sets_tests.dir\Release\sets_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "sets_tests.dir\Release\sets_tests.tlog\unsuccessfulbuild".
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\numeric_buffer_views_tests.vcxproj" (28) в узле 1 (целевые объекты по умолчанию).
+    28>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    10>ClCompile:
+         executor.cpp
+    44>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    28>InitializeBuildStatus:
+         Создание "numeric_buffer_views_tests.dir\Release\numeric_.B0A56C4C.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "numeric_buffer_views_tests.dir\Release\numeric_.B0A56C4C.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    44>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    28>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    44>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+    28>ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Link:
+         Для всех выходных данных обновления не требуется.
+    44>Link:
+         Для всех выходных данных обновления не требуется.
+    28>Link:
+         numeric_buffer_views_tests.vcxproj -> BUILD_ROOT\Release\numeric_buffer_views_tests.exe
+    44>Link:
+         sets_tests.vcxproj -> BUILD_ROOT\Release\sets_tests.exe
+    28>FinalizeBuildStatus:
+         Файл "numeric_buffer_views_tests.dir\Release\numeric_.B0A56C4C.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "numeric_buffer_views_tests.dir\Release\numeric_.B0A56C4C.tlog\numeric_buffer_views_tests.lastbuildstate".
+    28>Сборка проекта "BUILD_ROOT\numeric_buffer_views_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    43>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+    11>Проект "BUILD_ROOT\csl_highs_lp.vcxproj" (11) выполняет сборку "BUILD_ROOT\csl_optimization.vcxproj" (15) в узле 1 (целевые объекты по умолчанию).
+    15>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild".
+    43>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    15>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    43>Link:
+         Для всех выходных данных обновления не требуется.
+         sets_public_client.vcxproj -> BUILD_ROOT\Release\sets_public_client.exe
+    15>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+    43>FinalizeBuildStatus:
+         Файл "sets_public_client.dir\Release\sets_pub.659B6CA0.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "sets_public_client.dir\Release\sets_pub.659B6CA0.tlog\sets_public_client.lastbuildstate".
+    43>Сборка проекта "BUILD_ROOT\sets_public_client.vcxproj" завершена (целевые объекты по умолчанию).
+    44>FinalizeBuildStatus:
+         Файл "sets_tests.dir\Release\sets_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "sets_tests.dir\Release\sets_tests.tlog\sets_tests.lastbuildstate".
+    44>Сборка проекта "BUILD_ROOT\sets_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    15>Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_optimization.vcxproj -> BUILD_ROOT\Release\csl_optimization.lib
+       FinalizeBuildStatus:
+         Файл "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_optimization.dir\Release\csl_optimization.tlog\csl_optimization.lastbuildstate".
+    15>Сборка проекта "BUILD_ROOT\csl_optimization.vcxproj" завершена (целевые объекты по умолчанию).
+    40>ClCompile:
+         Компиляция…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "public_headers_client.dir\Release\\" /Fo"public_headers_client.dir\Release\\" /Fd"public_headers_client.dir\Release\vc143.pdb" /sourceDependencies "public_headers_client.dir\Release\.d.json" /external:W1 /Gd /TP /errorReport:queue SOURCE_ROOT\tests\contract\public_headers_client.cpp
+    39>ClCompile:
+         Компиляция…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D CSL_PUBLIC_HEADERS_LP_FIRST=1 /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "public_headers_lp_first_client.dir\Release\\" /Fo"public_headers_lp_first_client.dir\Release\\" /Fd"public_headers_lp_first_client.dir\Release\vc143.pdb" /sourceDependencies "public_headers_lp_first_client.dir\Release\.d.json" /external:W1 /Gd /TP /errorReport:queue SOURCE_ROOT\tests\contract\public_headers_client.cpp
+     3>Проект "BUILD_ROOT\affine_dynamics_tests.vcxproj" (3) выполняет сборку "BUILD_ROOT\csl_model.vcxproj" (7) в узле 1 (целевые объекты по умолчанию).
+     7>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_model.vcxproj -> BUILD_ROOT\Release\csl_model.lib
+    40>ClCompile:
+         public_headers_client.cpp
+     7>FinalizeBuildStatus:
+         Файл "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate".
+     7>Сборка проекта "BUILD_ROOT\csl_model.vcxproj" завершена (целевые объекты по умолчанию).
+    39>ClCompile:
+         public_headers_client.cpp
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\objectives_tests.vcxproj" (33) в узле 1 (целевые объекты по умолчанию).
+    33>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "objectives_tests.dir\Release\objectives_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "objectives_tests.dir\Release\objectives_tests.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Link:
+         Для всех выходных данных обновления не требуется.
+         objectives_tests.vcxproj -> BUILD_ROOT\Release\objectives_tests.exe
+       FinalizeBuildStatus:
+         Файл "objectives_tests.dir\Release\objectives_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "objectives_tests.dir\Release\objectives_tests.tlog\objectives_tests.lastbuildstate".
+    33>Сборка проекта "BUILD_ROOT\objectives_tests.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\objectives_public_client.vcxproj" (31) в узле 1 (целевые объекты по умолчанию).
+    31>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "objectives_public_client.dir\Release\objectiv.D136EE4B.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "objectives_public_client.dir\Release\objectiv.D136EE4B.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Link:
+         Для всех выходных данных обновления не требуется.
+         objectives_public_client.vcxproj -> BUILD_ROOT\Release\objectives_public_client.exe
+       FinalizeBuildStatus:
+         Файл "objectives_public_client.dir\Release\objectiv.D136EE4B.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "objectives_public_client.dir\Release\objectiv.D136EE4B.tlog\objectives_public_client.lastbuildstate".
+    31>Сборка проекта "BUILD_ROOT\objectives_public_client.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\objective_evaluator_tests.vcxproj" (30) в узле 1 (целевые объекты по умолчанию).
+    30>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "objective_evaluator_tests.dir\Release\objectiv.696028E6.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "objective_evaluator_tests.dir\Release\objectiv.696028E6.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Link:
+         Для всех выходных данных обновления не требуется.
+         objective_evaluator_tests.vcxproj -> BUILD_ROOT\Release\objective_evaluator_tests.exe
+       FinalizeBuildStatus:
+         Файл "objective_evaluator_tests.dir\Release\objectiv.696028E6.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "objective_evaluator_tests.dir\Release\objectiv.696028E6.tlog\objective_evaluator_tests.lastbuildstate".
+    30>Сборка проекта "BUILD_ROOT\objective_evaluator_tests.vcxproj" завершена (целевые объекты по умолчанию).
+     3>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\model_tests.vcxproj" (27) в узле 3 (целевые объекты по умолчанию).
+    27>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+     3>InitializeBuildStatus:
+         Создание "affine_dynamics_tests.dir\Release\affine_d.3799BD22.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "affine_dynamics_tests.dir\Release\affine_d.3799BD22.tlog\unsuccessfulbuild".
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_problem.vcxproj" (18) в узле 2 (целевые объекты по умолчанию).
+    18>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    27>InitializeBuildStatus:
+         Создание "model_tests.dir\Release\model_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "model_tests.dir\Release\model_tests.tlog\unsuccessfulbuild".
+    18>InitializeBuildStatus:
+         Создание "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild".
+     3>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    27>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    18>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\model_public_client.vcxproj" (26) в узле 1 (целевые объекты по умолчанию).
+    26>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "model_public_client.dir\Release\model_pu.84D3135A.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "model_public_client.dir\Release\model_pu.84D3135A.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\observation_model_tests.vcxproj" (34) в узле 3 (целевые объекты по умолчанию).
+    34>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "observation_model_tests.dir\Release\observat.5CF17B03.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "observation_model_tests.dir\Release\observat.5CF17B03.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    26>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    18>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    26>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    18>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    26>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    34>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+    18>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    26>Link:
+         Для всех выходных данных обновления не требуется.
+         model_public_client.vcxproj -> BUILD_ROOT\Release\model_public_client.exe
+    18>Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_problem.vcxproj -> BUILD_ROOT\Release\csl_problem.lib
+    34>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    26>FinalizeBuildStatus:
+         Файл "model_public_client.dir\Release\model_pu.84D3135A.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "model_public_client.dir\Release\model_pu.84D3135A.tlog\model_public_client.lastbuildstate".
+    26>Сборка проекта "BUILD_ROOT\model_public_client.vcxproj" завершена (целевые объекты по умолчанию).
+    34>Link:
+         Для всех выходных данных обновления не требуется.
+         observation_model_tests.vcxproj -> BUILD_ROOT\Release\observation_model_tests.exe
+    18>FinalizeBuildStatus:
+         Файл "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_problem.dir\Release\csl_problem.tlog\csl_problem.lastbuildstate".
+    18>Сборка проекта "BUILD_ROOT\csl_problem.vcxproj" завершена (целевые объекты по умолчанию).
+     3>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+    34>FinalizeBuildStatus:
+         Файл "observation_model_tests.dir\Release\observat.5CF17B03.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "observation_model_tests.dir\Release\observat.5CF17B03.tlog\observation_model_tests.lastbuildstate".
+    34>Сборка проекта "BUILD_ROOT\observation_model_tests.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\problem_tests.vcxproj" (37) в узле 2 (целевые объекты по умолчанию).
+    37>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "problem_tests.dir\Release\problem_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "problem_tests.dir\Release\problem_tests.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    27>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+     3>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    27>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    37>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+     3>Link:
+         Для всех выходных данных обновления не требуется.
+         affine_dynamics_tests.vcxproj -> BUILD_ROOT\Release\affine_dynamics_tests.exe
+    37>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    27>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    37>ClCompile:
+         Для всех выходных данных обновления не требуется.
+     3>FinalizeBuildStatus:
+         Файл "affine_dynamics_tests.dir\Release\affine_d.3799BD22.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "affine_dynamics_tests.dir\Release\affine_d.3799BD22.tlog\affine_dynamics_tests.lastbuildstate".
+     3>Сборка проекта "BUILD_ROOT\affine_dynamics_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    27>Link:
+         Для всех выходных данных обновления не требуется.
+         model_tests.vcxproj -> BUILD_ROOT\Release\model_tests.exe
+    37>Link:
+         Для всех выходных данных обновления не требуется.
+         problem_tests.vcxproj -> BUILD_ROOT\Release\problem_tests.exe
+    11>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild".
+    27>FinalizeBuildStatus:
+         Файл "model_tests.dir\Release\model_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "model_tests.dir\Release\model_tests.tlog\model_tests.lastbuildstate".
+    27>Сборка проекта "BUILD_ROOT\model_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    11>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    37>FinalizeBuildStatus:
+         Файл "problem_tests.dir\Release\problem_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "problem_tests.dir\Release\problem_tests.tlog\problem_tests.lastbuildstate".
+    37>Сборка проекта "BUILD_ROOT\problem_tests.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\lp_backend_tests.vcxproj" (25) в узле 3 (целевые объекты по умолчанию).
+    25>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\optimization_public_client.vcxproj" (35) в узле 1 (целевые объекты по умолчанию).
+    35>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    25>InitializeBuildStatus:
+         Создание "lp_backend_tests.dir\Release\lp_backend_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "lp_backend_tests.dir\Release\lp_backend_tests.tlog\unsuccessfulbuild".
+    35>InitializeBuildStatus:
+         Создание "optimization_public_client.dir\Release\optimiza.247D6BAF.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "optimization_public_client.dir\Release\optimiza.247D6BAF.tlog\unsuccessfulbuild".
+    25>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\registry_tests.vcxproj" (42) в узле 2 (целевые объекты по умолчанию).
+    42>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    35>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    42>InitializeBuildStatus:
+         Создание "registry_tests.dir\Release\registry_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "registry_tests.dir\Release\registry_tests.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\linear_program_tests.vcxproj" (23) в узле 1 (целевые объекты по умолчанию).
+    23>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "linear_program_tests.dir\Release\linear_p.49A5AE9C.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "linear_program_tests.dir\Release\linear_p.49A5AE9C.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\problem_public_client.vcxproj" (36) в узле 3 (целевые объекты по умолчанию).
+    36>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "problem_public_client.dir\Release\problem_.D71F273E.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "problem_public_client.dir\Release\problem_.D71F273E.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    23>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    42>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+    23>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    36>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+    23>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    42>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    36>ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Link:
+         Для всех выходных данных обновления не требуется.
+    42>Link:
+         Для всех выходных данных обновления не требуется.
+         registry_tests.vcxproj -> BUILD_ROOT\Release\registry_tests.exe
+    36>Link:
+         problem_public_client.vcxproj -> BUILD_ROOT\Release\problem_public_client.exe
+    23>Link:
+         Для всех выходных данных обновления не требуется.
+         linear_program_tests.vcxproj -> BUILD_ROOT\Release\linear_program_tests.exe
+       FinalizeBuildStatus:
+         Файл "linear_program_tests.dir\Release\linear_p.49A5AE9C.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "linear_program_tests.dir\Release\linear_p.49A5AE9C.tlog\linear_program_tests.lastbuildstate".
+    23>Сборка проекта "BUILD_ROOT\linear_program_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    42>FinalizeBuildStatus:
+         Файл "registry_tests.dir\Release\registry_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "registry_tests.dir\Release\registry_tests.tlog\registry_tests.lastbuildstate".
+    25>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    42>Сборка проекта "BUILD_ROOT\registry_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    35>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+    25>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    35>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    25>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    35>Link:
+         Для всех выходных данных обновления не требуется.
+         optimization_public_client.vcxproj -> BUILD_ROOT\Release\optimization_public_client.exe
+    25>Link:
+         Для всех выходных данных обновления не требуется.
+         lp_backend_tests.vcxproj -> BUILD_ROOT\Release\lp_backend_tests.exe
+    35>FinalizeBuildStatus:
+         Файл "optimization_public_client.dir\Release\optimiza.247D6BAF.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "optimization_public_client.dir\Release\optimiza.247D6BAF.tlog\optimization_public_client.lastbuildstate".
+    35>Сборка проекта "BUILD_ROOT\optimization_public_client.vcxproj" завершена (целевые объекты по умолчанию).
+    11>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    25>FinalizeBuildStatus:
+         Файл "lp_backend_tests.dir\Release\lp_backend_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "lp_backend_tests.dir\Release\lp_backend_tests.tlog\lp_backend_tests.lastbuildstate".
+    25>Сборка проекта "BUILD_ROOT\lp_backend_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    11>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    36>FinalizeBuildStatus:
+         Файл "problem_public_client.dir\Release\problem_.D71F273E.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "problem_public_client.dir\Release\problem_.D71F273E.tlog\problem_public_client.lastbuildstate".
+    36>Сборка проекта "BUILD_ROOT\problem_public_client.vcxproj" завершена (целевые объекты по умолчанию).
+    11>ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_highs_lp.vcxproj -> BUILD_ROOT\Release\csl_highs_lp.lib
+       FinalizeBuildStatus:
+         Файл "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_highs_lp.dir\Release\csl_highs_lp.tlog\csl_highs_lp.lastbuildstate".
+    11>Сборка проекта "BUILD_ROOT\csl_highs_lp.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\highs_lp_tests.vcxproj" (20) в узле 1 (целевые объекты по умолчанию).
+    20>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\highs_public_client.vcxproj" (21) в узле 3 (целевые объекты по умолчанию).
+    21>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    20>InitializeBuildStatus:
+         Создание "highs_lp_tests.dir\Release\highs_lp_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "highs_lp_tests.dir\Release\highs_lp_tests.tlog\unsuccessfulbuild".
+    21>InitializeBuildStatus:
+         Создание "highs_public_client.dir\Release\highs_pu.9F6E823F.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "highs_public_client.dir\Release\highs_pu.9F6E823F.tlog\unsuccessfulbuild".
+    20>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    21>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    20>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+    21>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+    20>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    21>Link:
+         Для всех выходных данных обновления не требуется.
+         highs_public_client.vcxproj -> BUILD_ROOT\Release\highs_public_client.exe
+    20>Link:
+         Для всех выходных данных обновления не требуется.
+         highs_lp_tests.vcxproj -> BUILD_ROOT\Release\highs_lp_tests.exe
+    21>FinalizeBuildStatus:
+         Файл "highs_public_client.dir\Release\highs_pu.9F6E823F.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "highs_public_client.dir\Release\highs_pu.9F6E823F.tlog\highs_public_client.lastbuildstate".
+    21>Сборка проекта "BUILD_ROOT\highs_public_client.vcxproj" завершена (целевые объекты по умолчанию).
+    20>FinalizeBuildStatus:
+         Файл "highs_lp_tests.dir\Release\highs_lp_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "highs_lp_tests.dir\Release\highs_lp_tests.tlog\highs_lp_tests.lastbuildstate".
+    20>Сборка проекта "BUILD_ROOT\highs_lp_tests.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\csl_lp_report.vcxproj" (13) в узле 3 (целевые объекты по умолчанию).
+    13>Проект "BUILD_ROOT\csl_lp_report.vcxproj" (13) выполняет сборку "BUILD_ROOT\csl_report_support.vcxproj" (16) в узле 3 (целевые объекты по умолчанию).
+    16>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_report_support.dir\Release\csl_repo.EA053C28.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_report_support.dir\Release\csl_repo.EA053C28.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         Для всех выходных данных обновления не требуется.
+       ClCompile:
+         Для всех выходных данных обновления не требуется.
+       Lib:
+         Для всех выходных данных обновления не требуется.
+         csl_report_support.vcxproj -> BUILD_ROOT\Release\csl_report_support.lib
+       FinalizeBuildStatus:
+         Файл "csl_report_support.dir\Release\csl_repo.EA053C28.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_report_support.dir\Release\csl_repo.EA053C28.tlog\csl_report_support.lastbuildstate".
+    16>Сборка проекта "BUILD_ROOT\csl_report_support.vcxproj" завершена (целевые объекты по умолчанию).
+    13>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "csl_lp_report.dir\Release\csl_lp_report.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_lp_report.dir\Release\csl_lp_report.tlog\unsuccessfulbuild".
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\lp_report_tests.vcxproj" (24) в узле 2 (целевые объекты по умолчанию).
+    24>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+    13>CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    24>InitializeBuildStatus:
+         Создание "lp_report_tests.dir\Release\lp_report_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "lp_report_tests.dir\Release\lp_report_tests.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+    13>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    24>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+    13>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    24>SetModuleDependencies:
+         Для всех выходных данных обновления не требуется.
+    13>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    24>ClCompile:
+         Для всех выходных данных обновления не требуется.
+    13>Link:
+         Для всех выходных данных обновления не требуется.
+         csl_lp_report.vcxproj -> BUILD_ROOT\Release\csl_lp_report.exe
+    24>Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"BUILD_ROOT\Release\lp_report_tests.exe" /INCREMENTAL:NO /NOLOGO Release\csl_report_support.lib Release\csl_highs_lp.lib Release\csl_optimization.lib Release\csl_numeric.lib Release\csl_registry.lib Release\csl_contracts.lib Release\bin\highs.lib Psapi.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"BUILD_ROOT/Release/lp_report_tests.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"BUILD_ROOT/Release/lp_report_tests.lib" /MACHINE:X64  /machine:x64 lp_report_tests.dir\Release\lp_report_tests.obj
+    13>FinalizeBuildStatus:
+         Файл "csl_lp_report.dir\Release\csl_lp_report.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_lp_report.dir\Release\csl_lp_report.tlog\csl_lp_report.lastbuildstate".
+    13>Сборка проекта "BUILD_ROOT\csl_lp_report.vcxproj" завершена (целевые объекты по умолчанию).
+    24>Link:
+         lp_report_tests.vcxproj -> BUILD_ROOT\Release\lp_report_tests.exe
+       FinalizeBuildStatus:
+         Файл "lp_report_tests.dir\Release\lp_report_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "lp_report_tests.dir\Release\lp_report_tests.tlog\lp_report_tests.lastbuildstate".
+    24>Сборка проекта "BUILD_ROOT\lp_report_tests.vcxproj" завершена (целевые объекты по умолчанию).
+    40>Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"BUILD_ROOT\Release\public_headers_client.exe" /INCREMENTAL:NO /NOLOGO Release\csl_numeric.lib Release\csl_contracts.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"BUILD_ROOT/Release/public_headers_client.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"BUILD_ROOT/Release/public_headers_client.lib" /MACHINE:X64  /machine:x64 public_headers_client.dir\Release\public_headers_client.obj
+    39>Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"BUILD_ROOT\Release\public_headers_lp_first_client.exe" /INCREMENTAL:NO /NOLOGO Release\csl_numeric.lib Release\csl_contracts.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"BUILD_ROOT/Release/public_headers_lp_first_client.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"BUILD_ROOT/Release/public_headers_lp_first_client.lib" /MACHINE:X64  /machine:x64 public_headers_lp_first_client.dir\Release\public_headers_client.obj
+    40>Link:
+         public_headers_client.vcxproj -> BUILD_ROOT\Release\public_headers_client.exe
+       FinalizeBuildStatus:
+         Файл "public_headers_client.dir\Release\public_h.C1EB0052.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "public_headers_client.dir\Release\public_h.C1EB0052.tlog\public_headers_client.lastbuildstate".
+    40>Сборка проекта "BUILD_ROOT\public_headers_client.vcxproj" завершена (целевые объекты по умолчанию).
+    10>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"BUILD_ROOT\Release\csl_execution.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_execution.dir\Release\executor.obj
+         csl_execution.vcxproj -> BUILD_ROOT\Release\csl_execution.lib
+       FinalizeBuildStatus:
+         Файл "csl_execution.dir\Release\csl_execution.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_execution.dir\Release\csl_execution.tlog\csl_execution.lastbuildstate".
+    10>Сборка проекта "BUILD_ROOT\csl_execution.vcxproj" завершена (целевые объекты по умолчанию).
+    39>Link:
+         public_headers_lp_first_client.vcxproj -> BUILD_ROOT\Release\public_headers_lp_first_client.exe
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\execution_public_client.vcxproj" (17) в узле 1 (целевые объекты по умолчанию).
+    17>PrepareForBuild:
+         Создание каталога "execution_public_client.dir\Release\".
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "execution_public_client.dir\Release\executio.DCBD8C22.tlog\".
+    39>FinalizeBuildStatus:
+         Файл "public_headers_lp_first_client.dir\Release\public_h.0CCDAA7B.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "public_headers_lp_first_client.dir\Release\public_h.0CCDAA7B.tlog\public_headers_lp_first_client.lastbuildstate".
+    17>InitializeBuildStatus:
+         Создание "execution_public_client.dir\Release\executio.DCBD8C22.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+    39>Сборка проекта "BUILD_ROOT\public_headers_lp_first_client.vcxproj" завершена (целевые объекты по умолчанию).
+    17>InitializeBuildStatus:
+         Обращение к "execution_public_client.dir\Release\executio.DCBD8C22.tlog\unsuccessfulbuild".
+     1>Проект "BUILD_ROOT\ALL_BUILD.vcxproj" (1) выполняет сборку "BUILD_ROOT\execution_tests.vcxproj" (19) в узле 3 (целевые объекты по умолчанию).
+    19>PrepareForBuild:
+         Создание каталога "execution_tests.dir\Release\".
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "execution_tests.dir\Release\execution_tests.tlog\".
+       InitializeBuildStatus:
+         Создание "execution_tests.dir\Release\execution_tests.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "execution_tests.dir\Release\execution_tests.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    17>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    19>SetModuleDependencies:
+         Создание каталога "execution_tests.dir\Release\execution_tests_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /I"BUILD_ROOT\_deps\doctest-src" /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "execution_tests.dir\Release\\" /scanDependencies "execution_tests.dir\Release\\" /Fo"execution_tests.dir\Release\\" /Fd"execution_tests.dir\Release\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue SOURCE_ROOT\tests\unit\execution\executor_tests.cpp
+    17>SetModuleDependencies:
+         Создание каталога "execution_public_client.dir\Release\executio.DCBD8C22_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "execution_public_client.dir\Release\\" /scanDependencies "execution_public_client.dir\Release\\" /Fo"execution_public_client.dir\Release\\" /Fd"execution_public_client.dir\Release\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue SOURCE_ROOT\tests\installed\execution_client.cpp
+    19>SetModuleDependencies:
+         executor_tests.cpp
+    17>SetModuleDependencies:
+         execution_client.cpp
+       ClCompile:
+         Компиляция…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "execution_public_client.dir\Release\\" /Fo"execution_public_client.dir\Release\\" /Fd"execution_public_client.dir\Release\vc143.pdb" /sourceDependencies "execution_public_client.dir\Release\.d.json" /external:W1 /Gd /TP /errorReport:queue SOURCE_ROOT\tests\installed\execution_client.cpp
+         execution_client.cpp
+    19>ClCompile:
+         Компиляция…
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /ISOURCE_ROOT\include /I"BUILD_ROOT\_deps\doctest-src" /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "execution_tests.dir\Release\\" /Fo"execution_tests.dir\Release\\" /Fd"execution_tests.dir\Release\vc143.pdb" /sourceDependencies "execution_tests.dir\Release\.d.json" /external:W1 /Gd /TP /errorReport:queue SOURCE_ROOT\tests\unit\execution\executor_tests.cpp
+         executor_tests.cpp
+    17>Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"BUILD_ROOT\Release\execution_public_client.exe" /INCREMENTAL:NO /NOLOGO Release\csl_execution.lib Release\csl_registry.lib Release\csl_contracts.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"BUILD_ROOT/Release/execution_public_client.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"BUILD_ROOT/Release/execution_public_client.lib" /MACHINE:X64  /machine:x64 execution_public_client.dir\Release\execution_client.obj
+         execution_public_client.vcxproj -> BUILD_ROOT\Release\execution_public_client.exe
+       FinalizeBuildStatus:
+         Файл "execution_public_client.dir\Release\executio.DCBD8C22.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "execution_public_client.dir\Release\executio.DCBD8C22.tlog\execution_public_client.lastbuildstate".
+    17>Сборка проекта "BUILD_ROOT\execution_public_client.vcxproj" завершена (целевые объекты по умолчанию).
+    19>Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"BUILD_ROOT\Release\execution_tests.exe" /INCREMENTAL:NO /NOLOGO Release\csl_execution.lib Release\csl_optimization.lib Release\csl_registry.lib Release\csl_numeric.lib Release\csl_contracts.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"BUILD_ROOT/Release/execution_tests.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"BUILD_ROOT/Release/execution_tests.lib" /MACHINE:X64  /machine:x64 execution_tests.dir\Release\executor_tests.obj
+         execution_tests.vcxproj -> BUILD_ROOT\Release\execution_tests.exe
+       FinalizeBuildStatus:
+         Файл "execution_tests.dir\Release\execution_tests.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "execution_tests.dir\Release\execution_tests.tlog\execution_tests.lastbuildstate".
+    19>Сборка проекта "BUILD_ROOT\execution_tests.vcxproj" завершена (целевые объекты по умолчанию).
+     1>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         Создание "x64\Release\ALL_BUILD\ALL_BUILD.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "x64\Release\ALL_BUILD\ALL_BUILD.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Для всех выходных данных обновления не требуется.
+       FinalizeBuildStatus:
+         Файл "x64\Release\ALL_BUILD\ALL_BUILD.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "x64\Release\ALL_BUILD\ALL_BUILD.tlog\ALL_BUILD.lastbuildstate".
+     1>Сборка проекта "BUILD_ROOT\ALL_BUILD.vcxproj" завершена (целевые объекты по умолчанию).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:11.92
+
+
+FILE API
+{
+  "cmake": {
+    "generator": {
+      "multiConfig": true,
+      "name": "Visual Studio 17 2022",
+      "platform": "x64"
+    },
+    "paths": {
+      "cmake": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe",
+      "cpack": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cpack.exe",
+      "ctest": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/ctest.exe",
+      "root": "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31"
+    },
+    "version": {
+      "isDirty": false,
+      "major": 3,
+      "minor": 31,
+      "patch": 6,
+      "string": "3.31.6-msvc6",
+      "suffix": "msvc6"
+    }
+  },
+  "configuration": "Release",
+  "paths": {
+    "build": "BUILD_ROOT",
+    "source": "SOURCE_ROOT"
+  },
+  "targets": [
+    {
+      "name": "csl_lp_report",
+      "type": "EXECUTABLE",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 4,
+              "path": "SOURCE_ROOT/benchmarks/reporting"
+            },
+            {
+              "backtrace": 4,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              4
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "link": {
+        "commandFragments": [
+          {
+            "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD",
+            "role": "flags"
+          },
+          {
+            "fragment": "/machine:x64 /INCREMENTAL:NO /subsystem:console",
+            "role": "flags"
+          },
+          {
+            "backtrace": 4,
+            "fragment": "Release\\csl_report_support.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 5,
+            "fragment": "Release\\csl_highs_lp.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 6,
+            "fragment": "Release\\csl_optimization.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 7,
+            "fragment": "Release\\csl_numeric.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 6,
+            "fragment": "Release\\csl_registry.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 8,
+            "fragment": "Release\\csl_contracts.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 12,
+            "fragment": "Release\\bin\\highs.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 13,
+            "fragment": "Psapi.lib",
+            "role": "libraries"
+          },
+          {
+            "fragment": "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+            "role": "libraries"
+          }
+        ],
+        "language": "CXX"
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_lp_report.exe"
+        },
+        {
+          "path": "Release/csl_lp_report.pdb"
+        }
+      ]
+    },
+    {
+      "name": "csl_optimization",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_optimization.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_numeric",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_numeric.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_contracts",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 4,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              5
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_contracts.lib"
+        }
+      ]
+    },
+    {
+      "name": "ZERO_CHECK",
+      "type": "UTILITY"
+    },
+    {
+      "name": "csl_registry",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_registry.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_highs_lp",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 9,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "BUILD_ROOT/_deps/csl_highs-src"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "BUILD_ROOT/_deps/csl_highs-build"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_highs_lp.lib"
+        }
+      ]
+    },
+    {
+      "name": "highs",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD"
+            },
+            {
+              "backtrace": 11,
+              "fragment": "-D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 12,
+              "fragment": "/MP"
+            },
+            {
+              "backtrace": 13,
+              "fragment": "/Z7"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/bigobj"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/Zc:preprocessor"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/fp:precise"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4005"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4018"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4065"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4068"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4101"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4146"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4200"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4244"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4251"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4267"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4305"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4307"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4309"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4334"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4355"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4477"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4506"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4715"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4800"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4996"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-build"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              1
+            ],
+            "standard": "11"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147
+          ]
+        },
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG -MD"
+            },
+            {
+              "backtrace": 11,
+              "fragment": "-D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 12,
+              "fragment": "/MP"
+            },
+            {
+              "backtrace": 13,
+              "fragment": "/Z7"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/bigobj"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/Zc:preprocessor"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/fp:precise"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4005"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4018"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4065"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4068"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4101"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4146"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4200"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4244"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4251"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4267"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4305"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4307"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4309"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4334"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4355"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4477"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4506"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4715"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4800"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4996"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-build"
+            }
+          ],
+          "language": "C",
+          "sourceIndexes": [
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175
+          ]
+        },
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "-DWIN32"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "BUILD_ROOT/_deps/csl_highs-build"
+            }
+          ],
+          "language": "RC",
+          "sourceIndexes": [
+            403
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/bin/highs.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_report_support",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 6,
+              "define": "CSL_REPORT_CONFIG=\"Release\""
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 7,
+              "path": "SOURCE_ROOT/benchmarks/reporting"
+            },
+            {
+              "backtrace": 8,
+              "path": "BUILD_ROOT/report-generated"
+            },
+            {
+              "backtrace": 4,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              9
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_report_support.lib"
+        }
+      ]
+    }
+  ],
+  "toolchains": {
+    "kind": "toolchains",
+    "toolchains": [
+      {
+        "compiler": {
+          "id": "MSVC",
+          "implicit": {
+            "includeDirectories": [],
+            "linkDirectories": [],
+            "linkFrameworkDirectories": [],
+            "linkLibraries": []
+          },
+          "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+          "version": "19.44.35215.0"
+        },
+        "language": "C",
+        "sourceFileExtensions": [
+          "c",
+          "m"
+        ]
+      },
+      {
+        "compiler": {
+          "id": "MSVC",
+          "implicit": {
+            "includeDirectories": [],
+            "linkDirectories": [],
+            "linkFrameworkDirectories": [],
+            "linkLibraries": []
+          },
+          "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+          "version": "19.44.35215.0"
+        },
+        "language": "CXX",
+        "sourceFileExtensions": [
+          "C",
+          "M",
+          "c++",
+          "cc",
+          "cpp",
+          "cxx",
+          "mm",
+          "mpp",
+          "CPP",
+          "ixx",
+          "cppm",
+          "ccm",
+          "cxxm",
+          "c++m"
+        ]
+      },
+      {
+        "compiler": {
+          "implicit": {},
+          "path": "rc"
+        },
+        "language": "RC",
+        "sourceFileExtensions": [
+          "rc",
+          "RC"
+        ]
+      }
+    ],
+    "version": {
+      "major": 1,
+      "minor": 0
+    }
+  }
+}

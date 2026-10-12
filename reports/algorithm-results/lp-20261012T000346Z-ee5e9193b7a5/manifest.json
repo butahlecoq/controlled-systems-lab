@@ -1,0 +1,18 @@
+{
+  "schema": "csl.report-manifest/1",
+  "report_id": "lp-20261012T000346Z-ee5e9193b7a5",
+  "files": {
+    "build-provenance.txt": "9fc2e35f041e3ae3c2d588492f4e849547ad3e4e9fcb7fdbf47490ab126db481",
+    "export.json": "b5dc695bb3399e7c9c7f835d92c9a7f1d2bc7fc1d829c910ff25152d88c40cc0",
+    "index.html": "2b7d31cb884861fdab7abe2d1fad8dadb4be1489f5e1edda4afdc8b05b3c22c2",
+    "latency.png": "128647a9b64c2d252d7b16d3ffa178ada9d13db168f83a02756f8247ec8cf3eb",
+    "latency.svg": "88cd4433e9f6f4b206fe70a287c8ff900e20393cae530d3a0764fdda2b304c51",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile.json": "2b379fdaa2f5d7b410f29eaad3516885b2c7f958ed4178c5f4977168863a225d",
+    "raw-events.jsonl": "cb64a303da831c77b8efdeb7f58a71d8fc3d7095bd188c2a6c974426d85e31f9",
+    "records.json": "7ad7b01c1a7982b9a28f7aa2a3c0a37be16695b96be9204f2741773166cf2162",
+    "scenarios.json": "ff442e6e6f96f6f894b586d22b62e8d6ffd1f4b1662765492479c8e36909b4a4",
+    "summary.csv": "a0e3d2d1da3e03a7136efe77604a23063c34ad6bb86323941448f180a1756d3e",
+    "trials.csv": "5ea93691bf1f2be0d9c478cc39ddef00c1138ff4255fb9376d2b7f6a0f51a6ce"
+  }
+}
