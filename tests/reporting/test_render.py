@@ -65,12 +65,16 @@ class RenderTests(unittest.TestCase):
     def test_svg_drawing_and_internal_references_allowed_unsafe_content_rejected(self):
         safe = b'<svg xmlns="http://www.w3.org/2000/svg"><defs><path id="p" d="M 0 0 L 1 1"/></defs><use href="#p"/></svg>'
         self.assertEqual(data.validate_svg(safe), safe.decode())
+        styled = b'<svg xmlns="http://www.w3.org/2000/svg"><style>text{font:13px system-ui,sans-serif;fill:#172033}.scenario{font-weight:600}</style><text class="scenario" x="0" y="1">fixture</text></svg>'
+        self.assertEqual(data.validate_svg(styled), styled.decode())
         unsafe = [b'<!DOCTYPE svg><svg/>', b'<!ENTITY x SYSTEM "file:///secret"><svg/>',
                   b'<svg xmlns="http://www.w3.org/2000/svg"><script/></svg>',
                   b'<svg xmlns="http://www.w3.org/2000/svg" onload="bad()"/>',
                   b'<svg xmlns="http://www.w3.org/2000/svg"><foreignObject/></svg>',
                   b'<svg xmlns="http://www.w3.org/2000/svg"><use href="https://bad/a"/></svg>',
                   b'<svg xmlns="http://www.w3.org/2000/svg"><path style="fill:url(https://bad)"/></svg>',
+                  b'<svg xmlns="http://www.w3.org/2000/svg"><text class="scenario onload=bad"/></svg>',
+                  b'<svg xmlns="http://www.w3.org/2000/svg"><style>text:hover{fill:red}</style></svg>',
                   b'<svg xmlns="http://www.w3.org/2000/svg"><metadata/></svg>',
                   b'<svg xmlns="http://www.w3.org/2000/svg" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>',
                   b'<?xml version="1.0"?><svg/>']

@@ -1,0 +1,1 @@
+SOURCE_ROOT\build-geo04-final\Release\csl_geo04_intersection_report.exe --repetitions 7 --warmups 1

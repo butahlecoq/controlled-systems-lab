@@ -1,0 +1,5 @@
+Separate CPU profile attempt (not part of reported timing trials):
+Command: wpr.exe -start CPU -filemode
+Tool: Windows Performance Recorder 10.0.22621; CPU profile available in WPR, Windows Performance Analyzer and xperf are installed.
+Outcome: WPR failed before recording with error 0xc5585011, “Failed to enable the policy to profile system performance.” The current account lacks the privilege needed for system CPU sampling. No ETL trace or samples were produced, and the driver was not run under the profiler. No elevation was attempted.
+Limiter attribution: unavailable. No hottest-function or bottleneck claim is made. An unprofiled functional smoke was run separately; its timing fields were discarded. Process CPU/host load measurements are recorded separately and are not treated as function-level profiling.

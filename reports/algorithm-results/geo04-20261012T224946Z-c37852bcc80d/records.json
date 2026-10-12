@@ -1,0 +1,1742 @@
+{
+  "schema": "csl.geo04-polyhedral-report/1",
+  "report_id": "geo04-20261012T224946Z-c37852bcc80d",
+  "algorithm": {
+    "id": "GEO-04",
+    "api": "CSL public polyhedral intersection and halfspace-reduction APIs",
+    "source_commit": "9579f9e936d85d66c59003b2a04157c153df6b63",
+    "harness_commit": "b83b8dc415dbe5811371b8446931ae4c6f3d2e28"
+  },
+  "inputs": {
+    "scenario_catalog_version": "geo04-analytic-v1",
+    "scenario_catalog_sha256": "91e4cf9b3f072fd189b025a8e6dec5422a7cc12aa5d8958123235bd628e7904c",
+    "executable_sha256": "c266bf24aefcb2a66cd3b44c19224cfb634766b0ff9ad4f25ac794dcf70e5806",
+    "executable_name": "csl_geo04_intersection_report.exe"
+  },
+  "drivers": {
+    "converter": {
+      "id": "csl.conversion.qhull",
+      "version": "1.0.0+qhull.8.0.2"
+    },
+    "lp_backend": {
+      "id": "csl.lp.highs",
+      "version": "1.0.0+highs.1.11.0"
+    }
+  },
+  "collection": {
+    "state": "complete",
+    "process_return_code": 0,
+    "aborted_or_timed_out": false,
+    "parse_error": null,
+    "expected_trials": 28,
+    "actual_trials": 28,
+    "failures": 0,
+    "measured_repetitions": 7,
+    "warmups_per_scenario": 1,
+    "order": "forward on even repetitions, reverse on odd repetitions",
+    "fresh_input_workspace_and_provider_per_trial": true,
+    "timings": "steady-clock nanoseconds; phase intervals as named in driver CSV",
+    "seed": {
+      "value": null,
+      "reason": "the implementations have no user-configurable random seed"
+    }
+  },
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "architecture": "AMD64",
+    "cpu_model": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "logical_cpu_count": 12,
+    "python": "3.13.5",
+    "resources": {
+      "total_threads": 1,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "memory_bytes": {
+        "value": null,
+        "reason": "no memory limit requested"
+      }
+    },
+    "native_threads_requested": 1,
+    "outer_workers": 1,
+    "threads_per_worker": 1,
+    "native_threads_observed": {
+      "value": null,
+      "reason": "not sampled by the phase-1 harness"
+    },
+    "per_trial_peak_memory": {
+      "value": null,
+      "reason": "not observed by the phase-1 harness"
+    },
+    "per_trial_cpu": {
+      "value": null,
+      "reason": "not observed by the phase-1 harness"
+    },
+    "machine_load": {
+      "before": {
+        "utc": "2026-10-12T22:49:41Z",
+        "os": "Windows-11-10.0.22631-SP0",
+        "logical_processors": 12,
+        "python": "3.13.5",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "load_percent": [
+          9
+        ],
+        "ram_bytes": 34189107200
+      },
+      "after": {
+        "utc": "2026-10-12T22:49:44Z",
+        "os": "Windows-11-10.0.22631-SP0",
+        "logical_processors": 12,
+        "python": "3.13.5",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "load_percent": [
+          8
+        ],
+        "ram_bytes": 34189107200
+      },
+      "process_cpu_deltas": {
+        "available": true,
+        "unit": "process CPU seconds over collection interval",
+        "values": {
+          "Adobe Crash Processor": 0.0,
+          "AdobeIPCBroker": 0.0,
+          "ApplicationFrameHost": 0.0,
+          "AvastUI": 0.0,
+          "cbservice": 0.046875,
+          "CCXProcess": 0,
+          "ChatGPT": 0.015625,
+          "chrome": 0.015625,
+          "cmd": 0,
+          "cnqtbapp": 0.0,
+          "codex": 0.0,
+          "codex-code-mode-host": 0.0,
+          "codex-command-runner-0.162.0-alpha.17.2": 0.0,
+          "codex-computer-use-swift": 0.015625,
+          "conhost": 0.0,
+          "ctfmon": 0.0,
+          "DataExchangeHost": 0.0,
+          "dllhost": 0.0,
+          "DTShellHlp": 0.0,
+          "explorer": 0.0,
+          "FLPService": 0.0,
+          "LockApp": 0.0,
+          "MSBuild": 0.0,
+          "node": 0.0,
+          "node_repl": 0.0,
+          "opencode": 0.0,
+          "OpenConsole": 0.0,
+          "pdf24": 0.0,
+          "PhoneExperienceHost": 0.0,
+          "pwsh": 0.0,
+          "python": 0.0,
+          "rhinomcp": 0,
+          "RuntimeBroker": 0.0,
+          "SearchHost": 0.0,
+          "SecurityHealthSystray": 0.0,
+          "ShellExperienceHost": 0.0,
+          "sihost": 0.0,
+          "sketchup-mcp": 0,
+          "StartMenuExperienceHost": 0.0,
+          "svchost": 0.0,
+          "SystemSettings": 0.0,
+          "SystemSettingsBroker": 0.0,
+          "tailscale-ipn": 0.0,
+          "taskhostw": 0.0,
+          "Telegram": 0.03125,
+          "TextInputHost": 0.0,
+          "uv": 0.0,
+          "WebKitNetworkProcess": 0.0,
+          "Widgets": 0.0,
+          "WidgetService": 0.0,
+          "WindowsTerminal": 0.0
+        },
+        "scope": "matching observed processes only; no arguments/paths, new/exited processes omitted"
+      }
+    },
+    "machine_observations": {
+      "before": {
+        "utc": "2026-10-12T22:49:41Z",
+        "os": "Windows-11-10.0.22631-SP0",
+        "logical_processors": 12,
+        "python": "3.13.5",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "load_percent": [
+          9
+        ],
+        "ram_bytes": 34189107200
+      },
+      "after": {
+        "utc": "2026-10-12T22:49:44Z",
+        "os": "Windows-11-10.0.22631-SP0",
+        "logical_processors": 12,
+        "python": "3.13.5",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "load_percent": [
+          8
+        ],
+        "ram_bytes": 34189107200
+      }
+    },
+    "physical_memory_before_bytes": 34189107200,
+    "physical_memory_after_bytes": 34189107200,
+    "load_percent_before": [
+      9
+    ],
+    "load_percent_after": [
+      8
+    ],
+    "compiler_and_release_flags": "see build-provenance.json and build-provenance.txt"
+  },
+  "tolerances": {
+    "numerical_policy": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "analytic_output_oracle": {
+      "absolute": 1e-07,
+      "relative": 0.0
+    },
+    "arithmetic": "binary64"
+  },
+  "expected": {
+    "crossing_octagon": {
+      "inputs": {
+        "left_A": [
+          [
+            1,
+            0
+          ],
+          [
+            -1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "left_b": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "right_A": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            -1
+          ],
+          [
+            -1,
+            1
+          ],
+          [
+            -1,
+            -1
+          ]
+        ],
+        "right_b": [
+          1.5,
+          1.5,
+          1.5,
+          1.5
+        ]
+      },
+      "vertices": [
+        [
+          1,
+          0.5
+        ],
+        [
+          1,
+          -0.5
+        ],
+        [
+          -1,
+          0.5
+        ],
+        [
+          -1,
+          -0.5
+        ],
+        [
+          0.5,
+          1
+        ],
+        [
+          -0.5,
+          1
+        ],
+        [
+          0.5,
+          -1
+        ],
+        [
+          -0.5,
+          -1
+        ]
+      ],
+      "inequalities": 8,
+      "equalities": 0
+    },
+    "empty_intersection": {
+      "inputs": {
+        "left_A": [
+          [
+            1,
+            0
+          ]
+        ],
+        "left_b": [
+          0
+        ],
+        "right_A": [
+          [
+            -1,
+            0
+          ]
+        ],
+        "right_b": [
+          -1
+        ]
+      },
+      "vertices": [],
+      "inequalities": 2
+    },
+    "affine_equality": {
+      "inputs": {
+        "A": [
+          [
+            1,
+            0
+          ],
+          [
+            -1,
+            0
+          ]
+        ],
+        "b": [
+          2,
+          0
+        ],
+        "E": [
+          [
+            0,
+            1
+          ]
+        ],
+        "f": [
+          1
+        ]
+      },
+      "vertices": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "inequalities": 4,
+      "equalities": 2
+    },
+    "essential_rows_highs": {
+      "inputs": {
+        "A": [
+          [
+            1,
+            0
+          ],
+          [
+            -1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "b": [
+          1,
+          0,
+          0
+        ],
+        "E": [
+          [
+            0,
+            1
+          ]
+        ],
+        "f": [
+          0
+        ]
+      },
+      "inequalities": 3,
+      "equalities": 1,
+      "reduction_status": "incomplete",
+      "lp_calls": 3,
+      "removed_inequalities": []
+    }
+  },
+  "evidence": {
+    "scope": "numerical binary64 fixture checks; no exact validated geometry claim",
+    "limiter_profile": {
+      "file": "profile-evidence.txt",
+      "timing_trials_profiled": false
+    },
+    "essential_row_result": "HiGHS currently returns no supported objective bounds; production reduction must remain incomplete and retain all rows.",
+    "fixed_bound_unit_fixture_is_benchmark_backend": false,
+    "limitations": [
+      "small analytic fixtures only",
+      "no competitor or speedup claim",
+      "no application-scale or scalability claim",
+      "LP query internal phase timings and OS-observed thread counts unavailable"
+    ]
+  },
+  "trials": [
+    {
+      "scenario": "crossing_octagon",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1800,
+      "prepare_ns": 3500,
+      "workspace_ns": 600,
+      "conversion_run_ns": 1698400,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1733100,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 8,
+      "equalities": 0,
+      "vertices": 8,
+      "oracle_checks": 36,
+      "vertices_json": [
+        [
+          -1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          -1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          1.0000000000000002
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "4cb44515291c15c054580be9a6daa92cab54f3daa73209c70424c127b3be2b15",
+      "input_sha256": "1060992076bcb0c92afb101b505ef193ea654a11f79d147fa529018f66c8747d"
+    },
+    {
+      "scenario": "empty_intersection",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1800,
+      "prepare_ns": 3500,
+      "workspace_ns": 700,
+      "conversion_run_ns": 257500,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 285100,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 2,
+      "equalities": 0,
+      "vertices": 0,
+      "oracle_checks": 1,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "3c9f02e5316af20400da99f4c2e81c40d0ca1099f5b02389202d7e9e52706dab",
+      "input_sha256": "f3fbfdf86a6cae47b14493b19cc8e3ca9fa814408c44f5677bb9fbc5d5250618"
+    },
+    {
+      "scenario": "affine_equality",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 2400,
+      "prepare_ns": 2700,
+      "workspace_ns": 700,
+      "conversion_run_ns": 1089800,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1108400,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 4,
+      "equalities": 2,
+      "vertices": 2,
+      "oracle_checks": 4,
+      "vertices_json": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "7c274439089dd1a799a15bbd5f4f857a1112447daaf12e4b7e81f9f8db8e604c",
+      "input_sha256": "d52990fbc5ff86abf0cddc86b3f497cffa1800818bb4f50099c380fa02201e9e"
+    },
+    {
+      "scenario": "essential_rows_highs",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 0,
+      "prepare_ns": 0,
+      "workspace_ns": 0,
+      "conversion_run_ns": 0,
+      "lp_workspace_ns": 1600,
+      "reduction_ns": 436500,
+      "total_ns": 478400,
+      "lp_calls": 3,
+      "lp_results": 3,
+      "lp_optimal": 1,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "incomplete",
+      "inequalities": 3,
+      "equalities": 1,
+      "vertices": 0,
+      "oracle_checks": 4,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "add568984fc69e35fd4ace9f5339547e169200eb6f98dfce2a20b24ef01134b0",
+      "input_sha256": "c76aaaf1b251f939625b562ff41e5b07b468f7d3fbe64c0b7d2f74554cbaea30"
+    },
+    {
+      "scenario": "essential_rows_highs",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 0,
+      "prepare_ns": 0,
+      "workspace_ns": 0,
+      "conversion_run_ns": 0,
+      "lp_workspace_ns": 2400,
+      "reduction_ns": 442500,
+      "total_ns": 481800,
+      "lp_calls": 3,
+      "lp_results": 3,
+      "lp_optimal": 1,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "incomplete",
+      "inequalities": 3,
+      "equalities": 1,
+      "vertices": 0,
+      "oracle_checks": 4,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "add568984fc69e35fd4ace9f5339547e169200eb6f98dfce2a20b24ef01134b0",
+      "input_sha256": "c76aaaf1b251f939625b562ff41e5b07b468f7d3fbe64c0b7d2f74554cbaea30"
+    },
+    {
+      "scenario": "affine_equality",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1900,
+      "prepare_ns": 2700,
+      "workspace_ns": 700,
+      "conversion_run_ns": 1032700,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1051600,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 4,
+      "equalities": 2,
+      "vertices": 2,
+      "oracle_checks": 4,
+      "vertices_json": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "7c274439089dd1a799a15bbd5f4f857a1112447daaf12e4b7e81f9f8db8e604c",
+      "input_sha256": "d52990fbc5ff86abf0cddc86b3f497cffa1800818bb4f50099c380fa02201e9e"
+    },
+    {
+      "scenario": "empty_intersection",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1700,
+      "prepare_ns": 3100,
+      "workspace_ns": 700,
+      "conversion_run_ns": 218700,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 234000,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 2,
+      "equalities": 0,
+      "vertices": 0,
+      "oracle_checks": 1,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "3c9f02e5316af20400da99f4c2e81c40d0ca1099f5b02389202d7e9e52706dab",
+      "input_sha256": "f3fbfdf86a6cae47b14493b19cc8e3ca9fa814408c44f5677bb9fbc5d5250618"
+    },
+    {
+      "scenario": "crossing_octagon",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1500,
+      "prepare_ns": 1900,
+      "workspace_ns": 600,
+      "conversion_run_ns": 1631600,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1661400,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 8,
+      "equalities": 0,
+      "vertices": 8,
+      "oracle_checks": 36,
+      "vertices_json": [
+        [
+          -1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          -1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          1.0000000000000002
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "4cb44515291c15c054580be9a6daa92cab54f3daa73209c70424c127b3be2b15",
+      "input_sha256": "1060992076bcb0c92afb101b505ef193ea654a11f79d147fa529018f66c8747d"
+    },
+    {
+      "scenario": "crossing_octagon",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1900,
+      "prepare_ns": 3500,
+      "workspace_ns": 700,
+      "conversion_run_ns": 1706900,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1743900,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 8,
+      "equalities": 0,
+      "vertices": 8,
+      "oracle_checks": 36,
+      "vertices_json": [
+        [
+          -1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          -1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          1.0000000000000002
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "4cb44515291c15c054580be9a6daa92cab54f3daa73209c70424c127b3be2b15",
+      "input_sha256": "1060992076bcb0c92afb101b505ef193ea654a11f79d147fa529018f66c8747d"
+    },
+    {
+      "scenario": "empty_intersection",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1800,
+      "prepare_ns": 3900,
+      "workspace_ns": 700,
+      "conversion_run_ns": 259500,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 276300,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 2,
+      "equalities": 0,
+      "vertices": 0,
+      "oracle_checks": 1,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "3c9f02e5316af20400da99f4c2e81c40d0ca1099f5b02389202d7e9e52706dab",
+      "input_sha256": "f3fbfdf86a6cae47b14493b19cc8e3ca9fa814408c44f5677bb9fbc5d5250618"
+    },
+    {
+      "scenario": "affine_equality",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 2300,
+      "prepare_ns": 2300,
+      "workspace_ns": 700,
+      "conversion_run_ns": 1117800,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1135500,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 4,
+      "equalities": 2,
+      "vertices": 2,
+      "oracle_checks": 4,
+      "vertices_json": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "7c274439089dd1a799a15bbd5f4f857a1112447daaf12e4b7e81f9f8db8e604c",
+      "input_sha256": "d52990fbc5ff86abf0cddc86b3f497cffa1800818bb4f50099c380fa02201e9e"
+    },
+    {
+      "scenario": "essential_rows_highs",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 0,
+      "prepare_ns": 0,
+      "workspace_ns": 0,
+      "conversion_run_ns": 0,
+      "lp_workspace_ns": 1800,
+      "reduction_ns": 459300,
+      "total_ns": 495800,
+      "lp_calls": 3,
+      "lp_results": 3,
+      "lp_optimal": 1,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "incomplete",
+      "inequalities": 3,
+      "equalities": 1,
+      "vertices": 0,
+      "oracle_checks": 4,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "add568984fc69e35fd4ace9f5339547e169200eb6f98dfce2a20b24ef01134b0",
+      "input_sha256": "c76aaaf1b251f939625b562ff41e5b07b468f7d3fbe64c0b7d2f74554cbaea30"
+    },
+    {
+      "scenario": "essential_rows_highs",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 0,
+      "prepare_ns": 0,
+      "workspace_ns": 0,
+      "conversion_run_ns": 0,
+      "lp_workspace_ns": 2200,
+      "reduction_ns": 445600,
+      "total_ns": 483000,
+      "lp_calls": 3,
+      "lp_results": 3,
+      "lp_optimal": 1,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "incomplete",
+      "inequalities": 3,
+      "equalities": 1,
+      "vertices": 0,
+      "oracle_checks": 4,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "add568984fc69e35fd4ace9f5339547e169200eb6f98dfce2a20b24ef01134b0",
+      "input_sha256": "c76aaaf1b251f939625b562ff41e5b07b468f7d3fbe64c0b7d2f74554cbaea30"
+    },
+    {
+      "scenario": "affine_equality",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 2000,
+      "prepare_ns": 2800,
+      "workspace_ns": 700,
+      "conversion_run_ns": 1001500,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1021400,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 4,
+      "equalities": 2,
+      "vertices": 2,
+      "oracle_checks": 4,
+      "vertices_json": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "7c274439089dd1a799a15bbd5f4f857a1112447daaf12e4b7e81f9f8db8e604c",
+      "input_sha256": "d52990fbc5ff86abf0cddc86b3f497cffa1800818bb4f50099c380fa02201e9e"
+    },
+    {
+      "scenario": "empty_intersection",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 2000,
+      "prepare_ns": 3100,
+      "workspace_ns": 600,
+      "conversion_run_ns": 204700,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 221200,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 2,
+      "equalities": 0,
+      "vertices": 0,
+      "oracle_checks": 1,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "3c9f02e5316af20400da99f4c2e81c40d0ca1099f5b02389202d7e9e52706dab",
+      "input_sha256": "f3fbfdf86a6cae47b14493b19cc8e3ca9fa814408c44f5677bb9fbc5d5250618"
+    },
+    {
+      "scenario": "crossing_octagon",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1600,
+      "prepare_ns": 1800,
+      "workspace_ns": 400,
+      "conversion_run_ns": 1568100,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1597500,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 8,
+      "equalities": 0,
+      "vertices": 8,
+      "oracle_checks": 36,
+      "vertices_json": [
+        [
+          -1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          -1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          1.0000000000000002
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "4cb44515291c15c054580be9a6daa92cab54f3daa73209c70424c127b3be2b15",
+      "input_sha256": "1060992076bcb0c92afb101b505ef193ea654a11f79d147fa529018f66c8747d"
+    },
+    {
+      "scenario": "crossing_octagon",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 2000,
+      "prepare_ns": 3600,
+      "workspace_ns": 800,
+      "conversion_run_ns": 1709400,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1746600,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 8,
+      "equalities": 0,
+      "vertices": 8,
+      "oracle_checks": 36,
+      "vertices_json": [
+        [
+          -1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          -1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          1.0000000000000002
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "4cb44515291c15c054580be9a6daa92cab54f3daa73209c70424c127b3be2b15",
+      "input_sha256": "1060992076bcb0c92afb101b505ef193ea654a11f79d147fa529018f66c8747d"
+    },
+    {
+      "scenario": "empty_intersection",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1800,
+      "prepare_ns": 3400,
+      "workspace_ns": 700,
+      "conversion_run_ns": 241100,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 261700,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 2,
+      "equalities": 0,
+      "vertices": 0,
+      "oracle_checks": 1,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "3c9f02e5316af20400da99f4c2e81c40d0ca1099f5b02389202d7e9e52706dab",
+      "input_sha256": "f3fbfdf86a6cae47b14493b19cc8e3ca9fa814408c44f5677bb9fbc5d5250618"
+    },
+    {
+      "scenario": "affine_equality",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1900,
+      "prepare_ns": 2300,
+      "workspace_ns": 700,
+      "conversion_run_ns": 1032100,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1051900,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 4,
+      "equalities": 2,
+      "vertices": 2,
+      "oracle_checks": 4,
+      "vertices_json": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "7c274439089dd1a799a15bbd5f4f857a1112447daaf12e4b7e81f9f8db8e604c",
+      "input_sha256": "d52990fbc5ff86abf0cddc86b3f497cffa1800818bb4f50099c380fa02201e9e"
+    },
+    {
+      "scenario": "essential_rows_highs",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 0,
+      "prepare_ns": 0,
+      "workspace_ns": 0,
+      "conversion_run_ns": 0,
+      "lp_workspace_ns": 1600,
+      "reduction_ns": 417500,
+      "total_ns": 463100,
+      "lp_calls": 3,
+      "lp_results": 3,
+      "lp_optimal": 1,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "incomplete",
+      "inequalities": 3,
+      "equalities": 1,
+      "vertices": 0,
+      "oracle_checks": 4,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "add568984fc69e35fd4ace9f5339547e169200eb6f98dfce2a20b24ef01134b0",
+      "input_sha256": "c76aaaf1b251f939625b562ff41e5b07b468f7d3fbe64c0b7d2f74554cbaea30"
+    },
+    {
+      "scenario": "essential_rows_highs",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 0,
+      "prepare_ns": 0,
+      "workspace_ns": 0,
+      "conversion_run_ns": 0,
+      "lp_workspace_ns": 2100,
+      "reduction_ns": 407000,
+      "total_ns": 456800,
+      "lp_calls": 3,
+      "lp_results": 3,
+      "lp_optimal": 1,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "incomplete",
+      "inequalities": 3,
+      "equalities": 1,
+      "vertices": 0,
+      "oracle_checks": 4,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "add568984fc69e35fd4ace9f5339547e169200eb6f98dfce2a20b24ef01134b0",
+      "input_sha256": "c76aaaf1b251f939625b562ff41e5b07b468f7d3fbe64c0b7d2f74554cbaea30"
+    },
+    {
+      "scenario": "affine_equality",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 2200,
+      "prepare_ns": 2600,
+      "workspace_ns": 600,
+      "conversion_run_ns": 1060500,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1079900,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 4,
+      "equalities": 2,
+      "vertices": 2,
+      "oracle_checks": 4,
+      "vertices_json": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "7c274439089dd1a799a15bbd5f4f857a1112447daaf12e4b7e81f9f8db8e604c",
+      "input_sha256": "d52990fbc5ff86abf0cddc86b3f497cffa1800818bb4f50099c380fa02201e9e"
+    },
+    {
+      "scenario": "empty_intersection",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1500,
+      "prepare_ns": 3300,
+      "workspace_ns": 500,
+      "conversion_run_ns": 221200,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 236800,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 2,
+      "equalities": 0,
+      "vertices": 0,
+      "oracle_checks": 1,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "3c9f02e5316af20400da99f4c2e81c40d0ca1099f5b02389202d7e9e52706dab",
+      "input_sha256": "f3fbfdf86a6cae47b14493b19cc8e3ca9fa814408c44f5677bb9fbc5d5250618"
+    },
+    {
+      "scenario": "crossing_octagon",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1600,
+      "prepare_ns": 1800,
+      "workspace_ns": 500,
+      "conversion_run_ns": 1695600,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1726400,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 8,
+      "equalities": 0,
+      "vertices": 8,
+      "oracle_checks": 36,
+      "vertices_json": [
+        [
+          -1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          -1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          1.0000000000000002
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "4cb44515291c15c054580be9a6daa92cab54f3daa73209c70424c127b3be2b15",
+      "input_sha256": "1060992076bcb0c92afb101b505ef193ea654a11f79d147fa529018f66c8747d"
+    },
+    {
+      "scenario": "crossing_octagon",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1900,
+      "prepare_ns": 3400,
+      "workspace_ns": 700,
+      "conversion_run_ns": 1801900,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1837600,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 8,
+      "equalities": 0,
+      "vertices": 8,
+      "oracle_checks": 36,
+      "vertices_json": [
+        [
+          -1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          -0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          -1.0000000000000002
+        ],
+        [
+          -1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          -0.5000000000000001,
+          1.0000000000000002
+        ],
+        [
+          1.0000000000000002,
+          0.5000000000000001
+        ],
+        [
+          0.5000000000000001,
+          1.0000000000000002
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "4cb44515291c15c054580be9a6daa92cab54f3daa73209c70424c127b3be2b15",
+      "input_sha256": "1060992076bcb0c92afb101b505ef193ea654a11f79d147fa529018f66c8747d"
+    },
+    {
+      "scenario": "empty_intersection",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1800,
+      "prepare_ns": 3400,
+      "workspace_ns": 700,
+      "conversion_run_ns": 293700,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 313200,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 2,
+      "equalities": 0,
+      "vertices": 0,
+      "oracle_checks": 1,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "3c9f02e5316af20400da99f4c2e81c40d0ca1099f5b02389202d7e9e52706dab",
+      "input_sha256": "f3fbfdf86a6cae47b14493b19cc8e3ca9fa814408c44f5677bb9fbc5d5250618"
+    },
+    {
+      "scenario": "affine_equality",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 1900,
+      "prepare_ns": 3100,
+      "workspace_ns": 600,
+      "conversion_run_ns": 1068200,
+      "lp_workspace_ns": 0,
+      "reduction_ns": 0,
+      "total_ns": 1088800,
+      "lp_calls": 0,
+      "lp_results": 0,
+      "lp_optimal": 0,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "not_applicable",
+      "inequalities": 4,
+      "equalities": 2,
+      "vertices": 2,
+      "oracle_checks": 4,
+      "vertices_json": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "oracle_passed": true,
+      "scenario_sha256": "7c274439089dd1a799a15bbd5f4f857a1112447daaf12e4b7e81f9f8db8e604c",
+      "input_sha256": "d52990fbc5ff86abf0cddc86b3f497cffa1800818bb4f50099c380fa02201e9e"
+    },
+    {
+      "scenario": "essential_rows_highs",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "intersection_ns": 0,
+      "prepare_ns": 0,
+      "workspace_ns": 0,
+      "conversion_run_ns": 0,
+      "lp_workspace_ns": 1700,
+      "reduction_ns": 413600,
+      "total_ns": 461200,
+      "lp_calls": 3,
+      "lp_results": 3,
+      "lp_optimal": 1,
+      "lp_bounds": 0,
+      "lp_supported_bounds": 0,
+      "reduction_status": "incomplete",
+      "inequalities": 3,
+      "equalities": 1,
+      "vertices": 0,
+      "oracle_checks": 4,
+      "vertices_json": [],
+      "oracle_passed": true,
+      "scenario_sha256": "add568984fc69e35fd4ace9f5339547e169200eb6f98dfce2a20b24ef01134b0",
+      "input_sha256": "c76aaaf1b251f939625b562ff41e5b07b468f7d3fbe64c0b7d2f74554cbaea30"
+    }
+  ],
+  "summary": {
+    "crossing_octagon": {
+      "attempts": 7,
+      "passed": 7,
+      "failures": 0,
+      "phases": {
+        "intersection_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1800,
+          "min": 1500,
+          "max": 2000,
+          "range": 500,
+          "trials_excluded_from_summary": 0
+        },
+        "prepare_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 3400,
+          "min": 1800,
+          "max": 3600,
+          "range": 1800,
+          "trials_excluded_from_summary": 0
+        },
+        "workspace_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 600,
+          "min": 400,
+          "max": 800,
+          "range": 400,
+          "trials_excluded_from_summary": 0
+        },
+        "conversion_run_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1698400,
+          "min": 1568100,
+          "max": 1801900,
+          "range": 233800,
+          "trials_excluded_from_summary": 0
+        },
+        "lp_workspace_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "reduction_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "total_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1733100,
+          "min": 1597500,
+          "max": 1837600,
+          "range": 240100,
+          "trials_excluded_from_summary": 0
+        }
+      }
+    },
+    "empty_intersection": {
+      "attempts": 7,
+      "passed": 7,
+      "failures": 0,
+      "phases": {
+        "intersection_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1800,
+          "min": 1500,
+          "max": 2000,
+          "range": 500,
+          "trials_excluded_from_summary": 0
+        },
+        "prepare_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 3400,
+          "min": 3100,
+          "max": 3900,
+          "range": 800,
+          "trials_excluded_from_summary": 0
+        },
+        "workspace_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 700,
+          "min": 500,
+          "max": 700,
+          "range": 200,
+          "trials_excluded_from_summary": 0
+        },
+        "conversion_run_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 241100,
+          "min": 204700,
+          "max": 293700,
+          "range": 89000,
+          "trials_excluded_from_summary": 0
+        },
+        "lp_workspace_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "reduction_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "total_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 261700,
+          "min": 221200,
+          "max": 313200,
+          "range": 92000,
+          "trials_excluded_from_summary": 0
+        }
+      }
+    },
+    "affine_equality": {
+      "attempts": 7,
+      "passed": 7,
+      "failures": 0,
+      "phases": {
+        "intersection_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 2000,
+          "min": 1900,
+          "max": 2400,
+          "range": 500,
+          "trials_excluded_from_summary": 0
+        },
+        "prepare_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 2700,
+          "min": 2300,
+          "max": 3100,
+          "range": 800,
+          "trials_excluded_from_summary": 0
+        },
+        "workspace_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 700,
+          "min": 600,
+          "max": 700,
+          "range": 100,
+          "trials_excluded_from_summary": 0
+        },
+        "conversion_run_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1060500,
+          "min": 1001500,
+          "max": 1117800,
+          "range": 116300,
+          "trials_excluded_from_summary": 0
+        },
+        "lp_workspace_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "reduction_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "total_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1079900,
+          "min": 1021400,
+          "max": 1135500,
+          "range": 114100,
+          "trials_excluded_from_summary": 0
+        }
+      }
+    },
+    "essential_rows_highs": {
+      "attempts": 7,
+      "passed": 7,
+      "failures": 0,
+      "phases": {
+        "intersection_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "prepare_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "workspace_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "conversion_run_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 0,
+          "min": 0,
+          "max": 0,
+          "range": 0,
+          "trials_excluded_from_summary": 0
+        },
+        "lp_workspace_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1800,
+          "min": 1600,
+          "max": 2400,
+          "range": 800,
+          "trials_excluded_from_summary": 0
+        },
+        "reduction_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 436500,
+          "min": 407000,
+          "max": 459300,
+          "range": 52300,
+          "trials_excluded_from_summary": 0
+        },
+        "total_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 478400,
+          "min": 456800,
+          "max": 495800,
+          "range": 39000,
+          "trials_excluded_from_summary": 0
+        }
+      }
+    }
+  },
+  "payload_sha256": "c37852bcc80d264084118446f5676d3f41c311d55456a8a661c00c62fff3bfc5",
+  "payload_hash_scope": "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
+}

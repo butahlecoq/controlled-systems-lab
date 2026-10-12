@@ -13,6 +13,7 @@ import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts' / 'reports'))
 import registered_reports as registered
+import geo04_registered_reports as geo04_publication
 SITE_PATH = Path(__file__).resolve().parents[2] / 'scripts' / 'reports' / 'site.py'
 SITE_SPEC = importlib.util.spec_from_file_location('csl_report_site', SITE_PATH)
 site = importlib.util.module_from_spec(SITE_SPEC)
@@ -213,6 +214,60 @@ class RegisteredKindTests(unittest.TestCase):
         self.assertIn('56', result.measured_scope)
         self.assertTrue(result.evidence_limits)
 
+    def test_geo04_adapter_preserves_validated_measurement_scope(self):
+        result = geo04_publication.adapt(FIXTURES / 'geo04-20261012T224946Z-c37852bcc80d')
+        self.assertEqual(result.kind, 'geo04-intersection')
+        self.assertEqual(result.source_report_id, 'geo04-20261012T224946Z-c37852bcc80d')
+        self.assertIn('28', result.measured_scope)
+        self.assertIn('4 analytic', result.measured_scope)
+        self.assertIn('no comparator', result.evidence_limits.lower())
+        self.assertIn('incomplete', result.evidence_limits.lower())
+
+    def test_geo04_report_id_is_bound_to_saved_payload_digest(self):
+        record = json.loads((FIXTURES / 'geo04-20261012T224946Z-c37852bcc80d' / 'records.json').read_text(encoding='utf-8'))
+        record['report_id'] = 'geo04-20261012T224946Z-000000000000'
+        with self.assertRaisesRegex(ValueError, 'report ID does not match payload digest'):
+            geo04_publication.adapt_payload(record)
+
+    def test_geo04_report_stages_with_scoped_page_and_reproducible_download(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / 'input'; root.mkdir()
+            catalogue = self.publication(root)
+            source_id = 'geo04-20261012T224946Z-c37852bcc80d'
+            shutil.copytree(FIXTURES / source_id, root / source_id)
+            shutil.copyfile(FIXTURES / (source_id + '.zip'), root / (source_id + '.zip'))
+            item = geo04_publication.adapt(root / source_id)
+            archive = geo04_publication.offline_zip(root / source_id, item)
+            (root / (item.report_id + '.zip')).write_bytes(archive)
+            catalogue['reports'].append({
+                'report_id': item.report_id, 'report_kind': item.kind,
+                'payload_sha256': item.payload_sha256, 'payload_schema': item.payload_schema,
+                'source_commit': item.source_commit, 'measured_scope': item.measured_scope,
+                'evidence_limits': item.evidence_limits,
+                'zip_sha256': hashlib.sha256(archive).hexdigest(),
+                'source_report_id': item.source_report_id,
+            })
+            (root / 'catalog.json').write_text(json.dumps(catalogue, indent=2) + '\n', encoding='utf-8')
+            (root / 'index.html').write_text(site.catalogue_index(catalogue), encoding='utf-8')
+            staged = site.stage(root / 'catalog.json', Path(temp) / 'site', check=True)
+            page = (staged / item.report_id / 'index.html').read_text(encoding='utf-8')
+            self.assertIn('Phase timing figure', page)
+            self.assertIn('No competitor, speedup, application-scale, or scalability claim is made.', page)
+            self.assertTrue((staged / item.report_id / 'raw-driver-output.csv').is_file())
+            self.assertEqual((staged / (item.report_id + '.zip')).read_bytes(), archive)
+            catalogue_page = (staged / 'index.html').read_text(encoding='utf-8')
+            self.assertIn(item.report_id + '/raw-driver-output.csv', catalogue_page)
+            self.assertNotIn(item.report_id + '/trials.csv', catalogue_page)
+            envelope = json.loads((staged / item.report_id / 'report-envelope.json').read_text(encoding='utf-8'))
+            self.assertEqual(envelope['source_report_id'], source_id)
+            self.assertEqual(envelope['native_payload_sha256'], item.native_payload_sha256)
+            self.assertTrue(site.validate_publication_manifest(staged / item.report_id, {
+                'report_id': item.report_id, 'report_kind': item.kind, 'payload_schema': item.payload_schema,
+                'payload_sha256': item.payload_sha256, 'source_commit': item.source_commit,
+                'measured_scope': item.measured_scope, 'evidence_limits': item.evidence_limits,
+                'native_payload_sha256': item.native_payload_sha256, 'source_report_id': source_id,
+            }))
+
     def test_unregistered_schema_is_rejected(self):
         with self.assertRaisesRegex(ValueError, 'unregistered'):
             registered.adapt_payload({'schema': 'csl.future/1', 'report_id': 'future'})
@@ -333,7 +388,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt05-hull','geo03-hv'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt05-hull','geo03-hv','geo04-intersection'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))

@@ -1,0 +1,146 @@
+{
+  "os": "Windows-11-10.0.22631-SP0",
+  "architecture": "AMD64",
+  "cpu_model": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+  "logical_cpu_count": 12,
+  "python": "3.13.5",
+  "resources": {
+    "total_threads": 1,
+    "outer_workers": 1,
+    "threads_per_worker": 1,
+    "memory_bytes": {
+      "value": null,
+      "reason": "no memory limit requested"
+    }
+  },
+  "native_threads_requested": 1,
+  "outer_workers": 1,
+  "threads_per_worker": 1,
+  "native_threads_observed": {
+    "value": null,
+    "reason": "not sampled by the phase-1 harness"
+  },
+  "per_trial_peak_memory": {
+    "value": null,
+    "reason": "not observed by the phase-1 harness"
+  },
+  "per_trial_cpu": {
+    "value": null,
+    "reason": "not observed by the phase-1 harness"
+  },
+  "machine_load": {
+    "before": {
+      "utc": "2026-10-12T22:49:41Z",
+      "os": "Windows-11-10.0.22631-SP0",
+      "logical_processors": 12,
+      "python": "3.13.5",
+      "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+      "load_percent": [
+        9
+      ],
+      "ram_bytes": 34189107200
+    },
+    "after": {
+      "utc": "2026-10-12T22:49:44Z",
+      "os": "Windows-11-10.0.22631-SP0",
+      "logical_processors": 12,
+      "python": "3.13.5",
+      "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+      "load_percent": [
+        8
+      ],
+      "ram_bytes": 34189107200
+    },
+    "process_cpu_deltas": {
+      "available": true,
+      "unit": "process CPU seconds over collection interval",
+      "values": {
+        "Adobe Crash Processor": 0.0,
+        "AdobeIPCBroker": 0.0,
+        "ApplicationFrameHost": 0.0,
+        "AvastUI": 0.0,
+        "cbservice": 0.046875,
+        "CCXProcess": 0,
+        "ChatGPT": 0.015625,
+        "chrome": 0.015625,
+        "cmd": 0,
+        "cnqtbapp": 0.0,
+        "codex": 0.0,
+        "codex-code-mode-host": 0.0,
+        "codex-command-runner-0.162.0-alpha.17.2": 0.0,
+        "codex-computer-use-swift": 0.015625,
+        "conhost": 0.0,
+        "ctfmon": 0.0,
+        "DataExchangeHost": 0.0,
+        "dllhost": 0.0,
+        "DTShellHlp": 0.0,
+        "explorer": 0.0,
+        "FLPService": 0.0,
+        "LockApp": 0.0,
+        "MSBuild": 0.0,
+        "node": 0.0,
+        "node_repl": 0.0,
+        "opencode": 0.0,
+        "OpenConsole": 0.0,
+        "pdf24": 0.0,
+        "PhoneExperienceHost": 0.0,
+        "pwsh": 0.0,
+        "python": 0.0,
+        "rhinomcp": 0,
+        "RuntimeBroker": 0.0,
+        "SearchHost": 0.0,
+        "SecurityHealthSystray": 0.0,
+        "ShellExperienceHost": 0.0,
+        "sihost": 0.0,
+        "sketchup-mcp": 0,
+        "StartMenuExperienceHost": 0.0,
+        "svchost": 0.0,
+        "SystemSettings": 0.0,
+        "SystemSettingsBroker": 0.0,
+        "tailscale-ipn": 0.0,
+        "taskhostw": 0.0,
+        "Telegram": 0.03125,
+        "TextInputHost": 0.0,
+        "uv": 0.0,
+        "WebKitNetworkProcess": 0.0,
+        "Widgets": 0.0,
+        "WidgetService": 0.0,
+        "WindowsTerminal": 0.0
+      },
+      "scope": "matching observed processes only; no arguments/paths, new/exited processes omitted"
+    }
+  },
+  "machine_observations": {
+    "before": {
+      "utc": "2026-10-12T22:49:41Z",
+      "os": "Windows-11-10.0.22631-SP0",
+      "logical_processors": 12,
+      "python": "3.13.5",
+      "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+      "load_percent": [
+        9
+      ],
+      "ram_bytes": 34189107200
+    },
+    "after": {
+      "utc": "2026-10-12T22:49:44Z",
+      "os": "Windows-11-10.0.22631-SP0",
+      "logical_processors": 12,
+      "python": "3.13.5",
+      "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+      "load_percent": [
+        8
+      ],
+      "ram_bytes": 34189107200
+    }
+  },
+  "physical_memory_before_bytes": 34189107200,
+  "physical_memory_after_bytes": 34189107200,
+  "load_percent_before": [
+    9
+  ],
+  "load_percent_after": [
+    8
+  ],
+  "compiler_and_release_flags": "see build-provenance.json and build-provenance.txt"
+}
