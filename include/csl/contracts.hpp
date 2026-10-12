@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace csl {
-// Revision 1.4. This is a source contract, not a stable binary ABI.
+// Revision 1.5. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
 struct ProgramIdentity { ProblemId problem; ProgramId program; bool operator==(const ProgramIdentity&) const = default; };
@@ -187,8 +187,37 @@ private:
     explicit LinearProgram(std::shared_ptr<const Storage> storage) : storage_(std::move(storage)) {}
     friend struct optimization::ProgramAccess;
 };
-struct QuadraticProgram { LinearProgram linear; SparseMatrix hessian; }; // full symmetric Q
-using ConvexProgram = std::variant<QuadraticProgram>; // conic forms require a revision
+namespace optimization { class Objective; class NormSquareReformulation; struct ConvexAccess; }
+class QuadraticProgram {
+public:
+    QuadraticProgram(const QuadraticProgram&) noexcept = default;
+    QuadraticProgram& operator=(const QuadraticProgram&) noexcept = default;
+    const ProgramIdentity& identity() const noexcept;
+    const optimization::Objective& objective() const noexcept;
+    const numeric::MatrixView& hessian() const noexcept;
+    const numeric::MatrixView& constraints() const noexcept;
+    std::span<const Interval> variables() const noexcept;
+    std::span<const Interval> rows() const noexcept;
+private:
+    struct Storage;
+    std::shared_ptr<const Storage> storage_;
+    explicit QuadraticProgram(std::shared_ptr<const Storage> storage) : storage_(std::move(storage)) {}
+    friend struct optimization::ConvexAccess;
+};
+class ConvexProgram {
+public:
+    ConvexProgram(const ConvexProgram&) noexcept = default;
+    ConvexProgram& operator=(const ConvexProgram&) noexcept = default;
+    const ProgramIdentity& identity() const noexcept;
+    const optimization::Objective& original_objective() const noexcept;
+    const QuadraticProgram& quadratic_program() const noexcept;
+    const optimization::NormSquareReformulation* reformulation() const noexcept;
+private:
+    struct Storage;
+    std::shared_ptr<const Storage> storage_;
+    explicit ConvexProgram(std::shared_ptr<const Storage> storage) : storage_(std::move(storage)) {}
+    friend struct optimization::ConvexAccess;
+};
 enum class Termination { completed, cancelled, resource_limit, numerical_failure };
 enum class MathematicalOutcome { optimal, infeasible, unbounded, infimum_not_attained, undetermined };
 template<class Subject> struct OutcomeClaim {
@@ -252,6 +281,7 @@ class WorkspaceIdentity {
     std::shared_ptr<const Token> token_;
     WorkspaceIdentity() : token_(std::make_shared<const Token>()) {}
     friend class LPWorkspace;
+    friend class ConvexWorkspace;
 public:
     bool operator==(const WorkspaceIdentity&) const = default;
 };
@@ -289,8 +319,32 @@ public:
     virtual BackendCapabilities capabilities() const = 0;
     virtual std::unique_ptr<LPWorkspace> make_workspace() const = 0;
 };
+class ConvexSolveStamp {
+    ConvexProgram program_;
+    WorkspaceIdentity workspace_;
+    std::uint64_t attempt_;
+    ConvexSolveStamp(const ConvexProgram& p, const WorkspaceIdentity& w, std::uint64_t a) noexcept
+        : program_(p), workspace_(w), attempt_(a) {}
+    friend class ConvexWorkspace;
+public:
+    const ConvexProgram& program() const noexcept { return program_; }
+    const WorkspaceIdentity& workspace() const noexcept { return workspace_; }
+    std::uint64_t attempt() const noexcept { return attempt_; }
+    bool operator==(const ConvexSolveStamp& other) const noexcept {
+        return workspace_ == other.workspace_ && attempt_ == other.attempt_;
+    }
+};
+struct ConvexSolveAttempt { ConvexSolveStamp stamp; SolveAttemptState state; };
 class ConvexWorkspace : public ExclusiveWorkspace {
-public: virtual ProgramOutcome solve(const ConvexProgram&, const ExecutionContext&) = 0;
+    WorkspaceIdentity identity_;
+    std::uint64_t sequence_{};
+    std::optional<ConvexSolveAttempt> attempt_;
+public:
+    ProgramOutcome solve(const ConvexProgram&, const ExecutionContext&);
+    const WorkspaceIdentity& workspace_identity() const noexcept { return identity_; }
+    const std::optional<ConvexSolveAttempt>& last_attempt() const noexcept { return attempt_; }
+protected:
+    virtual ProgramOutcome do_solve(const ConvexProgram&, const ExecutionContext&) = 0;
 };
 class ConvexBackend {
 public:

@@ -1,6 +1,7 @@
 #pragma once
 #include <csl/registry/registry.hpp>
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/optimization/convex_backend.hpp>
 #include <cmath>
 #include <string>
 
@@ -113,9 +114,8 @@ inline StrategyRegistration forward_registration(const Registry<LPPort>& lp, std
 // The following adapters exercise callable port plumbing only. Stopped/undetermined
 // outcomes deliberately make no mathematical-completeness claim.
 class ConvexFixture final : public ConvexWorkspace {
-public: ProgramOutcome solve(const ConvexProgram& r,const ExecutionContext&) override {
-    const auto& p = std::get<QuadraticProgram>(r).linear;
-    return ProgramResult{Termination::resource_limit,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}}, {},{},p.identity().program.value};
+public: ProgramOutcome do_solve(const ConvexProgram& r,const ExecutionContext&) override {
+    return ProgramResult{Termination::resource_limit,{r.identity(),MathematicalOutcome::undetermined,Unestablished{},{}}, {},{},r.identity().program.value};
 }};
 class GeometryFixture final : public SetOperatorWorkspace {
 public: OperationOutcome apply(const OperationRequest& r,const ExecutionContext&) override {
@@ -152,7 +152,8 @@ struct AllPorts {
     Registry<ConversionPort> conversion; Registry<ApproximationPort> approximation;
     Registry<SelectorPort> selector; Registry<StrategyPort> strategy;
     LinearProgram lp_request = interval_lp(3);
-    ConvexProgram convex_request = QuadraticProgram{interval_lp(3),{1,1,{0,1},{0},{2}}};
+    ConvexProgram convex_request = std::get<ConvexProgram>(optimization::make_convex_program({
+        {{"problem"},{"interval"}},QuadraticTerminal{{1,1,{2}},{3},2},{0,1,{0},{},{}},{{-1,4}},{},{}}));
     SetHandle set{{1,{"poly"},SetProperty::yes,SetProperty::yes,SetProperty::yes},std::make_shared<const SetPayload>(),{"set"}};
     GeometryRequestIdentity geometry_id{{"problem"},{"geometry-request"},{"ideal"}};
     OperationRequest geometry_request{geometry_id,{"geometry"},SupportQuery{set,{1}},SetRelation::equivalent,Assurance::numerical};

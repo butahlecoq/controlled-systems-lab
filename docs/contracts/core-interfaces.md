@@ -1,7 +1,8 @@
-# Native interfaces, revision 1.4
+# Native interfaces, revision 1.5
 
 MODEL-03 adds the [resolved problem module](resolved-problems.md) without changing
-this canonical source revision. It publishes immutable composition, computes the
+the canonical `Problem` DTO introduced in source 1.4 and retained in source 1.5.
+It publishes immutable composition, computes the
 [versioned structural math/content identity](problem-identity-v1.md), and bridges
 to actual configured registry admission. The authored ID is retained as a label;
 the frozen compatibility DTO carries the computed ID. Data publication does not
@@ -34,6 +35,13 @@ callers using inferred types need no change. LP alternatives remain `T` or
 `Diagnostics`, and objective `optimization::Result<T>` remains `T`, `Diagnostic`
 or `OperationStopped`. No mathematical, evidence, ownership or runtime behavior
 changes in this source patch.
+
+Revision 1.5 makes ConvexProgram/QuadraticProgram immutable canonical handles,
+with original Objective and explicit pure-norm-square provenance. ConvexWorkspace
+owns separate authoritative solve attempts. The [convex contract](convex-programs.md)
+documents the deliberate full-CSR Hessian to dense QuadraticTerminal source
+migration, numerical KKT evidence and native 4096-variable profile. All source
+1.4 domain, LPDataResult, LP and execution contracts remain unchanged.
 
 Revision 1.4 adds explicit dimensions to the canonical finite catalogue and
 quantifiers to initial sets. `InitialInformation` names the existing point/set
@@ -124,7 +132,7 @@ The three terminal forms are cᵀx+d, ½xᵀQx+qᵀx+c, and ||Lx−r||₂. Q mus
 | `RepresentationConverterWorkspace` | Equivalent representation only, selected output ID | Conversion preserves the mathematical set; result must have `equivalent` relation. Conversion is not approximation. Materialization may be exponential. |
 | `SetApproximatorWorkspace` | Explicit inner/outer/heuristic relation, requested representation and size budget | Invalid equivalent-as-approximation requests are rejected; reported relation must meet the request. Budget is admission information until enforced by an adapter. Approximation of a reachable set is not automatically an approximation of its optimizer set. |
 | `LPWorkspace` / `LPBackend` | Minimize linear objective plus offset over CSR row and variable intervals, including zero-objective feasibility | Factory allocates independent native state. Sparse translation O(rows+cols+nnz); solver cost is backend/problem dependent. Primal may be absent on limit/failure. Mathematical status does not certify evidence. |
-| `ConvexWorkspace` / `ConvexBackend` | Revision 1 convex quadratic programs with full symmetric CSR Q and the same linear constraints | Independent port even when supplied by the same native library. Translation includes triangular storage conversion. General conic/SDP/nonconvex support requires a contract revision and separate capability. |
+| `ConvexWorkspace` / `ConvexBackend` | Immutable linear, convex quadratic and pure residual norm originals; dense canonical Q and CSR linear constraints | Independent port with original/squared identity and exclusive attempt history. Private native triangular conversion; numerical original-space KKT evidence, no complete family. Dense publication costs O(n²) storage/O(n³) PSD checking. General conic/SDP/nonconvex support requires a contract revision and separate capability. |
 | `BasisDiagnostics` | Optional typed snapshot, last-pivot and basis-coordinate capabilities | Owning snapshots identify the program, actual workspace and attempt. Current checks compare the independently observed workspace stamp; generic LP calls require no basis. See [the basis contract](linear-programs.md#basis-and-pivot-data). |
 
 Set/operator metadata and evidence are declarations to be checked by registered compatible adapters; the header is not a proof system. Geometry ports return a successful set/query value, `Unsupported`, or `OperationStopped` (cancellation, limit or numerical failure, without a successful output/guarantee). A partial object cannot be returned as a successful equivalent conversion. Conversion and approximation return only set transforms; their result types cannot contain scalar/boolean query answers.

@@ -147,6 +147,12 @@ public:
     const std::optional<SolveAttempt>& last_attempt() const noexcept requires std::is_same_v<Port,LPPort> {
         return workspace_->last_attempt();
     }
+    const WorkspaceIdentity& workspace_identity() const noexcept requires std::is_same_v<Port,ConvexPort> {
+        return workspace_->workspace_identity();
+    }
+    const std::optional<ConvexSolveAttempt>& last_attempt() const noexcept requires std::is_same_v<Port,ConvexPort> {
+        return workspace_->last_attempt();
+    }
 };
 namespace detail {
 template<class Port> struct CheckedEntry {
