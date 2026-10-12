@@ -8,7 +8,7 @@ This document adds a class-level workflow map to the [current framework composit
 
 ## First workflow and proposed solver profile
 
-The first solver profile is `nominal_open_loop`: affine discrete-time stages; a known deterministic initial state; absent or zero process disturbance; continuous controls; and a supported terminal-only linear, convex-quadratic, or weighted Euclidean residual objective. For initial baseline scenarios, use the working control bound `u ∈ [-1, 1]` as an explicit modeling assumption. This bound is not a source-verified canonical archival input; any scenario using it must remain distinct from the historical B04 record until its original inputs are restored. The first experiments add no other new stagewise or cross-time restrictions. Strategy admission must report unsupported constraints rather than silently discard them. The first profile has no observation-driven policy, nonempty temporal coupling, or uncertain-initial-state quantifier; those inputs remain representable but require a later profile to define their semantics. This revised profile reflects the owner's direction to reserve constraint support without changing the initial experiments.
+The first solver profile is `nominal_open_loop`: affine discrete-time stages; a known deterministic initial state; absent or zero process disturbance; continuous controls; and a supported terminal-only linear, convex-quadratic, or weighted Euclidean residual objective. For newly authored baseline scenarios, the owner-approved control bound is `u ∈ [-1, 1]`, recorded as an explicit modeling assumption. This bound is not a source-verified canonical archival input; any scenario using it must remain distinct from the historical B04 record until its original inputs are restored. The first experiments add no other new stagewise or cross-time restrictions. Strategy admission must report unsupported constraints rather than silently discard them. The first profile has no observation-driven policy, nonempty temporal coupling, or uncertain-initial-state quantifier; those inputs remain representable but require a later profile to define their semantics. This revised profile reflects the owner's direction to reserve constraint support without changing the initial experiments.
 
 The first completed application solves this profile and returns the full joint relation of optimal states and controls. It compares reachability with backward recovery against direct joint-trajectory optimization on the same resolved problem, objective, tolerances, output scope, and compatible LP/convex backend wherever both strategies support that backend. A backend exception is recorded and explained; backend substitutions are separate crossed comparisons. The first strategy comparison uses exact operations only; reachable-set approximations are deferred. Each approach must retain dependence across time; samples or separate per-stage control marginals are not the family.
 
@@ -16,7 +16,7 @@ The two-strategy integration gate passes only when both strategies return the de
 
 The current problem model has data types for disturbance, observation, continuous/finite/mixed control domains, and temporal constraints; these do not imply support from the first strategies. It does not represent hybrid modes, guards, resets, or permitted mode transitions. Those require a separate future model extension, not another name for finite or mixed-valued controls; that scope is tracked in [EXT-07 #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156). The first archival experiments use no process disturbance or newly added state/temporal coupling constraints; only source-documented domain bounds may be present. Numerical verification comes first. Validated verification remains an explicit future capability. Whenever any algorithm first produces numerical results, publish an English HTML report with raw data and performance measurements, even before a paired strategy comparison exists. Generate reports from persisted run/comparison data, never by invoking a solver while rendering.
 
-The interface vocabulary follows the repository glossary and the deep-module terms: a **module** has one caller-facing **interface**; an **adapter** implements a replaceable **seam**; depth is the capability callers receive through that interface. Proposed class names below are role names, not settled C++ declarations.
+The interface vocabulary follows the repository glossary and the deep-module terms: a **module** has one caller-facing **interface**; an **adapter** implements a replaceable **seam**; depth is the capability callers receive through that interface. Proposed class names below are role names, not settled C++ declarations. The [synthesis note](2026-10-12-class-level-system-architecture-synthesis.md) records Candidate B as the base, the independent review, and the adopted corrections.
 
 ## Compact module seam map
 
@@ -44,7 +44,7 @@ The reusable mathematical model is a discrete-time affine LTV system with contin
 |---|---|---|
 | `LinearDynamics` logical role (`csl::Dynamics` / `csl::SystemModel`, evaluated by `model::LinearSystem`) | `x[t+1] = A[t] x[t] + B[t] u[t] + E[t] w[t] + a[t]`. `A` is free evolution, `B` is control, `E` maps an external/process input, and `a` is the affine offset. The input-channel meaning is supplied by the problem, not inferred from its matrix. | The affine discrete subset is implemented as model data. Continuous-time descriptions are representable separately; they are not the first solver profile. Descriptive channel names avoid relying on archives that call the disturbance matrix `C` or `D`. |
 | `ObservationModel` logical role (`csl::Observation` / `ObservationStage` today) | Pre-decision example: `y_pre[t] = C[t] x[t] + F[t] v[t] + b[t]`. Optional post-action/direct-feedthrough observations add declared `D_u[t]u[t]` and `D_w[t]w[t]` terms. Each sample records source stage, measurement event, and availability event. | Scheduled observation data and causality checks are implemented. An absent observation does not grant full-state information. Observation timing and algebraic-loop policy remain explicit capability requirements. |
-| `ControlProblem` logical role (`problem::Problem` today), `InitialData`, `Constraints`, and domains | Compose the system with horizon, known point or quantified initial set, stage state/control/external sets, objective, and optional temporal constraints. Continuous, finite, and mixed action domains remain distinct; continuous-valued controls do not imply continuous-time dynamics or convex admissibility. | Problem data and optional temporal constraint values are implemented; a strategy must declare the subset it supports. The first baseline uses continuous controls `u ∈ [-1,1]`, a known initial state, and no added coupling constraints. |
+| `ControlProblem` logical role (`problem::Problem` today), `InitialData`, `Constraints`, and domains | Compose the system with horizon, known point or quantified initial set, stage state/control/external sets, objective, and optional temporal constraints. Continuous, finite, and mixed action domains remain distinct; continuous-valued controls do not imply continuous-time dynamics or convex admissibility. | Problem data and optional temporal constraint values are implemented; a strategy must declare the subset it supports. New baselines use continuous controls `u ∈ [-1,1]`, a known initial state, and no added coupling constraints; historical B04 bounds remain unresolved. |
 | Proposed `UncertaintyModel` and `InformationPattern` semantic roles | Declare whether an external signal is known, bounded exogenous, stochastic under an explicit law, or adversarial, including temporal dependencies, quantifiers, and what each decision maker knows when acting. These roles refine existing external-input data; they are not claims that these named public classes already exist. | Future strategy semantics, not consequences of adding `Ew` to the state equation. Bounded uncertainty and a two-player objective are different problem classes; robust/adversarial strategy and policy contracts require separate review. |
 | Proposed policy-class role | The first profile is nominal open-loop: the full control sequence is chosen without conditioning on future observations. A future feedback policy maps only the declared available observation/history to an action. | Feedback, estimation, partially observed and multi-player policies are not silently accepted by either first strategy; admission reports them unsupported until a compatible strategy exists. |
 
@@ -54,32 +54,56 @@ The equations and event-ordering details live in the [general linear-system cont
 
 These are recommended defaults for review, not owner-approved implementation interfaces. They close the gaps between the broad module names and the guarantees the first workflow requests.
 
-**Objective to complete family.** `TerminalOptimizer` must return the full terminal minimizer relation and numerical optimum evidence; `OptimalFamilyBuilder::build(feasible_joint_relation, terminal_minimizers)` must lift that relation back to the joint state/control coordinates; `FamilyQuery` initially exposes consistent witness selection and capability-admitted coordinate projection, with membership and secondary optimization kept as later query variants. Under the stated first profile, the feasible joint relation is polyhedral and all three supported terminal objective forms admit polyhedral minimizer conditions. A linear objective uses its complete optimal face. For a PSD quadratic and any one minimizer `x*`, minimizers satisfy `Qx = Qx*` and `qᵀx = qᵀx*`. For a weighted residual objective, write the objective as `||A(Lx-r)||₂`, where `A` already includes the residual weights. The attainable transformed residual set `{A(Lx-r) : x is terminal-feasible}` is convex; minimizing the Euclidean norm over it has a unique transformed residual `y*`, and all minimizers satisfy `A(Lx-r)=y*`. The untransformed residual `Lx-r` need not be unique when `A` has a nontrivial nullspace. Intersecting these affine terminal conditions with the feasible-history polyhedron gives the full family, retaining all state/control dependencies. This characterization does not itself certify that a numerically computed optimum, affine condition, or family is exact or complete: report numerical optimum evidence and family-completeness evidence as separate claims, and do not call either certified merely because the relation is polyhedral. If the configured representation or evidence cannot establish full coverage for the requested profile, the strategy returns unsupported/partial output and cannot pass the first-workflow gate. Implicit convex/SOC family forms remain an extension for future objectives or relations that require them.
+**Objective to complete family.** `TerminalOptimizer` returns the full terminal minimizer relation and numerical optimum evidence. The private relation builder lifts that relation back to joint state/control coordinates. The single `FamilyPublisher` binds and constructs the claim. The existing `SelectorPort` exposes consistent witness selection; capability-admitted coordinate projection uses `GeometryPort`. Membership and secondary optimization remain later query variants. Under the stated first profile, the feasible joint relation is polyhedral and all three supported terminal objective forms admit polyhedral minimizer conditions. A linear objective uses its complete optimal face. For a PSD quadratic and any one minimizer `x*`, minimizers satisfy `Qx = Qx*` and `qᵀx = qᵀx*`. For a weighted residual objective, write the objective as `||A(Lx-r)||₂`, where `A` already includes the residual weights. The attainable transformed residual set `{A(Lx-r) : x is terminal-feasible}` is convex; minimizing the Euclidean norm over it has a unique transformed residual `y*`, and all minimizers satisfy `A(Lx-r)=y*`. The untransformed residual `Lx-r` need not be unique when `A` has a nontrivial nullspace. Intersecting these affine terminal conditions with the feasible-history polyhedron gives the full family, retaining all state/control dependencies. This characterization does not itself certify that a numerically computed optimum, affine condition, or family is exact or complete: report numerical optimum evidence and family-completeness evidence as separate claims, and do not call either certified merely because the relation is polyhedral. If the configured representation or evidence cannot establish full coverage for the requested profile, the strategy returns unsupported/partial output and cannot pass the first-workflow gate. Implicit convex/SOC family forms remain an extension for future objectives or relations that require them.
 
-**Family outcome and evidence shape (proposed; owner review open).** Prefer a closed outcome variant over independent status/optional-evidence fields, so “complete” cannot be constructed without completeness evidence and a relation. The existing `OptimalFamily { target, evidence }` data shape is deliberately not sufficient as a final contract: its independent fields permit contradictory combinations and remain an implementation gap, not an approved design:
+**Family outcome and evidence shape (proposed coordinated migration).** Keep the existing `SynthesisResult`, `SynthesisOutcome`, `SynthesisWorkspace`, and `StrategyPort` names. Evolve their request and family fields together in SYN-07 #155; do not add a parallel `FamilySolve` or `SynthesisReport` interface. Today's independent `OptimalFamily { target, evidence }` fields permit contradictory claims. Replace that shape with a guarded product while preserving the existing separation of termination, mathematical outcome, bounds, and incumbents:
 
 ```cpp
 struct CompleteOptimalFamily {
-  JointRelation relation;
-  OptimumEvidence optimum;
-  CompletenessEvidence completeness;
+	JointRelation relation;
+	OptimumEvidence optimum;
+	CompletenessEvidence completeness;
 };
-struct PartialOptimalFamily {
-  JointRelation relation;
-  OptimumEvidence optimum;
-  CoverageScope known_scope;
+struct PartialOptimalFamily {             // every retained history is known optimal
+	JointRelation relation;
+	OptimumEvidence optimum;
+	InnerSubsetEvidence optimal_subset;
+	CoverageScope known_scope;              // completeness is not established
 };
 using FamilyRelationToTarget = std::variant<OuterCandidateEvidence,
-    InnerSubsetEvidence, HeuristicRelationEvidence>;
-struct CandidateFamily {
-  JointRelation relation;
-  FamilyRelationToTarget relation_to_target;
+	FeasibleCandidateEvidence, HeuristicRelationEvidence>;
+using CandidateFeasibilityEvidence = std::variant<UnestablishedFeasibility,
+	WitnessFeasibilityEvidence, RelationFeasibilityEvidence>;
+struct CandidateFamily {                  // no optimal-membership claim implied
+	JointRelation relation;
+	FamilyRelationToTarget relation_to_target;
+	CandidateFeasibilityEvidence feasibility;
 };
 using OptimalFamilyOutcome = std::variant<CompleteOptimalFamily,
-    PartialOptimalFamily, CandidateFamily>;
-using SynthesisOutcome = std::variant<OptimalFamilyOutcome, Infeasible,
-    Unbounded, UnattainedInfimum, Unsupported, Cancelled>;
+	PartialOptimalFamily, CandidateFamily>;
+struct ScopedOperationStopped {
+	OperationStopped stop;
+	RequestProvenance request;
+	RetainedEvidenceScope retained;
+};
+struct NoStop {};
+using StopEvidence = std::variant<NoStop, ScopedOperationStopped>;
+struct FeasibleIncumbent { Witness witness; FeasibilityEvidence evidence; };
+struct SynthesisResult {                  // evolves the existing result
+	Termination termination;               // completed/cancelled/resource_limit/numerical_failure
+	SynthesisOutcomeClaim outcome;          // optimal/infeasible/unbounded/infimum_not_attained/undetermined
+	ObjectiveEvidence objective;            // retained independently supported bounds
+	std::optional<OptimalFamily> family;    // guarded identity + OptimalFamilyOutcome
+	std::vector<FeasibleIncumbent> incumbents; // retains each feasibility claim
+	StopEvidence stop;                      // NoStop or scoped stop reason/diagnostics
+	std::vector<TimingSpan> spans;
+};
+using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
 ```
+
+`OptimalFamily` becomes an immutable handle with private construction. It binds relation identity, effective request, coordinate schema, and lineage to its product. One `FamilyPublisher` owns claim construction and binding validation; strategies supply derivation facts rather than construct products directly. The closed product requires evidence fields but does not prove their correctness. A feasible incumbent whose primary optimality is unproved remains a candidate, even when it has the same value as another witness. Candidate feasibility evidence names its scope: an outer relaxation can contain infeasible histories, so a checked witness does not establish feasibility of the whole candidate relation. `PartialOptimalFamily` requires evidence that every retained history belongs to the true optimal relation, not merely evidence of feasibility or an inner subset of the feasible set.
+
+The result-boundary validator keeps cancellation and resource/numerical stops separate from mathematical outcomes. Only completed, supported optimal results can carry a complete family. Interrupted results can retain a labelled partial/candidate relation, valid bounds, and independently supported feasible incumbents. A numerical failure preserves earlier valid evidence. Infeasible, unbounded, and unattained-infimum claims cannot carry an optimal-family product; absence of a witness does not prove infeasibility. `Unsupported` records capability admission failure, not a mathematical conclusion. Cross-field contradictions reject at publication rather than silently lose evidence.
 
 This sketch keeps completeness evidence structurally present only in the complete case and makes a candidate's relation direction explicit; it does not prove evidence correctness by construction. Bind every completeness claim to all of: the resolved-problem content digest; the effective objective and family request (including profile and tolerance identity); the ordered joint-coordinate schema; the strategy ID/version; and the ordered transformation lineage with input/output identities. The verifier rejects a binding mismatch before it checks evidence. A witness, any finite collection of witnesses, objective agreement, or a small floating-point residual alone is never completeness evidence.
 
@@ -115,13 +139,243 @@ struct CompletenessEvidence {
 
 These names are conceptual and remain proposed; the snippet specifies the required distinctions, not settled C++ declarations or a claim that every strategy can construct either assurance.
 
-**Geometry operation planning (proposed; owner review open).** Keep registered geometry adapters, and add one typed planning seam for representation-dependent operation pipelines. A proposed `GeometryOperationRequest` names the operation, ordered input representation IDs, requested output representation (if constrained), guarantee relation and strength, and required capabilities. `GeometryOperationPlanner` resolves it to a `PreparedGeometryPlan`: a typed sequence of operation/conversion/approximation registrations with intermediate representation IDs, assumptions, provenance, and an operation-specific guarantee transfer for each step and for the composition. There is no generic “best available guarantee” ordering: admission must check whether each specific operation preserves the requested relation and whether the composed result proves the requested claim. A missing transfer rule, incompatible representation, or weakened guarantee rejects the plan before any workspace is created. Every path that may claim a complete optimal family requires exact/equivalent transformations at every step under the declared mathematical contract; an inner, outer, heuristic, or otherwise weaker relation can only produce an appropriately typed partial/candidate result unless a separate reviewed theorem proves coverage. Exact algebraic operations evaluated in floating point still carry numerical support, not a validated exactness certificate. Recommended v1 default is to compose the existing geometry, conversion and approximation registries as the single selection path, preferring exact-compatible plans; a unified operation-plan registry remains open unless composition has a demonstrated gap.
+**Public evidence migration gate (#155, #157, T-V02).** Today's `check_family_evidence` rejects a numerical completeness assertion. The proposed `NumericallySupportedCompleteness` cannot be published through that guard yet. Before either strategy publishes it, migrate `OptimalFamily`, request/result contracts, `check_family_evidence`, registry offers/admission, artifact encoding, and all callers together. Freeze the scientific coverage procedure and acceptance policy through review, then add independent public-interface tests. No sketch overrides the current guard.
+
+T-V02 must reject samples, relaxed relations, backend success, plain numerical residuals, incomplete scope, and mismatched bindings as complete-family evidence. It also rejects numerical evidence presented as validated. Extend it with positive acceptance of the reviewed numerical-coverage evidence at numerical assurance only, negative validated-assurance admission, and tampered problem/request/coordinates/strategy/lineage cases. #157 additionally tests cancellation, resource limit, numerical failure, retained bounds/incumbents, and illegal complete-family combinations through the public strategy seam. Until that migration and policy are checked, return a supported partial/candidate relation or unsupported; T-X01 remains open. Residual checks support witnesses and optimum diagnostics, never complete coverage by themselves.
+
+**Geometry operation planning (proposed; owner review open).** Keep registered geometry adapters, and add one typed planning seam for representation-dependent operation pipelines. A proposed `GeometryOperationRequest` names the operation, ordered input representation IDs, requested output representation (if constrained), guarantee relation and strength, and required capabilities. `GeometryOperationPlanner` resolves it to a `PreparedGeometryPlan`: a typed sequence of operation/conversion/approximation registrations with intermediate representation IDs, assumptions, provenance, and an operation-specific guarantee transfer for each step and for the composition. There is no generic “best available guarantee” ordering: admission must check whether each specific operation preserves the requested relation and whether the composed result proves the requested claim. A missing transfer rule, incompatible representation, or weakened guarantee rejects the plan before any workspace is created. Every path that may claim a complete optimal family requires exact/equivalent transformations at every step under the declared mathematical contract; an inner, outer, heuristic, or otherwise weaker relation can only produce an appropriately typed partial/candidate result unless a separate reviewed theorem proves coverage. Exact algebraic operations evaluated in floating point still carry numerical support, not a validated exactness certificate. The proposed v1 plan composes the existing geometry, conversion, and approximation registries as the single selection path. It introduces no operation-plan registry. The first comparison admits only exact-compatible plans.
 
 **One bounded-work and cancellation owner (proposed v1 default; owner review open).** One task-level execution owner creates a control object and lends it to the selected strategy and nested algorithms/adapters; `SynthesisWorkspace` receives the shared cancellation/resource context, not a second scheduler. Strategy and algorithm work is serial within each task in v1. The outer executor owns parallelism across independent tasks/scenarios/strategy runs and admits them under its declared task/resource policy. A future internal-fan-out seam may issue permits from that same owner; strategies must not create an independent pool or budget. Report resource policy as separate configured, admitted, observed, and enforced facts for backend threads and memory: a requested/selected thread count or memory estimate is not proof of runtime enforcement, and OS-level thread/memory limits must not be claimed unless the adapter/platform actually enforces them. Record backend-reported or measured use where available, and say “unknown/unavailable” otherwise. This policy avoids oversubscription in v1 without implying a global hard limit that the implementation cannot enforce.
 
-**Strategy A/B joint-history contract (proposed v1 invariant).** Both strategies consume the same immutable resolved problem and effective family request, and both must target the full minimizer locus in canonical joint coordinates `(x0,…,xT,u0,…,u(T−1))`. Strategy A may propagate reachable relations and recover backward, but its recovery result must remain a joint history relation (or equivalent dependency-preserving parameterization); it cannot multiply independent state/control/time marginals. Strategy B may build a joint LP/convex program, but after finding the optimum it must extract the entire optimal face/minimizer locus through the source-to-program coordinate map, including degenerate or constant-objective cases. A primal optimum, tied witness list, or terminal minimizer alone is insufficient. Both outputs carry the same typed completeness/assurance and identity-binding contract above; inability to preserve coordinates, dependencies, or coverage lowers the outcome to partial/candidate/unsupported. The exact internal representations and generated-request composition remain per-strategy design work.
+**Strategy A/B joint-history contract (proposed v1 invariant).** Both strategies consume the same immutable resolved problem and effective family request, and both must target the full minimizer locus in canonical joint coordinates `(x0,…,xT,u0,…,u(T−1))`. Strategy A may propagate reachable relations and recover backward, but its recovery result must remain a joint history relation (or equivalent dependency-preserving parameterization); it cannot multiply independent state/control/time marginals. Strategy B may build a joint LP/convex program, but after finding the optimum it must extract the entire optimal face/minimizer locus through the source-to-program coordinate map, including degenerate or constant-objective cases. A primal optimum, tied witness list, or terminal minimizer alone is insufficient. Both outputs carry the same typed completeness/assurance and identity-binding contract above; inability to preserve coordinates, dependencies, or coverage lowers the outcome to partial/candidate/unsupported. The proposed callable flow below assigns the common relation and lineage to one publisher, while each strategy owns its derivation and exclusive workspaces.
 
 **Comparison identity and immutable run references (proposed v1 contract; owner review open).** Give the normalized comparison definition a content-derived `ComparisonSpecId` over the resolved-problem digest; effective strategy/profile and objective request; tolerances and requested assurance; requested outputs/projections; and selected strategy, algorithm, backend, thread/memory policy and relevant version/configuration identities. Persist every repetition as an immutable content-addressed run record, referenced by a `RunRecordRef` that identifies that exact record. An executed paired comparison has a `ComparisonRunId`, derived from its `ComparisonSpecId` and the ordered full set of `RunRecordRef`s (including repetition identity). Preserve every requested repetition and every terminal outcome, including unsupported, failed, cancelled and incomplete runs; do not form the run identity from successful runs only. This separates “same experiment definition” from “these exact observed runs,” while ensuring that changes in backend configuration, output scope, evidence level, or any run payload cannot silently reuse a comparison identity. Comparison rendering reads those references and never executes a solver.
+
+### Callable preparation, synthesis, and publication
+
+These C++20 sketches evolve the existing contracts in one migration. Names absent from the inspected headers remain **Proposed**. No second strategy registry or solve interface is introduced. `FamilyRequest` is the effective request after application defaults are resolved. It carries the profile, objective identity, target scope, arithmetic/tolerance policy identity, requested assurance, representation, and declared output limits. Preparation snapshots the resolved problem and this request together.
+
+```cpp
+// Proposed evolution of existing registry::StrategyRequest and contracts.
+struct FamilyRequest {
+	ProfileId profile;
+	ObjectiveIdentity objective;
+	FamilyTarget target;
+	NumericalPolicy numerical;
+	Assurance assurance;
+	FamilyOutputContract output;
+};
+struct StrategyRequest {
+	problem::ResolvedProblem problem;
+	StrategyConfiguration configuration;
+	FamilyRequest family;
+};
+class SynthesisWorkspace : public ExclusiveWorkspace {
+public:
+	virtual SynthesisOutcome solve(const problem::ResolvedProblem&,
+		const FamilyRequest&, const ExecutionContext&) = 0;
+};
+// StrategyPort::run calls w.solve(r.problem, r.family, context).
+problem::StrategyAdmission problem::prepare_strategy(
+	const ResolvedProblem&, const registry::StrategyRegistry&,
+	const StrategyConfiguration&, const FamilyRequest&,
+	const registry::Requirements&, std::optional<std::string> strategy_version = {});
+
+// Caller sketch after migration; handle admission/task alternatives first.
+auto admitted = problem::prepare_strategy(resolved, strategies, configuration,
+	effective_family_request, requirements);
+auto prepared = require_admitted(admitted);
+auto task = require_task(execution::make_task(task_id, prepared.preparation(), resources));
+auto observed = executor.run(tasks_containing(task));
+// Persist Returned<StrategyPort>, Skipped, TaskFailure, or preparation rejection.
+```
+
+The current overload lacks `FamilyRequest` and `StrategyPort::run` passes a DTO `Problem`. The migration updates request snapshots, `PreparedResolvedStrategy`, strategy registration capability callbacks/factories, and callers together. Retire the old solve overload once callers move; it must not remain a route that bypasses family admission. `PreparedResolvedStrategy` retains the resolved owner and effective request through execution and verification. `PreparedStrategy` retains selected registration/provenance after registry destruction. Whole-plan admission checks every known dependency before factories run. Each generated concrete request then passes through `PreparedProvider<Port>::prepare(request)` with frozen requirements before its request-specific workspace is created. No per-query requirement override is added.
+
+Candidate B's first relation storage is an immutable `HistoryRows` with sparse inequality/equality rows, canonical `JointLayout`, and source-row origins. `JointLayout` owns state/control block offsets. `ProgramCoordinateMap` binds source and native variables, slack/eliminated coordinates, source rows, and objective reformulations to the exact program identity. Every transformation records ordered input/output relation identities, coordinate maps, module versions, assumptions, and guarantee transfer. Program compilation and family extraction use the same map, not separately inferred offsets.
+
+```cpp
+class HistoryRelationBuilder {            // private to one strategy solve
+public:
+	Result<void> append_stage_factor(StageIndex, const TransitionFiber&);
+	Result<void> append_original_rows(const OriginalRowMap&);
+	Result<void> append_terminal_minimizers(const TerminalMinimizerRelation&);
+	Result<HistoryRows> freeze();             // immutable owning snapshot
+};
+class ReachBackWorkspace final : public SynthesisWorkspace {
+public:
+	SynthesisOutcome solve(const problem::ResolvedProblem&, const FamilyRequest&,
+		const ExecutionContext&) override;
+private:
+	StageOutcome forward(StageIndex, const SetHandle&, const ExecutionContext&);
+	RecoveryOutcome recover(StageIndex, const SetHandle& reachable,
+		const SetHandle& viable_next, const ExecutionContext&);
+	// Owns prepared geometry recipe, LP/convex providers, scratch, and builder.
+};
+class DirectJointWorkspace final : public SynthesisWorkspace {
+public:
+	SynthesisOutcome solve(const problem::ResolvedProblem&, const FamilyRequest&,
+		const ExecutionContext&) override;
+private:
+	Result<CompiledHistoryProgram> compile(const problem::ResolvedProblem&);
+	Result<HistoryRows> extract(const CompiledHistoryProgram&,
+		const TerminalMinimizerRelation&, const ProgramCoordinateMap&);
+	// Owns prepared LP/convex providers, sparse program, map, and builder.
+};
+class FamilyPublisher {                   // sole constructor of claimed OptimalFamily
+public:
+	Result<OptimalFamily> publish(const problem::ResolvedProblem&, const FamilyRequest&,
+		HistoryRows, const DerivationRecord&, const FamilyClaimFacts&) const;
+};
+Diagnostics check_synthesis_result(const SynthesisResult&,
+	const problem::ResolvedProblem&, const FamilyRequest&);
+struct VerificationRequest { NumericalPolicy numerical; Assurance assurance; };
+struct VerificationRecord {
+	ProblemId problem;
+	std::vector<NamedTrajectoryResidual> residuals;
+	ScopedClaimCheck feasibility, optimality, completeness;
+	Verifier verifier;
+};
+VerificationRecord OriginalProblemVerifier::check(const problem::ResolvedProblem&,
+	const SynthesisResult&, const WitnessSelection&, const VerificationRequest&) const;
+```
+
+For A, `R[0]` is the initial point intersected with its admitted domain. Forward propagation computes `R[t+1] = X[t+1] ∩ image(R[t] × U[t])` under the original affine transition. Terminal optimization returns all minimizers `M`, then backward recovery starts with `K[T]=M`. Each recovery step retains `C[t]={(x,u,y): x∈R[t], u∈U[t], y∈K[t+1], y=A[t]x+B[t]u+a[t]}` and computes `K[t]=projection_x(C[t])`. The builder joins the retained `C[t]` on the same canonical state coordinates, anchored at the initial point. It never multiplies stage marginals. These forward/predecessor operations implement #53 and #51 inside Strategy A #66; the hull reducer is only an optional admitted operation implementation.
+
+For B #67, `compile` writes the original initial row, every transition and admitted domain row, and the supported terminal objective into one LP/convex program. Its provider admits that generated program, then the optimizer and terminal-minimizer analysis #61 supply the full optimal equalities. `extract` adds those equalities to the retained original feasible-history rows and maps the result to canonical coordinates. It does not infer a family from one primal or from only the active inequalities at that primal. Both paths handle singular dynamics without an inverse assumption and feed the same `FamilyPublisher`.
+
+The publisher checks claim binding, coordinate coverage, source-row coverage, objective reformulation, and every registered guarantee transfer. It cannot prove an adapter's theorem or validate numerical coverage from residual checks. Independent original-problem verification #43 checks returned witnesses; a separate evidence audit checks the claim binding and scope. Only the result guard accepts the finished combination of outcome, termination, relation, bounds, and incumbents.
+
+### Family selection and mathematical projection
+
+Use the existing `registry::SelectorPort`, whose workspace is `WitnessSelectorWorkspace`; there is no new family-query registry. Evolve `SelectorRequest` to carry the guarded `OptimalFamily` handle and retain `select(family, WitnessRequest, context)`. Admission checks the representation, requested selection directions, count, distinctness metric/tolerance, assurance, and output limits. Later membership or secondary optimization needs a separately reviewed query variant.
+
+```cpp
+struct WitnessSelection {                // proposed evolution of existing result
+	FamilyId source;
+	WitnessBatch batch;                      // requested and returned counts retained
+	SelectionStatus status;                 // fulfilled, shortfall, or stopped
+	Termination termination;
+	StopEvidence stop;
+	SelectionEvidence evidence;             // metric, duplicates, search/shortfall facts
+	registry::Provenance provenance;
+};
+using SelectionOutcome = std::variant<WitnessSelection, Unsupported>;
+// Existing selector workspace method, with the evolved owning family handle:
+SelectionOutcome WitnessSelectorWorkspace::select(const OptimalFamily&,
+	const WitnessRequest&, const ExecutionContext&);
+
+struct FamilyProjectionRequest {
+	OptimalFamily source;
+	std::vector<std::size_t> coordinates;     // ordered canonical indices
+	GeometryOutputRequest output;            // representation, relation, assurance, limits
+};
+struct FamilyProjectionResult {
+	FamilyId source;
+	SetHandle projected;
+	ProjectionCoordinateMap coordinates;
+	GeometryEvidence evidence;
+	TransformLineage lineage;
+};
+using FamilyProjectionOutcome = std::variant<FamilyProjectionResult,
+	OperationStopped, Unsupported>;
+FamilyProjectionOutcome project_family(const FamilyProjectionRequest&,
+	const PreparedGeometryPlan&, const ExecutionContext&);
+```
+
+For selection, an admitted LP provider searches different directions on the retained relation, decodes complete histories, evaluates the original objective, and records duplicate filtering. Every query result preserves source family identity and claim scope. A shortfall explains exhausted directions, duplicates, or a stop; fewer witnesses proves neither uniqueness nor completeness. A stopped selection may retain already checked witnesses without upgrading the source claim.
+
+Mathematical projection uses the existing `GeometryPort` `Projection` operation. A representation adapter exposes the immutable relation as a `SetHandle` with an equivalent map to canonical coordinates. If that adapter or projection capability is absent, admission returns unsupported. Geometry evidence binds the source relation, ordered requested coordinates, and output identity. Projection of a partial or candidate relation remains explicitly a projection of that source scope. Selected-witness plots are a different artifact and never receive set-projection evidence.
+
+### Geometry plans over the existing registrations
+
+`GeometryOperationPlanner` owns no new registry. Its catalogue view borrows the current typed registries during admission; a successful plan retains selected registrations through owning `PreparedProvider` values. Ordered operand contracts include representations and coordinate schemas; concrete operand identity is bound when each generated request is admitted.
+
+```cpp
+struct GeometryOperationRequest {
+	GeometryOperationKind operation;
+	std::vector<OperandContract> inputs;      // ordered representation/coordinate contracts
+	GeometryOutputRequest output;            // relation + assurance + capacity requirements
+};
+struct GuaranteeTransfer {
+	OperationSpecificRuleId rule;
+	std::vector<GuaranteeContract> required_inputs;
+	GuaranteeContract output;
+	CoordinateTransfer coordinates;
+	std::vector<Assumption> assumptions;
+};
+struct GeometryStep { registry::PreparedProvider<registry::GeometryPort> provider;
+	GuaranteeTransfer transfer; };
+struct ConversionStep { registry::PreparedProvider<registry::ConversionPort> provider;
+	GuaranteeTransfer transfer; };
+struct ApproximationStep { registry::PreparedProvider<registry::ApproximationPort> provider;
+	GuaranteeTransfer transfer; };
+using GeometryPlanStep = std::variant<GeometryStep, ConversionStep, ApproximationStep>;
+class PreparedGeometryPlan {
+public:
+	std::span<const GeometryPlanStep> steps() const;
+	GuaranteeContract composed_guarantee() const;
+	std::unique_ptr<GeometryPlanWorkspace> create() const;
+};
+using GeometryPlanAdmission = std::variant<PreparedGeometryPlan, registry::Rejection>;
+GeometryPlanAdmission GeometryOperationPlanner::prepare(const GeometryOperationRequest&,
+	const ExistingGeometryRegistries&) const;
+struct GeometryPlanResult { OperationResult result; TransformLineage lineage;
+	GuaranteeContract applied_guarantee; };
+using GeometryPlanOutcome = std::variant<GeometryPlanResult, OperationStopped, Unsupported>;
+GeometryPlanOutcome GeometryPlanWorkspace::run(std::span<const SetHandle> operands,
+	const ExecutionContext&);
+```
+
+This sketch covers the set-producing chain used by A and family projection; existing support/containment outcomes retain their own typed results. Plan admission checks each intermediate representation and operation-specific guarantee transfer before workspace creation. Execution admits concrete operations through the frozen provider, verifies each returned identity/evidence, and appends the actual transformation lineage. A rejected or stopped step yields no successful final set and retains its request provenance.
+
+There is no universal ordering of guarantees. Image, intersection, predecessor, and projection each need a reviewed rule for their input/output relation and assurance. Missing rules or weakened guarantees reject a complete-family request. Inner/outer/heuristic steps can produce a correspondingly scoped partial/candidate result only where their registered rule supports that claim. Exact/equivalent mathematical transformations evaluated in binary64 still carry numerical assurance. Approximation adapters remain outside the first comparison. Selecting the concrete exact operation/capacity fixture for #51 remains an open scientific gate.
+
+### Comparison records and offline export
+
+Extend the existing `artifacts::RunRecord` and `publish_run`/`encode_run` path with versioned synthesis, family, query, verification, and lineage attachments. Reuse its resolved configuration, module/resource observations, spans, and execution summary. The application composition root writes one record for every requested attempt, including preparation rejection, skipped task, task failure, unsupported, stopped, or incomplete output. Allocation/internal invariant failures are runtime failures, never mathematical infeasibility.
+
+```cpp
+struct ComparisonSpecId { problem::ContentDigest digest; };
+struct ComparisonRunId { problem::ContentDigest digest; };
+struct RunRecordRef { artifacts::RunId run; ArtifactDigest content; };
+struct ComparisonSpec {
+	ComparisonSpecId identity;
+	ProblemId problem;
+	FamilyRequest request;
+	std::vector<RunSelection> methods;
+	RepetitionPlan repetitions;
+	QueryOutputScope output;
+};
+struct AttemptRecord { AttemptId attempt; MethodIndex method; RepetitionIndex repetition;
+	AttemptStatus status; RunRecordRef record; }; // status checked against saved outcome
+struct ComparisonRecord { ComparisonSpecId spec; ComparisonRunId run;
+	std::vector<AttemptRecord> attempts; };  // full ordered set, never successful-only
+ArtifactResult<ComparisonSpec> resolve_comparison(const problem::ResolvedProblem&,
+	const ComparisonDefinition&);
+ArtifactResult<ComparisonRecord> compare(const problem::ResolvedProblem&,
+	const ComparisonSpec&, ExecutionOwner&, RunArtifactWriter&);
+
+struct ExportLimits { std::optional<std::size_t> bytes, artifacts, projection_elements; };
+struct ReportProjectionRequest { ReportViewScope scope; ExportLimits limits; };
+struct CompleteReportProjection { ReportData data; std::vector<RunRecordRef> sources; };
+struct LimitedReportProjection { ReportData data; std::vector<RunRecordRef> sources;
+	OmissionManifest omissions; ExportLimitEvidence limit; };
+using ReportProjectionOutcome = std::variant<CompleteReportProjection,
+	LimitedReportProjection, ExportRejected>;
+ReportProjectionOutcome project_report(const SavedComparisonView&,
+	const SavedRunReader&, const ReportProjectionRequest&);
+struct CompleteExport { ExportManifest manifest; };
+struct LimitedExport { ExportManifest manifest; OmissionManifest omissions;
+	ExportLimitEvidence limit; };
+using HtmlExportOutcome = std::variant<CompleteExport, LimitedExport, ExportRejected>;
+HtmlExportOutcome export_html(const ReportProjectionOutcome&,
+	const SavedArtifactReader&, const HtmlExportRequest&);
+```
+
+Comparison normalization binds the resolved problem, effective request/objective, requested and actual method/version/configuration identities, numerical/resource policies, query/output scope, and repetition setup. `ComparisonRunId` binds the spec and every ordered attempt reference. Admission rejection has a persisted diagnostic record with a known-not-called observation. Incomplete/stopped runs remain visible but fail the complete-family comparison gate. Backend substitutions are separately identified comparisons; a compatible fixed backend is used for the first strategy comparison.
+
+The offline report projection reuses saved family projections and witness artifacts; it cannot launch geometry, query, or synthesis work. `LimitedReportProjection` and `LimitedExport` name omitted payloads, plots, or raw-data attachments and retain identities/counts/limit evidence. Missing or mismatched required records reject export; size limits never silently truncate evidence. HTML uses the existing publication envelope/report-kind adapter path where available, with synthesis as a new saved-data kind rather than a per-strategy publisher. Reports distinguish witness traces from mathematical set projections and carry coordinate names/units. #83 and T-X02 cover round-trip provenance, phase timings, and unavailable counters. The first numerical result gets an English HTML report even while T-X01 remains open.
 
 ## End-to-end flow and dependency direction
 
@@ -174,7 +428,7 @@ The first end-to-end milestone starts when both proposed synthesis strategies ca
 | Strategy A: reachability and backward recovery | **Proposed adapter of implemented `StrategyPort`/`SynthesisWorkspace`:** compose forward stage reachability, terminal minimization, and backward predecessor/recovery. | Resolved problem + optimal-family request → joint state/control family, optimum evidence, assumptions, and timing spans. It must preserve all histories and terminal minimizers. | Depends on reachability/predecessor, terminal optimizer, family builder, geometry/LP adapters; shares input/output contract with Strategy B. [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [TEST-13 #77](https://github.com/butahlecoq/controlled-systems-lab/issues/77). |
 | Strategy B: direct joint-trajectory optimization | **Proposed adapter of `StrategyPort`/`SynthesisWorkspace`:** a trajectory-program builder plus an optimal-relation extractor. | Resolved problem → sparse program for `x0…xT,u0…u(T-1)`, explicit source-to-program coordinate map, optimum relation, and problem/program evidence association. | Depends on immutable model/objective, LP or convex ports, terminal minimizer/family construction, and generated-request providers if the extractor needs additional solves. Must encode every transition and stage constraint and handle singular A. [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [TEST-12 #74](https://github.com/butahlecoq/controlled-systems-lab/issues/74). |
 | Joint optimal-family representation | **Partially implemented, not final:** `JointCoordinates`, `JointRelation`, `OptimalFamily`, `FamilyTarget`, `FamilyEvidence`, `Witness` in `include/csl/contracts.hpp`; `OptimalFamily` currently keeps target and evidence as independent fields and can express contradictions. `JointRelationPayload` is opaque and has no query methods. | Proposed closed outcome variant over canonical `x0…xT,u0…u(T-1)` coordinates: complete claim with explicit numerical-support or validated-certificate assurance; partial relation with known coverage scope; candidate with explicit inner/outer/heuristic relation-to-target. Completeness evidence binds resolved-problem digest, effective objective/request, ordered coordinate schema, strategy/version and transformation lineage. | Proposed relation adapters preserve dependencies and answer declared queries without materializing unnecessarily large projections. A witness sample never proves family completeness. Replacing the current loose shape with validated typed outcomes is an implementation gap; this proposal is not an approved code interface. The shared strategy-boundary contract is tracked in [SYN-07 #155](https://github.com/butahlecoq/controlled-systems-lab/issues/155), with its expanded independent public-API suite in [TEST-24 #157](https://github.com/butahlecoq/controlled-systems-lab/issues/157). [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67). |
-| Family queries and witness selection | **Partially implemented:** `WitnessSelectorPort`/`WitnessSelectorWorkspace`, `WitnessRequest`, `WitnessSelection`. **Proposed minimum seam:** capability-admitted `FamilyQuery` with typed witness-selection and projection requests/results; membership and secondary optimization remain later query variants. | Optimal family + query → a consistent witness or explicitly labelled projected relation, target/evidence preservation, query provenance, counts, resource/cancellation outcome. A query never upgrades a partial/candidate family to complete; fewer distinct witnesses does not establish uniqueness. | Query adapters operate on the opaque joint relation and may use replaceable geometry/optimization providers. Report projection and witness selection use the same family identity/evidence contract. [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), [TEST-13 #77](https://github.com/butahlecoq/controlled-systems-lab/issues/77), [VIZ-02 #91](https://github.com/butahlecoq/controlled-systems-lab/issues/91). |
+| Family queries and witness selection | **Partially implemented:** `registry::SelectorPort`/`WitnessSelectorWorkspace`, `WitnessRequest`, `WitnessSelection`. **Proposed evolution:** selection keeps that registered seam; mathematical projection uses `GeometryPort` with typed source-family binding. Membership and secondary optimization remain later query variants. | Optimal family + query → a consistent witness or explicitly labelled projected relation, target/evidence preservation, query provenance, counts, resource/cancellation outcome. A query never upgrades a partial/candidate family to complete; fewer distinct witnesses does not establish uniqueness. | Query adapters operate on the opaque joint relation and may use replaceable geometry/optimization providers. Report projection and witness selection use the same family identity/evidence contract. [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), [TEST-13 #77](https://github.com/butahlecoq/controlled-systems-lab/issues/77), [VIZ-02 #91](https://github.com/butahlecoq/controlled-systems-lab/issues/91). |
 | Independent trajectory/evidence verification | **Proposed:** replaceable numerical `TrajectoryVerifier` plus future validated-evidence adapter. Existing residual evaluators cover optimization programs; generic `check_family_evidence` is not a trajectory verifier. | Resolved original problem + witness/family + tolerance/assurance request → named dynamics, initial, control/state/temporal residuals, original objective, evidence-binding diagnostics, and explicit unsupported/validated status. | Must not call back into the synthesis strategy to establish correctness. Feasibility, objective optimality, family completeness, and validated proof are distinct claims. [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [REVIEW-04 #85](https://github.com/butahlecoq/controlled-systems-lab/issues/85). |
 | Task execution and workspace isolation | **Implemented:** `execution::Task`, `make_task`, `Executor::run`, `ResourceUse`, `ExecutionContext`, bounded outer admission, cancellation and lifecycle observations. | Prepared typed/strategy work + resource declaration → per-task exclusive workspace, outcome, provenance, timing and enforcement report. Native solver threads are declared; OS-level thread enforcement is not promised. | Suitable for independent batches/scenarios and strategy invocations. No scheduler/task-group is injected into `SynthesisWorkspace`; nested/algorithm-internal parallel fan-out and total solver-thread coordination need a design decision. [RUN-01 #25](https://github.com/butahlecoq/controlled-systems-lab/issues/25) is closed; [RUN-02 #80](https://github.com/butahlecoq/controlled-systems-lab/issues/80), [OBS-02 #60](https://github.com/butahlecoq/controlled-systems-lab/issues/60), [REVIEW-05 #95](https://github.com/butahlecoq/controlled-systems-lab/issues/95). |
 | Run observation and artifact publication | **Implemented foundations:** `SynthesisResult.spans`, `execution::observability::CollectionPlan`/`ObservationShard`, `artifacts::RunStatistics`, `FamilyRecord`, attachments, `publish_run`, `encode_run`/`decode_run`. These do not automatically instrument solver internals or create a comparison report. | One resolved problem/configuration/run + final result, collection, resource/execution observations and attachments → validated immutable portable run record and encoded bytes. | Collection consumes explicit observations; record codecs are independent of solver workspaces. Family payload may be an attachment or `FamilyWithoutExporter`, so a synthesis-family exporter remains to implement. [OBS-01 #49](https://github.com/butahlecoq/controlled-systems-lab/issues/49) is closed; [OBS-02 #60](https://github.com/butahlecoq/controlled-systems-lab/issues/60), [OBS-03 #79](https://github.com/butahlecoq/controlled-systems-lab/issues/79). |
@@ -221,38 +475,43 @@ The implemented registry, execution, LP/convex, and request-provider seams do no
 3. **Direct joint optimization and complete relation extraction.** Strategy B still needs a source-to-program coordinate map, a trajectory program builder for every admitted constraint, and an extractor for the full optimal relation. Current LP/convex solve results and a single returned primal are not an optimal family. Constant or degenerate objectives must preserve all feasible minimizers, with completeness evidence separate from the optimum claim.
 4. **Common verification and comparison path.** Neither strategy implementation currently returns the complete relation target required by the common contract. An independent verifier must check original dynamics, constraints, objective, and evidence binding; a comparison runner must hold request/profile and compatible backend fixed, retain unsupported/failure/cancellation outcomes, and persist the same family/evidence fields from each method. Existing run records and program-level reports do not provide this synthesis layer.
 
-The two strategy tickets and their module tests remain the implementation path: [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [TEST-12 #74](https://github.com/butahlecoq/controlled-systems-lab/issues/74), and [TEST-13 #77](https://github.com/butahlecoq/controlled-systems-lab/issues/77). These statements record gaps, not a proposed class owner or a promise that either algorithm supports the whole model contract.
+The two strategy tickets and their module tests remain the implementation path: [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), [TEST-12 #74](https://github.com/butahlecoq/controlled-systems-lab/issues/74), and [TEST-13 #77](https://github.com/butahlecoq/controlled-systems-lab/issues/77). These are implementation gaps assigned to the proposed workspace/publisher flow above, not a claim that either algorithm supports the whole model contract.
 
 For the two-stage integrator with `u0+u1=1`, the family must preserve that equation: the Cartesian product `[0,1] × [0,1]` is invalid because it admits `(0,0)` and `(1,1)`. Distinct selected witnesses such as `(0,1)` and `(1,0)` must retain their consistent state histories and equal primary objective. Constant objectives must retain every feasible trajectory. If the implementation only produces witnesses or a numerical candidate enclosure, it must report that target and its incomplete/relaxed evidence honestly.
 
 The verifier recomputes initial conditions, every transition, all declared supported constraints, and the original objective from the immutable problem. Any program result used as evidence must be tied to its source problem and transformation map. Plots show selected witnesses or declared projections; they do not imply the full relation is visualized. Timing totals distinguish nested inclusive spans from additive work and report unavailable metrics explicitly.
 
-## Open design decisions before implementation
+## Scientific gates before complete-family acceptance
 
-These are decisions to resolve in the architecture review and the named tickets, not hidden assumptions in this draft.
+The callable interfaces above are proposed ticket defaults, not implementation approval. Only these scientific choices remain unresolved for the first workflow:
 
-1. **Family completeness evidence and numerical policy:** review the polyhedral full-family characterization for the stated profile (linear optimal face; PSD quadratic affine minimizer conditions; weighted residual optimal-residual condition; intersect each with the feasible-history polyhedron). Specify the numerical support procedure, tolerance policy and acceptance thresholds; none is owner-approved yet. Keep numerical-tolerance support distinct from validated certification, and bind evidence to the resolved problem, effective request/objective, coordinate schema, strategy/version, and transformations. Witnesses/residual checks alone cannot prove coverage; unsupported or unproved cases cannot pass T-X01. Reserve implicit convex/SOC forms for future cases that need them.
-2. **Strategy-level generated-request composition:** review merged #143 and #144 together, then specify how each proposed strategy composes its changing LP and geometry requests through prepared providers. The reducer runner in #144 implements sequential per-query admission and request-specific workspaces for hull membership LPs; decide what other operations need workspace reuse or bounded concurrency. Do not infer a general strategy executor from the hull adapter.
-3. **Geometry selection and guarantee composition:** review the proposed default that `GeometryOperationPlanner` composes existing geometry/conversion/approximation registrations as one path, with operation-specific guarantee-transfer rules. Exact/equivalent steps are required when claiming a complete-family path unless a reviewed theorem proves otherwise. Consider a unified operation-plan registry only if composition has a demonstrated gap. Require representation IDs and guarantee-compatible explicit fallback; unsupported plans fail before workspace creation.
-4. **Parallelism/resource reporting:** review the proposed v1 policy: serial strategy/algorithm work within each task, outer executor owns concurrency, and any future internal fan-out obtains permits from the same execution owner. Confirm how backend configured/admitted/enforced thread counts and memory limits are represented; do not claim hard enforcement where the adapter/platform does not provide it.
-5. **Comparison identity/artifact:** review the proposed `ComparisonSpecId` for the immutable comparison definition, `ComparisonRunId` for the executed paired comparison, and `RunRecordRef` for every immutable repetition record. The run identity binds the spec to the complete ordered reference set and all outcomes, including failures/unsupported/cancellation/incomplete records. Use the same compatible LP/convex backend when available; label exceptions. Comparative performance reports follow the repository repetition protocol.
-6. **Visualization/export:** select backend-neutral projection data; name fuel-state coordinate pairs and axis units; decide where optional family payloads are encoded and how size limits/partial exports are represented. Distinguish sampled witness plots from mathematical projections.
-7. **Assurance:** choose the initial numerical verification request/result fields and precisely which certificates, if any, can later satisfy validated assurance.
-8. **Concrete first exact-set profile:** select the initial H/V operation/capacity profile and analytic acceptance fixtures without implying all polyhedra or dimensions are supported.
-9. **Owner confirmation of remaining first solver profile:** the working baseline control bound is `u ∈ [-1, 1]` for initial baseline scenarios as an explicit assumption; it is not verified canonical B04 input. Keep the historical scenario non-executable until its original bound/convention is sourced. Confirm any remaining profile details for known deterministic initial point, nominal open-loop decisions, absent/zero disturbance, affine discrete stages, supported terminal objectives, and no added state or temporal coupling constraints. Feedback, uncertain initial quantifiers, and nonempty temporal constraints remain unsupported until separately reviewed.
-10. **Future disturbance/observation profile:** after the nominal workflow, choose which semantics to support first: known exogenous input, bounded exogenous disturbance, open-loop robust control, adversarial/minimax control, or observation-driven feedback. For the selected case, define input/history dependence, quantifiers, player objective where relevant, observation timing, and policy information before claiming the profile is admitted. This does not gate the nominal zero-disturbance open-loop experiment.
-11. **Future geometry expansion:** after the exact polyhedral workflow, select which exact generator representation or approximation adapter to prioritize (for example zonotope/CZ, parallelotope enclosure, or ellipsoidal families). Specify the supported operations and direction/evidence guarantees per adapter. The Kurzhanskiy/Varaiya Ellipsoidal Toolbox remains a possible pinned external reference; its historical use by the owner and current compatibility are unverified. None of these choices enables approximations in the first comparison.
-12. **Family result types:** review the proposed outcome sum type and boundary validation rules. `CompleteOptimalFamily` requires relation, optimum evidence, and completeness evidence together, with an explicit numerical-support versus validated-certificate assurance. Partial and candidate relations remain distinct, candidate direction is explicit, and query results cannot promote a family. Exact evidence payloads, validation ownership, and numerical acceptance policy remain open before implementation tickets freeze.
+1. **Numerical coverage policy.** Review the complete-family characterization for each supported terminal objective and define the numerical coverage procedure, arithmetic/tolerance policy, and acceptance thresholds. No thresholds are invented here. Optimum diagnostics and witness residuals do not establish complete coverage. Coordinate/lineage binding and the `check_family_evidence`/T-V02 migration must ship with that reviewed policy.
+2. **Exact-operation and capacity fixture.** Select the concrete H/V operation chain, supported dimensions/output-size limits, and analytic oracle fixtures for A's images, intersections, predecessor projections, and joint relation. H/V conversion and hull reduction alone are insufficient. Missing operations or coverage support produce unsupported/partial/candidate records and cannot pass T-X01.
+3. **Historical B04 restoration.** Source its original bounds, conventions, and missing inputs before making that archival manifest executable. The owner-approved `u ∈ [-1,1]` bound applies only to new baselines and does not repair or redefine B04.
+
+The nominal open-loop profile, deterministic initial point, absent/zero disturbance, continuous controls, supported terminal objectives, and no added state/temporal coupling constraints are confirmed scope. They do not require another owner-confirmation gate. Record/query identities, one publisher, existing-registry/provider composition, serial work within a task with outer-executor concurrency, and saved-data export are proposed defaults specified above. Future feedback/disturbance quantifiers, uncertain initial states, nonempty temporal couplings, hybrid/discrete relation support, validated arithmetic, and approximation adapters require separate capability review after this slice. They do not gate the nominal numerical workflow.
 
 ## Ticket alignment and review gates
 
 The main workflow is tracked by [SYN-01 #53](https://github.com/butahlecoq/controlled-systems-lab/issues/53), [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-05 #71](https://github.com/butahlecoq/controlled-systems-lab/issues/71), and [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43). Module contract tests are tracked separately by [TEST-10 #65](https://github.com/butahlecoq/controlled-systems-lab/issues/65), [TEST-11 #69](https://github.com/butahlecoq/controlled-systems-lab/issues/69), [TEST-12 #74](https://github.com/butahlecoq/controlled-systems-lab/issues/74), and [TEST-13 #77](https://github.com/butahlecoq/controlled-systems-lab/issues/77), and shared outcome-boundary tests [TEST-24 #157](https://github.com/butahlecoq/controlled-systems-lab/issues/157). Independent whole-system reviews are [REVIEW-01 #59](https://github.com/butahlecoq/controlled-systems-lab/issues/59), [REVIEW-03 #82](https://github.com/butahlecoq/controlled-systems-lab/issues/82), and [REVIEW-06 #90](https://github.com/butahlecoq/controlled-systems-lab/issues/90). The architecture agreements remain open in [#7](https://github.com/butahlecoq/controlled-systems-lab/issues/7), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8), and user feedback [#140](https://github.com/butahlecoq/controlled-systems-lab/issues/140); this draft is intended to make those reviews concrete, not to close them. Hybrid-system extension work is separately tracked by [EXT-07 #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156).
+
+The proposed interface/test ownership is concrete:
+
+| Ticket seam | Acceptance through the caller-facing interface |
+|---|---|
+| #53 reachability, #51 geometry, #66 Strategy A | T-S01 joins recovery fibers to enforce `u0+u1=1`; singular dynamics need no inverse. Every admitted geometry step retains coordinate/guarantee lineage and output limits. |
+| #61 terminal minimizers, #67 Strategy B | T-S02 keeps all trajectories for a constant objective; T-S03 keeps multiple control histories even with a unique terminal minimizer. Source-to-program row/coordinate maps preserve these cases through extraction. |
+| #43 independent verification | T-V01 detects injected transition, control-domain, and original-objective errors using named numerical residuals and the configured policy. T-V02 audits assurance, scope, and all claim bindings independently of strategy status. |
+| #155 shared synthesis boundary, #157 public-interface tests | Run both registered strategies through the migrated `StrategyPort`; reject contradictory family products and test all termination outcomes with retained partial relations, incumbents, and bounds. T-V02 enforces the migration gate above. |
+| #66/#67 comparison, #83 run statistics/artifacts | T-X01 runs both strategies on T-S01/02/03 with the same effective request and compatible backend. T-X02 round-trips every attempt, family/query identities, phase timings, resource/selector provenance, failed/stopped records, and explicitly limited exports through saved artifacts. |
+
+T-S01's established analytic `[0,1]` control fixture remains its oracle; the new-baseline `[-1,1]` decision does not silently rewrite it. A sampled witness or objective agreement cannot pass T-X01. T-X02 verifies offline renderers using saved records with no solver/query/geometry execution. Future numerical adapters and representations add independent substitution tests when implemented.
 
 ## Self-review against issue #140 and owner decisions
 
 - This map starts from the whole scenario-to-saved-result flow, rather than another individual numerical optimization.
 - It keeps the first pair of approaches explicit and distinct, while allowing each strategy and numerical adapter to be replaced independently; fair comparison holds a compatible LP/convex backend fixed.
 - It makes a complete joint state/control family an acceptance gate; partial relations and sampled witnesses remain labelled outcomes, not success.
-- It distinguishes merged GEO-03 conversion, draft provider/reducer implementations #143/#144, their unproven generated-provider composition, and proposed end-to-end strategy modules.
-- It reserves future domains and guarantees without claiming current solver support; the first experiment adds no constraints beyond source-documented domain bounds, and verification is numerical-first.
+- It distinguishes merged GEO-03 conversion and merged provider/reducer implementations #143/#144 from proposed end-to-end strategy composition. Per-query reducer/provider admission is implemented; A/B synthesis is not.
+- It reserves future domains and guarantees without claiming current solver support; new baselines use the owner-approved control bound, archival cases retain source-only domain bounds, and verification is numerical-first.
 - It identifies open seams and owners through existing issues without changing ticket scope or declaring any ticket complete.
