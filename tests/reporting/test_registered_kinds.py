@@ -24,7 +24,7 @@ class RegisteredKindTests(unittest.TestCase):
     def publication(self, root):
         legacy=json.loads((Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/'catalog.json').read_text())
         reports=[]
-        for report in legacy['reports']:
+        for report in legacy['reports'][:2]:
             rid=report['report_id']
             shutil.copytree(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/rid,root/rid)
             shutil.copyfile(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/(rid+'.zip'),root/(rid+'.source.zip'))
@@ -235,6 +235,67 @@ class RegisteredKindTests(unittest.TestCase):
                     self.assertEqual(archive.read(rid+'/publication-manifest.json'),
                         (out/rid/'publication-manifest.json').read_bytes())
                     self.assertTrue(site.validate_publication_manifest(out/rid,report))
+
+    def test_production_catalogue_uses_shared_outer_contract_for_all_kinds(self):
+        repo=Path(__file__).resolve().parents[2]
+        root=repo/'reports'/'algorithm-results'
+        catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
+        self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt05-hull','geo03-hv'})
+        shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
+        for report in catalogue['reports']:
+            self.assertTrue(shared <= set(report))
+            self.assertRegex(report['payload_sha256'],r'^[0-9a-f]{64}$')
+            self.assertRegex(report['source_commit'],r'^[0-9a-f]{40}$')
+            self.assertRegex(report['zip_sha256'],r'^[0-9a-f]{64}$')
+            if report['report_kind'] in ('opt05-hull','geo03-hv'):
+                self.assertTrue({'measured_scope','evidence_limits'} <= set(report))
+                # Per-kind saved schemas/manifests are validated at the boundary,
+                # then projected into the same catalogue identity contract.
+                adapted=registered.adapt(root/report['report_id'])
+                self.assertEqual((report['report_id'],report['report_kind'],report['payload_sha256'],report['source_commit']),
+                                 (adapted.report_id,adapted.kind,adapted.payload_sha256,adapted.source_commit))
+                self.assertEqual((report['measured_scope'],report['evidence_limits']),
+                                 (adapted.measured_scope,adapted.evidence_limits))
+        with tempfile.TemporaryDirectory() as temp:
+            first=site.stage(root/'catalog.json',Path(temp)/'stage-a',check=True)
+            second=site.stage(root/'catalog.json',Path(temp)/'stage-b',check=True)
+            index=(first/'index.html').read_text(encoding='utf-8')
+            for report in catalogue['reports']:
+                rid=report['report_id']
+                self.assertIn(rid+'/index.html',index)
+                self.assertIn(rid+'/records.json',index)
+                self.assertIn(rid+'.zip',index)
+                archive_bytes=(first/(rid+'.zip')).read_bytes()
+                self.assertEqual(archive_bytes,(second/(rid+'.zip')).read_bytes())
+                self.assertEqual(hashlib.sha256(archive_bytes).hexdigest(),report['zip_sha256'])
+                if report['report_kind'] in ('opt05-hull','geo03-hv'):
+                    with zipfile.ZipFile(first/(rid+'.zip')) as archive:
+                        self.assertEqual(archive.read(rid+'/report-envelope.json'),(first/rid/'report-envelope.json').read_bytes())
+                        self.assertEqual(archive.read(rid+'/publication-manifest.json'),(first/rid/'publication-manifest.json').read_bytes())
+            for rid in ('opt05-hull-20261012-d1c211c2','geo03-20261012-37c3fb484e0d'):
+                page=(first/rid/'index.html').read_text(encoding='utf-8')
+                self.assertIn('records.json',page)
+                self.assertIn('trials.csv',page)
+                self.assertIn('summary.csv',page)
+                self.assertIn('latency.svg',page)
+                self.assertTrue((first/rid/'latency.svg').is_file())
+                envelope=json.loads((first/rid/'report-envelope.json').read_text(encoding='utf-8'))
+                manifest=json.loads((first/rid/'publication-manifest.json').read_text(encoding='utf-8'))
+                report=next(item for item in catalogue['reports'] if item['report_id']==rid)
+                self.assertEqual(envelope['schema'],'csl.algorithm-report-envelope/1')
+                self.assertEqual((envelope['report_id'],envelope['report_kind'],envelope['payload_sha256'],envelope['source_commit']),
+                                 (report['report_id'],report['report_kind'],report['payload_sha256'],report['source_commit']))
+                self.assertEqual(manifest['schema'],'csl.algorithm-report-publication-manifest/1')
+                self.assertEqual((manifest['report_id'],manifest['report_kind']),(rid,report['report_kind']))
+                self.assertIn('report-envelope.json',manifest['files'])
+                self.assertIn('index.html',manifest['files'])
+                self.assertTrue(site.validate_publication_manifest(first/rid,report))
+                tampered=json.loads((first/rid/'publication-manifest.json').read_text(encoding='utf-8'))
+                tampered['files']['records.json']='0'*64
+                (first/rid/'publication-manifest.json').write_text(json.dumps(tampered),encoding='utf-8')
+                with self.assertRaisesRegex(ValueError,'publication manifest'):
+                    site.validate_publication_manifest(first/rid,report)
 
     def test_real_stage_rejects_tampered_file_and_unregistered_kind(self):
         with tempfile.TemporaryDirectory() as temp:

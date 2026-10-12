@@ -1,5 +1,5 @@
 {
-  "schema": "csl.algorithm-report-catalog/2",
+  "schema": "csl.algorithm-report-catalog/3",
   "artifact_ref": "main",
   "reports": [
     {
@@ -15,6 +15,24 @@
       "payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f",
       "source_commit": "cc3d91b579d1bfbb07fb6159b6709a08cd15fa10",
       "zip_sha256": "46581b40d1f9cf6a30b05937eda2c4d89d336d4ba25c0ed4130dd908aafe9b40"
+    },
+    {
+      "report_id": "opt05-hull-20261012-d1c211c2",
+      "report_kind": "opt05-hull",
+      "payload_sha256": "679a6c76aea4e6d64d216b16f41c1e7b7ba49d6c9d3f21667d6b25ff603311f4",
+      "source_commit": "d1c211c2763989a9cf3e39a8acaf609c5cf33a07",
+      "measured_scope": "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices",
+      "evidence_limits": "No comparator; binary64 numerical checks; not exact arithmetic or a validated global certificate",
+      "zip_sha256": "444b127c2bd21e9868d5fb3ae8634a0ce41bf8f860c25348e0bdaaa222b6fe32"
+    },
+    {
+      "report_id": "geo03-20261012-37c3fb484e0d",
+      "report_kind": "geo03-hv",
+      "payload_sha256": "37c3fb484e0da72e4710cdc8f1e5ebe27b906c2ecd3b3396c43f67d0b8e4196c",
+      "source_commit": "ba83547b3495cc8017f720702083bcf76c71fb30",
+      "measured_scope": "56 measured trials across four bounded 2D fixtures in both conversion directions",
+      "evidence_limits": "contract fixtures only; no accepted workload-size baseline; bounded H/V cases only; no available competing adapter; numerical checks are not validated global certificates; no inner conversion phase timing; A17/A18 lineage not audited",
+      "zip_sha256": "f6e9a1d572ffb5873987d2e78f14e382e11fe8928d85334d57978e253b36a574"
     }
   ]
 }

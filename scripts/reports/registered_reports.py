@@ -209,7 +209,7 @@ def render_page(bundle, publication):
             '</title></head><body><h1>' + escape(publication.kind) + ' measurement report</h1><p><code>' +
             escape(publication.report_id) + '</code></p><h2>Measured scope</h2><p>' + escape(publication.measured_scope) +
             '</p><h2>Saved measurements</h2>'+table+'<h2>Evidence limits</h2><p>' + escape(publication.evidence_limits) + '</p><p>Source commit <code>' +
-            escape(publication.source_commit) + '</code></p><p><a href="latency.svg">Checked latency SVG</a></p><ul><li>' + '</li><li>'.join(links) + '</li></ul></body></html>')
+            escape(publication.source_commit) + '</code></p><p><a href="report-envelope.json">Versioned report envelope</a></p><p><a href="publication-manifest.json">Publication manifest</a></p><p><a href="latency.svg">Checked latency SVG</a></p><ul><li>' + '</li><li>'.join(links) + '</li></ul></body></html>')
 
 
 def _json_bytes(value):
