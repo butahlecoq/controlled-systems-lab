@@ -221,3 +221,55 @@ headers/`find_package(CSL CONFIG)` target. It verifies a retained custom-port
 request and literal independent mutable state. Full production solvers, model
 validation, optimal-family reconstruction, scenario loading, statistics and
 performance claims are outside CORE-04.
+
+
+## Generated requests through a frozen registered provider
+
+`<csl/registry/provider.hpp>` adds an owning selected-registration provider for
+algorithms that generate later LP or other typed requests. It uses the existing
+port traits and changes no fixed `PreparedPipeline` / `BoundWorkspace` API.
+`select_provider(registry, method, requirements)` and `check_providers(...)`
+resolve every declared method/version and check known scalar, assurance and
+basis-factory requirements without copying registration callbacks, snapshotting
+numeric requests or constructing workspaces. `CheckedProviders` borrows the
+registrations until its synchronous `snapshot()`, exactly like `CheckedPipeline`.
+It has no output offer: future numeric capability acceptance is conditional.
+
+`snapshot()` yields an owning tuple of `PreparedProvider<Port>` values.
+`prepare_provider(selection)` is the standalone check-and-snapshot convenience.
+Each provider freezes actual/requested identity/version and Requirements in
+immutable shared storage. Callbacks obey the same pure-capability and immutable
+captured-configuration contract as existing registrations: a callback retaining
+mutable aliases or dangling references violates that contract; copying a
+std::function cannot make arbitrary external state immutable.
+
+`provider.prepare(concrete_request)` has no per-query requirements argument.
+It calls the selected capability callback on the complete concrete request,
+checks the actual offer and requested basis availability, then uses the existing
+checked pipeline snapshot path. Rejection copies no request and creates no
+workspace. A successful prepared pipeline owns its complete request and selected
+factory and creates a fresh exclusive bound workspace through the original path.
+Neither provider nor caller can swap unchecked requests into a live workspace.
+A declaration requiring established completeness does not itself establish that
+capability; a future offer lacking it rejects. Callback/factory exceptions retain
+the existing exception/RAII policy, and basis diagnostics retain their original
+workspace lifetime and ordering.
+
+The narrow composition overload is
+`compose_strategy(checked_fixed_pipeline, checked_providers, builder)`. Its
+builder receives `(fixed_workspace_tuple, prepared_provider_tuple,
+frozen_strategy_request, requirements)`. Both fixed request snapshots and
+provider callback copies are deferred until the enclosing StrategyRegistry has
+accepted its capability and all declared known dependency checks. Planners use
+`check_pipeline` / `check_providers`, not their standalone prepare conveniences;
+all registries/borrowed requests stay stable through synchronous preparation.
+Provenance lists the strategy, fixed dependencies, then generated providers.
+Concrete generated calls still record their own successful or rejected request
+admission; the declaration is never a promise about unseen numeric data.
+
+A provider can be copied and retained after the source registry/request/config
+objects die. Independent `prepare().create()` calls obtain independent mutable
+workspaces. An algorithm needing multiple varying programs stores the provider
+and prepares each program; it never receives a raw unchecked workspace. No
+central port dispatch, solver implementation, fallback, or hull mathematics is
+introduced by this seam.
