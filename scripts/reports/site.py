@@ -167,11 +167,8 @@ def catalogue_index(catalogue):
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
                 data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv"),"unknown catalogue kind")
-                labels={"opt05-hull":"OPT-05 LP-backed finite-point hull reduction; evidence limits are stated on its report page","geo03-hv":"GEO-03 bounded 2D H/V contract fixtures; evidence limits are stated on its report page"}
-                label_kind=labels.get(report["report_kind"],"HiGHS reference convex, nine analytic microfixtures" if report["report_kind"]=="convex" else label_kind)
-                if report["report_kind"] in ("opt05-hull","geo03-hv"):
-                    data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"registered scope/evidence metadata required")
-                    label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
+                data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"schema-v3 scope/evidence metadata required")
+                label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
             else:
                 data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
                 label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
