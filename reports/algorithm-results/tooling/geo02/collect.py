@@ -50,7 +50,7 @@ def main():
  import re
  if not re.fullmatch(r'[0-9a-f]{40}',a.source_commit) or not re.fullmatch(r'[0-9a-f]{40}',a.harness_commit):p.error('source and harness commits must be full lowercase 40-character Git SHAs')
  for commit in (a.source_commit,a.harness_commit):
-  try:git('cat-file','-e',commit+'^{commit}')
+  try:provenance.git('cat-file','-e',commit+'^{commit}')
   except subprocess.CalledProcessError:p.error(f'unknown Git commit: {commit}')
  try:
   concurrent_note=a.concurrent_work.read_text(encoding='utf8').strip();profile_note=a.profile_evidence.read_text(encoding='utf8').strip()

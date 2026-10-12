@@ -1,5 +1,6 @@
 """Focused contract tests for immutable GEO-02 numerical reports."""
 import copy, hashlib, json, sys, unittest, tempfile, subprocess, zipfile
+from unittest import mock
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
@@ -43,4 +44,10 @@ class ContractTests(unittest.TestCase):
   expected=provenance.expected_harness_cmake(source)
   provenance.validate_harness_cmake(source,expected)
   with self.assertRaisesRegex(ValueError,'CMakeLists.txt'):provenance.validate_harness_cmake(source,expected+'\nadd_library(unreviewed x.cpp)')
+ def test_collector_rejects_unknown_commit_before_build_validation(self):
+  with tempfile.TemporaryDirectory() as temporary:
+   root=Path(temporary);concurrent=root/'concurrent.txt';profile=root/'profile.txt';concurrent.write_text('none\n',encoding='utf8');profile.write_text('none\n',encoding='utf8')
+   args=['collect.py','--exe',str(root/'missing.exe'),'--build-dir',str(root/'build'),'--source-commit','0'*40,'--harness-commit','0'*40,'--concurrent-work',str(concurrent),'--profile-evidence',str(profile),'--out',str(root/'collection'),'--reviewed']
+   with mock.patch.object(sys,'argv',args),self.assertRaises(SystemExit) as raised:collect.main()
+   self.assertEqual(raised.exception.code,2)
 if __name__=='__main__':unittest.main()
