@@ -1,5 +1,12 @@
 # Native interfaces, revision 1.4
 
+MODEL-03 adds the [resolved problem module](resolved-problems.md) without changing
+this canonical source revision. It publishes immutable composition, computes the
+[versioned structural math/content identity](problem-identity-v1.md), and bridges
+to actual configured registry admission. The authored ID is retained as a label;
+the frozen compatibility DTO carries the computed ID. Data publication does not
+assert feasibility or supply a production loader, planner or synthesis family.
+
 Date: 2026-10-11. CORE-01 / issue #11; MODEL-01 / issue #15 and OPT-02 / issue #18 revisions. This revision turns the [native design sketch](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md) into a compiled source contract in [contracts.hpp](../../include/csl/contracts.hpp). The [master specification](../superpowers/specs/2026-10-11-controlled-systems-master-design.md) remains the requirements authority. Integration review is required before downstream adapters depend on this revision.
 
 This delivery contains values, coarse abstract ports and small structural guards. Revision 1.1 adds scoped outcome claims, mathematical geometry operands and reference-bound geometry evidence following integration review. It does **not** implement optimization adapters, a registry, a problem validator, numerical synthesis, geometry, family construction or a scenario loader. The [isolated probes](../../probes/core-01/CMakeLists.txt) exercise selected dependencies directly. CORE-02 owns the product build; later module tickets own implementation. The [dependency decision](../architecture/decisions/0002-native-integrations.md) records pinned versions and licensing.

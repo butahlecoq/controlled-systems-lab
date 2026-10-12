@@ -1,5 +1,11 @@
 # Typed adapter registry and preparation
 
+The additive [resolved problem bridge](resolved-problems.md) invokes this actual
+registry with an owning canonical description and computed mathematical ID.
+Configured strategy restrictions remain capability/admission decisions; they do
+not redefine publication validity. The bridge preserves the pure planning,
+check-before-snapshot and dependency-before-factory contracts below.
+
 CORE-04 adds `<csl/registry/registry.hpp>` and the installed `CSL::registry`
 target. It preserves [native interface revision 1.1](core-interfaces.md).
 This is a C++20 source interface for compatible in-process toolchains. It
