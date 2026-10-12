@@ -403,20 +403,25 @@ The offline report projection reuses saved family projections and witness artifa
 
 ```mermaid
 flowchart LR
-    File[Scenario file or C++ Problem] --> Load[Scenario loader]
-    Load --> Resolve[ResolvedProblem]
-    Resolve --> Admit[prepare_strategy / StrategyRegistry]
-    Admit --> Plan[Strategy planner checks dependencies]
-    Plan --> Ports[LP / convex / geometry / generated-request providers]
-    Ports --> Strategy[Selected SynthesisWorkspace]
-    Strategy --> Family[OptimalFamily relation + evidence]
-    Family --> Query[Witness selector and family queries]
-    Query --> Verify[Independent verifier]
-    Strategy --> Observe[Execution and observations]
+    File[Scenario file or C++ Problem] --> Load[load_scenario_file / input adapter]
+    Load --> Resolve[problem::resolve → ResolvedProblem]
+    Resolve --> Prepare[prepare_strategy / StrategyRegistry]
+    Prepare --> Plan[StrategyPlan → PreparedStrategy]
+    Plan --> Task[make_task / Executor]
+    Task --> Strategy[StrategyPort → exclusive SynthesisWorkspace]
+    Strategy --> Provider[PreparedProvider::prepare for each generated request]
+    Provider --> Geometry[PreparedGeometryPlan / geometry and conversion ports]
+    Provider --> LP[LPPort / ConvexPort]
+    Geometry --> Strategy
+    LP --> Strategy
+    Strategy --> Family[FamilyPublisher → guarded OptimalFamily]
+    Family --> Query[SelectorPort / typed GeometryPort projection]
+    Query --> Verify[Independent original-problem verifier]
+    Strategy --> Observe[Execution and module observations]
     Query --> Observe
-    Verify --> Record[Run and comparison records]
+    Verify --> Record[RunRecord + comparison records]
     Observe --> Record
-    Record --> Export[Offline HTML / tables / figures]
+    Record --> Export[Saved-data HTML / tables / figures]
 ```
 
 Application strategies depend on mathematical ports and immutable problem data. Numerical adapters depend on those port contracts, not on fuel-specific equations, strategy classes, plotting, or report formatting. Execution owns workspaces and resource admission. Verification reads the resolved original problem and returned witnesses/family evidence; it does not trust the strategy's success flag. Report rendering consumes saved records only.
