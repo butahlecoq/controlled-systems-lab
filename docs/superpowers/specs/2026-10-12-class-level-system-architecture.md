@@ -18,6 +18,61 @@ The existing problem model keeps disturbance, observation, finite/mixed-domain, 
 
 The interface vocabulary follows the repository glossary and the deep-module terms: a **module** has one caller-facing **interface**; an **adapter** implements a replaceable **seam**; depth is the capability callers receive through that interface. Proposed class names below are role names, not settled C++ declarations.
 
+## Compact module seam map
+
+This is the short architectural index; the detailed map below records current status, evidence, tickets, and caveats. The interfaces are domain-level requests and results: framework and backend types remain behind adapters, and each proposed seam is still subject to the open decisions later in this draft.
+
+| Module | Responsibility and caller-facing interface | Main extension seam |
+|---|---|---|
+| Scenario intake and resolution | Parse a versioned scenario or authored `Problem` into an immutable `ResolvedProblem` with source and mathematical identity. | File-format adapters and model/problem value types. |
+| Strategy preparation | Admit a strategy and its complete known dependency requirements before creating workspaces; return a prepared strategy with selected identities and versions. | `StrategyPort`/`StrategyRegistry`, typed backend and geometry registrations, generated-request providers where needed. |
+| Dynamics, domains, objectives, and sets | Describe the original controlled system, information pattern, constraints, terminal objective, and set-valued data independently of any algorithm. | Model/domain/objective contracts and set representations with declared capabilities. |
+| Mathematical operations | Apply a requested set operation, conversion, approximation, LP, or convex program and return the result with scoped status/evidence. | `GeometryPort`, `ConversionPort`, `ApproximationPort`, `LPPort`, and `ConvexPort` adapters. |
+| Synthesis strategy | Solve one admitted problem/request and return an `OptimalFamily` relation plus optimum and family evidence. | Shared `StrategyPort`/`SynthesisWorkspace`; Strategy A composes reachability/backward recovery, Strategy B builds and extracts a direct joint-trajectory relation. |
+| Family query and witness selection | Select consistent witnesses or request a supported projection while preserving family identity and evidence. | Capability-admitted query/selector adapters over the opaque joint relation. |
+| Verification | Recompute original-problem feasibility and objective for returned witnesses; report evidence scope separately for feasibility, optimality, completeness, and validated claims. | Independent numerical verifier first; later assurance-specific verifier adapters. |
+| Execution and observation | Give each task exclusive mutable workspaces under declared resource/cancellation policy and collect actual module/run observations. | Executor policies, coarse task scheduling, instrumentation collectors. |
+| Records, comparison, and publication | Persist owning run/comparison data and render tables, plots, and HTML without solver execution. | Versioned record/export adapters and backend-neutral plot/report data. |
+
+The first profile is deliberately a capability-bounded path through these modules. Data being representable does not mean a strategy or operation supports it; admission must reject unsupported domains, couplings, guarantees, or evidence requests before execution.
+
+### Proposed contracts for the high-risk seams
+
+These are recommended defaults for review, not owner-approved implementation interfaces. They close the gaps between the broad module names and the guarantees the first workflow requests.
+
+**Objective to complete family.** `TerminalOptimizer` must return the full terminal minimizer relation and optimum evidence; `OptimalFamilyBuilder::build(feasible_joint_relation, terminal_minimizers)` must lift that relation back to the joint state/control coordinates; `FamilyQuery` initially exposes consistent witness selection and capability-admitted coordinate projection, with membership and secondary optimization kept as later query variants. A polyhedral linear objective can use its complete optimal face and the feasible-history preimage. A convex quadratic or weighted residual objective needs a full relation form that retains every tie, such as an implicit convex/SOC relation when the selected operations can represent and query it. If the configured representation and evidence cannot establish full coverage for that objective, the strategy returns unsupported/partial output and cannot pass the first-workflow gate. The owner still needs to choose the initial exact family forms and acceptable completeness evidence for each objective; no objective is assumed complete merely because its optimizer returns a point.
+
+**Family outcome and evidence shape.** Prefer a closed outcome variant over independent status/optional-evidence fields, so “complete” cannot be constructed without completeness evidence and a relation:
+
+```cpp
+struct CompleteOptimalFamily {
+  JointRelation relation;
+  OptimumEvidence optimum;
+  CompletenessEvidence completeness;
+};
+struct PartialOptimalFamily {
+  JointRelation relation;
+  OptimumEvidence optimum;
+  CoverageScope known_scope;
+};
+using FamilyRelationToTarget = std::variant<OuterCandidateEvidence,
+    InnerSubsetEvidence, HeuristicRelationEvidence>;
+struct CandidateFamily {
+  JointRelation relation;
+  FamilyRelationToTarget relation_to_target;
+};
+using OptimalFamilyOutcome = std::variant<CompleteOptimalFamily,
+    PartialOptimalFamily, CandidateFamily>;
+using SynthesisOutcome = std::variant<OptimalFamilyOutcome, Infeasible,
+    Unbounded, UnattainedInfimum, Unsupported, Cancelled>;
+```
+
+This sketch keeps completeness evidence structurally present only in the complete case and makes a candidate's relation direction explicit; it does not prove evidence correctness by construction. At the result boundary, validate problem/objective identity, relation coordinates, transformation bindings, and evidence scope. The independent verifier checks the supported claims. The precise evidence payloads and which methods can produce them remain ticket/review decisions. Query results carry their source family identity and cannot change the family outcome or upgrade its completeness.
+
+**Geometry operation planning.** Keep registered geometry adapters, and add one typed planning seam for representation-dependent operation pipelines. A proposed `GeometryOperationRequest` names the operation, ordered input representation IDs, requested output representation (if constrained), guarantee strength/relation, and required capabilities. `GeometryOperationPlanner` resolves that request to a `PreparedGeometryPlan`: a typed sequence of operation/conversion/approximation registrations with declared intermediate representation IDs, guarantees, assumptions, and provenance. Admission rejects a missing operation, incompatible representation, or weaker guarantee before creating workspaces. Recommended default: exact operations only unless the request explicitly permits a named inner/outer/heuristic relation; use a fallback only when that relation satisfies the request, otherwise return unsupported. Whether this planner composes the existing registries or becomes a single operation-plan registry is still an owner/review choice; avoid maintaining two competing selection paths.
+
+**One bounded-work and cancellation owner.** Recommended default: one execution-owned control object is created per task and borrowed by the selected strategy and all nested algorithms/adapters. It carries the shared resource budget/permit source and cancellation token; strategy fan-out and backend threads must draw from the same declared budget, and nested modules cannot create an independent pool or reset the budget. `SynthesisWorkspace` receives this control object as an execution dependency, not a second scheduler. The owner must decide whether the strategy may request bounded permits for independent internal work, or must return such work to the outer executor. Until that is decided, the first milestone can run strategies sequentially with backend thread counts included in `ResourceUse`; do not claim a global hard limit that the implementation cannot enforce.
+
 ## End-to-end flow and dependency direction
 
 ```mermaid
@@ -41,6 +96,12 @@ flowchart LR
 Application strategies depend on mathematical ports and immutable problem data. Numerical adapters depend on those port contracts, not on fuel-specific equations, strategy classes, plotting, or report formatting. Execution owns workspaces and resource admission. Verification reads the resolved original problem and returned witnesses/family evidence; it does not trust the strategy's success flag. Report rendering consumes saved records only.
 
 The intended preparation path is `problem::prepare_strategy(resolved, strategy_registry, configuration, requirements)`, followed by `execution::make_task(prepared.preparation(), ...)` and `Executor::run`. `prepare_strategy` returns `PreparedResolvedStrategy`; `make_task` consumes its contained `registry::PreparedStrategy` through `.preparation()`. The prepared strategy retains the selected strategy and provenance; the application retains the `ResolvedProblem` through verification and publication. This is an actual entry path, while the end-to-end diagram still contains proposed synthesis, family-query, verification, and comparison modules.
+
+## Runnable now and the first end-to-end milestone
+
+The [README quick start and examples](../../../README.md#quick-start) are runnable installed-package demonstrations of model construction, scenario-file loading, objective/program execution, and substitution between two real LP adapters. They demonstrate several current modules; they do not yet run a control-planning strategy, construct the full optimal trajectory relation, independently verify that family, or publish a synthesis comparison. The [current composition page](../../architecture/framework-composition.md#substitution-that-runs-today) lists these concrete examples and the missing glue.
+
+The first end-to-end milestone starts when both proposed synthesis strategies can consume the same resolved supported problem and family request, return the same declared complete optimal-family target with consistent witnesses, pass independent original-problem checks, and produce comparable saved run records. A solver point, standalone backend swap, example evaluation of supplied controls, sampled witnesses, or partial/candidate relation is useful runnable progress but does not meet that milestone. Numerical runs are published from persisted data as HTML with raw measurements; rendering does not launch solvers. The owner-confirmed profile, evidence limits, and open design choices below still govern the scope, so this milestone does not claim support for every representable future model or assurance level.
 
 ## Class and module map
 
@@ -94,15 +155,16 @@ The verifier recomputes initial conditions, every transition, all declared suppo
 
 These are decisions to resolve in the architecture review and the named tickets, not hidden assumptions in this draft.
 
-1. **Family completeness evidence:** the release gate requires the full relation for the named supported profile. Specify which certificates/independent oracles establish completeness for linear faces and supported convex quadratics/residual norms; unsupported or unproved cases cannot pass T-X01.
+1. **Family forms and completeness evidence:** confirm the per-objective full-family form (linear optimal face plus feasible-history preimage; implicit convex/SOC or another tie-preserving relation for quadratic/residual objectives) and specify which certificates/independent oracles establish its coverage. Bind evidence to the problem, objective, coordinates, and transformations; unsupported or unproved cases cannot pass T-X01.
 2. **Generated-request execution:** integrate and independently test draft PR #143; define cancellation, per-query provenance, bounded concurrency, and provider lifetime in the outer strategy contract.
-3. **Geometry selection:** use the existing generic `Registry<GeometryPort>`/`ConversionPort`/`ApproximationPort` as the sole selection seam, or define an operation-plan registry for dynamic representation-dependent pipelines? Do not add both without a demonstrated variation need.
-4. **Parallelism:** define whether strategies receive a bounded task-group/scheduler for independent membership and support queries, or return work to the application executor. Avoid nested executors, oversubscription, or an undocumented second resource budget.
+3. **Geometry selection:** confirm whether the proposed typed `GeometryOperationPlanner` composes the existing `Registry<GeometryPort>`/`ConversionPort`/`ApproximationPort` registrations or replaces them with one operation-plan registry for dynamic representation-dependent pipelines. Require representation IDs and guarantee-compatible explicit fallback; unsupported plans fail before workspace creation.
+4. **Parallelism:** confirm the single execution-owned budget/cancellation seam and whether strategies may request permits for independent membership/support queries or return that work to the outer executor. Nested executors and a second resource budget are excluded from the proposed default.
 5. **Comparison artifact:** choose whether paired comparisons reference RunStatistics or embed records. The first comparison preserves repetitions and every failed/unsupported/cancelled run; use the same compatible LP/convex backend, and label backend exceptions. Comparative performance reports follow the repository repetition protocol.
 6. **Visualization/export:** select backend-neutral projection data; name fuel-state coordinate pairs and axis units; decide where optional family payloads are encoded and how size limits/partial exports are represented. Distinguish sampled witness plots from mathematical projections.
 7. **Assurance:** choose the initial numerical verification request/result fields and precisely which certificates, if any, can later satisfy validated assurance.
 8. **Concrete first exact-set profile:** select the initial H/V operation/capacity profile and analytic acceptance fixtures without implying all polyhedra or dimensions are supported.
 9. **Owner confirmation of first solver profile:** confirm known deterministic initial point, nominal open-loop decisions, absent/zero disturbance, affine discrete stages, stagewise polyhedral state/control sets, supported terminal objective forms, and rejection of feedback, uncertain initial quantifiers and nonempty temporal constraints.
+10. **Family result types:** review the proposed outcome sum type and boundary validation rules. The default makes `CompleteOptimalFamily` require relation, optimum evidence, and completeness evidence together; partial and candidate relations remain distinct, candidate direction is explicit, and query results cannot promote the family. Decide exact evidence payloads and validation ownership before implementation tickets freeze.
 
 ## Ticket alignment and review gates
 
