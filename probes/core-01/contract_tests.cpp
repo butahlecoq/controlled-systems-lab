@@ -22,12 +22,12 @@ Problem make_problem() {
 }
 struct RelationFixture : JointRelationPayload {};
 OptimalFamily family() {
-    ClaimEvidence unknown{{"test/singular"}, Unestablished{}};
+    ClaimEvidence optimum{{"test/singular"}, SymbolicArgument{"fixture optimum","fixture assumptions"}};
     FamilyRequest request{"nominal",{"test/singular"},FamilyTarget::exact_optimal_relation,
         {1e-8,1e-8},Assurance::numerical,{"fixture/joint"},{}};
     FamilyIdentity identity{{"test/singular"},request,{{1,1,0},1},{"fixture/strategy"},"1",{}};
     JointRelation relation{identity.coordinates,{"fixture/joint"},std::make_shared<const RelationFixture>()};
-    CompleteOptimalFamily complete{relation,{unknown,{}},
+    CompleteOptimalFamily complete{relation,{optimum,{}},
         {identity,NumericalCoverageEvidence{"unreviewed",request.numerical,{"fixture/verifier"},""}},Assurance::numerical};
     return {identity,complete};
 }

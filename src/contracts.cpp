@@ -143,6 +143,8 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.binding","Complete-family evidence does not bind the resolved problem, effective request, coordinates, strategy and ordered lineage"});
             if (complete.assurance != assurance)
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.assurance","Claimed assurance differs from the request"});
+            if (std::holds_alternative<Unestablished>(complete.optimum.optimum.support))
+                result.push_back({DiagnosticCode::invalid_claim,"family.optimum","Complete-family optimum needs supporting evidence"});
             // The numerical coverage procedure and its acceptance thresholds have not
             // been reviewed. Neither a symbolic note nor a residual is a substitute.
             result.push_back({DiagnosticCode::unsupported,"family.completeness","Complete-family publication is disabled until reviewed coverage evidence is implemented"});
@@ -153,6 +155,7 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 partial.optimal_subset.every_history_optimal.problem != expected)
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.partial","Partial-family evidence does not bind the joint relation and problem"});
             if (partial.known_scope.description.empty() || partial.optimal_subset.procedure.empty() ||
+                std::holds_alternative<Unestablished>(partial.optimum.optimum.support) ||
                 std::holds_alternative<Unestablished>(partial.optimal_subset.every_history_optimal.support) ||
                 std::holds_alternative<NumericalCheck>(partial.optimal_subset.every_history_optimal.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.partial.optimality","An inner subset is not known optimal without scoped optimal-membership support"});
@@ -201,9 +204,10 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
         if (result.family->target()==FamilyTarget::exact_optimal_relation &&
             (result.termination!=Termination::completed || result.outcome.value!=MathematicalOutcome::optimal))
             add(DiagnosticCode::invalid_claim,"family.complete","Only a completed, supported optimal outcome may carry a complete family");
-        if (result.family->target()!=FamilyTarget::candidate_relaxation &&
-            result.outcome.value!=MathematicalOutcome::optimal && result.outcome.value!=MathematicalOutcome::undetermined)
-            add(DiagnosticCode::invalid_claim,"family.outcome","A nonoptimal mathematical outcome cannot carry an optimal-family product");
+        if (result.outcome.value==MathematicalOutcome::infeasible ||
+            result.outcome.value==MathematicalOutcome::unbounded ||
+            result.outcome.value==MathematicalOutcome::infimum_not_attained)
+            add(DiagnosticCode::invalid_claim,"family.outcome","This mathematical outcome cannot carry an optimal-family product");
         if ((expected.request.target!=FamilyTarget::exact_optimal_relation &&
             result.family->target()==FamilyTarget::exact_optimal_relation) ||
             (expected.request.target==FamilyTarget::candidate_relaxation &&
@@ -217,19 +221,35 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
             const auto& rejected=std::get<ScopedRequestRejection>(result.stop);
             if (rejected.request.request.value.empty() || rejected.request.port.empty() || rejected.diagnostics.empty())
                 add(DiagnosticCode::invalid_claim,"result.stop.rejection","Scoped rejection needs the exact request identity, port and provider diagnostic");
+            const RetainedEvidenceScope observed{result.objective.lower.has_value(),result.objective.upper.has_value(),
+                result.incumbents.size(),result.family.has_value()};
+            if (rejected.retained.lower_bound!=observed.lower_bound ||
+                rejected.retained.upper_bound!=observed.upper_bound ||
+                rejected.retained.incumbents!=observed.incumbents ||
+                rejected.retained.partial_or_candidate_family!=observed.partial_or_candidate_family)
+                add(DiagnosticCode::evidence_mismatch,"result.stop.retained","Retained-evidence scope differs from the result payload");
         }
     } else if (std::holds_alternative<ScopedRequestRejection>(result.stop))
         add(DiagnosticCode::invalid_claim,"result.stop","ScopedRequestRejection requires operation_rejected termination");
     if (result.termination==Termination::cancelled || result.termination==Termination::deadline_expired ||
-        result.termination==Termination::resource_limit) {
+        result.termination==Termination::resource_limit || result.termination==Termination::numerical_failure) {
         if (!std::holds_alternative<ScopedOperationStopped>(result.stop))
             add(DiagnosticCode::invalid_claim,"result.stop","Cancelled, deadline and resource stops require scoped stop evidence");
         else {
         const auto reason=std::get<ScopedOperationStopped>(result.stop).stop.reason;
         if ((result.termination==Termination::cancelled && reason!=StopReason::cancelled) ||
             (result.termination==Termination::deadline_expired && reason!=StopReason::deadline_expired) ||
-            (result.termination==Termination::resource_limit && reason!=StopReason::resource_limit))
+            (result.termination==Termination::resource_limit && reason!=StopReason::resource_limit) ||
+            (result.termination==Termination::numerical_failure && reason!=StopReason::numerical_failure))
             add(DiagnosticCode::invalid_claim,"result.stop.reason","Execution termination and scoped stop reason differ");
+        const auto& stopped=std::get<ScopedOperationStopped>(result.stop);
+        const RetainedEvidenceScope observed{result.objective.lower.has_value(),result.objective.upper.has_value(),
+            result.incumbents.size(),result.family.has_value()};
+        if (stopped.request.request.value.empty() || stopped.request.port.empty() || stopped.stop.diagnostics.empty() ||
+            stopped.retained.lower_bound!=observed.lower_bound || stopped.retained.upper_bound!=observed.upper_bound ||
+            stopped.retained.incumbents!=observed.incumbents ||
+            stopped.retained.partial_or_candidate_family!=observed.partial_or_candidate_family)
+            add(DiagnosticCode::evidence_mismatch,"result.stop.retained","Scoped stop must name its source, diagnostics and actual retained payload");
         }
     }
     return diagnostics;
