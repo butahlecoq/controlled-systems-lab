@@ -445,9 +445,11 @@ TEST_CASE("geometry selector and custom outcomes retain their distinct public ty
     FamilyRequest family_request{"nominal_open_loop",{"p"},FamilyTarget::candidate_relaxation,
         {1e-8,1e-8},Assurance::numerical,{"joint"},{}};
     FamilyIdentity identity{{"p"},family_request,{{1,1,0},1},{"strategy"},"1",{}};
-    reg::SelectorRequest request{{identity,CandidateFamily{
+    auto published=FamilyPublisher::publish(identity,CandidateFamily{
         {identity.coordinates,{"joint"},std::make_shared<const JointRelationPayload>()},
-        HeuristicRelationEvidence{"fixture"},{{"p"},Unestablished{}}}},{3,0.1,{},42}};
+        HeuristicRelationEvidence{"fixture"},Unestablished{}});
+    REQUIRE(std::holds_alternative<OptimalFamily>(published));
+    reg::SelectorRequest request{std::get<OptimalFamily>(std::move(published)),{3,0.1,{},42}};
     for (auto count:{3u,0u}) {
         request.selection.count=count;
         std::vector<ex::Task<reg::SelectorPort>> selectors{port_task<reg::SelectorPort>(request,
