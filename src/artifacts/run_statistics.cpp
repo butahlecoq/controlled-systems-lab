@@ -1,4 +1,5 @@
 #include <csl/artifacts/run_statistics.hpp>
+#include "collection_budget.hpp"
 #include <limits>
 #include <algorithm>
 #include <cmath>
@@ -70,6 +71,14 @@ static ArtifactResult<CollectedStatistics> checked_collection(CollectionRecord i
     try {
         const auto error=[](std::string path,std::string message)->ArtifactResult<CollectedStatistics>{return ArtifactError{ArtifactErrorCode::invalid_input,std::move(path),std::move(message)};};
         const auto& settings=input.settings;
+        if(!settings.enabled){
+            const auto* complete=std::get_if<Unavailable>(&input.complete);
+            if(!input.spans.empty()||!input.buckets.empty()||!input.clocks.empty()||!input.tasks.empty()||!input.operations.empty()||
+               !complete||complete->reason!=MissingReason::collection_disabled||!complete->detail.empty())
+                return error("collection.disabled","Disabled collection retains bindings only");
+        }
+        if(settings.enabled&&!collection_budget::retained(input).fits(settings.plan_bytes))
+            return ArtifactError{ArtifactErrorCode::limit,"collection.plan_bytes","Retained metadata exceeds budget"};
         if(input.problem.value.size()!=86||!input.problem.value.starts_with("csl.problem.v1.sha256:")||
             !std::all_of(input.problem.value.begin()+22,input.problem.value.end(),[](char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');}))return error("collection.problem","Expected a MODEL03 identity");
         if(!identity(input.configuration.value,"csl.config.v1.sha256:")||input.run.value.empty())return error("collection.identity","Invalid configuration or run identity");
@@ -320,7 +329,14 @@ ArtifactResult<SpanRecord> project_legacy_span(const TimingSpan& value,SpanDescr
     if(descriptor.module.id.value!=value.module.value||descriptor.module.version.empty()||descriptor.clock.value.empty()||descriptor.task.empty()||descriptor.operation.empty()||!std::isfinite(value.start_seconds)||!std::isfinite(value.end_seconds)||value.start_seconds<0||value.end_seconds<value.start_seconds)
         return ArtifactError{ArtifactErrorCode::invalid_input,"legacy","Missing/mismatched provenance or invalid legacy interval"};
     descriptor.id={value.id};descriptor.parent=value.parent?std::optional<SpanParent>{{{*value.parent},ParentKind::nested}}:std::optional<SpanParent>{};
-    return SpanRecord{std::move(descriptor),LegacySecondsInterval{value.start_seconds,value.end_seconds},UnknownObservation{},Unavailable{MissingReason::not_instrumented,{}},Unavailable{MissingReason::not_instrumented,{}},Unavailable{MissingReason::not_instrumented,{}}};
+    ArtifactResult<SpanRecord> result{std::in_place_type<SpanRecord>};
+    auto& record=std::get<SpanRecord>(result);
+    record.descriptor=std::move(descriptor);
+    record.interval=LegacySecondsInterval{value.start_seconds,value.end_seconds};
+    record.termination=Unavailable{MissingReason::not_instrumented,{}};
+    record.iterations=Unavailable{MissingReason::not_instrumented,{}};
+    record.detail=Unavailable{MissingReason::not_instrumented,{}};
+    return result;
     }catch(const std::bad_alloc&){return ArtifactError{ArtifactErrorCode::allocation,{},{}};}
 }
 }

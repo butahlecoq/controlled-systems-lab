@@ -1,4 +1,5 @@
 #include <csl/execution/observability.hpp>
+#include "../artifacts/collection_budget.hpp"
 #include <algorithm>
 #include <cstring>
 #include <limits>
@@ -34,38 +35,7 @@ struct Slot {
     std::size_t offset{},capacity{},size{};RecordDisposition disposition{RecordDisposition::unknown_span};
 };
 struct Counts {std::uint64_t id;ar::ExactCount duplicate,wrong,overflow;};
-std::uint64_t descriptor_bytes(const ar::SpanDescriptor& d) {
-    std::uint64_t bytes=sizeof(ar::SpanDescriptor)+sizeof(Slot);
-    const auto text=[&](const std::string& value){bytes=add(bytes,value.size());};
-    text(d.task);text(d.operation);text(d.module.id.value);text(d.module.version);text(d.clock.value);
-    const auto pinbytes=[&](const ar::PinAvailability& p){if(const auto* a=std::get_if<ar::Available<ar::ModulePin>>(&p))text(a->value.sha256);else text(std::get<ar::Unavailable>(p).detail);};
-    pinbytes(d.module.pin);
-    if(d.backend){bytes=add(bytes,sizeof(ar::ModuleIdentity));text(d.backend->id.value);text(d.backend->version);pinbytes(d.backend->pin);}
-    if(d.program){bytes=add(bytes,sizeof(ProgramIdentity));text(d.program->problem.value);text(d.program->program.value);}
-    if(d.input_representation){bytes=add(bytes,sizeof(RepresentationId));text(d.input_representation->value);}
-    if(d.output_representation){bytes=add(bytes,sizeof(RepresentationId));text(d.output_representation->value);}
-    text(d.observation_source);
-    if(const auto* u=std::get_if<ar::Unavailable>(&d.applied_assurance))text(u->detail);
-    const auto summary=[&](const std::shared_ptr<const ar::RepresentationSummary>& value){
-        if(!value)return;
-        bytes=add(bytes,sizeof(ar::RepresentationSummary));text(value->representation.value);
-        bytes=add(bytes,multiply(value->sizes.size(),sizeof(ar::RepresentationSize)));
-        for(const auto& size:value->sizes){text(size.quantity);text(size.unit);if(const auto* u=std::get_if<ar::Unavailable>(&size.value))text(u->detail);}
-    };
-    summary(d.input_summary);summary(d.output_summary);
-    if(d.relation_evidence){const auto& e=*d.relation_evidence;bytes=add(bytes,sizeof(GeometryEvidence));
-        text(e.reference.identity.problem.value);text(e.reference.identity.request.value);text(e.reference.identity.ideal_output.value);
-        bytes=add(bytes,multiply(e.reference.inputs.size(),sizeof(SetId)));for(const auto& id:e.reference.inputs)text(id.value);
-        bytes=add(bytes,multiply(e.assumptions.size(),sizeof(std::string)));for(const auto& assumption:e.assumptions)text(assumption);
-        std::visit([&](const auto& support){using T=std::decay_t<decltype(support)>;
-            if constexpr(std::is_same_v<T,NumericalCheck>)text(support.verifier.value);
-            else if constexpr(std::is_same_v<T,SymbolicArgument>){text(support.reference);text(support.assumptions);}
-            else if constexpr(std::is_same_v<T,CertificateReference>){text(support.artifact);text(support.verifier);}
-        },e.support);
-        if(e.error_bound){text(e.error_bound->metric.value);text(e.error_bound->units);}
-    }
-    return bytes;
-}
+
 }
 struct CollectionPlan::Storage {
     PlanInput input;
@@ -164,18 +134,17 @@ CollectionResult<CollectionPlan> make_collection_plan(PlanInput input) {
         }
         check(bytes<=std::numeric_limits<std::size_t>::max(),"plan.bytes","Storage exceeds platform width");
         check(input.shard_count<=input.spans.size()+1,"plan.shards","Shard layout must be bounded by admitted spans");
-        bytes=0;for(const auto& d:input.spans)bytes=add(bytes,descriptor_bytes(d));
-        for(const auto* dictionary:{&input.tasks,&input.operations}){bytes=add(bytes,multiply(dictionary->size(),sizeof(std::string)));for(const auto& name:*dictionary)bytes=add(bytes,name.size());}
-        for(const auto& c:input.clocks){
-            bytes=add(bytes,add(sizeof(ar::ClockDomain),add(c.id.value.size(),c.scope.size())));bytes=add(bytes,c.origin_label.size());
-            if(const auto* value=std::get_if<ar::Available<std::string>>(&c.calibration))bytes=add(bytes,value->value.size());
-            else bytes=add(bytes,std::get<ar::Unavailable>(c.calibration).detail.size());
-            if(const auto* u=std::get_if<ar::Unavailable>(&c.resolution_ticks))bytes=add(bytes,u->detail.size());
-        }
-        bytes=add(bytes,multiply(input.shard_count,sizeof(std::size_t)+sizeof(Counts)));
-        // Local index, global bucket index, and at most one bucket counter per span.
-        bytes=add(bytes,multiply(input.spans.size(),sizeof(std::size_t)+sizeof(std::uint64_t)+sizeof(Counts)));
-        if(bytes>settings.plan_bytes)throw Rejection{{ar::ArtifactErrorCode::limit,"plan.bytes","Plan needs "+std::to_string(bytes)+" bytes; limit is "+std::to_string(settings.plan_bytes)}};
+        if(settings.enabled&&!ar::collection_budget::planned(input.problem.identity(),input.configuration.identity(),input.run,
+                input.clocks,input.spans,input.tasks,input.operations).fits(settings.plan_bytes))
+            return ar::ArtifactError{ar::ArtifactErrorCode::limit,"plan.bytes","Planned metadata exceeds budget"};
+        // Producer-only native slot/index/counter reservations are checked for
+        // representability separately; portable metadata never uses sizeof.
+        auto native=multiply(input.spans.size(),sizeof(ar::SpanDescriptor)+sizeof(ar::SpanRecord)+sizeof(Slot)+sizeof(std::size_t)+sizeof(std::uint64_t)+sizeof(Counts)+sizeof(ar::BucketSummary));
+        native=add(native,multiply(input.shard_count,sizeof(std::size_t)+sizeof(Counts)));
+        native=add(native,multiply(input.clocks.size(),sizeof(ar::ClockDomain)));
+        native=add(native,multiply(add(input.tasks.size(),input.operations.size()),sizeof(std::string)));
+        native=add(native,bytes);
+        check(native<=std::numeric_limits<std::size_t>::max(),"plan.bytes","Native storage exceeds platform width");
         // Copy logical values after admission so moved-in spare vector/string capacity
         // is not retained by the immutable plan. Deep optional metadata is cloned below.
         input=PlanInput(input);
@@ -183,7 +152,7 @@ CollectionResult<CollectionPlan> make_collection_plan(PlanInput input) {
         std::vector<std::size_t> counts(static_cast<std::size_t>(input.shard_count),0),local;
         std::vector<std::uint64_t> buckets;
         local.reserve(input.spans.size());buckets.reserve(input.spans.size()+1);
-        ar::CollectionRecord validation{input.problem.identity(),input.configuration.identity(),input.run,settings,input.clocks,{},{},ar::Unavailable{ar::MissingReason::incomplete_span,{}}};
+        ar::CollectionRecord validation{input.problem.identity(),input.configuration.identity(),input.run,settings,input.clocks,{},{},ar::Unavailable{settings.enabled?ar::MissingReason::incomplete_span:ar::MissingReason::collection_disabled,{}}};
         validation.tasks=input.tasks;validation.operations=input.operations;
         for(auto& d:input.spans){
             if(d.backend)d.backend=std::make_shared<const ar::ModuleIdentity>(*d.backend);

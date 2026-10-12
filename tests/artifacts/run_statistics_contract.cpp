@@ -18,17 +18,26 @@ struct ScopedFailure {
     ScopedFailure& operator=(const ScopedFailure&)=delete;
 };
 }
-void* operator new(std::size_t size) {
+// Keep replacement allocation/deallocation calls observable as a matched pair.
+// Partial inlining otherwise makes GCC diagnose malloc/free inside delete as a
+// mismatched caller-side new/delete pair at -O3.
+#if defined(_MSC_VER)
+#define CSL_ALLOCATION_PROBE_NOINLINE __declspec(noinline)
+#else
+#define CSL_ALLOCATION_PROBE_NOINLINE __attribute__((noinline))
+#endif
+CSL_ALLOCATION_PROBE_NOINLINE void* operator new(std::size_t size) {
     if(allocation_probe::enabled){++allocation_probe::count;allocation_probe::max_size=std::max(allocation_probe::max_size,size);
         if(allocation_probe::failure_minimum&&size>=allocation_probe::failure_minimum){allocation_probe::failure_minimum=0;allocation_probe::injected=true;throw std::bad_alloc{};}}
     if(void* result=std::malloc(size?size:1))return result;
     throw std::bad_alloc{};
 }
-void* operator new[](std::size_t size){return ::operator new(size);}
-void operator delete(void* p)noexcept{std::free(p);}
-void operator delete[](void* p)noexcept{std::free(p);}
-void operator delete(void* p,std::size_t)noexcept{std::free(p);}
-void operator delete[](void* p,std::size_t)noexcept{std::free(p);}
+CSL_ALLOCATION_PROBE_NOINLINE void* operator new[](std::size_t size){return ::operator new(size);}
+CSL_ALLOCATION_PROBE_NOINLINE void operator delete(void* p)noexcept{std::free(p);}
+CSL_ALLOCATION_PROBE_NOINLINE void operator delete[](void* p)noexcept{std::free(p);}
+CSL_ALLOCATION_PROBE_NOINLINE void operator delete(void* p,std::size_t)noexcept{std::free(p);}
+CSL_ALLOCATION_PROBE_NOINLINE void operator delete[](void* p,std::size_t)noexcept{std::free(p);}
+#undef CSL_ALLOCATION_PROBE_NOINLINE
 using namespace csl;
 namespace ar = csl::artifacts;
 namespace ob = csl::execution::observability;
@@ -542,4 +551,96 @@ TEST_CASE("backend program and representation metadata own independent aliases t
     const auto& span=restored.description().statistics.description().spans[3].descriptor;
     REQUIRE(span.backend);REQUIRE(span.program);REQUIRE(span.input_representation);
     CHECK(span.backend->id.value=="literal-native");CHECK(span.backend->version=="fixture-1");CHECK(span.program->program.value=="literal-derived");CHECK(span.input_representation->value=="literal-input");
+}
+
+TEST_CASE("review F1 run binding is admitted before proportional plan copies") {
+    auto input=plan_input();input.run.value=std::string(100000,'r');
+    allocation_probe::max_size=0;allocation_probe::enabled=true;
+    const auto result=ob::make_collection_plan(std::move(input));allocation_probe::enabled=false;
+    CHECK(allocation_probe::max_size<=128);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(result));
+    CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);
+    CHECK(std::get<ar::ArtifactError>(result).path=="plan.bytes");
+}
+TEST_CASE("review F2 direct collection admission rejects zero budget before cloning") {
+    auto record=accepted(ar::decode_run(fixture_text())).description().statistics.description();
+    record.settings.plan_bytes=0;
+    allocation_probe::max_size=0;allocation_probe::enabled=true;
+    const auto result=ar::publish_collection(std::move(record));allocation_probe::enabled=false;
+    CHECK(allocation_probe::max_size<=128);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(result));
+    CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);
+    CHECK(std::get<ar::ArtifactError>(result).path=="collection.plan_bytes");
+}
+TEST_CASE("review F2 independently resealed wire cannot bypass the metadata budget") {
+    auto text=fixture_text();
+    for(int i=0;i<2;++i)text=changed(std::move(text),"\"plan_bytes\": \"4096\"","\"plan_bytes\": \"0\"");
+    constexpr auto before="csl.config.v1.sha256:e27f771c2d04bb72827ad27eeaa4123a4df58eaea22aaac4b789ee36033e5abf";
+    constexpr auto after="csl.config.v1.sha256:bb7967e0a8bbfc7bd8acefb5395659c1e096b97817c23b0fda101d0cbef341cf";
+    for(int i=0;i<2;++i)text=changed(std::move(text),before,after);
+    const auto result=ar::decode_run(text);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(result));
+    CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);
+    CHECK(std::get<ar::ArtifactError>(result).path=="collection.plan_bytes");
+}
+TEST_CASE("review F2 large retained summary text is rejected before its clone") {
+    auto record=accepted(ar::decode_run(fixture_text())).description().statistics.description();
+    record.spans[0].descriptor.input_summary=std::make_shared<const ar::RepresentationSummary>(ar::RepresentationSummary{{"joint"},1,{{std::string(100000,'q'),"rows",ar::Available<std::uint64_t>{1}}}});
+    allocation_probe::max_size=0;allocation_probe::enabled=true;
+    const auto result=ar::publish_collection(std::move(record));allocation_probe::enabled=false;
+    CHECK(allocation_probe::max_size<=128);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(result));
+    CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);
+    CHECK(std::get<ar::ArtifactError>(result).path=="collection.plan_bytes");
+}
+TEST_CASE("review F3 legacy projection keeps the active incomplete alternative") {
+    const auto result=accepted(ar::project_legacy_span({9,{}, {"lp-a"},0.125,0.375},plan_input().spans[0]));
+    CHECK(result.descriptor.id.value==9);CHECK_FALSE(result.descriptor.parent);
+    CHECK(std::get<ar::LegacySecondsInterval>(result.interval).start==0.125);
+    CHECK(std::get<ar::LegacySecondsInterval>(result.interval).end==0.375);
+    CHECK(std::holds_alternative<ar::UnknownObservation>(result.execution));
+    CHECK(std::holds_alternative<ar::IncompleteSpan>(result.status));CHECK_FALSE(result.completion_observed);
+    CHECK(result.detail_state==ar::DetailState::not_observed);
+    CHECK(std::get<ar::Unavailable>(result.termination).reason==ar::MissingReason::not_instrumented);
+    CHECK(std::get<ar::Unavailable>(result.iterations).reason==ar::MissingReason::not_instrumented);
+    CHECK(std::get<ar::Unavailable>(result.detail).reason==ar::MissingReason::not_instrumented);
+}
+
+TEST_CASE("review F2 portable metadata boundary is independent of native object sizes") {
+    const auto z=zero_problem();
+    // Three framed bindings: (8+86)+(8+85)+(8+1)=196 bytes.
+    // Settings34, five empty array counts40, available completeness2: total272.
+    for(const std::uint64_t cap:{272U,271U}) {
+        auto c=configuration();c.collection={true,ar::CollectionMode::detail,0,cap,0,0};
+        const auto config=accepted(ar::resolve_configuration(c));
+        ar::CollectionRecord record{z.identity(),config.identity(),{"r"},c.collection,{},{},{},ar::Available<bool>{true}};
+        const auto result=ar::publish_collection(std::move(record));
+        if(cap==272)CHECK(std::holds_alternative<ar::CollectedStatistics>(result));
+        else {REQUIRE(std::holds_alternative<ar::ArtifactError>(result));CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);}
+    }
+    auto c=configuration();c.collection={true,ar::CollectionMode::summary,std::numeric_limits<std::uint64_t>::max(),272,std::numeric_limits<std::uint64_t>::max(),std::numeric_limits<std::uint64_t>::max()};
+    const auto config=accepted(ar::resolve_configuration(c));
+    ar::CollectionRecord record{z.identity(),config.identity(),{"r"},c.collection,{},{},{},ar::Available<bool>{true}};
+    CHECK(std::holds_alternative<ar::CollectedStatistics>(ar::publish_collection(record)));
+    record.run.value="\xc3\xa9";CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_collection(record)));
+    record.settings.plan_bytes=273;CHECK(std::holds_alternative<ar::CollectedStatistics>(ar::publish_collection(record)));
+}
+TEST_CASE("review budgets retain disabled dormant settings and reject real native extent overflow") {
+    auto c=configuration();c.collection={false,ar::CollectionMode::detail,0,0,0,std::numeric_limits<std::uint64_t>::max()};
+    const auto config=accepted(ar::resolve_configuration(c));
+    const auto plan=accepted(ob::make_collection_plan({zero_problem(),config,{"disabled-zero"},{},{},0}));
+    const auto record=accepted(ob::merge_observations(plan,{}));CHECK(record.description().settings==c.collection);
+    CHECK(std::get<ar::Unavailable>(record.description().complete).reason==ar::MissingReason::collection_disabled);
+    auto input=plan_input();input.shard_count=std::numeric_limits<std::uint64_t>::max();
+    allocation_probe::max_size=0;allocation_probe::enabled=true;const auto result=ob::make_collection_plan(std::move(input));allocation_probe::enabled=false;
+    CHECK(allocation_probe::max_size<=128);REQUIRE(std::holds_alternative<ar::ArtifactError>(result));CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);
+}
+
+TEST_CASE("review dormant zero caps do not admit hidden disabled metadata") {
+    auto c=configuration();c.collection={false,ar::CollectionMode::summary,0,0,0,0};
+    const auto config=accepted(ar::resolve_configuration(c));
+    ar::CollectionRecord record{zero_problem().identity(),config.identity(),{"disabled"},c.collection,{},{},{},ar::Unavailable{ar::MissingReason::collection_disabled,std::string(100000,'h')}};
+    allocation_probe::max_size=0;allocation_probe::enabled=true;const auto result=ar::publish_collection(std::move(record));allocation_probe::enabled=false;
+    CHECK(allocation_probe::max_size<=128);REQUIRE(std::holds_alternative<ar::ArtifactError>(result));
+    CHECK(std::get<ar::ArtifactError>(result).path=="collection.disabled");
 }

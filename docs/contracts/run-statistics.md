@@ -136,11 +136,74 @@ final witnesses, native solvers or unrelated work. Final artifacts have separate
 codec limits. Publication/encoding allocation failure returns an artifact error
 and does not turn the caller's mathematical result into success or infeasibility.
 
-Accounting includes fixed descriptor/completion slots, local/bucket indices,
-per-shard and per-span counter bounds, dictionaries and deep optional metadata.
+### Portable metadata budget
+
+`plan_bytes` admits a logical metadata size, independently of compiler ABI,
+Debug STL layout, JSON formatting or allocator overhead. The private shared
+accounting rule is normative for enabled collection at plan construction,
+`publish_collection`, and wire decoding through publication. It walks borrowed
+values without allocating, checks every unsigned64 addition, and rejects before
+plan copies, optional-owner clones, validation maps or portability serialization.
+A budget error has code `limit`, with path `plan.bytes` for setup or
+`collection.plan_bytes` for publication/decoding.
+
+The logical grammar counts every retained field of `CollectionRecord` recursively:
+
+- Boolean and enum values cost 1 byte; signed/unsigned integers and binary64
+  values cost 8 bytes, irrespective of their magnitude or printed spelling.
+- A string costs an 8-byte length plus its UTF-8 **byte** length. Identifier
+  wrappers count their string. An array costs an 8-byte count plus its elements.
+- An optional or optional immutable pointer costs a 1-byte presence tag plus
+  the present value. A variant costs a 1-byte alternative tag plus its active
+  value. Empty alternatives cost zero beyond that tag. Structs sum their fields.
+- `Metric<T>` therefore counts its alternative plus either the available value
+  or the unavailable reason and detail string. All module/pin, program, geometry,
+  representation-summary, clock, provenance, binding and dictionary text counts.
+  Fixed span topology/status/availability fields, ten bucket exact counters,
+  bucket clocks, completeness and all six effective collection settings count.
+- Only an **available `SpanRecord::detail` string payload** is excluded from
+  metadata bytes: its variant tag and length still count, while its actual
+  UTF-8 payload is admitted against `detail_bytes` and `detail_spans`. Unavailable
+  explanation text is metadata and cannot bypass the plan budget.
+
+For example an enabled empty record with the 86-byte ProblemId, 85-byte ConfigId,
+RunId `r`, five empty arrays, six settings and available completeness costs
+`(8+86)+(8+85)+(8+1)+34+5*8+2 = 272` bytes. Cap272 admits it; cap271 rejects it.
+Replacing `r` with a two-byte UTF-8 character costs273. These values are identical
+on MSVC Debug/Release and GCC and do not use `sizeof` or a JSON byte count.
+
+A live plan reserves the same grammar for its descriptors, clocks, bindings and
+required task/operation dictionaries. It reserves10 bytes for unavailable
+completeness with empty prose, and116 bytes per span plus the declared observation
+source and module-version byte lengths for the largest possible fixed completion:
+interval21, not-called observation18 plus those two string payloads, termination10,
+iterations10, detail framing10, failed status45, completion/disposition2.
+The largest failure text emitted by this collector is `unspecified` plus
+`producer_reported`. Its API cannot accept arbitrary status/explanation text.
+Each span additionally reserves116 bytes plus its clock-ID length for a possible
+bucket, and another116 for the unclassified bucket. Duplicate buckets deliberately
+overreserve; no temporary set is needed for admission. Publication counts the
+actual retained fields, so unused reservations do not invent observations.
+
+Native producer-only completion slots, local/bucket indices, per-shard counters,
+validation/output containers and detail arenas have separate checked native
+extent calculations before allocation. Their ABI-dependent storage is not a
+portable `plan_bytes` decision. Logical metadata bounds limit actual admitted
+counts/payload; native bookkeeping and allocator overhead are additional storage,
+not a claimed byte-for-byte heap cap. Actual detail reservations are rounded down
+per admitted slot and checked against native vector extents. No dormant maximum
+setting allocates its declared maximum by itself.
+
+When disabled, all four caps remain hashed but dormant as specified: only the
+run/problem/configuration bindings and unavailable/collection_disabled completeness
+with empty prose remain. No spans, clocks, buckets, task/operation dictionaries or
+hidden completeness prose may use this exception. In summary mode only detail
+caps are dormant; metadata admission is unchanged. Configured zero caps remain
+valid configuration values but admit only fitting enabled records.
+
 Logical values are copied after admission so spare producer capacity is not
 retained. Optional metadata is cloned, including backend provenance. Record-time
-lookups use sorted unsigned64 IDs (at most 64 comparisons per lookup); text
+lookups use sorted unsigned64 IDs (at most64 comparisons per lookup); text
 inspection/copying is bounded by its admitted slot. Bucket merge uses the same
 bounded lookup, and parent validation visits each edge a fixed number of times.
 These are structural bounds, not latency or allocator-overhead measurements.
