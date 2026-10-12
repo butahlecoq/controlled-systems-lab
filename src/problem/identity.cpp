@@ -127,6 +127,19 @@ public:
         matrix(value.rows,value.cols,[&](auto r,auto c){return value.values[r*value.cols+c];});
     }
     void matrix(const numeric::MatrixView& value) {
+        const auto descriptor=value.descriptor();
+        if(const auto* csr=std::get_if<numeric::CsrInput>(&descriptor)) {
+            // The retaining view owns validated, sorted, unique CSR rows. The
+            // checked emitter visits logical coordinates in row-major order;
+            // consume each stored entry once, including explicitly stored zero.
+            std::size_t next=0;
+            matrix(csr->rows,csr->cols,[&](auto row,auto col) {
+                if(next<csr->row_offsets[row+1] && csr->column_indices[next]==col)
+                    return csr->values[next++];
+                return 0.0;
+            });
+            return;
+        }
         matrix(value.rows(),value.cols(),[&](auto r,auto c){return value(r,c);});
     }
     void set(const AdmissibleSet& value) {

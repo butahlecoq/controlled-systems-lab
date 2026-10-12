@@ -398,6 +398,38 @@ TEST_CASE("native set logical layout normalizes while representation row order a
     vertices.controls=ContinuousDomain{{vhandle({1,-1})}};CHECK(published(vertices).identity()!=v1.identity());
     auto bad=row;bad.metadata.dimension=3;p.controls=ContinuousDomain{{bad}};diagnostic(p,DiagnosticCode::invalid_input);
 }
+TEST_CASE("sparse native H and V gaps empty rows and signed zero retain literal root identities") {
+    auto p=scalar();edit_model(p,[](auto& m){m.dynamics.dimensions.control=5;std::get<LinearStage>(m.dynamics.stages).B={1,5,{1,1,1,1,1}};});
+    const auto dense=matrix({4,5,{0,2,0,-3,0, 0,0,0,0,0, 4,0,0,0,0, 0,5,0,0,0}});
+    const auto sparse=accepted(numeric::snapshot(SparseMatrix{4,5,{0,2,2,4,5},{1,3,0,2,1},{2,-3,4,-0.0,5}}));
+    // Independent struct/hashlib reference over literal mathematical fields, not product output.
+    const char* digests[]={"4c9cfc7a18bc7c22e828511decdc7a2d3b37ca7749a41de0ab2b58abe8045b16",
+                           "1f60feadeece0620d9283079541758e43b51315494e979edc5c10efd989a50da"};
+    for(int representation=0;representation<2;++representation) {
+        CAPTURE(representation);
+        const auto handle=[&](numeric::MatrixView coefficients) {
+            if(representation==0) return accepted(sets::make_h({{"gaps-H"},5,{}},
+                {coefficients,vector({7,8,9,10}),matrix({0,5,{}}),vector({})})).as_handle();
+            return accepted(sets::make_v({{"gaps-V"},5,{}},{coefficients,matrix({0,5,{}})})).as_handle();
+        };
+        p.controls=ContinuousDomain{{handle(dense)}};const auto logical=published(p);
+        p.controls=ContinuousDomain{{handle(sparse)}};const auto actual=published(p);
+        CHECK(actual.canonical_bytes()==logical.canonical_bytes());
+        CHECK(actual.canonical_bytes().size()==(representation==0?525:477));
+        CHECK(actual.identity().value==std::string("csl.problem.v1.sha256:")+digests[representation]);
+        CHECK(logical.identity()==actual.identity());
+        const auto retained=accepted(sets::from_handle(std::get<SetHandle>(std::get<ContinuousDomain>(*actual.controls().description()).stages[0])));
+        const auto coefficients=representation==0?std::get<sets::HRepresentation>(retained.representation()).inequalities:
+                                                  std::get<sets::VRepresentation>(retained.representation()).vertices;
+        const auto csr=std::get<numeric::CsrInput>(coefficients.descriptor());
+        CHECK(csr.rows==4);CHECK(csr.cols==5);CHECK(csr.values.size()==5);
+        CHECK(csr.row_offsets[1]==2);CHECK(csr.row_offsets[2]==2);CHECK(csr.column_indices[3]==2);
+        CHECK(std::signbit(csr.values[3]));CHECK(coefficients(0,3)==-3);CHECK(coefficients(1,4)==0);
+        CHECK(coefficients(2,0)==4);CHECK(coefficients(3,1)==5);CHECK(coefficients(3,4)==0);
+        if(representation==0) CHECK(std::get<sets::HRepresentation>(retained.representation()).upper_bounds[3]==10);
+        CHECK(accepted(actual.model().step({0},Vector{2},Vector{1,2,3,4,5},{}))==Vector{15});
+    }
+}
 TEST_CASE("zero-width native vertices retain row counts without nonexistent coordinate traversal") {
     auto p=zero();const auto rows=std::numeric_limits<std::size_t>::max();
     const auto vertices=accepted(sets::make_v({{"many-empty-points"},0,{}},{matrix({rows,0,{}}),matrix({0,0,{}})})).as_handle();

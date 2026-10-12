@@ -8,10 +8,23 @@ implementation follows FIPS 180-4; no FIPS validation claim is made.
 
 Normal publication streams these bytes through the hash without allocating a
 second full encoding. `canonical_bytes()` materializes the same writer's output
-for inspection/interchange. Work is linear in emitted bytes; a sparse native
-H/V matrix is emitted in logical dense order. Large sparse inputs can therefore
-have substantial encoding cost. Counts and products are checked against the
-SHA-256 byte-length limit `2^61-1` before overflow/narrowing. Standard allocation
+for inspection/interchange. Encoding and SHA processing are linear in emitted
+bytes. Native H/V matrices emit logical dense row-major values: dense views use
+constant-time coordinate reads, and CSR views consume their validated sorted
+entries with a forward cursor while emitting missing coordinates as zeros.
+Each coordinate is emitted once and each stored CSR entry is consumed once;
+there is no per-coordinate search or full dense matrix copy. For nonzero column
+count, this takes O(rows * columns) work even for sparse inputs. A zero-column
+matrix emits its two counts without traversing rows. Temporal CSR instead
+retains structural order and takes O(rows + nnz) work. Large sparse H/V inputs
+can therefore still have substantial output volume and encoding cost.
+
+These encoding costs exclude component publication/validation, actual external
+content hashing, binding-key sorting/comparison and objective PSD checks.
+`canonical_bytes()` additionally owns storage proportional to the emitted byte
+count; normal fingerprinting streams without that output allocation. These are
+source-derived bounds, not a measured speedup. Counts and products are checked
+against the SHA-256 byte-length limit `2^61-1` before overflow/narrowing. Standard allocation
 exceptions propagate; unrepresentable publication lengths produce
 `invalid_input` at `problem.identity.length`. The format requires eight-bit bytes
 and IEEE-754 binary64, checked at compile time. It does not serialize native
