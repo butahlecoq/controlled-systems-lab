@@ -1,0 +1,4719 @@
+case_id,round,sequence,harness,termination,outcome,support,original_objective,validation_passed,end_to_end_scope,row_residual,variable_residual,diagnostics,input_publication_ns,registration_preparation_ns,workspace_creation_ns,public_run_ns,independent_verification_ns,end_to_end_ns,solver_objective,candidate,stationarity_violation,stationarity_scale,signs_violation,signs_scale,complementarity_violation,complementarity_scale,feasibility_execution_state,feasibility_execution_reason,feasibility_api_status,feasibility_model_status,feasibility_iterations_available,feasibility_iterations_kind,feasibility_iterations_value,feasibility_iterations_reason,feasibility_elapsed_available,feasibility_elapsed_value_ns,feasibility_elapsed_reason,qp_execution_state,qp_execution_reason,qp_api_status,qp_model_status,qp_iterations_available,qp_iterations_kind,qp_iterations_value,qp_iterations_reason,qp_elapsed_available,qp_elapsed_value_ns,qp_elapsed_reason,linear_execution_state,linear_execution_reason,linear_api_status,linear_model_status,linear_iterations_available,linear_iterations_kind,linear_iterations_value,linear_iterations_reason,linear_elapsed_available,linear_elapsed_value_ns,linear_elapsed_reason
+quadratic-boundary,1,10,returned,completed,optimal,unestablished,1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-boundary
+program.solver=quadratic-boundary
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=1
+objective.solver=1
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=4
+check.signs.violation=0
+check.signs.scale=2
+check.complementarity.violation=0
+check.complementarity.scale=4
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                1                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5100,2900,300,268600,1700,279000,1.0,[2.0],0.0,4.0,0.0,2.0,0.0,4.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-equality,1,11,returned,completed,optimal,unestablished,4.5,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-equality
+program.solver=quadratic-equality
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=1
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=1
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=3
+objective.original=4.5
+objective.solver=4.5
+check.rows.violation=0
+check.rows.scale=2
+check.variables.violation=0
+check.variables.scale=1.5
+check.stationarity.violation=0
+check.stationarity.scale=6
+check.signs.violation=0
+check.signs.scale=3
+check.complementarity.violation=0
+check.complementarity.scale=6
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(2); Du: 0(2.3388e-13) 0s
+          1     0.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 2 matrix nonzeros; 3 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [8e+00, 1e+01]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+  Iteration        Objective     NullspaceDim
+          0                5                1      0.00s
+          3              4.5                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 3
+Objective value     :  4.5000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4700,2900,100,336500,2000,346800,4.5,"[0.5,1.5]",0.0,6.0,0.0,3.0,0.0,6.0,observed_return,returned_status_pair,0,7,True,simplex,1,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,3,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-positive,1,12,returned,completed,optimal,unestablished,4.123105625617661,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-positive
+program.solver=norm-positive-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=4.1231056256176606
+objective.solver=17
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0               25                0      0.00s
+          2               17                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.7000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",8500,4500,200,293600,1800,309100,17.0,[2.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-zero,1,13,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-zero
+program.solver=norm-zero-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+norm.subgradient=checked-componentwise-zero
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6400,3600,300,287000,1600,299200,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-constant,1,14,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-constant
+program.solver=norm-constant-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=0
+model.native_rows=0
+phase.linear.time_limit=inf
+phase.linear.api_status=0
+phase.linear.model_status=7
+phase.linear.iterations=0
+objective.original=5
+objective.solver=25
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     :  2.5000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5500,3400,200,109200,1600,120200,25.0,[0.0],0.0,1.0,0.0,1.0,0.0,1.0,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter
+quadratic-face,1,15,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-face
+program.solver=quadratic-face
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                1                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4800,2600,200,285600,1700,295200,0.0,"[1.0,0.0]",0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-row,1,16,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-row
+program.solver=quadratic-zero-row
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 2 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                4                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6200,2900,200,274800,1800,286300,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-contradiction,1,17,returned,completed,infeasible,unestablished,4.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-contradiction
+program.solver=quadratic-zero-contradiction
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=8
+phase.feasibility.iterations=0
+objective.original=4
+objective.solver=4
+dual.unavailable=invalid native multiplier mapping
+check.rows.violation=1
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     7.2684833718e-07 Pr: 1(1) 0s
+          0     7.2684833718e-07 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 / 7.27e-07  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  7.2684780888e-07
+HiGHS run time      :          0.00
+",5400,3000,100,190100,1600,200700,4.0,[1.0],,,,,,,observed_return,returned_status_pair,0,8,True,simplex,0,,False,,not_exposed_by_adapter,known_not_called,earlier_phase_exit,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-unbounded,1,18,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-unbounded
+program.solver=quadratic-unbounded
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=10
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=1
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                0                1      0.00s
+Model status        : Unbounded
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5000,3400,200,287800,1400,298400,0.0,"[0.0,0.0]",1.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,10,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-boundary,2,19,returned,completed,optimal,unestablished,1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-boundary
+program.solver=quadratic-boundary
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=1
+objective.solver=1
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=4
+check.signs.violation=0
+check.signs.scale=2
+check.complementarity.violation=0
+check.complementarity.scale=4
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                1                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5600,2900,200,266000,1700,277000,1.0,[2.0],0.0,4.0,0.0,2.0,0.0,4.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-equality,2,20,returned,completed,optimal,unestablished,4.5,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-equality
+program.solver=quadratic-equality
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=1
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=1
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=3
+objective.original=4.5
+objective.solver=4.5
+check.rows.violation=0
+check.rows.scale=2
+check.variables.violation=0
+check.variables.scale=1.5
+check.stationarity.violation=0
+check.stationarity.scale=6
+check.signs.violation=0
+check.signs.scale=3
+check.complementarity.violation=0
+check.complementarity.scale=6
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(2); Du: 0(2.3388e-13) 0s
+          1     0.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 2 matrix nonzeros; 3 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [8e+00, 1e+01]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+  Iteration        Objective     NullspaceDim
+          0                5                1      0.00s
+          3              4.5                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 3
+Objective value     :  4.5000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6500,3000,200,327300,2300,339800,4.5,"[0.5,1.5]",0.0,6.0,0.0,3.0,0.0,6.0,observed_return,returned_status_pair,0,7,True,simplex,1,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,3,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-positive,2,21,returned,completed,optimal,unestablished,4.123105625617661,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-positive
+program.solver=norm-positive-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=4.1231056256176606
+objective.solver=17
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0               25                0      0.00s
+          2               17                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.7000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",9900,3000,200,285000,1800,300400,17.0,[2.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-zero,2,22,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-zero
+program.solver=norm-zero-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+norm.subgradient=checked-componentwise-zero
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",7200,3200,200,293000,1600,305700,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-constant,2,23,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-constant
+program.solver=norm-constant-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=0
+model.native_rows=0
+phase.linear.time_limit=inf
+phase.linear.api_status=0
+phase.linear.model_status=7
+phase.linear.iterations=0
+objective.original=5
+objective.solver=25
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     :  2.5000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6300,2900,100,116700,1600,128200,25.0,[0.0],0.0,1.0,0.0,1.0,0.0,1.0,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter
+quadratic-face,2,24,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-face
+program.solver=quadratic-face
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                1                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4300,2600,100,276500,1700,285600,0.0,"[1.0,0.0]",0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-row,2,25,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-row
+program.solver=quadratic-zero-row
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 2 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                4                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6000,2800,200,285000,1700,296000,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-contradiction,2,26,returned,completed,infeasible,unestablished,4.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-contradiction
+program.solver=quadratic-zero-contradiction
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=8
+phase.feasibility.iterations=0
+objective.original=4
+objective.solver=4
+dual.unavailable=invalid native multiplier mapping
+check.rows.violation=1
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     7.2684833718e-07 Pr: 1(1) 0s
+          0     7.2684833718e-07 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 / 7.27e-07  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  7.2684780888e-07
+HiGHS run time      :          0.00
+",5600,3100,200,167500,1400,178300,4.0,[1.0],,,,,,,observed_return,returned_status_pair,0,8,True,simplex,0,,False,,not_exposed_by_adapter,known_not_called,earlier_phase_exit,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-unbounded,2,27,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-unbounded
+program.solver=quadratic-unbounded
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=10
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=1
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                0                1      0.00s
+Model status        : Unbounded
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6700,4500,300,335200,1800,349600,0.0,"[0.0,0.0]",1.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,10,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-boundary,3,28,returned,completed,optimal,unestablished,1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-boundary
+program.solver=quadratic-boundary
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=1
+objective.solver=1
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=4
+check.signs.violation=0
+check.signs.scale=2
+check.complementarity.violation=0
+check.complementarity.scale=4
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                1                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6800,4100,300,305400,2100,319300,1.0,[2.0],0.0,4.0,0.0,2.0,0.0,4.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-equality,3,29,returned,completed,optimal,unestablished,4.5,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-equality
+program.solver=quadratic-equality
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=1
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=1
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=3
+objective.original=4.5
+objective.solver=4.5
+check.rows.violation=0
+check.rows.scale=2
+check.variables.violation=0
+check.variables.scale=1.5
+check.stationarity.violation=0
+check.stationarity.scale=6
+check.signs.violation=0
+check.signs.scale=3
+check.complementarity.violation=0
+check.complementarity.scale=6
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(2); Du: 0(2.3388e-13) 0s
+          1     0.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 2 matrix nonzeros; 3 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [8e+00, 1e+01]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+  Iteration        Objective     NullspaceDim
+          0                5                1      0.00s
+          3              4.5                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 3
+Objective value     :  4.5000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",7700,3600,200,350100,1900,364200,4.5,"[0.5,1.5]",0.0,6.0,0.0,3.0,0.0,6.0,observed_return,returned_status_pair,0,7,True,simplex,1,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,3,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-positive,3,30,returned,completed,optimal,unestablished,4.123105625617661,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-positive
+program.solver=norm-positive-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=4.1231056256176606
+objective.solver=17
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0               25                0      0.00s
+          2               17                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.7000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",8400,3900,200,289200,2000,304100,17.0,[2.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-zero,3,31,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-zero
+program.solver=norm-zero-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+norm.subgradient=checked-componentwise-zero
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6300,3300,300,289200,1700,301200,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-constant,3,32,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-constant
+program.solver=norm-constant-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=0
+model.native_rows=0
+phase.linear.time_limit=inf
+phase.linear.api_status=0
+phase.linear.model_status=7
+phase.linear.iterations=0
+objective.original=5
+objective.solver=25
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     :  2.5000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5400,3100,200,117600,1700,128300,25.0,[0.0],0.0,1.0,0.0,1.0,0.0,1.0,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter
+quadratic-face,3,33,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-face
+program.solver=quadratic-face
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                1                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5300,2600,100,301900,1600,312000,0.0,"[1.0,0.0]",0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-row,3,34,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-row
+program.solver=quadratic-zero-row
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 2 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                4                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6300,2900,200,295700,1800,307500,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-contradiction,3,35,returned,completed,infeasible,unestablished,4.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-contradiction
+program.solver=quadratic-zero-contradiction
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=8
+phase.feasibility.iterations=0
+objective.original=4
+objective.solver=4
+dual.unavailable=invalid native multiplier mapping
+check.rows.violation=1
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     7.2684833718e-07 Pr: 1(1) 0s
+          0     7.2684833718e-07 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 / 7.27e-07  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  7.2684780888e-07
+HiGHS run time      :          0.00
+",5200,2700,100,167900,1100,177300,4.0,[1.0],,,,,,,observed_return,returned_status_pair,0,8,True,simplex,0,,False,,not_exposed_by_adapter,known_not_called,earlier_phase_exit,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-unbounded,3,36,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-unbounded
+program.solver=quadratic-unbounded
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=10
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=1
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                0                1      0.00s
+Model status        : Unbounded
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4400,2700,200,297000,1300,306000,0.0,"[0.0,0.0]",1.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,10,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-boundary,4,37,returned,completed,optimal,unestablished,1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-boundary
+program.solver=quadratic-boundary
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=1
+objective.solver=1
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=4
+check.signs.violation=0
+check.signs.scale=2
+check.complementarity.violation=0
+check.complementarity.scale=4
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                1                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5500,3200,300,291300,1600,302500,1.0,[2.0],0.0,4.0,0.0,2.0,0.0,4.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-equality,4,38,returned,completed,optimal,unestablished,4.5,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-equality
+program.solver=quadratic-equality
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=1
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=1
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=3
+objective.original=4.5
+objective.solver=4.5
+check.rows.violation=0
+check.rows.scale=2
+check.variables.violation=0
+check.variables.scale=1.5
+check.stationarity.violation=0
+check.stationarity.scale=6
+check.signs.violation=0
+check.signs.scale=3
+check.complementarity.violation=0
+check.complementarity.scale=6
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(2); Du: 0(2.3388e-13) 0s
+          1     0.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 2 matrix nonzeros; 3 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [8e+00, 1e+01]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+  Iteration        Objective     NullspaceDim
+          0                5                1      0.00s
+          3              4.5                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 3
+Objective value     :  4.5000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6800,3200,200,335600,1900,348200,4.5,"[0.5,1.5]",0.0,6.0,0.0,3.0,0.0,6.0,observed_return,returned_status_pair,0,7,True,simplex,1,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,3,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-positive,4,39,returned,completed,optimal,unestablished,4.123105625617661,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-positive
+program.solver=norm-positive-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=4.1231056256176606
+objective.solver=17
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0               25                0      0.00s
+          2               17                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.7000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",7600,3200,200,270600,1700,283700,17.0,[2.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-zero,4,40,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-zero
+program.solver=norm-zero-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+norm.subgradient=checked-componentwise-zero
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6000,2800,100,308100,1600,319100,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-constant,4,41,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-constant
+program.solver=norm-constant-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=0
+model.native_rows=0
+phase.linear.time_limit=inf
+phase.linear.api_status=0
+phase.linear.model_status=7
+phase.linear.iterations=0
+objective.original=5
+objective.solver=25
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     :  2.5000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5500,3200,100,120700,1700,131600,25.0,[0.0],0.0,1.0,0.0,1.0,0.0,1.0,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter
+quadratic-face,4,42,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-face
+program.solver=quadratic-face
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                1                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4600,2500,100,299400,1800,308800,0.0,"[1.0,0.0]",0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-row,4,43,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-row
+program.solver=quadratic-zero-row
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 2 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                4                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6700,3600,200,307100,1800,319800,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-contradiction,4,44,returned,completed,infeasible,unestablished,4.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-contradiction
+program.solver=quadratic-zero-contradiction
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=8
+phase.feasibility.iterations=0
+objective.original=4
+objective.solver=4
+dual.unavailable=invalid native multiplier mapping
+check.rows.violation=1
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     7.2684833718e-07 Pr: 1(1) 0s
+          0     7.2684833718e-07 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 / 7.27e-07  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  7.2684780888e-07
+HiGHS run time      :          0.00
+",5400,2900,200,155400,1200,165500,4.0,[1.0],,,,,,,observed_return,returned_status_pair,0,8,True,simplex,0,,False,,not_exposed_by_adapter,known_not_called,earlier_phase_exit,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-unbounded,4,45,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-unbounded
+program.solver=quadratic-unbounded
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=10
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=1
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                0                1      0.00s
+Model status        : Unbounded
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4400,2800,100,259900,1600,269400,0.0,"[0.0,0.0]",1.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,10,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-boundary,5,46,returned,completed,optimal,unestablished,1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-boundary
+program.solver=quadratic-boundary
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=1
+objective.solver=1
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=4
+check.signs.violation=0
+check.signs.scale=2
+check.complementarity.violation=0
+check.complementarity.scale=4
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                1                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5100,2900,300,253700,1600,264000,1.0,[2.0],0.0,4.0,0.0,2.0,0.0,4.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-equality,5,47,returned,completed,optimal,unestablished,4.5,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-equality
+program.solver=quadratic-equality
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=1
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=1
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=3
+objective.original=4.5
+objective.solver=4.5
+check.rows.violation=0
+check.rows.scale=2
+check.variables.violation=0
+check.variables.scale=1.5
+check.stationarity.violation=0
+check.stationarity.scale=6
+check.signs.violation=0
+check.signs.scale=3
+check.complementarity.violation=0
+check.complementarity.scale=6
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(2); Du: 0(2.3388e-13) 0s
+          1     0.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 2 matrix nonzeros; 3 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [8e+00, 1e+01]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+  Iteration        Objective     NullspaceDim
+          0                5                1      0.00s
+          3              4.5                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 3
+Objective value     :  4.5000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6300,3100,200,328000,1900,340000,4.5,"[0.5,1.5]",0.0,6.0,0.0,3.0,0.0,6.0,observed_return,returned_status_pair,0,7,True,simplex,1,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,3,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-positive,5,48,returned,completed,optimal,unestablished,4.123105625617661,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-positive
+program.solver=norm-positive-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=4.1231056256176606
+objective.solver=17
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0               25                0      0.00s
+          2               17                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.7000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",7900,3800,200,264400,1700,278300,17.0,[2.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-zero,5,49,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-zero
+program.solver=norm-zero-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+norm.subgradient=checked-componentwise-zero
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5900,3200,200,265700,1600,277000,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-constant,5,50,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-constant
+program.solver=norm-constant-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=0
+model.native_rows=0
+phase.linear.time_limit=inf
+phase.linear.api_status=0
+phase.linear.model_status=7
+phase.linear.iterations=0
+objective.original=5
+objective.solver=25
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     :  2.5000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5300,3000,200,111200,1500,121500,25.0,[0.0],0.0,1.0,0.0,1.0,0.0,1.0,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter
+quadratic-face,5,51,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-face
+program.solver=quadratic-face
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                1                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5800,3200,100,269900,1900,281200,0.0,"[1.0,0.0]",0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-row,5,52,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-row
+program.solver=quadratic-zero-row
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 2 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                4                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5900,3500,200,295600,1800,307500,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-contradiction,5,53,returned,completed,infeasible,unestablished,4.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-contradiction
+program.solver=quadratic-zero-contradiction
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=8
+phase.feasibility.iterations=0
+objective.original=4
+objective.solver=4
+dual.unavailable=invalid native multiplier mapping
+check.rows.violation=1
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     7.2684833718e-07 Pr: 1(1) 0s
+          0     7.2684833718e-07 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 / 7.27e-07  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  7.2684780888e-07
+HiGHS run time      :          0.00
+",5300,3100,200,158700,1200,169000,4.0,[1.0],,,,,,,observed_return,returned_status_pair,0,8,True,simplex,0,,False,,not_exposed_by_adapter,known_not_called,earlier_phase_exit,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-unbounded,5,54,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-unbounded
+program.solver=quadratic-unbounded
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=10
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=1
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                0                1      0.00s
+Model status        : Unbounded
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5000,2900,300,261200,1400,271200,0.0,"[0.0,0.0]",1.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,10,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-boundary,6,55,returned,completed,optimal,unestablished,1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-boundary
+program.solver=quadratic-boundary
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=1
+objective.solver=1
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=4
+check.signs.violation=0
+check.signs.scale=2
+check.complementarity.violation=0
+check.complementarity.scale=4
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                1                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5300,3200,300,272500,1800,283600,1.0,[2.0],0.0,4.0,0.0,2.0,0.0,4.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-equality,6,56,returned,completed,optimal,unestablished,4.5,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-equality
+program.solver=quadratic-equality
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=1
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=1
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=3
+objective.original=4.5
+objective.solver=4.5
+check.rows.violation=0
+check.rows.scale=2
+check.variables.violation=0
+check.variables.scale=1.5
+check.stationarity.violation=0
+check.stationarity.scale=6
+check.signs.violation=0
+check.signs.scale=3
+check.complementarity.violation=0
+check.complementarity.scale=6
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(2); Du: 0(2.3388e-13) 0s
+          1     0.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 2 matrix nonzeros; 3 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [8e+00, 1e+01]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+  Iteration        Objective     NullspaceDim
+          0                5                1      0.00s
+          3              4.5                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 3
+Objective value     :  4.5000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6600,3200,200,311500,1900,323900,4.5,"[0.5,1.5]",0.0,6.0,0.0,3.0,0.0,6.0,observed_return,returned_status_pair,0,7,True,simplex,1,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,3,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-positive,6,57,returned,completed,optimal,unestablished,4.123105625617661,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-positive
+program.solver=norm-positive-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=4.1231056256176606
+objective.solver=17
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0               25                0      0.00s
+          2               17                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.7000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",7500,3100,200,250800,1700,263700,17.0,[2.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-zero,6,58,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-zero
+program.solver=norm-zero-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+norm.subgradient=checked-componentwise-zero
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5600,2800,200,261100,1700,271600,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-constant,6,59,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-constant
+program.solver=norm-constant-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=0
+model.native_rows=0
+phase.linear.time_limit=inf
+phase.linear.api_status=0
+phase.linear.model_status=7
+phase.linear.iterations=0
+objective.original=5
+objective.solver=25
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     :  2.5000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5300,2900,200,117000,1600,127300,25.0,[0.0],0.0,1.0,0.0,1.0,0.0,1.0,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter
+quadratic-face,6,60,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-face
+program.solver=quadratic-face
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                1                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4500,2900,100,256700,1700,266200,0.0,"[1.0,0.0]",0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-row,6,61,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-row
+program.solver=quadratic-zero-row
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 2 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                4                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6300,2700,100,271600,1800,283000,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-contradiction,6,62,returned,completed,infeasible,unestablished,4.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-contradiction
+program.solver=quadratic-zero-contradiction
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=8
+phase.feasibility.iterations=0
+objective.original=4
+objective.solver=4
+dual.unavailable=invalid native multiplier mapping
+check.rows.violation=1
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     7.2684833718e-07 Pr: 1(1) 0s
+          0     7.2684833718e-07 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 / 7.27e-07  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  7.2684780888e-07
+HiGHS run time      :          0.00
+",5500,2700,200,152400,1100,162200,4.0,[1.0],,,,,,,observed_return,returned_status_pair,0,8,True,simplex,0,,False,,not_exposed_by_adapter,known_not_called,earlier_phase_exit,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-unbounded,6,63,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-unbounded
+program.solver=quadratic-unbounded
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=10
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=1
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                0                1      0.00s
+Model status        : Unbounded
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4100,3000,200,253400,1400,262200,0.0,"[0.0,0.0]",1.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,10,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-boundary,7,64,returned,completed,optimal,unestablished,1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-boundary
+program.solver=quadratic-boundary
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=1
+objective.solver=1
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=4
+check.signs.violation=0
+check.signs.scale=2
+check.complementarity.violation=0
+check.complementarity.scale=4
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                1                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5600,3300,300,274700,1700,286000,1.0,[2.0],0.0,4.0,0.0,2.0,0.0,4.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-equality,7,65,returned,completed,optimal,unestablished,4.5,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-equality
+program.solver=quadratic-equality
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=1
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=1
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=3
+objective.original=4.5
+objective.solver=4.5
+check.rows.violation=0
+check.rows.scale=2
+check.variables.violation=0
+check.variables.scale=1.5
+check.stationarity.violation=0
+check.stationarity.scale=6
+check.signs.violation=0
+check.signs.scale=3
+check.complementarity.violation=0
+check.complementarity.scale=6
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(2); Du: 0(2.3388e-13) 0s
+          1     0.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 2 matrix nonzeros; 3 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [8e+00, 1e+01]
+  Bound  [0e+00, 0e+00]
+  RHS    [2e+00, 2e+00]
+  Iteration        Objective     NullspaceDim
+          0                5                1      0.00s
+          3              4.5                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 3
+Objective value     :  4.5000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6500,3100,200,314200,1800,326200,4.5,"[0.5,1.5]",0.0,6.0,0.0,3.0,0.0,6.0,observed_return,returned_status_pair,0,7,True,simplex,1,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,3,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-positive,7,66,returned,completed,optimal,unestablished,4.123105625617661,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-positive
+program.solver=norm-positive-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=4.1231056256176606
+objective.solver=17
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [2e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0               25                0      0.00s
+          2               17                0      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  1.7000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",7800,3300,200,248200,1700,261500,17.0,[2.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-zero,7,67,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-zero
+program.solver=norm-zero-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+norm.subgradient=checked-componentwise-zero
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [5e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                9                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5700,2800,100,252000,1700,262700,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+norm-constant,7,68,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=norm-constant
+program.solver=norm-constant-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=false
+model.original_rows=0
+model.native_rows=0
+phase.linear.time_limit=inf
+phase.linear.api_status=0
+phase.linear.model_status=7
+phase.linear.iterations=0
+objective.original=5
+objective.solver=25
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     :  2.5000000000e+01
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",7900,5400,300,139500,2000,155600,25.0,[0.0],0.0,1.0,0.0,1.0,0.0,1.0,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter
+quadratic-face,7,69,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-face
+program.solver=quadratic-face
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=2
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 2e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                1                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",5000,2700,200,270000,1700,280200,0.0,"[1.0,0.0]",0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-row,7,70,returned,completed,optimal,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-row
+program.solver=quadratic-zero-row
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+check.stationarity.violation=0
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 2 rows; 1 cols; 1 matrix nonzeros; 1 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [6e+00, 6e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                4                0      0.00s
+          2                0                1      0.00s
+Model status        : Optimal
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",6500,3100,200,275500,1800,287400,0.0,[3.0],0.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,7,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-zero-contradiction,7,71,returned,completed,infeasible,unestablished,4.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-zero-contradiction
+program.solver=quadratic-zero-contradiction
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=1
+model.native_rows=2
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=8
+phase.feasibility.iterations=0
+objective.original=4
+objective.solver=4
+dual.unavailable=invalid native multiplier mapping
+check.rows.violation=1
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=5
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [1e+00, 5e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     7.2684833718e-07 Pr: 1(1) 0s
+          0     7.2684833718e-07 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 / 7.27e-07  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  7.2684780888e-07
+HiGHS run time      :          0.00
+",5000,2900,200,150100,1200,159600,4.0,[1.0],,,,,,,observed_return,returned_status_pair,0,8,True,simplex,0,,False,,not_exposed_by_adapter,known_not_called,earlier_phase_exit,,,False,qp,,phase_not_called,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter
+quadratic-unbounded,7,72,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.original=quadratic-unbounded
+program.solver=quadratic-unbounded
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=10
+phase.qp.iterations=2
+objective.original=0
+objective.solver=0
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=1
+check.stationarity.violation=1
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0                0                1      0.00s
+Model status        : Unbounded
+QP ASM    iterations: 2
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",4300,2800,100,258800,1400,267700,0.0,"[0.0,0.0]",1.0,1.0,0.0,1.0,0.0,1.0,observed_return,returned_status_pair,0,7,True,simplex,0,,False,,not_exposed_by_adapter,observed_return,returned_status_pair,0,10,True,qp,2,,False,,not_exposed_by_adapter,known_not_called,route_not_selected,,,False,simplex,,phase_not_called,False,,not_exposed_by_adapter

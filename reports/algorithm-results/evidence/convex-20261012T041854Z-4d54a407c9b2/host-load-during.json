@@ -1,0 +1,324 @@
+{
+  "source": "Windows GetSystemTimes",
+  "scope": "250ms wall samples during the entire unchanged collector process, including final provenance build and machine snapshots; not native/per-trial CPU",
+  "kernel_includes_idle": true,
+  "sampled_process": "lightweight collector-launcher thread; overhead not subtracted",
+  "started_utc": "2026-10-12T04:18:46.224825+00:00",
+  "ended_utc": "2026-10-12T04:18:55.003142+00:00",
+  "samples": [
+    {
+      "utc": "2026-10-12T04:18:46.224878+00:00",
+      "monotonic_ns": 518520713011000,
+      "available": true,
+      "idle_100ns": 51865486406250,
+      "kernel_including_idle_100ns": 52703732500000,
+      "user_100ns": 2324694687500
+    },
+    {
+      "utc": "2026-10-12T04:18:46.490370+00:00",
+      "monotonic_ns": 518520978507800,
+      "available": true,
+      "idle_100ns": 51865519062500,
+      "kernel_including_idle_100ns": 52703765781250,
+      "user_100ns": 2324694843750,
+      "all_processors_busy_percent": 2.336448598130841
+    },
+    {
+      "utc": "2026-10-12T04:18:46.744156+00:00",
+      "monotonic_ns": 518521232294500,
+      "available": true,
+      "idle_100ns": 51865545625000,
+      "kernel_including_idle_100ns": 52703792968750,
+      "user_100ns": 2324697343750,
+      "all_processors_busy_percent": 10.526315789473685
+    },
+    {
+      "utc": "2026-10-12T04:18:46.996723+00:00",
+      "monotonic_ns": 518521484861200,
+      "available": true,
+      "idle_100ns": 51865572343750,
+      "kernel_including_idle_100ns": 52703820781250,
+      "user_100ns": 2324699843750,
+      "all_processors_busy_percent": 11.855670103092784
+    },
+    {
+      "utc": "2026-10-12T04:18:47.249967+00:00",
+      "monotonic_ns": 518521738120800,
+      "available": true,
+      "idle_100ns": 51865600781250,
+      "kernel_including_idle_100ns": 52703849375000,
+      "user_100ns": 2324701406250,
+      "all_processors_busy_percent": 5.699481865284974
+    },
+    {
+      "utc": "2026-10-12T04:18:47.503989+00:00",
+      "monotonic_ns": 518521992126100,
+      "available": true,
+      "idle_100ns": 51865628281250,
+      "kernel_including_idle_100ns": 52703877500000,
+      "user_100ns": 2324702968750,
+      "all_processors_busy_percent": 7.368421052631579
+    },
+    {
+      "utc": "2026-10-12T04:18:47.757808+00:00",
+      "monotonic_ns": 518522245945900,
+      "available": true,
+      "idle_100ns": 51865659375000,
+      "kernel_including_idle_100ns": 52703909062500,
+      "user_100ns": 2324703437500,
+      "all_processors_busy_percent": 2.926829268292683
+    },
+    {
+      "utc": "2026-10-12T04:18:48.012470+00:00",
+      "monotonic_ns": 518522500612300,
+      "available": true,
+      "idle_100ns": 51865689218750,
+      "kernel_including_idle_100ns": 52703939062500,
+      "user_100ns": 2324703593750,
+      "all_processors_busy_percent": 1.0362694300518134
+    },
+    {
+      "utc": "2026-10-12T04:18:48.264999+00:00",
+      "monotonic_ns": 518522753139100,
+      "available": true,
+      "idle_100ns": 51865718906250,
+      "kernel_including_idle_100ns": 52703968906250,
+      "user_100ns": 2324703750000,
+      "all_processors_busy_percent": 1.0416666666666667
+    },
+    {
+      "utc": "2026-10-12T04:18:48.518958+00:00",
+      "monotonic_ns": 518523007123300,
+      "available": true,
+      "idle_100ns": 51865748593750,
+      "kernel_including_idle_100ns": 52703998906250,
+      "user_100ns": 2324703750000,
+      "all_processors_busy_percent": 1.0416666666666667
+    },
+    {
+      "utc": "2026-10-12T04:18:48.773240+00:00",
+      "monotonic_ns": 518523261409700,
+      "available": true,
+      "idle_100ns": 51865779218750,
+      "kernel_including_idle_100ns": 52704029687500,
+      "user_100ns": 2324704375000,
+      "all_processors_busy_percent": 2.487562189054726
+    },
+    {
+      "utc": "2026-10-12T04:18:49.026652+00:00",
+      "monotonic_ns": 518523514797700,
+      "available": true,
+      "idle_100ns": 51865808750000,
+      "kernel_including_idle_100ns": 52704060000000,
+      "user_100ns": 2324704531250,
+      "all_processors_busy_percent": 3.076923076923077
+    },
+    {
+      "utc": "2026-10-12T04:18:49.280897+00:00",
+      "monotonic_ns": 518523769034700,
+      "available": true,
+      "idle_100ns": 51865836406250,
+      "kernel_including_idle_100ns": 52704089687500,
+      "user_100ns": 2324704843750,
+      "all_processors_busy_percent": 7.8125
+    },
+    {
+      "utc": "2026-10-12T04:18:49.534177+00:00",
+      "monotonic_ns": 518524022317000,
+      "available": true,
+      "idle_100ns": 51865864218750,
+      "kernel_including_idle_100ns": 52704119375000,
+      "user_100ns": 2324705000000,
+      "all_processors_busy_percent": 6.806282722513089
+    },
+    {
+      "utc": "2026-10-12T04:18:49.787978+00:00",
+      "monotonic_ns": 518524276117700,
+      "available": true,
+      "idle_100ns": 51865894375000,
+      "kernel_including_idle_100ns": 52704151250000,
+      "user_100ns": 2324705000000,
+      "all_processors_busy_percent": 5.392156862745098
+    },
+    {
+      "utc": "2026-10-12T04:18:50.042849+00:00",
+      "monotonic_ns": 518524530989500,
+      "available": true,
+      "idle_100ns": 51865922500000,
+      "kernel_including_idle_100ns": 52704180781250,
+      "user_100ns": 2324705312500,
+      "all_processors_busy_percent": 5.7591623036649215
+    },
+    {
+      "utc": "2026-10-12T04:18:50.295943+00:00",
+      "monotonic_ns": 518524784080400,
+      "available": true,
+      "idle_100ns": 51865950937500,
+      "kernel_including_idle_100ns": 52704209843750,
+      "user_100ns": 2324706250000,
+      "all_processors_busy_percent": 5.208333333333333
+    },
+    {
+      "utc": "2026-10-12T04:18:50.550817+00:00",
+      "monotonic_ns": 518525038978600,
+      "available": true,
+      "idle_100ns": 51865981093750,
+      "kernel_including_idle_100ns": 52704240156250,
+      "user_100ns": 2324706250000,
+      "all_processors_busy_percent": 0.5154639175257731
+    },
+    {
+      "utc": "2026-10-12T04:18:50.801856+00:00",
+      "monotonic_ns": 518525289996400,
+      "available": true,
+      "idle_100ns": 51866012500000,
+      "kernel_including_idle_100ns": 52704271718750,
+      "user_100ns": 2324706406250,
+      "all_processors_busy_percent": 0.9852216748768473
+    },
+    {
+      "utc": "2026-10-12T04:18:51.054288+00:00",
+      "monotonic_ns": 518525542449600,
+      "available": true,
+      "idle_100ns": 51866041718750,
+      "kernel_including_idle_100ns": 52704300937500,
+      "user_100ns": 2324706875000,
+      "all_processors_busy_percent": 1.5789473684210527
+    },
+    {
+      "utc": "2026-10-12T04:18:51.305686+00:00",
+      "monotonic_ns": 518525793886300,
+      "available": true,
+      "idle_100ns": 51866071562500,
+      "kernel_including_idle_100ns": 52704331250000,
+      "user_100ns": 2324707031250,
+      "all_processors_busy_percent": 2.051282051282051
+    },
+    {
+      "utc": "2026-10-12T04:18:51.558817+00:00",
+      "monotonic_ns": 518526046976400,
+      "available": true,
+      "idle_100ns": 51866099218750,
+      "kernel_including_idle_100ns": 52704360000000,
+      "user_100ns": 2324708125000,
+      "all_processors_busy_percent": 7.329842931937173
+    },
+    {
+      "utc": "2026-10-12T04:18:51.810409+00:00",
+      "monotonic_ns": 518526298556600,
+      "available": true,
+      "idle_100ns": 51866127500000,
+      "kernel_including_idle_100ns": 52704389843750,
+      "user_100ns": 2324708281250,
+      "all_processors_busy_percent": 5.729166666666667
+    },
+    {
+      "utc": "2026-10-12T04:18:52.064700+00:00",
+      "monotonic_ns": 518526552838800,
+      "available": true,
+      "idle_100ns": 51866155937500,
+      "kernel_including_idle_100ns": 52704420000000,
+      "user_100ns": 2324708281250,
+      "all_processors_busy_percent": 5.699481865284974
+    },
+    {
+      "utc": "2026-10-12T04:18:52.317446+00:00",
+      "monotonic_ns": 518526805586600,
+      "available": true,
+      "idle_100ns": 51866185156250,
+      "kernel_including_idle_100ns": 52704451562500,
+      "user_100ns": 2324708437500,
+      "all_processors_busy_percent": 7.8817733990147785
+    },
+    {
+      "utc": "2026-10-12T04:18:52.570683+00:00",
+      "monotonic_ns": 518527058819900,
+      "available": true,
+      "idle_100ns": 51866214062500,
+      "kernel_including_idle_100ns": 52704481250000,
+      "user_100ns": 2324708750000,
+      "all_processors_busy_percent": 3.6458333333333335
+    },
+    {
+      "utc": "2026-10-12T04:18:52.823905+00:00",
+      "monotonic_ns": 518527312046600,
+      "available": true,
+      "idle_100ns": 51866241562500,
+      "kernel_including_idle_100ns": 52704509218750,
+      "user_100ns": 2324710468750,
+      "all_processors_busy_percent": 7.368421052631579
+    },
+    {
+      "utc": "2026-10-12T04:18:53.077155+00:00",
+      "monotonic_ns": 518527565296200,
+      "available": true,
+      "idle_100ns": 51866268750000,
+      "kernel_including_idle_100ns": 52704536718750,
+      "user_100ns": 2324713437500,
+      "all_processors_busy_percent": 10.76923076923077
+    },
+    {
+      "utc": "2026-10-12T04:18:53.330639+00:00",
+      "monotonic_ns": 518527818776000,
+      "available": true,
+      "idle_100ns": 51866295937500,
+      "kernel_including_idle_100ns": 52704564062500,
+      "user_100ns": 2324715781250,
+      "all_processors_busy_percent": 8.421052631578947
+    },
+    {
+      "utc": "2026-10-12T04:18:53.584661+00:00",
+      "monotonic_ns": 518528072803600,
+      "available": true,
+      "idle_100ns": 51866325625000,
+      "kernel_including_idle_100ns": 52704594062500,
+      "user_100ns": 2324717343750,
+      "all_processors_busy_percent": 5.9405940594059405
+    },
+    {
+      "utc": "2026-10-12T04:18:53.837709+00:00",
+      "monotonic_ns": 518528325848500,
+      "available": true,
+      "idle_100ns": 51866353906250,
+      "kernel_including_idle_100ns": 52704622656250,
+      "user_100ns": 2324718750000,
+      "all_processors_busy_percent": 5.729166666666667
+    },
+    {
+      "utc": "2026-10-12T04:18:54.091629+00:00",
+      "monotonic_ns": 518528579765700,
+      "available": true,
+      "idle_100ns": 51866380937500,
+      "kernel_including_idle_100ns": 52704650000000,
+      "user_100ns": 2324720625000,
+      "all_processors_busy_percent": 7.4866310160427805
+    },
+    {
+      "utc": "2026-10-12T04:18:54.346168+00:00",
+      "monotonic_ns": 518528834309400,
+      "available": true,
+      "idle_100ns": 51866410312500,
+      "kernel_including_idle_100ns": 52704679531250,
+      "user_100ns": 2324722500000,
+      "all_processors_busy_percent": 6.467661691542289
+    },
+    {
+      "utc": "2026-10-12T04:18:54.600358+00:00",
+      "monotonic_ns": 518529088499300,
+      "available": true,
+      "idle_100ns": 51866439218750,
+      "kernel_including_idle_100ns": 52704708750000,
+      "user_100ns": 2324725156250,
+      "all_processors_busy_percent": 9.313725490196079
+    },
+    {
+      "utc": "2026-10-12T04:18:54.853113+00:00",
+      "monotonic_ns": 518529341250700,
+      "available": true,
+      "idle_100ns": 51866467343750,
+      "kernel_including_idle_100ns": 52704737031250,
+      "user_100ns": 2324726875000,
+      "all_processors_busy_percent": 6.25
+    }
+  ]
+}

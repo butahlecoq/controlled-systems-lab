@@ -1,0 +1,18 @@
+{
+  "schema": "csl.report-manifest/1",
+  "report_id": "convex-20261012T041854Z-4d54a407c9b2",
+  "files": {
+    "build-provenance.txt": "092d879c7b877acad8c96c399f6ca4a8a7fe9c11154faa39343bb5c603a7607f",
+    "export.json": "47c5895e48cd9794a9ebdb89d9f608cf0f694704644cc554db78bc60453bcab5",
+    "index.html": "14882d50e392e3abfd57504c6f9fb175aa73f6ace856a8f20322ffdc9f1220fc",
+    "latency.png": "5cfdf4b3ffab5036be4b3fe2cae9be80844ae46e04c0fea38c92f829a4d88007",
+    "latency.svg": "1c597e51ed6e9c0f0bae3a26bccb6246692265f6d3805b70b2b6b13e057e9369",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile.json": "a6fc915a14469102f4a01ca89a6fa8d4eb205f59c9db34a8b2f1a2c87f9e8253",
+    "raw-events.jsonl": "636dca99a02c8aed37ee4e93e03306fbd59622ea4d51310effdec94cbd7ec70a",
+    "records.json": "9647875975580980567feb4f81a181317578b57ec2966c01e9ab3de08ee5915e",
+    "scenarios.json": "4af00b9ee355a09d7951b51df8840b1edb39ea646f8263749f853836b1038a2b",
+    "summary.csv": "15a20f1c9dfe40789bf6e805b6b5e107c20951cfe2980782ec6643eeae5670a0",
+    "trials.csv": "0b43a5de83bf9791fef91bda05a157c7f13d6517c5b85d7c17417b417e16d29d"
+  }
+}
