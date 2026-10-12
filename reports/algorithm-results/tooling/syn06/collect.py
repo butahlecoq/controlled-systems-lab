@@ -106,7 +106,7 @@ def compiler_info(build: Path) -> dict:
     return values
 
 
-def collect(executable: Path, build: Path, source_commit: str) -> Path:
+def collect(executable: Path, build: Path, source_commit: str, cmake: Path) -> Path:
     if not re.fullmatch(r"[0-9a-f]{40}", source_commit):
         raise ValueError("full fixed source commit required")
     if git("rev-parse", source_commit) != source_commit:
@@ -117,14 +117,16 @@ def collect(executable: Path, build: Path, source_commit: str) -> Path:
         raise ValueError("verifier source is dirty")
     if not executable.is_file() or not build.is_dir():
         raise ValueError("configured Release driver/build required")
-    build_command = ["cmake", "--build", str(build), "--config", "Release", "--target", "csl_syn06_verifier_report"]
+    build_command = [str(cmake), "--build", str(build), "--config", "Release", "--target", "csl_syn06_verifier_report"]
     build_process = run(build_command, capture_output=True)
     build_log = build_process.stdout + build_process.stderr
     pilot_record, pilot_raw = pilot(executable)
     batch = pilot_record["selected_batch"]
     profile_record, profile_raw = profile_run(executable, max(batch, 100000), source_commit)
+    host_cpu_before = psutil.cpu_percent(interval=1.0)
     command = [str(executable), str(batch), "7", "7"]
     raw, stderr = measured_run(executable, batch, 7, 7)
+    host_cpu_after = psutil.cpu_percent(interval=1.0)
     trials = report.raw_projection(raw, batch, 7, 7)
     summary = report.summarize(trials, batch)
     if any(row["min_elapsed_ns"] < 50_000_000 for row in summary):
@@ -141,7 +143,7 @@ def collect(executable: Path, build: Path, source_commit: str) -> Path:
         "binary_sha256": report.digest_bytes(executable.read_bytes()),
         "cmake_cache_sha256": report.digest_bytes((build / "CMakeCache.txt").read_bytes()),
         "compiler": compiler_info(build),
-        "configuration_command": ["cmake", "-S", ".", "-B", str(build),
+        "configuration_command": [str(cmake), "-S", ".", "-B", str(build),
                                   "-DCSL_BUILD_SYN06_REPORT=ON", "-DBUILD_TESTING=OFF"],
         "build_command": build_command,
     }
@@ -150,6 +152,7 @@ def collect(executable: Path, build: Path, source_commit: str) -> Path:
         "logical_cpus": psutil.cpu_count(logical=True), "physical_cpus": psutil.cpu_count(logical=False),
         "memory_bytes": psutil.virtual_memory().total,
         "collection_utc": datetime.now(timezone.utc).isoformat(),
+        "host_cpu_percent_before": host_cpu_before, "host_cpu_percent_after": host_cpu_after,
         "cache_policy": "one process, seven warmup batches per fixture, then seven measured batches",
         "seed": None, "simultaneous_work": "No intentional co-located benchmark; host may run background services",
     }
@@ -216,8 +219,10 @@ def main() -> None:
     parser.add_argument("--executable", type=Path, required=True)
     parser.add_argument("--build", type=Path, required=True)
     parser.add_argument("--source-commit", required=True)
+    parser.add_argument("--cmake", type=Path, required=True)
     args = parser.parse_args()
-    print(collect(args.executable.resolve(), args.build.resolve(), args.source_commit).relative_to(ROOT))
+    print(collect(args.executable.resolve(), args.build.resolve(), args.source_commit,
+                  args.cmake.resolve()).relative_to(ROOT))
 
 
 if __name__ == "__main__":
