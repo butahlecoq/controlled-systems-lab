@@ -60,7 +60,7 @@ def validate(root:Path)->None:
     assert "<svg" in html and "<!doctype html>" in html.lower()
     assert not re.search(r'(?:href|src)=["\']https?://',html,re.I)
     assert payload["limiter_profile"]["profiled_operations"]>0
-    assert (root/"profile.etl").stat().st_size>0
+    assert (root/"profile.txt").stat().st_size>0
     assert "no accepted workload-size baseline" in " ".join(payload["scope_limitations"])
 
     archive=root.parent/(wrapper["report_id"]+".zip")

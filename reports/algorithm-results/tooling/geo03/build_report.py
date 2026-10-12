@@ -13,7 +13,6 @@ import os
 import platform
 import statistics
 import subprocess
-import sys
 import zipfile
 from pathlib import Path
 
@@ -145,9 +144,9 @@ def render_html(report: dict, summary: list[dict], svg: str) -> str:
 <h2>Conversion time</h2><p>Timed region: <code>RepresentationConverterWorkspace::run</code>, after input creation, selection/preparation and worker creation; those stages are reported separately in raw trials. End-to-end below is the measured harness pipeline from registration/input creation through conversion return, before independent verification and destruction.</p>{svg}
 <table><thead><tr><th>Fixture</th><th>Direction</th><th>Trials</th><th>Run median</th><th>Run min–max</th><th>Pipeline median</th><th>Independent checks</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
 <p>All timings use a steady clock and are reported as descriptive samples. Range is min–max, not a confidence interval. Setup phases are nested/exclusive only as defined in raw timing boundaries; they must not be summed to infer a different boundary.</p>
-<h2>Limiter evidence</h2><p>{html.escape(p['limiter_profile']['finding'])} Profile duration and profiled operations are separate from the reported trials. Full ETW trace and summary are in the offline bundle.</p>
+<h2>Limiter evidence</h2><p>{html.escape(p['limiter_profile']['finding'])} Profile duration and profiled operations are separate from the reported trials. The bundle contains the sanitized target-process module summary; the host-wide ETW trace is retained locally and is not redistributed.</p>
 <h2>Environment and build</h2><pre>{html.escape(json.dumps(p['environment'],indent=2,ensure_ascii=False))}</pre><p>Build log, source/dependency hashes, exact commands, environment snapshots, raw JSONL, full CSV trials, summary and profile evidence are linked in the bundle.</p>
-<h2>Limitations</h2><ul><li>Only 2D square, simplex, embedded segment and singleton contract fixtures are measured; all have at most four vertices.</li><li>Ray-bearing V inputs, unbounded sets, empty sets, higher-dimensional sets and large facet counts are unsupported by the selected bounded-only adapter and were excluded from timing.</li><li>No comparison adapter is available in this report; no speedup or rank claim is made.</li><li>The selected implementation uses binary64 reductions, LP prerequisite checks and Qhull 8.0.2. Support/equivalence evidence remains numerical and non-certified.</li><li>No conversion decomposition into LP, affine reduction and Qhull substage timings is exposed. The separate sample profile identifies the observed hottest module/function only; it does not produce a certified per-submodule cost model.</li><li>Historical A17/A18 lineage and executable equivalence are not audited here.</li></ul>
+<h2>Limitations</h2><ul><li>Only 2D square, simplex, embedded segment and singleton contract fixtures are measured; all have at most four vertices.</li><li>Ray-bearing V inputs, unbounded sets, empty sets, higher-dimensional sets and large facet counts are unsupported by the selected bounded-only adapter and were excluded from timing.</li><li>No comparison adapter is available in this report; no speedup or rank claim is made.</li><li>The selected implementation uses binary64 reductions, LP prerequisite checks and Qhull 8.0.2. Support/equivalence evidence remains numerical and non-certified.</li><li>No conversion decomposition into LP, affine reduction and Qhull substage timings is exposed. ETW was resolved to modules but not functions, so it cannot identify a per-stage algorithmic limiter.</li><li>Historical A17/A18 lineage and executable equivalence are not audited here.</li></ul>
 <h2>Raw data and offline bundle</h2><ul><li><a href="records.json">Versioned report records</a></li><li><a href="raw-events.jsonl">Raw trial records</a></li><li><a href="trials.csv">Trial table</a></li><li><a href="summary.csv">Summary table</a></li><li><a href="scenarios.json">Analytic fixture definitions</a></li><li><a href="profile.txt">External CPU sample profile notes</a></li></ul>
 </body></html>'''
 
@@ -172,7 +171,7 @@ def write_artifacts(out: Path, rows: list[dict], args: argparse.Namespace, env: 
                         "timed_region":"RepresentationConverterWorkspace::run", "oracle_outside_timing":True},
         "scenarios":FIXTURES,"trials":rows,"summary":summaries,
         "limiter_profile":{"profiled_operations":args.profile_operations,"method":"Windows Performance Recorder CPU ETW sampling; separate untimed executable mode; independent oracle omitted, output representation/status consumed",
-                           "finding":args.profile_finding,"profile_file":"profile.etl","profile_summary_file":"profile.txt"},
+                           "finding":args.profile_finding,"trace_redistributed":False,"profile_summary_file":"profile.txt"},
         "scope_limitations":["contract fixtures only; no accepted workload-size baseline","bounded H/V cases only","no available competing adapter","numerical checks are not validated global certificates","no inner conversion phase timing","A17/A18 lineage not audited"]
     }
     digest=hashlib.sha256(canonical(payload)).hexdigest()
@@ -198,7 +197,6 @@ def write_artifacts(out: Path, rows: list[dict], args: argparse.Namespace, env: 
     (out/"measurement-command.txt").write_text("\n".join(args.command)+"\n",encoding="utf-8")
     (out/"build-provenance.txt").write_text(args.build_provenance.read_text(encoding="utf-8",errors="replace"),encoding="utf-8")
     (out/"profile.txt").write_text(args.profile_summary.read_text(encoding="utf-8",errors="replace"),encoding="utf-8")
-    (out/"profile.etl").write_bytes(args.profile_trace.read_bytes())
     svg=svg_chart(summaries)
     (out/"latency.svg").write_text(svg,encoding="utf-8")
     (out/"index.html").write_text(render_html(wrapper,summaries,svg),encoding="utf-8")
@@ -240,7 +238,6 @@ def main() -> int:
     parser.add_argument("--profile-operations",type=int,required=True)
     parser.add_argument("--profile-finding",required=True)
     parser.add_argument("--profile-summary",type=Path,required=True)
-    parser.add_argument("--profile-trace",type=Path,required=True)
     parser.add_argument("--build-provenance",type=Path,required=True)
     parser.add_argument("--out",type=Path,required=True)
     args=parser.parse_args()
