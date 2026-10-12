@@ -162,7 +162,9 @@ def catalogue_index(catalogue):
     parts=['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CSL algorithm reports</title></head><body><h1>Versioned algorithm reports</h1><p>Each report identifies its measured scope and evidence limits. Cross-method performance or certification claims are not implied.</p><ul>']
     for report in catalogue["reports"]:
         rid=report["report_id"]
-        tree,archive,label=data.artifact_links(rid,artifact_ref)
+        source_id=report.get("source_report_id",rid)
+        tree,_,label=data.artifact_links(source_id,artifact_ref)
+        _,archive,_=data.artifact_links(rid,artifact_ref)
         label_kind='HiGHS reference LP, five analytic microfixtures'
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
@@ -203,16 +205,20 @@ def stage(catalog_path,out,check=True,allow_test=False):
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
         if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv"):
-            item=registered.adapt(root/rid)
+            source_id=report.get("source_report_id",rid)
+            source_pattern = r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else r"geo03-\d{8}-[0-9a-f]{12}"
+            data.require(isinstance(source_id,str) and re.fullmatch(source_pattern,source_id) is not None,"invalid registered source bundle identity")
+            item=registered.adapt(root/source_id)
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
+            data.require(report.get("source_report_id","")==item.source_report_id,"registered catalogue source identity mismatch")
             data.require(report.get("payload_sha256")==item.payload_sha256 and report.get("source_commit")==item.source_commit,"registered catalogue provenance mismatch")
             data.require(report.get("measured_scope")==item.measured_scope and report.get("evidence_limits")==item.evidence_limits,"registered scope/evidence differs from typed records")
             data.require(report.get("payload_schema")==item.payload_schema,"registered catalogue payload schema differs")
-            generated_page=registered.render_page(root/rid,item)
+            generated_page=registered.render_page(root/source_id,item)
             OfflineHTML(set(item.files)|{"report-envelope.json","publication-manifest.json"}).feed(generated_page)
-            data.validate_svg((root/rid/"latency.svg").read_bytes())
-            artifacts=registered.publication_artifacts(root/rid,item)
-            archive_bytes=registered.offline_zip(root/rid,item)
+            data.validate_svg((root/source_id/"latency.svg").read_bytes())
+            artifacts=registered.publication_artifacts(root/source_id,item)
+            archive_bytes=registered.offline_zip(root/source_id,item)
             data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"registered generated ZIP digest differs")
             registered_records[rid]=item
             registered_artifacts[rid]=artifacts
@@ -220,6 +226,7 @@ def stage(catalog_path,out,check=True,allow_test=False):
             continue
         if catalogue["schema"]=="csl.algorithm-report-catalog/3":
             data.require(report.get("report_kind") in ("lp","convex"),"unknown catalogue kind")
+            data.require("source_report_id" not in report,"LP/convex source identity must equal publication identity")
         data.require(re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",rid) is not None,"unsafe report ID")
         view=validate_bundle(root/rid,allow_test)
         expected_kind="convex" if view["schema"]==data.CONVEX_SCHEMA else "lp"
@@ -273,7 +280,7 @@ def stage(catalog_path,out,check=True,allow_test=False):
                 expected={"report_id":item.report_id,"report_kind":item.kind,"payload_schema":item.payload_schema,
                     "payload_sha256":item.payload_sha256,"source_commit":item.source_commit,
                     "measured_scope":item.measured_scope,"evidence_limits":item.evidence_limits,
-                    "native_payload_sha256":item.native_payload_sha256}
+                    "native_payload_sha256":item.native_payload_sha256,"source_report_id":item.source_report_id}
                 data.require(registered.validate_publication_manifest(out/rid,expected),"generated publication manifest failed validation")
                 (out/(rid+".zip")).write_bytes(registered_archives[rid])
             else:

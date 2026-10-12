@@ -1,5 +1,6 @@
 """Typed native report adapters preserve producer identity and evidence scope."""
 import json
+import csv
 import hashlib
 import copy
 import importlib.util
@@ -21,6 +22,34 @@ FIXTURES = Path(__file__).parent / 'fixtures' / 'registered'
 
 
 class RegisteredKindTests(unittest.TestCase):
+    def rehash_native(self, bundle, kind):
+        if kind=='geo03-hv':
+            manifest_path=bundle/'manifest.json'
+            manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+            for name in manifest['files']:
+                manifest['files'][name]=hashlib.sha256((bundle/name).read_bytes()).hexdigest()
+            manifest_path.write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
+            return
+        excluded={'manifest.sha256','bundle.zip','bundle.zip.sha256'}
+        names=sorted(path.relative_to(bundle).as_posix() for path in bundle.rglob('*') if path.is_file() and path.name not in excluded)
+        manifest=''.join(hashlib.sha256((bundle/name).read_bytes()).hexdigest()+'  '+name+'\n' for name in names)
+        (bundle/'manifest.sha256').write_text(manifest,encoding='utf-8',newline='\n')
+        with zipfile.ZipFile(bundle/'bundle.zip','w',compression=zipfile.ZIP_STORED) as archive:
+            for name in names+['manifest.sha256']:
+                archive.write(bundle/name,bundle.name+'/'+name)
+        digest=hashlib.sha256((bundle/'bundle.zip').read_bytes()).hexdigest()
+        (bundle/'bundle.zip.sha256').write_text(digest+'  bundle.zip\n',encoding='ascii',newline='\n')
+
+    def rewrite_csv_cell(self, path, field):
+        with path.open(newline='',encoding='utf-8') as stream:
+            reader=csv.DictReader(stream)
+            fields=reader.fieldnames
+            rows=list(reader)
+        rows[0][field]='999999999' if rows[0][field]!='999999999' else '999999998'
+        with path.open('w',newline='',encoding='utf-8') as stream:
+            writer=csv.DictWriter(stream,fieldnames=fields)
+            writer.writeheader();writer.writerows(rows)
+
     def publication(self, root):
         legacy=json.loads((Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/'catalog.json').read_text())
         reports=[]
@@ -48,11 +77,12 @@ class RegisteredKindTests(unittest.TestCase):
             target = root / rid
             shutil.copytree(source, target)
             item = registered.adapt(target)
-            (root / (rid + '.zip')).write_bytes(registered.offline_zip(target,item))
-            reports.append({'report_id':rid, 'report_kind':kind, 'payload_sha256':item.payload_sha256,
+            (root / (item.report_id + '.zip')).write_bytes(registered.offline_zip(target,item))
+            reports.append({'report_id':item.report_id, 'report_kind':kind, 'payload_sha256':item.payload_sha256,
                 'payload_schema':item.payload_schema,
                 'source_commit':item.source_commit, 'measured_scope':item.measured_scope,
-                'evidence_limits':item.evidence_limits, 'zip_sha256':hashlib.sha256((root/(rid+'.zip')).read_bytes()).hexdigest()})
+                'evidence_limits':item.evidence_limits, 'zip_sha256':hashlib.sha256((root/(item.report_id+'.zip')).read_bytes()).hexdigest(),
+                **({'source_report_id':item.source_report_id} if item.source_report_id else {})})
         catalogue={'schema':'csl.algorithm-report-catalog/3','artifact_ref':'main','reports':reports}
         (root/'catalog.json').write_text(json.dumps(catalogue,indent=2)+'\n',encoding='utf-8')
         (root/'index.html').write_text(site.catalogue_index(catalogue),encoding='utf-8')
@@ -61,7 +91,9 @@ class RegisteredKindTests(unittest.TestCase):
     def test_opt05_adapter_keeps_measured_scope_and_no_comparator(self):
         result = registered.adapt(FIXTURES / 'opt05-hull-20261012-d1c211c2')
         self.assertEqual(result.kind, 'opt05-hull')
-        self.assertEqual(result.report_id, 'opt05-hull-20261012-d1c211c2')
+        self.assertTrue(result.report_id.startswith('opt05-hull-20261012-'))
+        self.assertEqual(len(result.report_id.rsplit('-',1)[1]),64)
+        self.assertEqual(result.source_report_id, 'opt05-hull-20261012-d1c211c2')
         self.assertIn('trial', result.measured_scope.lower())
         self.assertIn('no comparator', result.evidence_limits.lower())
 
@@ -79,6 +111,55 @@ class RegisteredKindTests(unittest.TestCase):
         record['code_commit']='a'*40
         with self.assertRaisesRegex(ValueError,'report ID does not match source commit'):
             registered.adapt_payload(record)
+
+    def test_registered_public_ids_bind_complete_native_evidence_and_publisher(self):
+        for kind,source_id in [('opt05-hull','opt05-hull-20261012-d1c211c2'),('geo03-hv','geo03-20261012-37c3fb484e0d')]:
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as temp:
+                source=FIXTURES/source_id
+                bundle=Path(temp)/source_id
+                shutil.copytree(source,bundle)
+                original=registered.adapt(bundle)
+                (bundle/'README.md').write_bytes((bundle/'README.md').read_bytes()+b'\nMore reproduction detail.\n')
+                self.rehash_native(bundle,kind)
+                changed=registered.adapt(bundle)
+                self.assertEqual(changed.source_report_id,original.source_report_id)
+                self.assertEqual(changed.source_commit,original.source_commit)
+                self.assertEqual(changed.payload_sha256,original.payload_sha256)
+                self.assertNotEqual(changed.report_id,original.report_id)
+
+    def test_opt05_same_source_with_different_saved_measurement_gets_new_public_id(self):
+        source_id='opt05-hull-20261012-d1c211c2'
+        with tempfile.TemporaryDirectory() as temp:
+            bundle=Path(temp)/source_id
+            shutil.copytree(FIXTURES/source_id,bundle)
+            original=registered.adapt(bundle)
+            record=json.loads((bundle/'records.json').read_text(encoding='utf-8'))
+            group=[trial for trial in record['trials'] if trial['case_id']=='grid-25' and not trial['warmup']]
+            latest=max(group,key=lambda trial:trial['elapsed_ns'])
+            old_max=latest['elapsed_ns'];latest['elapsed_ns']=old_max+1
+            next(row for row in record['summary'] if row['case_id']=='grid-25')['max_ns']=old_max+1
+            for name in ('records.json','evidence/accepted-002/records.json'):
+                (bundle/name).write_text(json.dumps(record,indent=2)+'\n',encoding='utf-8')
+            for name,field in (('trials.csv','elapsed_ns'),('evidence/accepted-002/trials.csv','elapsed_ns'),('summary.csv','max_ns'),('evidence/accepted-002/summary.csv','max_ns')):
+                path=bundle/name
+                path.write_text(path.read_text(encoding='utf-8').replace(str(old_max),str(old_max+1),1),encoding='utf-8')
+            self.rehash_native(bundle,'opt05-hull')
+            changed=registered.adapt(bundle)
+            self.assertEqual(changed.source_report_id,original.source_report_id)
+            self.assertEqual(changed.source_commit,original.source_commit)
+            self.assertNotEqual(changed.payload_sha256,original.payload_sha256)
+            self.assertNotEqual(changed.report_id,original.report_id)
+
+    def test_registered_csv_must_match_json_even_with_consistent_native_hashes(self):
+        for kind,source_id in [('opt05-hull','opt05-hull-20261012-d1c211c2'),('geo03-hv','geo03-20261012-37c3fb484e0d')]:
+            for name,field in [('trials.csv','elapsed_ns' if kind=='opt05-hull' else 'run_ns'),('summary.csv','max_ns' if kind=='opt05-hull' else 'run_ns_max_ns')]:
+                with self.subTest(kind=kind,file=name), tempfile.TemporaryDirectory() as temp:
+                    bundle=Path(temp)/source_id
+                    shutil.copytree(FIXTURES/source_id,bundle)
+                    self.rewrite_csv_cell(bundle/name,field)
+                    self.rehash_native(bundle,kind)
+                    with self.assertRaisesRegex(ValueError,name.replace('.','\\.')+' differs from validated records'):
+                        registered.adapt(bundle)
 
     def test_opt05_embedded_zip_hash_and_contents_are_validated(self):
         source=FIXTURES/'opt05-hull-20261012-d1c211c2'
@@ -120,7 +201,9 @@ class RegisteredKindTests(unittest.TestCase):
     def test_geo03_adapter_preserves_native_payload_digest_and_limitations(self):
         result = registered.adapt(FIXTURES / 'geo03-20261012-37c3fb484e0d')
         self.assertEqual(result.kind, 'geo03-hv')
-        self.assertEqual(result.report_id, 'geo03-20261012-37c3fb484e0d')
+        self.assertTrue(result.report_id.startswith('geo03-20261012-'))
+        self.assertEqual(len(result.report_id.rsplit('-',1)[1]),64)
+        self.assertEqual(result.source_report_id, 'geo03-20261012-37c3fb484e0d')
         self.assertEqual(result.payload_sha256, '37c3fb484e0da72e4710cdc8f1e5ebe27b906c2ecd3b3396c43f67d0b8e4196c')
         self.assertIn('56', result.measured_scope)
         self.assertTrue(result.evidence_limits)
@@ -165,8 +248,8 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertIn('21 verified measured trials across 5x5, 9x9, and 13x13 square lattices',page)
             self.assertIn('56 measured trials across four bounded 2D fixtures in both conversion directions',page)
             self.assertIn('No comparator',page)
-            opt_page=(out/'opt05-hull-20261012-d1c211c2'/'index.html').read_text(encoding='utf-8')
-            geo_page=(out/'geo03-20261012-37c3fb484e0d'/'index.html').read_text(encoding='utf-8')
+            opt_page=(out/registered.adapt(FIXTURES/'opt05-hull-20261012-d1c211c2').report_id/'index.html').read_text(encoding='utf-8')
+            geo_page=(out/registered.adapt(FIXTURES/'geo03-20261012-37c3fb484e0d').report_id/'index.html').read_text(encoding='utf-8')
             self.assertIn('<td>2,135,700</td>',opt_page)
             self.assertIn('<td>1,029,100</td>',geo_page)
             self.assertIn('Checked latency SVG',geo_page)
@@ -194,6 +277,8 @@ class RegisteredKindTests(unittest.TestCase):
                 else:
                     self.assertNotIn('native_payload_sha256',envelope)
                     self.assertEqual(registered._digest(envelope['payload']),envelope['payload_sha256'])
+                    if report['report_kind'] in ('opt05-hull','geo03-hv'):
+                        self.assertEqual(envelope['source_report_id'],report['source_report_id'])
                 self.assertEqual(manifest['schema'],'csl.algorithm-report-publication-manifest/1')
                 self.assertEqual((manifest['report_id'],manifest['report_kind']),
                     (rid,report['report_kind']))
@@ -209,7 +294,7 @@ class RegisteredKindTests(unittest.TestCase):
             for report in catalogue['reports'][2:]:
                 rid=report['report_id']
                 self.assertIn(rid+'/index.html',page)
-                self.assertIn('reports/algorithm-results/'+rid, page)
+                self.assertIn('reports/algorithm-results/'+(report.get('source_report_id') or rid), page)
                 staged_zip=(out/(rid+'.zip')).read_bytes()
                 self.assertEqual(staged_zip,(root/(rid+'.zip')).read_bytes())
                 self.assertTrue((out/rid/'index.html').is_file())
@@ -393,12 +478,14 @@ class RegisteredKindTests(unittest.TestCase):
             source_manifest['report_id']=rid
             (root/original_rid/'manifest.json').write_text(json.dumps(source_manifest,indent=2)+'\n',encoding='utf-8')
             (root/original_rid).rename(root/rid)
-            (root/(original_rid+'.zip')).rename(root/(rid+'.zip'))
+            original_public_id=next(row['report_id'] for row in catalogue['reports'] if row.get('source_report_id')==original_rid)
+            (root/(original_public_id+'.zip')).unlink()
             item=registered.adapt(root/rid)
             archive=registered.offline_zip(root/rid,item)
-            (root/(rid+'.zip')).write_bytes(archive)
-            report=next(row for row in catalogue['reports'] if row['report_id']==original_rid)
-            report['report_id']=rid
+            (root/(item.report_id+'.zip')).write_bytes(archive)
+            report=next(row for row in catalogue['reports'] if row.get('source_report_id')==original_rid)
+            report['report_id']=item.report_id
+            report['source_report_id']=rid
             report['payload_sha256']=item.payload_sha256
             report['evidence_limits']=item.evidence_limits
             report['zip_sha256']=hashlib.sha256(archive).hexdigest()
@@ -426,8 +513,11 @@ class RegisteredKindTests(unittest.TestCase):
             (root/rid/'manifest.json').write_text(json.dumps(manifest),encoding='utf-8')
             item=registered.adapt(root/rid)
             archive=registered.offline_zip(root/rid,item)
-            (root/(rid+'.zip')).write_bytes(archive)
-            report=next(x for x in catalogue['reports'] if x['report_id']==rid)
+            old_public_id=next(x['report_id'] for x in catalogue['reports'] if x.get('source_report_id')==rid)
+            (root/(old_public_id+'.zip')).unlink()
+            (root/(item.report_id+'.zip')).write_bytes(archive)
+            report=next(x for x in catalogue['reports'] if x.get('source_report_id')==rid)
+            report['report_id']=item.report_id
             report['zip_sha256']=hashlib.sha256(archive).hexdigest()
             (root/'catalog.json').write_text(json.dumps(catalogue),encoding='utf-8')
             (root/'index.html').write_text(site.catalogue_index(catalogue),encoding='utf-8')
