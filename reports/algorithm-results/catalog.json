@@ -3,10 +3,10 @@
   "artifact_ref": "main",
   "reports": [
     {
-      "report_id": "lp-20261012T000346Z-54516ee8780c8b584748ffa4df26402fa208b29100ccfade95767e90060cc61d",
+      "report_id": "lp-20261012T000346Z-9b916da6a4ffd6685e99df3129f6cbaaa73d85c9f12533a828c1e1714dd12ff0",
       "payload_sha256": "e6b70ff30fe8d8149876470edff62cd55c9de35cbc41edc314726033e2d8778d",
       "source_commit": "6780941b80fd1e94d6b5a6c5142822d5273bfa3f",
-      "zip_sha256": "03fa65757636207b8137cd4274aef986d8b0975ebfb17d83542ff2731a1c4443",
+      "zip_sha256": "fb5a837a2c8aaa1136ce064c98d369f812ef7d8b48e0ed8f3839376b3f301daa",
       "report_kind": "lp",
       "measured_scope": "Five analytic LP microfixtures",
       "evidence_limits": "Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates",
@@ -15,11 +15,11 @@
       "source_report_id": "lp-20261012T000346Z-ee5e9193b7a5"
     },
     {
-      "report_id": "convex-20261012T041854Z-659bf6f3e6e3e8d70a546b1626f4b72d4fea2f25c7f6b3283c57c1777b6116ac",
+      "report_id": "convex-20261012T041854Z-2a87a229b670431a399a070008bc871c97d696444f0a80e8061b42d0ffc79a59",
       "report_kind": "convex",
       "payload_sha256": "f1bd431e5a241923f95d0c20617d2017374599c54d04392c7107c3d5b62b9e0a",
       "source_commit": "cc3d91b579d1bfbb07fb6159b6709a08cd15fa10",
-      "zip_sha256": "8ff51c17f84e81e12cec0819ba692e1bf65d18fa7dcc62981d370852cbf3c1f2",
+      "zip_sha256": "e205d7ac4f38e3d63ee78d9a2b3909c671f579ce01651db60391d7bbc979f56c",
       "measured_scope": "Nine analytic convex microfixtures",
       "evidence_limits": "Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates",
       "payload_schema": "csl.algorithm-report-view/2",

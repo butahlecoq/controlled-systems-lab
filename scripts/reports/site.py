@@ -264,8 +264,9 @@ def stage(catalog_path,out,check=True,allow_test=False):
             source_id=report.get("source_report_id")
             data.require(isinstance(source_id,str) and re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",source_id) is not None,"unsafe LP/convex source identity")
             data.require(lp_convex_publication_id(root,source_id)==rid,"LP/convex public identity differs from source")
-            validate_legacy_publication(root,source_id,pinned_legacy)
-            legacy_sources.add(source_id)
+            if source_id in pinned_legacy:
+                validate_legacy_publication(root,source_id,pinned_legacy)
+                legacy_sources.add(source_id)
         else:
             source_id=rid
         data.require(re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",source_id) is not None,"unsafe source report ID")

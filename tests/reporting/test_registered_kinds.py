@@ -421,6 +421,57 @@ class RegisteredKindTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'publication manifest'):
                     site.validate_publication_manifest(first/rid,report)
 
+    def test_new_lp_source_stages_without_extending_historical_pinset(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)/'input';root.mkdir()
+            catalogue=self.publication(root)
+            historical=catalogue['reports'][0]
+            old_source=historical['source_report_id']
+            old_view=site.data.load_view(root/old_source/'records.json')
+            payload=copy.deepcopy(old_view['payload'])
+            payload['created_utc']='2026-10-12T00:03:47Z'
+            view=site.data.seal(payload)
+            source_id=view['report_id']
+            self.assertNotEqual(source_id,old_source)
+            bundle=root/source_id
+            shutil.copytree(root/old_source,bundle)
+            (bundle/'records.json').write_text(json.dumps(view,indent=2)+'\n',encoding='utf-8')
+            exported=json.loads((bundle/'export.json').read_text(encoding='utf-8'))
+            exported['payload_sha256']=view['payload_sha256']
+            exported['plot']['payload_sha256']=view['payload_sha256']
+            (bundle/'export.json').write_text(json.dumps(exported,indent=2)+'\n',encoding='utf-8')
+            svg=(bundle/'latency.svg').read_text(encoding='utf-8')
+            (bundle/'index.html').write_text(site.render.document(view,svg,exported['artifact_ref']),encoding='utf-8')
+            manifest=json.loads((bundle/'manifest.json').read_text(encoding='utf-8'))
+            manifest['report_id']=source_id
+            manifest['files']={name:site.data.file_digest(bundle/name) for name in manifest['files']}
+            (bundle/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
+            site.make_zip(bundle,root/(source_id+'.source.zip'))
+            rid=site.lp_convex_publication_id(root,source_id)
+            scope,limits=site.lp_convex_publication_metadata('lp',view)
+            item=registered.PublicationRecord('lp',rid,registered._digest(view),historical['source_commit'],scope,limits,
+                                              tuple(sorted(site.FILES)),view['schema'],view['payload_sha256'],source_id)
+            source_page=(bundle/'index.html').read_text(encoding='utf-8')
+            links='<p>Publication <code>'+rid+'</code>; source <code>'+source_id+'</code>. <a href="report-envelope.json">Versioned report envelope</a> · <a href="publication-manifest.json">Publication manifest</a></p>'
+            staged_page=source_page.replace('</body>',links+'</body>')
+            artifacts=registered.publication_artifacts(bundle,item,staged_page.encode('utf-8'))
+            archive=registered.publication_zip(rid,artifacts)
+            (root/(rid+'.zip')).write_bytes(archive)
+            catalogue['reports'].append({**historical,'report_id':rid,'source_report_id':source_id,
+                'payload_sha256':item.payload_sha256,'native_payload_sha256':view['payload_sha256'],
+                'zip_sha256':hashlib.sha256(archive).hexdigest()})
+            (root/'catalog.json').write_text(json.dumps(catalogue,indent=2)+'\n',encoding='utf-8')
+            (root/'index.html').write_text(site.catalogue_index(catalogue),encoding='utf-8')
+            staged=site.stage(root/'catalog.json',Path(temp)/'stage',check=True)
+            self.assertTrue((staged/rid/'report-envelope.json').is_file())
+            self.assertEqual((staged/(old_source+'.zip')).read_bytes(),(root/(old_source+'.source.zip')).read_bytes())
+            self.assertTrue((staged/historical['report_id']/'report-envelope.json').is_file())
+            catalogue['reports'].remove(historical)
+            (root/'catalog.json').write_text(json.dumps(catalogue,indent=2)+'\n',encoding='utf-8')
+            (root/'index.html').write_text(site.catalogue_index(catalogue),encoding='utf-8')
+            with self.assertRaisesRegex(ValueError,'legacy publication sources differ'):
+                site.stage(root/'catalog.json',Path(temp)/'missing-historical',check=True)
+
     def test_legacy_retention_rejects_changed_bytes_and_rehashed_pinset(self):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)/'input';root.mkdir()

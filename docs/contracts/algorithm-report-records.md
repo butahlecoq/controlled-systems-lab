@@ -387,5 +387,9 @@ rows use those old IDs as `source_report_id` and derive new public IDs from the
 complete validated source inventory, original ZIP and publisher code. The new
 pages and ZIPs live only at the new IDs. The old paths remain available without
 changing any historical measurement or download bytes.
+The pinset applies only to those historical source IDs. Future LP and convex
+source bundles may be registered with new content-bound public IDs without
+editing the pinset; every pinned historical source must still be present and
+staged byte-for-byte.
 
 The manifest records the exact staged file inventory and SHA-256 values, including the staged page, figures, evidence files and serialized envelope. The manifest itself is excluded from its own file list. The offline ZIP contains the same envelope and manifest bytes as the staged directory and uses deterministic, uncompressed entries. Schema-1/2 catalogues remain readable under their existing publication path; schema-3 rows require the common envelope metadata. An unknown native payload schema is rejected before output is created.
