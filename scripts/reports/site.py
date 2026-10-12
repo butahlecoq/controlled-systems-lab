@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 import csv
+import hashlib
 from html import escape
 from html.parser import HTMLParser
 import json
@@ -12,6 +13,7 @@ import zipfile
 
 import report_data as data
 import render
+import registered_reports as registered
 
 FILES={"index.html","records.json","scenarios.json","raw-events.jsonl","profile.json","build-provenance.txt",
        "process-stderr.txt","trials.csv","summary.csv","latency.svg","latency.png","export.json","manifest.json"}
@@ -157,14 +159,22 @@ def make_zip(bundle,path,allow_test=False):
 
 def catalogue_index(catalogue):
     artifact_ref=catalogue.get("artifact_ref","main");data.artifact_reference(artifact_ref)
-    parts=['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CSL algorithm reports</title></head><body><h1>Versioned algorithm reports</h1><p>Single-adapter numerical reports. No certificate, optimizer-family or speedup claim is implied.</p><ul>']
+    parts=['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CSL algorithm reports</title></head><body><h1>Versioned algorithm reports</h1><p>Each report identifies its measured scope and evidence limits. Cross-method performance or certification claims are not implied.</p><ul>']
     for report in catalogue["reports"]:
         rid=report["report_id"]
         tree,archive,label=data.artifact_links(rid,artifact_ref)
         label_kind='HiGHS reference LP, five analytic microfixtures'
-        if catalogue.get("schema","csl.algorithm-report-catalog/1")=="csl.algorithm-report-catalog/2":
-            data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
-            label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
+        if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
+            if catalogue["schema"]=="csl.algorithm-report-catalog/3":
+                data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv"),"unknown catalogue kind")
+                labels={"opt05-hull":"OPT-05 LP-backed finite-point hull reduction; evidence limits are stated on its report page","geo03-hv":"GEO-03 bounded 2D H/V contract fixtures; evidence limits are stated on its report page"}
+                label_kind=labels.get(report["report_kind"],"HiGHS reference convex, nine analytic microfixtures" if report["report_kind"]=="convex" else label_kind)
+                if report["report_kind"] in ("opt05-hull","geo03-hv"):
+                    data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"registered scope/evidence metadata required")
+                    label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
+            else:
+                data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
+                label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
         parts.append('<li><a href="'+rid+'/index.html">'+escape(rid)+'</a> — '+label_kind+'; source <code>'+escape(report["source_commit"])+'</code> — <a href="'+rid+'/records.json">raw JSON</a> · <a href="'+rid+'/trials.csv">CSV</a> · <a href="'+rid+'.zip">offline ZIP</a> · <a href="'+tree+'">Repository artifact fallback ('+label+')</a> · <a href="'+archive+'">Repository ZIP fallback</a></li>')
     return ''.join(parts)+"</ul></body></html>"
 
@@ -172,13 +182,29 @@ def catalogue_index(catalogue):
 def stage(catalog_path,out,check=True,allow_test=False):
     catalog_path=Path(catalog_path);root=catalog_path.parent
     catalogue=data.parse_json(catalog_path.read_text(encoding="utf-8"))
-    data.require(catalogue["schema"] in ("csl.algorithm-report-catalog/1","csl.algorithm-report-catalog/2") and catalogue["reports"],"nonempty versioned catalogue required")
+    data.require(catalogue["schema"] in ("csl.algorithm-report-catalog/1","csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3") and catalogue["reports"],"nonempty versioned catalogue required")
     artifact_ref=catalogue.get("artifact_ref","main");data.artifact_reference(artifact_ref)
     ids=set()
+    registered_records={}
     for report in catalogue["reports"]:
         rid=report["report_id"]
-        data.require(re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",rid) is not None and rid not in ids,"unsafe/duplicate report ID")
+        data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv"):
+            item=registered.adapt(root/rid)
+            data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
+            data.require(report.get("payload_sha256")==item.payload_sha256 and report.get("source_commit")==item.source_commit,"registered catalogue provenance mismatch")
+            data.require(report.get("measured_scope")==item.measured_scope and report.get("evidence_limits")==item.evidence_limits,"registered scope/evidence differs from typed records")
+            generated_page=registered.render_page(root/rid,item)
+            OfflineHTML(set(item.files)).feed(generated_page)
+            data.validate_svg((root/rid/"latency.svg").read_bytes())
+            archive_bytes=registered.offline_zip(root/rid,item)
+            data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"registered generated ZIP digest differs")
+            registered_records[rid]=item
+            continue
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3":
+            data.require(report.get("report_kind") in ("lp","convex"),"unknown catalogue kind")
+        data.require(re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",rid) is not None,"unsafe report ID")
         view=validate_bundle(root/rid,allow_test)
         expected_kind="convex" if view["schema"]==data.CONVEX_SCHEMA else "lp"
         if catalogue["schema"]=="csl.algorithm-report-catalog/1": data.require(expected_kind=="lp" and "report_kind" not in report,"v1 catalogue is LP only")
@@ -196,6 +222,23 @@ def stage(catalog_path,out,check=True,allow_test=False):
     index=catalogue_index(catalogue)
     if check: data.require(data.local_file(root,"index.html").read_text(encoding="utf-8")==index,"committed index differs from catalogue")
     out=Path(out);out.mkdir(parents=True,exist_ok=False)
+    if catalogue["schema"]=="csl.algorithm-report-catalog/3":
+        for rid in ids:
+            (out/rid).mkdir()
+            if rid in registered_records:
+                item=registered_records[rid]
+                for name in item.files:
+                    if name=="index.html": continue
+                    source=root/rid/name;destination=out/rid/name
+                    destination.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,destination)
+                (out/rid/"index.html").write_text(registered.render_page(root/rid,item),encoding="utf-8")
+                (out/(rid+".zip")).write_bytes(registered.offline_zip(root/rid,item))
+            else:
+                for name in FILES: shutil.copyfile(data.local_file(root/rid,name),out/rid/name)
+                shutil.copyfile(data.local_file(root,rid+".zip"),out/(rid+".zip"))
+        shutil.copyfile(catalog_path,out/"catalog.json")
+        (out/"index.html").write_text(index,encoding="utf-8")
+        return out
     for rid in ids:
         (out/rid).mkdir()
         for name in FILES: shutil.copyfile(data.local_file(root/rid,name),out/rid/name)

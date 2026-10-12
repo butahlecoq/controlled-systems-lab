@@ -343,3 +343,20 @@ only with its genuine scenario/configuration binding. Public-run timing retains
 its wrapper/native/translation/check scope, and missing native observations stay
 explicitly unavailable. OBS01 adds no native diagnostic parser or performance
 publication gate exemption.
+
+## Registered non-LP publication adapters
+
+The shared Pages publisher accepts catalogue schema `csl.algorithm-report-catalog/3`
+for mixed LP, convex, OPT-05 and GEO-03 catalogues. LP/convex retain their existing
+validated view schemas and bundle projections. New report kinds are admitted only
+through `scripts/reports/registered_reports.py` adapters for
+`csl.hull-benchmark-records/1` (`opt05-hull`) and `csl.geo03-hv-report/1`
+(`geo03-hv`). The adapters validate their native source identity, typed trial and
+summary coherence, explicit file inventory, manifest hashes and safe paths before
+staging. The shared renderer projects measured tables, evidence limits and links
+from those validated records, then the same `site.stage` operation emits their
+offline ZIPs and catalogue links. Producer HTML is retained as hash-checked source
+evidence but is never copied as the published page. Catalogue scope/limit text must
+match the adapter projection; it cannot add claims. A staged result is not a public
+URL: source artifacts still require review and the main Pages workflow must publish
+the integrated catalogue before the live URL check can pass.
