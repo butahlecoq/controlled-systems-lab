@@ -213,7 +213,10 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 [&](const FeasibleCandidateEvidence& relation) { if (relation.feasibility.problem != expected)
                     result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.inner","Feasible-candidate evidence is bound to another problem"});
                     else if (std::holds_alternative<Unestablished>(relation.feasibility.support))
-                    result.push_back({DiagnosticCode::invalid_claim,"family.candidate.inner","Inner feasibility needs supporting evidence"}); },
+                    result.push_back({DiagnosticCode::invalid_claim,"family.candidate.inner","Inner feasibility needs supporting evidence"});
+                    if (!std::holds_alternative<RelationFeasibilityEvidence>(candidate.feasibility))
+                        result.push_back({DiagnosticCode::invalid_claim,"family.candidate.feasibility.relation",
+                            "A feasible inner relation needs whole-relation feasibility, not only a witness"}); },
                 [&](const HeuristicRelationEvidence& relation) { if (relation.method.empty())
                     result.push_back({DiagnosticCode::invalid_claim,"family.candidate.heuristic","Heuristic relation must name its method"}); }
             },candidate.relation_to_target);

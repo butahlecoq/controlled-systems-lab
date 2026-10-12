@@ -135,6 +135,8 @@ TEST_CASE("outer candidate witness feasibility is scoped to that witness") {
     auto bad_witness=witness;bad_witness.problem={"other"};
     outcome=CandidateFamily{relation,OuterCandidateEvidence{support},WitnessFeasibilityEvidence{bad_witness,support}};
     CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,outcome)));
+    outcome=CandidateFamily{relation,FeasibleCandidateEvidence{support},WitnessFeasibilityEvidence{witness,support}};
+    CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,outcome)));
 }
 TEST_CASE("T-M03: nonpolyhedral stage domains need another pipeline") {
     auto p = make_problem();
