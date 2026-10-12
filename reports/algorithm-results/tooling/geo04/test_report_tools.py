@@ -10,6 +10,7 @@ import copy
 import sys
 import unittest
 from pathlib import Path
+import xml.etree.ElementTree as ET
 import geo04_catalog
 
 HERE = Path(__file__).resolve().parent
@@ -236,6 +237,22 @@ class ReportToolTests(unittest.TestCase):
         canonical = {key:value for key,value in payload.items() if key not in excluded}
         expected = hashlib.sha256(json.dumps(canonical,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
         self.assertEqual(payload["payload_sha256"], expected)
+
+    def test_phase_chart_left_column_labels_have_non_overlapping_vertical_rows(self):
+        root = ET.fromstring(render.render_svg(valid_payload("geo04-chart-layout")))
+        ns = {"svg": "http://www.w3.org/2000/svg"}
+        baselines = sorted(float(node.attrib["y"]) for node in root.findall(".//svg:text[@x='8']", ns))
+        self.assertGreater(len(baselines), 4)
+        for previous, current in zip(baselines, baselines[1:]):
+            self.assertGreaterEqual(current-previous, 15, f"overlapping chart labels at y={previous} and y={current}")
+
+    def test_report_tables_are_wrapped_in_keyboard_accessible_horizontal_scrollers(self):
+        page = render.render_html(valid_payload("geo04-table-layout"))
+        self.assertEqual(page.count('<div class="table-scroll"'), 2)
+        self.assertEqual(page.count('tabindex="0"><table>'), 2)
+        self.assertIn("overflow-x:auto", page)
+        self.assertIn('tabindex="0"', page)
+        self.assertIn("width:max-content;min-width:100%", page)
 
     def test_offline_export_uses_saved_records_only_and_packages_required_files(self):
         payload = valid_payload("geo04-offline-test")

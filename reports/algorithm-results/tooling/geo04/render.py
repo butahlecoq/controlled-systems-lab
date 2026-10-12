@@ -186,14 +186,14 @@ def render_html(payload: dict) -> str:
     status = html.escape(payload["collection"]["state"])
     chart = render_svg(payload)
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{report_id} — GEO-04</title><style>body{{font:16px system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#172033}}table{{border-collapse:collapse;width:100%;overflow:auto;display:block}}th,td{{border:1px solid #ccd3df;padding:.4rem;text-align:left;white-space:nowrap}}th{{background:#edf1f7}}code{{overflow-wrap:anywhere}}.note{{background:#f3f6fb;padding:1rem}}</style></head><body>
+<title>{report_id} — GEO-04</title><style>body{{font:16px system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#172033}}table{{border-collapse:collapse}}.table-scroll{{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:1rem 0}}.table-scroll table{{width:max-content;min-width:100%}}th,td{{border:1px solid #ccd3df;padding:.4rem;text-align:left;white-space:nowrap}}th{{background:#edf1f7}}code{{overflow-wrap:anywhere}}.note{{background:#f3f6fb;padding:1rem}}</style></head><body>
 <h1>GEO-04 polyhedral intersection and halfspace reduction</h1><p>Report <code>{report_id}</code>; collection state: <strong>{status}</strong>.</p>
 <p>Algorithm source <code>{source}</code>; report harness <code>{harness}</code>. Binary64 numerical fixtures; no exact validated-geometry claim.</p>
 <h2>Measured phase summaries</h2><p>Nanoseconds; each cell is median (min–max) across passing repetitions. Failed attempts remain in the trial table and are excluded from summaries.</p>
-<table><thead><tr><th>Scenario</th><th>Attempts</th><th>Passed</th><th>Failures</th><th>Intersection</th><th>Pipeline preparation</th><th>Conversion workspace</th><th>Conversion run</th><th>LP workspace</th><th>Reduction + LP</th><th>Whole trial</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
+<div class="table-scroll" role="region" aria-label="Phase summary table" tabindex="0"><table><thead><tr><th>Scenario</th><th>Attempts</th><th>Passed</th><th>Failures</th><th>Intersection</th><th>Pipeline preparation</th><th>Conversion workspace</th><th>Conversion run</th><th>LP workspace</th><th>Reduction + LP</th><th>Whole trial</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 <h2>Phase timing figure</h2>{chart}<h2>Scientific and evidence scope</h2><div class="note"><p>{evidence}</p><p>The fixed-bound unit-test fixture is not a benchmark backend and supplies no performance measurements.</p></div>
 <ul>{limits}</ul><p>No competitor, speedup, application-scale, or scalability claim is made. Workspace timing includes only the named public workspace creation phase; reduction timing includes its internal LP queries, whose separate timings are unavailable.</p>
-<h2>Per-repetition records</h2><table><thead><tr><th>Scenario</th><th>Rep.</th><th>Status</th><th>Oracle</th><th>Intersection ns</th><th>Prepare ns</th><th>Converter workspace ns</th><th>Conversion run ns</th><th>LP workspace ns</th><th>Reduction ns</th><th>Whole trial ns</th><th>LP calls</th><th>LP results</th><th>Optimal claims</th><th>Objective bounds</th><th>Supported bounds</th><th>Reduction status</th><th>Observed V vertices (binary64)</th><th>Failure detail</th></tr></thead><tbody>{''.join(trial_rows)}</tbody></table>
+<h2>Per-repetition records</h2><div class="table-scroll" role="region" aria-label="Per-repetition records table" tabindex="0"><table><thead><tr><th>Scenario</th><th>Rep.</th><th>Status</th><th>Oracle</th><th>Intersection ns</th><th>Prepare ns</th><th>Converter workspace ns</th><th>Conversion run ns</th><th>LP workspace ns</th><th>Reduction ns</th><th>Whole trial ns</th><th>LP calls</th><th>LP results</th><th>Optimal claims</th><th>Objective bounds</th><th>Supported bounds</th><th>Reduction status</th><th>Observed V vertices (binary64)</th><th>Failure detail</th></tr></thead><tbody>{''.join(trial_rows)}</tbody></table></div>
 <h2>Provenance and offline files</h2><ul>{''.join(f'<li><a href="{html.escape(name)}">{html.escape(name)}</a></li>' for name in FILES if name in payload.get('_files', []))}</ul>
 <p>Hardware, OS, compiler/build flags, configured worker counts, tolerances, load observations and unavailable evidence are in records and provenance files. See the offline ZIP for the complete bundle.</p></body></html>'''
 
@@ -204,16 +204,17 @@ def render_svg(payload: dict) -> str:
     keys = ("intersection_ns", "prepare_ns", "workspace_ns", "conversion_run_ns", "lp_workspace_ns", "reduction_ns", "total_ns")
     colors = ("#3568a8", "#4c956c", "#db8b25", "#8b63a8", "#a97842", "#bb5353", "#4b8f9c")
     max_value = max((phase["median"] or 0 for _, group in scenarios for phase in group["phases"].values()), default=0)
-    width, left, scale = 900, 240, 600 / max(max_value, 1)
-    height = 80 + 120*len(scenarios)
+    width, left, scale = 1100, 260, 650 / max(max_value, 1)
+    group_height, phase_top, phase_step = 200, 32, 22
+    height = 50 + group_height*len(scenarios)
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Median phase duration by GEO-04 scenario" viewBox="0 0 {width} {height}">',
-             '<style>text{font:13px system-ui,sans-serif;fill:#172033}</style>']
+             '<style>text{font:13px system-ui,sans-serif;fill:#172033}.scenario{font-weight:600}</style>']
     for si, (scenario, group) in enumerate(scenarios):
-        y0 = 28 + si*120
-        parts.append(f'<text x="8" y="{y0+13}">{html.escape(scenario)}</text>')
+        y0 = 20 + si*group_height
+        parts.append(f'<text class="scenario" x="8" y="{y0+15}">{html.escape(scenario)}</text>')
         for phase_index, (label, key, color) in enumerate(zip(labels, keys, colors)):
-            y = y0 + phase_index*19
-            parts.append(f'<text x="8" y="{y+12}">{label}</text>')
+            y = y0 + phase_top + phase_index*phase_step
+            parts.append(f'<text x="8" y="{y+13}">{label}</text>')
             value = group["phases"][key]["median"]
             if value is not None:
                 bar_width = max(1, value*scale)
