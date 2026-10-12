@@ -5,6 +5,13 @@ add_executable(installed_input_client input_client.cpp)
 target_link_libraries(installed_input_client PRIVATE CSL::input)
 set_target_properties(installed_input_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_input_client COMMAND installed_input_client)
+
+add_executable(installed_conversion_client conversion_client.cpp)
+target_link_libraries(installed_conversion_client PRIVATE CSL::qhull_conversion CSL::highs_lp)
+set_target_properties(installed_conversion_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_conversion_client COMMAND installed_conversion_client)
+set_tests_properties(installed_conversion_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed Qhull conversion client: registered square conversion and literal vertices passed")
 set_tests_properties(installed_input_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed input client: owning scenario, literal identity and original cost passed")
 add_executable(installed_convex_client convex_client.cpp)
