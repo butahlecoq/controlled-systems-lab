@@ -115,6 +115,15 @@ if(BUILD_TESTING)
   add_executable(optimization_public_client tests/installed/optimization_client.cpp)
   target_link_libraries(optimization_public_client PRIVATE CSL::optimization CSL::registry)
   add_test(NAME optimization_public_client COMMAND optimization_public_client)
+  add_executable(lp_backend_contract tests/contract/optimization/lp_backend_contract.cpp)
+  target_link_libraries(lp_backend_contract PRIVATE CSL::highs_lp doctest::doctest)
+  add_test(NAME lp_backend_contract COMMAND lp_backend_contract)
+  add_test(NAME lp_analytic_catalogue_consistency COMMAND ${CMAKE_COMMAND}
+    "-DTEST05_EXE=$<TARGET_FILE:lp_backend_contract>"
+    "-DTEST05_CATALOGUE=${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/optimization/analytic_lp_cases.json"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/contract/optimization/check_lp_catalogue.cmake")
+  set_tests_properties(lp_backend_contract PROPERTIES TIMEOUT 60)
+  set_tests_properties(lp_analytic_catalogue_consistency PROPERTIES TIMEOUT 20)
   add_executable(lp_backend_tests tests/contract/optimization/lp_backend_tests.cpp)
   target_link_libraries(lp_backend_tests PRIVATE CSL::optimization CSL::registry doctest::doctest)
   add_test(NAME lp_backend_tests COMMAND lp_backend_tests)
