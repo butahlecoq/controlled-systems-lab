@@ -363,7 +363,7 @@ def artifact_reference(ref):
 
 def artifact_links(report_id,ref="main"):
     label=artifact_reference(ref)
-    require(re.fullmatch(r"(?:(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|opt05-hull-\d{8}-[0-9a-f]{8}|(?:opt05-hull|geo03)-\d{8}-[0-9a-f]{64}|geo03-\d{8}-[0-9a-f]{12})",report_id) is not None,"unsafe report identity")
+    require(re.fullmatch(r"(?:(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|opt05-hull-\d{8}-[0-9a-f]{8}|(?:opt05-hull|geo03)-\d{8}-[0-9a-f]{64}|geo03-\d{8}-[0-9a-f]{12}|geo04-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64}))",report_id) is not None,"unsafe report identity")
     base="https://github.com/butahlecoq/controlled-systems-lab/"
     path="/reports/algorithm-results/"+report_id
     return base+"tree/"+ref+path,base+"blob/"+ref+path+".zip",label
@@ -427,7 +427,7 @@ def validate_svg(content):
     svg = "{http://www.w3.org/2000/svg}"
     require(root.tag == svg+"svg", "SVG root namespace required")
     tags = {"svg","g","defs","path","clipPath","use","rect","line","polyline","polygon","circle","ellipse","text","tspan","style","title","desc"}
-    attributes = {"id","width","height","viewBox","version","x","y","x1","x2","y1","y2","cx","cy","rx","ry","r","d","points","transform","style","clip-path","clipPathUnits","fill","stroke","stroke-width","stroke-linecap","stroke-linejoin","stroke-dasharray","stroke-dashoffset","stroke-opacity","fill-opacity","opacity","font-size","font-family","font-style","font-weight","text-anchor","type","href","role","aria-label","aria-labelledby","{http://www.w3.org/1999/xlink}href"}
+    attributes = {"id","class","width","height","viewBox","version","x","y","x1","x2","y1","y2","cx","cy","rx","ry","r","d","points","transform","style","clip-path","clipPathUnits","fill","stroke","stroke-width","stroke-linecap","stroke-linejoin","stroke-dasharray","stroke-dashoffset","stroke-opacity","fill-opacity","opacity","font-size","font-family","font-style","font-weight","text-anchor","type","href","role","aria-label","aria-labelledby","{http://www.w3.org/1999/xlink}href"}
     properties = {"fill","fill-opacity","fill-rule","stroke","stroke-width","stroke-linecap","stroke-linejoin","stroke-dasharray","stroke-dashoffset","stroke-opacity","stroke-miterlimit","opacity","font","font-size","font-family","font-style","font-weight","text-anchor","clip-path"}
     ids, refs = set(), []
     def safe_value(value):
@@ -447,6 +447,7 @@ def validate_svg(content):
         require(isinstance(element.tag,str) and element.tag.startswith(svg) and element.tag[len(svg):] in tags, "unsafe SVG element")
         for key,value in element.attrib.items():
             require(key in attributes, "unknown/event SVG attribute")
+            if key=="class": require(re.fullmatch(r"[A-Za-z_][A-Za-z0-9_-]*(?:\s+[A-Za-z_][A-Za-z0-9_-]*)*",value) is not None,"unsafe SVG class")
             if key=="role": require(value in {"img","graphics-document"},"unsupported SVG role")
             if key=="aria-label": require(bool(value.strip()) and len(value)<=256,"invalid SVG accessible label")
             if key=="aria-labelledby":
@@ -461,8 +462,11 @@ def validate_svg(content):
             else: safe_value(value)
         if element.tag == svg+"style":
             css = element.text or ""
-            require(re.fullmatch(r"\s*(?:\*|text)\s*\{[^{}]*\}\s*",css) is not None, "unsupported SVG stylesheet")
-            style(css[css.index("{")+1:css.rindex("}")])
+            rule_pattern = r"(?:\*|text|\.scenario|text\.scenario)\s*\{([^{}]*)\}"
+            rules = list(re.finditer(rule_pattern, css))
+            require(rules and re.fullmatch(r"\s*(?:(?:\*|text|\.scenario|text\.scenario)\s*\{[^{}]*\}\s*)+",css) is not None, "unsupported SVG stylesheet")
+            for rule in rules:
+                style(rule.group(1))
     require(all(ref in ids for ref in refs), "missing internal SVG target")
     return text
 

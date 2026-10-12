@@ -47,6 +47,17 @@
       "zip_sha256": "8e62aa3394ae02797329ab1244d863966a7c770fbcbdd60a51eb4362d8e49abe",
       "payload_schema": "csl.geo03-hv-report/1",
       "source_report_id": "geo03-20261012-3c12ca125831"
+    },
+    {
+      "report_id": "geo04-20261012T224946Z-30606c76deb657567eb86a451c474c5aa796827651262a550b15fa4cb4ece549",
+      "report_kind": "geo04-intersection",
+      "payload_sha256": "961fa1b4019a35863dc2969d70d4ca7e3f31521379695d40dd5285569192f369",
+      "payload_schema": "csl.geo04-polyhedral-report/1",
+      "source_commit": "9579f9e936d85d66c59003b2a04157c153df6b63",
+      "measured_scope": "28 measured trials across 4 analytic polyhedral-intersection fixtures",
+      "evidence_limits": "No comparator or speedup claim; binary64 numerical fixtures without exact validated geometry; no application-scale or scalability claim; HiGHS reduction remains incomplete and retains all rows; CPU profile and per-trial resource counters unavailable",
+      "zip_sha256": "a708532a9068fa8127f742b7370f38836ce31e7af2d09f8633caf97ed8946db1",
+      "source_report_id": "geo04-20261012T224946Z-c37852bcc80d"
     }
   ]
 }

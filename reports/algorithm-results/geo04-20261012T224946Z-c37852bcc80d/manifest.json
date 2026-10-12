@@ -1,0 +1,20 @@
+{
+  "files": {
+    "build-provenance.txt": "9a3608ef4c1a50c85f7a9238b0603ceae6a9d20aa9b59865a0a35fe0f1ae4dc0",
+    "collection-status.json": "55bddc04a6b6a8782ab6a10dd9fadca20ce683990040df64baba4c300bc0daea",
+    "concurrent-work.txt": "fa78272a5b5e22f5e06fa6d41013e7162458637282449087eeaff375dff2012f",
+    "environment.json": "460df3a7ad5e4300a5818215fc2e3cdb43ecea0c3d0c0c5d4bd64d399d73b376",
+    "index.html": "9aa60da764e8812499135ccb7862079e7ca5a1da81efff86b4ed83fbd0473e50",
+    "latency.svg": "a12295a0c135576547be32bc575e73628d9e74297c1428885adff6226d651313",
+    "measurement-command.txt": "bce4956467f90abbebbcbb9aee1df3b138073a5e94e3b3997ce6b6150743ffc2",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile-evidence.txt": "26e6d30959ccd853c5eaf0d6b2a5431d6e88ffe9860aae081798ab89a8239502",
+    "raw-driver-output.csv": "95296f6129216d59efb4bc09e99ceaa45a1a250339b50c8b46637eb5e75fe748",
+    "raw-events.jsonl": "159cf21efa71e686fedf7f49d77a58ae248cd0dc58a908fe93712fca49d9f5be",
+    "records.json": "ad0ab0228090d16117756a6f9c3aff28da6a03e96ae2562671c2d2cec9cce022",
+    "scenarios.json": "43fde4c4c15fd08aefcd1d6581187d54f28b718177af201f21f495b59aa3aba9",
+    "summary.csv": "919ea7794ad5e8bd87c87f753a394369294a020113fef2cc76234f8c9276e48b"
+  },
+  "report_id": "geo04-20261012T224946Z-c37852bcc80d",
+  "schema": "csl.geo04-report-manifest/1"
+}

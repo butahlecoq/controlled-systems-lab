@@ -1,0 +1,10 @@
+{
+  "aborted_or_timed_out": false,
+  "actual_trials": 28,
+  "expected_trials": 28,
+  "failures": 0,
+  "parse_error": null,
+  "return_code": 0,
+  "schema": "csl.geo04-collection-status/1",
+  "state": "complete"
+}

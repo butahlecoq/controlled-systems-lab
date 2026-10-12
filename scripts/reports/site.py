@@ -13,11 +13,20 @@ import zipfile
 
 import report_data as data
 import render
+import geo04_registered_reports as geo04
 import registered_reports as registered
 
 FILES={"index.html","records.json","scenarios.json","raw-events.jsonl","profile.json","build-provenance.txt",
        "process-stderr.txt","trials.csv","summary.csv","latency.svg","latency.png","export.json","manifest.json"}
 LEGACY_PINS_SHA256="9422834b586490e43dc492f47b4a3b4e7000302a75bcb0b8f4557a9e9f1bb2d5"
+# Frozen publisher identity for LP/convex publication v1. New report adapters
+# must not silently change URLs for already published records.
+LP_CONVEX_PUBLISHER_V1={
+    "site.py":"5864b16bde6f129b1f973ddc50e4155470a35c02f95c2552937cd9a3b5e2e4c5",
+    "registered_reports.py":"7c6d9913396b1f8a2dd8d74e14a37536b659bc7552c0a5d0d3ed85fbb801793a",
+    "report_data.py":"c482a0c6a3f8e0973be3a239cb992e58d6737eb1b9f1d401f5135278418b5833",
+    "render.py":"0bea998ed0cea04f670a25b68e9a93f25aa558e37d0521206c5e2681822e3888",
+}
 
 
 class OfflineHTML(HTMLParser):
@@ -25,9 +34,9 @@ class OfflineHTML(HTMLParser):
         super().__init__(convert_charrefs=True);self.files=files;self.in_style=False;self.in_svg=False
     def handle_starttag(self,tag,attrs):
         html={t:set() for t in ("head","title","body","h1","h2","p","strong","table","thead","tbody","tr","th","td","code","pre","details","summary","dl","dt","dd","figcaption","ul","li","style")}
-        html.update({"html":{"lang"},"meta":{"charset","name","content"},"a":{"href"},"div":{"class"},"span":{"class"},"figure":{"aria-label"}})
+        html.update({"html":{"lang"},"meta":{"charset","name","content"},"a":{"href"},"div":{"class","role","aria-label","tabindex"},"span":{"class"},"figure":{"aria-label"}})
         svg_tags={"svg","g","defs","path","clippath","use","rect","line","polyline","polygon","circle","ellipse","text","tspan","style"}
-        svg_attrs={"xmlns","xmlns:xlink","id","width","height","viewbox","version","x","y","x1","x2","y1","y2","cx","cy","rx","ry","r","d","points","transform","style","clip-path","clippathunits","fill","stroke","stroke-width","stroke-linecap","stroke-linejoin","stroke-dasharray","stroke-dashoffset","stroke-opacity","fill-opacity","opacity","font-size","font-family","font-style","font-weight","text-anchor","type","href","xlink:href"}
+        svg_attrs={"xmlns","xmlns:xlink","id","class","role","aria-label","width","height","viewbox","version","x","y","x1","x2","y1","y2","cx","cy","rx","ry","r","d","points","transform","style","clip-path","clippathunits","fill","stroke","stroke-width","stroke-linecap","stroke-linejoin","stroke-dasharray","stroke-dashoffset","stroke-opacity","fill-opacity","opacity","font-size","font-family","font-style","font-weight","text-anchor","type","href","xlink:href"}
         if tag=="svg":
             data.require(not self.in_svg,"nested SVG not generated");self.in_svg=True
         allowed=svg_attrs if self.in_svg else html.get(tag)
@@ -45,7 +54,7 @@ class OfflineHTML(HTMLParser):
                 data.require(re.search(r"@import|url\s*\(|expression\s*\(",local,re.I) is None,"external/active inline style")
             if key in {"href","src","xlink:href"} and value:
                 if value.startswith("#"): continue
-                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip)",value): continue
+                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip)",value): continue
                 data.require(value in self.files,"external/escaping HTML asset")
     def handle_endtag(self,tag):
         if tag=="style": self.in_style=False
@@ -169,13 +178,14 @@ def catalogue_index(catalogue):
         label_kind='HiGHS reference LP, five analytic microfixtures'
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
-                data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv"),"unknown catalogue kind")
+                data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv","geo04-intersection"),"unknown catalogue kind")
                 data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"schema-v3 scope/evidence metadata required")
                 label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
             else:
                 data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
                 label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
-        parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/trials.csv">CSV</a> · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
+        csv_name = "raw-driver-output.csv" if report.get("report_kind") == "geo04-intersection" else "trials.csv"
+        parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/'+csv_name+'">CSV</a> · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
     return ''.join(parts)+"</ul></body></html>"
 
 
@@ -197,10 +207,7 @@ def lp_convex_publication_id(root,source_id):
     bundle=Path(root)/source_id
     native_files={name:data.file_digest(data.local_file(bundle,name)) for name in sorted(FILES)}
     native_files["source.zip"]=data.file_digest(data.local_file(root,source_id+".source.zip"))
-    publisher_files={}
-    for name in ("site.py","registered_reports.py","report_data.py","render.py"):
-        source=(Path(__file__).parent/name).read_text(encoding="utf-8").replace("\r\n","\n").encode("utf-8")
-        publisher_files[name]=hashlib.sha256(source).hexdigest()
+    publisher_files=dict(LP_CONVEX_PUBLISHER_V1)
     identity={"schema":"csl.lp-convex-publication-identity/1","source_report_id":source_id,
               "source_files":native_files,"publisher_files":publisher_files}
     return source_id.rsplit("-",1)[0]+"-"+registered._digest(identity)
@@ -239,21 +246,24 @@ def stage(catalog_path,out,check=True,allow_test=False):
         rid=report["report_id"]
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
-        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv"):
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv","geo04-intersection"):
             source_id=report.get("source_report_id",rid)
-            source_pattern = r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else r"geo03-\d{8}-[0-9a-f]{12}"
+            source_pattern = (r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else
+                              r"geo04-\d{8}T\d{6}Z-[0-9a-f]{12}" if report["report_kind"]=="geo04-intersection" else
+                              r"geo03-\d{8}-[0-9a-f]{12}")
             data.require(isinstance(source_id,str) and re.fullmatch(source_pattern,source_id) is not None,"invalid registered source bundle identity")
-            item=registered.adapt(root/source_id)
+            publisher = geo04 if report["report_kind"] == "geo04-intersection" else registered
+            item=publisher.adapt(root/source_id)
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
             data.require(report.get("source_report_id","")==item.source_report_id,"registered catalogue source identity mismatch")
             data.require(report.get("payload_sha256")==item.payload_sha256 and report.get("source_commit")==item.source_commit,"registered catalogue provenance mismatch")
             data.require(report.get("measured_scope")==item.measured_scope and report.get("evidence_limits")==item.evidence_limits,"registered scope/evidence differs from typed records")
             data.require(report.get("payload_schema")==item.payload_schema,"registered catalogue payload schema differs")
-            generated_page=registered.render_page(root/source_id,item)
+            generated_page=publisher.render_page(root/source_id,item)
             OfflineHTML(set(item.files)|{"report-envelope.json","publication-manifest.json"}).feed(generated_page)
             data.validate_svg((root/source_id/"latency.svg").read_bytes())
-            artifacts=registered.publication_artifacts(root/source_id,item)
-            archive_bytes=registered.offline_zip(root/source_id,item)
+            artifacts=publisher.publication_artifacts(root/source_id,item)
+            archive_bytes=publisher.offline_zip(root/source_id,item)
             data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"registered generated ZIP digest differs")
             registered_records[rid]=item
             registered_artifacts[rid]=artifacts

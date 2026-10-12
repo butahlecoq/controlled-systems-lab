@@ -23,6 +23,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/convex_client.cpp" DESTINATION "${w
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/run_statistics_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/input_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/conversion_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/polyhedral_intersection_client.cpp" DESTINATION "${work}/source")
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
