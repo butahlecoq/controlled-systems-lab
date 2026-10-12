@@ -163,12 +163,12 @@ struct ExternalFamilyPayload { AttachmentId attachment; };
 struct FamilyWithoutExporter {};
 using FamilyPayload=std::variant<ExternalFamilyPayload,FamilyWithoutExporter>;
 struct FamilyRecord {
-    ProblemId problem; JointCoordinates coordinates; RepresentationId representation;
-    FamilyTarget target; FamilyEvidence evidence; FamilyPayload payload;
+    OptimalFamily family; FamilyPayload payload;
 };
 struct SynthesisFinal {
     Termination termination; SynthesisOutcomeClaim outcome; ObjectiveEvidence objective;
-    std::optional<FamilyRecord> family; std::vector<Witness> incumbents;
+    std::optional<FamilyRecord> family; std::vector<FeasibleIncumbent> incumbents;
+    SynthesisStopEvidence stop{};
 };
 struct ProgramFinal { ProgramResult result; std::optional<AttachmentId> raw_diagnostics; };
 struct UnsupportedFinal { Diagnostics diagnostics; };

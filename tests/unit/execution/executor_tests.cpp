@@ -340,16 +340,23 @@ class TwoCalls final : public SynthesisWorkspace {
 public:
     TwoCalls(std::unique_ptr<reg::BoundWorkspace<reg::LPPort>> lp,std::shared_ptr<StrategyAudit> audit)
         : lp_(std::move(lp)),audit_(std::move(audit)) {}
-    SynthesisOutcome solve(const Problem& problem,const ExecutionContext& ctx) override {
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& ctx) override {
         std::vector<SolveStamp> stamps;
         auto answer=std::get<ProgramResult>(lp_->run(ctx));stamps.push_back(lp_->last_attempt()->stamp);
         if (!ctx.cancellation.stop_requested()) {
             answer=std::get<ProgramResult>(lp_->run(ctx));stamps.push_back(lp_->last_attempt()->stamp);
         }
         { std::lock_guard lock(audit_->mutex);audit_->attempts.push_back(std::move(stamps)); }
-        return SynthesisResult{ctx.cancellation.stop_requested()?Termination::cancelled:Termination::completed,
-            {problem.id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
-            {{problem.id,{{0},*answer.primal}, {*answer.primal},answer.objective.upper->value}}, {}};
+        const auto id=problem.identity();
+        SynthesisResult result{ctx.cancellation.stop_requested()?Termination::cancelled:Termination::completed,
+            {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+            {{{id,{{0},*answer.primal}, {*answer.primal},answer.objective.upper->value},
+                {id,SymbolicArgument{"fixture", "bounded LP point"}}}}, {}};
+        if (ctx.cancellation.stop_requested())
+            result.stop=ScopedOperationStopped{{StopReason::cancelled,"fixture cancellation"},
+                RequestProvenance{{"fixture/two-calls"},"strategy",{"two-calls"},std::string{"1"},
+                    ModuleId{"two-calls"},std::string{"1"}}, {false,false,1,false}};
+        return result;
     }
 };
 ex::Task<reg::StrategyPort> strategy_task(std::shared_ptr<StrategyAudit> audit,std::shared_ptr<Counts> counts,Action action={},std::string id="strategy") {
@@ -369,7 +376,11 @@ ex::Task<reg::StrategyPort> strategy_task(std::shared_ptr<StrategyAudit> audit,s
     Problem problem{{"problem"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,stage},{}}),
         {0,1},KnownInitial{{0}},ContinuousDomain{{UniversalSet{1}}},{UniversalSet{1},UniversalSet{1}},{},{},
         InformationPattern::nominal_open_loop,LinearTerminal{{3},2}};
-    reg::StrategyRequest request{problem,{{"two-calls"},{"analytic"},{},{},{},{},{},{},{}}};
+    auto resolved=std::get<csl::problem::ResolvedProblem>(csl::problem::resolve(problem,
+        {csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    reg::StrategyRequest request{resolved,{{"two-calls"},{"analytic"},{},{},{},{},{},{},{}},
+        {"nominal_open_loop",resolved.identity(),FamilyTarget::candidate_relaxation,{1e-12,1e-12},
+            Assurance::numerical,{},{}}};
     auto prepared=std::get<reg::PreparedStrategy>(strategies.prepare(request));
     return std::get<ex::Task<reg::StrategyPort>>(ex::make_task({std::move(id)},prepared,use()));
 }
@@ -381,8 +392,8 @@ TEST_CASE("retained strategy owns private LP attempts and never promotes an incu
         auto batch=std::get<ex::BatchResult<reg::StrategyPort>>(e->run<reg::StrategyPort>(tasks,context(*e),mode));
         const auto& value=std::get<SynthesisResult>(std::get<ex::Returned<reg::StrategyPort>>(batch.tasks[0].outcome).value);
         CHECK(value.termination==Termination::completed);CHECK_FALSE(value.family);REQUIRE(value.incumbents.size()==1);
-        CHECK(value.incumbents[0].controls==std::vector<Vector>{{-1}});CHECK(value.incumbents[0].original_objective==-1);
-        CHECK(value.incumbents[0].states==std::vector<Vector>{{0},{-1}});
+        CHECK(value.incumbents[0].witness.controls==std::vector<Vector>{{-1}});CHECK(value.incumbents[0].witness.original_objective==-1);
+        CHECK(value.incumbents[0].witness.states==std::vector<Vector>{{0},{-1}});
         CHECK(value.outcome.value==MathematicalOutcome::undetermined);CHECK(std::holds_alternative<Unestablished>(value.outcome.support));
         CHECK(batch.tasks[0].provenance.size()==2);
     }
@@ -394,8 +405,8 @@ TEST_CASE("retained strategy owns private LP attempts and never promotes an incu
     std::vector<ex::Task<reg::StrategyPort>> cancelled{strategy_task(audit,counts,[&](const ExecutionContext&){stop.request_stop();})};
     auto batch=std::get<ex::BatchResult<reg::StrategyPort>>(e->run<reg::StrategyPort>(cancelled,ctx,ex::Mode::sequential));
     const auto& value=std::get<SynthesisResult>(std::get<ex::Returned<reg::StrategyPort>>(batch.tasks[0].outcome).value);
-    CHECK(value.termination==Termination::cancelled);CHECK_FALSE(value.family);CHECK(value.incumbents[0].original_objective==-1);
-    CHECK(value.incumbents[0].states==std::vector<Vector>{{0},{-1}});CHECK(value.incumbents[0].controls==std::vector<Vector>{{-1}});
+    CHECK(value.termination==Termination::cancelled);CHECK_FALSE(value.family);CHECK(value.incumbents[0].witness.original_objective==-1);
+    CHECK(value.incumbents[0].witness.states==std::vector<Vector>{{0},{-1}});CHECK(value.incumbents[0].witness.controls==std::vector<Vector>{{-1}});
     CHECK(std::holds_alternative<Unestablished>(value.outcome.support));CHECK(audit->attempts.back().size()==1);
 }
 namespace {
@@ -406,7 +417,7 @@ public: OperationOutcome apply(const OperationRequest& r,const ExecutionContext&
 class Selector final:public WitnessSelectorWorkspace {
 public: std::variant<WitnessSelection,Unsupported> select(const OptimalFamily& f,const WitnessRequest& r,const ExecutionContext&) override {
     if (!r.count) return Unsupported{{{DiagnosticCode::unsupported,"selector.count","fixture requires a positive request"}}};
-    return WitnessSelection{{{{f.problem,{{7}},{{2}},17}},r.count,{"literal-selector"},r.seed},Termination::resource_limit,"one witness only"};
+    return WitnessSelection{{{{f.identity().problem,{{7}},{{2}},17}},r.count,{"literal-selector"},r.seed,f.identity()},Termination::resource_limit,"one witness only"};
 }};
 class CustomWorkspace:public ExclusiveWorkspace { public: int calls{}; };
 struct CustomPort {
@@ -431,8 +442,14 @@ TEST_CASE("geometry selector and custom outcomes retain their distinct public ty
     auto g=std::get<ex::BatchResult<reg::GeometryPort>>(e->run<reg::GeometryPort>(geometry,context(*e),ex::Mode::bounded_parallel));
     const auto& stopped=std::get<OperationStopped>(std::get<ex::Returned<reg::GeometryPort>>(g.tasks[0].outcome).value);
     CHECK(stopped.reason==StopReason::resource_limit);CHECK(stopped.diagnostics=="stopped-query");
-    reg::SelectorRequest request{{{"p"},{{{1,1,0},1},{"joint"},std::make_shared<const JointRelationPayload>()},FamilyTarget::partial_relation,
-        {{{"p"},Unestablished{}},{{"p"},Unestablished{}},{{"p"},Unestablished{}}}},{3,0.1,{},42}};
+    FamilyRequest family_request{"nominal_open_loop",{"p"},FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{"joint"},{}};
+    FamilyIdentity identity{{"p"},family_request,{{1,1,0},1},{"strategy"},"1",{}};
+    auto published=FamilyPublisher::publish(identity,CandidateFamily{
+        {identity.coordinates,{"joint"},std::make_shared<const JointRelationPayload>()},
+        HeuristicRelationEvidence{"fixture"},Unestablished{}});
+    REQUIRE(std::holds_alternative<OptimalFamily>(published));
+    reg::SelectorRequest request{std::get<OptimalFamily>(std::move(published)),{3,0.1,{},42}};
     for (auto count:{3u,0u}) {
         request.selection.count=count;
         std::vector<ex::Task<reg::SelectorPort>> selectors{port_task<reg::SelectorPort>(request,
@@ -502,7 +519,7 @@ TEST_CASE("two concurrent strategy tasks have separate LP identities and local o
     REQUIRE(batch.tasks.size()==2);CHECK(batch.tasks[0].id.value=="left");CHECK(batch.tasks[1].id.value=="right");
     for(const auto& record:batch.tasks) {
         const auto& result=std::get<SynthesisResult>(std::get<ex::Returned<reg::StrategyPort>>(record.outcome).value);
-        CHECK(result.incumbents[0].original_objective==-1);CHECK_FALSE(result.family);
+        CHECK(result.incumbents[0].witness.original_objective==-1);CHECK_FALSE(result.family);
     }
     REQUIRE(audit->attempts.size()==2);
     for(const auto& attempts:audit->attempts) {REQUIRE(attempts.size()==2);CHECK(attempts[0].attempt()==1);CHECK(attempts[1].attempt()==2);CHECK(attempts[0].workspace()==attempts[1].workspace());}

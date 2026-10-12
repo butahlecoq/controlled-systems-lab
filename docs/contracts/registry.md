@@ -26,9 +26,18 @@ The existing mathematical interfaces have separate `LPPort`, `ConvexPort`,
 `GeometryPort`, `ConversionPort`, `ApproximationPort`, `SelectorPort` and
 `StrategyPort` traits. Their request/workspace/result distinctions are preserved.
 `SelectorRequest` pairs the existing family and witness request;
-`StrategyRequest` pairs the existing problem and strategy configuration. LP and
+`StrategyRequest` owns an immutable `ResolvedProblem`, the effective
+`FamilyRequest`, strategy configuration and selected strategy version. LP and
 convex factories can call the existing backend's `make_workspace()`; their
 factories return the same exclusive mathematical workspace interfaces.
+`StrategyPort::run` checks the numerical policy against the prepared family
+request before invoking the workspace and validates family/outcome identity on
+return. `SynthesisWorkspace::solve` returns `SynthesisResult` only; the port's
+`SynthesisOutcome` can report top-level `Unsupported` only before that call.
+A late provider rejection belongs in `SynthesisResult` with scoped
+request provenance and retained evidence. Contract validation failures use
+`contract_rejected` and retain the original stop evidence separately; they do
+not synthesize a provider request identity.
 
 GEO-02 adds `HullReducerPort` (`hull-reducer`) as a separately selectable
 operation. `geometry::make_lp_hull_reducer_registration()` registers the current

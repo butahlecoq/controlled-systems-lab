@@ -1,7 +1,7 @@
 # Portable run statistics
 
 `CSL::artifacts` publishes immutable scenario records and reads/writes the closed
-`csl.run-statistics/1` JSON format. Include `csl/artifacts/run_statistics.hpp` for
+`csl.run-statistics/3` JSON format. Include `csl/artifacts/run_statistics.hpp` for
 records and `csl/execution/observability.hpp` for bounded collection and RUN01
 projection. These additions preserve source contract 1.5 and mathematical identity
 version 1. No solver, estimator, mathematical verifier, family exporter, timer
@@ -54,13 +54,29 @@ raw diagnostics. Shapes and finite data are checked; serialization does not prov
 feasibility, optimality, uniqueness, attainment, family completeness or numerical
 reproduction.
 
-A family remains a joint relation with its canonical target and three evidence
-claims. With no exporter its payload is `unavailable_no_exporter`, while metadata
-and evidence survive. An external attachment is a digest/size/schema/media claim,
+A family record retains the source `FamilyIdentity` (resolved problem, effective
+family request, joint coordinates, strategy/version and ordered transformation
+lineage) and exactly one typed complete, partial or candidate product. The
+opaque live relation payload is never serialized. With no exporter its payload
+is `unavailable_no_exporter`, while relation metadata and evidence survive.
+Complete- and partial-family publication are refused until reviewed coverage
+and every-history optimality procedures are implemented. Candidate feasibility
+is scoped to the whole relation, a named full-history witness, or unknown;
+an outer enclosure with one feasible witness does not claim whole-relation
+feasibility. Feasible incumbents retain their own feasibility support. A late generated-request rejection retains request/provider
+provenance, completed lineage and the scope of bounds, incumbents and candidate
+or partial family that survived the stop. A separate contract-validation failure
+retains the original stop record without inventing provider provenance. An external attachment is a digest/size/schema/media claim,
 not an executable family or proof the referenced file exists. Supplied embedded
 bytes are hashed and checked. Paths are relative artifact references without
 absolute roots, drive prefixes, traversal or empty components; serialization
 never opens them. Consumers select their own attachment root.
+
+V3 requires stated support for retained objective bounds and checks each
+incumbent's full-history shape against the run coordinates. When reading a V2
+record, an `Unestablished` bound is dropped rather than promoted to supported
+evidence. If a V2 stop scope refers to such a bound, migration is rejected
+because rewriting the historical retained scope would invent provenance.
 
 Every metric is exactly `{state:"available", value:...}` or
 `{state:"unavailable", value:null, reason, detail}`. Available zero is retained.
@@ -215,7 +231,7 @@ to a diagnostics-role attachment. A missing attachment remains explicit null.
 
 ## Wire format and compatibility
 
-The [schema](../artifacts/schemas/run-statistics-v1.schema.json) describes closed
+The [v3 schema](../artifacts/schemas/run-statistics-v3.schema.json) describes closed
 objects and variants. The checked codec additionally enforces integer width,
 UTF-8 byte limits, finite values, content digests, recomputed configuration ID,
 problem/config/run bindings, parent DAGs, capacities and reference semantics.
@@ -223,7 +239,17 @@ Input byte, string, node and depth limits are checked before unrestricted DOM
 growth; duplicate keys are rejected before overwrite. Unknown fields/tags/versions,
 noncanonical integers, invalid UTF-8, trailing input and contradictory metric
 variants are errors. New fields or variants require a new wire version and
-explicit reader policy. JSON types and native solver types do not cross the
+explicit reader policy. This reader accepts v3 and historical v2. A v2 candidate
+with unestablished feasibility maps to v3 `Unestablished`; supported v2
+candidate feasibility is rejected because its unscoped claim cannot be assigned
+relation or witness scope without inventing evidence. Decoding a v2 record and
+encoding it again emits v3; the historical fixture and schema remain unchanged.
+The [v1 schema](../artifacts/schemas/run-statistics-v1.schema.json)
+and the [v1 fixture](../../tests/artifacts/fixtures/run-statistics-v1.json) remain
+historical evidence. V1 synthesis records are explicitly rejected with a schema
+error: their independent target/evidence fields cannot be safely upgraded to a
+typed family, and an old unestablished complete claim is never treated as proof.
+JSON types and native solver types do not cross the
 installed public boundary.
 
 Historical standalone LP/convex bootstrap reports retain their real ProgramIdentity

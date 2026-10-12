@@ -77,26 +77,30 @@ inline StrategyRequest strategy_request() {
     Problem problem{{"problem"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,stage},{}}),
         {0,1},KnownInitial{{0}},ContinuousDomain{{UniversalSet{1}}},{UniversalSet{1},UniversalSet{1}}, {},{},
         InformationPattern::nominal_open_loop,LinearTerminal{{3},2}};
-    return {problem,{{"forward"},{"endpoint"},{"unused-convex"},{"unused-hull"},{},{},{},{},{}}};
+    auto resolved=std::get<csl::problem::ResolvedProblem>(csl::problem::resolve(problem,{csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    return {resolved,{{"forward"},{"endpoint"},{"unused-convex"},{"unused-hull"},{},{},{},{},{}},
+        {"nominal_open_loop",resolved.identity(),FamilyTarget::candidate_relaxation,{1e-8,1e-8},Assurance::numerical,{},{}}};
 }
 // Plumbing fixture only: forwards a bounded LP answer as an incumbent, never a full family.
 class ForwardFixture final : public SynthesisWorkspace {
     std::unique_ptr<BoundWorkspace<LPPort>> lp_;
 public:
     explicit ForwardFixture(std::unique_ptr<BoundWorkspace<LPPort>> lp) : lp_(std::move(lp)) {}
-    SynthesisOutcome solve(const Problem& problem, const ExecutionContext& context) override {
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem, const FamilyRequest&, const ExecutionContext& context) override {
         const auto answer = std::get<ProgramResult>(lp_->run(context));
-        return SynthesisResult{Termination::completed,{problem.id,MathematicalOutcome::undetermined,Unestablished{},{}},
-            {},{},{{problem.id,{}, {*answer.primal},answer.objective.upper->value}}, {}};
+        const auto id=problem.identity();
+        return SynthesisResult{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},
+            {},{},{{{id,{{0},{answer.primal->at(0)}}, {*answer.primal},answer.objective.upper->value},
+                {id,SymbolicArgument{"fixture LP point", "bounded scalar interval"}}}}, {}};
     }
 };
 inline StrategyRegistration forward_registration(const Registry<LPPort>& lp, std::string id = "forward") {
     const auto request = std::make_shared<const LinearProgram>(interval_lp(3));
     return {{{std::move(id)},"fixture-1"},
         [](const StrategyRequest& r,const Requirements& requirements) -> Capability {
-            auto diagnostics = check_nominal_profile(r.problem,false,requirements.output.assurance);
+            auto diagnostics = check_nominal_profile(*r.problem.description(),false,requirements.output.assurance);
             if (!diagnostics.empty()) return diagnostics;
-            if (!std::holds_alternative<LinearTerminal>(r.problem.objective))
+            if (!std::holds_alternative<LinearTerminal>(r.problem.description()->objective))
                 return Diagnostics{{DiagnosticCode::unsupported,"objective","fixture requires a linear terminal objective"}};
             return Offer{};
         },
@@ -134,11 +138,28 @@ public: std::variant<WitnessSelection,Unsupported> select(const OptimalFamily&,c
     return WitnessSelection{{{},r.count,{"selector-fixture"},r.seed},Termination::resource_limit,"fixture"};
 }};
 class StrategyFixture final : public SynthesisWorkspace {
-public: SynthesisOutcome solve(const Problem& p,const ExecutionContext&) override {
-    const auto& stage = std::get<LinearStage>(p.model->dynamics.stages);
-    return SynthesisResult{Termination::resource_limit,{p.id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
-        {{p.id,{stage.offset},{},std::get<LinearTerminal>(p.objective).offset}}, {}};
+public: SynthesisResult solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext&) override {
+    const auto raw=p.description();
+    const auto& stage = std::get<LinearStage>(raw->model->dynamics.stages);
+    const auto id=p.identity();
+    SynthesisResult result{Termination::resource_limit,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+        {{{id,{{0},stage.offset},{{0}},std::get<LinearTerminal>(raw->objective).offset},
+            {id,SymbolicArgument{"fixture state", "single stage"}}}}, {}};
+    result.stop=ScopedOperationStopped{{StopReason::resource_limit,"fixture"},
+        RequestProvenance{{"fixture/strategy"},"strategy",{"strategy"},std::string{"fixture-1"},
+            ModuleId{"strategy"},std::string{"fixture-1"}},
+        {false,false,1,false}};
+    return result;
 }};
+inline OptimalFamily candidate_family() {
+    FamilyRequest request{"nominal_open_loop",{"problem"},FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{"joint"},{}};
+    FamilyIdentity identity{{"problem"},request,{{1,1,0},1},{"strategy"},"1",{}};
+    auto published=FamilyPublisher::publish(identity,CandidateFamily{
+        {identity.coordinates,{"joint"},std::make_shared<const JointRelationPayload>()},
+        HeuristicRelationEvidence{"fixture"},Unestablished{}});
+    return std::get<OptimalFamily>(std::move(published));
+}
 class BasisFixture final : public BasisDiagnostics {
 public:
     BasisCapabilities capabilities() const override { return {false,false,false}; }
@@ -159,9 +180,7 @@ struct AllPorts {
     OperationRequest geometry_request{geometry_id,{"geometry"},SupportQuery{set,{1}},SetRelation::equivalent,Assurance::numerical};
     ConversionRequest conversion_request{geometry_id,set,{"vertices"},Assurance::numerical};
     ApproximationRequest approximation_request{geometry_id,set,{"box"},SetRelation::outer,17,Assurance::numerical};
-    SelectorRequest selector_request{{{"problem"},{{{1,1,0},1},{"joint"},std::make_shared<const JointRelationPayload>()},
-        FamilyTarget::partial_relation,{{{"problem"},Unestablished{}},{{"problem"},Unestablished{}},{{"problem"},Unestablished{}}}},
-        {3,0.1,{},42}};
+    SelectorRequest selector_request{candidate_family(),{3,0.1,{},42}};
     StrategyRequest strategy_request_value = strategy_request();
     AllPorts() {
         auto e = endpoint_registration(); e.factory = [this](const LinearProgram&) { ++factories[0]; return std::make_unique<EndpointWorkspace>(); }; lp.add(e);
@@ -172,7 +191,7 @@ struct AllPorts {
         approximation.add({{{"approximation"},"fixture-1"},capability,[this](const ApproximationRequest&) { ++factories[4]; return std::make_unique<ApproximationFixture>(); }});
         selector.add({{{"selector"},"fixture-1"},capability,[this](const SelectorRequest&) { ++factories[5]; return std::make_unique<SelectorFixture>(); }});
         strategy.add({{{"strategy"},"fixture-1"},[](const StrategyRequest& r,const Requirements&) -> Capability {
-            if (!std::holds_alternative<LinearTerminal>(r.problem.objective))
+            if (!std::holds_alternative<LinearTerminal>(r.problem.description()->objective))
                 return Diagnostics{{DiagnosticCode::unsupported,"objective","plumbing fixture expects a linear objective"}};
             return Offer{};
         },[this](const StrategyRequest&) { ++factories[6]; return std::make_unique<StrategyFixture>(); }});

@@ -14,6 +14,13 @@ template<class T,class... R> T accepted(std::variant<T,R...> result) {
     REQUIRE(std::holds_alternative<T>(result)); return std::get<T>(std::move(result));
 }
 ResolutionContext context() {return {UncertaintyStructure::stage_product_uncoupled,{},{}};}
+StrategyAdmission prepare_strategy(const ResolvedProblem& p,const StrategyRegistry& registry,
+    const StrategyConfiguration& configuration,const Requirements& requirements={},
+    std::optional<std::string> version={}) {
+    FamilyRequest family{"nominal_open_loop",p.identity(),FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{},{}};
+    return csl::problem::prepare_strategy(p,registry,configuration,family,requirements,std::move(version));
+}
 Problem scalar() {
     return {{"authored"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
         LinearStage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}}},{}}),{0,1},KnownInitial{{2}},
@@ -45,14 +52,17 @@ class Forward final : public SynthesisWorkspace {
     std::unique_ptr<BoundWorkspace<LPPort>> control_;
 public:
     explicit Forward(std::unique_ptr<BoundWorkspace<LPPort>> control):control_(std::move(control)) {}
-    SynthesisOutcome solve(const Problem& p,const ExecutionContext& c) override {
+    SynthesisResult solve(const ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& c) override {
+        const auto& p=*problem.description();
         const auto u=*accepted(control_->run(c)).primal;
         const auto model=accepted(model::snapshot(*p.model,p.times));
         const auto x0=std::get<KnownInitial>(p.initial).point;
         const auto x1=accepted(model.step({0},x0,u,{}));
         const auto objective=accepted(optimization::snapshot(p.objective));
         const auto cost=accepted(optimization::evaluate(objective,x1));
-        return SynthesisResult{Termination::completed,{p.id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{{p.id,{x0,x1},{u},cost}},{}};
+        const auto id=problem.identity();
+        return SynthesisResult{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+            {{{id,{x0,x1},{u},cost},{id,SymbolicArgument{"fixture", "fixed control trajectory"}}}}, {}};
     }
 };
 struct Strategies {
@@ -65,7 +75,7 @@ struct Strategies {
             [count=factories](const LinearProgram&) {++*count;return std::make_unique<FixedControl>();}});
         for(const std::string profile:{"forward","inverse","compact","full-dimensional","nominal","stagewise","square-safe"}) strategies.add({{{profile},"1"},
             [profile](const StrategyRequest& request,const Requirements& requirements) -> Capability {
-                const auto& p=request.problem;
+                const auto& p=*request.problem.description();
                 if(profile=="inverse" && std::get<LinearStage>(p.model->dynamics.stages).A.values[0]==0)
                     return Diagnostics{{DiagnosticCode::unsupported,"strategy.inverse","requires nonsingular scalar A"}};
                 if(profile=="forward" || profile=="inverse" || profile=="nominal") {
@@ -101,7 +111,7 @@ struct Strategies {
             },
             [this](const StrategyRequest& request,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
                 auto operand=std::make_shared<const LinearProgram>(std::get<LinearProgram>(optimization::make_linear_program(
-                    {{request.problem.id,{"fixed-control"}},{0},0,{0,1,{0},{},{}},{{3,3}},{}})));
+                    {{request.problem.identity(),{"fixed-control"}},{0},0,{0,1,{0},{},{}},{{3,3}},{}})));
                 auto checked=check_pipeline(select(lp,Method{request.configuration.lp,{}},*operand));
                 if(auto* r=std::get_if<Rejection>(&checked)) return *r;
                 return compose_strategy(std::get<CheckedPipeline<LPPort>>(checked),[operand,count=factories](auto workers,const StrategyRequest&,const Requirements&) {
@@ -162,8 +172,8 @@ TEST_CASE("actual strategy admission rejects inverse assumptions without changin
         CHECK(plan.problem().identity()==p.identity());
         CHECK(plan.preparation().provenance()[1].actual->id.value==backend);
         const auto answer=accepted(plan.preparation().create()->run({}));
-        REQUIRE(answer.incumbents.size()==1);CHECK(answer.incumbents[0].states.back()==Vector{3});
-        CHECK(answer.incumbents[0].original_objective==3);CHECK(answer.incumbents[0].problem==p.identity());CHECK_FALSE(answer.family);
+        REQUIRE(answer.incumbents.size()==1);CHECK(answer.incumbents[0].witness.states.back()==Vector{3});
+        CHECK(answer.incumbents[0].witness.original_objective==3);CHECK(answer.incumbents[0].witness.problem==p.identity());CHECK_FALSE(answer.family);
     }
     CHECK(p.identity().value=="csl.problem.v1.sha256:"+scalar_digest);
 }
@@ -366,7 +376,7 @@ TEST_CASE("prepared actual dependency graph survives registries and rejected lat
     CHECK(std::holds_alternative<Rejection>(prepare_strategy(p,registry.strategies,configuration(),{},"missing-version")));CHECK(*registry.factories==0);
     const auto prepared=[] {Strategies temporary;return accepted(prepare_strategy(published(scalar()),temporary.strategies,configuration()));}();
     const auto answer=accepted(prepared.preparation().create()->run({}));REQUIRE(answer.incumbents.size()==1);
-    CHECK(answer.incumbents[0].states==std::vector<Vector>{{2},{3}});CHECK(answer.incumbents[0].controls==std::vector<Vector>{{3}});
+    CHECK(answer.incumbents[0].witness.states==std::vector<Vector>{{2},{3}});CHECK(answer.incumbents[0].witness.controls==std::vector<Vector>{{3}});
     CHECK(answer.outcome.subject==prepared.problem().identity());CHECK_FALSE(answer.family);
 }
 TEST_CASE("native set logical layout normalizes while representation row order and metadata remain explicit") {

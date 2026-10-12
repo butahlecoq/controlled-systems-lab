@@ -1,5 +1,6 @@
 // Contract fixtures only. No numerical synthesis or family construction happens here.
 #include <csl/contracts.hpp>
+#include <csl/problem/resolved_problem.hpp>
 #include <future>
 #include <iostream>
 #include <utility>
@@ -9,9 +10,8 @@ using namespace csl;
 class FixtureWorkspace final : public SynthesisWorkspace {
 public:
     explicit FixtureWorkspace(ModuleId strategy) : strategy_(std::move(strategy)) {}
-    SynthesisOutcome solve(const Problem&, const ExecutionContext&) override {
-        return Unsupported{{{DiagnosticCode::unsupported, strategy_.value,
-            "Contract fixture: synthesis adapter is not implemented"}}};
+    SynthesisResult solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) override {
+        throw std::logic_error("Unsupported contract fixture has no executable solve");
     }
 private:
     ModuleId strategy_;
@@ -19,8 +19,8 @@ private:
 class FixtureStrategy final : public SynthesisStrategy {
 public:
     explicit FixtureStrategy(StrategyConfiguration config) : config_(std::move(config)) {}
-    Diagnostics check_capabilities(const Problem& p, Assurance assurance) const override {
-        auto diagnostics = check_nominal_profile(p,false,assurance);
+    Diagnostics check_capabilities(const problem::ResolvedProblem& p, const FamilyRequest& request) const override {
+        auto diagnostics = check_nominal_profile(*p.description(),false,request.assurance);
         diagnostics.push_back({DiagnosticCode::unsupported,config_.strategy.value,
             "Contract fixture: no executable synthesis capability"});
         return diagnostics;
@@ -57,15 +57,14 @@ int main() {
     auto first = reachability.make_workspace();
     auto second = joint.make_workspace();
     if (first.get() == second.get()) return 2;
-    auto run = [problem,context](std::unique_ptr<SynthesisWorkspace> workspace) {
-        return workspace->solve(*problem,context);
-    };
-    auto a = std::async(std::launch::async,run,std::move(first));
-    auto b = std::async(std::launch::async,run,std::move(second));
+    auto resolution=problem::resolve(*problem,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}});
+    if (!std::holds_alternative<problem::ResolvedProblem>(resolution)) return 4;
+    const auto resolved=std::get<problem::ResolvedProblem>(std::move(resolution));
+    const FamilyRequest request{"nominal_open_loop",resolved.identity(),FamilyTarget::candidate_relaxation,
+        context.numerical,Assurance::numerical,{"joint/polyhedral"},{}};
     for (auto* strategy : {&reachability,&joint}) {
-        auto diagnostics = strategy->check_capabilities(*problem,Assurance::numerical);
+        auto diagnostics = strategy->check_capabilities(resolved,request);
         for (const auto& d : diagnostics) std::cout << d.field << ": " << d.explanation << '\n';
     }
-    if (!std::holds_alternative<Unsupported>(a.get()) || !std::holds_alternative<Unsupported>(b.get())) return 3;
-    std::cout << "Two exclusive workspaces completed fixture calls. No solver/family result was produced.\n";
+    std::cout << "Two exclusive fixture workspaces exist. No solver/family result was produced.\n";
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/contracts.hpp>
+#include <csl/problem/resolved_problem.hpp>
 #include <array>
 #include <functional>
 #include <map>
@@ -34,7 +35,12 @@ struct Offer { Output output; };
 using Capability = std::variant<Offer, Diagnostics>;
 struct Transition { std::size_t producer; Output required; };
 struct SelectorRequest { OptimalFamily family; WitnessRequest selection; };
-struct StrategyRequest { Problem problem; StrategyConfiguration configuration; };
+struct StrategyRequest {
+    problem::ResolvedProblem problem;
+    StrategyConfiguration configuration;
+    FamilyRequest family;
+    std::string strategy_version; // selected registration, frozen at preparation
+};
 
 struct LPPort {
     using Request = LinearProgram; using Workspace = LPWorkspace;
@@ -70,15 +76,13 @@ struct SelectorPort {
     using Request = SelectorRequest; using Workspace = WitnessSelectorWorkspace;
     static constexpr const char* name = "selector";
     static Request snapshot(const Request& r) { return r; }
-    static std::variant<WitnessSelection, Unsupported> run(Workspace& w, const Request& r, const ExecutionContext& c) {
-        return w.select(r.family,r.selection,c);
-    }
+    static std::variant<WitnessSelection, Unsupported> run(Workspace& w, const Request& r, const ExecutionContext& c);
 };
 struct StrategyPort {
     using Request = StrategyRequest; using Workspace = SynthesisWorkspace;
     static constexpr const char* name = "strategy";
     static Request snapshot(const Request&);
-    static SynthesisOutcome run(Workspace& w, const Request& r, const ExecutionContext& c) { return w.solve(r.problem,c); }
+    static SynthesisOutcome run(Workspace& w, const Request& r, const ExecutionContext& c);
 };
 
 template<class Port> struct Registration {
@@ -236,7 +240,10 @@ struct PipelineAccess {
         return std::unique_ptr<BoundWorkspace<Port>>(new BoundWorkspace<Port>(std::move(request),std::move(workspace),nullptr));
     }
     template<class Port> static PreparedEntry<Port> snapshot_entry(const CheckedEntry<Port>& e) {
-        return {*e.entry,std::make_shared<const typename Port::Request>(Port::snapshot(*e.request)),e.requirements,e.provenance};
+        auto request=Port::snapshot(*e.request);
+        if constexpr (std::is_same_v<Port,StrategyPort>)
+            request.strategy_version=e.provenance.actual->version;
+        return {*e.entry,std::make_shared<const typename Port::Request>(std::move(request)),e.requirements,e.provenance};
     }
     template<class... Ports> static PreparedPipeline<Ports...> snapshot(const CheckedPipeline<Ports...>& checked) {
         return std::apply([](const auto&... e) {

@@ -31,7 +31,7 @@ add_executable(contract_tests contract_tests.cpp)
 target_link_libraries(contract_tests PRIVATE csl_contracts doctest::doctest)
 add_test(NAME contract_tests COMMAND contract_tests)
 find_package(Threads REQUIRED)
-add_executable(caller_example caller_example.cpp)
+add_executable(caller_example caller_example_contracts.cpp)
 target_link_libraries(caller_example PRIVATE csl_contracts Threads::Threads)
 add_test(NAME caller_example COMMAND caller_example)
 

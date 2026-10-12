@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <set>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace csl::artifacts {
@@ -272,6 +273,10 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
         if(input.selection){
             const auto& batch=input.selection->batch;const auto& config=input.configuration.description();
             if(batch.selector.value!=config.selector.id.value||batch.requested!=config.output.witnesses.count||batch.seed!=config.output.witnesses.seed||batch.witnesses.size()>batch.requested)return reject("run.selection","Selection disagrees with the resolved request");
+            if(batch.source_family){
+                const auto* synthesis=std::get_if<SynthesisFinal>(&input.final);
+                if(!synthesis||!synthesis->family||*batch.source_family!=synthesis->family->family.identity())return reject("run.selection.source_family","Selection refers to a different family");
+            }
             for(const auto& w:batch.witnesses){
                 if(w.problem!=input.problem||input.horizon==std::numeric_limits<std::uint64_t>::max()||w.states.size()!=input.horizon+1||w.controls.size()!=input.horizon||!std::isfinite(w.original_objective))return reject("run.selection.witnesses","Invalid selected witness shape or subject");
                 for(const auto& state:w.states)if(state.size()!=input.dimensions.state||!finite_vector(state))return reject("run.selection.witnesses","Invalid selected state");
@@ -281,15 +286,48 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
         if(const auto* s=std::get_if<SynthesisFinal>(&input.final)){
             if(s->outcome.subject!=input.problem||!support_valid(s->outcome.support))return reject("run.final.outcome","Foreign or invalid synthesis claim");
             for(const auto* bound:{&s->objective.lower,&s->objective.upper})if(*bound&&(!std::isfinite((*bound)->value)||!claim((*bound)->evidence)))return reject("run.final.objective","Foreign or nonfinite objective evidence");
-            for(const auto& w:s->incumbents){
+            for(const auto& incumbent:s->incumbents){
+                const auto& w=incumbent.witness;
+                if(!claim(incumbent.feasibility)||std::holds_alternative<Unestablished>(incumbent.feasibility.support))return reject("run.final.incumbents.feasibility","Incumbent lacks independently supported feasibility");
                 if(w.problem!=input.problem||input.horizon==std::numeric_limits<std::uint64_t>::max()||w.states.size()!=input.horizon+1||w.controls.size()!=input.horizon||!std::isfinite(w.original_objective))return reject("run.final.witnesses","Invalid witness subject or full-history shape");
                 for(const auto& state:w.states)if(state.size()!=input.dimensions.state||!finite_vector(state))return reject("run.final.witnesses.states","Invalid state shape or value");
                 for(const auto& control:w.controls)if(control.size()!=input.dimensions.control||!finite_vector(control))return reject("run.final.witnesses.controls","Invalid control shape or value");
             }
             if(s->family){const auto& f=*s->family;
-                if(f.problem!=input.problem||f.coordinates.horizon!=input.horizon||f.coordinates.dimensions.state!=input.dimensions.state||f.coordinates.dimensions.control!=input.dimensions.control||f.coordinates.dimensions.external!=input.dimensions.external||!claim(f.evidence.feasibility)||!claim(f.evidence.optimality)||!claim(f.evidence.completeness))return reject("run.final.family","Foreign family subject, evidence or shape");
+                const auto& identity=f.family.identity();
+                const auto* relation=std::visit([](const auto& product)->const JointRelation*{return &product.relation;},f.family.outcome());
+                const auto strategy_version=std::find_if(input.configuration.description().modules.begin(),input.configuration.description().modules.end(),[&](const auto& module){return module.role=="strategy"&&module.implementation.id==identity.strategy&&module.implementation.version==identity.strategy_version;});
+                if(identity.problem!=input.problem||identity.coordinates.horizon!=input.horizon||identity.coordinates.dimensions.state!=input.dimensions.state||identity.coordinates.dimensions.control!=input.dimensions.control||identity.coordinates.dimensions.external!=input.dimensions.external||
+                    relation->coordinates!=identity.coordinates||relation->representation!=identity.request.representation||relation->payload||
+                    identity.request.objective!=input.problem||identity.request.numerical!=input.configuration.description().numerical||
+                    identity.request.assurance!=input.configuration.description().output.assurance||identity.request.representation!=input.configuration.description().output.representation||
+                    identity.request.target!=input.configuration.description().output.family||identity.request.profile.empty()||
+                    identity.strategy!=input.configuration.description().strategy.strategy||strategy_version==input.configuration.description().modules.end())
+                    return reject("run.final.family","Foreign family identity, request, relation or live payload");
+                for(const auto& step:identity.lineage)if(step.request.value.empty()||step.input.value.empty()||step.output.value.empty()||step.module.value.empty()||step.version.empty())return reject("run.final.family.lineage","Incomplete transformation identity");
                 if(const auto* p=std::get_if<ExternalFamilyPayload>(&f.payload);p&&!attachment_role(p->attachment,AttachmentRole::family))return reject("run.final.family.attachment","Missing family-role attachment");
             }
+            FamilyIdentity expected{};expected.problem=input.problem;
+            expected.request.assurance=input.configuration.description().output.assurance;
+            if(input.horizon>std::numeric_limits<std::size_t>::max())
+                return reject("run.horizon","Horizon exceeds this platform's coordinate size");
+            expected.coordinates={input.dimensions,static_cast<std::size_t>(input.horizon)};
+            if(s->family)expected=s->family->family.identity();
+            const SynthesisResult checked{s->termination,s->outcome,s->objective,s->family?std::optional<OptimalFamily>{s->family->family}:std::nullopt,s->incumbents,{},s->stop};
+            if(!check_synthesis_result(checked,expected).empty())return reject("run.final.synthesis.evidence","Unsupported or contradictory synthesis evidence");
+            const auto retained_scope=[&](const RetainedEvidenceScope& scope){
+                return scope.lower_bound==s->objective.lower.has_value()&&scope.upper_bound==s->objective.upper.has_value()&&
+                    scope.incumbents==s->incumbents.size()&&scope.partial_or_candidate_family==s->family.has_value();
+            };
+            if(const auto* stopped=std::get_if<ScopedOperationStopped>(&s->stop))
+                if(stopped->request.request.value.empty()||stopped->request.port.empty()||!retained_scope(stopped->retained))
+                    return reject("run.final.stop.scope","Stopped operation has incomplete provenance or incorrect retained scope");
+            if(s->termination==Termination::operation_rejected) {
+                if(const auto* rejected=std::get_if<ScopedRequestRejection>(&s->stop)) {
+                    if(rejected->request.request.value.empty()||rejected->request.port.empty()||rejected->diagnostics.empty()||!retained_scope(rejected->retained))
+                        return reject("run.final.stop.rejection","Missing rejection provenance or incorrect retained-evidence scope");
+                }else return reject("run.final.stop.rejection","Operation rejection requires scoped request rejection");
+            }else if(std::holds_alternative<ScopedRequestRejection>(s->stop))return reject("run.final.stop","Scoped rejection requires operation_rejected termination");
         } else if(const auto* p=std::get_if<ProgramFinal>(&input.final)){
             const auto& r=p->result;const auto& subject=r.outcome.subject;
             if(subject.problem!=input.problem||subject.program.value.empty()||!support_valid(r.outcome.support)||(r.primal&&!finite_vector(*r.primal)))return reject("run.final.program","Foreign or invalid program result");
@@ -320,9 +358,13 @@ SynthesisFinal project_final(const SynthesisResult& result,std::optional<Attachm
     std::optional<FamilyRecord> family;
     if(result.family){const auto& f=*result.family;FamilyPayload payload=FamilyWithoutExporter{};
         if(attachment)payload=ExternalFamilyPayload{std::move(*attachment)};
-        family=FamilyRecord{f.problem,f.relation.coordinates,f.relation.representation,f.target,f.evidence,std::move(payload)};
+        auto outcome=f.outcome();
+        std::visit([](auto& product){product.relation.payload.reset();},outcome);
+        auto metadata=FamilyPublisher::publish(f.identity(),std::move(outcome));
+        if(!std::holds_alternative<OptimalFamily>(metadata))throw std::logic_error("A published family lost its evidence when projected");
+        family=FamilyRecord{std::get<OptimalFamily>(std::move(metadata)),std::move(payload)};
     }
-    return {result.termination,result.outcome,result.objective,std::move(family),result.incumbents};
+    return {result.termination,result.outcome,result.objective,std::move(family),result.incumbents,result.stop};
 }
 ArtifactResult<SpanRecord> project_legacy_span(const TimingSpan& value,SpanDescriptor descriptor){
     try {

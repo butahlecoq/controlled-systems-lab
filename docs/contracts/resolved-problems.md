@@ -1,11 +1,12 @@
 # Resolved mathematical problems
 
-`<csl/problem/validator.hpp>` and `CSL::resolved_problem` add complete, owning
+`<csl/problem/resolved_problem.hpp>` and `CSL::resolved_core` provide complete, owning
 publication on top of the `Problem` DTO introduced in canonical source 1.4 and
 retained in source 1.5. This is an additive module; the DTO, LP data result alias
 and existing component targets retain their
-authority. The target publicly composes `CSL::problem`, `CSL::objectives` and
-`CSL::registry`. See [component data](problem-data.md) and the
+authority. The upper `<csl/problem/validator.hpp>` and `CSL::resolved_problem`
+provide strategy admission; the registry depends on the lower resolved core,
+not on this admission wrapper. See [component data](problem-data.md) and the
 [identity byte format](problem-identity-v1.md).
 
 ## Publication and admission
@@ -56,21 +57,21 @@ which state is known to a strategy. Temporal constraints retain the complete CSR
 joint map on `x0,...,xT,u0,...,u(T-1)`, including presence with zero rows. Component
 factories check dimension arithmetic, CSR structure and offsets.
 
-`prepare_strategy(resolved, registry, configuration, requirements, version)` calls
+`prepare_strategy(resolved, registry, configuration, family_request, requirements, version)` calls
 the actual `StrategyRegistry::prepare` with the frozen canonical description and
-copied configuration. It returns `PreparedResolvedStrategy` or the registry's
+copied configuration and effective family request. It returns `PreparedResolvedStrategy` or the registry's
 unchanged `Rejection`. The selected strategy owns its inverse, compactness,
 full-dimension, nominal, information and temporal support requirements. There is
 no default strategy or hardcoded nominal gate inside the resolver. Registry
 check-before-snapshot and dependency-before-factory behavior remains in force.
-Resource policy and execution context still belong to execution.
+Resource policy and execution context still belong to execution; the context
+numerical policy must match the effective family request when the strategy runs.
 
 The wrapper retains both the resolved problem and actual prepared strategy.
 `preparation()` returns an owning registry preparation usable after registries
 and producers are destroyed, under the registry's existing callback-lifetime
-rules. Extracting that preparation alone does not add a content-interpreter
-seam: a future strategy needing resolved artifacts must define its own explicit
-owning dependency. The current API does not turn declarations into executable
+rules. The prepared `StrategyRequest` also owns the same resolved handle, so
+extracting its preparation does not lose canonical content. The current API does not turn declarations into executable
 game semantics. Existing nominal guards still reject unsupported external,
 feedback and finite profiles.
 
