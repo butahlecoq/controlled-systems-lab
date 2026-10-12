@@ -62,3 +62,23 @@ execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/build"
   --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
+
+# Exercise the README examples as a second, isolated installed-package consumer.
+# Copy only their public sources/template: no repository include or build paths.
+set(example_source "${work}/examples-source")
+file(MAKE_DIRECTORY "${example_source}/scenarios")
+foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
+    resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp)
+  file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
+endforeach()
+file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
+  DESTINATION "${example_source}/scenarios")
+execute_process(COMMAND "${CMAKE_COMMAND}" -S "${example_source}" -B "${work}/examples-build"
+  ${generator_args} "-DCMAKE_PREFIX_PATH=${prefix}" "-DCMAKE_BUILD_TYPE=${CSL_CONFIG}"
+  "-DCMAKE_CXX_COMPILER=${CSL_CXX_COMPILER}" "-DCMAKE_CXX_FLAGS=${CSL_CXX_FLAGS}"
+  "-DCMAKE_EXE_LINKER_FLAGS=${CSL_EXE_LINKER_FLAGS}"
+  COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/examples-build"
+  --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/examples-build"
+  -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
