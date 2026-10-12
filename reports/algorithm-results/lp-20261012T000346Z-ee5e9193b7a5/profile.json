@@ -1,0 +1,381 @@
+{
+  "schema": "csl.lp-profile/1",
+  "purpose": "profile",
+  "return_code": 0,
+  "aborted": false,
+  "events": [
+    {
+      "schema": "csl.lp-report-events/1",
+      "event": "header",
+      "purpose": "profile",
+      "repetitions": 7,
+      "warmups": 0,
+      "build": {
+        "source_commit": "6780941b80fd1e94d6b5a6c5142822d5273bfa3f",
+        "build_owner_sha256": "142beddc76b84b48a98585c95035bce081f6f656e1c0c028351a51c3bedb19a3",
+        "compiler": "MSVC",
+        "compiler_version": "19.44.35215.0",
+        "generator": "Visual Studio 17 2022",
+        "architecture": "AMD64/x64",
+        "configuration": "Release",
+        "cxx_standard": 20,
+        "ndebug": true,
+        "configured_flags": "/DWIN32 /D_WINDOWS /EHsc",
+        "release_flags": "/O2 /Ob2 /DNDEBUG"
+      },
+      "clock": {
+        "is_steady": true,
+        "period_num": 1,
+        "period_den": 1000000000
+      },
+      "scenarios": [
+        {
+          "case_id": "offset-triangle",
+          "identity": {
+            "problem": "html01-literals",
+            "program": "offset-triangle"
+          },
+          "input": {
+            "linear": [
+              -1.0,
+              -2.0
+            ],
+            "offset": 7.0,
+            "constraints": {
+              "rows": 1,
+              "cols": 2,
+              "starts": [
+                0,
+                2
+              ],
+              "indices": [
+                0,
+                1
+              ],
+              "values": [
+                1.0,
+                1.0
+              ]
+            },
+            "variables": [
+              [
+                0.0,
+                null
+              ],
+              [
+                0.0,
+                null
+              ]
+            ],
+            "rows": [
+              [
+                null,
+                1.0
+              ]
+            ]
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": [
+              0.0,
+              1.0
+            ],
+            "objective": 5.0,
+            "derivation": "x+2y <= 2(x+y) <= 2; value5 attained at(0,1)."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "scalar-positive",
+          "identity": {
+            "problem": "html01-literals",
+            "program": "scalar-positive"
+          },
+          "input": {
+            "linear": [
+              3.0
+            ],
+            "offset": 2.0,
+            "constraints": {
+              "rows": 0,
+              "cols": 1,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                -1.0,
+                4.0
+              ]
+            ],
+            "rows": []
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": [
+              -1.0
+            ],
+            "objective": -1.0,
+            "derivation": "Positive slope selects lower endpoint-1."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "scalar-negative",
+          "identity": {
+            "problem": "html01-literals",
+            "program": "scalar-negative"
+          },
+          "input": {
+            "linear": [
+              -2.0
+            ],
+            "offset": 2.0,
+            "constraints": {
+              "rows": 0,
+              "cols": 1,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                -1.0,
+                4.0
+              ]
+            ],
+            "rows": []
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": [
+              4.0
+            ],
+            "objective": -6.0,
+            "derivation": "Negative slope selects upper endpoint4."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "contradictory-rows",
+          "identity": {
+            "problem": "html01-literals",
+            "program": "contradictory-rows"
+          },
+          "input": {
+            "linear": [
+              0.0
+            ],
+            "offset": 0.0,
+            "constraints": {
+              "rows": 2,
+              "cols": 1,
+              "starts": [
+                0,
+                1,
+                2
+              ],
+              "indices": [
+                0,
+                0
+              ],
+              "values": [
+                1.0,
+                1.0
+              ]
+            },
+            "variables": [
+              [
+                null,
+                null
+              ]
+            ],
+            "rows": [
+              [
+                null,
+                0.0
+              ],
+              [
+                1.0,
+                null
+              ]
+            ]
+          },
+          "reference": {
+            "outcome": "infeasible",
+            "point": null,
+            "objective": null,
+            "derivation": "x<=0 and x>=1 contradict."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "free-unbounded",
+          "identity": {
+            "problem": "html01-literals",
+            "program": "free-unbounded"
+          },
+          "input": {
+            "linear": [
+              -1.0
+            ],
+            "offset": 0.0,
+            "constraints": {
+              "rows": 0,
+              "cols": 1,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                null,
+                null
+              ]
+            ],
+            "rows": []
+          },
+          "reference": {
+            "outcome": "unbounded",
+            "point": null,
+            "objective": null,
+            "derivation": "-x tends to minus infinity as x grows."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        }
+      ]
+    },
+    {
+      "schema": "csl.lp-report-events/1",
+      "event": "profile",
+      "purpose": "profile",
+      "rounds": 1000,
+      "trials": 5000,
+      "failures": 0,
+      "observation_token": "17056366293274259928",
+      "wall_ns": 676911400,
+      "phase_totals_ns": [
+        5783600,
+        8471900,
+        740100,
+        577936000,
+        7897100,
+        602778100
+      ],
+      "before": {
+        "source": "GetProcessTimes / GetProcessMemoryInfo",
+        "user_cpu": {
+          "available": true,
+          "value": 0,
+          "unit": "ns",
+          "scope": "process lifetime CPU at snapshot"
+        },
+        "kernel_cpu": {
+          "available": true,
+          "value": 0,
+          "unit": "ns",
+          "scope": "process lifetime CPU at snapshot"
+        },
+        "peak_resident": {
+          "available": true,
+          "value": 4190208,
+          "unit": "bytes",
+          "scope": "process lifetime peak, not per trial or delta"
+        }
+      },
+      "after": {
+        "source": "GetProcessTimes / GetProcessMemoryInfo",
+        "user_cpu": {
+          "available": true,
+          "value": 500000000,
+          "unit": "ns",
+          "scope": "process lifetime CPU at snapshot"
+        },
+        "kernel_cpu": {
+          "available": true,
+          "value": 31250000,
+          "unit": "ns",
+          "scope": "process lifetime CPU at snapshot"
+        },
+        "peak_resident": {
+          "available": true,
+          "value": 6189056,
+          "unit": "bytes",
+          "scope": "process lifetime peak, not per trial or delta"
+        }
+      },
+      "scope": "separate sequential fresh-workspace profile, no per-trial serialization; lifetime peak is not per-call memory"
+    }
+  ],
+  "stderr": "",
+  "limiter": "unresolved at current profile granularity; no sampling/call-stack profile",
+  "phase_order": [
+    "input_publication",
+    "registration_preparation",
+    "workspace_creation",
+    "public_run",
+    "independent_verification",
+    "end_to_end"
+  ],
+  "scope": "separate profile; nested totals are not additive to end_to_end",
+  "assessment": {
+    "dominant_measured_phase": "public_run",
+    "phase_totals_ns": {
+      "input_publication": 5783600,
+      "registration_preparation": 8471900,
+      "workspace_creation": 740100,
+      "public_run": 577936000,
+      "independent_verification": 7897100,
+      "end_to_end": 602778100
+    },
+    "end_to_end_total_ns": 602778100,
+    "user_cpu_delta": {
+      "available": true,
+      "value": 500000000,
+      "unit": "ns",
+      "scope": "separate profile process CPU delta"
+    },
+    "kernel_cpu_delta": {
+      "available": true,
+      "value": 31250000,
+      "unit": "ns",
+      "scope": "separate profile process CPU delta"
+    },
+    "peak_resident": {
+      "available": true,
+      "value": 6189056,
+      "unit": "bytes",
+      "scope": "process lifetime peak, not per trial or delta"
+    },
+    "source_path": "src/adapters/lp/highs.cpp through BoundWorkspace.run",
+    "inner_limiter": "unresolved at current profile granularity; no sampling/call-stack profile",
+    "scope": "largest accumulated sequential component, not throughput or exclusive native time; end_to_end is not added to components"
+  }
+}

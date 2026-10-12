@@ -1,0 +1,1989 @@
+case_id,round,sequence,harness,termination,outcome,support,original_objective,validation_passed,end_to_end_scope,row_residual,variable_residual,diagnostics,input_publication_ns,registration_preparation_ns,workspace_creation_ns,public_run_ns,independent_verification_ns,end_to_end_ns
+offset-triangle,1,6,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=offset-triangle
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=5
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=5
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 2e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0    -2.9999971925e+00 Ph1: 1(2); Du: 2(3) 0s
+          1     5.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  5.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1300,2000,200,186900,2200,193000
+scalar-positive,1,7,returned,completed,optimal,unestablished,-1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-positive
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-1
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-1
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [3e+00, 3e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1100,2000,200,111000,1900,116700
+scalar-negative,1,8,returned,completed,optimal,unestablished,-6.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-negative
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-6
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-6
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -6.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1700,1800,100,110100,1700,115800
+contradictory-rows,1,9,returned,completed,infeasible,unestablished,0.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=contradictory-rows
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=8
+native.model_status_name=Infeasible
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=1
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=0
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(1); Du: 0(7.70355e-13) 0s
+          1     5.0487097934e-29 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         0 / 5.05e-29  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0487097934e-29
+HiGHS run time      :          0.00
+",1300,2100,200,185600,1700,191100
+free-unbounded,1,10,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=free-unbounded
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=10
+native.model_status_name=Unbounded
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=0
+native.dual_infeasibility=1
+native.simplex_iterations=0
+original.objective=0
+dual.unavailable=invalid dimensions, nonfinite values or nonzero free-interval multiplier
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+WARNING: LP solution KKT conditions
+num/max      0 /        0 (relative      0 /        0) primal infeasibilities     (tolerance = 1e-08)
+num/max      1 /        1 (relative      1 /      0.5)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 /      0.5  P-D objective error        (tolerance = 1e-07)
+Model status        : Unbounded
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0000000000e-01
+HiGHS run time      :          0.00
+",1200,2600,300,121100,1500,127300
+offset-triangle,2,11,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=offset-triangle
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=5
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=5
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 2e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0    -2.9999971925e+00 Ph1: 1(2); Du: 2(3) 0s
+          1     5.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  5.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1900,1800,200,190200,1900,196300
+scalar-positive,2,12,returned,completed,optimal,unestablished,-1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-positive
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-1
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-1
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [3e+00, 3e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",900,2000,200,102900,1600,108000
+scalar-negative,2,13,returned,completed,optimal,unestablished,-6.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-negative
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-6
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-6
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -6.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",700,1800,200,103200,1300,107600
+contradictory-rows,2,14,returned,completed,infeasible,unestablished,0.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=contradictory-rows
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=8
+native.model_status_name=Infeasible
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=1
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=0
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(1); Du: 0(7.70355e-13) 0s
+          1     5.0487097934e-29 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         0 / 5.05e-29  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0487097934e-29
+HiGHS run time      :          0.00
+",2100,1800,100,168700,1600,174600
+free-unbounded,2,15,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=free-unbounded
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=10
+native.model_status_name=Unbounded
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=0
+native.dual_infeasibility=1
+native.simplex_iterations=0
+original.objective=0
+dual.unavailable=invalid dimensions, nonfinite values or nonzero free-interval multiplier
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+WARNING: LP solution KKT conditions
+num/max      0 /        0 (relative      0 /        0) primal infeasibilities     (tolerance = 1e-08)
+num/max      1 /        1 (relative      1 /      0.5)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 /      0.5  P-D objective error        (tolerance = 1e-07)
+Model status        : Unbounded
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0000000000e-01
+HiGHS run time      :          0.00
+",900,2100,200,117300,1400,122500
+offset-triangle,3,16,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=offset-triangle
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=5
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=5
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 2e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0    -2.9999971925e+00 Ph1: 1(2); Du: 2(3) 0s
+          1     5.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  5.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",2000,2000,100,179400,2000,186000
+scalar-positive,3,17,returned,completed,optimal,unestablished,-1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-positive
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-1
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-1
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [3e+00, 3e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",900,2000,200,109000,1800,114300
+scalar-negative,3,18,returned,completed,optimal,unestablished,-6.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-negative
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-6
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-6
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -6.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",700,1800,200,102600,1500,107100
+contradictory-rows,3,19,returned,completed,infeasible,unestablished,0.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=contradictory-rows
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=8
+native.model_status_name=Infeasible
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=1
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=0
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(1); Du: 0(7.70355e-13) 0s
+          1     5.0487097934e-29 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         0 / 5.05e-29  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0487097934e-29
+HiGHS run time      :          0.00
+",1900,1700,200,166100,1600,171800
+free-unbounded,3,20,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=free-unbounded
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=10
+native.model_status_name=Unbounded
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=0
+native.dual_infeasibility=1
+native.simplex_iterations=0
+original.objective=0
+dual.unavailable=invalid dimensions, nonfinite values or nonzero free-interval multiplier
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+WARNING: LP solution KKT conditions
+num/max      0 /        0 (relative      0 /        0) primal infeasibilities     (tolerance = 1e-08)
+num/max      1 /        1 (relative      1 /      0.5)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 /      0.5  P-D objective error        (tolerance = 1e-07)
+Model status        : Unbounded
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0000000000e-01
+HiGHS run time      :          0.00
+",900,2000,200,106200,1400,111100
+offset-triangle,4,21,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=offset-triangle
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=5
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=5
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 2e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0    -2.9999971925e+00 Ph1: 1(2); Du: 2(3) 0s
+          1     5.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  5.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1100,1800,100,172800,1800,177900
+scalar-positive,4,22,returned,completed,optimal,unestablished,-1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-positive
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-1
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-1
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [3e+00, 3e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1700,2000,200,105000,1700,110900
+scalar-negative,4,23,returned,completed,optimal,unestablished,-6.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-negative
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-6
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-6
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -6.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",700,1900,100,100500,1600,105100
+contradictory-rows,4,24,returned,completed,infeasible,unestablished,0.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=contradictory-rows
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=8
+native.model_status_name=Infeasible
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=1
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=0
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(1); Du: 0(7.70355e-13) 0s
+          1     5.0487097934e-29 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         0 / 5.05e-29  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0487097934e-29
+HiGHS run time      :          0.00
+",1100,1900,100,163800,1700,169000
+free-unbounded,4,25,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=free-unbounded
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=10
+native.model_status_name=Unbounded
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=0
+native.dual_infeasibility=1
+native.simplex_iterations=0
+original.objective=0
+dual.unavailable=invalid dimensions, nonfinite values or nonzero free-interval multiplier
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+WARNING: LP solution KKT conditions
+num/max      0 /        0 (relative      0 /        0) primal infeasibilities     (tolerance = 1e-08)
+num/max      1 /        1 (relative      1 /      0.5)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 /      0.5  P-D objective error        (tolerance = 1e-07)
+Model status        : Unbounded
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0000000000e-01
+HiGHS run time      :          0.00
+",1000,2200,200,110600,1500,115900
+offset-triangle,5,26,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=offset-triangle
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=5
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=5
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 2e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0    -2.9999971925e+00 Ph1: 1(2); Du: 2(3) 0s
+          1     5.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  5.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1200,1900,200,186500,2000,192000
+scalar-positive,5,27,returned,completed,optimal,unestablished,-1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-positive
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-1
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-1
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [3e+00, 3e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1200,2300,200,110900,1600,116700
+scalar-negative,5,28,returned,completed,optimal,unestablished,-6.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-negative
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-6
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-6
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -6.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",700,1800,200,100900,1300,105300
+contradictory-rows,5,29,returned,completed,infeasible,unestablished,0.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=contradictory-rows
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=8
+native.model_status_name=Infeasible
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=1
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=0
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(1); Du: 0(7.70355e-13) 0s
+          1     5.0487097934e-29 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         0 / 5.05e-29  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0487097934e-29
+HiGHS run time      :          0.00
+",2100,1700,200,165900,1500,171600
+free-unbounded,5,30,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=free-unbounded
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=10
+native.model_status_name=Unbounded
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=0
+native.dual_infeasibility=1
+native.simplex_iterations=0
+original.objective=0
+dual.unavailable=invalid dimensions, nonfinite values or nonzero free-interval multiplier
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+WARNING: LP solution KKT conditions
+num/max      0 /        0 (relative      0 /        0) primal infeasibilities     (tolerance = 1e-08)
+num/max      1 /        1 (relative      1 /      0.5)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 /      0.5  P-D objective error        (tolerance = 1e-07)
+Model status        : Unbounded
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0000000000e-01
+HiGHS run time      :          0.00
+",1100,1900,100,112800,1400,117900
+offset-triangle,6,31,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=offset-triangle
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=5
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=5
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 2e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0    -2.9999971925e+00 Ph1: 1(2); Du: 2(3) 0s
+          1     5.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  5.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",2000,2000,100,176000,1900,182700
+scalar-positive,6,32,returned,completed,optimal,unestablished,-1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-positive
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-1
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-1
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [3e+00, 3e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1000,2300,200,115100,1800,120700
+scalar-negative,6,33,returned,completed,optimal,unestablished,-6.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-negative
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-6
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-6
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -6.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",2200,2000,200,108200,1500,114300
+contradictory-rows,6,34,returned,completed,infeasible,unestablished,0.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=contradictory-rows
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=8
+native.model_status_name=Infeasible
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=1
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=0
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(1); Du: 0(7.70355e-13) 0s
+          1     5.0487097934e-29 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         0 / 5.05e-29  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0487097934e-29
+HiGHS run time      :          0.00
+",1200,1800,100,170200,1700,175400
+free-unbounded,6,35,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=free-unbounded
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=10
+native.model_status_name=Unbounded
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=0
+native.dual_infeasibility=1
+native.simplex_iterations=0
+original.objective=0
+dual.unavailable=invalid dimensions, nonfinite values or nonzero free-interval multiplier
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+WARNING: LP solution KKT conditions
+num/max      0 /        0 (relative      0 /        0) primal infeasibilities     (tolerance = 1e-08)
+num/max      1 /        1 (relative      1 /      0.5)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 /      0.5  P-D objective error        (tolerance = 1e-07)
+Model status        : Unbounded
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0000000000e-01
+HiGHS run time      :          0.00
+",1000,2100,200,107200,1600,112500
+offset-triangle,7,36,returned,completed,optimal,unestablished,5.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=offset-triangle
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=5
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=5
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+00, 2e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0    -2.9999971925e+00 Ph1: 1(2); Du: 2(3) 0s
+          1     5.0000000000e+00 Pr: 0(0) 0s
+Model status        : Optimal
+Simplex   iterations: 1
+Objective value     :  5.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",2000,1900,200,187500,1900,193800
+scalar-positive,7,37,returned,completed,optimal,unestablished,-1.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-positive
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-1
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-1
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [3e+00, 3e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -1.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1000,2200,200,107700,1800,113100
+scalar-negative,7,38,returned,completed,optimal,unestablished,-6.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=scalar-negative
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=7
+native.model_status_name=Optimal
+stop=none
+native.info=available
+native.objective=-6
+native.primal_infeasibility=0
+native.dual_infeasibility=0
+native.simplex_iterations=0
+original.objective=-6
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [2e+00, 2e+00]
+  Bound  [1e+00, 4e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+Model status        : Optimal
+Objective value     : -6.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+",1700,1900,100,103200,1400,108500
+contradictory-rows,7,39,returned,completed,infeasible,unestablished,0.0,True,end_to_end,1.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=contradictory-rows
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=8
+native.model_status_name=Infeasible
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=1
+native.dual_infeasibility=0
+native.simplex_iterations=1
+original.objective=0
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 2 rows; 1 cols; 2 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [1e+00, 1e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 1(1); Du: 0(7.70355e-13) 0s
+          1     5.0487097934e-29 0s
+WARNING: LP solution KKT conditions
+num/max      1 /        1 (relative      1 /      0.5) primal infeasibilities     (tolerance = 1e-08)
+num/max      0 /        0 (relative      0 /        0)   dual infeasibilities     (tolerance = 1e-08)
+                                         0 / 5.05e-29  P-D objective error        (tolerance = 1e-07)
+Model status        : Infeasible
+Simplex   iterations: 1
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0487097934e-29
+HiGHS run time      :          0.00
+",1100,1700,100,171500,1700,176500
+free-unbounded,7,40,returned,completed,unbounded,unestablished,0.0,True,end_to_end,0.0,0.0,"adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.githash=n/a
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+program.problem=html01-literals
+program.id=free-unbounded
+options.solver=simplex
+options.presolve=off
+options.parallel=off
+options.threads=1
+options.random_seed=0
+options.allow_unbounded_or_infeasible=false
+options.log_to_console=true
+logging.destination=callback
+options.absolute_tolerance=1e-08
+residual.relative_tolerance=1e-08
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.iteration_limit=2147483647
+options.time_limit=inf
+model.reused=false
+native.load_status=0
+native_run=true
+native.call_status=0
+native.call_status_name=OK
+native.model_status=10
+native.model_status_name=Unbounded
+stop=none
+native.info=available
+native.objective=0
+native.primal_infeasibility=0
+native.dual_infeasibility=1
+native.simplex_iterations=0
+original.objective=0
+dual.unavailable=invalid dimensions, nonfinite values or nonzero free-interval multiplier
+complementarity=unavailable
+certificates=unavailable
+basis=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+Model has either no columns or no rows, so ignoring user constraint matrix data and initialising empty matrix
+LP   has 0 rows; 1 cols; 0 nonzeros
+Coefficient ranges:
+  Cost   [1e+00, 1e+00]
+  Bound  [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Solving an unconstrained LP with 1 columns
+WARNING: LP solution KKT conditions
+num/max      0 /        0 (relative      0 /        0) primal infeasibilities     (tolerance = 1e-08)
+num/max      1 /        1 (relative      1 /      0.5)   dual infeasibilities     (tolerance = 1e-08)
+                                         1 /      0.5  P-D objective error        (tolerance = 1e-07)
+Model status        : Unbounded
+Objective value     :  0.0000000000e+00
+P-D objective error :  5.0000000000e-01
+HiGHS run time      :          0.00
+",1900,2300,200,117500,1600,124000
