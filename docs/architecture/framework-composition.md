@@ -20,11 +20,13 @@ full mathematical requirements.
 | Real LP implementations | `CSL::highs_lp`, `CSL::phase_one` | Registered HiGHS optimizer; `phase-one-bland` for zero-objective equality/nonnegative feasibility with basis diagnostics. |
 | Real convex implementation | `CSL::highs_convex` | Registered HiGHS convex adapter with declared numerical admission; original norm and squared solver cost remain separate. |
 | Task execution | `CSL::execution`, `make_task`, `Executor::run` | Sequential/bounded-parallel retained tasks and actual execution provenance; resource declarations are not hard OS enforcement. |
+| Portable run records and collection | `CSL::artifacts`, `artifacts::RunStatistics`, `resolve_configuration`, `encode_run` / `decode_run`, `execution::observability` | Immutable run records, separate configuration identity, closed JSON codec and bounded collection/RUN01 projection; no automatic timer instrumentation or synthesis report exporter. |
 | Saved numerical reports | `benchmarks/reporting`, `scripts/reports` | Existing LP/convex drivers, saved-record validation, HTML/CSV/figures and published versioned artifacts. |
 
 Public headers are under `include/csl`. See the authoritative
 [resolved-problem](../contracts/resolved-problems.md),
 [registry](../contracts/registry.md),
+[run-statistics](../contracts/run-statistics.md),
 [LP](../contracts/linear-programs.md) and
 [report-record](../contracts/algorithm-report-records.md) contracts for details.
 

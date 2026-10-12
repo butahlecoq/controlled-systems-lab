@@ -13,10 +13,16 @@ int main() try {
     const auto controls = std::get<sets::SetData>(sets::make_h({{"/controls"}, 1, {}}, {H, h, E, e}));
     const auto system = std::make_shared<const SystemModel>(SystemModel{
         {{1, 1, 0}, TimeDomain::discrete, LinearStage{{1, 1, {1}}, {1, 1, {1}}, {1, 0, {}}, {0}}}, {}});
+    QuadraticTerminal terminal{}; // 1/2 * 2*x^2 - 2*x + 1 = (x-1)^2
+    terminal.Q.rows = 1;
+    terminal.Q.cols = 1;
+    terminal.Q.values = {2};
+    terminal.linear = {-2};
+    terminal.offset = 1;
     const Problem authored{{"two-stage-integrator"}, system, {0, 1, 2}, KnownInitial{{0}},
         ContinuousDomain{{controls.as_handle(), controls.as_handle()}},
         {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}}, {}, {}, InformationPattern::nominal_open_loop,
-        QuadraticTerminal{{1, 1, {2}}, {-2}, 1}}; // 1/2 * 2*x^2 - 2*x + 1 = (x-1)^2
+        terminal};
     const auto publication = problem::resolve(authored, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     if (const auto* diagnostic = std::get_if<Diagnostic>(&publication))
         throw std::runtime_error(diagnostic->field + ": " + diagnostic->explanation);
