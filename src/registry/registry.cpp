@@ -37,6 +37,8 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     // Preserve independently bound evidence while refusing to publish a malformed
     // or unsupported family claim. This copy has never been published to callers.
     auto retained=answer;
+    if (!check_outcome_evidence(retained.outcome,id,request.family.assurance).empty())
+        retained.outcome={id,MathematicalOutcome::undetermined,Unestablished{}, {}};
     if (retained.objective.lower &&
         (retained.objective.lower->evidence.problem!=id || !std::isfinite(retained.objective.lower->value)))
         retained.objective.lower.reset();

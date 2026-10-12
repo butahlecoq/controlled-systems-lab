@@ -740,6 +740,7 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
                 return result;
             }
             if (request.target==FamilyTarget::candidate_relaxation) {
+                if (request.profile=="outcome-identity-mismatch") result.outcome.subject={"other-problem"};
                 auto candidate_identity=identity;
                 if (request.profile=="candidate-identity-mismatch") candidate_identity.strategy={"other-strategy"};
                 auto published=FamilyPublisher::publish(candidate_identity,CandidateFamily{relation,
@@ -862,6 +863,17 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
     REQUIRE(std::holds_alternative<ContractValidationFailure>(candidate_rejected.stop));
     CHECK(std::get<ContractValidationFailure>(candidate_rejected.stop).retained.incumbents==1);
     CHECK(std::holds_alternative<std::monostate>(std::get<ContractValidationFailure>(candidate_rejected.stop).source_stop));
+    request.family.profile="outcome-identity-mismatch";
+    auto outcome_prepared=registry.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(outcome_prepared));
+    auto outcome_answer=std::get<PreparedStrategy>(std::move(outcome_prepared)).create()->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(outcome_answer));
+    const auto& outcome_rejected=std::get<SynthesisResult>(outcome_answer);
+    CHECK(outcome_rejected.termination==Termination::contract_rejected);
+    CHECK(outcome_rejected.outcome.subject==request.problem.identity());
+    CHECK(outcome_rejected.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(outcome_rejected.family.has_value());
+    CHECK(outcome_rejected.family->identity().request==request.family);
     for (const auto& [profile,reason]:{
         std::pair{"user-cancel",StopReason::cancelled},
         std::pair{"deadline",StopReason::deadline_expired}}) {
