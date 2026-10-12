@@ -33,6 +33,6 @@ The review verdict was "provisional base, not yet ticket-ready." The revisions s
 
 ## Remaining gates and next step
 
-Only scientific numerical-coverage policy, the exact-operation/capacity fixture, and historical B04 restoration remain unresolved for the first workflow. The nominal solver profile is confirmed. Future feedback, uncertainty, hybrid/discrete, approximation, and validated profiles remain separate work.
+The first-workflow gates are scientific numerical-coverage policy and the exact-operation/capacity fixture. Historical B04 restoration is a separate archival task and does not block newly authored nominal-baseline experiments. The nominal solver profile is confirmed. Future feedback, uncertainty, hybrid/discrete, approximation, and validated profiles remain separate work.
 
 First implement the coordinated #155/#157 public contract and tests, then the private relation/publisher path against T-S01/02/03 and the admitted #53/#51 operations. T-V01/02, T-X01, and T-X02 connect that work to independent verification, two-strategy acceptance, and saved artifacts. No interface is declared implemented by this synthesis.

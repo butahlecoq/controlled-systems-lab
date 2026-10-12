@@ -86,16 +86,30 @@ struct ScopedOperationStopped {
 	RequestProvenance request;
 	RetainedEvidenceScope retained;
 };
+struct RequestRejectionEvidence {           // registry-independent value in lower contracts
+	std::string port;
+	ModuleId requested_module;
+	std::optional<std::string> requested_version;
+	std::optional<ModuleId> actual_module;
+	std::optional<std::string> actual_version;
+	Diagnostics diagnostics;
+};
+struct ScopedRequestRejection {
+	RequestProvenance request;
+	RequestRejectionEvidence rejection;     // registry adapter translates its Rejection
+	TransformLineage completed_lineage;
+	RetainedEvidenceScope retained;
+};
 struct NoStop {};
-using StopEvidence = std::variant<NoStop, ScopedOperationStopped>;
+using StopEvidence = std::variant<NoStop, ScopedOperationStopped, ScopedRequestRejection>;
 struct FeasibleIncumbent { Witness witness; FeasibilityEvidence evidence; };
 struct SynthesisResult {                  // evolves the existing result
-	Termination termination;               // completed/cancelled/resource_limit/numerical_failure
+	Termination termination;               // completed/cancelled/resource_limit/numerical_failure/operation_rejected
 	SynthesisOutcomeClaim outcome;          // optimal/infeasible/unbounded/infimum_not_attained/undetermined
 	ObjectiveEvidence objective;            // retained independently supported bounds
 	std::optional<OptimalFamily> family;    // guarded identity + OptimalFamilyOutcome
 	std::vector<FeasibleIncumbent> incumbents; // retains each feasibility claim
-	StopEvidence stop;                      // NoStop or scoped stop reason/diagnostics
+	StopEvidence stop;                      // includes scoped generated-request rejection/provenance
 	std::vector<TimingSpan> spans;
 };
 using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
@@ -103,7 +117,7 @@ using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
 
 `OptimalFamily` becomes an immutable handle with private construction. It binds relation identity, effective request, coordinate schema, and lineage to its product. One `FamilyPublisher` owns claim construction and binding validation; strategies supply derivation facts rather than construct products directly. The closed product requires evidence fields but does not prove their correctness. A feasible incumbent whose primary optimality is unproved remains a candidate, even when it has the same value as another witness. Candidate feasibility evidence names its scope: an outer relaxation can contain infeasible histories, so a checked witness does not establish feasibility of the whole candidate relation. `PartialOptimalFamily` requires evidence that every retained history belongs to the true optimal relation, not merely evidence of feasibility or an inner subset of the feasible set.
 
-The result-boundary validator keeps cancellation and resource/numerical stops separate from mathematical outcomes. Only completed, supported optimal results can carry a complete family. Interrupted results can retain a labelled partial/candidate relation, valid bounds, and independently supported feasible incumbents. A numerical failure preserves earlier valid evidence. Infeasible, unbounded, and unattained-infimum claims cannot carry an optimal-family product; absence of a witness does not prove infeasibility. `Unsupported` records capability admission failure, not a mathematical conclusion. Cross-field contradictions reject at publication rather than silently lose evidence.
+The result-boundary validator keeps cancellation and resource/numerical stops separate from mathematical outcomes. Only completed, supported optimal results can carry a complete family. Interrupted results can retain a labelled partial/candidate relation, valid bounds, and independently supported feasible incumbents. A numerical failure preserves earlier valid evidence. Infeasible, unbounded, and unattained-infimum claims cannot carry an optimal-family product; absence of a witness does not prove infeasibility. `Unsupported` records capability admission failure before solving. Once solving has produced evidence, a later generated-request rejection is represented inside `SynthesisResult` as `operation_rejected` with `ScopedRequestRejection`: exact request provenance, provider diagnostic, completed transformation lineage, and a scope naming retained bounds, incumbents, and any partial/candidate relation. The registry adapter translates its registry-specific rejection into this registry-independent evidence DTO, preserving port, requested/actual module and versions, and diagnostics. It cannot become infeasibility, numerical failure, or a top-level `Unsupported` that discards evidence. Boundary validation requires `operation_rejected` and `ScopedRequestRejection` together. Cross-field contradictions reject at publication rather than silently lose evidence.
 
 This sketch keeps completeness evidence structurally present only in the complete case and makes a candidate's relation direction explicit; it does not prove evidence correctness by construction. Bind every completeness claim to all of: the resolved-problem content digest; the effective objective and family request (including profile and tolerance identity); the ordered joint-coordinate schema; the strategy ID/version; and the ordered transformation lineage with input/output identities. The verifier rejects a binding mismatch before it checks evidence. A witness, any finite collection of witnesses, objective agreement, or a small floating-point residual alone is never completeness evidence.
 
@@ -161,7 +175,7 @@ struct FamilyRequest {
 	ProfileId profile;
 	ObjectiveIdentity objective;
 	FamilyTarget target;
-	NumericalPolicy numerical;
+	NumericalPolicy numerical;              // authoritative immutable policy identity
 	Assurance assurance;
 	FamilyOutputContract output;
 };
@@ -190,7 +204,9 @@ auto observed = executor.run(tasks_containing(task));
 // Persist Returned<StrategyPort>, Skipped, TaskFailure, or preparation rejection.
 ```
 
-The current overload lacks `FamilyRequest` and `StrategyPort::run` passes a DTO `Problem`. The migration updates request snapshots, `PreparedResolvedStrategy`, strategy registration capability callbacks/factories, and callers together. Retire the old solve overload once callers move; it must not remain a route that bypasses family admission. `PreparedResolvedStrategy` retains the resolved owner and effective request through execution and verification. `PreparedStrategy` retains selected registration/provenance after registry destruction. Whole-plan admission checks every known dependency before factories run. Each generated concrete request then passes through `PreparedProvider<Port>::prepare(request)` with frozen requirements before its request-specific workspace is created. No per-query requirement override is added.
+`FamilyRequest.numerical` is the authoritative policy identity for solving and family evidence. The execution owner derives the `ExecutionContext` numerical policy from that prepared request; it cannot independently override tolerances. Reject a mismatched context before the first workspace runs. Verification has a separately identified policy only when explicitly requested; bind its identity into verification evidence and report it separately from the solve policy, so it cannot retroactively change the solve claim.
+
+The current overload lacks `FamilyRequest` and `StrategyPort::run` passes a DTO `Problem`. The migration updates request snapshots, `PreparedResolvedStrategy`, strategy registration capability callbacks/factories, and callers together. The existing include graph has `problem/validator.hpp` include `registry/registry.hpp` before `ResolvedProblem` is defined, so this by-value request cannot simply be placed in `registry.hpp`. Break the cycle as part of the same migration: move the immutable `ResolvedProblem` handle declaration and storage-independent identity into a lower-level `problem/resolved_problem.hpp` included by both headers, or define an immutable owning `ResolvedProblemHandle` there. Move only registry-independent data/identity into that header; keep registry admission glue in a layer that can include both modules without making either depend on the other. Do not use a raw pointer or permit a mutable DTO across the admission boundary. Retire the old solve overload once callers move; it must not remain a route that bypasses family admission. `PreparedResolvedStrategy` retains the resolved owner and effective request through execution and verification. `PreparedStrategy` retains selected registration/provenance after registry destruction. Whole-plan admission checks every known dependency before factories run. Each generated concrete request then passes through `PreparedProvider<Port>::prepare(request)` with frozen requirements before its request-specific workspace is created. No per-query requirement override is added.
 
 Candidate B's first relation storage is an immutable `HistoryRows` with sparse inequality/equality rows, canonical `JointLayout`, and source-row origins. `JointLayout` owns state/control block offsets. `ProgramCoordinateMap` binds source and native variables, slack/eliminated coordinates, source rows, and objective reformulations to the exact program identity. Every transformation records ordered input/output relation identities, coordinate maps, module versions, assumptions, and guarantee transfer. Program compilation and family extraction use the same map, not separately inferred offsets.
 
@@ -293,8 +309,8 @@ Mathematical projection uses the existing `GeometryPort` `Projection` operation.
 
 ```cpp
 struct GeometryOperationRequest {
-	GeometryOperationKind operation;
-	std::vector<OperandContract> inputs;      // ordered representation/coordinate contracts
+	GeometryRequestIdentity identity;         // problem + immutable full request payload
+	GeometryOperation operation;              // tagged operands: affine map, projection, etc.
 	GeometryOutputRequest output;            // relation + assurance + capacity requirements
 };
 struct GuaranteeTransfer {
@@ -317,17 +333,23 @@ public:
 	GuaranteeContract composed_guarantee() const;
 	std::unique_ptr<GeometryPlanWorkspace> create() const;
 };
-using GeometryPlanAdmission = std::variant<PreparedGeometryPlan, registry::Rejection>;
+struct GeometryPlanRejected { GeometryRequestIdentity identity; registry::Rejection reason; };
+using GeometryPlanAdmission = std::variant<PreparedGeometryPlan, GeometryPlanRejected>;
 GeometryPlanAdmission GeometryOperationPlanner::prepare(const GeometryOperationRequest&,
 	const ExistingGeometryRegistries&) const;
 struct GeometryPlanResult { OperationResult result; TransformLineage lineage;
 	GuaranteeContract applied_guarantee; };
-using GeometryPlanOutcome = std::variant<GeometryPlanResult, OperationStopped, Unsupported>;
-GeometryPlanOutcome GeometryPlanWorkspace::run(std::span<const SetHandle> operands,
+struct GeometryPlanStopped { GeometryRequestIdentity identity; OperationStopped reason;
+	TransformLineage completed_lineage; };
+struct GeometryPlanRejectedAtRuntime { GeometryRequestIdentity identity;
+	registry::Rejection reason; TransformLineage completed_lineage; };
+using GeometryPlanOutcome = std::variant<GeometryPlanResult, GeometryPlanStopped,
+	GeometryPlanRejectedAtRuntime>;
+GeometryPlanOutcome GeometryPlanWorkspace::run(const GeometryOperationRequest&,
 	const ExecutionContext&);
 ```
 
-This sketch covers the set-producing chain used by A and family projection; existing support/containment outcomes retain their own typed results. Plan admission checks each intermediate representation and operation-specific guarantee transfer before workspace creation. Execution admits concrete operations through the frozen provider, verifies each returned identity/evidence, and appends the actual transformation lineage. A rejected or stopped step yields no successful final set and retains its request provenance.
+This reuses the existing discriminated geometry operand contract: `AffineImage` carries its matrix and offset; `Projection` carries ordered coordinate indices; `AffinePreimage` carries its map and offset; and other variants carry their set operands, direction, or containment pair. `GeometryRequestIdentity` binds the complete immutable payload. The planner derives ordered representation/coordinate contracts from those operands, checks every intermediate representation and operation-specific guarantee transfer before workspace creation, and freezes concrete requests in prepared providers. The workspace runs those exact prepared requests; it cannot substitute a different matrix, projection, or operand after admission. Existing support/containment outcomes retain their own typed results. Execution verifies each returned identity/evidence and appends actual transformation lineage. Preparation rejection carries the original request identity; a stopped or late-rejected step carries that identity, its reason, and all completed lineage. Such an outcome yields no successful final set and cannot discard prior synthesis evidence when propagated to the strategy result.
 
 There is no universal ordering of guarantees. Image, intersection, predecessor, and projection each need a reviewed rule for their input/output relation and assurance. Missing rules or weakened guarantees reject a complete-family request. Inner/outer/heuristic steps can produce a correspondingly scoped partial/candidate result only where their registered rule supports that claim. Exact/equivalent mathematical transformations evaluated in binary64 still carry numerical assurance. Approximation adapters remain outside the first comparison. Selecting the concrete exact operation/capacity fixture for #51 remains an open scientific gate.
 
@@ -483,11 +505,12 @@ The verifier recomputes initial conditions, every transition, all declared suppo
 
 ## Scientific gates before complete-family acceptance
 
-The callable interfaces above are proposed ticket defaults, not implementation approval. Only these scientific choices remain unresolved for the first workflow:
+The callable interfaces above are proposed ticket defaults, not implementation approval. These scientific choices remain unresolved for the first workflow:
 
 1. **Numerical coverage policy.** Review the complete-family characterization for each supported terminal objective and define the numerical coverage procedure, arithmetic/tolerance policy, and acceptance thresholds. No thresholds are invented here. Optimum diagnostics and witness residuals do not establish complete coverage. Coordinate/lineage binding and the `check_family_evidence`/T-V02 migration must ship with that reviewed policy.
 2. **Exact-operation and capacity fixture.** Select the concrete H/V operation chain, supported dimensions/output-size limits, and analytic oracle fixtures for A's images, intersections, predecessor projections, and joint relation. H/V conversion and hull reduction alone are insufficient. Missing operations or coverage support produce unsupported/partial/candidate records and cannot pass T-X01.
-3. **Historical B04 restoration.** Source its original bounds, conventions, and missing inputs before making that archival manifest executable. The owner-approved `u ∈ [-1,1]` bound applies only to new baselines and does not repair or redefine B04.
+
+Historical archive gate, separate from the first workflow: source B04's original bounds, conventions, and missing inputs before making that archival manifest executable. The owner-approved `u ∈ [-1,1]` bound applies only to new baselines and does not repair or redefine B04.
 
 The nominal open-loop profile, deterministic initial point, absent/zero disturbance, continuous controls, supported terminal objectives, and no added state/temporal coupling constraints are confirmed scope. They do not require another owner-confirmation gate. Record/query identities, one publisher, existing-registry/provider composition, serial work within a task with outer-executor concurrency, and saved-data export are proposed defaults specified above. Future feedback/disturbance quantifiers, uncertain initial states, nonempty temporal couplings, hybrid/discrete relation support, validated arithmetic, and approximation adapters require separate capability review after this slice. They do not gate the nominal numerical workflow.
 
@@ -502,7 +525,7 @@ The proposed interface/test ownership is concrete:
 | #53 reachability, #51 geometry, #66 Strategy A | T-S01 joins recovery fibers to enforce `u0+u1=1`; singular dynamics need no inverse. Every admitted geometry step retains coordinate/guarantee lineage and output limits. |
 | #61 terminal minimizers, #67 Strategy B | T-S02 keeps all trajectories for a constant objective; T-S03 keeps multiple control histories even with a unique terminal minimizer. Source-to-program row/coordinate maps preserve these cases through extraction. |
 | #43 independent verification | T-V01 detects injected transition, control-domain, and original-objective errors using named numerical residuals and the configured policy. T-V02 audits assurance, scope, and all claim bindings independently of strategy status. |
-| #155 shared synthesis boundary, #157 public-interface tests | Run both registered strategies through the migrated `StrategyPort`; reject contradictory family products and test all termination outcomes with retained partial relations, incumbents, and bounds. T-V02 enforces the migration gate above. |
+| #155 shared synthesis boundary, #157 public-interface tests | Run both registered strategies through the migrated `StrategyPort`; reject contradictory family products and test distinct termination versus mathematical outcome. Force a late `PreparedProvider` rejection after valid evidence exists and assert the caller retains bounds, incumbents, scoped partial/candidate relation, request identity, and completed lineage. Verify numerical-policy identity mismatch rejects before execution. T-V02 independently checks all claim bindings and assurance. |
 | #66/#67 comparison, #83 run statistics/artifacts | T-X01 runs both strategies on T-S01/02/03 with the same effective request and compatible backend. T-X02 round-trips every attempt, family/query identities, phase timings, resource/selector provenance, failed/stopped records, and explicitly limited exports through saved artifacts. |
 
 T-S01's established analytic `[0,1]` control fixture remains its oracle; the new-baseline `[-1,1]` decision does not silently rewrite it. A sampled witness or objective agreement cannot pass T-X01. T-X02 verifies offline renderers using saved records with no solver/query/geometry execution. Future numerical adapters and representations add independent substitution tests when implemented.
