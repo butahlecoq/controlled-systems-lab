@@ -85,6 +85,34 @@ class DeploymentHeadTest(unittest.TestCase):
         self.assertEqual(older.returncode, 0, older.stderr)
         self.assertEqual(older_output, "current=false\n")
 
+    def test_busy_deployer_keeps_newer_pending_when_older_validation_finishes_late(self):
+        # Model GitHub's documented pending-slot semantics from the real workflow.
+        # A running old deployment holds the group while the newer, then older,
+        # validated jobs arrive. With the default single slot, older replaces newer.
+        workflow = (ROOT / ".github" / "workflows" / "algorithm-reports.yml").read_text()
+        deploy = workflow.split("\n  deploy:\n", 1)[1]
+        concurrency = deploy.split("\n    concurrency:\n", 1)[1].split("\n    environment:\n", 1)[0]
+        settings = dict(
+            line.strip().split(": ", 1)
+            for line in concurrency.splitlines()
+            if ": " in line
+        )
+        pending = [NEWER]
+        if settings.get("queue", "single") == "single":
+            pending = [OLDER]
+        elif settings["queue"] == "max":
+            pending.append(OLDER)
+        else:
+            self.fail("Unsupported deploy queue policy")
+
+        published = "0" * 40  # Already-running deployment finished first.
+        for commit in pending:
+            result, output = self.run_gate(commit)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            if output == "current=true\n":
+                published = commit
+        self.assertEqual(published, NEWER)
+
     def test_api_failure_blocks_deployment(self):
         BranchHandler.response_code = 503
         result, output = self.run_gate(NEWER)

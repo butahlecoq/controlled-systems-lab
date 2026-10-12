@@ -60,6 +60,8 @@ jobs:
     concurrency:
       group: github-pages
       cancel-in-progress: false
+      # Preserve reverse-finished validations; GitHub caps this queue at 100 pending jobs.
+      queue: max
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
