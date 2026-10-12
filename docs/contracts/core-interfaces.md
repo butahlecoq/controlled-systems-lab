@@ -204,3 +204,11 @@ observation schedule, with literal dynamics/feedthrough, causal-clock, rejection
 and lifetime tests plus an installed client. It does not close admissibility or
 the broader architecture obligations. Any change to this contract must revise
 this document and affected tests before integration.
+
+## Portable scenario statistics
+
+The additive `CSL::artifacts` module owns the [run-statistics contract](run-statistics.md),
+configuration identity and closed portable scenario wire format. Public source
+revision 1.5 and canonical mathematical DTO authority remain unchanged. Artifact
+publication validates ownership and data consistency; it grants no solver or
+checked-verifier authority.

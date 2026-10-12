@@ -1,12 +1,12 @@
 # Modular algorithms and optimal solution families
 
-Date: 2026-10-11. Status: concrete architecture proposal for discussion; no product classes are implemented.
+Date: 2026-10-11; implementation status updated 2026-10-12. Native data, registry, execution, input and LP/convex components are implemented and packaged. The complete two-approach synthesis and optimal-family workflow remains pending. See the [current composition map and runnable examples](framework-composition.md).
 
 ## Decisions and implementation direction
 
 The owner requires architecture before numerical benchmarking, replaceable mathematical algorithms, and an initial result representing all optimal plans. The first workflow is nominal optimal control planning with continuous actions. Finite and mixed control domains remain explicit future extension points. Disturbance, observation and richer problem classes remain part of the [model contract](linear-system-contract.md).
 
-The owner selected C++ as the main implementation language; C++20 is the working standard. A library API and CMake packaging remain design proposals. Python remains an independent mathematical reference and an optional future binding. Benchmarks validate algorithms, integrations and performance within these boundaries; they do not postpone defining the boundaries. See the [accepted language decision](decisions/0001-cpp20-core.md) and [draft native contracts](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md).
+The owner selected C++ as the main implementation language; C++20 is the working standard. The library API and CMake package are available for the implemented components listed in the [current composition map](framework-composition.md). Python remains an independent mathematical reference and an optional future binding. Benchmarks validate algorithms, integrations and performance within these boundaries; they do not postpone defining the boundaries. See the [accepted language decision](decisions/0001-cpp20-core.md) and [draft native contracts](../superpowers/specs/2026-10-11-cpp-core-contracts-design.md).
 
 The first public request is an optimal solution family. Feasible sets are internal mathematical objects. Near-optimal output is a future explicit request, not the initial product requirement.
 

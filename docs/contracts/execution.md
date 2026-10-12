@@ -183,3 +183,13 @@ The standalone installed consumer uses only `find_package(CSL CONFIG)` and
 numeric-only link boundary and runtime checks. The public dependency audit remains
 applicable. Actual native enforcement, arbitrary scheduler deadlock recovery and
 OS thread-creation exhaustion are not certified by these analytic fixtures.
+
+## Portable post-join projection
+
+`csl/execution/observability.hpp` provides explicit post-join timing/resource
+projection and exclusive bounded observation shards; see
+[run statistics](run-statistics.md). Projection retains the original configured
+deadline, first admission-close cause/time, separate external cancellation,
+join/completion and task lifetime observations with checked clock arithmetic.
+It changes no executor scheduling, stop, credit or destruction semantics and
+owns no numerical workspace.

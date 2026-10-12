@@ -19,9 +19,18 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/highs_client.cpp" DESTINATION "${wo
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/phase_one_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/hull_reducer_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/convex_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/run_statistics_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/input_client.cpp" DESTINATION "${work}/source")
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
+if(NOT EXISTS "${prefix}/share/CSL/notices/nlohmann-json-3.11.3/LICENSE.MIT")
+  message(FATAL_ERROR "Installed input dependency notice is missing")
+endif()
+file(READ "${prefix}/lib/cmake/CSL/CSLTargets.cmake" input_export)
+if(input_export MATCHES "nlohmann|csl_json")
+  message(FATAL_ERROR "Private input JSON dependency leaked into exports")
+endif()
 file(GLOB_RECURSE public_headers "${prefix}/include/csl/*.hpp")
 if(NOT public_headers)
   message(FATAL_ERROR "No installed CSL public headers found for dependency audit.")
@@ -53,4 +62,24 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -S "${work}/source" -B "${work}/build
 execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/build"
   --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/build"
+  -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
+
+# Exercise the README examples as a second, isolated installed-package consumer.
+# Copy only their public sources/template: no repository include or build paths.
+set(example_source "${work}/examples-source")
+file(MAKE_DIRECTORY "${example_source}/scenarios")
+foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
+    resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp)
+  file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
+endforeach()
+file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
+  DESTINATION "${example_source}/scenarios")
+execute_process(COMMAND "${CMAKE_COMMAND}" -S "${example_source}" -B "${work}/examples-build"
+  ${generator_args} "-DCMAKE_PREFIX_PATH=${prefix}" "-DCMAKE_BUILD_TYPE=${CSL_CONFIG}"
+  "-DCMAKE_CXX_COMPILER=${CSL_CXX_COMPILER}" "-DCMAKE_CXX_FLAGS=${CSL_CXX_FLAGS}"
+  "-DCMAKE_EXE_LINKER_FLAGS=${CSL_EXE_LINKER_FLAGS}"
+  COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/examples-build"
+  --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/examples-build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)

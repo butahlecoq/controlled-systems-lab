@@ -1,0 +1,13 @@
+{
+  "schema": "csl.scenario/1",
+  "id": "affine-ltv",
+  "horizon": 2,
+  "times": [0, 2, 5],
+  "model": {"kind": "affine_discrete_ltv", "stages": [
+    {"A": [[3]], "B": [[2]], "offset": [-1]},
+    {"A": [[3]], "B": [[2]], "offset": [-1]}
+  ]},
+  "initial_state": [2],
+  "controls": {"kind": "universal"},
+  "objective": {"kind": "linear", "coefficients": [1]}
+}
