@@ -274,7 +274,7 @@ struct WitnessSelection {                // proposed evolution of existing resul
 	Termination termination;
 	StopEvidence stop;
 	SelectionEvidence evidence;             // metric, duplicates, search/shortfall facts
-	registry::Provenance provenance;
+	RequestProvenance provenance;            // neutral owning value below registry adapters
 };
 using SelectionOutcome = std::variant<WitnessSelection, Unsupported>;
 // Existing selector workspace method, with the evolved owning family handle:
@@ -282,6 +282,7 @@ SelectionOutcome WitnessSelectorWorkspace::select(const OptimalFamily&,
 	const WitnessRequest&, const ExecutionContext&);
 
 struct FamilyProjectionRequest {
+	GeometryRequestIdentity identity;        // binds source, coordinates and output requirements
 	OptimalFamily source;
 	std::vector<std::size_t> coordinates;     // ordered canonical indices
 	GeometryOutputRequest output;            // representation, relation, assurance, limits
@@ -293,15 +294,38 @@ struct FamilyProjectionResult {
 	GeometryEvidence evidence;
 	TransformLineage lineage;
 };
+struct FamilyProjectionUnsupported {        // pre-admission only
+	FamilyId source;
+	GeometryRequestIdentity request;
+	Unsupported reason;
+};
+struct FamilyProjectionStopped {
+	FamilyId source;
+	GeometryRequestIdentity request;
+	OperationStopped reason;
+	TransformLineage completed_lineage;
+};
+struct FamilyProjectionRejectedAtRuntime {
+	FamilyId source;
+	GeometryRequestIdentity request;
+	RequestProvenance failed_request;
+	RequestRejectionEvidence rejection;     // neutral translation of provider rejection
+	TransformLineage completed_lineage;
+};
 using FamilyProjectionOutcome = std::variant<FamilyProjectionResult,
-	OperationStopped, Unsupported>;
+	FamilyProjectionUnsupported, FamilyProjectionStopped,
+	FamilyProjectionRejectedAtRuntime>;
 FamilyProjectionOutcome project_family(const FamilyProjectionRequest&,
 	const PreparedGeometryPlan&, const ExecutionContext&);
 ```
 
 For selection, an admitted LP provider searches different directions on the retained relation, decodes complete histories, evaluates the original objective, and records duplicate filtering. Every query result preserves source family identity and claim scope. A shortfall explains exhausted directions, duplicates, or a stop; fewer witnesses proves neither uniqueness nor completeness. A stopped selection may retain already checked witnesses without upgrading the source claim.
 
+Selector provenance is the neutral owning `RequestProvenance` value used by the lower result contracts. Registry adapters translate their requested/actual method IDs, versions and request binding into that value; lower mathematical results do not depend on `registry::Provenance` or borrow a registry.
+
 Mathematical projection uses the existing `GeometryPort` `Projection` operation. A representation adapter exposes the immutable relation as a `SetHandle` with an equivalent map to canonical coordinates. If that adapter or projection capability is absent, admission returns unsupported. Geometry evidence binds the source relation, ordered requested coordinates, and output identity. Projection of a partial or candidate relation remains explicitly a projection of that source scope. Selected-witness plots are a different artifact and never receive set-projection evidence.
+
+Projection stop and late-rejection alternatives retain source-family identity, the original projection request, completed transformation lineage and the failed concrete request's neutral provenance. A provider rejection after execution is not pre-admission `Unsupported`, and neither failure returns a partial set as a successful full projection. Caller-facing tests cancel or reject a provider after one completed conversion and round-trip the scoped failure through saved artifacts, asserting those bindings and lineage survive.
 
 ### Geometry plans over the existing registrations
 
