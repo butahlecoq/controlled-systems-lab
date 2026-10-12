@@ -69,9 +69,14 @@ including compiler and version, C++ standard, Release/NDEBUG flags, dependency
 graph, executable hash, and source identity. The provenance binds the complete
 Git tracked tree at the code-source commit and records its tree object ID. It
 allows only the declared report-harness paths between that commit and the
-harness commit, so implementation changes anywhere in the repository—including
-Qhull, HiGHS, and shared numeric code—fail validation. Dependency pin files are
-hashed separately. Record an operator note about concurrent work and host load. For
+harness commit. `CMakeLists.txt` is checked separately by removing and
+comparing the exact GEO-04 option and target insertion against the source
+commit; unrelated target, source-list, compile-flag, or definition changes
+fail validation. Thus implementation changes anywhere in the repository—
+including Qhull, HiGHS, and shared numeric code—fail validation. Dependency
+pin files are hashed separately. The renderer also checks the payload against
+the versioned `geo04_catalog.py` scenario catalog before trusting any oracle or
+catalog digest. Record an operator note about concurrent work and host load. For
 reproducibility, use at least seven measured repetitions and one excluded
 warmup, forward/reverse fixture order, and a clean Release executable. Example:
 

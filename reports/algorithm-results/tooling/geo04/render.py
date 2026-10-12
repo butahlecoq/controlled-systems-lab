@@ -9,6 +9,7 @@ import json
 import shutil
 import zipfile
 from pathlib import Path
+from geo04_catalog import CATALOG_VERSION, EXPECTED as PINNED_EXPECTED
 
 SCHEMA = "csl.geo04-polyhedral-report/1"
 FILES = ("records.json", "collection-status.json", "raw-events.jsonl", "raw-driver-output.csv", "process-stderr.txt",
@@ -46,7 +47,9 @@ def validate(payload: dict) -> None:
     if claimed != actual or payload.get("payload_hash_scope") != "canonical JSON payload excluding report_id and payload_sha256":
         raise ValueError("saved record payload digest mismatch")
     scenarios = payload.get("expected", {})
-    catalog_hash = hashlib.sha256(json.dumps(scenarios,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+    if payload.get("inputs", {}).get("scenario_catalog_version") != CATALOG_VERSION or scenarios != PINNED_EXPECTED:
+        raise ValueError("scenario catalog differs from pinned catalog")
+    catalog_hash = hashlib.sha256(json.dumps(PINNED_EXPECTED,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
     if catalog_hash != payload.get("inputs", {}).get("scenario_catalog_sha256"):
         raise ValueError("scenario catalog hash mismatch")
     for key in ("crossing_octagon", "empty_intersection", "affine_equality", "essential_rows_highs"):

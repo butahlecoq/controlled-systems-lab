@@ -12,6 +12,7 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
 SPEC = importlib.util.spec_from_file_location("geo04_collect", HERE / "collect.py")
 collect = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = collect
@@ -53,7 +54,8 @@ def valid_payload(report_id: str) -> dict:
         "algorithm": {"id": "GEO-04", "source_commit": "abc", "harness_commit": "def"},
         "collection": {"state": "complete", "expected_trials": len(rows), "actual_trials": len(rows), "failures": 0},
         "expected": expected,
-        "inputs": {"scenario_catalog_sha256": hashlib.sha256(json.dumps(expected,sort_keys=True,separators=(",", ":")).encode()).hexdigest()},
+        "inputs": {"scenario_catalog_version": render.CATALOG_VERSION,
+                   "scenario_catalog_sha256": hashlib.sha256(json.dumps(expected,sort_keys=True,separators=(",", ":")).encode()).hexdigest()},
         "summary": collect.summarize(rows,True), "trials": rows,
         "evidence": {"essential_row_result": "HiGHS has no supported bounds.", "limitations": ["no speedup claim"]}}
     return payload
@@ -68,9 +70,23 @@ class ReportToolTests(unittest.TestCase):
 
     def test_source_identity_allows_only_declared_report_harness_paths(self):
         collect.validate_source_tree_delta([
-            "CMakeLists.txt",
             "reports/algorithm-results/tooling/geo04/collect.py",
         ])
+
+    def test_cmake_provenance_allows_only_exact_geo04_report_target_insertion(self):
+        baseline = collect.GEO03_CMAKE_OPTION + "\n" + collect.GEO03_CMAKE_TARGET + "\nadd_library(core src/core.cpp)\n"
+        harness = baseline.replace(collect.GEO03_CMAKE_OPTION, collect.GEO03_CMAKE_OPTION + "\n" + collect.GEO04_CMAKE_OPTION, 1)
+        harness = harness.replace(collect.GEO03_CMAKE_TARGET, collect.GEO03_CMAKE_TARGET + "\n" + collect.GEO04_CMAKE_TARGET, 1)
+        collect.validate_cmake_delta(baseline, harness)
+
+    def test_cmake_provenance_rejects_unrelated_compile_definition_or_source_change(self):
+        baseline = collect.GEO03_CMAKE_OPTION + "\n" + collect.GEO03_CMAKE_TARGET + "\nadd_library(core src/core.cpp)\n"
+        harness = baseline.replace(collect.GEO03_CMAKE_OPTION, collect.GEO03_CMAKE_OPTION + "\n" + collect.GEO04_CMAKE_OPTION, 1)
+        harness = harness.replace(collect.GEO03_CMAKE_TARGET, collect.GEO03_CMAKE_TARGET + "\n" + collect.GEO04_CMAKE_TARGET, 1)
+        for unrelated in ("add_compile_definitions(CSL_CHANGED=1)\n", "add_library(core src/other.cpp)\n"):
+            with self.subTest(unrelated=unrelated):
+                with self.assertRaisesRegex(ValueError, "beyond the exact GEO-04 report-target insertion"):
+                    collect.validate_cmake_delta(baseline, harness + unrelated)
 
     def test_collector_oracle_rejects_duplicate_replacing_missing_vertex_within_tolerance(self):
         expected = collect.EXPECTED["crossing_octagon"]["vertices"]
@@ -118,6 +134,23 @@ class ReportToolTests(unittest.TestCase):
         payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
         payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
         with self.assertRaisesRegex(ValueError, "saved vertex coordinates fail independent literal oracle"):
+            render.validate(payload)
+
+    def test_renderer_rejects_fully_resigned_altered_scenario_catalog(self):
+        payload = valid_payload("geo04-altered-catalog")
+        payload["expected"] = copy.deepcopy(payload["expected"])
+        changed = payload["expected"]["crossing_octagon"]
+        changed["vertices"][1] = [1, 0.50000009]
+        case = changed
+        trial_row = payload["trials"][0]
+        trial_row["vertices_json"] = copy.deepcopy(case["vertices"])
+        trial_row["scenario_sha256"] = hashlib.sha256(json.dumps(case,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+        trial_row["input_sha256"] = hashlib.sha256(json.dumps(case["inputs"],sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+        payload["inputs"]["scenario_catalog_sha256"] = hashlib.sha256(json.dumps(payload["expected"],sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+        unsigned = {key:value for key,value in payload.items() if key not in ("report_id", "payload_sha256", "payload_hash_scope")}
+        payload["payload_sha256"] = hashlib.sha256(json.dumps(unsigned,sort_keys=True,separators=(",", ":"),allow_nan=False).encode()).hexdigest()
+        payload["payload_hash_scope"] = "canonical JSON payload excluding report_id and payload_sha256"
+        with self.assertRaisesRegex(ValueError, "scenario catalog differs from pinned catalog"):
             render.validate(payload)
 
     def test_offline_export_uses_saved_records_only_and_packages_required_files(self):

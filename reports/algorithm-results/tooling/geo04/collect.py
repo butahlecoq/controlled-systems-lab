@@ -13,32 +13,32 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
+from geo04_catalog import CATALOG_VERSION, EXPECTED, SCENARIOS
 sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "scripts" / "reports"))
 import collector_common
 
 SCHEMA = "csl.geo04-polyhedral-report/1"
-SCENARIOS = ("crossing_octagon", "empty_intersection", "affine_equality", "essential_rows_highs")
 PHASES = ("intersection_ns", "prepare_ns", "workspace_ns", "conversion_run_ns", "lp_workspace_ns", "reduction_ns", "total_ns")
 FIELDS = ("scenario", "repetition", "status", "detail", *PHASES, "lp_calls", "lp_results", "lp_optimal",
           "lp_bounds", "lp_supported_bounds", "reduction_status", "inequalities", "equalities", "vertices", "oracle_checks", "vertices_json", "oracle_passed")
-EXPECTED = {
-    "crossing_octagon": {"inputs": {"left_A": [[1,0],[-1,0],[0,1],[0,-1]], "left_b": [1,1,1,1],
-                                     "right_A": [[1,1],[1,-1],[-1,1],[-1,-1]], "right_b": [1.5]*4},
-                         "vertices": [[1,.5],[1,-.5],[-1,.5],[-1,-.5],[.5,1],[-.5,1],[.5,-1],[-.5,-1]], "inequalities": 8, "equalities": 0},
-    "empty_intersection": {"inputs": {"left_A": [[1,0]], "left_b": [0], "right_A": [[-1,0]], "right_b": [-1]}, "vertices": [], "inequalities": 2},
-    "affine_equality": {"inputs": {"A": [[1,0],[-1,0]], "b": [2,0], "E": [[0,1]], "f": [1]},
-                        "vertices": [[0,1],[2,1]], "inequalities": 4, "equalities": 2},
-    "essential_rows_highs": {"inputs": {"A": [[1,0],[-1,0],[0,1]], "b": [1,0,0], "E": [[0,1]], "f": [0]},
-                             "inequalities": 3, "equalities": 1, "reduction_status": "incomplete", "lp_calls": 3, "removed_inequalities": []},
-}
 HARNESS_PATH_ALLOWLIST = {
-    "CMakeLists.txt",
     "reports/algorithm-results/tooling/geo04/README.md",
+    "reports/algorithm-results/tooling/geo04/geo04_catalog.py",
     "reports/algorithm-results/tooling/geo04/collect.py",
     "reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp",
     "reports/algorithm-results/tooling/geo04/render.py",
     "reports/algorithm-results/tooling/geo04/test_report_tools.py",
 }
+GEO04_CMAKE_OPTION = 'option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report driver" OFF)'
+GEO04_CMAKE_TARGET = '''if(CSL_BUILD_GEO04_REPORT)
+  add_executable(csl_geo04_intersection_report reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp)
+  target_link_libraries(csl_geo04_intersection_report PRIVATE CSL::polyhedral CSL::qhull_conversion CSL::highs_lp)
+endif()'''
+GEO03_CMAKE_OPTION = 'option(CSL_BUILD_GEO03_REPORT "Build the GEO-03 H/V conversion report driver" OFF)'
+GEO03_CMAKE_TARGET = '''if(CSL_BUILD_GEO03_REPORT)
+  add_executable(csl_geo03_conversion_report reports/algorithm-results/tooling/geo03/hv_conversion_driver.cpp)
+  target_link_libraries(csl_geo03_conversion_report PRIVATE CSL::qhull_conversion CSL::highs_lp)
+endif()'''
 
 
 def sha256_bytes(value: bytes) -> str:
@@ -53,6 +53,15 @@ def validate_source_tree_delta(changed_paths: list[str]) -> None:
     unexpected = sorted(set(changed_paths) - HARNESS_PATH_ALLOWLIST)
     if unexpected:
         raise ValueError(f"tracked source tree changed outside the report harness allowlist: {unexpected}")
+
+
+def validate_cmake_delta(source_text: str, harness_text: str) -> None:
+    if source_text.count(GEO03_CMAKE_OPTION) != 1 or source_text.count(GEO03_CMAKE_TARGET) != 1:
+        raise ValueError("pinned CMakeLists.txt lacks the unique GEO-03 anchors")
+    expected = source_text.replace(GEO03_CMAKE_OPTION, GEO03_CMAKE_OPTION + "\n" + GEO04_CMAKE_OPTION, 1)
+    expected = expected.replace(GEO03_CMAKE_TARGET, GEO03_CMAKE_TARGET + "\n" + GEO04_CMAKE_TARGET, 1)
+    if harness_text != expected:
+        raise ValueError("CMakeLists.txt changed beyond the exact GEO-04 report-target insertion")
 
 
 def vertices_match_expected(points: list, expected_points: list, tolerance: float = 1e-7) -> bool:
@@ -95,7 +104,10 @@ def build_provenance(build: Path, exe: Path, source_commit: str, harness_commit:
     if git("rev-parse", "HEAD") != harness_commit:
         raise ValueError("harness commit does not match current checkout")
     changed_paths = git("diff", "--name-only", source_commit, harness_commit).splitlines()
-    validate_source_tree_delta(changed_paths)
+    validate_source_tree_delta([path for path in changed_paths if path != "CMakeLists.txt"])
+    source_cmake = subprocess.check_output(["git", "show", f"{source_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
+    harness_cmake = subprocess.check_output(["git", "show", f"{harness_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
+    validate_cmake_delta(source_cmake, harness_cmake)
     source_tree_oid = git("rev-parse", f"{source_commit}^{{tree}}")
     harness_tree_oid = git("rev-parse", f"{harness_commit}^{{tree}}")
     reply = build / ".cmake" / "api" / "v1" / "reply"
@@ -304,7 +316,8 @@ def main() -> int:
         "schema": SCHEMA, "report_id": None,
         "algorithm": {"id": "GEO-04", "api": "CSL public polyhedral intersection and halfspace-reduction APIs",
                       "source_commit": args.source_commit, "harness_commit": args.harness_commit},
-        "inputs": {"scenario_catalog_sha256": sha256_bytes(json.dumps(EXPECTED,sort_keys=True,separators=(",", ":")).encode()),
+        "inputs": {"scenario_catalog_version": CATALOG_VERSION,
+                   "scenario_catalog_sha256": sha256_bytes(json.dumps(EXPECTED,sort_keys=True,separators=(",", ":")).encode()),
                    "executable_sha256": executable_hash,
                    "executable_name": args.exe.name},
         "drivers": {"converter": {"id": "csl.conversion.qhull", "version": "1.0.0+qhull.8.0.2"},
