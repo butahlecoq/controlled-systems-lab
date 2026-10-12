@@ -35,13 +35,13 @@
       "payload_schema": "csl.hull-benchmark-records/1"
     },
     {
-      "report_id": "geo03-20261012-37c3fb484e0d",
+      "report_id": "geo03-20261012-3c12ca125831",
       "report_kind": "geo03-hv",
-      "payload_sha256": "37c3fb484e0da72e4710cdc8f1e5ebe27b906c2ecd3b3396c43f67d0b8e4196c",
+      "payload_sha256": "3c12ca12583170423a81142c8f4b743cf88a16e463267d6864ddda4b56bd9044",
       "source_commit": "ba83547b3495cc8017f720702083bcf76c71fb30",
       "measured_scope": "56 measured trials across four bounded 2D fixtures in both conversion directions",
-      "evidence_limits": "contract fixtures only; no accepted workload-size baseline; bounded H/V cases only; no available competing adapter; numerical checks are not validated global certificates; no inner conversion phase timing; A17/A18 lineage not audited",
-      "zip_sha256": "33dc400855575e1b9f0defb96232d1b603f4073ae7576b100af7081340315bb2",
+      "evidence_limits": "contract fixtures only; no accepted workload-size baseline; bounded H/V cases only; no available competing adapter; numerical checks are not validated global certificates; no inner conversion phase timing; A17/A18 audit covers source lineage only; executable equivalence is not established",
+      "zip_sha256": "eddaa8257b17a663f93b6447f30150a6d4e7522b2d893e011dabdd9ed685bb32",
       "payload_schema": "csl.geo03-hv-report/1"
     }
   ]
