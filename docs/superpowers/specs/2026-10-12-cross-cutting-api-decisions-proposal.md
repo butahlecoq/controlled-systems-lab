@@ -22,55 +22,18 @@ These are proposed defaults, not additional approvals. The new-baseline bound `u
 
 **Proposed default:** represent family results with a closed outcome variant, not an envelope whose target and evidence fields can be freely combined:
 
-```cpp
-struct CompleteOptimalFamily {
-  JointRelation relation;
-  OptimumEvidence optimum;
-  CompletenessEvidence completeness;
-};
-struct PartialOptimalFamily {
-  JointRelation relation;
-  OptimumEvidence optimum;
-  InnerSubsetEvidence optimal_subset; // every retained history is known optimal
-  CoverageScope known_scope;          // coverage of the full optimum remains open
-};
-using FamilyRelationToTarget = std::variant<OuterCandidateEvidence,
-    FeasibleCandidateEvidence, HeuristicRelationEvidence>;
-struct CandidateFamily {
-  JointRelation relation;
-  FamilyRelationToTarget relation_to_target;
-  CandidateFeasibilityEvidence feasibility;
-};
-using OptimalFamilyOutcome = std::variant<CompleteOptimalFamily,
-    PartialOptimalFamily, CandidateFamily>;
-// Complete opaque value handle; constructed only by FamilyPublisher.
-class FamilyPublisher;
-class OptimalFamily {
- public:
-  const OptimalFamilyOutcome& outcome() const;
- private:
-  struct Data;
-  std::shared_ptr<const Data> data_;
-  explicit OptimalFamily(std::shared_ptr<const Data>);
-  friend class FamilyPublisher;
-};
-struct SynthesisResult {
-  Termination termination;
-  SynthesisOutcomeClaim outcome; // optimal/infeasible/unbounded/infimum_not_attained/undetermined
-  ObjectiveEvidence objective;   // retain independently supported bounds
-  std::optional<OptimalFamily> family;
-  std::vector<FeasibleIncumbent> incumbents;
-  StopEvidence stop;
-  std::vector<TimingSpan> spans;
-};
-using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
-```
+The class map is the canonical C++ type sketch for these outcomes. It defines
+`CompleteOptimalFamily`, `PartialOptimalFamily`, `CandidateFamily`, the closed
+`OptimalFamilyOutcome`, the opaque `OptimalFamily` handle, and the complete
+`SynthesisResult` with scoped stop evidence. Keep those declarations in one
+place so candidate-feasibility scope and retained evidence cannot drift between
+two nearly identical sketches.
 
-The complete variant therefore always carries a relation, optimum evidence, and completeness evidence. Partial results carry evidence that every retained history is optimal and state their known coverage; candidate results state the relation to the true target and separately scope feasibility. A witness query may return a witness and feasibility evidence, but cannot upgrade the family outcome or completeness claim. Evidence is bound to the resolved-problem digest, effective family request, ordered relation coordinates, strategy and version, and every transformation used to obtain the relation. Those identities are immutable values, not display labels. Evidence uses the class-map assurance vocabulary: `NumericalToleranceSupport` records arithmetic, tolerances, coverage procedure, and diagnostics supporting a numerical claim; `ValidatedCompletenessCertificate` is reserved for a checked certificate under an explicitly supported validated arithmetic/model profile. Numerical tolerance support is not exact set equality or validated completeness, and cannot satisfy a request requiring a `ValidatedCompletenessCertificate`. Any future certified or exact mechanism must map explicitly to one of these assurance levels and be checked by a supported verifier; it does not add a competing `ValidatedClaim` or `CertifiedClaim` variant.
+The complete variant always carries a relation, optimum evidence, and completeness evidence. Partial results carry evidence that every retained history is optimal and state their known coverage; candidate results state the relation to the true target and separately scope feasibility. A witness query may return a witness and feasibility evidence, but cannot upgrade the family outcome or completeness claim. Evidence is bound to the resolved-problem digest, effective family request, ordered relation coordinates, strategy and version, and every transformation used to obtain the relation. Those identities are immutable values, not display labels. Evidence uses the class-map assurance vocabulary: `NumericalToleranceSupport` records arithmetic, tolerances, coverage procedure, and diagnostics supporting a numerical claim; `ValidatedCompletenessCertificate` is reserved for a checked certificate under an explicitly supported validated arithmetic/model profile. Numerical tolerance support is not exact set equality or validated completeness, and cannot satisfy a request requiring a `ValidatedCompletenessCertificate`. Any future certified or exact mechanism must map explicitly to one of these assurance levels and be checked by a supported verifier; it does not add a competing `ValidatedClaim` or `CertifiedClaim` variant.
 
 The API should make mismatched bindings difficult to construct: carry `ResolvedProblemDigest`, `ObjectiveDigest`, `EffectiveFamilyRequestDigest`, ordered `JointCoordinateSchemaId`, `StrategyVersion`, and ordered `TransformStepIdentity` lineage in the evidence binding, followed by a typed `CompletenessAssurance`. At the result boundary, require exact identity and coordinate agreement with the owning `PreparedStrategy` and request, and require the trace to compose from that strategy's resolved problem. The independent verifier checks numerical-support claims against the original resolved problem. Type shape and digest binding make provenance auditable; neither alone proves the mathematical claim. `CompleteOptimalFamily` is a claim at its explicitly declared assurance level, not a promise of exact set equality in binary64. It may be produced only by a strategy/verifier path with a checkable coverage argument; a numerical tolerance check alone is not that argument.
 
-Keep the relation payload behind `JointRelationPayload`; add query capabilities through typed relation adapters rather than exposing representation-specific storage through `OptimalFamilyOutcome`. A witness query may return a feasible witness but cannot upgrade the source family outcome. Reject unsupported queries and unsupported assurance requests explicitly. `Termination` separates completion, cancellation, resource limit, numerical failure, and generated-request rejection from the mathematical outcome. The `cancelled` termination carries typed stop reasons that distinguish user cancellation from deadline expiry; `resource_limit` remains its own termination. These are execution facts, not mathematical outcomes. `Unsupported` is pre-solve admission only. A late provider rejection after evidence exists is `operation_rejected` in `SynthesisResult`, carrying request identity, registry-independent rejection diagnostics, completed lineage, and retained-evidence scope. Any partial relation retained for diagnosis stays partial and is not returned as a complete-family success. See the canonical callable contract in the [class-level architecture](2026-10-12-class-level-system-architecture.md).
+Keep the relation payload behind `JointRelationPayload`; add query capabilities through typed relation adapters rather than exposing representation-specific storage through `OptimalFamilyOutcome`. A witness query may return a feasible witness but cannot upgrade the source family outcome. Reject unsupported queries and unsupported assurance requests explicitly. `Termination` separates completion, cancellation, resource limit, numerical failure, and generated-request rejection from the mathematical outcome. The `cancelled` termination carries typed stop reasons that distinguish user cancellation from deadline expiry; `resource_limit` remains its own termination. These are execution facts, not mathematical outcomes. `Unsupported` is a pre-solve admission result. A late provider rejection after evidence exists is `operation_rejected` in `SynthesisResult`, carrying request identity, registry-independent rejection diagnostics, completed lineage, and retained-evidence scope. Any partial relation retained for diagnosis stays partial and is not returned as a complete-family success. See the canonical callable contract in the [class-level architecture](2026-10-12-class-level-system-architecture.md).
 
 **Class-map seam:** `OptimalFamily`, `JointRelation`, `JointRelationPayload`, `FamilyTarget`, `FamilyEvidence`, `Witness`, and the independent verifier. **Tickets:** [SYN-02 #61](https://github.com/butahlecoq/controlled-systems-lab/issues/61), [SYN-03 #66](https://github.com/butahlecoq/controlled-systems-lab/issues/66), [SYN-04 #67](https://github.com/butahlecoq/controlled-systems-lab/issues/67), [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43), and shared strategy-boundary outcome enforcement [SYN-07 #155](https://github.com/butahlecoq/controlled-systems-lab/issues/155), with the independent public-API contract suite [TEST-24 #157](https://github.com/butahlecoq/controlled-systems-lab/issues/157).
 
@@ -80,7 +43,7 @@ Keep the relation payload behind `JointRelationPayload`; add query capabilities 
 
 The policy and run record distinguish configured, admitted, observed, and enforced facts for thread and memory use. Record requested/effective worker counts, numerical-backend thread settings, and backend-reported or measured use where available; otherwise record `unknown`/`unavailable`. Adapters either apply a supported thread cap or explicitly report it unenforced. Memory estimates or admission checks are not runtime enforcement; never claim a hard limit unless the selected adapter/platform actually enforces it. Exact caps, deadlines, and platform mechanisms remain owner choices.
 
-A prepared provider is owned by the prepared strategy/workspace; it cannot outlive that execution or expose a raw native workspace. Every generated request passes the provider's frozen capability/requirement admission before snapshot or native workspace creation, and retains provider provenance. Each mutable workspace has one task owner. The execution context's stop token and deadline are checked before admission, between generated requests, and at documented long-operation checkpoints inside adapters; an adapter unable to interrupt an in-progress native call reports that limitation and checks immediately after return. Cancellation or a resource-limit stop preserves diagnostics and any partial relation as incomplete, but returns a distinct non-success outcome and cannot satisfy family completeness. Partial work is never silently discarded into an infeasibility result.
+A `PreparedProvider` owns a frozen registration, requirements, and provenance. It can outlive its source registry and can be copied into a strategy/workspace; the registration callbacks must still obey the documented purity and captured-state lifetime contract. Each generated request passes the provider's frozen capability/requirement admission before snapshot or native workspace creation, and retains provider provenance. Each mutable workspace has one task owner and is destroyed with its owning task. Prepared requests and immutable result handles own their data; borrowed `std::span` values and references remain valid only for the documented call or while their owning handle lives. The execution context's stop token and deadline are checked before admission, between generated requests, and at documented long-operation checkpoints inside adapters; an adapter unable to interrupt an in-progress native call reports that limitation and checks immediately after return. Cancellation or a resource-limit stop preserves diagnostics and any partial relation as incomplete, but returns a distinct non-success outcome and cannot satisfy family completeness. Partial work is never silently discarded into an infeasibility result.
 
 This selects execution ownership and truthful accounting without choosing the owner's worker count, memory cap, deadline values, cancellation latency guarantee, or any future internal-permit policy.
 
