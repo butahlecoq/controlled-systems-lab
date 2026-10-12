@@ -38,7 +38,7 @@ SUMMARY_FIELDS = ("fixture", "trials", "failures", "batch", "median_elapsed_ns",
                   "min_elapsed_ns", "max_elapsed_ns")
 FIXTURES = ("valid", "violating")
 SCOPE = "Original-data numerical verification of two literal two-stage integrator witnesses"
-LIMITS = "Single Release adapter, no solver or optimal-family completeness claim; microbenchmark excludes resolution, setup, rendering and end-to-end use"
+LIMITS = "Single Release adapter, no solver or optimal-family completeness claim; microbenchmark excludes resolution, setup, rendering and end-to-end use; limiter not established"
 
 
 def digest_bytes(content: bytes) -> str:
@@ -66,7 +66,7 @@ def local(bundle: Path, name: str) -> Path:
 
 
 def read_json(path: Path) -> dict:
-    value = json.loads(path.read_text(encoding="utf-8"))
+    value = report_data.parse_json(path.read_text(encoding="utf-8"))
     require(isinstance(value, dict), "JSON object required: " + path.name)
     return value
 
@@ -89,7 +89,7 @@ def expected_fixture() -> dict:
 def raw_projection(raw: bytes, batch: int, warmups: int, repetitions: int) -> list[dict]:
     lines = raw.decode("utf-8").splitlines()
     require(len(lines) == 1 + len(FIXTURES) * (warmups + repetitions), "raw event count differs")
-    events = [json.loads(line) for line in lines]
+    events = [report_data.parse_json(line) for line in lines]
     header = events[0]
     require(header.get("event") == "header" and header.get("schema") == "csl.syn06-verifier-raw/1" and
             header.get("batch") == batch and header.get("warmups") == warmups and
@@ -164,8 +164,9 @@ def page(record: dict, figure: str) -> str:
             '</figure><h2>Analytic outputs</h2><p>The valid witness passes original transitions, domains '
             'and objective. The deliberately altered final control violates an original domain and transition. '
             'Both retain unsupported optimal-family completeness and validated-proof claims.</p><p>Hardware, '
-            'compiler, pilot, timer overhead, and separate limiter observations are in the raw records and '
-            'sidecars. Setup, end-to-end latency, and internal phase counters were not measured.</p><ul>'
+            'compiler, pilot, timer overhead, and separate process CPU and memory observations are in the raw '
+            'records and sidecars. The separate sample does not identify a source-level hotspot or establish '
+            'the limiter. Setup, end-to-end latency, and internal phase counters were not measured.</p><ul>'
             '<li><a href="records.json">Raw record</a></li><li><a href="raw-events.jsonl">All raw events</a>'
             '</li><li><a href="trials.csv">Trials CSV</a></li><li><a href="summary.csv">Summary CSV</a>'
             '</li><li><a href="profile.json">Separate limiter profile</a></li></ul></body></html>')
@@ -233,16 +234,39 @@ def validate(bundle: Path) -> registered.PublicationRecord:
             build.get("driver_sha256") == digest_bytes(driver.read_bytes()),
             "SYN-06 build provenance differs")
     pilot = read_json(local(bundle, "pilot.json"))
+    pilot_lines = local(bundle, "pilot-raw.jsonl").read_bytes().decode("utf-8").splitlines()
+    require(len(pilot_lines) == 15, "SYN-06 pilot raw event count differs")
+    pilot_events = [report_data.parse_json(line) for line in pilot_lines]
+    pilot_observations = []
+    for index, pilot_batch in enumerate((100, 1000, 10000)):
+        group = pilot_events[index*5:(index+1)*5]
+        require(group[0].get("event") == "header" and group[0].get("batch") == pilot_batch and
+                group[0].get("warmups") == 1 and group[0].get("trials_per_fixture") == 1,
+                "SYN-06 pilot header differs")
+        for fixture, measured in zip(FIXTURES, (group[2], group[4])):
+            require(measured.get("event") == "trial" and measured.get("fixture") == fixture and
+                    measured.get("round") == 1 and measured.get("warmup") is False and
+                    type(measured.get("elapsed_ns")) is int and measured["elapsed_ns"] > 0,
+                    "SYN-06 pilot measured event differs")
+            pilot_observations.append({"fixture": fixture, "batch": pilot_batch,
+                                       "elapsed_ns": measured["elapsed_ns"]})
     require(pilot.get("selected_batch") == batch and isinstance(pilot.get("observations"), list) and
-            pilot["observations"] and all(type(row.get("elapsed_ns")) is int and row["elapsed_ns"] > 0
-                                          for row in pilot["observations"]) and
+            pilot["observations"] == pilot_observations and
             pilot.get("raw_sha256") == digest_bytes(local(bundle, "pilot-raw.jsonl").read_bytes()),
             "SYN-06 pilot differs")
     profile = read_json(local(bundle, "profile.json"))
     require(profile.get("purpose") == "non-report limiter observation" and
             profile.get("source_commit") == source and
-            profile.get("raw_sha256") == digest_bytes(local(bundle, "profile-raw.jsonl").read_bytes()),
+            profile.get("raw_sha256") == digest_bytes(local(bundle, "profile-raw.jsonl").read_bytes()) and
+            type(profile.get("wall_ns")) is int and profile["wall_ns"] > 0 and
+            isinstance(profile.get("samples"), list) and profile["samples"] and
+            profile.get("max_observed_cpu_seconds", 0) > 0 and
+            profile.get("max_observed_resident_bytes", 0) > 0,
             "SYN-06 limiter profile differs")
+    require(local(bundle, "process-stderr.txt").read_bytes() == b"" and
+            local(bundle, "measurement-command.txt").read_text(encoding="utf-8") ==
+            f"{batch} 7 7 (Release driver; cwd repository root)\n",
+            "SYN-06 process or command sidecar differs")
     figure = local(bundle, "latency.svg").read_bytes()
     report_data.validate_svg(figure)
     require(figure == svg(payload["summary"]).encode("utf-8"), "SYN-06 figure differs from records")

@@ -1,0 +1,22 @@
+{
+  "files": {
+    "README.md": "8164d71d1a1e4c3a7138b398b1d33526b77aa37c6b93b855494e39eafb510dc0",
+    "build-log.txt": "8fc6640291582889fc6395b77d75f8a55f5510117282883a80a611555e48fdab",
+    "build-provenance.json": "44a86beae6dc2025796682587f498315db5507670bb2b75148ab06faa0d880d6",
+    "index.html": "68d482b3539b6669daf0cf1db4b235c4d2f01dd74b62f1912a8c2e9c744383b2",
+    "latency.svg": "51021ee3b1d61451e007df31fec8e20055f6a948d912795e3dd3605a0ce0af07",
+    "measurement-command.txt": "0b08c6c4914fb730479b0b5df4f7494ecbb1f10ac8ec47fcc672179d9e8f3d6b",
+    "pilot-raw.jsonl": "38b91d8d698a32b0e31795176dfaaaea6d38b224f64df91d3c8a7f15a41e316c",
+    "pilot.json": "0f7f19cc41580bf01a0ee95dbacdae4beee365c7e1f417f1258ea1974db03e68",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile-raw.jsonl": "311c9c4dbfaec83988d633c4ce7732b6fb37d58b74e823076688a1d098b270c4",
+    "profile.json": "ca0fcab7161777d723ccb1ea631bdf757e76ec4eea4a52d0174d7d21fe399aff",
+    "raw-events.jsonl": "6d652836538575ef6ae850e219704e3bd7286c8ce21ebce035f92fe073cab879",
+    "records.json": "7f20b302d9f4c6f90fe7cae62c30565f5f38d43dd8071e4879b11e6ea133fa73",
+    "summary.csv": "1c3db216f555dec880f3b96beff313f2f34f4705a835c40e53adda105868fff4",
+    "trials.csv": "0bf6c581798d3bff525fd8e95a1bb2c5ee1e881f66de3f78dab1c38a4a9eb69c",
+    "verifier_driver.cpp": "1ee5ea9c945274713531b1ef6e9fa3f2cb40d35785e541a57333b4cddb576466"
+  },
+  "report_id": "syn06-verifier-20261012-edf2b200",
+  "schema": "csl.syn06-source-manifest/1"
+}

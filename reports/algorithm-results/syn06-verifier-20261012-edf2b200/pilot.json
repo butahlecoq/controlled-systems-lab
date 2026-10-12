@@ -1,0 +1,38 @@
+{
+  "observations": [
+    {
+      "batch": 100,
+      "elapsed_ns": 598200,
+      "fixture": "valid"
+    },
+    {
+      "batch": 100,
+      "elapsed_ns": 534500,
+      "fixture": "violating"
+    },
+    {
+      "batch": 1000,
+      "elapsed_ns": 3036100,
+      "fixture": "valid"
+    },
+    {
+      "batch": 1000,
+      "elapsed_ns": 2507000,
+      "fixture": "violating"
+    },
+    {
+      "batch": 10000,
+      "elapsed_ns": 25277500,
+      "fixture": "valid"
+    },
+    {
+      "batch": 10000,
+      "elapsed_ns": 24846100,
+      "fixture": "violating"
+    }
+  ],
+  "raw_sha256": "38b91d8d698a32b0e31795176dfaaaea6d38b224f64df91d3c8a7f15a41e316c",
+  "schema": "csl.syn06-pilot/1",
+  "selected_batch": 50000,
+  "target_batch_ns": 125000000
+}

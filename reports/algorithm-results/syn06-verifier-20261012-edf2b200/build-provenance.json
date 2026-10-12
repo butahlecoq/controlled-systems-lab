@@ -1,0 +1,32 @@
+{
+  "binary_sha256": "46359692c2867b1a66633dcb77e15add5f0f702a2e4384617353d30fcd5e6ba3",
+  "build_command": [
+    "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "--build",
+    "C:\\Users\\f5spb\\.codex\\worktrees\\syn06-report\\repo\\build\\syn06-report",
+    "--config",
+    "Release",
+    "--target",
+    "csl_syn06_verifier_report"
+  ],
+  "cmake_cache_sha256": "88ea7beefe7c7a06528f38d4fc7a7dba1ca36cd902c8f8fb8fa65de1184a3593",
+  "collector_commit": "5008509d004245db58975c173b4334c223036dfe",
+  "compiler": {
+    "CMAKE_CXX_COMPILER": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+    "CMAKE_CXX_COMPILER_ID": "MSVC",
+    "CMAKE_CXX_COMPILER_VERSION": "19.44.35215.0"
+  },
+  "configuration": "Release",
+  "configuration_command": [
+    "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "-S",
+    ".",
+    "-B",
+    "C:\\Users\\f5spb\\.codex\\worktrees\\syn06-report\\repo\\build\\syn06-report",
+    "-DCSL_BUILD_SYN06_REPORT=ON",
+    "-DBUILD_TESTING=OFF"
+  ],
+  "driver_sha256": "1ee5ea9c945274713531b1ef6e9fa3f2cb40d35785e541a57333b4cddb576466",
+  "schema": "csl.syn06-build-provenance/1",
+  "source_commit": "edf2b200209f4312b0d00a522a7a0b2e26a96d65"
+}

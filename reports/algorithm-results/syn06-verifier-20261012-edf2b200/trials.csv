@@ -1,0 +1,15 @@
+fixture,round,warmup,batch,elapsed_ns,bindings,feasibility,objective,completeness,recomputed_objective,residual_count,observation_token
+valid,7,False,50000,119650100,numerical_pass,numerical_pass,numerical_pass,unsupported,1,10,2530720327668584736
+valid,8,False,50000,118968400,numerical_pass,numerical_pass,numerical_pass,unsupported,1,10,2530720327668584736
+valid,9,False,50000,119548200,numerical_pass,numerical_pass,numerical_pass,unsupported,1,10,2530720327668584736
+valid,10,False,50000,119363800,numerical_pass,numerical_pass,numerical_pass,unsupported,1,10,2530720327668584736
+valid,11,False,50000,126692300,numerical_pass,numerical_pass,numerical_pass,unsupported,1,10,2530720327668584736
+valid,12,False,50000,121644400,numerical_pass,numerical_pass,numerical_pass,unsupported,1,10,2530720327668584736
+valid,13,False,50000,120078300,numerical_pass,numerical_pass,numerical_pass,unsupported,1,10,2530720327668584736
+violating,7,False,50000,135867700,numerical_pass,violation,numerical_pass,unsupported,1,10,15604542167562801904
+violating,8,False,50000,127227600,numerical_pass,violation,numerical_pass,unsupported,1,10,15604542167562801904
+violating,9,False,50000,124305900,numerical_pass,violation,numerical_pass,unsupported,1,10,15604542167562801904
+violating,10,False,50000,122015600,numerical_pass,violation,numerical_pass,unsupported,1,10,15604542167562801904
+violating,11,False,50000,128172200,numerical_pass,violation,numerical_pass,unsupported,1,10,15604542167562801904
+violating,12,False,50000,134299700,numerical_pass,violation,numerical_pass,unsupported,1,10,15604542167562801904
+violating,13,False,50000,123242100,numerical_pass,violation,numerical_pass,unsupported,1,10,15604542167562801904
