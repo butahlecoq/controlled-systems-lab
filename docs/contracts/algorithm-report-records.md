@@ -333,7 +333,7 @@ CTest result satisfies those numerical/publication obligations.
 
 ## Scenario statistics alongside historical algorithm reports
 
-The additive [run-statistics format](run-statistics.md), now `csl.run-statistics/2`,
+The additive [run-statistics format](run-statistics.md), now `csl.run-statistics/3`,
 binds actual MODEL03 problem identity to an independently resolved execution
 configuration. Standalone LP/convex bootstrap records keep their real program
 identities, schema kinds, provenance and existing readers. They do not acquire

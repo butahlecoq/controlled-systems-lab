@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <set>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace csl::artifacts {
@@ -274,7 +275,7 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
             if(batch.selector.value!=config.selector.id.value||batch.requested!=config.output.witnesses.count||batch.seed!=config.output.witnesses.seed||batch.witnesses.size()>batch.requested)return reject("run.selection","Selection disagrees with the resolved request");
             if(batch.source_family){
                 const auto* synthesis=std::get_if<SynthesisFinal>(&input.final);
-                if(!synthesis||!synthesis->family||*batch.source_family!=synthesis->family->family.identity)return reject("run.selection.source_family","Selection refers to a different family");
+                if(!synthesis||!synthesis->family||*batch.source_family!=synthesis->family->family.identity())return reject("run.selection.source_family","Selection refers to a different family");
             }
             for(const auto& w:batch.witnesses){
                 if(w.problem!=input.problem||input.horizon==std::numeric_limits<std::uint64_t>::max()||w.states.size()!=input.horizon+1||w.controls.size()!=input.horizon||!std::isfinite(w.original_objective))return reject("run.selection.witnesses","Invalid selected witness shape or subject");
@@ -293,8 +294,8 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
                 for(const auto& control:w.controls)if(control.size()!=input.dimensions.control||!finite_vector(control))return reject("run.final.witnesses.controls","Invalid control shape or value");
             }
             if(s->family){const auto& f=*s->family;
-                const auto& identity=f.family.identity;
-                const auto& relation=std::visit([](const auto& product)->const JointRelation&{return product.relation;},f.family.outcome);
+                const auto& identity=f.family.identity();
+                const auto& relation=std::visit([](const auto& product)->const JointRelation&{return product.relation;},f.family.outcome());
                 const auto strategy_version=std::find_if(input.configuration.description().modules.begin(),input.configuration.description().modules.end(),[&](const auto& module){return module.role=="strategy"&&module.implementation.id==identity.strategy&&module.implementation.version==identity.strategy_version;});
                 if(identity.problem!=input.problem||identity.coordinates.horizon!=input.horizon||identity.coordinates.dimensions.state!=input.dimensions.state||identity.coordinates.dimensions.control!=input.dimensions.control||identity.coordinates.dimensions.external!=input.dimensions.external||
                     relation.coordinates!=identity.coordinates||relation.representation!=identity.request.representation||relation.payload||
@@ -307,7 +308,7 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
                 if(const auto* p=std::get_if<ExternalFamilyPayload>(&f.payload);p&&!attachment_role(p->attachment,AttachmentRole::family))return reject("run.final.family.attachment","Missing family-role attachment");
             }
             FamilyIdentity expected{};expected.problem=input.problem;expected.request.assurance=input.configuration.description().output.assurance;
-            if(s->family)expected=s->family->family.identity;
+            if(s->family)expected=s->family->family.identity();
             const SynthesisResult checked{s->termination,s->outcome,s->objective,s->family?std::optional<OptimalFamily>{s->family->family}:std::nullopt,s->incumbents,{},s->stop};
             if(!check_synthesis_result(checked,expected).empty())return reject("run.final.synthesis.evidence","Unsupported or contradictory synthesis evidence");
             const auto retained_scope=[&](const RetainedEvidenceScope& scope){
@@ -353,9 +354,11 @@ SynthesisFinal project_final(const SynthesisResult& result,std::optional<Attachm
     std::optional<FamilyRecord> family;
     if(result.family){const auto& f=*result.family;FamilyPayload payload=FamilyWithoutExporter{};
         if(attachment)payload=ExternalFamilyPayload{std::move(*attachment)};
-        auto metadata=f;
-        std::visit([](auto& product){product.relation.payload.reset();},metadata.outcome);
-        family=FamilyRecord{std::move(metadata),std::move(payload)};
+        auto outcome=f.outcome();
+        std::visit([](auto& product){product.relation.payload.reset();},outcome);
+        auto metadata=FamilyPublisher::publish(f.identity(),std::move(outcome));
+        if(!std::holds_alternative<OptimalFamily>(metadata))throw std::logic_error("A published family lost its evidence when projected");
+        family=FamilyRecord{std::get<OptimalFamily>(std::move(metadata)),std::move(payload)};
     }
     return {result.termination,result.outcome,result.objective,std::move(family),result.incumbents,result.stop};
 }

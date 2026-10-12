@@ -1,7 +1,7 @@
 # Portable run statistics
 
 `CSL::artifacts` publishes immutable scenario records and reads/writes the closed
-`csl.run-statistics/2` JSON format. Include `csl/artifacts/run_statistics.hpp` for
+`csl.run-statistics/3` JSON format. Include `csl/artifacts/run_statistics.hpp` for
 records and `csl/execution/observability.hpp` for bounded collection and RUN01
 projection. These additions preserve source contract 1.5 and mathematical identity
 version 1. No solver, estimator, mathematical verifier, family exporter, timer
@@ -225,7 +225,7 @@ to a diagnostics-role attachment. A missing attachment remains explicit null.
 
 ## Wire format and compatibility
 
-The [v2 schema](../artifacts/schemas/run-statistics-v2.schema.json) describes closed
+The [v3 schema](../artifacts/schemas/run-statistics-v3.schema.json) describes closed
 objects and variants. The checked codec additionally enforces integer width,
 UTF-8 byte limits, finite values, content digests, recomputed configuration ID,
 problem/config/run bindings, parent DAGs, capacities and reference semantics.
@@ -233,7 +233,12 @@ Input byte, string, node and depth limits are checked before unrestricted DOM
 growth; duplicate keys are rejected before overwrite. Unknown fields/tags/versions,
 noncanonical integers, invalid UTF-8, trailing input and contradictory metric
 variants are errors. New fields or variants require a new wire version and
-explicit reader policy. This reader accepts v2; the [v1 schema](../artifacts/schemas/run-statistics-v1.schema.json)
+explicit reader policy. This reader accepts v3 and historical v2. A v2 candidate
+with unestablished feasibility maps to v3 `Unestablished`; supported v2
+candidate feasibility is rejected because its unscoped claim cannot be assigned
+relation or witness scope without inventing evidence. Decoding a v2 record and
+encoding it again emits v3; the historical fixture and schema remain unchanged.
+The [v1 schema](../artifacts/schemas/run-statistics-v1.schema.json)
 and the [v1 fixture](../../tests/artifacts/fixtures/run-statistics-v1.json) remain
 historical evidence. V1 synthesis records are explicitly rejected with a schema
 error: their independent target/evidence fields cannot be safely upgraded to a

@@ -1,0 +1,843 @@
+{
+  "schema": "csl.run-statistics/3",
+  "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+  "dimensions": {
+    "state": "1",
+    "control": "1",
+    "external": "0"
+  },
+  "horizon": "2",
+  "configuration": {
+    "id": "csl.config.v1.sha256:e27f771c2d04bb72827ad27eeaa4123a4df58eaea22aaac4b789ee36033e5abf",
+    "value": {
+      "collection": {
+        "detail_bytes": "4096",
+        "detail_spans": "3",
+        "enabled": true,
+        "mode": "detail",
+        "plan_bytes": "4096",
+        "plan_spans": "4"
+      },
+      "modules": [
+        {
+          "id": "lp-a",
+          "options": [],
+          "pin": {
+            "detail": "",
+            "reason": "not_instrumented",
+            "state": "unavailable",
+            "value": null
+          },
+          "role": "lp",
+          "version": "1"
+        },
+        {
+          "id": "joint",
+          "options": [],
+          "pin": {
+            "detail": "",
+            "reason": "not_instrumented",
+            "state": "unavailable",
+            "value": null
+          },
+          "role": "strategy",
+          "version": "1"
+        }
+      ],
+      "numerical": {
+        "absolute_bits": "0000000000000000",
+        "relative_bits": "0000000000000000"
+      },
+      "output": {
+        "assurance": "numerical",
+        "directions": [],
+        "distinctness_bits": "0000000000000000",
+        "family": "exact_optimal_relation",
+        "kind": "synthesis",
+        "representation": "joint",
+        "seed": null,
+        "witness_count": "1"
+      },
+      "resources": {
+        "memory_bytes": null,
+        "outer_workers": "2",
+        "threads_per_worker": "1",
+        "total_threads": "2"
+      },
+      "selector": {
+        "id": "first",
+        "options": [],
+        "version": "1"
+      },
+      "stop": {
+        "deadline_budget_ticks": null
+      },
+      "strategy": {
+        "approximation": null,
+        "converter": null,
+        "convex": null,
+        "geometry": null,
+        "hull": null,
+        "lp": "lp-a",
+        "representation": "joint",
+        "selector": "first",
+        "strategy": "joint"
+      },
+      "workspace_policy": "fresh"
+    }
+  },
+  "run": "literal-full-history",
+  "final": {
+    "kind": "synthesis",
+    "value": {
+      "termination": "completed",
+      "outcome": {
+        "subject": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+        "value": "optimal",
+        "support": {
+          "kind": "unestablished",
+          "value": {}
+        },
+        "assumptions": []
+      },
+      "objective": {
+        "lower": {
+          "value": 0.0,
+          "evidence": {
+            "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+            "support": {
+              "kind": "unestablished",
+              "value": {}
+            }
+          }
+        },
+        "upper": {
+          "value": 0.0,
+          "evidence": {
+            "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+            "support": {
+              "kind": "unestablished",
+              "value": {}
+            }
+          }
+        }
+      },
+      "family": {
+        "family": {
+          "identity": {
+            "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+            "request": {
+              "profile": "nominal",
+              "objective": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+              "target": "exact_optimal_relation",
+              "numerical": {
+                "absolute_tolerance": 0.0,
+                "relative_tolerance": 0.0
+              },
+              "assurance": "numerical",
+              "representation": "joint",
+              "materialization_limit": null
+            },
+            "coordinates": {
+              "dimensions": {
+                "state": "1",
+                "control": "1",
+                "external": "0"
+              },
+              "horizon": "2"
+            },
+            "strategy": "joint",
+            "strategy_version": "1",
+            "lineage": []
+          },
+          "outcome": {
+            "kind": "candidate",
+            "value": {
+              "relation": {
+                "coordinates": {
+                  "dimensions": {
+                    "state": "1",
+                    "control": "1",
+                    "external": "0"
+                  },
+                  "horizon": "2"
+                },
+                "representation": "joint"
+              },
+              "relation_to_target": {
+                "kind": "heuristic",
+                "value": {
+                  "method": "literal fixture candidate"
+                }
+              },
+              "feasibility": {
+                "kind": "unestablished",
+                "value": {}
+              }
+            }
+          }
+        },
+        "payload": {
+          "kind": "external_reference",
+          "value": {
+            "attachment": "family-relation"
+          }
+        }
+      },
+      "incumbents": [
+        {
+          "feasibility": {
+            "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+            "support": {
+              "kind": "symbolic_argument",
+              "value": {
+                "reference": "two-step analytic fixture",
+                "assumptions": "literal two-step dynamics and bounds"
+              }
+            }
+          },
+          "witness": {
+            "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "original_objective": 0.0
+          }
+        },
+        {
+          "feasibility": {
+            "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+            "support": {
+              "kind": "symbolic_argument",
+              "value": {
+                "reference": "two-step analytic fixture",
+                "assumptions": "literal two-step dynamics and bounds"
+              }
+            }
+          },
+          "witness": {
+            "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "original_objective": 0.0
+          }
+        }
+      ],
+      "stop": {
+        "kind": "none",
+        "value": {}
+      }
+    }
+  },
+  "statistics": {
+    "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+    "configuration": "csl.config.v1.sha256:e27f771c2d04bb72827ad27eeaa4123a4df58eaea22aaac4b789ee36033e5abf",
+    "run": "literal-full-history",
+    "settings": {
+      "detail_bytes": "4096",
+      "detail_spans": "3",
+      "enabled": true,
+      "mode": "detail",
+      "plan_bytes": "4096",
+      "plan_spans": "4"
+    },
+    "clocks": [
+      {
+        "id": "wall",
+        "metric": "steady_wall",
+        "scope": "run",
+        "period_numerator": "1",
+        "period_denominator": "1000",
+        "resolution_ticks": {
+          "state": "available",
+          "value": "1"
+        },
+        "origin_label": "fixture.run_origin",
+        "calibration": {
+          "state": "unavailable",
+          "value": null,
+          "reason": "not_instrumented",
+          "detail": ""
+        }
+      }
+    ],
+    "spans": [
+      {
+        "descriptor": {
+          "id": {
+            "value": "0"
+          },
+          "parent": null,
+          "shard": "0",
+          "bucket": "0",
+          "task": "task",
+          "operation": "solve",
+          "module": {
+            "id": "lp-a",
+            "version": "1",
+            "pin": {
+              "state": "unavailable",
+              "value": null,
+              "reason": "not_instrumented",
+              "detail": ""
+            }
+          },
+          "backend": null,
+          "clock": "wall",
+          "program": null,
+          "stage": null,
+          "query": null,
+          "input_representation": "joint",
+          "output_representation": "joint",
+          "input_size": "3",
+          "output_size": "2",
+          "requested_assurance": "numerical",
+          "applied_assurance": {
+            "state": "available",
+            "value": "numerical"
+          },
+          "relation": "equivalent",
+          "relation_evidence": null,
+          "input_summary": null,
+          "output_summary": null,
+          "observation_source": "literal-fixture"
+        },
+        "interval": {
+          "kind": "ticks",
+          "value": {
+            "start": {
+              "state": "available",
+              "value": "0"
+            },
+            "end": {
+              "state": "available",
+              "value": "20"
+            }
+          }
+        },
+        "execution": {
+          "kind": "observed_return",
+          "value": {}
+        },
+        "termination": {
+          "state": "available",
+          "value": "completed"
+        },
+        "iterations": {
+          "state": "available",
+          "value": "0"
+        },
+        "detail": {
+          "state": "available",
+          "value": "owned detail"
+        },
+        "status": {
+          "kind": "returned",
+          "value": {
+            "termination": "completed",
+            "outcome": {
+              "state": "unavailable",
+              "value": null,
+              "reason": "not_instrumented",
+              "detail": ""
+            }
+          }
+        },
+        "completion_observed": true,
+        "detail_state": "retained"
+      },
+      {
+        "descriptor": {
+          "id": {
+            "value": "1"
+          },
+          "parent": {
+            "id": {
+              "value": "0"
+            },
+            "kind": "nested"
+          },
+          "shard": "1",
+          "bucket": "0",
+          "task": "task",
+          "operation": "solve",
+          "module": {
+            "id": "lp-a",
+            "version": "1",
+            "pin": {
+              "state": "unavailable",
+              "value": null,
+              "reason": "not_instrumented",
+              "detail": ""
+            }
+          },
+          "backend": null,
+          "clock": "wall",
+          "program": null,
+          "stage": null,
+          "query": null,
+          "input_representation": "joint",
+          "output_representation": "joint",
+          "input_size": "3",
+          "output_size": "2",
+          "requested_assurance": "numerical",
+          "applied_assurance": {
+            "state": "available",
+            "value": "numerical"
+          },
+          "relation": "equivalent",
+          "relation_evidence": null,
+          "input_summary": null,
+          "output_summary": null,
+          "observation_source": "literal-fixture"
+        },
+        "interval": {
+          "kind": "ticks",
+          "value": {
+            "start": {
+              "state": "available",
+              "value": "2"
+            },
+            "end": {
+              "state": "available",
+              "value": "12"
+            }
+          }
+        },
+        "execution": {
+          "kind": "observed_return",
+          "value": {}
+        },
+        "termination": {
+          "state": "available",
+          "value": "completed"
+        },
+        "iterations": {
+          "state": "available",
+          "value": "0"
+        },
+        "detail": {
+          "state": "available",
+          "value": "owned detail"
+        },
+        "status": {
+          "kind": "returned",
+          "value": {
+            "termination": "completed",
+            "outcome": {
+              "state": "unavailable",
+              "value": null,
+              "reason": "not_instrumented",
+              "detail": ""
+            }
+          }
+        },
+        "completion_observed": true,
+        "detail_state": "retained"
+      },
+      {
+        "descriptor": {
+          "id": {
+            "value": "2"
+          },
+          "parent": {
+            "id": {
+              "value": "0"
+            },
+            "kind": "nested"
+          },
+          "shard": "0",
+          "bucket": "0",
+          "task": "task",
+          "operation": "solve",
+          "module": {
+            "id": "lp-a",
+            "version": "1",
+            "pin": {
+              "state": "unavailable",
+              "value": null,
+              "reason": "not_instrumented",
+              "detail": ""
+            }
+          },
+          "backend": null,
+          "clock": "wall",
+          "program": null,
+          "stage": null,
+          "query": null,
+          "input_representation": "joint",
+          "output_representation": "joint",
+          "input_size": "3",
+          "output_size": "2",
+          "requested_assurance": "numerical",
+          "applied_assurance": {
+            "state": "available",
+            "value": "numerical"
+          },
+          "relation": "equivalent",
+          "relation_evidence": null,
+          "input_summary": null,
+          "output_summary": null,
+          "observation_source": "literal-fixture"
+        },
+        "interval": {
+          "kind": "ticks",
+          "value": {
+            "start": {
+              "state": "available",
+              "value": "5"
+            },
+            "end": {
+              "state": "available",
+              "value": "17"
+            }
+          }
+        },
+        "execution": {
+          "kind": "observed_return",
+          "value": {}
+        },
+        "termination": {
+          "state": "available",
+          "value": "completed"
+        },
+        "iterations": {
+          "state": "available",
+          "value": "0"
+        },
+        "detail": {
+          "state": "available",
+          "value": "owned detail"
+        },
+        "status": {
+          "kind": "returned",
+          "value": {
+            "termination": "completed",
+            "outcome": {
+              "state": "unavailable",
+              "value": null,
+              "reason": "not_instrumented",
+              "detail": ""
+            }
+          }
+        },
+        "completion_observed": true,
+        "detail_state": "retained"
+      },
+      {
+        "descriptor": {
+          "id": {
+            "value": "3"
+          },
+          "parent": {
+            "id": {
+              "value": "1"
+            },
+            "kind": "nested"
+          },
+          "shard": "1",
+          "bucket": "0",
+          "task": "task",
+          "operation": "solve",
+          "module": {
+            "id": "lp-a",
+            "version": "1",
+            "pin": {
+              "state": "unavailable",
+              "value": null,
+              "reason": "not_instrumented",
+              "detail": ""
+            }
+          },
+          "backend": null,
+          "clock": "wall",
+          "program": null,
+          "stage": null,
+          "query": null,
+          "input_representation": "joint",
+          "output_representation": "joint",
+          "input_size": "3",
+          "output_size": "2",
+          "requested_assurance": "numerical",
+          "applied_assurance": {
+            "state": "available",
+            "value": "numerical"
+          },
+          "relation": "equivalent",
+          "relation_evidence": null,
+          "input_summary": null,
+          "output_summary": null,
+          "observation_source": "literal-fixture"
+        },
+        "interval": {
+          "kind": "ticks",
+          "value": {
+            "start": {
+              "state": "available",
+              "value": "4"
+            },
+            "end": {
+              "state": "available",
+              "value": "9"
+            }
+          }
+        },
+        "execution": {
+          "kind": "observed_return",
+          "value": {}
+        },
+        "termination": {
+          "state": "available",
+          "value": "completed"
+        },
+        "iterations": {
+          "state": "available",
+          "value": "0"
+        },
+        "detail": {
+          "state": "unavailable",
+          "value": null,
+          "reason": "detail_limit",
+          "detail": ""
+        },
+        "status": {
+          "kind": "returned",
+          "value": {
+            "termination": "completed",
+            "outcome": {
+              "state": "unavailable",
+              "value": null,
+              "reason": "not_instrumented",
+              "detail": ""
+            }
+          }
+        },
+        "completion_observed": true,
+        "detail_state": "capacity_dropped"
+      }
+    ],
+    "buckets": [
+      {
+        "id": "0",
+        "clock": "wall",
+        "observed": {
+          "value": "4",
+          "exact": true
+        },
+        "detail_dropped": {
+          "value": "1",
+          "exact": true
+        },
+        "duplicate": {
+          "value": "0",
+          "exact": true
+        },
+        "wrong_shard": {
+          "value": "0",
+          "exact": true
+        },
+        "declared_overflow": {
+          "value": "0",
+          "exact": true
+        },
+        "duration_contributors": {
+          "value": "4",
+          "exact": true
+        },
+        "inclusive_ticks": {
+          "state": "available",
+          "value": "47"
+        },
+        "failed": {
+          "value": "0",
+          "exact": true
+        },
+        "not_called": {
+          "value": "0",
+          "exact": true
+        },
+        "unknown": {
+          "value": "0",
+          "exact": true
+        },
+        "incomplete": {
+          "value": "0",
+          "exact": true
+        }
+      }
+    ],
+    "complete": {
+      "state": "available",
+      "value": true
+    },
+    "tasks": [
+      "task"
+    ],
+    "operations": [
+      "solve"
+    ]
+  },
+  "resources": {
+    "peak_active_tasks": {
+      "state": "available",
+      "value": "2"
+    },
+    "peak_reserved_threads": {
+      "state": "available",
+      "value": "2"
+    },
+    "peak_reserved_bytes": {
+      "state": "unavailable",
+      "value": null,
+      "reason": "not_requested",
+      "detail": ""
+    },
+    "actual_threads": {
+      "state": "unavailable",
+      "value": null,
+      "reason": "not_instrumented",
+      "detail": ""
+    },
+    "outer_admission_enforced": true,
+    "memory": "unlimited"
+  },
+  "execution": {
+    "configured_deadline": {
+      "state": "available",
+      "value": "-1"
+    },
+    "admission_closed": {
+      "cause": "adapter_exception",
+      "at": {
+        "state": "available",
+        "value": "1"
+      }
+    },
+    "external_cancellation": {
+      "state": "available",
+      "value": "2"
+    },
+    "workers_joined": {
+      "state": "available",
+      "value": "7"
+    },
+    "completed": {
+      "state": "available",
+      "value": "8"
+    },
+    "clock": {
+      "id": "wall",
+      "metric": "steady_wall",
+      "scope": "run",
+      "period_numerator": "1",
+      "period_denominator": "1000",
+      "resolution_ticks": {
+        "state": "available",
+        "value": "1"
+      },
+      "origin_label": "fixture.run_origin",
+      "calibration": {
+        "state": "unavailable",
+        "value": null,
+        "reason": "not_instrumented",
+        "detail": ""
+      }
+    },
+    "started": {
+      "state": "available",
+      "value": "0"
+    },
+    "tasks": []
+  },
+  "attachments": [
+    {
+      "id": "family-relation",
+      "role": "family",
+      "digest": "d4c67234559d1d389f48ea4fb262d2a10384d4f5eca10d4350bb816a641b1d36",
+      "byte_count": "7",
+      "media_type": "text/plain",
+      "schema": "literal.joint-relation/1",
+      "relative_path": "family/relation.txt",
+      "content": null
+    },
+    {
+      "id": "raw-diagnostics",
+      "role": "diagnostics",
+      "digest": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+      "byte_count": "3",
+      "media_type": "text/plain",
+      "schema": "literal.diagnostics/1",
+      "relative_path": null,
+      "content": "616263"
+    }
+  ],
+  "provenance": "identity_recorded",
+  "selection": {
+    "batch": {
+      "witnesses": [
+        {
+          "problem": "csl.problem.v1.sha256:c3eb59c9382beedb7fabcb9682d168f418ae203c34706985de1c7b5d0de9c579",
+          "states": [
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              1
+            ]
+          ],
+          "controls": [
+            [
+              0
+            ],
+            [
+              1
+            ]
+          ],
+          "original_objective": 0.0
+        }
+      ],
+      "requested": "1",
+      "selector": "first",
+      "seed": null,
+      "source_family": null
+    },
+    "termination": "completed",
+    "diagnostics": "synthetic selector projection"
+  }
+}
