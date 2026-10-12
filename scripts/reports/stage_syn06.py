@@ -10,6 +10,7 @@ import argparse
 import csv
 import hashlib
 from html import escape
+import importlib.util
 import io
 import json
 from pathlib import Path
@@ -18,7 +19,10 @@ import statistics
 
 import registered_reports as registered
 import report_data
-import site
+
+_site_spec = importlib.util.spec_from_file_location("csl_report_site_v1", Path(__file__).with_name("site.py"))
+site = importlib.util.module_from_spec(_site_spec)
+_site_spec.loader.exec_module(site)
 
 SOURCE_FILES = frozenset({
     "README.md", "build-log.txt", "build-provenance.json", "index.html", "latency.svg",
@@ -151,8 +155,8 @@ def page(record: dict, figure: str) -> str:
             '</head><body><h1>SYN-06 original-data trajectory verification</h1><p>Source commit <code>' +
             escape(payload["source_commit"]) + '</code>. ' + escape(SCOPE) + '.</p><p>' + escape(LIMITS) +
             '.</p><h2>Saved Release timings</h2><p>Seven measured batches of ' + str(payload["batch"]) +
-            ' calls per fixture, after seven warmup batches. Each interval contains only '
-            '<code>verify_trajectory</code> and consumption of every returned report; resolution and setup '
+            ' calls per fixture, after seven warmup batches. Each interval contains '
+            '<code>verify_trajectory</code>, report assignment and consumption of every returned report; resolution and setup '
             'are outside. Values are batch elapsed time divided by calls, in nanoseconds per call. '
             'No comparator or speedup is claimed.</p><table><thead><tr><th>Witness</th><th>Trials</th>'
             '<th>Median ns/call</th><th>Min ns/call</th><th>Max ns/call</th></tr></thead><tbody>' +

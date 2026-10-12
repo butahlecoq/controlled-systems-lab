@@ -176,7 +176,7 @@ def collect(executable: Path, build: Path, source_commit: str, cmake: Path) -> P
         "numerical": {"absolute": 1e-8, "relative": 1e-8},
         "workers": {"requested": 1, "actual": 1, "native_threads": 1},
         "batch": batch, "warmups": 7, "repetitions": 7,
-        "timing_scope": "verify_trajectory plus complete result consumption; resolved problem and request prebuilt",
+        "timing_scope": "verify_trajectory, report assignment and complete result consumption; resolved problem and request prebuilt",
         "unavailable_timings": ["problem resolution", "setup", "end-to-end", "rendering", "internal phases"],
         "trials": trials, "summary": summary,
         "raw_sha256": report.digest_bytes(raw),
