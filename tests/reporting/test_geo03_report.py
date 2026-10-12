@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import csv
+import argparse
 import hashlib
 import importlib.util
+import io
 import json
 import shutil
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,6 +21,11 @@ SPEC = importlib.util.spec_from_file_location("geo03_validate_report", VALIDATOR
 assert SPEC is not None and SPEC.loader is not None
 VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
+BUILDER_PATH = ROOT / "reports" / "algorithm-results" / "tooling" / "geo03" / "build_report.py"
+BUILDER_SPEC = importlib.util.spec_from_file_location("geo03_build_report", BUILDER_PATH)
+assert BUILDER_SPEC is not None and BUILDER_SPEC.loader is not None
+BUILDER = importlib.util.module_from_spec(BUILDER_SPEC)
+BUILDER_SPEC.loader.exec_module(BUILDER)
 
 
 class Geo03ReportCsvProjectionTests(unittest.TestCase):
@@ -128,6 +136,124 @@ class Geo03ReportCsvProjectionTests(unittest.TestCase):
             self.refresh_manifest_for(report, "summary.csv")
             with self.assertRaisesRegex(AssertionError, "summary CSV does not exactly project"):
                 VALIDATOR.validate(report)
+
+    def test_zip_manifest_must_equal_adjacent_manifest_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            report = self.copy_report(temp)
+            archive_path = report.parent / f"{report.name}.zip"
+            with zipfile.ZipFile(archive_path) as original:
+                members = [(info, original.read(info.filename)) for info in original.infolist()]
+            with zipfile.ZipFile(archive_path, "w") as changed:
+                for info, data in members:
+                    changed.writestr(info, data + b"\n" if info.filename == "manifest.json" else data)
+            with self.assertRaisesRegex(AssertionError, "ZIP manifest differs"):
+                VALIDATOR.validate(report)
+
+    def test_saved_package_rebuild_is_byte_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            report = self.copy_report(temp)
+            first_archive = BUILDER.package_artifacts(report, report.name)
+            first = first_archive.read_bytes()
+            second_archive = BUILDER.package_artifacts(report, report.name)
+            self.assertEqual(first, second_archive.read_bytes())
+            VALIDATOR.validate(report)
+
+
+class Geo03FailedCollectionTests(unittest.TestCase):
+    @staticmethod
+    def driver_csv_with_change(field: str, value: str) -> tuple[str, int]:
+        source = next(path for path in REPORTS.glob("geo03-*") if path.is_dir())
+        with (source / "raw-driver-output.csv").open(newline="", encoding="utf-8") as stream:
+            reader = csv.DictReader(stream)
+            fields = reader.fieldnames
+            rows = list(reader)
+        assert fields is not None
+        rows[0][field] = value
+        output = io.StringIO(newline="")
+        writer = csv.DictWriter(output, fieldnames=fields, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+        return output.getvalue(), len(rows)
+
+    def test_nonzero_process_preserves_available_output_and_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            out = Path(temp) / "failed"
+            args = argparse.Namespace(exe=Path("driver.exe"), repetitions=7, warmups=1,
+                                      out=out, cmake_version="test")
+            with patch.object(BUILDER, "load_snapshot", return_value={"sample": "test"}), \
+                 patch.object(BUILDER, "run_text", return_value=(9, "partial,csv\n", "native failure\n")):
+                with self.assertRaisesRegex(SystemExit, "executable failed"):
+                    BUILDER.collect(args)
+            self.assertEqual((out / "raw-driver-output.csv").read_text(), "partial,csv\n")
+            self.assertEqual((out / "process-stderr.txt").read_text(), "native failure\n")
+            status = json.loads((out / "collection-status.json").read_text())
+            self.assertEqual(status["process_return_code"], 9)
+            self.assertEqual(status["state"], "failed")
+            self.assertFalse((out / "records.json").exists())
+
+    def test_failed_oracle_preserves_all_emitted_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            out = Path(temp) / "failed"
+            args = argparse.Namespace(exe=Path("driver.exe"), repetitions=7, warmups=1,
+                                      out=out, cmake_version="test")
+            raw, count = self.driver_csv_with_change("oracle_passed", "false")
+            with patch.object(BUILDER, "load_snapshot", return_value={"sample": "test"}), \
+                 patch.object(BUILDER, "run_text", return_value=(0, raw, "oracle detail\n")):
+                with self.assertRaises(SystemExit):
+                    BUILDER.collect(args)
+            self.assertEqual((out / "raw-driver-output.csv").read_text(), raw)
+            self.assertEqual((out / "process-stderr.txt").read_text(), "oracle detail\n")
+            status = json.loads((out / "collection-status.json").read_text())
+            self.assertEqual(status["parsed_rows"], count)
+            self.assertEqual(status["expected_rows"], count)
+            self.assertEqual(status["state"], "failed")
+            self.assertIn("oracle", status["reason"])
+
+    def test_malformed_csv_preserves_raw_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            out = Path(temp) / "failed"
+            args = argparse.Namespace(exe=Path("driver.exe"), repetitions=5, warmups=1,
+                                      out=out, cmake_version="test")
+            raw = "not,a,driver,header\n" + "malformed,row\n" * 40
+            with patch.object(BUILDER, "load_snapshot", return_value={"sample": "test"}), \
+                 patch.object(BUILDER, "run_text", return_value=(0, raw, "parse detail\n")):
+                with self.assertRaises(SystemExit):
+                    BUILDER.collect(args)
+            self.assertEqual((out / "raw-driver-output.csv").read_text(), raw)
+            self.assertEqual((out / "process-stderr.txt").read_text(), "parse detail\n")
+            status = json.loads((out / "collection-status.json").read_text())
+            self.assertEqual(status["state"], "failed")
+            self.assertIn("malformed", status["reason"])
+
+    def test_bad_numeric_row_preserves_raw_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            out = Path(temp) / "failed"
+            args = argparse.Namespace(exe=Path("driver.exe"), repetitions=7, warmups=1,
+                                      out=out, cmake_version="test")
+            raw, count = self.driver_csv_with_change("run_ns", "not-an-integer")
+            with patch.object(BUILDER, "load_snapshot", return_value={"sample": "test"}), \
+                 patch.object(BUILDER, "run_text", return_value=(0, raw, "numeric detail\n")):
+                with self.assertRaises(SystemExit):
+                    BUILDER.collect(args)
+            self.assertEqual((out / "raw-driver-output.csv").read_text(), raw)
+            status = json.loads((out / "collection-status.json").read_text())
+            self.assertEqual(status["parsed_rows"], count)
+            self.assertIn("numeric", status["reason"])
+
+    def test_failed_roster_preserves_raw_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            out = Path(temp) / "failed"
+            args = argparse.Namespace(exe=Path("driver.exe"), repetitions=7, warmups=1,
+                                      out=out, cmake_version="test")
+            raw, count = self.driver_csv_with_change("fixture", "unexpected-fixture")
+            with patch.object(BUILDER, "load_snapshot", return_value={"sample": "test"}), \
+                 patch.object(BUILDER, "run_text", return_value=(0, raw, "roster detail\n")):
+                with self.assertRaises(SystemExit):
+                    BUILDER.collect(args)
+            self.assertEqual((out / "raw-driver-output.csv").read_text(), raw)
+            status = json.loads((out / "collection-status.json").read_text())
+            self.assertEqual(status["parsed_rows"], count)
+            self.assertIn("roster", status["reason"])
 
 
 if __name__ == "__main__":

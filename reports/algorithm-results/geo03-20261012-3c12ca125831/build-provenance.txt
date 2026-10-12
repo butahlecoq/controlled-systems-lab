@@ -9,9 +9,9 @@ Compiler from configure log: MSVC 19.44.35215.0; toolset path 14.44.35207
 Build config: Release
 Native dependencies: Qhull 8.0.2; HiGHS 1.11.0
 Report executable SHA-256: 48AF97AD5191A4DF620EAA921902F3B57C46CD06DA212CBDB41CA3274CD1D699
-Final build log SHA-256: 6EA338ED6EA5C371372170D2DDD26123299C308509E88AB6E41412846BF543B1
-Final build log SHA-256: 
-344078FBBC1FFD6CDB45DDB1915E565F08A43FC5AF2514489A31E0E5502383F0
+Build-log provenance limitation: two different SHA-256 values were recorded under the same "Final build log" label. The corresponding log bytes are not retained in this bundle or the inspected report source worktree. Neither value can be authenticated as the timed build's final log from the saved evidence.
+Recorded build-log digest A (unattributed): 6EA338ED6EA5C371372170D2DDD26123299C308509E88AB6E41412846BF543B1
+Recorded build-log digest B (unattributed): 344078FBBC1FFD6CDB45DDB1915E565F08A43FC5AF2514489A31E0E5502383F0
 Runtime/dependency pin source SHA-256:
 0B9F868D8E7B94A074112D01935DB046EB76526C5163AC3B967D80C092D416B1  CMakeLists.txt
 624D8D1C0BFF9C7E210CDD7B2E4EBC14B34552B4EDE8450841E998DB307DAC24  cmake/QhullDependencies.cmake

@@ -225,8 +225,11 @@ def validate(root: Path) -> None:
     archive = root.parent / (wrapper["report_id"] + ".zip")
     require(archive.is_file(), "offline ZIP is missing")
     with zipfile.ZipFile(archive) as zf:
+        require(len(zf.namelist()) == len(set(zf.namelist())), "ZIP contains duplicate members")
         require(set(zf.namelist()) == set(manifest["files"]) | {"manifest.json"}, "ZIP inventory mismatch")
         require(zf.testzip() is None, "ZIP CRC validation failed")
+        require(zf.read("manifest.json") == (root / "manifest.json").read_bytes(),
+                "ZIP manifest differs from adjacent manifest.json")
         for name, expected in manifest["files"].items():
             require(hashlib.sha256(zf.read(name)).hexdigest() == expected, f"ZIP hash mismatch: {name}")
     print(f"VALID {wrapper['report_id']}: {len(trials)} trials, 8 independent-oracle groups, {len(manifest['files'])} hashed bundle files")
