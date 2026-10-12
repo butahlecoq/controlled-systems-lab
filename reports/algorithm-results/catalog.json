@@ -41,7 +41,7 @@
       "source_commit": "ba83547b3495cc8017f720702083bcf76c71fb30",
       "measured_scope": "56 measured trials across four bounded 2D fixtures in both conversion directions",
       "evidence_limits": "contract fixtures only; no accepted workload-size baseline; bounded H/V cases only; no available competing adapter; numerical checks are not validated global certificates; no inner conversion phase timing; A17/A18 audit covers source lineage only; executable equivalence is not established",
-      "zip_sha256": "51218957fea1c0c0601935b8207bc35330f97a093c6136e0c0e5ab8b8cc66619",
+      "zip_sha256": "2d9ad2f23277afa6b1dff3be4163a3030eed3677def977282c8afdb9240b9d5b",
       "payload_schema": "csl.geo03-hv-report/1"
     }
   ]
