@@ -1,0 +1,38 @@
+{
+  "binary_sha256": "31c0156be47b551c171051958b146a876eafc22eff142ff44373f05a14f29f9c",
+  "build_command": [
+    "cmake",
+    "--build",
+    "BUILD_ROOT",
+    "--config",
+    "Release",
+    "--target",
+    "csl_syn06_verifier_report"
+  ],
+  "clean_source_after_build": true,
+  "clean_source_before_build": true,
+  "cmake_cache_sha256": "a981c518733f7339f3307671c664901f38094758a3408648aa95b26cd79f1167",
+  "compiler": {
+    "CMAKE_CXX_COMPILER_ID": "MSVC",
+    "CMAKE_CXX_COMPILER_VERSION": "19.44.35215.0"
+  },
+  "configuration": "Release",
+  "configuration_command": [
+    "cmake",
+    "-S",
+    "SOURCE_ROOT",
+    "-B",
+    "BUILD_ROOT",
+    "-G",
+    "Visual Studio 17 2022",
+    "-DCSL_BUILD_SYN06_REPORT=ON",
+    "-DBUILD_TESTING=OFF",
+    "-A",
+    "x64"
+  ],
+  "driver_sha256": "ad25cc60bd4a8f996e6aa1ca4556ebe261fd452c80b7db45ade746b98bdaa30e",
+  "schema": "csl.syn06-build-provenance/2",
+  "source_commit": "f0e32e2b8aae6a710892c5559d353da7ea70d637",
+  "source_tree": "c8977b43809241d3269a86b19696b3f8e6901f4d",
+  "verifier_core_commit": "edf2b200209f4312b0d00a522a7a0b2e26a96d65"
+}
