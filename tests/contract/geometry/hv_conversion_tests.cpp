@@ -42,7 +42,7 @@ Requirements conversion_requirements(std::string output) {
 }
 ExecutionContext context() { return {{}, {}, {}, {1e-8,1e-8}, "geo03-tests"}; }
 SetHandle make_h_handle(std::string id,std::size_t n,Matrix a,Vector b,Matrix e={},Vector f={}) {
-    if (e.cols==0) e={0,n,{}};
+    if (e.rows==0&&e.cols==0) e={0,n,{}};
     return take(sets::make_h({{std::move(id)},n,{}},
         {take(numeric::snapshot(a)),take(numeric::snapshot_vector(b)),
          take(numeric::snapshot(e)),take(numeric::snapshot_vector(f))})).as_handle();
@@ -230,6 +230,32 @@ TEST_CASE("zero-dimensional and vertex-free ray descriptions follow the set conv
     const auto hr=h.representation(); REQUIRE(std::holds_alternative<sets::HRepresentation>(hr));
     CHECK(std::get<sets::HRepresentation>(hr).inequalities.rows()==1);
     const std::array<double,2> any{0,0}; CHECK_FALSE(satisfies(std::get<sets::HRepresentation>(hr),any));
+}
+
+TEST_CASE("zero-dimensional contradictions inside numerical tolerance are unsupported") {
+    auto r0_inequality=make_h_handle("R0-near-contradiction",0,Matrix{1,0,{}},Vector{-1e-9});
+    auto inequality_result=convert(r0_inequality,"csl.polyhedron.v","R0-near-contradiction-to-V");
+    CHECK(std::holds_alternative<Unsupported>(inequality_result));
+
+    auto clear_r0_inequality=make_h_handle("R0-clear-contradiction",0,Matrix{1,0,{}},Vector{-1e-6});
+    auto clear_inequality_result=convert(clear_r0_inequality,"csl.polyhedron.v","R0-clear-contradiction-to-V");
+    REQUIRE(std::holds_alternative<OperationResult>(clear_inequality_result));
+    auto clear_empty=take(sets::from_handle(std::get<OperationResult>(clear_inequality_result).output));
+    const auto clear_empty_rep=clear_empty.representation(); REQUIRE(std::holds_alternative<sets::VRepresentation>(clear_empty_rep));
+    CHECK(std::get<sets::VRepresentation>(clear_empty_rep).vertices.rows()==0);
+
+    auto r0_equality=make_h_handle("R0-near-inconsistent-equality",0,Matrix{0,0,{}},Vector{},Matrix{1,0,{}},Vector{1e-9});
+    auto equality_result=convert(r0_equality,"csl.polyhedron.v","R0-near-inconsistent-equality-to-V");
+    CHECK(std::holds_alternative<Unsupported>(equality_result));
+
+    auto singleton=make_h_handle("singleton-near-contradiction",1,Matrix{1,1,{0}},Vector{-1e-9},Matrix{1,1,{1}},Vector{0});
+    auto singleton_result=convert(singleton,"csl.polyhedron.v","singleton-near-contradiction-to-V");
+    CHECK(std::holds_alternative<Unsupported>(singleton_result));
+
+    auto reduced_constant=make_h_handle("reduced-constant-near-contradiction",2,
+        Matrix{1,2,{0,1}},Vector{-1e-9},Matrix{1,2,{0,1}},Vector{0});
+    auto reduced_constant_result=convert(reduced_constant,"csl.polyhedron.v","reduced-constant-near-contradiction-to-V");
+    CHECK(std::holds_alternative<Unsupported>(reduced_constant_result));
 }
 
 TEST_CASE("equality coefficient scale does not erase independent inequality dimensions") {

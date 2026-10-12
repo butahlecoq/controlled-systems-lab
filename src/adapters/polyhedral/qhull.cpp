@@ -240,11 +240,65 @@ class Workspace final : public RepresentationConverterWorkspace {
         std::string reason;
         if (!admission(static_cast<std::size_t>(n),static_cast<std::size_t>(a.rows()+e.rows()),reason)) return unsupported("conversion.capacity",reason);
         if (n==0) {
-            bool feasible=true;
-            for (Eigen::Index i=0;i<b.size();++i) feasible=feasible&&(b[i]>=-context.numerical.absolute_tolerance);
-            for (Eigen::Index i=0;i<f.size();++i) feasible=feasible&&(std::abs(f[i])<=context.numerical.absolute_tolerance);
-            if (!feasible) return publish(*empty_output(false),context,0,{"zero-dimensional structural feasibility check"});
+            for (Eigen::Index i=0;i<b.size();++i) if (b[i]<0) {
+                const double allowed=context.numerical.absolute_tolerance+context.numerical.relative_tolerance*std::max(1.0,std::abs(b[i]));
+                if (b[i]<-allowed) return publish(*empty_output(false),context,0,{"zero-dimensional structural infeasibility check"});
+                return unsupported("conversion.zero_dimensional","Inequality contradiction is within numerical tolerance in R^0.");
+            }
+            for (Eigen::Index i=0;i<f.size();++i) if (f[i]!=0) {
+                const double allowed=context.numerical.absolute_tolerance+context.numerical.relative_tolerance*std::max(1.0,std::abs(f[i]));
+                if (std::abs(f[i])>allowed) return publish(*empty_output(false),context,0,{"zero-dimensional structural infeasibility check"});
+                return unsupported("conversion.zero_dimensional","Equality contradiction is within numerical tolerance in R^0.");
+            }
             return publish(*singleton_output(Eigen::VectorXd(0),false),context,0,{"R^0 contains exactly one empty-coordinate point"});
+        }
+        Eigen::VectorXd p=Eigen::VectorXd::Zero(n);
+        Eigen::MatrixXd basis=Eigen::MatrixXd::Identity(n,n);
+        double rank_tolerance=0;
+        if (e.rows()>0) {
+            Eigen::JacobiSVD<Eigen::MatrixXd> svd(e,Eigen::ComputeFullU|Eigen::ComputeFullV);
+            if (svd.info()!=Eigen::Success) return unsupported("conversion.equalities","Equality rank decomposition failed.");
+            rank_tolerance=128*std::numeric_limits<double>::epsilon()*static_cast<double>(std::max(e.rows(),e.cols()))*std::max(1.0,e.cwiseAbs().maxCoeff());
+            std::size_t rank=0;
+            for (Eigen::Index i=0;i<svd.singularValues().size();++i) {
+                const double s=svd.singularValues()[i]; if (s>rank_tolerance) ++rank;
+                else if (s>0) return unsupported("conversion.rank","Equality rank is numerically ambiguous; no dimension was discarded.");
+            }
+            p=svd.solve(f);
+            const double equality_residual=(e*p-f).norm();
+            const double equality_scale=std::max({1.0,e.norm()*p.norm(),f.norm()});
+            const double rounding_bound=64*std::numeric_limits<double>::epsilon()*
+                static_cast<double>(std::max(e.rows(),e.cols()))*equality_scale;
+            if (!p.allFinite()||!std::isfinite(equality_residual)||
+                equality_residual>rounding_bound||
+                equality_residual>context.numerical.absolute_tolerance+context.numerical.relative_tolerance*equality_scale)
+                return unsupported("conversion.equalities","Equalities are inconsistent or unresolved in binary64.");
+            basis=svd.matrixV().rightCols(n-static_cast<Eigen::Index>(rank));
+        }
+        const Eigen::Index r=basis.cols();
+        affine_dimension_=static_cast<std::size_t>(r);
+        const Eigen::MatrixXd reduced=a*basis;
+        const Eigen::VectorXd rhs=b-a*p;
+        double residual=0;
+        std::vector<Eigen::Index> rows;
+        for (Eigen::Index i=0;i<reduced.rows();++i) {
+            const double norm=reduced.row(i).norm();
+            if (!std::isfinite(norm)||!std::isfinite(rhs[i])) return unsupported("conversion.reduction","Nonfinite reduced inequality.");
+            const double row_scale=a.row(i).norm();
+            const double reduced_row_tolerance=128*std::numeric_limits<double>::epsilon()*
+                static_cast<double>(std::max<Eigen::Index>(n,r))*row_scale;
+            if (norm<=reduced_row_tolerance) {
+                const double allowed=context.numerical.absolute_tolerance+
+                    context.numerical.relative_tolerance*std::max(1.0,std::abs(rhs[i]));
+                if (rhs[i]<-allowed) return publish(*empty_output(false),context,0,{"constant inequality proves infeasibility after equality reduction"});
+                if (rhs[i]<0) return unsupported("conversion.reduction.ambiguous","Constant inequality contradiction is within numerical tolerance after equality reduction.");
+            } else rows.push_back(i);
+        }
+        if (r==0) {
+            Eigen::MatrixXd vertex(1,n); vertex.row(0)=p.transpose();
+            auto set=make_v(result_id(request_),vertex);
+            if (!set) return unsupported("conversion.output","Could not construct zero-dimensional V output.");
+            return publish(*set,context,rank_tolerance,{"explicit equality null-space reduction","zero-dimensional case; Qhull not used"});
         }
         Eigen::MatrixXd constraints(a.rows()+e.rows(),n);
         constraints.topRows(a.rows())=a; constraints.bottomRows(e.rows())=e;
@@ -263,7 +317,6 @@ class Workspace final : public RepresentationConverterWorkspace {
         if (feasible.result->primal->size()!=static_cast<std::size_t>(n))
             return unsupported("conversion.lp.feasibility","Selected LP returned a witness with the wrong dimension.");
         const Eigen::Map<const Eigen::VectorXd> witness(feasible.result->primal->data(),n);
-        double residual=0;
         for (Eigen::Index i=0;i<a.rows();++i) residual=std::max(residual,a.row(i).dot(witness)-b[i]);
         for (Eigen::Index i=0;i<e.rows();++i) residual=std::max(residual,std::abs(e.row(i).dot(witness)-f[i]));
         for (Eigen::Index j=0;j<n;++j) for (double sign:{-1.0,1.0}) {
@@ -281,57 +334,21 @@ class Workspace final : public RepresentationConverterWorkspace {
             for (Eigen::Index i=0;i<a.rows();++i) residual=std::max(residual,a.row(i).dot(x)-b[i]);
             for (Eigen::Index i=0;i<e.rows();++i) residual=std::max(residual,std::abs(e.row(i).dot(x)-f[i]));
         }
-        Eigen::VectorXd p=Eigen::VectorXd::Zero(n);
-        Eigen::MatrixXd basis=Eigen::MatrixXd::Identity(n,n);
-        double rank_tolerance=0;
-        if (e.rows()>0) {
-            Eigen::JacobiSVD<Eigen::MatrixXd> svd(e,Eigen::ComputeFullU|Eigen::ComputeFullV);
-            if (svd.info()!=Eigen::Success) return unsupported("conversion.equalities","Equality rank decomposition failed.");
-            rank_tolerance=128*std::numeric_limits<double>::epsilon()*static_cast<double>(std::max(e.rows(),e.cols()))*std::max(1.0,e.cwiseAbs().maxCoeff());
-            std::size_t rank=0;
-            for (Eigen::Index i=0;i<svd.singularValues().size();++i) {
-                const double s=svd.singularValues()[i]; if (s>rank_tolerance) ++rank;
-                else if (s>0) return unsupported("conversion.rank","Equality rank is numerically ambiguous; no dimension was discarded.");
-            }
-            p=svd.solve(f);
-            if (!p.allFinite()||(e*p-f).norm()>context.numerical.absolute_tolerance+context.numerical.relative_tolerance*std::max(1.0,f.norm()))
-                return unsupported("conversion.equalities","Equalities are inconsistent or unresolved in binary64.");
-            basis=svd.matrixV().rightCols(n-static_cast<Eigen::Index>(rank));
-        }
-        const Eigen::Index r=basis.cols();
-        affine_dimension_=static_cast<std::size_t>(r);
-        if (r==0) {
-            for (Eigen::Index i=0;i<a.rows();++i) if (a.row(i).dot(p)>b[i]+context.numerical.absolute_tolerance)
-                return publish(*empty_output(false),context,residual,{"zero-dimensional reduced infeasibility classification"});
-            Eigen::MatrixXd vertex(1,n); vertex.row(0)=p.transpose();
-            auto set=make_v(result_id(request_),vertex);
-            if (!set) return unsupported("conversion.output","Could not construct zero-dimensional V output.");
-            return publish(*set,context,std::max(residual,rank_tolerance),{"explicit equality null-space reduction","LP feasibility and boundedness prerequisites","zero-dimensional case; Qhull not used"});
-        }
-        const Eigen::MatrixXd reduced=a*basis; const Eigen::VectorXd rhs=b-a*p;
-        std::vector<Eigen::Index> rows;
-        for (Eigen::Index i=0;i<reduced.rows();++i) {
-            const double norm=reduced.row(i).norm();
-            if (!std::isfinite(norm)||!std::isfinite(rhs[i])) return unsupported("conversion.reduction","Nonfinite reduced inequality.");
-            const double row_scale=a.row(i).norm();
-            const double reduced_row_tolerance=128*std::numeric_limits<double>::epsilon()*
-                static_cast<double>(std::max<Eigen::Index>(n,r))*row_scale;
-            if (norm<=reduced_row_tolerance) {
-                if (rhs[i]<-context.numerical.absolute_tolerance) return publish(*empty_output(false),context,residual,{"constant inequality proves numerical infeasibility after equality reduction"});
-            } else rows.push_back(i);
-        }
         Eigen::MatrixXd c(rows.size(),r); Eigen::VectorXd d(rows.size());
         for (std::size_t i=0;i<rows.size();++i) { c.row(i)=reduced.row(rows[i]); d[static_cast<Eigen::Index>(i)]=rhs[rows[i]]; }
-        if (r==0) {
-            // The generated equality system already identifies the singleton.
-        } else if (r==1) {
+        if (r==1) {
             double lo=-std::numeric_limits<double>::infinity(),hi=std::numeric_limits<double>::infinity();
             for (Eigen::Index i=0;i<c.rows();++i) {
                 const double coefficient=c(i,0);
                 if (coefficient>0) hi=std::min(hi,d[i]/coefficient);
                 else if (coefficient<0) lo=std::max(lo,d[i]/coefficient);
-                else if (d[i]<-context.numerical.absolute_tolerance)
-                    return publish(*empty_output(false),context,residual,{"constant-row reduced infeasibility classification"});
+                else if (d[i]<0) {
+                    const double allowed=context.numerical.absolute_tolerance+
+                        context.numerical.relative_tolerance*std::max(1.0,std::abs(d[i]));
+                    if (d[i]<-allowed)
+                        return publish(*empty_output(false),context,residual,{"constant-row reduced infeasibility classification"});
+                    return unsupported("conversion.interval.ambiguous","Constant-row contradiction is within numerical tolerance.");
+                }
             }
             if (!std::isfinite(lo)||!std::isfinite(hi)||lo>hi)
                 return unsupported("conversion.interval","Reduced one-dimensional endpoints were not resolved as finite and ordered.");
