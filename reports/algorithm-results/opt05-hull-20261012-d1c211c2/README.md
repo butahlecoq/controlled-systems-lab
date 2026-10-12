@@ -41,7 +41,7 @@ python reports/algorithm-results/opt05-hull-20261012-d1c211c2/validate_report.py
 
 The benchmark collector runs a new measurement; rendering and validation are offline and do not invoke the solver. The CMake test configuration fetches the pinned project dependencies and builds the `hull_reducer_test` target in Release before CTest runs it. The commands above describe reproduction, not a claim that every command ran in this exact order during collection. Recorded execution evidence: Release harness build succeeded; collector accepted 21/21 trials and retained 3 warmups; the recorded `ctest ... -R hull_reducer_test ...` run passed 1/1 (0.02 s); saved-record rendering and consistency validation are run when assembling this report.
 
-The report validator also checks every field in both accepted and root-level trial and summary CSV files against `records.json`. Run its corruption checks with `python -m unittest reports.algorithm-results.opt05-hull-20261012-d1c211c2.test_validate_report`; they mutate a trial or summary value in both CSV copies and require validation to reject it.
+The report validator also checks every field in both accepted and root-level trial and summary CSV files against `records.json`. Run its corruption checks with `python reports/algorithm-results/opt05-hull-20261012-d1c211c2/test_validate_report.py`; they mutate a trial or summary value in both CSV copies and require validation to reject it.
 
 `profile/target-process-samples.csv` and `.json` are exported target-process-only summaries from a distinct `/Zi` symbol-enabled run. Raw system-wide ETL and symbolized all-process exports are intentionally excluded. Raw reducer-profile JSONL and exact profiler command/evidence remain in `profile/`.
 
