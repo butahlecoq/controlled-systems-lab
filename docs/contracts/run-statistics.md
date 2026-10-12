@@ -59,11 +59,14 @@ family request, joint coordinates, strategy/version and ordered transformation
 lineage) and exactly one typed complete, partial or candidate product. The
 opaque live relation payload is never serialized. With no exporter its payload
 is `unavailable_no_exporter`, while relation metadata and evidence survive.
-Complete-family publication is refused until a reviewed coverage procedure is
-implemented at the synthesis boundary. Feasible incumbents retain their own
-feasibility support. A late generated-request rejection retains request/provider
+Complete- and partial-family publication are refused until reviewed coverage
+and every-history optimality procedures are implemented. Candidate feasibility
+is scoped to the whole relation, a named full-history witness, or unknown;
+an outer enclosure with one feasible witness does not claim whole-relation
+feasibility. Feasible incumbents retain their own feasibility support. A late generated-request rejection retains request/provider
 provenance, completed lineage and the scope of bounds, incumbents and candidate
-or partial family that survived the stop. An external attachment is a digest/size/schema/media claim,
+or partial family that survived the stop. A separate contract-validation failure
+retains the original stop record without inventing provider provenance. An external attachment is a digest/size/schema/media claim,
 not an executable family or proof the referenced file exists. Supplied embedded
 bytes are hashed and checked. Paths are relative artifact references without
 absolute roots, drive prefixes, traversal or empty components; serialization

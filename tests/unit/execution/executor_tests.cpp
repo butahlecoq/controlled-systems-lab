@@ -417,7 +417,7 @@ public: OperationOutcome apply(const OperationRequest& r,const ExecutionContext&
 class Selector final:public WitnessSelectorWorkspace {
 public: std::variant<WitnessSelection,Unsupported> select(const OptimalFamily& f,const WitnessRequest& r,const ExecutionContext&) override {
     if (!r.count) return Unsupported{{{DiagnosticCode::unsupported,"selector.count","fixture requires a positive request"}}};
-    return WitnessSelection{{{{f.identity.problem,{{7}},{{2}},17}},r.count,{"literal-selector"},r.seed,f.identity},Termination::resource_limit,"one witness only"};
+    return WitnessSelection{{{{f.identity().problem,{{7}},{{2}},17}},r.count,{"literal-selector"},r.seed,f.identity()},Termination::resource_limit,"one witness only"};
 }};
 class CustomWorkspace:public ExclusiveWorkspace { public: int calls{}; };
 struct CustomPort {

@@ -35,7 +35,9 @@ request before invoking the workspace and validates family/outcome identity on
 return. `SynthesisWorkspace::solve` returns `SynthesisResult` only; the port's
 `SynthesisOutcome` can report top-level `Unsupported` only before that call.
 A late provider rejection belongs in `SynthesisResult` with scoped
-request provenance and retained evidence.
+request provenance and retained evidence. Contract validation failures use
+`contract_rejected` and retain the original stop evidence separately; they do
+not synthesize a provider request identity.
 
 GEO-02 adds `HullReducerPort` (`hull-reducer`) as a separately selectable
 operation. `geometry::make_lp_hull_reducer_registration()` registers the current
