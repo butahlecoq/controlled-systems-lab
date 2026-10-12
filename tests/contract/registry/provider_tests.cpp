@@ -82,12 +82,14 @@ class GeneratedFixture final : public SynthesisWorkspace {
     PreparedProvider<LPPort> generated_;
 public:
     GeneratedFixture(std::unique_ptr<BoundWorkspace<CounterPort>> f,PreparedProvider<LPPort> p):fixed_(std::move(f)),generated_(std::move(p)){}
-    SynthesisOutcome solve(const Problem& problem,const ExecutionContext& context) override {
+    SynthesisOutcome solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& context) override {
         const auto fixed=fixed_->run(context);
         auto workers=accepted(generated_.prepare(interval_lp(-2))).create();
         const auto lp=std::get<ProgramResult>(std::get<0>(workers)->run(context));
-        return SynthesisResult{Termination::completed,{problem.id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
-            {{problem.id,{{static_cast<double>(fixed)}},{*lp.primal},lp.objective.upper->value}}, {}};
+        const auto id=problem.identity();
+        return SynthesisResult{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+            {{{id,{{static_cast<double>(fixed)}},{*lp.primal},lp.objective.upper->value},
+                {id,SymbolicArgument{"fixture", "bounded LP sample"}}}}, {}};
     }
 };
 TEST_CASE("mixed fixed and generated strategy owns both after enclosing preparation") {
@@ -114,8 +116,8 @@ TEST_CASE("mixed fixed and generated strategy owns both after enclosing preparat
     CHECK(prepared.provenance()[1].actual->id.value=="counter");
     CHECK(prepared.provenance()[2].actual->id.value=="endpoint");
     const auto result=std::get<SynthesisResult>(prepared.create()->run(context()));
-    REQUIRE(result.incumbents.size()==1);CHECK(result.incumbents[0].states==std::vector<Vector>{{31}});
-    CHECK(result.incumbents[0].controls==std::vector<Vector>{{4}});CHECK(result.incumbents[0].original_objective==-6);
+    REQUIRE(result.incumbents.size()==1);CHECK(result.incumbents[0].witness.states==std::vector<Vector>{{31}});
+    CHECK(result.incumbents[0].witness.controls==std::vector<Vector>{{4}});CHECK(result.incumbents[0].witness.original_objective==-6);
 }
 TEST_CASE("later outer dependency rejection snapshots neither fixed data nor generated callbacks") {
     struct CopyProbe {

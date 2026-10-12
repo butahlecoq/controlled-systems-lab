@@ -12,13 +12,16 @@ template<class T,class... R> T accepted(std::variant<T,R...> result) {
 }
 class Forward final:public SynthesisWorkspace {
 public:
-    SynthesisOutcome solve(const Problem& p,const ExecutionContext&) override {
+    SynthesisOutcome solve(const ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext&) override {
+        const auto& p=*problem.description();
         const auto model=accepted(model::snapshot(*p.model,p.times));
         const auto x0=std::get<KnownInitial>(p.initial).point;
         const auto u=std::get<Singleton>(std::get<ContinuousDomain>(p.controls).stages[0]).point;
         const auto x1=accepted(model.step({0},x0,u,{}));
         const auto cost=accepted(optimization::evaluate(accepted(optimization::snapshot(p.objective)),x1));
-        return SynthesisResult{Termination::completed,{p.id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{{p.id,{x0,x1},{u},cost}},{}};
+        const auto id=problem.identity();
+        return SynthesisResult{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+            {{{id,{x0,x1},{u},cost},{id,SymbolicArgument{"fixed control", "literal singleton control"}}}}, {}};
     }
 };
 }
@@ -37,7 +40,7 @@ int main() try {
         for(bool inverse:{false,true}) {
             require(!registry.add({{{inverse?"inverse":"forward"},"1"},
                 [inverse](const StrategyRequest& request,const Requirements&) -> Capability {
-                    const auto& input=request.problem;
+                    const auto& input=*request.problem.description();
                     auto errors=check_nominal_profile(input,inverse,Assurance::numerical);
                     if(!errors.empty()) return errors;
                     const auto* controls=std::get_if<ContinuousDomain>(&input.controls);
@@ -52,14 +55,16 @@ int main() try {
                 }}),"registration failed");
         }
         StrategyConfiguration config{{"inverse"},{},{},{},{},{},{},{},{}};
-        require(std::holds_alternative<Rejection>(prepare_strategy(p,registry,config)),"inverse profile admitted singular dynamics");
+        FamilyRequest family{"nominal_open_loop",p.identity(),FamilyTarget::candidate_relaxation,
+            {1e-8,1e-8},Assurance::numerical,{},{}};
+        require(std::holds_alternative<Rejection>(prepare_strategy(p,registry,config,family)),"inverse profile admitted singular dynamics");
         require(*factories==0,"rejection constructed a workspace");
-        config.strategy={"forward"};return accepted(prepare_strategy(p,registry,config));
+        config.strategy={"forward"};return accepted(prepare_strategy(p,registry,config,family));
     }();
     const auto result=accepted(prepared.preparation().create()->run({}));
     require(*factories==1,"wrong factory count");require(result.incumbents.size()==1,"missing literal witness");
-    require(result.incumbents[0].states==std::vector<Vector>{{2},{3}},"retained trajectory differs");
-    require(result.incumbents[0].original_objective==3,"original cost differs");
+    require(result.incumbents[0].witness.states==std::vector<Vector>{{2},{3}},"retained trajectory differs");
+    require(result.incumbents[0].witness.original_objective==3,"original cost differs");
     require(result.outcome.subject==p.identity() && !result.family,"result identity or family claim differs");
     std::cout<<"Installed resolved problem client: literal identity, retained data and actual strategy admission passed\n";
     return 0;

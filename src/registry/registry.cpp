@@ -2,6 +2,24 @@
 #include <cmath>
 
 namespace csl::registry {
+std::variant<WitnessSelection,Unsupported> SelectorPort::run(Workspace& workspace,const Request& request,
+    const ExecutionContext& context) {
+    auto diagnostics=check_family_evidence(request.family,request.family.identity.problem,
+        request.family.identity.request.assurance);
+    if (!diagnostics.empty()) return Unsupported{std::move(diagnostics)};
+    auto selection=workspace.select(request.family,request.selection,context);
+    if (auto* result=std::get_if<WitnessSelection>(&selection)) {
+        if (result->batch.source_family && *result->batch.source_family!=request.family.identity)
+            return Unsupported{{{DiagnosticCode::evidence_mismatch,"selection.source_family",
+                "Selector reported a different source family identity"}}};
+        for (const auto& witness:result->batch.witnesses)
+            if (witness.problem!=request.family.identity.problem)
+                return Unsupported{{{DiagnosticCode::evidence_mismatch,"selection.witness.problem",
+                    "Selected witness belongs to another resolved problem"}}};
+        result->batch.source_family=request.family.identity;
+    }
+    return selection;
+}
 StrategyRequest StrategyPort::snapshot(const Request& request) {
     return request; // ResolvedProblem already owns immutable canonical data and its content.
 }

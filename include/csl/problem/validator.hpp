@@ -3,6 +3,7 @@
 #include <csl/registry/registry.hpp>
 
 namespace csl::problem {
+namespace detail { struct PreparedAccess; }
 class PreparedResolvedStrategy {
 public:
     PreparedResolvedStrategy(const PreparedResolvedStrategy&) = default;
@@ -13,7 +14,7 @@ private:
     PreparedResolvedStrategy(ResolvedProblem,registry::PreparedStrategy);
     ResolvedProblem problem_;
     registry::PreparedStrategy preparation_;
-    friend struct detail::ResolvedAccess;
+    friend struct detail::PreparedAccess;
 };
 using StrategyAdmission = std::variant<PreparedResolvedStrategy,registry::Rejection>;
 // Delegates admission to the actual registry; retains resolved content in the wrapper.

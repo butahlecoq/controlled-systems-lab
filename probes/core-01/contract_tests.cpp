@@ -12,7 +12,7 @@ static_assert(!std::is_convertible_v<WitnessBatch, OptimalFamily>);
 static_assert(!std::is_same_v<ProblemId, ModuleId>);
 
 namespace {
-Problem problem() {
+Problem make_problem() {
     LinearStage singular{{1,1,{0}}, {1,1,{1}}, {1,0,{}}, {0}};
     return {{"test/singular"}, std::make_shared<const SystemModel>(SystemModel{
         {{1,1,0}, TimeDomain::discrete, singular}, {}}),
@@ -23,13 +23,18 @@ Problem problem() {
 struct RelationFixture : JointRelationPayload {};
 OptimalFamily family() {
     ClaimEvidence unknown{{"test/singular"}, Unestablished{}};
-    return {{"test/singular"}, {{ {1,1,0}, 1}, {"fixture/joint"}, std::make_shared<const RelationFixture>()},
-        FamilyTarget::exact_optimal_relation, {unknown, unknown, unknown}};
+    FamilyRequest request{"nominal",{"test/singular"},FamilyTarget::exact_optimal_relation,
+        {1e-8,1e-8},Assurance::numerical,{"fixture/joint"},{}};
+    FamilyIdentity identity{{"test/singular"},request,{{1,1,0},1},{"fixture/strategy"},"1",{}};
+    JointRelation relation{identity.coordinates,{"fixture/joint"},std::make_shared<const RelationFixture>()};
+    CompleteOptimalFamily complete{relation,{unknown,{}},
+        {identity,NumericalCoverageEvidence{"unreviewed",request.numerical,{"fixture/verifier"},""}},Assurance::numerical};
+    return {identity,complete};
 }
 }
 
 TEST_CASE("T-M03: singular dynamics remain representable; inverse-only pipeline is unsupported") {
-    auto p = problem();
+    auto p = make_problem();
     CHECK(check_model_shape(p.model->dynamics, 1).empty());
     CHECK(check_nominal_profile(p, false, Assurance::numerical).empty());
     auto rejected = check_nominal_profile(p, true, Assurance::numerical);
@@ -38,7 +43,7 @@ TEST_CASE("T-M03: singular dynamics remain representable; inverse-only pipeline 
     CHECK(rejected[0].field == "dynamics.inverse");
 }
 TEST_CASE("T-M03: future profiles do not masquerade as infeasibility") {
-    auto p = problem();
+    auto p = make_problem();
     SUBCASE("temporal") { p.temporal = TemporalConstraints{{1,3,{0,1},{0},{1}},{{0,1}}}; }
     SUBCASE("finite") { p.controls = FiniteDomain{1,{{0},{1}}}; }
     SUBCASE("mixed") { p.controls = MixedDomain{{{UniversalSet{0}}}, {1,{{0},{1}}}}; }
@@ -51,12 +56,12 @@ TEST_CASE("T-M03: future profiles do not masquerade as infeasibility") {
     CHECK(rejected[0].code == DiagnosticCode::unsupported);
 }
 TEST_CASE("empty temporal collection is the uncoupled profile") {
-    auto p = problem();
+    auto p = make_problem();
     p.temporal = TemporalConstraints{{0,3,{0},{},{}},{}};
     CHECK(check_nominal_profile(p, false, Assurance::numerical).empty());
 }
 TEST_CASE("model shape checks reject malformed input but allow absent ports and constant coefficients") {
-    auto d = problem().model->dynamics;
+    auto d = make_problem().model->dynamics;
     CHECK(check_model_shape(d, 3).empty());
     SUBCASE("coefficient count") { d.stages = std::vector<LinearStage>{}; }
     SUBCASE("storage") { std::get<LinearStage>(d.stages).A.values = {}; }
@@ -65,45 +70,48 @@ TEST_CASE("model shape checks reject malformed input but allow absent ports and 
     REQUIRE_FALSE(rejected.empty());
     CHECK(rejected[0].code == DiagnosticCode::invalid_input);
 }
-TEST_CASE("T-V02: numerical success and certificate references cannot satisfy validated request") {
+TEST_CASE("T-V02: complete-family publication waits for reviewed coverage evidence") {
     auto f = family();
-    f.evidence.feasibility.support = NumericalCheck{1e-8,1e-8,0,{"fixture/verifier"}};
-    CHECK(check_family_evidence(f, {"test/singular"}, Assurance::numerical).empty());
-    SUBCASE("numerical") {}
-    SUBCASE("unverified certificate") { f.evidence.completeness.support = CertificateReference{"cert.json","future/verifier"}; }
+    const auto numerical = check_family_evidence(f, {"test/singular"}, Assurance::numerical);
+    REQUIRE_FALSE(numerical.empty());
+    CHECK(numerical[0].field == "family.completeness");
     auto rejected = check_family_evidence(f, {"test/singular"}, Assurance::validated);
     REQUIRE_FALSE(rejected.empty());
     CHECK(rejected[0].code == DiagnosticCode::unsupported);
 }
 TEST_CASE("T-V02: evidence is bound to the expected problem for every claim") {
     auto f = family();
-    SUBCASE("family") { f.problem = {"other"}; }
-    SUBCASE("feasibility") { f.evidence.feasibility.problem = {"other"}; }
-    SUBCASE("optimality") { f.evidence.optimality.problem = {"other"}; }
-    SUBCASE("completeness") { f.evidence.completeness.problem = {"other"}; }
+    SUBCASE("family") { f.identity.problem = {"other"}; }
+    SUBCASE("optimality") { std::get<CompleteOptimalFamily>(f.outcome).optimum.optimum.problem = {"other"}; }
+    SUBCASE("completeness") { std::get<CompleteOptimalFamily>(f.outcome).completeness.binding.problem = {"other"}; }
     auto rejected = check_family_evidence(f, {"test/singular"}, Assurance::numerical);
     REQUIRE_FALSE(rejected.empty());
     CHECK(rejected[0].code == DiagnosticCode::evidence_mismatch);
 }
 TEST_CASE("T-V02: partial or relaxed relations cannot claim full optimal-family coverage") {
     auto f = family();
-    SUBCASE("partial") { f.target = FamilyTarget::partial_relation; }
-    SUBCASE("relaxed") { f.target = FamilyTarget::candidate_relaxation; }
-    CHECK(check_family_evidence(f, {"test/singular"}, Assurance::numerical).empty());
-    f.evidence.completeness.support = SymbolicArgument{"argument","assumptions"};
-    auto rejected = check_family_evidence(f, {"test/singular"}, Assurance::numerical);
-    REQUIRE(rejected.size() == 1);
-    CHECK(rejected[0].code == DiagnosticCode::invalid_claim);
+    auto relation=std::get<CompleteOptimalFamily>(f.outcome).relation;
+    ClaimEvidence claim{{"test/singular"},SymbolicArgument{"fixture proof","fixture assumptions"}};
+    SUBCASE("partial") {
+        f.identity.request.target=FamilyTarget::partial_relation;
+        f.outcome=PartialOptimalFamily{relation,{claim,{}},{claim,"fixture membership proof"},{"specified inner slice"}};
+        CHECK(f.target()==FamilyTarget::partial_relation);
+    }
+    SUBCASE("candidate") {
+        f.identity.request.target=FamilyTarget::candidate_relaxation;
+        f.outcome=CandidateFamily{relation,FeasibleCandidateEvidence{claim},claim};
+        CHECK(f.target()==FamilyTarget::candidate_relaxation);
+    }
+    CHECK(check_family_evidence(f,{"test/singular"},Assurance::numerical).empty());
 }
 TEST_CASE("T-V02: a numerical check alone cannot establish completeness") {
     auto f = family();
-    f.evidence.completeness.support = NumericalCheck{1e-8,1e-8,0,{"backend/success"}};
     auto rejected = check_family_evidence(f, {"test/singular"}, Assurance::numerical);
     REQUIRE(rejected.size() == 1);
-    CHECK(rejected[0].code == DiagnosticCode::invalid_claim);
+    CHECK(rejected[0].code == DiagnosticCode::unsupported);
 }
 TEST_CASE("T-M03: nonpolyhedral stage domains need another pipeline") {
-    auto p = problem();
+    auto p = make_problem();
     SetHandle curved{{1,{"curved"},SetProperty::yes,SetProperty::no,SetProperty::yes}, {}, {"curved/set"}};
     SUBCASE("control") { p.controls = ContinuousDomain{{curved}}; }
     SUBCASE("state") { p.states[1] = curved; }

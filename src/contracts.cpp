@@ -162,9 +162,13 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate","Candidate relation does not bind the joint coordinates and problem"});
             std::visit(Overloaded{
                 [&](const OuterCandidateEvidence& relation) { if (relation.enclosure.problem != expected)
-                    result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.outer","Outer evidence is bound to another problem"}); },
+                    result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.outer","Outer evidence is bound to another problem"});
+                    else if (std::holds_alternative<Unestablished>(relation.enclosure.support))
+                    result.push_back({DiagnosticCode::invalid_claim,"family.candidate.outer","Outer enclosure needs supporting evidence"}); },
                 [&](const FeasibleCandidateEvidence& relation) { if (relation.feasibility.problem != expected)
-                    result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.inner","Feasible-candidate evidence is bound to another problem"}); },
+                    result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.inner","Feasible-candidate evidence is bound to another problem"});
+                    else if (std::holds_alternative<Unestablished>(relation.feasibility.support))
+                    result.push_back({DiagnosticCode::invalid_claim,"family.candidate.inner","Inner feasibility needs supporting evidence"}); },
                 [&](const HeuristicRelationEvidence& relation) { if (relation.method.empty())
                     result.push_back({DiagnosticCode::invalid_claim,"family.candidate.heuristic","Heuristic relation must name its method"}); }
             },candidate.relation_to_target);
@@ -200,8 +204,10 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
         if (result.family->target()!=FamilyTarget::candidate_relaxation &&
             result.outcome.value!=MathematicalOutcome::optimal && result.outcome.value!=MathematicalOutcome::undetermined)
             add(DiagnosticCode::invalid_claim,"family.outcome","A nonoptimal mathematical outcome cannot carry an optimal-family product");
-        if (expected.request.target!=FamilyTarget::exact_optimal_relation &&
-            result.family->target()==FamilyTarget::exact_optimal_relation)
+        if ((expected.request.target!=FamilyTarget::exact_optimal_relation &&
+            result.family->target()==FamilyTarget::exact_optimal_relation) ||
+            (expected.request.target==FamilyTarget::candidate_relaxation &&
+            result.family->target()==FamilyTarget::partial_relation))
             add(DiagnosticCode::invalid_claim,"family.target","A result cannot upgrade the requested family target");
     }
     if (result.termination==Termination::operation_rejected) {
@@ -214,13 +220,17 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
         }
     } else if (std::holds_alternative<ScopedRequestRejection>(result.stop))
         add(DiagnosticCode::invalid_claim,"result.stop","ScopedRequestRejection requires operation_rejected termination");
-    if ((result.termination==Termination::cancelled || result.termination==Termination::deadline_expired ||
-        result.termination==Termination::resource_limit) && std::holds_alternative<ScopedOperationStopped>(result.stop)) {
+    if (result.termination==Termination::cancelled || result.termination==Termination::deadline_expired ||
+        result.termination==Termination::resource_limit) {
+        if (!std::holds_alternative<ScopedOperationStopped>(result.stop))
+            add(DiagnosticCode::invalid_claim,"result.stop","Cancelled, deadline and resource stops require scoped stop evidence");
+        else {
         const auto reason=std::get<ScopedOperationStopped>(result.stop).stop.reason;
         if ((result.termination==Termination::cancelled && reason!=StopReason::cancelled) ||
             (result.termination==Termination::deadline_expired && reason!=StopReason::deadline_expired) ||
             (result.termination==Termination::resource_limit && reason!=StopReason::resource_limit))
             add(DiagnosticCode::invalid_claim,"result.stop.reason","Execution termination and scoped stop reason differ");
+        }
     }
     return diagnostics;
 }

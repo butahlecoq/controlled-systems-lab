@@ -76,9 +76,7 @@ struct SelectorPort {
     using Request = SelectorRequest; using Workspace = WitnessSelectorWorkspace;
     static constexpr const char* name = "selector";
     static Request snapshot(const Request& r) { return r; }
-    static std::variant<WitnessSelection, Unsupported> run(Workspace& w, const Request& r, const ExecutionContext& c) {
-        return w.select(r.family,r.selection,c);
-    }
+    static std::variant<WitnessSelection, Unsupported> run(Workspace& w, const Request& r, const ExecutionContext& c);
 };
 struct StrategyPort {
     using Request = StrategyRequest; using Workspace = SynthesisWorkspace;

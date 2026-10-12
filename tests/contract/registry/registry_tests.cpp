@@ -211,8 +211,8 @@ TEST_CASE("registered strategy planners hide tuple types from the configuration-
             auto answer = workspace->run(context());
             REQUIRE(std::holds_alternative<SynthesisResult>(answer));
             const auto& solved = std::get<SynthesisResult>(answer);
-            CHECK(solved.incumbents[0].controls == std::vector<Vector>{{-1}});
-            CHECK(solved.incumbents[0].original_objective == -1);
+            CHECK(solved.incumbents[0].witness.controls == std::vector<Vector>{{-1}});
+            CHECK(solved.incumbents[0].witness.original_objective == -1);
             CHECK_FALSE(solved.family.has_value());
         }
     }
@@ -235,7 +235,7 @@ TEST_CASE("all existing ports execute through typed factories and rejection cons
     CHECK(std::get<OperationStopped>(std::get<3>(workers)->run(context())).diagnostics == "vertices");
     CHECK(std::get<OperationStopped>(std::get<4>(workers)->run(context())).diagnostics == "17");
     CHECK(std::get<WitnessSelection>(std::get<5>(workers)->run(context())).batch.requested == 3);
-    CHECK(std::get<SynthesisResult>(std::get<6>(workers)->run(context())).incumbents[0].original_objective == 2);
+    CHECK(std::get<SynthesisResult>(std::get<6>(workers)->run(context())).incumbents[0].witness.original_objective == 2);
     CHECK(ports.factories == std::array<int,7>{1,1,1,1,1,1,1});
 }
 
@@ -385,17 +385,20 @@ TEST_CASE("strategy snapshots copy mutable model aliases and authored objective 
         registry.add({{{"capture"},"1"},[](const StrategyRequest&,const Requirements&) -> Capability { return Offer{}; },
             [](const StrategyRequest&) { return std::make_unique<StrategyFixture>(); }});
         auto request = strategy_request();
-        auto model = std::make_shared<SystemModel>(*request.problem.model);
-        request.problem.model = model;
+        auto raw = *request.problem.description();
+        auto model = std::make_shared<SystemModel>(*raw.model);
+        raw.model = model;
+        request.problem = std::get<csl::problem::ResolvedProblem>(csl::problem::resolve(raw,{csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+        request.family.objective=request.problem.identity();
         auto result = prepare_pipeline(select(registry,Method{{"capture"},{}},request));
         std::get<LinearStage>(model->dynamics.stages).offset[0] = 999;
-        std::get<LinearTerminal>(request.problem.objective).offset = 888;
+        std::get<LinearTerminal>(raw.objective).offset = 888;
         return std::get<0>(std::move(result));
     }();
     auto workers = plan.create();
     const auto solved = std::get<SynthesisResult>(std::get<0>(workers)->run(context()));
-    CHECK(solved.incumbents[0].states == std::vector<Vector>{{0}});
-    CHECK(solved.incumbents[0].original_objective == 2);
+    CHECK(solved.incumbents[0].witness.states == std::vector<Vector>{{0}});
+    CHECK(solved.incumbents[0].witness.original_objective == 2);
 }
 
 TEST_CASE("T-M03 unsupported profiles stay capability rejection rather than infeasibility") {
@@ -403,24 +406,36 @@ TEST_CASE("T-M03 unsupported profiles stay capability rejection rather than infe
     StrategyRegistry registry; registry.add(forward_registration(lp));
     auto inverse = forward_registration(lp,"inverse");
     inverse.capabilities = [](const StrategyRequest& r,const Requirements& requirements) -> Capability {
-        return check_nominal_profile(r.problem,true,requirements.output.assurance);
+        return check_nominal_profile(*r.problem.description(),true,requirements.output.assurance);
     };
     registry.add(inverse);
     auto request = strategy_request();
-    REQUIRE(check_model_shape(request.problem.model->dynamics,1).empty());
+    REQUIRE(check_model_shape(request.problem.description()->model->dynamics,1).empty());
     auto forward = registry.prepare(request);
     REQUIRE(std::holds_alternative<PreparedStrategy>(forward));
-    CHECK(std::get<SynthesisResult>(std::get<PreparedStrategy>(forward).create()->run(context())).incumbents[0].original_objective == -1);
+    CHECK(std::get<SynthesisResult>(std::get<PreparedStrategy>(forward).create()->run(context())).incumbents[0].witness.original_objective == -1);
     std::vector<std::pair<StrategyRequest,std::string>> cases;
     auto modified = request; modified.configuration.strategy = {"inverse"}; cases.push_back({modified,"dynamics.inverse"});
-    modified = request; modified.problem.controls = FiniteDomain{1,{{0},{1}}}; cases.push_back({modified,"controls"});
-    modified = request; modified.problem.controls = MixedDomain{ContinuousDomain{{UniversalSet{0}}},FiniteDomain{1,{{0}}}}; cases.push_back({modified,"controls"});
-    modified = request; modified.problem.information = InformationPattern::feedback; cases.push_back({modified,"information"});
-    modified = request; modified.problem.temporal = TemporalConstraints{{1,1,{0,1},{0},{1}},{{0,1}}}; cases.push_back({modified,"temporal"});
-    modified = request; auto continuous = std::make_shared<SystemModel>(*request.problem.model);
-    continuous->dynamics.time_domain = TimeDomain::continuous; modified.problem.model = continuous; cases.push_back({modified,"time_domain"});
-    modified = request; modified.problem.objective = ResidualNormTerminal{{1,1,{1}},{0}}; cases.push_back({modified,"objective"});
-    modified = request; modified.problem.controls = ContinuousDomain{{SetHandle{{1,{"poly"},SetProperty::unknown,SetProperty::yes,SetProperty::unknown},{},{"unknown"}}}}; cases.push_back({modified,"controls"});
+    auto add_case=[&](const Problem& raw,const char* field) {
+        auto resolution=csl::problem::resolve(raw,{csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}});
+        if (auto* diagnostic=std::get_if<Diagnostic>(&resolution)) {
+            CHECK((diagnostic->code==DiagnosticCode::unsupported || diagnostic->code==DiagnosticCode::invalid_input));
+            CHECK_FALSE(diagnostic->field.empty());
+            return;
+        }
+        auto input=request;
+        input.problem=std::get<csl::problem::ResolvedProblem>(std::move(resolution));
+        input.family.objective=input.problem.identity();
+        cases.push_back({std::move(input),field});
+    };
+    auto raw=*request.problem.description(); raw.controls = FiniteDomain{1,{{0},{1}}}; add_case(raw,"controls");
+    raw=*request.problem.description(); raw.controls = MixedDomain{ContinuousDomain{{UniversalSet{0}}},FiniteDomain{1,{{0}}}}; add_case(raw,"controls");
+    raw=*request.problem.description(); raw.information = InformationPattern::feedback; add_case(raw,"information");
+    raw=*request.problem.description(); raw.temporal = TemporalConstraints{{1,1,{0,1},{0},{1}},{{0,1}}}; add_case(raw,"temporal");
+    raw=*request.problem.description(); auto continuous = std::make_shared<SystemModel>(*raw.model);
+    continuous->dynamics.time_domain = TimeDomain::continuous; raw.model = continuous; add_case(raw,"time_domain");
+    raw=*request.problem.description(); raw.objective = ResidualNormTerminal{{1,1,{1}},{0}}; add_case(raw,"objective");
+    raw=*request.problem.description(); raw.controls = ContinuousDomain{{SetHandle{{1,{"poly"},SetProperty::unknown,SetProperty::yes,SetProperty::unknown},{},{"unknown"}}}}; add_case(raw,"controls");
     for (const auto& [input,field] : cases) {
         auto result = registry.prepare(input);
         REQUIRE(std::holds_alternative<Rejection>(result));
@@ -463,7 +478,7 @@ TEST_CASE("a required unavailable hull execution rejects while unused hull selec
     auto request = strategy_request();
     auto accepted = strategies.prepare(request);
     REQUIRE(std::holds_alternative<PreparedStrategy>(accepted));
-    CHECK(std::get<SynthesisResult>(std::get<PreparedStrategy>(accepted).create()->run(context())).incumbents[0].original_objective == -1);
+    CHECK(std::get<SynthesisResult>(std::get<PreparedStrategy>(accepted).create()->run(context())).incumbents[0].witness.original_objective == -1);
     request.configuration.strategy = {"needs-hull"};
     auto rejected = strategies.prepare(request);
     REQUIRE(std::holds_alternative<Rejection>(rejected));
@@ -522,7 +537,10 @@ TEST_CASE("all-port factory counts stay zero across capability and registration 
         CHECK(std::get<Rejection>(result).diagnostics[0].field == field);
         CHECK(ports.factories == std::array<int,7>{0,0,0,0,0,0,0});
     }
-    ports.strategy_request_value.problem.objective = ResidualNormTerminal{{1,1,{1}},{0}};
+    auto raw=*ports.strategy_request_value.problem.description();
+    raw.objective = ResidualNormTerminal{{1,1,{1}},{0}};
+    ports.strategy_request_value.problem=std::get<csl::problem::ResolvedProblem>(csl::problem::resolve(raw,{csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    ports.strategy_request_value.family.objective=ports.strategy_request_value.problem.identity();
     auto objective = ports.prepare();
     REQUIRE(std::holds_alternative<Rejection>(objective));
     CHECK(std::get<Rejection>(objective).diagnostics[0].field == "objective");
@@ -543,9 +561,15 @@ TEST_CASE("runtime strategy extension adds a different typed dependency tuple wi
     struct CustomStrategy final : SynthesisWorkspace {
         std::unique_ptr<BoundWorkspace<CounterPort>> counter;
         explicit CustomStrategy(std::unique_ptr<BoundWorkspace<CounterPort>> w) : counter(std::move(w)) {}
-        SynthesisOutcome solve(const Problem& p,const ExecutionContext& c) override {
-            return SynthesisResult{Termination::resource_limit,{p.id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
-                {{p.id,{}, {},static_cast<double>(counter->run(c))}}, {}};
+        SynthesisOutcome solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext& c) override {
+            const auto id=p.identity();
+            SynthesisResult result{Termination::resource_limit,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+                {{{id,{}, {},static_cast<double>(counter->run(c))},
+                    {id,SymbolicArgument{"fixture", "counter sample"}}}}, {}};
+            result.stop=ScopedOperationStopped{{StopReason::resource_limit,"counter fixture"},
+                RequestProvenance{{"fixture/custom"},"strategy",{"custom-strategy"},std::string{"7"},
+                    ModuleId{"custom-strategy"},std::string{"7"}},{false,false,1,false}};
+            return result;
         }
     };
     auto prepared = [] {
@@ -570,7 +594,7 @@ TEST_CASE("runtime strategy extension adds a different typed dependency tuple wi
             auto plan = strategies.prepare(request);
             REQUIRE(std::holds_alternative<PreparedStrategy>(plan));
             request.configuration.strategy = {"mutated"};
-            std::get<LinearTerminal>(request.problem.objective).offset = 999;
+            request.family.profile = "mutated after snapshot";
             result.push_back(std::get<PreparedStrategy>(std::move(plan)));
         }
         return result;
@@ -579,7 +603,7 @@ TEST_CASE("runtime strategy extension adds a different typed dependency tuple wi
     for (std::size_t i=0;i<prepared.size();++i) {
         auto workspace = prepared[i].create();
         const auto answer = std::get<SynthesisResult>(workspace->run(context()));
-        CHECK(answer.incumbents[0].original_objective == expected[i]);
+        CHECK(answer.incumbents[0].witness.original_objective == expected[i]);
     }
     CHECK(prepared[1].provenance()[1].actual->id.value == "counter");
     CHECK(prepared[1].provenance()[1].actual->version == "3");
@@ -616,7 +640,8 @@ TEST_CASE("erased strategy retains the complete immutable requested output profi
         return Offer{output};
     };
     registry.add(entry);
-    const auto request = strategy_request();
+    auto request = strategy_request();
+    request.family.target=FamilyTarget::partial_relation;
     Requirements requirements;
     requirements.output.family = FamilyTarget::partial_relation;
     requirements.output.completeness = Completeness::unestablished;
@@ -638,10 +663,14 @@ TEST_CASE("runtime builder observes retained requirements and request after ever
             : dependency_(std::move(dependency)), configuration_{
                 requirements.output.family == FamilyTarget::partial_relation &&
                 requirements.output.completeness == Completeness::unestablished ? "partial/unestablished" : "lost profile",
-                std::get<LinearTerminal>(request.problem.objective).offset == 2 ? "original request" : "lost request"} {}
-        SynthesisOutcome solve(const Problem& p,const ExecutionContext&) override {
-            return SynthesisResult{Termination::resource_limit,
-                {p.id,MathematicalOutcome::undetermined,Unestablished{},configuration_},{},{},{},{}};
+                std::get<LinearTerminal>(request.problem.description()->objective).offset == 2 ? "original request" : "lost request"} {}
+        SynthesisOutcome solve(const csl::problem::ResolvedProblem& p,const FamilyRequest&,const ExecutionContext&) override {
+            SynthesisResult result{Termination::resource_limit,
+                {p.identity(),MathematicalOutcome::undetermined,Unestablished{},configuration_},{},{},{},{}};
+            result.stop=ScopedOperationStopped{{StopReason::resource_limit,"profile fixture"},
+                RequestProvenance{{"fixture/profile"},"strategy",{"profile"},std::string{"1"},
+                    ModuleId{"profile"},std::string{"1"}}, {}};
+            return result;
         }
     };
     auto prepared = [] {
@@ -660,15 +689,102 @@ TEST_CASE("runtime builder observes retained requirements and request after ever
             });
         }});
         auto request = strategy_request(); request.configuration.strategy = {"profile"};
+        request.family.target=FamilyTarget::partial_relation;
         Requirements requirements; requirements.output.family = FamilyTarget::partial_relation;
         requirements.output.completeness = Completeness::unestablished;
         auto result = registry.prepare(request,requirements);
         REQUIRE(std::holds_alternative<PreparedStrategy>(result));
         requirements.output.family = FamilyTarget::exact_optimal_relation;
         requirements.output.completeness = Completeness::established;
-        std::get<LinearTerminal>(request.problem.objective).offset = 999;
+        request.family.profile = "mutated after snapshot";
         return std::get<PreparedStrategy>(std::move(result));
     }();
     const auto answer = std::get<SynthesisResult>(prepared.create()->run(context()));
     CHECK(answer.outcome.assumptions == std::vector<std::string>{"partial/unestablished","original request"});
+}
+
+TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retained evidence distinct") {
+    class Synthetic final : public SynthesisWorkspace {
+    public:
+        SynthesisOutcome solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
+            const ExecutionContext&) override {
+            const auto id=problem.identity();
+            const ClaimEvidence support{id,SymbolicArgument{"synthetic fixture assertion","literal fixture only"}};
+            const FamilyIdentity identity{id,request,problem.constraints().coordinates(),{"synthetic"},"1",{}};
+            const JointRelation relation{identity.coordinates,{"joint"},std::make_shared<const JointRelationPayload>()};
+            SynthesisResult result{Termination::completed,
+                {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+                {{{id,{{0},{1}},{{1}},5},support}}, {}};
+            if (request.profile=="late-provider-rejection") {
+                result.termination=Termination::operation_rejected;
+                result.stop=ScopedRequestRejection{
+                    RequestProvenance{{"generated/lp/7"},"lp",{"endpoint"},std::string{"1.0"},
+                        ModuleId{"endpoint"},std::string{"1.0"}},
+                    {{DiagnosticCode::unsupported,"lp.generated","provider rejected generated request"}},
+                    {{{"transform/4"},{"input/set"},{"output/set"},{"converter"},"2"}},
+                    {false,false,1,false}};
+                return result;
+            }
+            if (request.target==FamilyTarget::candidate_relaxation) {
+                result.family=OptimalFamily{identity,CandidateFamily{relation,HeuristicRelationEvidence{"synthetic"},support}};
+            } else if (request.target==FamilyTarget::partial_relation) {
+                result.family=OptimalFamily{identity,PartialOptimalFamily{relation,{support,{}},
+                    {support,"literal subset proof"},{"one supported witness"}}};
+            } else {
+                result.outcome={id,MathematicalOutcome::optimal,support.support,{}};
+                result.family=OptimalFamily{identity,CompleteOptimalFamily{relation,{support,{}},
+                    {identity,NumericalCoverageEvidence{"unreviewed",request.numerical,{"fixture"},""}},
+                    Assurance::numerical}};
+            }
+            return result;
+        }
+    };
+    StrategyRegistry registry;
+    REQUIRE_FALSE(registry.add({{{"synthetic"},"1"},
+        [](const StrategyRequest& request,const Requirements&) -> Capability {
+            Output output;output.family=request.family.target;return Offer{output};
+        },[](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+            return compose_strategy(std::get<CheckedPipeline<>>(check_pipeline()),
+                [](auto,const StrategyRequest&,const Requirements&) {return std::make_unique<Synthetic>();});
+        }}));
+    for (const auto target:{FamilyTarget::candidate_relaxation,FamilyTarget::partial_relation,
+        FamilyTarget::exact_optimal_relation}) {
+        auto request=strategy_request();request.configuration.strategy={"synthetic"};request.family.target=target;
+        Requirements requirements;requirements.output.family=target;
+        auto preparation=registry.prepare(request,requirements);
+        REQUIRE(std::holds_alternative<PreparedStrategy>(preparation));
+        auto answer=std::get<PreparedStrategy>(std::move(preparation)).create()->run(context());
+        REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+        const auto& result=std::get<SynthesisResult>(answer);
+        REQUIRE(result.incumbents.size()==1);
+        CHECK(result.incumbents[0].witness.original_objective==5);
+        CHECK(result.incumbents[0].feasibility.problem==request.problem.identity());
+        if (target==FamilyTarget::exact_optimal_relation) {
+            CHECK(result.termination==Termination::operation_rejected);
+            CHECK_FALSE(result.family.has_value());
+            REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
+            CHECK(std::get<ScopedRequestRejection>(result.stop).retained.incumbents==1);
+        } else {
+            CHECK(result.termination==Termination::completed);
+            REQUIRE(result.family.has_value());
+            CHECK(result.family->target()==target);
+            CHECK(result.family->identity.request==request.family);
+        }
+    }
+    auto request=strategy_request();request.configuration.strategy={"synthetic"};
+    request.family.profile="late-provider-rejection";
+    auto preparation=registry.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(preparation));
+    const auto answer=std::get<PreparedStrategy>(std::move(preparation)).create()->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto& result=std::get<SynthesisResult>(answer);
+    CHECK(result.termination==Termination::operation_rejected);
+    REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
+    const auto& rejection=std::get<ScopedRequestRejection>(result.stop);
+    CHECK(rejection.request.request.value=="generated/lp/7");
+    CHECK(rejection.request.port=="lp");
+    CHECK(rejection.diagnostics[0].field=="lp.generated");
+    CHECK(rejection.completed_lineage[0].request.value=="transform/4");
+    CHECK(rejection.retained.incumbents==1);
+    CHECK(result.incumbents[0].witness.original_objective==5);
 }

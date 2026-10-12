@@ -76,10 +76,15 @@ add_library(csl_problem STATIC src/problem/domains.cpp src/problem/constraints.c
 add_library(CSL::problem ALIAS csl_problem)
 set_target_properties(csl_problem PROPERTIES EXPORT_NAME problem CXX_EXTENSIONS OFF)
 target_link_libraries(csl_problem PUBLIC CSL::model CSL::sets)
-add_library(csl_resolved_problem STATIC src/problem/validator.cpp src/problem/identity.cpp)
+add_library(csl_resolved_core STATIC src/problem/identity.cpp src/problem/resolved.cpp)
+add_library(CSL::resolved_core ALIAS csl_resolved_core)
+set_target_properties(csl_resolved_core PROPERTIES EXPORT_NAME resolved_core CXX_EXTENSIONS OFF)
+target_link_libraries(csl_resolved_core PUBLIC CSL::problem CSL::objectives)
+target_link_libraries(csl_registry PUBLIC CSL::resolved_core)
+add_library(csl_resolved_problem STATIC src/problem/validator.cpp)
 add_library(CSL::resolved_problem ALIAS csl_resolved_problem)
 set_target_properties(csl_resolved_problem PROPERTIES EXPORT_NAME resolved_problem CXX_EXTENSIONS OFF)
-target_link_libraries(csl_resolved_problem PUBLIC CSL::problem CSL::objectives CSL::registry)
+target_link_libraries(csl_resolved_problem PUBLIC CSL::resolved_core CSL::registry)
 include(cmake/JsonDependencies.cmake)
 add_library(csl_input STATIC src/input/scenario_loader.cpp src/input/scenario_json.cpp src/input/scenario_file.cpp)
 add_library(CSL::input ALIAS csl_input)
@@ -96,7 +101,7 @@ add_library(CSL::artifacts ALIAS csl_artifacts)
 set_target_properties(csl_artifacts PROPERTIES EXPORT_NAME artifacts CXX_EXTENSIONS OFF)
 target_link_libraries(csl_artifacts PUBLIC CSL::resolved_problem CSL::execution)
 target_include_directories(csl_artifacts SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
-foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one csl_artifacts csl_input csl_qhull_conversion csl_hull)
+foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_core csl_resolved_problem csl_phase_one csl_artifacts csl_input csl_qhull_conversion csl_hull)
   target_compile_features(${target} PUBLIC cxx_std_20)
   target_include_directories(${target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -108,7 +113,7 @@ foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_mode
   endif()
 endforeach()
 
-install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_qhull_conversion csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one csl_artifacts csl_input csl_hull EXPORT CSLTargets
+install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_qhull_conversion csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_core csl_resolved_problem csl_phase_one csl_artifacts csl_input csl_hull EXPORT CSLTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES include/csl/input/scenario_loader.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/input)
 install(FILES schemas/scenario/v1.schema.json schemas/scenario/README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/schemas/scenario)
@@ -296,7 +301,7 @@ if(BUILD_TESTING)
   target_link_libraries(registry_public_client PRIVATE CSL::registry)
   add_test(NAME registry_public_client COMMAND registry_public_client)
   add_executable(caller_example probes/core-01/caller_example.cpp)
-  target_link_libraries(caller_example PRIVATE CSL::contracts Threads::Threads)
+  target_link_libraries(caller_example PRIVATE CSL::resolved_core Threads::Threads)
   add_test(NAME caller_example COMMAND caller_example)
   add_test(NAME installed_public_client COMMAND ${CMAKE_COMMAND}
     "-DCSL_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
