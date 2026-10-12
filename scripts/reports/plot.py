@@ -34,7 +34,7 @@ def plot(view,out):
     groups=data.aggregate(view)
     series=data.figure_series(view)
     with matplotlib.rc_context({"font.family":"DejaVu Sans","font.size":10,"svg.hashsalt":"csl-report-style-v1","svg.fonttype":"path"}):
-        fig,axes=plt.subplots(1,2,figsize=(11,4.6),layout="constrained")
+        fig,axes=plt.subplots(1,2,figsize=(11,6.6 if view["schema"]==data.CONVEX_SCHEMA else 4.6),layout="constrained")
         try:
             for axis,phase,title in zip(axes,("public_run","end_to_end"),("Public registered run","Input-to-verified-result")):
                 for index,row in enumerate(series[phase]):
@@ -47,7 +47,7 @@ def plot(view,out):
                 axis.set_yticks(range(len(groups)),[g["case_id"] for g in groups]);axis.invert_yaxis()
                 axis.set_xlabel("Inclusive duration (ns)");axis.set_title(title);axis.grid(axis="x",alpha=.2)
             fig.supxlabel("Dots: raw trials · Diamonds: median · Line: min–max · Inclusive panels are not additive",fontsize=9)
-            fig.suptitle(("TEST DATA — " if view["payload"]["purpose"]=="test" else "")+"LP microfixtures · unestablished outcome support",fontsize=12)
+            fig.suptitle(("TEST DATA — " if view["payload"]["purpose"]=="test" else "")+("Convex" if view["schema"]==data.CONVEX_SCHEMA else "LP")+" microfixtures · unestablished outcome support",fontsize=12)
             owned=io.StringIO()
             fig.savefig(owned,format="svg",metadata={"Date":None,"Format":None,"Type":None,"Creator":None})
             final=normalize_owned_svg(owned.getvalue())

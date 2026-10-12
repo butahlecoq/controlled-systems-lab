@@ -1,0 +1,2685 @@
+{
+  "schema": "csl.algorithm-report-view/2",
+  "report_id": "convex-20261012T000000Z-146aa658b5a8",
+  "payload_sha256": "146aa658b5a84fa311d1b51cc95d940ffd4145599074c9b4e7eb86a3738b2502",
+  "payload": {
+    "report_kind": "convex",
+    "native_phase_policy": "csl.convex-native-phases/1",
+    "purpose": "test",
+    "created_utc": "2026-10-12T00:00:00Z",
+    "provenance": {
+      "source_commit": "0000000000000000000000000000000000000000",
+      "tracked_clean": false,
+      "executable_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "backend": {
+        "id": "csl.convex.highs",
+        "version": "1.0.0+highs.1.11.0"
+      },
+      "build": {
+        "configuration": "TEST"
+      },
+      "repository": "butahlecoq/controlled-systems-lab"
+    },
+    "environment": {
+      "scalar": "binary64",
+      "workspace_reuse": false,
+      "resources": {
+        "total_threads": 1,
+        "outer_workers": 1,
+        "threads_per_worker": 1,
+        "memory_bytes": null
+      },
+      "absolute_tolerance": 1e-08,
+      "relative_tolerance": 1e-08,
+      "seed": 0,
+      "clock": {
+        "is_steady": true,
+        "period_num": 1,
+        "period_den": 1000000000
+      }
+    },
+    "scenarios": [
+      {
+        "case_id": "quadratic-boundary",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-boundary"
+        },
+        "input": {
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                2.0
+              ]
+            },
+            "linear": [
+              -6.0
+            ],
+            "offset": 9.0
+          },
+          "constraints": {
+            "rows": 0,
+            "cols": 1,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          },
+          "variables": [
+            [
+              0.0,
+              2.0
+            ]
+          ],
+          "rows": []
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-boundary"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                2.0
+              ]
+            },
+            "linear": [
+              -6.0
+            ],
+            "offset": 9.0
+          },
+          "transformation": null
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": [
+            2.0
+          ],
+          "coordinate_constraints": [],
+          "objective": 1.0,
+          "solver_objective": 1.0,
+          "derivation": "(x-3)^2 decreases on [0,2]; minimum1 at2."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "1de146d8fd0b50dbfb4ca0a8fbbc0fc9a5455d29f0a939a5b9b4a55e9f55a321",
+        "scenario_sha256": "66ac158b12bb62d21016888305a0991416d28f4c560956923bfef7c7d747ce2f"
+      },
+      {
+        "case_id": "quadratic-equality",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-equality"
+        },
+        "input": {
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 2,
+              "cols": 2,
+              "values": [
+                4.0,
+                2.0,
+                2.0,
+                4.0
+              ]
+            },
+            "linear": [
+              -8.0,
+              -10.0
+            ],
+            "offset": 17.0
+          },
+          "constraints": {
+            "rows": 1,
+            "cols": 2,
+            "starts": [
+              0,
+              2
+            ],
+            "indices": [
+              0,
+              1
+            ],
+            "values": [
+              1.0,
+              1.0
+            ]
+          },
+          "variables": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ],
+          "rows": [
+            [
+              2.0,
+              2.0
+            ]
+          ]
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-equality"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 2,
+              "cols": 2,
+              "values": [
+                4.0,
+                2.0,
+                2.0,
+                4.0
+              ]
+            },
+            "linear": [
+              -8.0,
+              -10.0
+            ],
+            "offset": 17.0
+          },
+          "transformation": null
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": [
+            0.5,
+            1.5
+          ],
+          "coordinate_constraints": [],
+          "objective": 4.5,
+          "solver_objective": 4.5,
+          "derivation": "Substitute y=2-x: 2x^2-2x+5; minimum4.5 at(.5,1.5)."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "48c886cae620f4f10c3de27f082ae66986535fb8e8b946a39bd62e55fd27f76e",
+        "scenario_sha256": "e9b68230b5a1eaabc112e09ffc24277910ddc35d0ca0d43ac2de6619e4a27527"
+      },
+      {
+        "case_id": "norm-positive",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "norm-positive"
+        },
+        "input": {
+          "objective": {
+            "kind": "residual_norm",
+            "L": {
+              "rows": 2,
+              "cols": 1,
+              "values": [
+                1.0,
+                0.0
+              ]
+            },
+            "target": [
+              3.0,
+              -4.0
+            ]
+          },
+          "constraints": {
+            "rows": 0,
+            "cols": 1,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          },
+          "variables": [
+            [
+              0.0,
+              2.0
+            ]
+          ],
+          "rows": []
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "norm-positive-squared"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                2.0
+              ]
+            },
+            "linear": [
+              -6.0
+            ],
+            "offset": 25.0
+          },
+          "transformation": "residual_norm_squared"
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": [
+            2.0
+          ],
+          "coordinate_constraints": [],
+          "objective": 4.123105625617661,
+          "solver_objective": 17.0,
+          "derivation": "sqrt((x-3)^2+16) minimizes at2; original sqrt17, squared17."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "33fbd0ef7cf49212901ccce2c0c6ae249871f54073b80f083d5cebcd7cea769b",
+        "scenario_sha256": "9e4879676d57ffa1a363dc0cc81e55413915d8ffb54d41bf4d8a6ff425a076ae"
+      },
+      {
+        "case_id": "norm-zero",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "norm-zero"
+        },
+        "input": {
+          "objective": {
+            "kind": "residual_norm",
+            "L": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                1.0
+              ]
+            },
+            "target": [
+              3.0
+            ]
+          },
+          "constraints": {
+            "rows": 0,
+            "cols": 1,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          },
+          "variables": [
+            [
+              0.0,
+              5.0
+            ]
+          ],
+          "rows": []
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "norm-zero-squared"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                2.0
+              ]
+            },
+            "linear": [
+              -6.0
+            ],
+            "offset": 9.0
+          },
+          "transformation": "residual_norm_squared"
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": [
+            3.0
+          ],
+          "coordinate_constraints": [],
+          "objective": 0.0,
+          "solver_objective": 0.0,
+          "derivation": "Absolute residual |x-3| has minimum0 at3."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "086e7ccfa069fda956d4d86ccae644e3ac7efd2566054c588ac6cef90c8b70a7",
+        "scenario_sha256": "75eeee17822a5be60d511fa3c6cf5fb7c98da3648a3d902f311addd083d90a4d"
+      },
+      {
+        "case_id": "norm-constant",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "norm-constant"
+        },
+        "input": {
+          "objective": {
+            "kind": "residual_norm",
+            "L": {
+              "rows": 2,
+              "cols": 1,
+              "values": [
+                0.0,
+                0.0
+              ]
+            },
+            "target": [
+              3.0,
+              4.0
+            ]
+          },
+          "constraints": {
+            "rows": 0,
+            "cols": 1,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          },
+          "variables": [
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "rows": []
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "norm-constant-squared"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                0.0
+              ]
+            },
+            "linear": [
+              -0.0
+            ],
+            "offset": 25.0
+          },
+          "transformation": "residual_norm_squared"
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": null,
+          "coordinate_constraints": [
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "objective": 5.0,
+          "solver_objective": 25.0,
+          "derivation": "Every x in [0,1] minimizes the constant norm5; square25."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "811b9b18db1617a5fa767b7bc34f772bea6d3b4193d1bc6847b88e214f78ca58",
+        "scenario_sha256": "0cdf4f28241b7978af7137c516e2801855b13e09e4a40624bf5b7efde6d21149"
+      },
+      {
+        "case_id": "quadratic-face",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-face"
+        },
+        "input": {
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 2,
+              "cols": 2,
+              "values": [
+                2.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "linear": [
+              -2.0,
+              0.0
+            ],
+            "offset": 1.0
+          },
+          "constraints": {
+            "rows": 0,
+            "cols": 2,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          },
+          "variables": [
+            [
+              0.0,
+              2.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "rows": []
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-face"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 2,
+              "cols": 2,
+              "values": [
+                2.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "linear": [
+              -2.0,
+              0.0
+            ],
+            "offset": 1.0
+          },
+          "transformation": null
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": null,
+          "coordinate_constraints": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "objective": 0.0,
+          "solver_objective": 0.0,
+          "derivation": "(x-1)^2 has minimum0 on the complete segment (1,t), t in [0,1]."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "550c3e772476a1796920c34165a7764f842bb06afec192649683c5cd8cbaa8de",
+        "scenario_sha256": "528875f112abdbe327e114cd314409faf3925f86adadc33dd128d3afc1f7e26d"
+      },
+      {
+        "case_id": "quadratic-zero-row",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-zero-row"
+        },
+        "input": {
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                2.0
+              ]
+            },
+            "linear": [
+              -6.0
+            ],
+            "offset": 9.0
+          },
+          "constraints": {
+            "rows": 1,
+            "cols": 1,
+            "starts": [
+              0,
+              0
+            ],
+            "indices": [],
+            "values": []
+          },
+          "variables": [
+            [
+              1.0,
+              5.0
+            ]
+          ],
+          "rows": [
+            [
+              0.0,
+              0.0
+            ]
+          ]
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-zero-row"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                2.0
+              ]
+            },
+            "linear": [
+              -6.0
+            ],
+            "offset": 9.0
+          },
+          "transformation": null
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": [
+            3.0
+          ],
+          "coordinate_constraints": [],
+          "objective": 0.0,
+          "solver_objective": 0.0,
+          "derivation": "Authored zero equality is redundant; (x-3)^2 minimizes at3."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "4f4af5c08752d5e4f6ffd1c8e71824b1f6c3a0249314709dc07b2c9c4c36beb8",
+        "scenario_sha256": "f9ffee6aa6983f8705fdc931205a94ddb40b029d23cc05a41dcd5bc3fd898d08"
+      },
+      {
+        "case_id": "quadratic-zero-contradiction",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-zero-contradiction"
+        },
+        "input": {
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                2.0
+              ]
+            },
+            "linear": [
+              -6.0
+            ],
+            "offset": 9.0
+          },
+          "constraints": {
+            "rows": 1,
+            "cols": 1,
+            "starts": [
+              0,
+              0
+            ],
+            "indices": [],
+            "values": []
+          },
+          "variables": [
+            [
+              1.0,
+              5.0
+            ]
+          ],
+          "rows": [
+            [
+              1.0,
+              1.0
+            ]
+          ]
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-zero-contradiction"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 1,
+              "cols": 1,
+              "values": [
+                2.0
+              ]
+            },
+            "linear": [
+              -6.0
+            ],
+            "offset": 9.0
+          },
+          "transformation": null
+        },
+        "reference": {
+          "outcome": "infeasible",
+          "point": null,
+          "coordinate_constraints": [],
+          "objective": null,
+          "solver_objective": null,
+          "derivation": "Authored row 0=1 is contradictory regardless of x."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "7cd562ad874dcd6002bbe0316aaf285cb173c109a13876eb178d63822fbbc488",
+        "scenario_sha256": "774e8f4dcf115c841abab69c8bc699bd69a94f6b5d106e0184044c09a946021f"
+      },
+      {
+        "case_id": "quadratic-unbounded",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-unbounded"
+        },
+        "input": {
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 2,
+              "cols": 2,
+              "values": [
+                2.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "linear": [
+              0.0,
+              -1.0
+            ],
+            "offset": 0.0
+          },
+          "constraints": {
+            "rows": 0,
+            "cols": 2,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          },
+          "variables": [
+            [
+              null,
+              null
+            ],
+            [
+              0.0,
+              null
+            ]
+          ],
+          "rows": []
+        },
+        "solver": {
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-unbounded"
+          },
+          "objective": {
+            "kind": "quadratic",
+            "Q": {
+              "rows": 2,
+              "cols": 2,
+              "values": [
+                2.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "linear": [
+              0.0,
+              -1.0
+            ],
+            "offset": 0.0
+          },
+          "transformation": null
+        },
+        "reference": {
+          "outcome": "unbounded",
+          "point": null,
+          "coordinate_constraints": [],
+          "objective": null,
+          "solver_objective": null,
+          "derivation": "Along (0,t), t>=0, x^2-y=-t tends to minus infinity."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "40722083256502e03f20a96a5e89d4e68a69119572a3517aebe44df47e55dd85",
+        "scenario_sha256": "8fc17dd332af9406b516744b886ee807ce9e91979a11e50f1fb397292b26ec1b"
+      }
+    ],
+    "trials": [
+      {
+        "case_id": "quadratic-boundary",
+        "round": 1,
+        "sequence": 1,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-boundary"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            2.0
+          ],
+          "original_objective": 1.0,
+          "solver_objective": 1.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "quadratic-boundary"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "quadratic-boundary"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=quadratic-boundary\nprogram.solver=quadratic-boundary\nphase.feasibility.time_limit=inf\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=0\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.api_status=0\nphase.qp.model_status=7\nphase.qp.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nobjective.original=1.0\nobjective.solver=1.0\ncheck.rows.violation=0\ncheck.rows.scale=1\ncheck.variables.violation=0\ncheck.variables.scale=1\ncheck.stationarity.violation=0\ncheck.stationarity.scale=1\ncheck.signs.violation=0\ncheck.signs.scale=1\ncheck.complementarity.violation=0\ncheck.complementarity.scale=1\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "qp",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      },
+      {
+        "case_id": "quadratic-equality",
+        "round": 1,
+        "sequence": 2,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-equality"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            0.5,
+            1.5
+          ],
+          "original_objective": 4.5,
+          "solver_objective": 4.5,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "quadratic-equality"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "quadratic-equality"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=quadratic-equality\nprogram.solver=quadratic-equality\nphase.feasibility.time_limit=inf\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=0\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.api_status=0\nphase.qp.model_status=7\nphase.qp.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nobjective.original=4.5\nobjective.solver=4.5\ncheck.rows.violation=0\ncheck.rows.scale=1\ncheck.variables.violation=0\ncheck.variables.scale=1\ncheck.stationarity.violation=0\ncheck.stationarity.scale=1\ncheck.signs.violation=0\ncheck.signs.scale=1\ncheck.complementarity.violation=0\ncheck.complementarity.scale=1\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "qp",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      },
+      {
+        "case_id": "norm-positive",
+        "round": 1,
+        "sequence": 3,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "norm-positive"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            2.0
+          ],
+          "original_objective": 4.123105625617661,
+          "solver_objective": 17.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "norm-positive"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "norm-positive"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=norm-positive\nprogram.solver=norm-positive-squared\nphase.feasibility.time_limit=inf\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=0\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.api_status=0\nphase.qp.model_status=7\nphase.qp.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nobjective.original=4.123105625617661\nobjective.solver=17.0\ncheck.rows.violation=0\ncheck.rows.scale=1\ncheck.variables.violation=0\ncheck.variables.scale=1\ncheck.stationarity.violation=0\ncheck.stationarity.scale=1\ncheck.signs.violation=0\ncheck.signs.scale=1\ncheck.complementarity.violation=0\ncheck.complementarity.scale=1\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "qp",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      },
+      {
+        "case_id": "norm-zero",
+        "round": 1,
+        "sequence": 4,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "norm-zero"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            3.0
+          ],
+          "original_objective": 0.0,
+          "solver_objective": 0.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "norm-zero"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "norm-zero"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=norm-zero\nprogram.solver=norm-zero-squared\nphase.feasibility.time_limit=inf\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=0\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.api_status=0\nphase.qp.model_status=7\nphase.qp.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nobjective.original=0.0\nobjective.solver=0.0\ncheck.rows.violation=0\ncheck.rows.scale=1\ncheck.variables.violation=0\ncheck.variables.scale=1\ncheck.stationarity.violation=0\ncheck.stationarity.scale=1\ncheck.signs.violation=0\ncheck.signs.scale=1\ncheck.complementarity.violation=0\ncheck.complementarity.scale=1\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "qp",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      },
+      {
+        "case_id": "norm-constant",
+        "round": 1,
+        "sequence": 5,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "norm-constant"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            0.0
+          ],
+          "original_objective": 5.0,
+          "solver_objective": 25.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "norm-constant"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "norm-constant"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=norm-constant\nprogram.solver=norm-constant-squared\nphase.linear.time_limit=inf\nphase.linear.api_status=0\nphase.linear.model_status=7\nphase.linear.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nobjective.original=5.0\nobjective.solver=25.0\ncheck.rows.violation=0\ncheck.rows.scale=1\ncheck.variables.violation=0\ncheck.variables.scale=1\ncheck.stationarity.violation=0\ncheck.stationarity.scale=1\ncheck.signs.violation=0\ncheck.signs.scale=1\ncheck.complementarity.violation=0\ncheck.complementarity.scale=1\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "qp",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      },
+      {
+        "case_id": "quadratic-face",
+        "round": 1,
+        "sequence": 6,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-face"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            1.0,
+            0.25
+          ],
+          "original_objective": 0.0,
+          "solver_objective": 0.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "quadratic-face"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "quadratic-face"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=quadratic-face\nprogram.solver=quadratic-face\nphase.feasibility.time_limit=inf\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=0\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.api_status=0\nphase.qp.model_status=7\nphase.qp.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nobjective.original=0.0\nobjective.solver=0.0\ncheck.rows.violation=0\ncheck.rows.scale=1\ncheck.variables.violation=0\ncheck.variables.scale=1\ncheck.stationarity.violation=0\ncheck.stationarity.scale=1\ncheck.signs.violation=0\ncheck.signs.scale=1\ncheck.complementarity.violation=0\ncheck.complementarity.scale=1\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "qp",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      },
+      {
+        "case_id": "quadratic-zero-row",
+        "round": 1,
+        "sequence": 7,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-zero-row"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            3.0
+          ],
+          "original_objective": 0.0,
+          "solver_objective": 0.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "quadratic-zero-row"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "convex-report-literals",
+                "program": "quadratic-zero-row"
+              },
+              "verifier": {
+                "id": "literal-test",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=quadratic-zero-row\nprogram.solver=quadratic-zero-row\nphase.feasibility.time_limit=inf\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=0\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.api_status=0\nphase.qp.model_status=7\nphase.qp.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nobjective.original=0.0\nobjective.solver=0.0\ncheck.rows.violation=0\ncheck.rows.scale=1\ncheck.variables.violation=0\ncheck.variables.scale=1\ncheck.stationarity.violation=0\ncheck.stationarity.scale=1\ncheck.signs.violation=0\ncheck.signs.scale=1\ncheck.complementarity.violation=0\ncheck.complementarity.scale=1\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "qp",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      },
+      {
+        "case_id": "quadratic-zero-contradiction",
+        "round": 1,
+        "sequence": 8,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-zero-contradiction"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "infeasible",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "solver_objective": null,
+          "objective_unavailable_reason": "no finite evaluated objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=quadratic-zero-contradiction\nprogram.solver=quadratic-zero-contradiction\nphase.feasibility.time_limit=inf\nphase.feasibility.api_status=0\nphase.feasibility.model_status=8\nphase.feasibility.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 8
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "earlier_phase_exit",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "qp",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      },
+      {
+        "case_id": "quadratic-unbounded",
+        "round": 1,
+        "sequence": 9,
+        "purpose": "test",
+        "identity": {
+          "problem": "convex-report-literals",
+          "program": "quadratic-unbounded"
+        },
+        "registry": {
+          "requested": "csl.convex.highs",
+          "actual": {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "5",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "10",
+            "end_tick": "15",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "20",
+            "end_tick": "25",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "30",
+            "end_tick": "35",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "40",
+            "end_tick": "45",
+            "duration_ns": 5,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "50",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null,
+          "diagnostics": []
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "unbounded",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "solver_objective": null,
+          "objective_unavailable_reason": "no finite evaluated objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nprogram.original=quadratic-unbounded\nprogram.solver=quadratic-unbounded\nphase.feasibility.time_limit=inf\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=0\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.api_status=0\nphase.qp.model_status=10\nphase.qp.iterations=0\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-8\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nnative.log:\nLiteral TEST DATA; no native execution."
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "public_run_entered": true,
+        "native_phases": {
+          "feasibility": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 7
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "simplex",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "qp": {
+            "execution": {
+              "state": "observed_return",
+              "reason": "returned_status_pair",
+              "statuses": {
+                "api_status": 0,
+                "model_status": 10
+              }
+            },
+            "iterations": {
+              "available": true,
+              "kind": "qp",
+              "value": 0,
+              "reason": null
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          },
+          "linear": {
+            "execution": {
+              "state": "known_not_called",
+              "reason": "route_not_selected",
+              "statuses": null
+            },
+            "iterations": {
+              "available": false,
+              "kind": "simplex",
+              "value": null,
+              "reason": "phase_not_called"
+            },
+            "elapsed": {
+              "available": false,
+              "value": null,
+              "unit": "ns",
+              "reason": "not_exposed_by_adapter"
+            }
+          }
+        }
+      }
+    ],
+    "process": {
+      "expected_trials": 9,
+      "emitted_trials": 9,
+      "repetitions": 1,
+      "complete": true,
+      "aborted": false,
+      "return_code": 0,
+      "warmups": 0,
+      "warmup_failures": 0
+    },
+    "profile": {
+      "available": false,
+      "reason": "literal test; no profile execution"
+    },
+    "historical": [],
+    "warmup_trials": []
+  }
+}

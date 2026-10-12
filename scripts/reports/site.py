@@ -42,7 +42,7 @@ class OfflineHTML(HTMLParser):
                 data.require(re.search(r"@import|url\s*\(|expression\s*\(",local,re.I) is None,"external/active inline style")
             if key in {"href","src","xlink:href"} and value:
                 if value.startswith("#"): continue
-                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/lp-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/lp-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip)",value): continue
+                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip)",value): continue
                 data.require(value in self.files,"external/escaping HTML asset")
     def handle_endtag(self,tag):
         if tag=="style": self.in_style=False
@@ -62,6 +62,50 @@ def validate_sidecar_hashes(bundle,payload):
         data.require(data.file_digest(data.local_file(bundle,name))==sha,"raw sidecar subject mismatch: "+name)
 
 
+def validate_convex_sidecars(bundle,view):
+    """Saved-only coherence; parsing retained events never starts a numerical process."""
+    import collector_common as collector
+    p=view["payload"]
+    raw=data.local_file(bundle,"raw-events.jsonl").read_bytes()
+    stderr=data.local_file(bundle,"process-stderr.txt").read_bytes()
+    profile=data.parse_json(data.local_file(bundle,"profile.json").read_text(encoding="utf-8"))
+    if "events_sha256" not in p["process"]:
+        placeholder=data.parse_json(raw.decode())
+        data.require(p["purpose"]=="test" and placeholder=={"purpose":"test","available":False,"reason":"synthetic saved fixture; no executed process"},"missing native raw sidecar")
+        return
+    data.require(collector.sha_bytes(raw)==p["process"]["events_sha256"] and collector.sha_bytes(stderr)==p["process"]["stderr_sha256"],"convex raw hashes differ")
+    events=collector.events_from_bytes(raw,p["process"]["aborted"] or p["process"]["return_code"]!=0)
+    data.require(events and collector.event_profile(events[0]) is collector.CONVEX,"convex raw header required")
+    data.require(events[0]["build"]==p["provenance"]["build"],"raw build identity differs")
+    rebuilt=collector.event_payload(events,p["process"]["return_code"],raw,stderr,p["provenance"],p["environment"],p["profile"],p["process"]["aborted"])
+    rebuilt["created_utc"]=p["created_utc"]
+    data.require(data.seal(rebuilt)==view,"saved convex view differs from retained events")
+    if not p["profile"]["available"]:
+        data.require(p["purpose"]=="test","measurement profile unavailable")
+        return
+    data.require(profile["schema"]=="csl.convex-profile/1" and profile["purpose"]=="profile","profile kind/version mismatch")
+    data.require(data.file_digest(data.local_file(bundle,"profile.json"))==p["profile"]["sha256"],"profile hash mismatch")
+    pevents=profile["events"]
+    data.require(len(pevents)==2 and pevents[0]["event"]=="header" and pevents[1]["event"]=="profile","complete separate profile events required")
+    header,body=pevents
+    data.require(all(e["schema"]==data.CONVEX_EVENT_SCHEMA and e["purpose"]=="profile" for e in pevents),"profile event version/purpose")
+    data.require(header["build"]==p["provenance"]["build"] and collector.scenarios(header)==p["scenarios"],"profile source/catalogue differs")
+    rounds=data.integer(body["rounds"],1);data.require(rounds<=10000 and body["trials"]==rounds*len(p["scenarios"]),"profile count differs")
+    wall=data.integer(body["wall_ns"])
+    data.require(isinstance(body["observation_token"],str) and body["observation_token"].isdecimal(),"profile consumption token required")
+    totals=body["phase_totals_ns"]
+    data.require(len(totals)==6 and all(type(x) is int and x>=0 for x in totals) and sum(totals[:5])<=totals[5]<=wall,"profile nested timing scopes differ")
+    for snapshot in ("before","after"):
+        for name in ("user_cpu","kernel_cpu","peak_resident"):
+            metric=body[snapshot][name];data.require(type(metric["available"]) is bool,"profile counter availability")
+            if metric["available"]:
+                data.integer(metric["value"]);data.require(metric["unit"]==("bytes" if name=="peak_resident" else "ns"),"profile counter unit")
+            else:data.require(bool(metric["reason"]),"unavailable profile counter reason")
+    failures=data.integer(body["failures"]);data.require(failures<=body["trials"],"profile failure count invalid")
+    data.require(profile["phase_order"]==list(data.PHASES) and profile["assessment"]==collector.profile_assessment(body),"profile assessment differs")
+    data.require(p["profile"]["valid"]==(profile["return_code"]==0 and not profile["aborted"] and failures==0),"profile success claim differs")
+
+
 def validate_bundle(bundle,allow_test=False):
     bundle=Path(bundle)
     data.require(bundle.is_dir() and not bundle.is_symlink(),"bundle directory required")
@@ -74,6 +118,7 @@ def validate_bundle(bundle,allow_test=False):
     data.require(manifest["report_id"]==view["report_id"] and bundle.name==view["report_id"],"bundle identity mismatch")
     data.require(data.publishable(view) or (allow_test and view["payload"]["purpose"]=="test"),"unreviewable/nonmeasurement bundle")
     if view["payload"]["purpose"]=="measurement": validate_sidecar_hashes(bundle,view["payload"])
+    if view["schema"]==data.CONVEX_SCHEMA: validate_convex_sidecars(bundle,view)
     data.require(data.parse_json(data.local_file(bundle,"scenarios.json").read_text(encoding="utf-8"))==view["payload"]["scenarios"],"scenario sidecar mismatch")
     svg=data.local_file(bundle,"latency.svg").read_bytes();data.validate_svg(svg)
     png=data.local_file(bundle,"latency.png").read_bytes();data.require(png.startswith(b'\x89PNG\r\n\x1a\n'),"PNG signature missing")
@@ -84,7 +129,7 @@ def validate_bundle(bundle,allow_test=False):
     page=data.local_file(bundle,"index.html").read_text(encoding="utf-8")
     OfflineHTML(FILES).feed(page)
     data.require(svg.decode() in page,"embedded figure differs from final bytes")
-    data.require(export["document_policy"]==render.DOCUMENT_POLICY,"unsupported document projection")
+    data.require(export["document_policy"]==render.document_policy(view),"unsupported document projection")
     data.artifact_reference(export["artifact_ref"])
     data.require(page==render.document(view,svg.decode(),export["artifact_ref"]),"HTML differs from saved document projection")
     data.validate_figure_metadata(view,export["plot"])
@@ -116,21 +161,28 @@ def catalogue_index(catalogue):
     for report in catalogue["reports"]:
         rid=report["report_id"]
         tree,archive,label=data.artifact_links(rid,artifact_ref)
-        parts.append('<li><a href="'+rid+'/index.html">'+escape(rid)+'</a> — HiGHS reference LP, five analytic microfixtures; source <code>'+escape(report["source_commit"])+'</code> — <a href="'+rid+'/records.json">raw JSON</a> · <a href="'+rid+'/trials.csv">CSV</a> · <a href="'+rid+'.zip">offline ZIP</a> · <a href="'+tree+'">Repository artifact fallback ('+label+')</a> · <a href="'+archive+'">Repository ZIP fallback</a></li>')
+        label_kind='HiGHS reference LP, five analytic microfixtures'
+        if catalogue.get("schema","csl.algorithm-report-catalog/1")=="csl.algorithm-report-catalog/2":
+            data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
+            label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
+        parts.append('<li><a href="'+rid+'/index.html">'+escape(rid)+'</a> — '+label_kind+'; source <code>'+escape(report["source_commit"])+'</code> — <a href="'+rid+'/records.json">raw JSON</a> · <a href="'+rid+'/trials.csv">CSV</a> · <a href="'+rid+'.zip">offline ZIP</a> · <a href="'+tree+'">Repository artifact fallback ('+label+')</a> · <a href="'+archive+'">Repository ZIP fallback</a></li>')
     return ''.join(parts)+"</ul></body></html>"
 
 
-def stage(catalog_path,out,check=True):
+def stage(catalog_path,out,check=True,allow_test=False):
     catalog_path=Path(catalog_path);root=catalog_path.parent
     catalogue=data.parse_json(catalog_path.read_text(encoding="utf-8"))
-    data.require(catalogue["schema"]=="csl.algorithm-report-catalog/1" and catalogue["reports"],"nonempty versioned catalogue required")
+    data.require(catalogue["schema"] in ("csl.algorithm-report-catalog/1","csl.algorithm-report-catalog/2") and catalogue["reports"],"nonempty versioned catalogue required")
     artifact_ref=catalogue.get("artifact_ref","main");data.artifact_reference(artifact_ref)
     ids=set()
     for report in catalogue["reports"]:
         rid=report["report_id"]
-        data.require(re.fullmatch(r"lp-\d{8}T\d{6}Z-[0-9a-f]{12}",rid) is not None and rid not in ids,"unsafe/duplicate report ID")
+        data.require(re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",rid) is not None and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
-        view=validate_bundle(root/rid)
+        view=validate_bundle(root/rid,allow_test)
+        expected_kind="convex" if view["schema"]==data.CONVEX_SCHEMA else "lp"
+        if catalogue["schema"]=="csl.algorithm-report-catalog/1": data.require(expected_kind=="lp" and "report_kind" not in report,"v1 catalogue is LP only")
+        else: data.require(report["report_kind"]==expected_kind,"catalogue kind differs from bundle")
         exported=data.parse_json(data.local_file(root/rid,"export.json").read_text(encoding="utf-8"))
         data.require(exported["artifact_ref"]==artifact_ref,"catalogue/bundle artifact reference differs")
         data.require(report["payload_sha256"]==view["payload_sha256"] and report["source_commit"]==view["payload"]["provenance"]["source_commit"],"catalogue provenance mismatch")
