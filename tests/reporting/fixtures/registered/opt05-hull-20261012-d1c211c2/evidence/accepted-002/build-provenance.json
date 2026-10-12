@@ -1,0 +1,28 @@
+{
+  "source_code_commit": "d1c211c2763989a9cf3e39a8acaf609c5cf33a07",
+  "source_identity_scope": "tracked reducer/backend code at the specified commit; the separate harness source hash is recorded below",
+  "build_generator": "Visual Studio 17 2022",
+  "build_platform": "x64",
+  "configuration": "Release",
+  "cxx_compiler": "MSVC",
+  "cxx_compiler_id": "MSVC",
+  "cxx_compiler_version": "19.44.35215.0",
+  "release_compile_flags": "/O2 /Ob2 /D NDEBUG /MD /fp:precise /std:c++20",
+  "expected_flags_present": {
+    "/O2": true,
+    "/D NDEBUG": true,
+    "/std:c++20": true
+  },
+  "configured_dependencies": {
+    "HiGHS": "1.11.0"
+  },
+  "build_command": "cmake --build build-opt05-harness --config Release --target csl_hull_measure --parallel 4 --verbose",
+  "release_build_log_sha256": "26750a14cccbf156af58e5d981ef90e8fa9d63d0070d2320a282b1d56f892949",
+  "executable_sha256": "6617de0f6d0fc86e833cfffa20fa44fb11bf565dfaf972e0bee2196251848786",
+  "source_sha256": {
+    "src/geometry/hull_reducer.cpp": "3a689f1e31c06d7d7559ccaffa86d312d47ee42def3a789e7297f0051b7517c8",
+    "include/csl/geometry/hull_reducer.hpp": "3f1fb511c5481fbbc9aa1e93d3c2e515a8c0d4a3f9c154f56e94db6851d5c774",
+    "reports/algorithm-results/opt05-hull-20261012-d1c211c2/harness/hull_measure.cpp": "b87b83013e96b6c7d4cc55d706641d55e1cb460ea7303debffebe8b864694598"
+  },
+  "cmake_cache_sha256": "ccff6caf5c0177b86a9e17f7f85a293e2a844134b0a1a7ae8bdcea9901dad0a9"
+}

@@ -1,0 +1,9 @@
+fixture,direction,trials,failures,all_oracles_passed,preparation_ns_median_ns,preparation_ns_min_ns,preparation_ns_max_ns,preparation_ns_range_ns,workspace_creation_ns_median_ns,workspace_creation_ns_min_ns,workspace_creation_ns_max_ns,workspace_creation_ns_range_ns,run_ns_median_ns,run_ns_min_ns,run_ns_max_ns,run_ns_range_ns,total_ns_median_ns,total_ns_min_ns,total_ns_max_ns,total_ns_range_ns
+embedded-segment,H-to-V,7,0,True,2500,1300,2800,1500,600,300,700,400,1029100,940900,1103100,162200,1035400,944600,1109100,164500
+embedded-segment,V-to-H,7,0,True,3200,1300,3300,2000,700,300,1000,700,10100,6000,10400,4400,17600,9300,17800,8500
+simplex,H-to-V,7,0,True,2500,2300,2600,300,600,600,700,100,1637200,1522300,1958000,435700,1643300,1528200,1964300,436100
+simplex,V-to-H,7,0,True,3200,2900,3500,600,600,500,700,200,292300,272500,322600,50100,300300,280300,329300,49000
+singleton,H-to-V,7,0,True,1500,1200,1600,400,400,300,700,400,7200,4700,7400,2700,11200,8100,11400,3300
+singleton,V-to-H,7,0,True,1300,1200,1700,500,400,300,400,100,4200,3300,4500,1200,7600,6300,7700,1400
+square,H-to-V,7,0,True,2500,1300,3600,2300,700,300,700,400,1583800,1472900,1636000,163100,1591400,1480800,1641900,161100
+square,V-to-H,7,0,True,3400,3300,3800,500,700,600,800,200,283100,274000,306300,32300,291500,281700,314500,32800

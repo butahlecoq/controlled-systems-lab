@@ -1,0 +1,691 @@
+{
+  "schema": "csl.hull-benchmark-records/1",
+  "report_id": "opt05-hull-20261012-d1c211c2",
+  "created_utc": "2026-10-12T10:32:53Z",
+  "code_commit": "d1c211c2763989a9cf3e39a8acaf609c5cf33a07",
+  "source_worktree_head": "d1c211c2763989a9cf3e39a8acaf609c5cf33a07",
+  "algorithm": {
+    "name": "LP-backed finite-point hull reduction",
+    "implementation": "CSL::geometry::reduce_hull",
+    "source": "src/geometry/hull_reducer.cpp"
+  },
+  "backend": {
+    "name": "HiGHS LP adapter",
+    "version": "1.11.0",
+    "source": "src/adapters/lp/highs.cpp",
+    "configured_threads": 1,
+    "presolve": "off",
+    "parallel": "off",
+    "simplex_iteration_limit": null
+  },
+  "build": {
+    "source_code_commit": "d1c211c2763989a9cf3e39a8acaf609c5cf33a07",
+    "source_identity_scope": "tracked reducer/backend code at the specified commit; the separate harness source hash is recorded below",
+    "build_generator": "Visual Studio 17 2022",
+    "build_platform": "x64",
+    "configuration": "Release",
+    "cxx_compiler": "MSVC",
+    "cxx_compiler_id": "MSVC",
+    "cxx_compiler_version": "19.44.35215.0",
+    "release_compile_flags": "/O2 /Ob2 /D NDEBUG /MD /fp:precise /std:c++20",
+    "expected_flags_present": {
+      "/O2": true,
+      "/D NDEBUG": true,
+      "/std:c++20": true
+    },
+    "configured_dependencies": {
+      "HiGHS": "1.11.0"
+    },
+    "build_command": "cmake --build build-opt05-harness --config Release --target csl_hull_measure --parallel 4 --verbose",
+    "release_build_log_sha256": "26750a14cccbf156af58e5d981ef90e8fa9d63d0070d2320a282b1d56f892949",
+    "executable_sha256": "6617de0f6d0fc86e833cfffa20fa44fb11bf565dfaf972e0bee2196251848786",
+    "source_sha256": {
+      "src/geometry/hull_reducer.cpp": "3a689f1e31c06d7d7559ccaffa86d312d47ee42def3a789e7297f0051b7517c8",
+      "include/csl/geometry/hull_reducer.hpp": "3f1fb511c5481fbbc9aa1e93d3c2e515a8c0d4a3f9c154f56e94db6851d5c774",
+      "reports/algorithm-results/opt05-hull-20261012-d1c211c2/harness/hull_measure.cpp": "b87b83013e96b6c7d4cc55d706641d55e1cb460ea7303debffebe8b864694598"
+    },
+    "cmake_cache_sha256": "ccff6caf5c0177b86a9e17f7f85a293e2a844134b0a1a7ae8bdcea9901dad0a9"
+  },
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "machine": "AMD64",
+    "host_before": {
+      "system": {
+        "cpu_load_percent": 10,
+        "visible_ram_kib": 33387800,
+        "free_ram_kib": 17835388,
+        "logical_processors": 12,
+        "cpu_name": "12th Gen Intel(R) Core(TM) i5-12400F"
+      },
+      "cpu_sample": {
+        "available": true,
+        "sample_interval_ms": 1000,
+        "busy_percent": 0.9
+      }
+    },
+    "host_after": {
+      "system": {
+        "cpu_load_percent": 7,
+        "visible_ram_kib": 33387800,
+        "free_ram_kib": 17837392,
+        "logical_processors": 12,
+        "cpu_name": "12th Gen Intel(R) Core(TM) i5-12400F"
+      },
+      "cpu_sample": {
+        "available": true,
+        "sample_interval_ms": 1000,
+        "busy_percent": 0.9
+      }
+    },
+    "concurrent_work_note": "Before collection, six MSBuild processes remained from other worktrees; all had 0.000 s CPU-time delta over a 5 s check and no cl.exe process was present. No overlapping build activity was observed during the timed collection. Pre/post system CPU snapshots are recorded; unrelated background work may still contribute.",
+    "requested_native_threads": 1,
+    "trial_policy": "one warmup per case; seven measured repetitions per case; round-robin interleaved case order; fresh LP workspace per invocation",
+    "timing_scope": "steady_clock duration of reduce_hull only; cloud creation, adapter registration and workspace factory excluded; first lazy HiGHS initialization inside the reducer call is included",
+    "process_wall_elapsed_ns": 244601400
+  },
+  "fixture": {
+    "definition": "all points (x/(s-1), y/(s-1)) on row-major s-by-s lattice over [0,1]^2",
+    "cases": [
+      {
+        "case_id": "grid-25",
+        "side": 5,
+        "points": 25,
+        "expected_retained": 4,
+        "expected_removed": 21,
+        "expected_lp_calls": 25
+      },
+      {
+        "case_id": "grid-81",
+        "side": 9,
+        "points": 81,
+        "expected_retained": 4,
+        "expected_removed": 77,
+        "expected_lp_calls": 81
+      },
+      {
+        "case_id": "grid-169",
+        "side": 13,
+        "points": 169,
+        "expected_retained": 4,
+        "expected_removed": 165,
+        "expected_lp_calls": 169
+      }
+    ],
+    "oracle": "exact known unit-square extreme-corner IDs plus re-evaluation of every returned barycentric removal certificate; all output outcomes must be feasible/infeasible and reducer complete",
+    "assurance": "binary64 numerical checks; not exact arithmetic or a validated global certificate"
+  },
+  "process": {
+    "exit_code": 0,
+    "invalid_stdout_lines": [],
+    "trial_rows": 24,
+    "measured_rows": 21,
+    "warmup_rows": 3,
+    "failures": 0
+  },
+  "trials": [
+    {
+      "round": 0,
+      "case_id": "grid-25",
+      "points": 25,
+      "warmup": true,
+      "elapsed_ns": 3233800,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 25,
+      "attempts": 25,
+      "removed": 21,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 21,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 0,
+      "case_id": "grid-81",
+      "points": 81,
+      "warmup": true,
+      "elapsed_ns": 7755400,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 81,
+      "attempts": 81,
+      "removed": 77,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 77,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 0,
+      "case_id": "grid-169",
+      "points": 169,
+      "warmup": true,
+      "elapsed_ns": 19760100,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 169,
+      "attempts": 169,
+      "removed": 165,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 165,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 0,
+      "case_id": "grid-25",
+      "points": 25,
+      "warmup": false,
+      "elapsed_ns": 2137300,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 25,
+      "attempts": 25,
+      "removed": 21,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 21,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 0,
+      "case_id": "grid-81",
+      "points": 81,
+      "warmup": false,
+      "elapsed_ns": 7706300,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 81,
+      "attempts": 81,
+      "removed": 77,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 77,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 0,
+      "case_id": "grid-169",
+      "points": 169,
+      "warmup": false,
+      "elapsed_ns": 18714000,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 169,
+      "attempts": 169,
+      "removed": 165,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 165,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 1,
+      "case_id": "grid-81",
+      "points": 81,
+      "warmup": false,
+      "elapsed_ns": 8326100,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 81,
+      "attempts": 81,
+      "removed": 77,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 77,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 1,
+      "case_id": "grid-169",
+      "points": 169,
+      "warmup": false,
+      "elapsed_ns": 18907700,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 169,
+      "attempts": 169,
+      "removed": 165,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 165,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 1,
+      "case_id": "grid-25",
+      "points": 25,
+      "warmup": false,
+      "elapsed_ns": 2105900,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 25,
+      "attempts": 25,
+      "removed": 21,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 21,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 2,
+      "case_id": "grid-169",
+      "points": 169,
+      "warmup": false,
+      "elapsed_ns": 19386500,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 169,
+      "attempts": 169,
+      "removed": 165,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 165,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 2,
+      "case_id": "grid-25",
+      "points": 25,
+      "warmup": false,
+      "elapsed_ns": 2157500,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 25,
+      "attempts": 25,
+      "removed": 21,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 21,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 2,
+      "case_id": "grid-81",
+      "points": 81,
+      "warmup": false,
+      "elapsed_ns": 7639300,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 81,
+      "attempts": 81,
+      "removed": 77,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 77,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 3,
+      "case_id": "grid-25",
+      "points": 25,
+      "warmup": false,
+      "elapsed_ns": 2097700,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 25,
+      "attempts": 25,
+      "removed": 21,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 21,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 3,
+      "case_id": "grid-81",
+      "points": 81,
+      "warmup": false,
+      "elapsed_ns": 7931900,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 81,
+      "attempts": 81,
+      "removed": 77,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 77,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 3,
+      "case_id": "grid-169",
+      "points": 169,
+      "warmup": false,
+      "elapsed_ns": 18870100,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 169,
+      "attempts": 169,
+      "removed": 165,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 165,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 4,
+      "case_id": "grid-81",
+      "points": 81,
+      "warmup": false,
+      "elapsed_ns": 8067100,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 81,
+      "attempts": 81,
+      "removed": 77,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 77,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 4,
+      "case_id": "grid-169",
+      "points": 169,
+      "warmup": false,
+      "elapsed_ns": 18917400,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 169,
+      "attempts": 169,
+      "removed": 165,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 165,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 4,
+      "case_id": "grid-25",
+      "points": 25,
+      "warmup": false,
+      "elapsed_ns": 2160700,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 25,
+      "attempts": 25,
+      "removed": 21,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 21,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 5,
+      "case_id": "grid-169",
+      "points": 169,
+      "warmup": false,
+      "elapsed_ns": 18852100,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 169,
+      "attempts": 169,
+      "removed": 165,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 165,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 5,
+      "case_id": "grid-25",
+      "points": 25,
+      "warmup": false,
+      "elapsed_ns": 2129900,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 25,
+      "attempts": 25,
+      "removed": 21,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 21,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 5,
+      "case_id": "grid-81",
+      "points": 81,
+      "warmup": false,
+      "elapsed_ns": 8296500,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 81,
+      "attempts": 81,
+      "removed": 77,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 77,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 6,
+      "case_id": "grid-25",
+      "points": 25,
+      "warmup": false,
+      "elapsed_ns": 2135700,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 25,
+      "attempts": 25,
+      "removed": 21,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 21,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 6,
+      "case_id": "grid-81",
+      "points": 81,
+      "warmup": false,
+      "elapsed_ns": 7635100,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 81,
+      "attempts": 81,
+      "removed": 77,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 77,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "round": 6,
+      "case_id": "grid-169",
+      "points": 169,
+      "warmup": false,
+      "elapsed_ns": 19250700,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 169,
+      "attempts": 169,
+      "removed": 165,
+      "retained": 4,
+      "outcomes": {
+        "feasible": 165,
+        "infeasible": 4,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    }
+  ],
+  "summary": [
+    {
+      "case_id": "grid-169",
+      "points": 169,
+      "attempts": 7,
+      "successes": 7,
+      "failures": 0,
+      "median_ns": 18907700,
+      "min_ns": 18714000,
+      "max_ns": 19386500,
+      "median_lp_calls": 169,
+      "outcome_totals": {
+        "feasible": 1155,
+        "infeasible": 28,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "case_id": "grid-25",
+      "points": 25,
+      "attempts": 7,
+      "successes": 7,
+      "failures": 0,
+      "median_ns": 2135700,
+      "min_ns": 2097700,
+      "max_ns": 2160700,
+      "median_lp_calls": 25,
+      "outcome_totals": {
+        "feasible": 147,
+        "infeasible": 28,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    },
+    {
+      "case_id": "grid-81",
+      "points": 81,
+      "attempts": 7,
+      "successes": 7,
+      "failures": 0,
+      "median_ns": 7931900,
+      "min_ns": 7635100,
+      "max_ns": 8326100,
+      "median_lp_calls": 81,
+      "outcome_totals": {
+        "feasible": 539,
+        "infeasible": 28,
+        "unsupported": 0,
+        "stopped": 0,
+        "numerical_failure": 0,
+        "malformed_result": 0
+      }
+    }
+  ]
+}

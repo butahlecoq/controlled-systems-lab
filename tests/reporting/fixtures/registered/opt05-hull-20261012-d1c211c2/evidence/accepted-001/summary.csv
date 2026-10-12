@@ -1,0 +1,4 @@
+case_id,points,attempts,successes,failures,median_ns,min_ns,max_ns,median_lp_calls
+grid-169,169,7,7,0,19543100,19225200,21195900,169
+grid-25,25,7,7,0,2208600,2098800,2443100,25
+grid-81,81,7,7,0,7951000,7633100,8785100,81
