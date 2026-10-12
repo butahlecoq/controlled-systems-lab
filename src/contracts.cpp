@@ -13,6 +13,15 @@ bool matrix_matches(const Matrix& m, std::size_t rows, std::size_t cols) {
         m.values.size() == rows * cols;
 }
 struct OperationScope { std::vector<SetId> inputs; GeometryClaimScope claim; };
+bool valid_lineage(const std::vector<TransformStepIdentity>& lineage) {
+    std::set<std::string> requests;
+    for (const auto& step:lineage)
+        if (step.request.value.empty() || step.input.value.empty() || step.output.value.empty() ||
+            step.module.value.empty() || step.version.empty() ||
+            !requests.insert(step.request.value).second)
+            return false;
+    return true;
+}
 OperationScope operation_scope(const GeometryOperation& operation) {
     return std::visit(Overloaded{
         [](const AffineImage& op) { return OperationScope{{op.input.id},GeometryClaimScope::set_relation}; },
@@ -142,14 +151,9 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
         identity.request.profile.empty() || identity.strategy.value.empty() || identity.strategy_version.empty())
         result.push_back({DiagnosticCode::evidence_mismatch,"family.identity",
             "Publisher needs a resolved objective, effective request profile and strategy identity"});
-    std::set<std::string> transformation_requests;
-    for (const auto& step:identity.lineage) {
-        if (step.request.value.empty() || step.input.value.empty() || step.output.value.empty() ||
-            step.module.value.empty() || step.version.empty() ||
-            !transformation_requests.insert(step.request.value).second)
-            result.push_back({DiagnosticCode::invalid_claim,"family.lineage",
-                "Ordered transformation lineage requires distinct nonempty request and input/output/module/version identities"});
-    }
+    if (!valid_lineage(identity.lineage))
+        result.push_back({DiagnosticCode::invalid_claim,"family.lineage",
+            "Ordered transformation lineage requires distinct nonempty request and input/output/module/version identities"});
     std::visit(Overloaded{
         [&](const CompleteOptimalFamily& complete) {
             if (complete.relation.coordinates != identity.coordinates ||
@@ -311,6 +315,9 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
             const auto& rejected=std::get<ScopedRequestRejection>(result.stop);
             if (rejected.request.request.value.empty() || rejected.request.port.empty() || rejected.diagnostics.empty())
                 add(DiagnosticCode::invalid_claim,"result.stop.rejection","Scoped rejection needs the exact request identity, port and provider diagnostic");
+            if (!valid_lineage(rejected.completed_lineage))
+                add(DiagnosticCode::invalid_claim,"result.stop.rejection.lineage",
+                    "Completed transformation lineage requires distinct nonempty request and input/output/module/version identities");
             const RetainedEvidenceScope observed{result.objective.lower.has_value(),result.objective.upper.has_value(),
                 result.incumbents.size(),result.family.has_value()};
             if (rejected.retained.lower_bound!=observed.lower_bound ||
