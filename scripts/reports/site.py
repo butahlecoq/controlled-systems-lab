@@ -176,6 +176,19 @@ def catalogue_index(catalogue):
     return ''.join(parts)+"</ul></body></html>"
 
 
+def lp_convex_publication_metadata(kind,view):
+    expected_schema=data.CONVEX_SCHEMA if kind=="convex" else data.SCHEMA
+    data.require(kind in ("lp","convex") and view.get("schema")==expected_schema,"LP/convex kind/schema mismatch")
+    scenarios=view.get("payload",{}).get("scenarios")
+    data.require(isinstance(scenarios,list) and scenarios,"LP/convex scenario inventory required")
+    count_labels={5:"Five",9:"Nine"}
+    data.require(len(scenarios) in count_labels,"LP/convex scenario inventory differs from publication policy")
+    label="convex" if kind=="convex" else "LP"
+    scope=f"{count_labels[len(scenarios)]} analytic {label} microfixtures"
+    limits="Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates"
+    return scope,limits
+
+
 def stage(catalog_path,out,check=True,allow_test=False):
     catalog_path=Path(catalog_path);root=catalog_path.parent
     catalogue=data.parse_json(catalog_path.read_text(encoding="utf-8"))
@@ -232,6 +245,8 @@ def stage(catalog_path,out,check=True,allow_test=False):
         if catalogue["schema"]=="csl.algorithm-report-catalog/3":
             payload_schema=view["schema"]
             data.require(report.get("payload_schema")==payload_schema and isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"LP/convex common envelope metadata required")
+            expected_scope,expected_limits=lp_convex_publication_metadata(expected_kind,view)
+            data.require(report["measured_scope"]==expected_scope and report["evidence_limits"]==expected_limits,"LP/convex scope/evidence differs from validated report policy")
             publication=registered.PublicationRecord(expected_kind,rid,report["payload_sha256"],view["payload"]["provenance"]["source_commit"],report["measured_scope"],report["evidence_limits"],tuple(sorted(FILES)),payload_schema,report["native_payload_sha256"])
             source_page=data.local_file(root/rid,"index.html").read_text(encoding="utf-8")
             links='<p><a href="report-envelope.json">Versioned report envelope</a> · <a href="publication-manifest.json">Publication manifest</a></p>'

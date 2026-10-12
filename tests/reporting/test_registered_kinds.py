@@ -30,7 +30,7 @@ class RegisteredKindTests(unittest.TestCase):
             shutil.copyfile(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/(rid+'.zip'),root/(rid+'.source.zip'))
             view=site.validate_bundle(root/rid)
             kind=report['report_kind']
-            scope='HiGHS reference LP, five analytic microfixtures' if kind=='lp' else 'HiGHS reference convex, nine analytic microfixtures'
+            scope='Five analytic LP microfixtures' if kind=='lp' else 'Nine analytic convex microfixtures'
             limits='Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates'
             item=registered.PublicationRecord(kind,rid,registered._digest(view),report['source_commit'],scope,limits,tuple(sorted(site.FILES)),view['schema'],view['payload_sha256'])
             source_page=(root/rid/'index.html').read_text(encoding='utf-8')
