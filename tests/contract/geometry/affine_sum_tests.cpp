@@ -73,16 +73,19 @@ public:
 };
 class HighResidualConversionWorkspace final : public RepresentationConverterWorkspace {
     ConversionRequest request_;
+    double upper_vertex_;
+    double reported_residual_;
 public:
-    explicit HighResidualConversionWorkspace(ConversionRequest request) : request_(std::move(request)) {}
+    HighResidualConversionWorkspace(ConversionRequest request,double upper_vertex,double reported_residual)
+        : request_(std::move(request)),upper_vertex_(upper_vertex),reported_residual_(reported_residual) {}
     SetTransformOutcome convert(const ConversionRequest&,const ExecutionContext&) override {
         const auto output=take(sets::make_v({{"high-residual-conversion-output"},1,{}},
-            {take(numeric::snapshot(Matrix{2,1,{0,2}})),
+            {take(numeric::snapshot(Matrix{2,1,{0,upper_vertex_}})),
              take(numeric::snapshot(Matrix{0,1,{}}))})).as_handle();
         return OperationResult{output,SetRelation::equivalent,
             {{request_.identity,{request_.input.id}},GeometryClaimScope::set_relation,
-             NumericalCheck{0.0,0.0,1e100,{"test.high-residual"}},
-             {"incorrect finite vertices with a reported large residual"},{}}};
+             NumericalCheck{0.0,0.0,reported_residual_,{"test.high-residual"}},
+             {"test conversion output and reported residual"},{}}};
     }
 };
 Registration<ConversionPort> make_unestablished_conversion_registration() {
@@ -93,7 +96,12 @@ Registration<ConversionPort> make_unestablished_conversion_registration() {
 Registration<ConversionPort> make_high_residual_conversion_registration() {
     return {{{"test.conversion.high-residual"},"1"},
         [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
-        [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request); }};
+        [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request,1.0,1e100); }};
+}
+Registration<ConversionPort> make_inaccurate_conversion_registration() {
+    return {{{"test.conversion.inaccurate"},"1"},
+        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
+        [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request,2.0,0.0); }};
 }
 class SubnormalResidualHullWorkspace final : public geometry::HullReducerWorkspace {
 public:
@@ -258,7 +266,7 @@ TEST_CASE("public geometry operation rejects H-to-V vertices without numerical e
     CHECK(std::holds_alternative<Unsupported>(result));
 }
 
-TEST_CASE("public geometry operation rejects H-to-V output with residual outside caller policy") {
+TEST_CASE("public geometry operation rejects valid H-to-V vertices with excessive reported residual") {
     auto h=take(sets::make_h({{"h-interval-high-residual"},1,{}},
         {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
          take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
@@ -268,6 +276,19 @@ TEST_CASE("public geometry operation rejects H-to-V output with residual outside
     conversion_requirements.output.relation=SetRelation::equivalent;
     selected.conversion=provider(make_high_residual_conversion_registration(),conversion_requirements);
     const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"high-residual-conversion"),std::move(selected));
+    CHECK(std::holds_alternative<Unsupported>(result));
+}
+
+TEST_CASE("public geometry operation rejects an H-to-V vertex outside H rows despite zero reported residual") {
+    auto h=take(sets::make_h({{"h-interval-inaccurate"},1,{}},
+        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
+         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    auto selected=dependencies(false,false);
+    Requirements conversion_requirements;
+    conversion_requirements.output.representation={"csl.polyhedron.v"};
+    conversion_requirements.output.relation=SetRelation::equivalent;
+    selected.conversion=provider(make_inaccurate_conversion_registration(),conversion_requirements);
+    const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"inaccurate-conversion"),std::move(selected));
     CHECK(std::holds_alternative<Unsupported>(result));
 }
 
