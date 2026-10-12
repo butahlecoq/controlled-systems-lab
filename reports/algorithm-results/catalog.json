@@ -36,13 +36,13 @@
       "source_report_id": "opt05-hull-20261012-d1c211c2"
     },
     {
-      "report_id": "geo03-20261012-4648de7b2f8142311d90e39c21ecf1c9928c3a20148b4fe99b94dff47f7966fc",
+      "report_id": "geo03-20261012-30157d9ac59269cc26a2ca24dfd1744297971b435a8bba13dcb68f2a1dbcd104",
       "report_kind": "geo03-hv",
       "payload_sha256": "3c12ca12583170423a81142c8f4b743cf88a16e463267d6864ddda4b56bd9044",
       "source_commit": "ba83547b3495cc8017f720702083bcf76c71fb30",
       "measured_scope": "56 measured trials across four bounded 2D fixtures in both conversion directions",
       "evidence_limits": "contract fixtures only; no accepted workload-size baseline; bounded H/V cases only; no available competing adapter; numerical checks are not validated global certificates; no inner conversion phase timing; A17/A18 audit covers source lineage only; executable equivalence is not established",
-      "zip_sha256": "bde7cbf67c44de82a07ef0df9608427daaae2d3e1b26c8aac03e587158dd80c6",
+      "zip_sha256": "8e62aa3394ae02797329ab1244d863966a7c770fbcbdd60a51eb4362d8e49abe",
       "payload_schema": "csl.geo03-hv-report/1",
       "source_report_id": "geo03-20261012-3c12ca125831"
     }
