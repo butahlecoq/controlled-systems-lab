@@ -1,7 +1,7 @@
 # Portable run statistics
 
 `CSL::artifacts` publishes immutable scenario records and reads/writes the closed
-`csl.run-statistics/1` JSON format. Include `csl/artifacts/run_statistics.hpp` for
+`csl.run-statistics/2` JSON format. Include `csl/artifacts/run_statistics.hpp` for
 records and `csl/execution/observability.hpp` for bounded collection and RUN01
 projection. These additions preserve source contract 1.5 and mathematical identity
 version 1. No solver, estimator, mathematical verifier, family exporter, timer
@@ -54,9 +54,16 @@ raw diagnostics. Shapes and finite data are checked; serialization does not prov
 feasibility, optimality, uniqueness, attainment, family completeness or numerical
 reproduction.
 
-A family remains a joint relation with its canonical target and three evidence
-claims. With no exporter its payload is `unavailable_no_exporter`, while metadata
-and evidence survive. An external attachment is a digest/size/schema/media claim,
+A family record retains the source `FamilyIdentity` (resolved problem, effective
+family request, joint coordinates, strategy/version and ordered transformation
+lineage) and exactly one typed complete, partial or candidate product. The
+opaque live relation payload is never serialized. With no exporter its payload
+is `unavailable_no_exporter`, while relation metadata and evidence survive.
+Complete-family publication is refused until a reviewed coverage procedure is
+implemented at the synthesis boundary. Feasible incumbents retain their own
+feasibility support. A late generated-request rejection retains request/provider
+provenance, completed lineage and the scope of bounds, incumbents and candidate
+or partial family that survived the stop. An external attachment is a digest/size/schema/media claim,
 not an executable family or proof the referenced file exists. Supplied embedded
 bytes are hashed and checked. Paths are relative artifact references without
 absolute roots, drive prefixes, traversal or empty components; serialization
@@ -215,7 +222,7 @@ to a diagnostics-role attachment. A missing attachment remains explicit null.
 
 ## Wire format and compatibility
 
-The [schema](../artifacts/schemas/run-statistics-v1.schema.json) describes closed
+The [v2 schema](../artifacts/schemas/run-statistics-v2.schema.json) describes closed
 objects and variants. The checked codec additionally enforces integer width,
 UTF-8 byte limits, finite values, content digests, recomputed configuration ID,
 problem/config/run bindings, parent DAGs, capacities and reference semantics.
@@ -223,7 +230,12 @@ Input byte, string, node and depth limits are checked before unrestricted DOM
 growth; duplicate keys are rejected before overwrite. Unknown fields/tags/versions,
 noncanonical integers, invalid UTF-8, trailing input and contradictory metric
 variants are errors. New fields or variants require a new wire version and
-explicit reader policy. JSON types and native solver types do not cross the
+explicit reader policy. This reader accepts v2; the [v1 schema](../artifacts/schemas/run-statistics-v1.schema.json)
+and the [v1 fixture](../../tests/artifacts/fixtures/run-statistics-v1.json) remain
+historical evidence. V1 synthesis records are explicitly rejected with a schema
+error: their independent target/evidence fields cannot be safely upgraded to a
+typed family, and an old unestablished complete claim is never treated as proof.
+JSON types and native solver types do not cross the
 installed public boundary.
 
 Historical standalone LP/convex bootstrap reports retain their real ProgramIdentity

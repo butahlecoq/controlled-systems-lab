@@ -189,7 +189,7 @@ void closed(const Json& value,std::initializer_list<std::string_view> keys) {
 template<class T>struct Field {std::string_view name;T& value;};
 template<class T>Field<T> field(std::string_view key,T& value){return {key,value};}
 template<class... F>Json object(F... f){Json j=Json::object();((j[std::string(f.name)]=put(f.value)),...);return j;}
-template<class... F>void fields(const Json& j,F... f){closed(j,{f.name...});((f.value=get<std::remove_cvref_t<decltype(f.value)>>(j.at(std::string(f.name)))),...);}
+template<class... F>void fields(const Json& j,F... f){closed(j,{f.name...});([&]{try{f.value=get<std::remove_cvref_t<decltype(f.value)>>(j.at(std::string(f.name)));}catch(Invalid& error){error.path=std::string(f.name)+"."+error.path;throw;}}(),...);}
 template<>struct Codec<std::string>{static Json put(const std::string& v){return v;}static std::string get(const Json& j){require(j.is_string(),"json.string","Expected string");return j.get<std::string>();}};
 template<>struct Codec<bool>{static Json put(bool v){return v;}static bool get(const Json& j){require(j.is_boolean(),"json.boolean","Expected boolean");return j.get<bool>();}};
 template<class T>T integer(const Json& j) {
@@ -237,7 +237,8 @@ EN(CollectionMode,EV(CollectionMode,detail),EV(CollectionMode,summary))
 ST(CollectionSettings,F(enabled),F(mode),F(plan_spans),F(plan_bytes),F(detail_spans),F(detail_bytes))
 EN(Assurance,EV(Assurance,numerical),EV(Assurance,validated))
 EN(SetRelation,EV(SetRelation,equivalent),EV(SetRelation,inner),EV(SetRelation,outer),EV(SetRelation,heuristic))
-EN(Termination,EV(Termination,completed),EV(Termination,cancelled),EV(Termination,resource_limit),EV(Termination,numerical_failure))
+EN(Termination,EV(Termination,completed),EV(Termination,cancelled),EV(Termination,deadline_expired),EV(Termination,resource_limit),EV(Termination,numerical_failure),EV(Termination,operation_rejected))
+EN(StopReason,EV(StopReason,cancelled),EV(StopReason,deadline_expired),EV(StopReason,resource_limit),EV(StopReason,numerical_failure))
 EN(MathematicalOutcome,EV(MathematicalOutcome,optimal),EV(MathematicalOutcome,infeasible),EV(MathematicalOutcome,unbounded),EV(MathematicalOutcome,infimum_not_attained),EV(MathematicalOutcome,undetermined))
 EN(FamilyTarget,EV(FamilyTarget,exact_optimal_relation),EV(FamilyTarget,candidate_relaxation),EV(FamilyTarget,partial_relation))
 EN(ClockMetric,EV(ClockMetric,steady_wall),EV(ClockMetric,thread_cpu),EV(ClockMetric,process_cpu))
@@ -276,6 +277,30 @@ ST(GeometryRequestIdentity,F(problem),F(request),F(ideal_output)) ST(GeometryRef
 ST(GeometryErrorBound,F(metric),F(bound),F(units))
 ST(GeometryEvidence,F(reference),F(scope),F(support),F(assumptions),F(error_bound))
 ST(ClaimEvidence,F(problem),F(support)) ST(FamilyEvidence,F(feasibility),F(optimality),F(completeness))
+ST(NumericalPolicy,F(absolute_tolerance),F(relative_tolerance))
+ST(FamilyRequest,F(profile),F(objective),F(target),F(numerical),F(assurance),F(representation),F(materialization_limit))
+ST(TransformStepIdentity,F(request),F(input),F(output),F(module),F(version))
+ST(FamilyIdentity,F(problem),F(request),F(coordinates),F(strategy),F(strategy_version),F(lineage))
+ST(OptimumEvidence,F(optimum),F(bounds))
+ST(NumericalCoverageEvidence,F(procedure),F(policy),F(verifier),F(diagnostics))
+ST(ValidatedCoverageEvidence,F(certificate),F(verifier),F(arithmetic_profile))
+TAG(NumericalCoverageEvidence,"numerical") TAG(ValidatedCoverageEvidence,"validated")
+ST(CompletenessEvidence,F(binding),F(support))
+ST(JointRelation,F(coordinates),F(representation))
+ST(CompleteOptimalFamily,F(relation),F(optimum),F(completeness),F(assurance))
+ST(InnerSubsetEvidence,F(every_history_optimal),F(procedure)) ST(CoverageScope,F(description))
+ST(PartialOptimalFamily,F(relation),F(optimum),F(optimal_subset),F(known_scope))
+ST(OuterCandidateEvidence,F(enclosure)) ST(FeasibleCandidateEvidence,F(feasibility)) ST(HeuristicRelationEvidence,F(method))
+TAG(OuterCandidateEvidence,"outer") TAG(FeasibleCandidateEvidence,"feasible") TAG(HeuristicRelationEvidence,"heuristic")
+ST(CandidateFamily,F(relation),F(relation_to_target),F(feasibility))
+TAG(CompleteOptimalFamily,"complete") TAG(PartialOptimalFamily,"partial") TAG(CandidateFamily,"candidate")
+ST(OptimalFamily,F(identity),F(outcome))
+ST(OperationStopped,F(reason),F(diagnostics))
+ST(RequestProvenance,F(request),F(port),F(requested_module),F(requested_version),F(actual_module),F(actual_version))
+ST(RetainedEvidenceScope,F(lower_bound),F(upper_bound),F(incumbents),F(partial_or_candidate_family))
+ST(ScopedOperationStopped,F(stop),F(request),F(retained))
+ST(ScopedRequestRejection,F(request),F(diagnostics),F(completed_lineage),F(retained))
+EMPTY(std::monostate) TAG(std::monostate,"none") TAG(ScopedOperationStopped,"operation_stopped") TAG(ScopedRequestRejection,"request_rejected")
 template<class Subject>struct Codec<OutcomeClaim<Subject>>{static Json put(const OutcomeClaim<Subject>& v){return object(F(subject),F(value),F(support),F(assumptions));}static OutcomeClaim<Subject>get(const Json& j){OutcomeClaim<Subject>v{};fields(j,F(subject),F(value),F(support),F(assumptions));return v;}};
 ST(ObjectiveBound,F(value),F(evidence)) ST(ObjectiveEvidence,F(lower),F(upper))
 ST(ProgramBoundEvidence,F(subject),F(support),F(assumptions)) ST(ProgramObjectiveBound,F(value),F(evidence)) ST(ProgramObjectiveEvidence,F(lower),F(upper))
@@ -283,11 +308,12 @@ ST(Verifier,F(id),F(version)) ST(ResidualMeasure,F(violation),F(scale)) ST(Resid
 ST(PrimalResiduals,F(context),F(rows),F(variables)) ST(DualResiduals,F(context),F(stationarity),F(signs),F(complementarity)) ST(ProgramResiduals,F(primal),F(dual))
 ST(ProgramResult,F(termination),F(outcome),F(primal),F(objective),F(raw_diagnostics),F(residuals))
 ST(Dimensions,F(state),F(control),F(external)) ST(JointCoordinates,F(dimensions),F(horizon)) ST(Witness,F(problem),F(states),F(controls),F(original_objective))
-ST(WitnessBatch,F(witnesses),F(requested),F(selector),F(seed)) ST(WitnessSelection,F(batch),F(termination),F(diagnostics))
+ST(FeasibleIncumbent,F(witness),F(feasibility))
+ST(WitnessBatch,F(witnesses),F(requested),F(selector),F(seed),F(source_family)) ST(WitnessSelection,F(batch),F(termination),F(diagnostics))
 ST(ExternalFamilyPayload,F(attachment)) EMPTY(FamilyWithoutExporter)
 TAG(ExternalFamilyPayload,"external_reference") TAG(FamilyWithoutExporter,"unavailable_no_exporter")
-ST(FamilyRecord,F(problem),F(coordinates),F(representation),F(target),F(evidence),F(payload))
-ST(SynthesisFinal,F(termination),F(outcome),F(objective),F(family),F(incumbents)) ST(ProgramFinal,F(result),F(raw_diagnostics)) ST(UnsupportedFinal,F(diagnostics)) ST(SkippedFinal,F(reason)) ST(FailedFinal,F(phase),F(reason),F(message),F(raw_diagnostics))
+ST(FamilyRecord,F(family),F(payload))
+ST(SynthesisFinal,F(termination),F(outcome),F(objective),F(family),F(incumbents),F(stop)) ST(ProgramFinal,F(result),F(raw_diagnostics)) ST(UnsupportedFinal,F(diagnostics)) ST(SkippedFinal,F(reason)) ST(FailedFinal,F(phase),F(reason),F(message),F(raw_diagnostics))
 TAG(SynthesisFinal,"synthesis") TAG(ProgramFinal,"program") TAG(UnsupportedFinal,"unsupported") TAG(SkippedFinal,"skipped") TAG(FailedFinal,"failed")
 ST(AdmissionObservation,F(cause),F(at))
 ST(ExecutionSummary::Task,F(id),F(queued),F(admitted),F(create_started),F(create_finished),F(call_started),F(call_finished),F(released),F(status))
@@ -392,14 +418,14 @@ Json parse_document(std::string_view text,const DecodeLimits& limits) {
     });
 }
 Json run_json(const RunRecord& r) {
-    return {{"schema","csl.run-statistics/1"},{"problem",put(r.problem)},{"dimensions",put(r.dimensions)},
+    return {{"schema","csl.run-statistics/2"},{"problem",put(r.problem)},{"dimensions",put(r.dimensions)},
         {"horizon",put(r.horizon)},{"configuration",{{"id",put(r.configuration.identity())},{"value",configuration_record(r.configuration.description(),false)}}},
         {"run",put(r.run)},{"final",put(r.final)},{"statistics",put(r.statistics.description())},{"resources",put(r.resources)},
         {"execution",put(r.execution)},{"attachments",put(r.attachments)},{"provenance",put(r.provenance)},{"selection",put(r.selection)}};
 }
 ArtifactResult<RunStatistics> read_run(const Json& j) {
     closed(j,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection"});
-    require(get<std::string>(j.at("schema"))=="csl.run-statistics/1","schema","Unsupported run statistics version");
+    require(get<std::string>(j.at("schema"))=="csl.run-statistics/2","schema","Unsupported run statistics version");
     const auto& config=j.at("configuration");closed(config,{"id","value"});auto resolved=resolve_configuration(parse_configuration(config.at("value")));
     if(const auto* error=std::get_if<ArtifactError>(&resolved))return *error;
     const auto configuration=std::get<ResolvedConfiguration>(resolved);

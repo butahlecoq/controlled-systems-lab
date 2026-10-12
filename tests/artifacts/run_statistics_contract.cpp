@@ -156,7 +156,7 @@ TEST_CASE("portable run codec owns actual problem binding and disabled skipped o
     ar::RunRecord record{z.identity(),{0,0,0},0,config,{"disabled-run"},ar::SkippedFinal{ar::SkippedReason::cancelled},statistics,
         {missing,missing,missing,missing,true,ar::MemoryAccounting::unlimited},{},{},ar::ProblemProvenance::problem_revalidated};
     auto owner=accepted(ar::publish_run({z,record}));
-    auto wire=accepted(ar::encode_run(owner));CHECK(wire.find("csl.run-statistics/1")!=std::string::npos);
+    auto wire=accepted(ar::encode_run(owner));CHECK(wire.find("csl.run-statistics/2")!=std::string::npos);
     const auto restored=accepted(ar::decode_run(wire));wire.assign("destroyed producer buffer");
     CHECK(restored.description().problem.value=="csl.problem.v1.sha256:2320a9f596bfa8f5bdd8aa6d272ca96fe5ff229411b65e1ab3e6f469a27f815e");
     CHECK(restored.description().provenance==ar::ProblemProvenance::identity_recorded);
@@ -170,14 +170,14 @@ TEST_CASE("independent full history fixture retains witnesses family evidence ne
     REQUIRE(!text.empty());const auto owner=accepted(ar::decode_run(text));const auto& r=owner.description();
     CHECK(r.horizon==2);REQUIRE(r.statistics.description().spans.size()==4);
     const auto& final=std::get<ar::SynthesisFinal>(r.final);REQUIRE(final.incumbents.size()==2);
-    CHECK(final.incumbents[0].states==std::vector<Vector>{{0},{0},{1}});CHECK(final.incumbents[0].controls==std::vector<Vector>{{0},{1}});
-    CHECK(final.incumbents[1].states==std::vector<Vector>{{0},{1},{1}});CHECK(final.incumbents[1].controls==std::vector<Vector>{{1},{0}});
-    CHECK(final.incumbents[0].original_objective==0);REQUIRE(final.family.has_value());
-    CHECK(std::holds_alternative<Unestablished>(final.family->evidence.completeness.support));
+    CHECK(final.incumbents[0].witness.states==std::vector<Vector>{{0},{0},{1}});CHECK(final.incumbents[0].witness.controls==std::vector<Vector>{{0},{1}});
+    CHECK(final.incumbents[1].witness.states==std::vector<Vector>{{0},{1},{1}});CHECK(final.incumbents[1].witness.controls==std::vector<Vector>{{1},{0}});
+    CHECK(final.incumbents[0].witness.original_objective==0);REQUIRE(final.family.has_value());
+    CHECK(std::holds_alternative<Unestablished>(std::get<CandidateFamily>(final.family->family.outcome).feasibility.support));
     CHECK(std::get<ar::ExternalFamilyPayload>(final.family->payload).attachment.value=="family-relation");
     CHECK(problem::hex(r.attachments[1].content->digest())=="ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
     const auto restored=accepted(ar::decode_run(accepted(ar::encode_run(owner))));
-    CHECK(std::get<ar::SynthesisFinal>(restored.description().final).incumbents[1].controls==std::vector<Vector>{{1},{0}});
+    CHECK(std::get<ar::SynthesisFinal>(restored.description().final).incumbents[1].witness.controls==std::vector<Vector>{{1},{0}});
     CHECK(std::get<ar::Available<std::uint64_t>>(restored.description().statistics.description().buckets[0].inclusive_ticks).value==47);
 }
 TEST_CASE("post-join projection preserves earlier failure later cancellation and original deadline") {
@@ -208,11 +208,19 @@ namespace {
 std::string fixture_text(){std::ifstream source(CSL_STATISTICS_FIXTURE);return {std::istreambuf_iterator<char>{source},std::istreambuf_iterator<char>{}};}
 std::string changed(std::string source,std::string_view from,std::string_view to){const auto position=source.find(from);REQUIRE(position!=std::string::npos);source.replace(position,from.size(),to);return source;}
 }
+TEST_CASE("historical v1 synthesis record is retained but requires explicit migration") {
+    std::ifstream source(CSL_STATISTICS_V1_FIXTURE);
+    const std::string historical{std::istreambuf_iterator<char>{source},std::istreambuf_iterator<char>{}};
+    REQUIRE(historical.find("csl.run-statistics/1")!=std::string::npos);
+    const auto decoded=ar::decode_run(historical);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(decoded));
+    CHECK(std::get<ar::ArtifactError>(decoded).path=="schema");
+}
 TEST_CASE("strict codec rejects malformed variants duplicate keys forged identity and declared limits") {
     const auto fixture=fixture_text();
     const std::vector<std::pair<std::string,std::string>> cases{
-        {"csl.run-statistics/1","csl.run-statistics/2"},
-        {"\"schema\": \"csl.run-statistics/1\",","\"schema\": \"csl.run-statistics/1\", \"schema\": \"csl.run-statistics/1\","},
+        {"csl.run-statistics/2","csl.run-statistics/9"},
+        {"\"schema\": \"csl.run-statistics/2\",","\"schema\": \"csl.run-statistics/2\", \"schema\": \"csl.run-statistics/2\","},
         {"\"horizon\": \"2\"","\"horizon\": \"02\""},
         {"\"horizon\": \"2\"","\"horizon\": \"18446744073709551616\""},
         {"\"horizon\": \"2\"","\"horizon\": \"-1\""},
@@ -369,7 +377,7 @@ TEST_CASE("encoding rejects a byte limit before allocating output or rewriting t
     }
     CHECK_FALSE(escaped);REQUIRE(result.has_value());REQUIRE(std::holds_alternative<ar::ArtifactError>(*result));
     CHECK(std::get<ar::ArtifactError>(*result).code==ar::ArtifactErrorCode::limit);CHECK_FALSE(allocation_probe::injected);CHECK(allocation_probe::max_size<wire_size);
-    CHECK(std::get<ar::SynthesisFinal>(owner.description().final).incumbents[0].original_objective==0);
+    CHECK(std::get<ar::SynthesisFinal>(owner.description().final).incumbents[0].witness.original_objective==0);
 }
 TEST_CASE("versioned content options carry actual owned bytes and computed digest") {
     const std::array<std::byte,3> abc{std::byte{'a'},std::byte{'b'},std::byte{'c'}};const auto snapshot=problem::snapshot_content(abc);REQUIRE(std::holds_alternative<problem::ResolvedContent>(snapshot));
@@ -424,10 +432,65 @@ TEST_CASE("scenario publication rejects foreign module stage geometry and invali
 }
 TEST_CASE("canonical family projection without exporter preserves metadata and evidence") {
     const auto id=zero_problem().identity();const ClaimEvidence evidence{id,Unestablished{}};
-    SynthesisResult result{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},OptimalFamily{id,{{{0,0,0},0},{"joint"},{}},FamilyTarget::partial_relation,{evidence,evidence,evidence}},{},{}};
+    FamilyIdentity identity{id,{"nominal",id,FamilyTarget::candidate_relaxation,{0,0},Assurance::numerical,{"joint"},{}},{{0,0,0},0},{"joint"},"1",{}};
+    CandidateFamily candidate{{identity.coordinates,{"joint"},{}},HeuristicRelationEvidence{"fixture"},evidence};
+    SynthesisResult result{Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},OptimalFamily{identity,candidate},{},{}};
     const auto projected=ar::project_final(result);REQUIRE(projected.family.has_value());CHECK(std::holds_alternative<ar::FamilyWithoutExporter>(projected.family->payload));
-    CHECK(projected.family->target==FamilyTarget::partial_relation);CHECK(projected.family->problem==id);CHECK(std::holds_alternative<Unestablished>(projected.family->evidence.completeness.support));
+    CHECK(projected.family->family.identity==identity);
+    CHECK(std::holds_alternative<CandidateFamily>(projected.family->family.outcome));
+    CHECK(std::get<HeuristicRelationEvidence>(std::get<CandidateFamily>(projected.family->family.outcome).relation_to_target).method=="fixture");
     CHECK(std::holds_alternative<ar::Unavailable>(ar::Metric<std::uint64_t>{}));
+}
+TEST_CASE("artifact publication refuses an unreviewed complete family") {
+    auto record=accepted(ar::decode_run(fixture_text())).description();
+    auto& final=std::get<ar::SynthesisFinal>(record.final);
+    REQUIRE(final.family.has_value());
+    const auto identity=final.family->family.identity;
+    const auto relation=std::get<CandidateFamily>(final.family->family.outcome).relation;
+    final.family->family.outcome=CompleteOptimalFamily{relation,{{identity.problem,Unestablished{}},final.objective},{identity,NumericalCoverageEvidence{"residual-only",identity.request.numerical,{"fixture"},"no coverage review"}},Assurance::numerical};
+    const auto refused=ar::publish_run({integrator_problem(),record});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(refused));
+    CHECK(std::get<ar::ArtifactError>(refused).path=="run.final.synthesis.evidence");
+}
+TEST_CASE("partial family scope and optimal-membership evidence survive round trip") {
+    auto record=accepted(ar::decode_run(fixture_text())).description();
+    auto& final=std::get<ar::SynthesisFinal>(record.final);
+    REQUIRE(final.family.has_value());
+    const auto relation=std::get<CandidateFamily>(final.family->family.outcome).relation;
+    const ClaimEvidence supported{record.problem,SymbolicArgument{"analytic endpoints","two-step integrator"}};
+    final.family->family.outcome=PartialOptimalFamily{relation,{supported,final.objective},{supported,"direct substitution"},{"two endpoint histories"}};
+    const auto owner=accepted(ar::publish_run({integrator_problem(),record}));
+    const auto restored=accepted(ar::decode_run(accepted(ar::encode_run(owner))));
+    const auto& partial=std::get<PartialOptimalFamily>(std::get<ar::SynthesisFinal>(restored.description().final).family->family.outcome);
+    CHECK(partial.known_scope.description=="two endpoint histories");
+    CHECK(partial.optimal_subset.procedure=="direct substitution");
+    std::get<PartialOptimalFamily>(final.family->family.outcome).known_scope.description.clear();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_run({integrator_problem(),record})));
+}
+TEST_CASE("late request rejection retains bounds incumbent evidence and candidate relation") {
+    auto record=accepted(ar::decode_run(fixture_text())).description();
+    auto& final=std::get<ar::SynthesisFinal>(record.final);
+    final.termination=Termination::operation_rejected;
+    final.outcome.value=MathematicalOutcome::undetermined;
+    final.stop=ScopedRequestRejection{{{"generated-query"},"geometry",{"geometry-a"},{},std::optional<ModuleId>{ModuleId{"geometry-a"}},std::optional<std::string>{"1"}},
+        {{DiagnosticCode::unsupported,"projection","provider rejected generated request"}},
+        {},{true,true,final.incumbents.size(),true}};
+    const auto owner=accepted(ar::publish_run({integrator_problem(),record}));
+    const auto restored=accepted(ar::decode_run(accepted(ar::encode_run(owner)),integrator_problem()));
+    const auto& retained=std::get<ar::SynthesisFinal>(restored.description().final);
+    CHECK(retained.termination==Termination::operation_rejected);
+    CHECK(retained.objective.lower.has_value());CHECK(retained.objective.upper.has_value());
+    CHECK(retained.incumbents.size()==2);CHECK(retained.family.has_value());
+    CHECK(std::get<ScopedRequestRejection>(retained.stop).request.request.value=="generated-query");
+    std::get<ScopedRequestRejection>(final.stop).retained.incumbents=0;
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_run({integrator_problem(),record})));
+}
+TEST_CASE("family identity and request tampering is rejected on decode") {
+    const auto fixture=fixture_text();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_run(changed(fixture,"\"strategy_version\": \"1\"","\"strategy_version\": \"2\""))));
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_run(changed(fixture,"\"profile\": \"nominal\"","\"profile\": \"\""))));
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_run(changed(fixture,"\"materialization_limit\": null","\"materialization_limit\": \"-1\""))));
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_run(changed(fixture,"\"stop\": {\n        \"kind\": \"none\"","\"stop\": {\n        \"kind\": \"request_rejected\""))));
 }
 TEST_CASE("resolved auxiliary backend provenance participates in configuration identity") {
     auto c=configuration();c.modules.push_back({"native",{{"native-lp"},"1.11",ar::Unavailable{ar::MissingReason::not_exposed_by_adapter,""}}, {}});
@@ -476,7 +539,7 @@ TEST_CASE("wire dictionary references and escaped UTF8 byte limits are checked i
     for(const unsigned char c:id){escaped+="\\u00";escaped+=digits[c>>4];escaped+=digits[c&15];}
     CHECK(std::holds_alternative<ar::RunStatistics>(ar::decode_run(fixture,{1000000,1000000,64,86})));
     CHECK(std::holds_alternative<ar::RunStatistics>(ar::decode_run(changed(fixture,id,escaped),{1000000,1000000,64,86})));
-    const auto bad_version=ar::decode_run(changed(fixture,"csl.run-statistics/1","csl.run-statistics/9"));
+    const auto bad_version=ar::decode_run(changed(fixture,"csl.run-statistics/2","csl.run-statistics/9"));
     REQUIRE(std::holds_alternative<ar::ArtifactError>(bad_version));CHECK(std::get<ar::ArtifactError>(bad_version).path=="schema");
     const auto bad_integer=ar::decode_run(changed(fixture,"\"horizon\": \"2\"","\"horizon\": \"02\""));
     REQUIRE(std::holds_alternative<ar::ArtifactError>(bad_integer));CHECK(std::get<ar::ArtifactError>(bad_integer).path=="json.integer");

@@ -30,6 +30,13 @@ int main(){
         ar::RunRecord record{problem.identity(),{0,0,0},0,configuration,{"prefix-only"},ar::SkippedFinal{ar::SkippedReason::cancelled},statistics,
             {unknown,unknown,unknown,unknown,true,ar::MemoryAccounting::unlimited},{},{},ar::ProblemProvenance::problem_revalidated};
         const auto owner=accepted(ar::publish_run({problem,record}));
+        const ClaimEvidence feasibility{problem.identity(),SymbolicArgument{"zero-dimensional feasible history","resolved zero problem"}};
+        FamilyIdentity family_id{problem.identity(),{"nominal",problem.identity(),FamilyTarget::candidate_relaxation,{0,0},Assurance::numerical,{"joint"},{}},{{0,0,0},0},{"joint"},"1",{}};
+        SynthesisResult synthesis{Termination::completed,{problem.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},
+            OptimalFamily{family_id,CandidateFamily{{family_id.coordinates,{"joint"},{}},HeuristicRelationEvidence{"installed client"},feasibility}},{},{}};
+        const auto projected=ar::project_final(synthesis);
+        if(!projected.family||projected.family->family.identity!=family_id||
+           !std::holds_alternative<CandidateFamily>(projected.family->family.outcome))return 4;
         auto wire=accepted(ar::encode_run(owner));const auto restored=accepted(ar::decode_run(wire));wire.assign(1000,'x');config.modules.clear();
         if(restored.description().problem.value!="csl.problem.v1.sha256:2320a9f596bfa8f5bdd8aa6d272ca96fe5ff229411b65e1ab3e6f469a27f815e" ||
             restored.description().configuration.identity().value!="csl.config.v1.sha256:58af261ea42c3dc78dad8a7d1e037de2df3747a9342b1a4e77d771c6bf598411" ||
