@@ -27,7 +27,7 @@ class RegisteredKindTests(unittest.TestCase):
         for report in legacy['reports'][:2]:
             rid=report['report_id']
             shutil.copytree(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/rid,root/rid)
-            shutil.copyfile(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/(rid+'.zip'),root/(rid+'.source.zip'))
+            shutil.copyfile(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/(rid+'.source.zip'),root/(rid+'.source.zip'))
             view=site.validate_bundle(root/rid)
             kind=report['report_kind']
             scope='Five analytic LP microfixtures' if kind=='lp' else 'Nine analytic convex microfixtures'
