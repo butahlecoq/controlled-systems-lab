@@ -4,19 +4,19 @@
 namespace csl::registry {
 std::variant<WitnessSelection,Unsupported> SelectorPort::run(Workspace& workspace,const Request& request,
     const ExecutionContext& context) {
-    auto diagnostics=check_family_evidence(request.family,request.family.identity.problem,
-        request.family.identity.request.assurance);
+    auto diagnostics=check_family_evidence(request.family,request.family.identity().problem,
+        request.family.identity().request.assurance);
     if (!diagnostics.empty()) return Unsupported{std::move(diagnostics)};
     auto selection=workspace.select(request.family,request.selection,context);
     if (auto* result=std::get_if<WitnessSelection>(&selection)) {
-        if (result->batch.source_family && *result->batch.source_family!=request.family.identity)
+        if (result->batch.source_family && *result->batch.source_family!=request.family.identity())
             return Unsupported{{{DiagnosticCode::evidence_mismatch,"selection.source_family",
                 "Selector reported a different source family identity"}}};
         for (const auto& witness:result->batch.witnesses)
-            if (witness.problem!=request.family.identity.problem)
+            if (witness.problem!=request.family.identity().problem)
                 return Unsupported{{{DiagnosticCode::evidence_mismatch,"selection.witness.problem",
                     "Selected witness belongs to another resolved problem"}}};
-        result->batch.source_family=request.family.identity;
+        result->batch.source_family=request.family.identity();
     }
     return selection;
 }
@@ -54,7 +54,7 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     if (retained.family && !check_family_evidence(*retained.family,id,request.family.assurance).empty())
         retained.family.reset();
     if (retained.family) {
-        const auto& identity=retained.family->identity;
+        const auto& identity=retained.family->identity();
         if (identity.problem!=expected.problem || identity.request!=expected.request ||
             identity.coordinates!=expected.coordinates || identity.strategy!=expected.strategy ||
             identity.strategy_version!=expected.strategy_version) retained.family.reset();
@@ -62,12 +62,11 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     if (retained.family && retained.family->target()==FamilyTarget::exact_optimal_relation) retained.family.reset();
     const RetainedEvidenceScope scope{retained.objective.lower.has_value(),retained.objective.upper.has_value(),
         retained.incumbents.size(),retained.family.has_value()};
-    std::vector<TransformStepIdentity> lineage;
-    if (answer.family) lineage=answer.family->identity.lineage;
-    retained.termination=Termination::operation_rejected;
-    retained.stop=ScopedRequestRejection{{{id.value+"/strategy-result"},StrategyPort::name,
-        request.configuration.strategy,request.strategy_version,request.configuration.strategy,request.strategy_version},
-        std::move(diagnostics),std::move(lineage),scope};
+    SourceStopEvidence source_stop{};
+    if (const auto* stopped=std::get_if<ScopedOperationStopped>(&answer.stop)) source_stop=*stopped;
+    if (const auto* rejected=std::get_if<ScopedRequestRejection>(&answer.stop)) source_stop=*rejected;
+    retained.termination=Termination::contract_rejected;
+    retained.stop=ContractValidationFailure{std::move(diagnostics),scope,std::move(source_stop)};
     return retained;
 }
 std::optional<Rejection> StrategyRegistry::add(StrategyRegistration entry) {

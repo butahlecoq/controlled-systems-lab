@@ -710,12 +710,12 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
             const ExecutionContext&) override {
             const auto id=problem.identity();
             const ClaimEvidence support{id,SymbolicArgument{"synthetic fixture assertion","literal fixture only"}};
-            const FamilyIdentity identity{id,request,problem.constraints().coordinates(),{"synthetic"},"1",{}};
-            const JointRelation relation{identity.coordinates,{"joint"},std::make_shared<const JointRelationPayload>()};
+            FamilyIdentity identity{id,request,problem.constraints().coordinates(),{"synthetic"},"1",{}};
+            const JointRelation relation{identity.coordinates,request.representation,std::make_shared<const JointRelationPayload>()};
             SynthesisResult result{Termination::completed,
                 {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
                 {{{id,{{0},{1}},{{1}},5},support}}, {}};
-            if (request.profile=="late-provider-rejection") {
+            if (request.profile=="late-provider-rejection" || request.profile=="malformed-provider-rejection") {
                 result.termination=Termination::operation_rejected;
                 result.stop=ScopedRequestRejection{
                     RequestProvenance{{"generated/lp/7"},"lp",{"endpoint"},std::string{"1.0"},
@@ -723,6 +723,11 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
                     {{DiagnosticCode::unsupported,"lp.generated","provider rejected generated request"}},
                     {{{"transform/4"},{"input/set"},{"output/set"},{"converter"},"2"}},
                     {false,false,1,false}};
+                if (request.profile=="malformed-provider-rejection") {
+                    auto wrong=identity;wrong.strategy={"other-strategy"};
+                    result.family=std::get<OptimalFamily>(FamilyPublisher::publish(wrong,CandidateFamily{
+                        relation,HeuristicRelationEvidence{"synthetic"},Unestablished{}}));
+                }
                 return result;
             }
             if (request.profile=="user-cancel" || request.profile=="deadline") {
@@ -735,18 +740,29 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
                 return result;
             }
             if (request.target==FamilyTarget::candidate_relaxation) {
-                result.family=OptimalFamily{identity,CandidateFamily{relation,HeuristicRelationEvidence{"synthetic"},support}};
+                auto candidate_identity=identity;
+                if (request.profile=="candidate-identity-mismatch") candidate_identity.strategy={"other-strategy"};
+                auto published=FamilyPublisher::publish(candidate_identity,CandidateFamily{relation,
+                    HeuristicRelationEvidence{"synthetic"},WitnessFeasibilityEvidence{result.incumbents[0].witness,support}});
+                result.family=std::get<OptimalFamily>(std::move(published));
             } else if (request.target==FamilyTarget::partial_relation) {
-                result.family=OptimalFamily{identity,PartialOptimalFamily{relation,{support,{}},
-                    {support,"literal subset proof"},{"one supported witness"}}};
+                auto refused=FamilyPublisher::publish(identity,PartialOptimalFamily{relation,{support,{}},
+                    {support,"literal subset proof"},{"one supported witness"}});
+                result.termination=Termination::contract_rejected;
+                result.stop=ContractValidationFailure{std::get<Diagnostics>(std::move(refused)),
+                    {false,false,1,false},{}};
             } else {
                 result.outcome={id,MathematicalOutcome::optimal,support.support,{}};
-                result.family=OptimalFamily{identity,CompleteOptimalFamily{relation,{support,{}},
-                    {identity,NumericalCoverageEvidence{"unreviewed",request.numerical,{"fixture"},""}},
-                    Assurance::numerical}};
                 if (request.profile=="lineage-mismatch")
-                    result.family->identity.lineage.push_back({{"generated/transform/1"},{"input/set"},
+                    identity.lineage.push_back({{"generated/transform/1"},{"input/set"},
                         {"output/set"},{"converter"},"2"});
+                auto refused=FamilyPublisher::publish(identity,CompleteOptimalFamily{relation,{support,{}},
+                    {FamilyIdentity{id,request,problem.constraints().coordinates(),{"synthetic"},"1",{}},
+                        NumericalCoverageEvidence{"unreviewed",request.numerical,{"fixture"},""}},
+                    Assurance::numerical});
+                result.termination=Termination::contract_rejected;
+                result.stop=ContractValidationFailure{std::get<Diagnostics>(std::move(refused)),
+                    {false,false,1,false},{}};
             }
             return result;
         }
@@ -772,12 +788,12 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
         CHECK(result.incumbents[0].witness.original_objective==5);
         CHECK(result.incumbents[0].feasibility.problem==request.problem.identity());
         if (target!=FamilyTarget::candidate_relaxation) {
-            CHECK(result.termination==Termination::operation_rejected);
+            CHECK(result.termination==Termination::contract_rejected);
             CHECK_FALSE(result.family.has_value());
-            REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
-            CHECK(std::get<ScopedRequestRejection>(result.stop).retained.incumbents==1);
+            REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+            CHECK(std::get<ContractValidationFailure>(result.stop).retained.incumbents==1);
             if (target==FamilyTarget::partial_relation) {
-                const auto& diagnostics=std::get<ScopedRequestRejection>(result.stop).diagnostics;
+                const auto& diagnostics=std::get<ContractValidationFailure>(result.stop).diagnostics;
                 CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const auto& value){
                     return value.field=="family.partial.optimality" && value.code==DiagnosticCode::unsupported;
                 }));
@@ -786,7 +802,9 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
             CHECK(result.termination==Termination::completed);
             REQUIRE(result.family.has_value());
             CHECK(result.family->target()==target);
-            CHECK(result.family->identity.request==request.family);
+            CHECK(result.family->identity().request==request.family);
+            const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+            CHECK(std::holds_alternative<WitnessFeasibilityEvidence>(candidate.feasibility));
         }
     }
     auto request=strategy_request();request.configuration.strategy={"synthetic"};
@@ -805,6 +823,19 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
     CHECK(rejection.completed_lineage[0].request.value=="transform/4");
     CHECK(rejection.retained.incumbents==1);
     CHECK(result.incumbents[0].witness.original_objective==5);
+    request.family.profile="malformed-provider-rejection";
+    auto malformed_provider=registry.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(malformed_provider));
+    auto malformed_answer=std::get<PreparedStrategy>(std::move(malformed_provider)).create()->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(malformed_answer));
+    const auto& malformed_result=std::get<SynthesisResult>(malformed_answer);
+    CHECK(malformed_result.termination==Termination::contract_rejected);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(malformed_result.stop));
+    const auto& original_stop=std::get<ContractValidationFailure>(malformed_result.stop).source_stop;
+    REQUIRE(std::holds_alternative<ScopedRequestRejection>(original_stop));
+    CHECK(std::get<ScopedRequestRejection>(original_stop).request.request.value=="generated/lp/7");
+    CHECK(std::get<ScopedRequestRejection>(original_stop).completed_lineage[0].request.value=="transform/4");
+    CHECK_FALSE(malformed_result.family.has_value());
     request.family.profile="lineage-mismatch";
     request.family.target=FamilyTarget::exact_optimal_relation;
     Requirements exact;exact.output.family=FamilyTarget::exact_optimal_relation;
@@ -813,13 +844,24 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
     auto mismatch=std::get<PreparedStrategy>(std::move(malformed)).create()->run(context());
     REQUIRE(std::holds_alternative<SynthesisResult>(mismatch));
     const auto& rejected=std::get<SynthesisResult>(mismatch);
-    CHECK(rejected.termination==Termination::operation_rejected);
+    CHECK(rejected.termination==Termination::contract_rejected);
     CHECK_FALSE(rejected.family.has_value());
-    const auto& diagnostic=std::get<ScopedRequestRejection>(rejected.stop).diagnostics;
+    const auto& diagnostic=std::get<ContractValidationFailure>(rejected.stop).diagnostics;
     CHECK(std::any_of(diagnostic.begin(),diagnostic.end(),[](const auto& value){
         return value.field=="family.completeness.binding";
     }));
     request.family.target=FamilyTarget::candidate_relaxation;
+    request.family.profile="candidate-identity-mismatch";
+    auto candidate_prepared=registry.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(candidate_prepared));
+    auto candidate_answer=std::get<PreparedStrategy>(std::move(candidate_prepared)).create()->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(candidate_answer));
+    const auto& candidate_rejected=std::get<SynthesisResult>(candidate_answer);
+    CHECK(candidate_rejected.termination==Termination::contract_rejected);
+    CHECK_FALSE(candidate_rejected.family.has_value());
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(candidate_rejected.stop));
+    CHECK(std::get<ContractValidationFailure>(candidate_rejected.stop).retained.incumbents==1);
+    CHECK(std::holds_alternative<std::monostate>(std::get<ContractValidationFailure>(candidate_rejected.stop).source_stop));
     for (const auto& [profile,reason]:{
         std::pair{"user-cancel",StopReason::cancelled},
         std::pair{"deadline",StopReason::deadline_expired}}) {

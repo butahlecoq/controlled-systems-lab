@@ -200,7 +200,10 @@ protected:
             records_.emplace_back(LPQuerySolverUnsupported{request.identity(),provider,unsupported->diagnostics});
         else {
             const auto& result=std::get<ProgramResult>(outcome);
-            if(result.termination==Termination::completed)
+            if(result.termination==Termination::operation_rejected || result.termination==Termination::contract_rejected)
+                records_.emplace_back(LPQuerySolverUnsupported{request.identity(),provider,
+                    {{DiagnosticCode::invalid_claim,"lp.termination","Synthesis-only termination is invalid for an LP result"}}});
+            else if(result.termination==Termination::completed)
                 records_.emplace_back(LPQueryCompleted{request.identity(),result.outcome.subject,provider,result.outcome.value});
             else {
                 LPQueryStopReason reason=LPQueryStopReason::numerical_failure;
@@ -208,6 +211,8 @@ protected:
                 case Termination::cancelled: reason=LPQueryStopReason::cancelled; break;
                 case Termination::resource_limit: reason=LPQueryStopReason::resource_limit; break;
                 case Termination::numerical_failure: reason=LPQueryStopReason::numerical_failure; break;
+                case Termination::operation_rejected: break; // handled before this branch
+                case Termination::contract_rejected: break; // handled before this branch
                 case Termination::completed: break;
                 }
                 records_.emplace_back(LPQueryStopped{request.identity(),provider,reason});

@@ -155,9 +155,10 @@ inline OptimalFamily candidate_family() {
     FamilyRequest request{"nominal_open_loop",{"problem"},FamilyTarget::candidate_relaxation,
         {1e-8,1e-8},Assurance::numerical,{"joint"},{}};
     FamilyIdentity identity{{"problem"},request,{{1,1,0},1},{"strategy"},"1",{}};
-    ClaimEvidence unknown{{"problem"},Unestablished{}};
-    return {identity,CandidateFamily{{identity.coordinates,{"joint"},std::make_shared<const JointRelationPayload>()},
-        HeuristicRelationEvidence{"fixture"},unknown}};
+    auto published=FamilyPublisher::publish(identity,CandidateFamily{
+        {identity.coordinates,{"joint"},std::make_shared<const JointRelationPayload>()},
+        HeuristicRelationEvidence{"fixture"},Unestablished{}});
+    return std::get<OptimalFamily>(std::move(published));
 }
 class BasisFixture final : public BasisDiagnostics {
 public:

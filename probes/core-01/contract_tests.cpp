@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/contracts.hpp>
 #include <type_traits>
+#include <algorithm>
 #include <limits>
 #include <utility>
 
@@ -9,6 +10,8 @@ using namespace csl;
 static_assert(!std::is_copy_constructible_v<LPWorkspace>);
 static_assert(!std::is_copy_constructible_v<SynthesisWorkspace>);
 static_assert(!std::is_convertible_v<WitnessBatch, OptimalFamily>);
+static_assert(!std::is_aggregate_v<OptimalFamily>);
+static_assert(!std::is_default_constructible_v<OptimalFamily>);
 static_assert(!std::is_same_v<ProblemId, ModuleId>);
 
 namespace {
@@ -21,7 +24,7 @@ Problem make_problem() {
         LinearTerminal{{1},0}};
 }
 struct RelationFixture : JointRelationPayload {};
-OptimalFamily family() {
+std::pair<FamilyIdentity,OptimalFamilyOutcome> family() {
     ClaimEvidence optimum{{"test/singular"}, SymbolicArgument{"fixture optimum","fixture assumptions"}};
     FamilyRequest request{"nominal",{"test/singular"},FamilyTarget::exact_optimal_relation,
         {1e-8,1e-8},Assurance::numerical,{"fixture/joint"},{}};
@@ -71,49 +74,67 @@ TEST_CASE("model shape checks reject malformed input but allow absent ports and 
     CHECK(rejected[0].code == DiagnosticCode::invalid_input);
 }
 TEST_CASE("T-V02: complete-family publication waits for reviewed coverage evidence") {
-    auto f = family();
-    const auto numerical = check_family_evidence(f, {"test/singular"}, Assurance::numerical);
-    REQUIRE_FALSE(numerical.empty());
-    CHECK(numerical[0].field == "family.completeness");
-    auto rejected = check_family_evidence(f, {"test/singular"}, Assurance::validated);
-    REQUIRE_FALSE(rejected.empty());
-    CHECK(rejected[0].code == DiagnosticCode::unsupported);
+    auto [identity,outcome] = family();
+    const auto numerical = FamilyPublisher::publish(identity,outcome);
+    REQUIRE(std::holds_alternative<Diagnostics>(numerical));
+    const auto& diagnostics=std::get<Diagnostics>(numerical);
+    REQUIRE_FALSE(diagnostics.empty());
+    CHECK(diagnostics[0].field == "family.completeness");
+    identity.request.assurance=Assurance::validated;
+    auto rejected=FamilyPublisher::publish(identity,outcome);
+    REQUIRE(std::holds_alternative<Diagnostics>(rejected));
+    CHECK(std::get<Diagnostics>(rejected)[0].code==DiagnosticCode::unsupported);
 }
 TEST_CASE("T-V02: evidence is bound to the expected problem for every claim") {
-    auto f = family();
-    SUBCASE("family") { f.identity.problem = {"other"}; }
-    SUBCASE("optimality") { std::get<CompleteOptimalFamily>(f.outcome).optimum.optimum.problem = {"other"}; }
-    SUBCASE("completeness") { std::get<CompleteOptimalFamily>(f.outcome).completeness.binding.problem = {"other"}; }
-    auto rejected = check_family_evidence(f, {"test/singular"}, Assurance::numerical);
-    REQUIRE_FALSE(rejected.empty());
-    CHECK(rejected[0].code == DiagnosticCode::evidence_mismatch);
+    auto [identity,outcome] = family();
+    SUBCASE("family") { identity.problem = {"other"}; }
+    SUBCASE("optimality") { std::get<CompleteOptimalFamily>(outcome).optimum.optimum.problem = {"other"}; }
+    SUBCASE("completeness") { std::get<CompleteOptimalFamily>(outcome).completeness.binding.problem = {"other"}; }
+    auto rejected=FamilyPublisher::publish(identity,outcome);
+    REQUIRE(std::holds_alternative<Diagnostics>(rejected));
+    const auto& diagnostics=std::get<Diagnostics>(rejected);
+    CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const auto& d){return d.code==DiagnosticCode::evidence_mismatch;}));
 }
 TEST_CASE("T-V02: partial or relaxed relations cannot claim full optimal-family coverage") {
-    auto f = family();
-    auto relation=std::get<CompleteOptimalFamily>(f.outcome).relation;
+    auto [identity,outcome] = family();
+    auto relation=std::get<CompleteOptimalFamily>(outcome).relation;
     ClaimEvidence claim{{"test/singular"},SymbolicArgument{"fixture proof","fixture assumptions"}};
     SUBCASE("partial") {
-        f.identity.request.target=FamilyTarget::partial_relation;
-        f.outcome=PartialOptimalFamily{relation,{claim,{}},{claim,"fixture membership proof"},{"specified inner slice"}};
-        CHECK(f.target()==FamilyTarget::partial_relation);
+        identity.request.target=FamilyTarget::partial_relation;
+        outcome=PartialOptimalFamily{relation,{claim,{}},{claim,"fixture membership proof"},{"specified inner slice"}};
     }
     SUBCASE("candidate") {
-        f.identity.request.target=FamilyTarget::candidate_relaxation;
-        f.outcome=CandidateFamily{relation,FeasibleCandidateEvidence{claim},claim};
-        CHECK(f.target()==FamilyTarget::candidate_relaxation);
+        identity.request.target=FamilyTarget::candidate_relaxation;
+        outcome=CandidateFamily{relation,FeasibleCandidateEvidence{claim},RelationFeasibilityEvidence{claim}};
     }
-    const auto checked=check_family_evidence(f,{"test/singular"},Assurance::numerical);
-    if (f.target()==FamilyTarget::partial_relation) {
-        REQUIRE_FALSE(checked.empty());
-        CHECK(checked[0].code==DiagnosticCode::unsupported);
-        CHECK(checked[0].field=="family.partial.optimality");
-    } else CHECK(checked.empty());
+    const auto checked=FamilyPublisher::publish(identity,outcome);
+    if (identity.request.target==FamilyTarget::partial_relation) {
+        REQUIRE(std::holds_alternative<Diagnostics>(checked));
+        CHECK(std::get<Diagnostics>(checked)[0].field=="family.partial.optimality");
+    } else CHECK(std::holds_alternative<OptimalFamily>(checked));
 }
 TEST_CASE("T-V02: a numerical check alone cannot establish completeness") {
-    auto f = family();
-    auto rejected = check_family_evidence(f, {"test/singular"}, Assurance::numerical);
-    REQUIRE(rejected.size() == 1);
-    CHECK(rejected[0].code == DiagnosticCode::unsupported);
+    auto [identity,outcome] = family();
+    auto rejected=FamilyPublisher::publish(identity,outcome);
+    REQUIRE(std::holds_alternative<Diagnostics>(rejected));
+    REQUIRE(std::get<Diagnostics>(rejected).size()==1);
+    CHECK(std::get<Diagnostics>(rejected)[0].code==DiagnosticCode::unsupported);
+}
+TEST_CASE("outer candidate witness feasibility is scoped to that witness") {
+    auto [identity,outcome]=family();
+    identity.request.target=FamilyTarget::candidate_relaxation;
+    auto relation=std::get<CompleteOptimalFamily>(outcome).relation;
+    const ClaimEvidence support{identity.problem,SymbolicArgument{"fixture","fixture"}};
+    const Witness witness{identity.problem,{{0},{1}},{{1}},1};
+    outcome=CandidateFamily{relation,OuterCandidateEvidence{support},WitnessFeasibilityEvidence{witness,support}};
+    auto published=FamilyPublisher::publish(identity,outcome);
+    REQUIRE(std::holds_alternative<OptimalFamily>(published));
+    const auto& candidate=std::get<CandidateFamily>(std::get<OptimalFamily>(published).outcome());
+    CHECK(std::holds_alternative<OuterCandidateEvidence>(candidate.relation_to_target));
+    CHECK(std::holds_alternative<WitnessFeasibilityEvidence>(candidate.feasibility));
+    auto bad_witness=witness;bad_witness.problem={"other"};
+    outcome=CandidateFamily{relation,OuterCandidateEvidence{support},WitnessFeasibilityEvidence{bad_witness,support}};
+    CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,outcome)));
 }
 TEST_CASE("T-M03: nonpolyhedral stage domains need another pipeline") {
     auto p = make_problem();

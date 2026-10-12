@@ -3,6 +3,7 @@
 #include <cmath>
 #include <utility>
 #include <set>
+#include <algorithm>
 namespace csl {
 namespace {
 template<class... Visitors> struct Overloaded : Visitors... { using Visitors::operator()...; };
@@ -132,12 +133,17 @@ Diagnostics check_nominal_profile(const Problem& p, bool requires_inverse, Assur
 }
 Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& expected, Assurance assurance) {
     Diagnostics result;
+    const auto& identity=family.identity();
     if (assurance == Assurance::validated)
         result.push_back({DiagnosticCode::unsupported,"assurance","Numerical checks, symbolic arguments and unchecked certificate references are not validated evidence"});
-    if (family.identity.problem != expected)
+    if (identity.problem != expected)
         result.push_back({DiagnosticCode::evidence_mismatch,"family.problem","Family does not belong to expected problem"});
+    if (identity.problem.value.empty() || identity.request.objective!=identity.problem ||
+        identity.request.profile.empty() || identity.strategy.value.empty() || identity.strategy_version.empty())
+        result.push_back({DiagnosticCode::evidence_mismatch,"family.identity",
+            "Publisher needs a resolved objective, effective request profile and strategy identity"});
     std::set<std::string> transformation_requests;
-    for (const auto& step:family.identity.lineage) {
+    for (const auto& step:identity.lineage) {
         if (step.request.value.empty() || step.input.value.empty() || step.output.value.empty() ||
             step.module.value.empty() || step.version.empty() ||
             !transformation_requests.insert(step.request.value).second)
@@ -146,8 +152,8 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
     }
     std::visit(Overloaded{
         [&](const CompleteOptimalFamily& complete) {
-            if (complete.relation.coordinates != family.identity.coordinates ||
-                complete.completeness.binding != family.identity ||
+            if (complete.relation.coordinates != identity.coordinates ||
+                complete.completeness.binding != identity ||
                 complete.optimum.optimum.problem != expected)
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.binding","Complete-family evidence does not bind the resolved problem, effective request, coordinates, strategy and ordered lineage"});
             if (complete.assurance != assurance)
@@ -159,7 +165,7 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
             result.push_back({DiagnosticCode::unsupported,"family.completeness","Complete-family publication is disabled until reviewed coverage evidence is implemented"});
         },
         [&](const PartialOptimalFamily& partial) {
-            if (partial.relation.coordinates != family.identity.coordinates ||
+            if (partial.relation.coordinates != identity.coordinates ||
                 partial.optimum.optimum.problem != expected ||
                 partial.optimal_subset.every_history_optimal.problem != expected)
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.partial","Partial-family evidence does not bind the joint relation and problem"});
@@ -172,8 +178,33 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 "No reviewed verifier can establish that every history in a partial relation is optimal"});
         },
         [&](const CandidateFamily& candidate) {
-            if (candidate.relation.coordinates != family.identity.coordinates || candidate.feasibility.problem != expected)
+            if (candidate.relation.coordinates != identity.coordinates)
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate","Candidate relation does not bind the joint coordinates and problem"});
+            std::visit(Overloaded{
+                [&](const Unestablished&) {},
+                [&](const RelationFeasibilityEvidence& feasibility) {
+                    if (feasibility.support.problem!=expected ||
+                        std::holds_alternative<Unestablished>(feasibility.support.support))
+                        result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.feasibility.relation",
+                            "Whole-relation feasibility needs supported evidence for this problem"});
+                },
+                [&](const WitnessFeasibilityEvidence& feasibility) {
+                    if (feasibility.support.problem!=expected || feasibility.witness.problem!=expected ||
+                        std::holds_alternative<Unestablished>(feasibility.support.support) ||
+                        !std::isfinite(feasibility.witness.original_objective) ||
+                        identity.coordinates.horizon==std::numeric_limits<std::size_t>::max() ||
+                        feasibility.witness.states.size()!=identity.coordinates.horizon+1 ||
+                        feasibility.witness.controls.size()!=identity.coordinates.horizon ||
+                        std::any_of(feasibility.witness.states.begin(),feasibility.witness.states.end(),[&](const Vector& state){
+                            return state.size()!=identity.coordinates.dimensions.state ||
+                                std::any_of(state.begin(),state.end(),[](double value){return !std::isfinite(value);});}) ||
+                        std::any_of(feasibility.witness.controls.begin(),feasibility.witness.controls.end(),[&](const Vector& control){
+                            return control.size()!=identity.coordinates.dimensions.control ||
+                                std::any_of(control.begin(),control.end(),[](double value){return !std::isfinite(value);});}))
+                        result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.feasibility.witness",
+                            "Witness-scoped feasibility needs a supported full history for this problem"});
+                }
+            },candidate.feasibility);
             std::visit(Overloaded{
                 [&](const OuterCandidateEvidence& relation) { if (relation.enclosure.problem != expected)
                     result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.outer","Outer evidence is bound to another problem"});
@@ -187,8 +218,18 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                     result.push_back({DiagnosticCode::invalid_claim,"family.candidate.heuristic","Heuristic relation must name its method"}); }
             },candidate.relation_to_target);
         }
-    },family.outcome);
+    },family.outcome());
+    const auto& relation=std::visit([](const auto& product)->const JointRelation&{return product.relation;},family.outcome());
+    if (relation.representation!=identity.request.representation)
+        result.push_back({DiagnosticCode::evidence_mismatch,"family.representation",
+            "Published relation representation differs from the effective family request"});
     return result;
+}
+std::variant<OptimalFamily,Diagnostics> FamilyPublisher::publish(FamilyIdentity identity,OptimalFamilyOutcome outcome) {
+    OptimalFamily proposed{std::move(identity),std::move(outcome)};
+    auto diagnostics=check_family_evidence(proposed,proposed.identity().problem,proposed.identity().request.assurance);
+    if (!diagnostics.empty()) return diagnostics;
+    return proposed;
 }
 Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIdentity& expected) {
     Diagnostics diagnostics=check_outcome_evidence(result.outcome,expected.problem,expected.request.assurance);
@@ -206,7 +247,7 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
             std::holds_alternative<Unestablished>(incumbent.feasibility.support))
             add(DiagnosticCode::evidence_mismatch,"result.incumbents","An incumbent has the wrong problem or a nonfinite objective");
     if (result.family) {
-        const auto& identity=result.family->identity;
+        const auto& identity=result.family->identity();
         if (identity.problem!=expected.problem || identity.request!=expected.request ||
             identity.coordinates!=expected.coordinates || identity.strategy!=expected.strategy ||
             identity.strategy_version!=expected.strategy_version)
@@ -243,6 +284,20 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
         }
     } else if (std::holds_alternative<ScopedRequestRejection>(result.stop))
         add(DiagnosticCode::invalid_claim,"result.stop","ScopedRequestRejection requires operation_rejected termination");
+    if (result.termination==Termination::contract_rejected) {
+        if (!std::holds_alternative<ContractValidationFailure>(result.stop))
+            add(DiagnosticCode::invalid_claim,"result.stop","contract_rejected requires ContractValidationFailure");
+        else {
+            const auto& failure=std::get<ContractValidationFailure>(result.stop);
+            const RetainedEvidenceScope observed{result.objective.lower.has_value(),result.objective.upper.has_value(),
+                result.incumbents.size(),result.family.has_value()};
+            if (failure.diagnostics.empty() || failure.retained.lower_bound!=observed.lower_bound ||
+                failure.retained.upper_bound!=observed.upper_bound || failure.retained.incumbents!=observed.incumbents ||
+                failure.retained.partial_or_candidate_family!=observed.partial_or_candidate_family)
+                add(DiagnosticCode::evidence_mismatch,"result.stop.contract","Contract failure needs diagnostics and exact retained scope");
+        }
+    } else if (std::holds_alternative<ContractValidationFailure>(result.stop))
+        add(DiagnosticCode::invalid_claim,"result.stop","ContractValidationFailure requires contract_rejected termination");
     if (result.termination==Termination::cancelled || result.termination==Termination::resource_limit ||
         result.termination==Termination::numerical_failure) {
         if (!std::holds_alternative<ScopedOperationStopped>(result.stop))

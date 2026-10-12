@@ -47,6 +47,8 @@ const char* termination_name(Termination value) {
     case Termination::cancelled:return "cancelled";
     case Termination::resource_limit:return "resource_limit";
     case Termination::numerical_failure:return "numerical_failure";
+    case Termination::operation_rejected:return "operation_rejected";
+    case Termination::contract_rejected:return "contract_rejected";
     }
     throw std::logic_error("unknown termination");
 }

@@ -219,7 +219,7 @@ private:
     explicit ConvexProgram(std::shared_ptr<const Storage> storage) : storage_(std::move(storage)) {}
     friend struct optimization::ConvexAccess;
 };
-enum class Termination { completed, cancelled, resource_limit, numerical_failure, operation_rejected };
+enum class Termination { completed, cancelled, resource_limit, numerical_failure, operation_rejected, contract_rejected };
 enum class MathematicalOutcome { optimal, infeasible, unbounded, infimum_not_attained, undetermined };
 template<class Subject> struct OutcomeClaim {
     Subject subject;
@@ -454,22 +454,36 @@ struct OuterCandidateEvidence { ClaimEvidence enclosure; };
 struct FeasibleCandidateEvidence { ClaimEvidence feasibility; };
 struct HeuristicRelationEvidence { std::string method; };
 using FamilyRelationToTarget = std::variant<OuterCandidateEvidence,FeasibleCandidateEvidence,HeuristicRelationEvidence>;
+struct Witness { ProblemId problem; std::vector<Vector> states, controls; double original_objective; };
+struct RelationFeasibilityEvidence { ClaimEvidence support; };
+struct WitnessFeasibilityEvidence { Witness witness; ClaimEvidence support; };
+using CandidateFeasibility = std::variant<Unestablished,RelationFeasibilityEvidence,WitnessFeasibilityEvidence>;
 struct CandidateFamily {
     JointRelation relation;
     FamilyRelationToTarget relation_to_target;
-    ClaimEvidence feasibility;
+    CandidateFeasibility feasibility;
 };
 using OptimalFamilyOutcome = std::variant<CompleteOptimalFamily,PartialOptimalFamily,CandidateFamily>;
-struct OptimalFamily {
-    FamilyIdentity identity;
-    OptimalFamilyOutcome outcome;
+class OptimalFamily {
+public:
+    const FamilyIdentity& identity() const noexcept { return identity_; }
+    const OptimalFamilyOutcome& outcome() const noexcept { return outcome_; }
     FamilyTarget target() const noexcept {
-        if (std::holds_alternative<CompleteOptimalFamily>(outcome)) return FamilyTarget::exact_optimal_relation;
-        if (std::holds_alternative<PartialOptimalFamily>(outcome)) return FamilyTarget::partial_relation;
+        if (std::holds_alternative<CompleteOptimalFamily>(outcome_)) return FamilyTarget::exact_optimal_relation;
+        if (std::holds_alternative<PartialOptimalFamily>(outcome_)) return FamilyTarget::partial_relation;
         return FamilyTarget::candidate_relaxation;
     }
+private:
+    FamilyIdentity identity_;
+    OptimalFamilyOutcome outcome_;
+    OptimalFamily(FamilyIdentity identity, OptimalFamilyOutcome outcome)
+        : identity_(std::move(identity)), outcome_(std::move(outcome)) {}
+    friend class FamilyPublisher;
 };
-struct Witness { ProblemId problem; std::vector<Vector> states, controls; double original_objective; };
+class FamilyPublisher {
+public:
+    static std::variant<OptimalFamily,Diagnostics> publish(FamilyIdentity identity,OptimalFamilyOutcome outcome);
+};
 struct FeasibleIncumbent {
     Witness witness;
     ClaimEvidence feasibility;
@@ -505,7 +519,13 @@ struct ScopedRequestRejection {
     std::vector<TransformStepIdentity> completed_lineage;
     RetainedEvidenceScope retained;
 };
-using SynthesisStopEvidence = std::variant<std::monostate,ScopedOperationStopped,ScopedRequestRejection>;
+using SourceStopEvidence = std::variant<std::monostate,ScopedOperationStopped,ScopedRequestRejection>;
+struct ContractValidationFailure {
+    Diagnostics diagnostics;
+    RetainedEvidenceScope retained;
+    SourceStopEvidence source_stop;
+};
+using SynthesisStopEvidence = std::variant<std::monostate,ScopedOperationStopped,ScopedRequestRejection,ContractValidationFailure>;
 struct SynthesisResult {
     Termination termination;
     SynthesisOutcomeClaim outcome;
