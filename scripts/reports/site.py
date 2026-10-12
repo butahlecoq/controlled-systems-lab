@@ -17,6 +17,7 @@ import registered_reports as registered
 
 FILES={"index.html","records.json","scenarios.json","raw-events.jsonl","profile.json","build-provenance.txt",
        "process-stderr.txt","trials.csv","summary.csv","latency.svg","latency.png","export.json","manifest.json"}
+LEGACY_PINS_SHA256="9422834b586490e43dc492f47b4a3b4e7000302a75bcb0b8f4557a9e9f1bb2d5"
 
 
 class OfflineHTML(HTMLParser):
@@ -191,6 +192,38 @@ def lp_convex_publication_metadata(kind,view):
     return scope,limits
 
 
+def lp_convex_publication_id(root,source_id):
+    """Bind a new public route to the exact native bundle and publisher code."""
+    bundle=Path(root)/source_id
+    native_files={name:data.file_digest(data.local_file(bundle,name)) for name in sorted(FILES)}
+    native_files["source.zip"]=data.file_digest(data.local_file(root,source_id+".source.zip"))
+    publisher_files={}
+    for name in ("site.py","registered_reports.py","report_data.py","render.py"):
+        source=(Path(__file__).parent/name).read_text(encoding="utf-8").replace("\r\n","\n").encode("utf-8")
+        publisher_files[name]=hashlib.sha256(source).hexdigest()
+    identity={"schema":"csl.lp-convex-publication-identity/1","source_report_id":source_id,
+              "source_files":native_files,"publisher_files":publisher_files}
+    return source_id.rsplit("-",1)[0]+"-"+registered._digest(identity)
+
+
+def legacy_pins(root):
+    pins=data.parse_json(data.local_file(root,"legacy-publications.json").read_text(encoding="utf-8"))
+    data.require(registered._digest(pins)==LEGACY_PINS_SHA256 and pins.get("schema")=="csl.legacy-report-pins/1",
+                 "legacy publication pinset differs")
+    return pins["reports"]
+
+
+def validate_legacy_publication(root,source_id,pins):
+    data.require(source_id in pins and set(pins[source_id]["files"])==FILES,"legacy publication inventory differs")
+    for name,digest in pins[source_id]["files"].items():
+        data.require(data.file_digest(data.local_file(root/source_id,name))==digest,
+                     "legacy publication file differs: "+name)
+    archive_digest=pins[source_id]["zip_sha256"]
+    for suffix in (".source.zip",".zip"):
+        data.require(data.file_digest(data.local_file(root,source_id+suffix))==archive_digest,
+                     "legacy publication ZIP differs")
+
+
 def stage(catalog_path,out,check=True,allow_test=False):
     catalog_path=Path(catalog_path);root=catalog_path.parent
     catalogue=data.parse_json(catalog_path.read_text(encoding="utf-8"))
@@ -200,6 +233,8 @@ def stage(catalog_path,out,check=True,allow_test=False):
     registered_records={}
     registered_artifacts={}
     registered_archives={}
+    pinned_legacy=legacy_pins(root) if catalogue["schema"]=="csl.algorithm-report-catalog/3" else {}
+    legacy_sources=set()
     for report in catalogue["reports"]:
         rid=report["report_id"]
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
@@ -226,13 +261,19 @@ def stage(catalog_path,out,check=True,allow_test=False):
             continue
         if catalogue["schema"]=="csl.algorithm-report-catalog/3":
             data.require(report.get("report_kind") in ("lp","convex"),"unknown catalogue kind")
-            data.require("source_report_id" not in report,"LP/convex source identity must equal publication identity")
-        data.require(re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",rid) is not None,"unsafe report ID")
-        view=validate_bundle(root/rid,allow_test)
+            source_id=report.get("source_report_id")
+            data.require(isinstance(source_id,str) and re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",source_id) is not None,"unsafe LP/convex source identity")
+            data.require(lp_convex_publication_id(root,source_id)==rid,"LP/convex public identity differs from source")
+            validate_legacy_publication(root,source_id,pinned_legacy)
+            legacy_sources.add(source_id)
+        else:
+            source_id=rid
+        data.require(re.fullmatch(r"(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}",source_id) is not None,"unsafe source report ID")
+        view=validate_bundle(root/source_id,allow_test)
         expected_kind="convex" if view["schema"]==data.CONVEX_SCHEMA else "lp"
         if catalogue["schema"]=="csl.algorithm-report-catalog/1": data.require(expected_kind=="lp" and "report_kind" not in report,"v1 catalogue is LP only")
         else: data.require(report["report_kind"]==expected_kind,"catalogue kind differs from bundle")
-        exported=data.parse_json(data.local_file(root/rid,"export.json").read_text(encoding="utf-8"))
+        exported=data.parse_json(data.local_file(root/source_id,"export.json").read_text(encoding="utf-8"))
         data.require(exported["artifact_ref"]==artifact_ref,"catalogue/bundle artifact reference differs")
         source_commit=view["payload"]["provenance"]["source_commit"]
         if catalogue["schema"]=="csl.algorithm-report-catalog/3":
@@ -240,25 +281,25 @@ def stage(catalog_path,out,check=True,allow_test=False):
         else:
             data.require(report["payload_sha256"]==view["payload_sha256"],"catalogue payload digest mismatch")
         data.require(report["source_commit"]==source_commit,"catalogue provenance mismatch")
-        source_archive_name=rid+".source.zip" if catalogue["schema"]=="csl.algorithm-report-catalog/3" else rid+".zip"
+        source_archive_name=source_id+".source.zip" if catalogue["schema"]=="csl.algorithm-report-catalog/3" else rid+".zip"
         archive=data.local_file(root,source_archive_name)
         if catalogue["schema"]!="csl.algorithm-report-catalog/3":
             data.require(data.file_digest(archive)==report["zip_sha256"],"ZIP hash mismatch")
         with zipfile.ZipFile(archive) as saved:
-            names=saved.namelist();expected={"index.html"}|{rid+"/"+name for name in FILES}
+            names=saved.namelist();expected={"index.html"}|{source_id+"/"+name for name in FILES}
             data.require(len(names)==len(expected) and set(names)==expected,"ZIP inventory mismatch")
-            for name in FILES: data.require(saved.read(rid+"/"+name)==data.local_file(root/rid,name).read_bytes(),"ZIP contents differ")
-            OfflineHTML({rid+"/index.html"}).feed(saved.read("index.html").decode("utf-8"))
+            for name in FILES: data.require(saved.read(source_id+"/"+name)==data.local_file(root/source_id,name).read_bytes(),"ZIP contents differ")
+            OfflineHTML({source_id+"/index.html"}).feed(saved.read("index.html").decode("utf-8"))
         if catalogue["schema"]=="csl.algorithm-report-catalog/3":
             payload_schema=view["schema"]
             data.require(report.get("payload_schema")==payload_schema and isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"LP/convex common envelope metadata required")
             expected_scope,expected_limits=lp_convex_publication_metadata(expected_kind,view)
             data.require(report["measured_scope"]==expected_scope and report["evidence_limits"]==expected_limits,"LP/convex scope/evidence differs from validated report policy")
-            publication=registered.PublicationRecord(expected_kind,rid,report["payload_sha256"],view["payload"]["provenance"]["source_commit"],report["measured_scope"],report["evidence_limits"],tuple(sorted(FILES)),payload_schema,report["native_payload_sha256"])
-            source_page=data.local_file(root/rid,"index.html").read_text(encoding="utf-8")
-            links='<p><a href="report-envelope.json">Versioned report envelope</a> · <a href="publication-manifest.json">Publication manifest</a></p>'
+            publication=registered.PublicationRecord(expected_kind,rid,report["payload_sha256"],view["payload"]["provenance"]["source_commit"],report["measured_scope"],report["evidence_limits"],tuple(sorted(FILES)),payload_schema,report["native_payload_sha256"],source_id)
+            source_page=data.local_file(root/source_id,"index.html").read_text(encoding="utf-8")
+            links='<p>Publication <code>'+escape(rid)+'</code>; source <code>'+escape(source_id)+'</code>. <a href="report-envelope.json">Versioned report envelope</a> · <a href="publication-manifest.json">Publication manifest</a></p>'
             staged_page=source_page.replace("</body>",links+"</body>") if "</body>" in source_page else source_page+links
-            artifacts=registered.publication_artifacts(root/rid,publication,staged_page.encode("utf-8"))
+            artifacts=registered.publication_artifacts(root/source_id,publication,staged_page.encode("utf-8"))
             OfflineHTML(set(FILES)|{"report-envelope.json","publication-manifest.json"}).feed(staged_page)
             archive_bytes=registered.publication_zip(rid,artifacts)
             data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"generated publication ZIP digest differs")
@@ -266,6 +307,8 @@ def stage(catalog_path,out,check=True,allow_test=False):
             registered_artifacts[rid]=artifacts
             registered_archives[rid]=archive_bytes
     index=catalogue_index(catalogue)
+    if pinned_legacy:
+        data.require(set(pinned_legacy)==legacy_sources,"legacy publication sources differ from pinned inventory")
     if check: data.require(data.local_file(root,"index.html").read_text(encoding="utf-8")==index,"committed index differs from catalogue")
     out=Path(out);out.mkdir(parents=True,exist_ok=False)
     if catalogue["schema"]=="csl.algorithm-report-catalog/3":
@@ -286,6 +329,11 @@ def stage(catalog_path,out,check=True,allow_test=False):
             else:
                 for name in FILES: shutil.copyfile(data.local_file(root/rid,name),out/rid/name)
                 shutil.copyfile(data.local_file(root,rid+".zip"),out/(rid+".zip"))
+        for source_id in legacy_sources:
+            (out/source_id).mkdir()
+            for name in FILES:
+                shutil.copyfile(data.local_file(root/source_id,name),out/source_id/name)
+            shutil.copyfile(data.local_file(root,source_id+".source.zip"),out/(source_id+".zip"))
         shutil.copyfile(catalog_path,out/"catalog.json")
         (out/"index.html").write_text(index,encoding="utf-8")
         return out

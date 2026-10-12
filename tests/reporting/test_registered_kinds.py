@@ -51,25 +51,30 @@ class RegisteredKindTests(unittest.TestCase):
             writer.writeheader();writer.writerows(rows)
 
     def publication(self, root):
-        legacy=json.loads((Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/'catalog.json').read_text())
+        production=Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'
+        legacy=json.loads((production/'catalog.json').read_text())
+        shutil.copyfile(production/'legacy-publications.json',root/'legacy-publications.json')
         reports=[]
         for report in legacy['reports'][:2]:
-            rid=report['report_id']
-            shutil.copytree(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/rid,root/rid)
-            shutil.copyfile(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/(rid+'.source.zip'),root/(rid+'.source.zip'))
-            view=site.validate_bundle(root/rid)
+            source_id=report['source_report_id']
+            shutil.copytree(production/source_id,root/source_id)
+            shutil.copyfile(production/(source_id+'.source.zip'),root/(source_id+'.source.zip'))
+            shutil.copyfile(production/(source_id+'.zip'),root/(source_id+'.zip'))
+            view=site.validate_bundle(root/source_id)
             kind=report['report_kind']
             count_label={5:'Five',9:'Nine'}[len(view['payload']['scenarios'])]
             scope=f"{count_label} analytic {'convex' if kind=='convex' else 'LP'} microfixtures"
             limits='Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates'
-            item=registered.PublicationRecord(kind,rid,registered._digest(view),report['source_commit'],scope,limits,tuple(sorted(site.FILES)),view['schema'],view['payload_sha256'])
-            source_page=(root/rid/'index.html').read_text(encoding='utf-8')
-            links='<p><a href="report-envelope.json">Versioned report envelope</a> · <a href="publication-manifest.json">Publication manifest</a></p>'
+            rid=site.lp_convex_publication_id(root,source_id)
+            item=registered.PublicationRecord(kind,rid,registered._digest(view),report['source_commit'],scope,limits,tuple(sorted(site.FILES)),view['schema'],view['payload_sha256'],source_id)
+            source_page=(root/source_id/'index.html').read_text(encoding='utf-8')
+            links='<p>Publication <code>'+rid+'</code>; source <code>'+source_id+'</code>. <a href="report-envelope.json">Versioned report envelope</a> · <a href="publication-manifest.json">Publication manifest</a></p>'
             staged_page=source_page.replace('</body>',links+'</body>') if '</body>' in source_page else source_page+links
-            artifacts=registered.publication_artifacts(root/rid,item,staged_page.encode('utf-8'))
+            artifacts=registered.publication_artifacts(root/source_id,item,staged_page.encode('utf-8'))
             archive=registered.publication_zip(rid,artifacts)
             (root/(rid+'.zip')).write_bytes(archive)
-            reports.append({**report,'native_payload_sha256':view['payload_sha256'],'payload_sha256':item.payload_sha256,
+            reports.append({**report,'report_id':rid,'source_report_id':source_id,
+                'native_payload_sha256':view['payload_sha256'],'payload_sha256':item.payload_sha256,
                 'payload_schema':view['schema'],'measured_scope':scope,'evidence_limits':limits,
                 'zip_sha256':hashlib.sha256(archive).hexdigest()})
         for kind, rid in [('opt05-hull','opt05-hull-20261012-d1c211c2'), ('geo03-hv','geo03-20261012-3c12ca125831')]:
@@ -274,6 +279,7 @@ class RegisteredKindTests(unittest.TestCase):
                 if report['report_kind'] in ('lp','convex'):
                     self.assertEqual(envelope['native_payload_sha256'],report['native_payload_sha256'])
                     self.assertEqual(envelope['payload']['payload_sha256'],report['native_payload_sha256'])
+                    self.assertEqual(envelope['source_report_id'],report['source_report_id'])
                 else:
                     self.assertNotIn('native_payload_sha256',envelope)
                     self.assertEqual(registered._digest(envelope['payload']),envelope['payload_sha256'])
@@ -331,6 +337,8 @@ class RegisteredKindTests(unittest.TestCase):
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))
+            self.assertIn('source_report_id',report)
+            self.assertNotEqual(report['report_id'],report['source_report_id'])
             self.assertRegex(report['payload_sha256'],r'^[0-9a-f]{64}$')
             self.assertRegex(report['source_commit'],r'^[0-9a-f]{40}$')
             self.assertRegex(report['zip_sha256'],r'^[0-9a-f]{64}$')
@@ -354,6 +362,21 @@ class RegisteredKindTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             first=site.stage(root/'catalog.json',Path(temp)/'stage-a',check=True)
             second=site.stage(root/'catalog.json',Path(temp)/'stage-b',check=True)
+            pins=json.loads((root/'legacy-publications.json').read_text(encoding='utf-8'))
+            self.assertEqual(registered._digest(pins),site.LEGACY_PINS_SHA256)
+            live_anchors={
+                'lp-20261012T000346Z-ee5e9193b7a5':('2b7d31cb884861fdab7abe2d1fad8dadb4be1489f5e1edda4afdc8b05b3c22c2','4a59e312cdfdfd3fb38abbc4ceac8991a9d41a76689b8bc926fe061aaa5027c6'),
+                'convex-20261012T041854Z-4d54a407c9b2':('14882d50e392e3abfd57504c6f9fb175aa73f6ace856a8f20322ffdc9f1220fc','46581b40d1f9cf6a30b05937eda2c4d89d336d4ba25c0ed4130dd908aafe9b40')}
+            self.assertEqual(set(pins['reports']),set(live_anchors))
+            for source_id,(page_sha,zip_sha) in live_anchors.items():
+                source_pins=pins['reports'][source_id]
+                self.assertEqual(source_pins['files']['index.html'],page_sha)
+                self.assertEqual(source_pins['zip_sha256'],zip_sha)
+                for name,digest in source_pins['files'].items():
+                    self.assertEqual(hashlib.sha256((first/source_id/name).read_bytes()).hexdigest(),digest)
+                    self.assertEqual((first/source_id/name).read_bytes(),(root/source_id/name).read_bytes())
+                self.assertEqual(hashlib.sha256((first/(source_id+'.zip')).read_bytes()).hexdigest(),zip_sha)
+                self.assertEqual((first/(source_id+'.zip')).read_bytes(),(root/(source_id+'.source.zip')).read_bytes())
             index=(first/'index.html').read_text(encoding='utf-8')
             for report in catalogue['reports']:
                 rid=report['report_id']
@@ -379,7 +402,6 @@ class RegisteredKindTests(unittest.TestCase):
                 self.assertTrue((first/rid/'latency.svg').is_file())
                 envelope=json.loads((first/rid/'report-envelope.json').read_text(encoding='utf-8'))
                 manifest=json.loads((first/rid/'publication-manifest.json').read_text(encoding='utf-8'))
-                report=next(item for item in catalogue['reports'] if item['report_id']==rid)
                 self.assertEqual(envelope['schema'],'csl.algorithm-report-envelope/1')
                 self.assertEqual((envelope['report_id'],envelope['report_kind'],envelope['payload_sha256'],envelope['source_commit']),
                                  (report['report_id'],report['report_kind'],report['payload_sha256'],report['source_commit']))
@@ -393,6 +415,37 @@ class RegisteredKindTests(unittest.TestCase):
                 (first/rid/'publication-manifest.json').write_text(json.dumps(tampered),encoding='utf-8')
                 with self.assertRaisesRegex(ValueError,'publication manifest'):
                     site.validate_publication_manifest(first/rid,report)
+
+    def test_legacy_retention_rejects_changed_bytes_and_rehashed_pinset(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)/'input';root.mkdir()
+            self.publication(root)
+            source_id='lp-20261012T000346Z-ee5e9193b7a5'
+            archive=root/(source_id+'.zip')
+            archive.write_bytes(archive.read_bytes()+b'altered')
+            with self.assertRaisesRegex(ValueError,'legacy publication ZIP differs'):
+                site.stage(root/'catalog.json',Path(temp)/'altered-zip',check=True)
+            archive.write_bytes((root/(source_id+'.source.zip')).read_bytes())
+            pins_path=root/'legacy-publications.json'
+            pins=json.loads(pins_path.read_text(encoding='utf-8'))
+            pins['reports'][source_id]['files']['index.html']='0'*64
+            pins_path.write_text(json.dumps(pins),encoding='utf-8')
+            with self.assertRaisesRegex(ValueError,'legacy publication pinset differs'):
+                site.stage(root/'catalog.json',Path(temp)/'altered-pins',check=True)
+
+    def test_lp_convex_public_ids_change_with_source_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)/'input';root.mkdir()
+            self.publication(root)
+            for source_id in ('lp-20261012T000346Z-ee5e9193b7a5',
+                              'convex-20261012T041854Z-4d54a407c9b2'):
+                with self.subTest(source_id=source_id):
+                    original=site.lp_convex_publication_id(root,source_id)
+                    evidence=root/source_id/'process-stderr.txt'
+                    native=evidence.read_bytes()
+                    evidence.write_bytes(native+b'\nchanged evidence')
+                    self.assertNotEqual(site.lp_convex_publication_id(root,source_id),original)
+                    evidence.write_bytes(native)
 
     def test_real_stage_rejects_tampered_file_and_unregistered_kind(self):
         with tempfile.TemporaryDirectory() as temp:

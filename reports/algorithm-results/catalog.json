@@ -3,26 +3,28 @@
   "artifact_ref": "main",
   "reports": [
     {
-      "report_id": "lp-20261012T000346Z-ee5e9193b7a5",
+      "report_id": "lp-20261012T000346Z-54516ee8780c8b584748ffa4df26402fa208b29100ccfade95767e90060cc61d",
       "payload_sha256": "e6b70ff30fe8d8149876470edff62cd55c9de35cbc41edc314726033e2d8778d",
       "source_commit": "6780941b80fd1e94d6b5a6c5142822d5273bfa3f",
-      "zip_sha256": "c0dc593c9b30304314a0a1d3206d2a47134815b43f158b84ae2c56f9b869087d",
+      "zip_sha256": "03fa65757636207b8137cd4274aef986d8b0975ebfb17d83542ff2731a1c4443",
       "report_kind": "lp",
       "measured_scope": "Five analytic LP microfixtures",
       "evidence_limits": "Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates",
       "payload_schema": "csl.algorithm-report-view/1",
-      "native_payload_sha256": "ee5e9193b7a55bbec9f85f805ca74e7e1f5e9b9d22199e5fffeab4ef72515501"
+      "native_payload_sha256": "ee5e9193b7a55bbec9f85f805ca74e7e1f5e9b9d22199e5fffeab4ef72515501",
+      "source_report_id": "lp-20261012T000346Z-ee5e9193b7a5"
     },
     {
-      "report_id": "convex-20261012T041854Z-4d54a407c9b2",
+      "report_id": "convex-20261012T041854Z-659bf6f3e6e3e8d70a546b1626f4b72d4fea2f25c7f6b3283c57c1777b6116ac",
       "report_kind": "convex",
       "payload_sha256": "f1bd431e5a241923f95d0c20617d2017374599c54d04392c7107c3d5b62b9e0a",
       "source_commit": "cc3d91b579d1bfbb07fb6159b6709a08cd15fa10",
-      "zip_sha256": "c946f845340a7baf948ea904460c5ab10e5f2f7eb6c2cba5bc3c7965fbfc6ae3",
+      "zip_sha256": "8ff51c17f84e81e12cec0819ba692e1bf65d18fa7dcc62981d370852cbf3c1f2",
       "measured_scope": "Nine analytic convex microfixtures",
       "evidence_limits": "Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates",
       "payload_schema": "csl.algorithm-report-view/2",
-      "native_payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f"
+      "native_payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f",
+      "source_report_id": "convex-20261012T041854Z-4d54a407c9b2"
     },
     {
       "report_id": "opt05-hull-20261012-d6d3282081d5ea90d8a0c440ccc1ec774d40221e209a01d8207ebd06a551dbf5",
