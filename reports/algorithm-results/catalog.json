@@ -25,24 +25,26 @@
       "native_payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f"
     },
     {
-      "report_id": "opt05-hull-20261012-d1c211c2",
+      "report_id": "opt05-hull-20261012-d6d3282081d5ea90d8a0c440ccc1ec774d40221e209a01d8207ebd06a551dbf5",
       "report_kind": "opt05-hull",
       "payload_sha256": "679a6c76aea4e6d64d216b16f41c1e7b7ba49d6c9d3f21667d6b25ff603311f4",
       "source_commit": "d1c211c2763989a9cf3e39a8acaf609c5cf33a07",
       "measured_scope": "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices",
       "evidence_limits": "No comparator; binary64 numerical checks; not exact arithmetic or a validated global certificate",
-      "zip_sha256": "7053594a614dcb182df8687ed0121a5ba5bd31fa7e0a64588545200e53e352bf",
-      "payload_schema": "csl.hull-benchmark-records/1"
+      "zip_sha256": "46f77edf5b5485b18a310eb45763d07dd73f338659ba49c6246f2ecb156411af",
+      "payload_schema": "csl.hull-benchmark-records/1",
+      "source_report_id": "opt05-hull-20261012-d1c211c2"
     },
     {
-      "report_id": "geo03-20261012-3c12ca125831",
+      "report_id": "geo03-20261012-4648de7b2f8142311d90e39c21ecf1c9928c3a20148b4fe99b94dff47f7966fc",
       "report_kind": "geo03-hv",
       "payload_sha256": "3c12ca12583170423a81142c8f4b743cf88a16e463267d6864ddda4b56bd9044",
       "source_commit": "ba83547b3495cc8017f720702083bcf76c71fb30",
       "measured_scope": "56 measured trials across four bounded 2D fixtures in both conversion directions",
       "evidence_limits": "contract fixtures only; no accepted workload-size baseline; bounded H/V cases only; no available competing adapter; numerical checks are not validated global certificates; no inner conversion phase timing; A17/A18 audit covers source lineage only; executable equivalence is not established",
-      "zip_sha256": "51218957fea1c0c0601935b8207bc35330f97a093c6136e0c0e5ab8b8cc66619",
-      "payload_schema": "csl.geo03-hv-report/1"
+      "zip_sha256": "bde7cbf67c44de82a07ef0df9608427daaae2d3e1b26c8aac03e587158dd80c6",
+      "payload_schema": "csl.geo03-hv-report/1",
+      "source_report_id": "geo03-20261012-3c12ca125831"
     }
   ]
 }

@@ -18,7 +18,7 @@ SITE_SPEC = importlib.util.spec_from_file_location('csl_report_site', SITE_PATH)
 site = importlib.util.module_from_spec(SITE_SPEC)
 SITE_SPEC.loader.exec_module(site)
 
-FIXTURES = Path(__file__).parent / 'fixtures' / 'registered'
+FIXTURES = Path(__file__).resolve().parents[2] / 'reports' / 'algorithm-results'
 
 
 class RegisteredKindTests(unittest.TestCase):
@@ -72,7 +72,7 @@ class RegisteredKindTests(unittest.TestCase):
             reports.append({**report,'native_payload_sha256':view['payload_sha256'],'payload_sha256':item.payload_sha256,
                 'payload_schema':view['schema'],'measured_scope':scope,'evidence_limits':limits,
                 'zip_sha256':hashlib.sha256(archive).hexdigest()})
-        for kind, rid in [('opt05-hull','opt05-hull-20261012-d1c211c2'), ('geo03-hv','geo03-20261012-37c3fb484e0d')]:
+        for kind, rid in [('opt05-hull','opt05-hull-20261012-d1c211c2'), ('geo03-hv','geo03-20261012-3c12ca125831')]:
             source = FIXTURES / rid
             target = root / rid
             shutil.copytree(source, target)
@@ -113,7 +113,7 @@ class RegisteredKindTests(unittest.TestCase):
             registered.adapt_payload(record)
 
     def test_registered_public_ids_bind_complete_native_evidence_and_publisher(self):
-        for kind,source_id in [('opt05-hull','opt05-hull-20261012-d1c211c2'),('geo03-hv','geo03-20261012-37c3fb484e0d')]:
+        for kind,source_id in [('opt05-hull','opt05-hull-20261012-d1c211c2'),('geo03-hv','geo03-20261012-3c12ca125831')]:
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as temp:
                 source=FIXTURES/source_id
                 bundle=Path(temp)/source_id
@@ -151,7 +151,7 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertNotEqual(changed.report_id,original.report_id)
 
     def test_registered_csv_must_match_json_even_with_consistent_native_hashes(self):
-        for kind,source_id in [('opt05-hull','opt05-hull-20261012-d1c211c2'),('geo03-hv','geo03-20261012-37c3fb484e0d')]:
+        for kind,source_id in [('opt05-hull','opt05-hull-20261012-d1c211c2'),('geo03-hv','geo03-20261012-3c12ca125831')]:
             for name,field in [('trials.csv','elapsed_ns' if kind=='opt05-hull' else 'run_ns'),('summary.csv','max_ns' if kind=='opt05-hull' else 'run_ns_max_ns')]:
                 with self.subTest(kind=kind,file=name), tempfile.TemporaryDirectory() as temp:
                     bundle=Path(temp)/source_id
@@ -186,25 +186,25 @@ class RegisteredKindTests(unittest.TestCase):
                 registered.adapt(bundle)
 
     def test_geo03_rejects_missing_or_duplicate_summary_group(self):
-        record=json.loads((FIXTURES/'geo03-20261012-37c3fb484e0d'/'records.json').read_text())
+        record=json.loads((FIXTURES/'geo03-20261012-3c12ca125831'/'records.json').read_text())
         missing=copy.deepcopy(record);missing['payload']['summary'].pop();missing['payload_sha256']=registered._digest(missing['payload'])
         with self.assertRaisesRegex(ValueError,'summary must contain'):
             registered.adapt_payload(missing)
 
     def test_geo03_report_id_is_bound_to_payload_digest(self):
-        record=json.loads((FIXTURES/'geo03-20261012-37c3fb484e0d'/'records.json').read_text())
+        record=json.loads((FIXTURES/'geo03-20261012-3c12ca125831'/'records.json').read_text())
         record['payload']['scope_limitations'].append('Changed evidence under a reused ID')
         record['payload_sha256']=registered._digest(record['payload'])
         with self.assertRaisesRegex(ValueError,'report ID does not match payload digest'):
             registered.adapt_payload(record)
 
     def test_geo03_adapter_preserves_native_payload_digest_and_limitations(self):
-        result = registered.adapt(FIXTURES / 'geo03-20261012-37c3fb484e0d')
+        result = registered.adapt(FIXTURES / 'geo03-20261012-3c12ca125831')
         self.assertEqual(result.kind, 'geo03-hv')
         self.assertTrue(result.report_id.startswith('geo03-20261012-'))
         self.assertEqual(len(result.report_id.rsplit('-',1)[1]),64)
-        self.assertEqual(result.source_report_id, 'geo03-20261012-37c3fb484e0d')
-        self.assertEqual(result.payload_sha256, '37c3fb484e0da72e4710cdc8f1e5ebe27b906c2ecd3b3396c43f67d0b8e4196c')
+        self.assertEqual(result.source_report_id, 'geo03-20261012-3c12ca125831')
+        self.assertEqual(result.payload_sha256, '3c12ca12583170423a81142c8f4b743cf88a16e463267d6864ddda4b56bd9044')
         self.assertIn('56', result.measured_scope)
         self.assertTrue(result.evidence_limits)
 
@@ -213,7 +213,7 @@ class RegisteredKindTests(unittest.TestCase):
             registered.adapt_payload({'schema': 'csl.future/1', 'report_id': 'future'})
 
     def test_geo_tampered_payload_is_rejected(self):
-        record = json.loads((FIXTURES / 'geo03-20261012-37c3fb484e0d' / 'records.json').read_text())
+        record = json.loads((FIXTURES / 'geo03-20261012-3c12ca125831' / 'records.json').read_text())
         record['payload']['summary'][0]['failures'] = 1
         record['payload_sha256'] = registered._digest(record['payload'])
         with self.assertRaises(ValueError):
@@ -221,12 +221,12 @@ class RegisteredKindTests(unittest.TestCase):
 
     def test_malformed_external_shapes_have_controlled_errors(self):
         with self.assertRaises(ValueError):
-            registered.adapt_payload({'schema':'csl.geo03-hv-report/1','report_id':'geo03-20261012-37c3fb484e0d','payload':[]})
+            registered.adapt_payload({'schema':'csl.geo03-hv-report/1','report_id':'geo03-20261012-3c12ca125831','payload':[]})
         with self.assertRaises(ValueError):
             registered.adapt_payload({'schema':'csl.hull-benchmark-records/1','report_id':'opt05-hull-20261012-d1c211c2','trials':[{}]})
 
     def test_geo_source_commit_is_required(self):
-        record = json.loads((FIXTURES / 'geo03-20261012-37c3fb484e0d' / 'records.json').read_text())
+        record = json.loads((FIXTURES / 'geo03-20261012-3c12ca125831' / 'records.json').read_text())
         record['payload']['report_source_commit'] = ''
         record['payload_sha256'] = registered._digest(record['payload'])
         with self.assertRaisesRegex(ValueError, 'source commit'):
@@ -249,7 +249,7 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertIn('56 measured trials across four bounded 2D fixtures in both conversion directions',page)
             self.assertIn('No comparator',page)
             opt_page=(out/registered.adapt(FIXTURES/'opt05-hull-20261012-d1c211c2').report_id/'index.html').read_text(encoding='utf-8')
-            geo_page=(out/registered.adapt(FIXTURES/'geo03-20261012-37c3fb484e0d').report_id/'index.html').read_text(encoding='utf-8')
+            geo_page=(out/registered.adapt(FIXTURES/'geo03-20261012-3c12ca125831').report_id/'index.html').read_text(encoding='utf-8')
             self.assertIn('<td>2,135,700</td>',opt_page)
             self.assertIn('<td>1,029,100</td>',geo_page)
             self.assertIn('Checked latency SVG',geo_page)
@@ -338,11 +338,19 @@ class RegisteredKindTests(unittest.TestCase):
                 self.assertTrue({'measured_scope','evidence_limits'} <= set(report))
                 # Per-kind saved schemas/manifests are validated at the boundary,
                 # then projected into the same catalogue identity contract.
-                adapted=registered.adapt(root/report['report_id'])
+                self.assertIn('source_report_id',report)
+                self.assertNotEqual(report['report_id'],report['source_report_id'])
+                adapted=registered.adapt(root/report['source_report_id'])
                 self.assertEqual((report['report_id'],report['report_kind'],report['payload_sha256'],report['source_commit']),
                                  (adapted.report_id,adapted.kind,adapted.payload_sha256,adapted.source_commit))
+                self.assertEqual(report['source_report_id'],adapted.source_report_id)
                 self.assertEqual((report['measured_scope'],report['evidence_limits']),
                                  (adapted.measured_scope,adapted.evidence_limits))
+        registered_rows=[report for report in catalogue['reports'] if report['report_kind'] in ('opt05-hull','geo03-hv')]
+        source_ids={report['source_report_id'] for report in registered_rows}
+        public_ids={report['report_id'] for report in registered_rows}
+        self.assertEqual(source_ids,{path.name for path in root.iterdir() if path.is_dir() and path.name.startswith(('opt05-hull-','geo03-'))})
+        self.assertEqual(public_ids,{path.stem for path in root.iterdir() if path.suffix=='.zip' and not path.name.endswith('.source.zip') and path.name.startswith(('opt05-hull-','geo03-'))})
         with tempfile.TemporaryDirectory() as temp:
             first=site.stage(root/'catalog.json',Path(temp)/'stage-a',check=True)
             second=site.stage(root/'catalog.json',Path(temp)/'stage-b',check=True)
@@ -390,7 +398,7 @@ class RegisteredKindTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)/'input';root.mkdir()
             catalogue=self.publication(root)
-            geo=root/'geo03-20261012-37c3fb484e0d'
+            geo=root/'geo03-20261012-3c12ca125831'
             (geo/'records.json').write_text('{}',encoding='utf-8')
             (root/'index.html').write_text(site.catalogue_index(catalogue),encoding='utf-8')
             with self.assertRaises(ValueError):
@@ -418,7 +426,7 @@ class RegisteredKindTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)/'input';root.mkdir()
             catalogue=self.publication(root)
-            (root/'geo03-20261012-37c3fb484e0d'/'unexpected.dat').write_text('extra')
+            (root/'geo03-20261012-3c12ca125831'/'unexpected.dat').write_text('extra')
             with self.assertRaisesRegex(ValueError,'unregistered files'):
                 site.stage(root/'catalog.json',Path(temp)/'extra-stage',check=True)
         with tempfile.TemporaryDirectory() as temp:
@@ -465,7 +473,7 @@ class RegisteredKindTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)/'input';root.mkdir()
             catalogue=self.publication(root)
-            original_rid='geo03-20261012-37c3fb484e0d'
+            original_rid='geo03-20261012-3c12ca125831'
             records_path=root/original_rid/'records.json'
             record=json.loads(records_path.read_text(encoding='utf-8'))
             record['payload']['scope_limitations'].append('<script>alert(1)</script>')
@@ -505,7 +513,7 @@ class RegisteredKindTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)/'input';root.mkdir()
             catalogue=self.publication(root)
-            rid='geo03-20261012-37c3fb484e0d'
+            rid='geo03-20261012-3c12ca125831'
             svg=b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'
             (root/rid/'latency.svg').write_bytes(svg)
             manifest=json.loads((root/rid/'manifest.json').read_text())
