@@ -41,6 +41,10 @@ set_target_properties(csl_phase_one PROPERTIES EXPORT_NAME phase_one CXX_EXTENSI
 target_link_libraries(csl_phase_one PUBLIC CSL::optimization CSL::registry)
 target_include_directories(csl_phase_one SYSTEM PRIVATE ${csl_objectives_eigen_SOURCE_DIR})
 target_compile_definitions(csl_phase_one PRIVATE EIGEN_MPL2_ONLY EIGEN_DONT_PARALLELIZE)
+add_library(csl_hull STATIC src/geometry/hull_reducer.cpp)
+add_library(CSL::hull ALIAS csl_hull)
+set_target_properties(csl_hull PROPERTIES EXPORT_NAME hull CXX_EXTENSIONS OFF)
+target_link_libraries(csl_hull PUBLIC CSL::optimization)
 add_library(csl_convex STATIC src/optimization/convex_backend.cpp)
 add_library(CSL::convex ALIAS csl_convex)
 set_target_properties(csl_convex PROPERTIES EXPORT_NAME convex CXX_EXTENSIONS OFF)
@@ -67,7 +71,7 @@ add_library(csl_execution STATIC src/execution/executor.cpp)
 add_library(CSL::execution ALIAS csl_execution)
 set_target_properties(csl_execution PROPERTIES EXPORT_NAME execution CXX_EXTENSIONS OFF)
 target_link_libraries(csl_execution PUBLIC CSL::registry Threads::Threads)
-foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one)
+foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one csl_hull)
   target_compile_features(${target} PUBLIC cxx_std_20)
   target_include_directories(${target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -79,13 +83,15 @@ foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_mode
   endif()
 endforeach()
 
-install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one EXPORT CSLTargets
+install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one csl_hull EXPORT CSLTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES include/csl/contracts.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl)
 install(FILES include/csl/adapters/lp/highs.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/adapters/lp)
 install(FILES include/csl/adapters/convex/highs.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/adapters/convex)
 install(FILES include/csl/optimization/convex_backend.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/optimization)
 install(FILES include/csl/optimization/phase_one.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/optimization)
+install(FILES include/csl/geometry/hull_reducer.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
+install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES include/csl/numeric/data.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/numeric)
 install(FILES include/csl/optimization/objectives.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/optimization)
 install(FILES include/csl/registry/registry.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/registry)
@@ -107,6 +113,9 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CSLConfig.cmake
 
 if(BUILD_TESTING)
   include(cmake/Dependencies.cmake)
+  add_executable(hull_reducer_test tests/unit/geometry/hull_reducer_test.cpp)
+  target_link_libraries(hull_reducer_test PRIVATE CSL::hull CSL::highs_lp doctest::doctest)
+  add_test(NAME hull_reducer_test COMMAND hull_reducer_test)
   add_executable(phase_one_tests tests/contract/phase_one/simplex_tests.cpp)
   target_link_libraries(phase_one_tests PRIVATE CSL::phase_one CSL::highs_lp doctest::doctest Threads::Threads)
   target_compile_definitions(phase_one_tests PRIVATE CSL_PHASE_ONE_REFERENCE=1)
