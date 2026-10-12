@@ -70,7 +70,11 @@ def main() -> None:
     zip_path = ROOT / "bundle.zip"
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
         for path in sorted([*files, ROOT / "manifest.sha256"]):
-            bundle.write(path, f"{ROOT.name}/{path.relative_to(ROOT).as_posix()}")
+            archive_path = f"{ROOT.name}/{path.relative_to(ROOT).as_posix()}"
+            info = zipfile.ZipInfo(archive_path, date_time=(1980, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o100644 << 16
+            bundle.writestr(info, path.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
     (ROOT / "bundle.zip.sha256").write_text(f"{sha256(zip_path)}  bundle.zip\n", encoding="ascii", newline="\n")
 
     with zipfile.ZipFile(zip_path) as bundle:
