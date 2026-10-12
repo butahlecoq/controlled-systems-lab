@@ -286,6 +286,13 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         if (!finite_policy(context.numerical))
             return unsupported("geometry.numerical", "Finite nonnegative numerical tolerances are required.", DiagnosticCode::invalid_input);
         if (const auto errors = check_operation_shape(request_); !errors.empty()) return Unsupported{errors};
+        if (const auto* image = std::get_if<AffineImage>(&request_.operation)) {
+            if (!std::all_of(image->map.values.begin(), image->map.values.end(),
+                    [](double value) { return std::isfinite(value); }) ||
+                !std::all_of(image->offset.begin(), image->offset.end(),
+                    [](double value) { return std::isfinite(value); }))
+                return unsupported("affine-sum.parameters", "Affine map and offset must contain only finite values.", DiagnosticCode::invalid_input);
+        }
         if (stopped(context)) return OperationStopped{stop_reason(context), "Stopped before affine/sum execution."};
 
         SetHandle left_handle, right_handle;

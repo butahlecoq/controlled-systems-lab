@@ -383,6 +383,16 @@ TEST_CASE("admission rejects wrong dimensions labels assurance foreign payloads 
     CHECK(std::holds_alternative<Unsupported>(run(request(MinkowskiSum{universal,input}),dependencies())));
 }
 
+TEST_CASE("affine image rejects non-finite map and offset even for an empty input") {
+    const auto empty=take(sets::make_empty({{"empty-non-finite-map"},1,{}})).as_handle();
+    const double infinity=std::numeric_limits<double>::infinity();
+    const double nan=std::numeric_limits<double>::quiet_NaN();
+    CHECK(std::holds_alternative<Unsupported>(run(
+        request(AffineImage{empty,{1,1,{nan}},{0}}),dependencies())));
+    CHECK(std::holds_alternative<Unsupported>(run(
+        request(AffineImage{empty,{1,1,{1}},{infinity}}),dependencies())));
+}
+
 TEST_CASE("candidate limits and pre-request stops never publish successful geometry") {
     const auto input=vertices("interval",1,{0,1},2);
     const auto req=request(MinkowskiSum{input,input});
