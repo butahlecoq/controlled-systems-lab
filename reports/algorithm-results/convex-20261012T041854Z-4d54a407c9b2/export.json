@@ -1,0 +1,373 @@
+{
+  "schema": "csl.report-export/1",
+  "document_policy": "csl.report-document/2",
+  "artifact_ref": "main",
+  "payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f",
+  "render_ns": 205878000,
+  "scope": "validation-complete through saved-data HTML/CSV/raw-file export; excludes this metadata, manifest and ZIP",
+  "figure_files": {
+    "latency.svg": "1c597e51ed6e9c0f0bae3a26bccb6246692265f6d3805b70b2b6b13e057e9369",
+    "latency.png": "5cfdf4b3ffab5036be4b3fe2cae9be80844ae46e04c0fea38c92f829a4d88007"
+  },
+  "svg_policy": "csl.report.svg.mpl-3.11.2/1",
+  "plot": {
+    "schema": "csl.report-figure/1",
+    "payload_sha256": "4d54a407c9b2288978ea2ea64f9546f96fc83c2197878c87d10ff1ee2fbce21f",
+    "series": {
+      "public_run": [
+        {
+          "case_id": "quadratic-boundary",
+          "values": [
+            268600,
+            266000,
+            305400,
+            291300,
+            253700,
+            272500,
+            274700
+          ],
+          "summary": {
+            "median": 272500,
+            "min": 253700,
+            "max": 305400,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-equality",
+          "values": [
+            336500,
+            327300,
+            350100,
+            335600,
+            328000,
+            311500,
+            314200
+          ],
+          "summary": {
+            "median": 328000,
+            "min": 311500,
+            "max": 350100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "norm-positive",
+          "values": [
+            293600,
+            285000,
+            289200,
+            270600,
+            264400,
+            250800,
+            248200
+          ],
+          "summary": {
+            "median": 270600,
+            "min": 248200,
+            "max": 293600,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "norm-zero",
+          "values": [
+            287000,
+            293000,
+            289200,
+            308100,
+            265700,
+            261100,
+            252000
+          ],
+          "summary": {
+            "median": 287000,
+            "min": 252000,
+            "max": 308100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "norm-constant",
+          "values": [
+            109200,
+            116700,
+            117600,
+            120700,
+            111200,
+            117000,
+            139500
+          ],
+          "summary": {
+            "median": 117000,
+            "min": 109200,
+            "max": 139500,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-face",
+          "values": [
+            285600,
+            276500,
+            301900,
+            299400,
+            269900,
+            256700,
+            270000
+          ],
+          "summary": {
+            "median": 276500,
+            "min": 256700,
+            "max": 301900,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-zero-row",
+          "values": [
+            274800,
+            285000,
+            295700,
+            307100,
+            295600,
+            271600,
+            275500
+          ],
+          "summary": {
+            "median": 285000,
+            "min": 271600,
+            "max": 307100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-zero-contradiction",
+          "values": [
+            190100,
+            167500,
+            167900,
+            155400,
+            158700,
+            152400,
+            150100
+          ],
+          "summary": {
+            "median": 158700,
+            "min": 150100,
+            "max": 190100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-unbounded",
+          "values": [
+            287800,
+            335200,
+            297000,
+            259900,
+            261200,
+            253400,
+            258800
+          ],
+          "summary": {
+            "median": 261200,
+            "min": 253400,
+            "max": 335200,
+            "count": 7
+          }
+        }
+      ],
+      "end_to_end": [
+        {
+          "case_id": "quadratic-boundary",
+          "values": [
+            279000,
+            277000,
+            319300,
+            302500,
+            264000,
+            283600,
+            286000
+          ],
+          "summary": {
+            "median": 283600,
+            "min": 264000,
+            "max": 319300,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-equality",
+          "values": [
+            346800,
+            339800,
+            364200,
+            348200,
+            340000,
+            323900,
+            326200
+          ],
+          "summary": {
+            "median": 340000,
+            "min": 323900,
+            "max": 364200,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "norm-positive",
+          "values": [
+            309100,
+            300400,
+            304100,
+            283700,
+            278300,
+            263700,
+            261500
+          ],
+          "summary": {
+            "median": 283700,
+            "min": 261500,
+            "max": 309100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "norm-zero",
+          "values": [
+            299200,
+            305700,
+            301200,
+            319100,
+            277000,
+            271600,
+            262700
+          ],
+          "summary": {
+            "median": 299200,
+            "min": 262700,
+            "max": 319100,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "norm-constant",
+          "values": [
+            120200,
+            128200,
+            128300,
+            131600,
+            121500,
+            127300,
+            155600
+          ],
+          "summary": {
+            "median": 128200,
+            "min": 120200,
+            "max": 155600,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-face",
+          "values": [
+            295200,
+            285600,
+            312000,
+            308800,
+            281200,
+            266200,
+            280200
+          ],
+          "summary": {
+            "median": 285600,
+            "min": 266200,
+            "max": 312000,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-zero-row",
+          "values": [
+            286300,
+            296000,
+            307500,
+            319800,
+            307500,
+            283000,
+            287400
+          ],
+          "summary": {
+            "median": 296000,
+            "min": 283000,
+            "max": 319800,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-zero-contradiction",
+          "values": [
+            200700,
+            178300,
+            177300,
+            165500,
+            169000,
+            162200,
+            159600
+          ],
+          "summary": {
+            "median": 169000,
+            "min": 159600,
+            "max": 200700,
+            "count": 7
+          }
+        },
+        {
+          "case_id": "quadratic-unbounded",
+          "values": [
+            298400,
+            349600,
+            306000,
+            269400,
+            271200,
+            262200,
+            267700
+          ],
+          "summary": {
+            "median": 271200,
+            "min": 262200,
+            "max": 349600,
+            "count": 7
+          }
+        }
+      ]
+    },
+    "unit": "ns",
+    "matplotlib": "3.11.2",
+    "svg_policy": "csl.report.svg.mpl-3.11.2/1",
+    "plot_ns": 1015554100,
+    "scope": "saved-data plotting including imports/figure creation and SVG/PNG write; excludes metadata serialization",
+    "files": {
+      "latency.svg": "1c597e51ed6e9c0f0bae3a26bccb6246692265f6d3805b70b2b6b13e057e9369",
+      "latency.png": "5cfdf4b3ffab5036be4b3fe2cae9be80844ae46e04c0fea38c92f829a4d88007"
+    },
+    "packages": {
+      "matplotlib": "3.11.2",
+      "numpy": "2.5.4",
+      "contourpy": "1.4.0",
+      "cycler": "0.12.1",
+      "fonttools": "4.66.1",
+      "kiwisolver": "1.5.1",
+      "packaging": "26.3",
+      "pillow": "12.3.0",
+      "pyparsing": "3.3.3",
+      "python-dateutil": "2.9.0.post0",
+      "six": "1.17.0"
+    }
+  },
+  "packaging": {
+    "available": false,
+    "reason": "not timed by renderer"
+  }
+}

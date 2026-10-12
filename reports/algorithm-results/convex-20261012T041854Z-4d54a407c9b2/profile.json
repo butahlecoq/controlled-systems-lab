@@ -1,0 +1,883 @@
+{
+  "schema": "csl.convex-profile/1",
+  "purpose": "profile",
+  "return_code": 0,
+  "aborted": false,
+  "events": [
+    {
+      "schema": "csl.convex-report-events/1",
+      "event": "header",
+      "purpose": "profile",
+      "repetitions": 7,
+      "warmups": 0,
+      "build": {
+        "source_commit": "cc3d91b579d1bfbb07fb6159b6709a08cd15fa10",
+        "build_owner_sha256": "3880c4a24c48d8efc47afa3c41f8680e6ae3beb7c5c3f72f93ee3203c542d15c",
+        "compiler": "MSVC",
+        "compiler_version": "19.44.35215.0",
+        "generator": "Visual Studio 17 2022",
+        "architecture": "AMD64/x64",
+        "configuration": "Release",
+        "cxx_standard": 20,
+        "ndebug": true,
+        "configured_flags": "/DWIN32 /D_WINDOWS /EHsc",
+        "release_flags": "/O2 /Ob2 /DNDEBUG"
+      },
+      "clock": {
+        "is_steady": true,
+        "period_num": 1,
+        "period_den": 1000000000
+      },
+      "scenarios": [
+        {
+          "case_id": "quadratic-boundary",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-boundary"
+          },
+          "input": {
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  2.0
+                ]
+              },
+              "linear": [
+                -6.0
+              ],
+              "offset": 9.0
+            },
+            "constraints": {
+              "rows": 0,
+              "cols": 1,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                0.0,
+                2.0
+              ]
+            ],
+            "rows": []
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "quadratic-boundary"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  2.0
+                ]
+              },
+              "linear": [
+                -6.0
+              ],
+              "offset": 9.0
+            },
+            "transformation": null
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": [
+              2.0
+            ],
+            "coordinate_constraints": [],
+            "objective": 1.0,
+            "solver_objective": 1.0,
+            "derivation": "(x-3)^2 decreases on [0,2]; minimum1 at2."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "quadratic-equality",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-equality"
+          },
+          "input": {
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 2,
+                "cols": 2,
+                "values": [
+                  4.0,
+                  2.0,
+                  2.0,
+                  4.0
+                ]
+              },
+              "linear": [
+                -8.0,
+                -10.0
+              ],
+              "offset": 17.0
+            },
+            "constraints": {
+              "rows": 1,
+              "cols": 2,
+              "starts": [
+                0,
+                2
+              ],
+              "indices": [
+                0,
+                1
+              ],
+              "values": [
+                1.0,
+                1.0
+              ]
+            },
+            "variables": [
+              [
+                null,
+                null
+              ],
+              [
+                null,
+                null
+              ]
+            ],
+            "rows": [
+              [
+                2.0,
+                2.0
+              ]
+            ]
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "quadratic-equality"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 2,
+                "cols": 2,
+                "values": [
+                  4.0,
+                  2.0,
+                  2.0,
+                  4.0
+                ]
+              },
+              "linear": [
+                -8.0,
+                -10.0
+              ],
+              "offset": 17.0
+            },
+            "transformation": null
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": [
+              0.5,
+              1.5
+            ],
+            "coordinate_constraints": [],
+            "objective": 4.5,
+            "solver_objective": 4.5,
+            "derivation": "Substitute y=2-x: 2x^2-2x+5; minimum4.5 at(.5,1.5)."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "norm-positive",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "norm-positive"
+          },
+          "input": {
+            "objective": {
+              "kind": "residual_norm",
+              "L": {
+                "rows": 2,
+                "cols": 1,
+                "values": [
+                  1.0,
+                  0.0
+                ]
+              },
+              "target": [
+                3.0,
+                -4.0
+              ]
+            },
+            "constraints": {
+              "rows": 0,
+              "cols": 1,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                0.0,
+                2.0
+              ]
+            ],
+            "rows": []
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "norm-positive-squared"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  2.0
+                ]
+              },
+              "linear": [
+                -6.0
+              ],
+              "offset": 25.0
+            },
+            "transformation": "residual_norm_squared"
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": [
+              2.0
+            ],
+            "coordinate_constraints": [],
+            "objective": 4.123105625617661,
+            "solver_objective": 17.0,
+            "derivation": "sqrt((x-3)^2+16) minimizes at2; original sqrt17, squared17."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "norm-zero",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "norm-zero"
+          },
+          "input": {
+            "objective": {
+              "kind": "residual_norm",
+              "L": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  1.0
+                ]
+              },
+              "target": [
+                3.0
+              ]
+            },
+            "constraints": {
+              "rows": 0,
+              "cols": 1,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                0.0,
+                5.0
+              ]
+            ],
+            "rows": []
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "norm-zero-squared"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  2.0
+                ]
+              },
+              "linear": [
+                -6.0
+              ],
+              "offset": 9.0
+            },
+            "transformation": "residual_norm_squared"
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": [
+              3.0
+            ],
+            "coordinate_constraints": [],
+            "objective": 0.0,
+            "solver_objective": 0.0,
+            "derivation": "Absolute residual |x-3| has minimum0 at3."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "norm-constant",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "norm-constant"
+          },
+          "input": {
+            "objective": {
+              "kind": "residual_norm",
+              "L": {
+                "rows": 2,
+                "cols": 1,
+                "values": [
+                  0.0,
+                  0.0
+                ]
+              },
+              "target": [
+                3.0,
+                4.0
+              ]
+            },
+            "constraints": {
+              "rows": 0,
+              "cols": 1,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                0.0,
+                1.0
+              ]
+            ],
+            "rows": []
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "norm-constant-squared"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  0.0
+                ]
+              },
+              "linear": [
+                -0.0
+              ],
+              "offset": 25.0
+            },
+            "transformation": "residual_norm_squared"
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": null,
+            "coordinate_constraints": [
+              [
+                0.0,
+                1.0
+              ]
+            ],
+            "objective": 5.0,
+            "solver_objective": 25.0,
+            "derivation": "Every x in [0,1] minimizes the constant norm5; square25."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "quadratic-face",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-face"
+          },
+          "input": {
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 2,
+                "cols": 2,
+                "values": [
+                  2.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "linear": [
+                -2.0,
+                0.0
+              ],
+              "offset": 1.0
+            },
+            "constraints": {
+              "rows": 0,
+              "cols": 2,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                0.0,
+                2.0
+              ],
+              [
+                0.0,
+                1.0
+              ]
+            ],
+            "rows": []
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "quadratic-face"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 2,
+                "cols": 2,
+                "values": [
+                  2.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "linear": [
+                -2.0,
+                0.0
+              ],
+              "offset": 1.0
+            },
+            "transformation": null
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": null,
+            "coordinate_constraints": [
+              [
+                1.0,
+                1.0
+              ],
+              [
+                0.0,
+                1.0
+              ]
+            ],
+            "objective": 0.0,
+            "solver_objective": 0.0,
+            "derivation": "(x-1)^2 has minimum0 on the complete segment (1,t), t in [0,1]."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "quadratic-zero-row",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-zero-row"
+          },
+          "input": {
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  2.0
+                ]
+              },
+              "linear": [
+                -6.0
+              ],
+              "offset": 9.0
+            },
+            "constraints": {
+              "rows": 1,
+              "cols": 1,
+              "starts": [
+                0,
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                1.0,
+                5.0
+              ]
+            ],
+            "rows": [
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "quadratic-zero-row"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  2.0
+                ]
+              },
+              "linear": [
+                -6.0
+              ],
+              "offset": 9.0
+            },
+            "transformation": null
+          },
+          "reference": {
+            "outcome": "optimal",
+            "point": [
+              3.0
+            ],
+            "coordinate_constraints": [],
+            "objective": 0.0,
+            "solver_objective": 0.0,
+            "derivation": "Authored zero equality is redundant; (x-3)^2 minimizes at3."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "quadratic-zero-contradiction",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-zero-contradiction"
+          },
+          "input": {
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  2.0
+                ]
+              },
+              "linear": [
+                -6.0
+              ],
+              "offset": 9.0
+            },
+            "constraints": {
+              "rows": 1,
+              "cols": 1,
+              "starts": [
+                0,
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                1.0,
+                5.0
+              ]
+            ],
+            "rows": [
+              [
+                1.0,
+                1.0
+              ]
+            ]
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "quadratic-zero-contradiction"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 1,
+                "cols": 1,
+                "values": [
+                  2.0
+                ]
+              },
+              "linear": [
+                -6.0
+              ],
+              "offset": 9.0
+            },
+            "transformation": null
+          },
+          "reference": {
+            "outcome": "infeasible",
+            "point": null,
+            "coordinate_constraints": [],
+            "objective": null,
+            "solver_objective": null,
+            "derivation": "Authored row 0=1 is contradictory regardless of x."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        },
+        {
+          "case_id": "quadratic-unbounded",
+          "identity": {
+            "problem": "convex-report-literals",
+            "program": "quadratic-unbounded"
+          },
+          "input": {
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 2,
+                "cols": 2,
+                "values": [
+                  2.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "linear": [
+                0.0,
+                -1.0
+              ],
+              "offset": 0.0
+            },
+            "constraints": {
+              "rows": 0,
+              "cols": 2,
+              "starts": [
+                0
+              ],
+              "indices": [],
+              "values": []
+            },
+            "variables": [
+              [
+                null,
+                null
+              ],
+              [
+                0.0,
+                null
+              ]
+            ],
+            "rows": []
+          },
+          "solver": {
+            "identity": {
+              "problem": "convex-report-literals",
+              "program": "quadratic-unbounded"
+            },
+            "objective": {
+              "kind": "quadratic",
+              "Q": {
+                "rows": 2,
+                "cols": 2,
+                "values": [
+                  2.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "linear": [
+                0.0,
+                -1.0
+              ],
+              "offset": 0.0
+            },
+            "transformation": null
+          },
+          "reference": {
+            "outcome": "unbounded",
+            "point": null,
+            "coordinate_constraints": [],
+            "objective": null,
+            "solver_objective": null,
+            "derivation": "Along (0,t), t>=0, x^2-y=-t tends to minus infinity."
+          },
+          "assumptions": [
+            "continuous variables",
+            "minimization",
+            "binary64 numerical output; outcome support unestablished"
+          ]
+        }
+      ]
+    },
+    {
+      "schema": "csl.convex-report-events/1",
+      "event": "profile",
+      "purpose": "profile",
+      "rounds": 1000,
+      "trials": 9000,
+      "failures": 0,
+      "observation_token": "8192013969619940800",
+      "wall_ns": 2217760300,
+      "phase_totals_ns": [
+        45924000,
+        23023400,
+        1381200,
+        1907723200,
+        12546100,
+        1993737700
+      ],
+      "before": {
+        "source": "GetProcessTimes / GetProcessMemoryInfo",
+        "user_cpu": {
+          "available": true,
+          "value": 0,
+          "unit": "ns",
+          "scope": "process lifetime CPU at snapshot"
+        },
+        "kernel_cpu": {
+          "available": true,
+          "value": 0,
+          "unit": "ns",
+          "scope": "process lifetime CPU at snapshot"
+        },
+        "peak_resident": {
+          "available": true,
+          "value": 4345856,
+          "unit": "bytes",
+          "scope": "process lifetime peak, not per trial or delta"
+        }
+      },
+      "after": {
+        "source": "GetProcessTimes / GetProcessMemoryInfo",
+        "user_cpu": {
+          "available": true,
+          "value": 1531250000,
+          "unit": "ns",
+          "scope": "process lifetime CPU at snapshot"
+        },
+        "kernel_cpu": {
+          "available": true,
+          "value": 78125000,
+          "unit": "ns",
+          "scope": "process lifetime CPU at snapshot"
+        },
+        "peak_resident": {
+          "available": true,
+          "value": 6725632,
+          "unit": "bytes",
+          "scope": "process lifetime peak, not per trial or delta"
+        }
+      },
+      "scope": "separate sequential fresh-workspace profile, no per-trial serialization; lifetime peak is not per-call memory"
+    }
+  ],
+  "stderr": "",
+  "limiter": "unresolved at current profile granularity; no sampling/call-stack profile",
+  "phase_order": [
+    "input_publication",
+    "registration_preparation",
+    "workspace_creation",
+    "public_run",
+    "independent_verification",
+    "end_to_end"
+  ],
+  "scope": "separate profile; nested totals are not additive to end_to_end",
+  "assessment": {
+    "dominant_measured_phase": "public_run",
+    "phase_totals_ns": {
+      "input_publication": 45924000,
+      "registration_preparation": 23023400,
+      "workspace_creation": 1381200,
+      "public_run": 1907723200,
+      "independent_verification": 12546100,
+      "end_to_end": 1993737700
+    },
+    "end_to_end_total_ns": 1993737700,
+    "user_cpu_delta": {
+      "available": true,
+      "value": 1531250000,
+      "unit": "ns",
+      "scope": "separate profile process CPU delta"
+    },
+    "kernel_cpu_delta": {
+      "available": true,
+      "value": 78125000,
+      "unit": "ns",
+      "scope": "separate profile process CPU delta"
+    },
+    "peak_resident": {
+      "available": true,
+      "value": 6725632,
+      "unit": "bytes",
+      "scope": "process lifetime peak, not per trial or delta"
+    },
+    "source_path": "src/adapters/convex/highs.cpp through BoundWorkspace.run",
+    "inner_limiter": "unresolved at current profile granularity; no sampling/call-stack profile",
+    "scope": "largest accumulated sequential component, not throughput or exclusive native time; end_to_end is not added to components"
+  }
+}
