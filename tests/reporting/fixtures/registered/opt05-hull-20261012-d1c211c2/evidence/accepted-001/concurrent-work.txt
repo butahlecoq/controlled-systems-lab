@@ -1,1 +1,0 @@
-Before collection, six MSBuild processes remained from other worktrees; all had 0.000 s CPU-time delta over a 5 s check and no cl.exe process was present. No overlapping build activity was observed during the timed collection. Unrelated system activity is summarized by pre/post CPU snapshots.

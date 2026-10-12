@@ -1,5 +1,0 @@
-csl_geo03_conversion_report.exe
---repetitions
-7
---warmups
-1
