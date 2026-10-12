@@ -63,6 +63,8 @@ For a complete-optimal-family request, the planner must reject any operation pla
 
 **Class-map seam:** `GeometryPort`, `ConversionPort`, `ApproximationPort`, their request/outcome types, `GeometryOperationPlanner`, and `PreparedGeometryPlan`. **Tickets:** [GEO-02 #40](https://github.com/butahlecoq/controlled-systems-lab/issues/40), [GEO-04 #41](https://github.com/butahlecoq/controlled-systems-lab/issues/41), [GEO-08 #52](https://github.com/butahlecoq/controlled-systems-lab/issues/52), [GEO-03 #31](https://github.com/butahlecoq/controlled-systems-lab/issues/31).
 
+The updated [native-integration decision](../../architecture/decisions/0002-native-integrations.md) selects Qhull only for bounded binary64 H/V conversion. It does not select a general polyhedral engine or implement the geometry-operation chain needed by either synthesis strategy. Its optional dimension and input-row limits do not define global capacity policy, and it has no output-size cap. Those wider operation and capacity choices remain open.
+
 The class map's candidate fixture proposal uses the established T-S01 `u ∈ [0,1]` full-family oracle and separate low-dimensional intersection, projection, and singular-image operator oracles. It keeps the `X1=[0,1/2]` intersection case separate from the first T-X01 baseline. These fixtures do not replace the owner-approved `u ∈ [-1,1]` assumption for newly authored baseline scenarios. Treat their dimensions and source-row counts as regression envelopes for those fixtures only; the operation profile, output limits, and global resource/capacity policy remain unresolved.
 
 ## 4. Immutable comparison definition and run identity
