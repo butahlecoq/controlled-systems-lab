@@ -91,6 +91,8 @@ template<class Port> struct Registration {
 };
 namespace detail {
 struct PipelineAccess;
+struct ProviderAccess;
+Diagnostics check_request_policy(const Requirements&, bool has_basis);
 Diagnostics check_offer(const Offer&, const Requirements&, bool has_basis);
 Diagnostics check_transition(const Output&, const Output&);
 Rejection reject(Provenance, std::string field, std::string reason);
@@ -99,6 +101,7 @@ Rejection capability_rejection(Provenance, Diagnostics);
 template<class Port> class Registry {
     std::map<std::string, Registration<Port>> entries_;
     friend struct detail::PipelineAccess;
+    friend struct detail::ProviderAccess;
 public:
     std::optional<Rejection> add(Registration<Port> entry) {
         const Method requested{entry.identity.id,entry.identity.version};
@@ -182,6 +185,7 @@ public:
 template<class... Ports> class CheckedPipeline {
     std::tuple<detail::CheckedEntry<Ports>...> entries_;
     friend struct detail::PipelineAccess;
+    friend struct detail::ProviderAccess;
     explicit CheckedPipeline(std::tuple<detail::CheckedEntry<Ports>...> entries) : entries_(std::move(entries)) {}
 public:
     // For registered planner composition. Input borrows remain live and unchanged
@@ -285,6 +289,7 @@ class StrategyPlan {
         : snapshot_(std::move(snapshot)), provenance_(std::move(provenance)) {}
     template<class... Ports,class Builder> friend StrategyPlan compose_strategy(CheckedPipeline<Ports...>,Builder);
     friend class StrategyRegistry;
+    friend struct detail::ProviderAccess;
 };
 template<class... Ports,class Builder> StrategyPlan compose_strategy(CheckedPipeline<Ports...> checked, Builder builder) {
     auto provenance = checked.provenance();
