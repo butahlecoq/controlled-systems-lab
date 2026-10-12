@@ -30,7 +30,8 @@ class RegisteredKindTests(unittest.TestCase):
             shutil.copyfile(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/(rid+'.source.zip'),root/(rid+'.source.zip'))
             view=site.validate_bundle(root/rid)
             kind=report['report_kind']
-            scope='Five analytic LP microfixtures' if kind=='lp' else 'Nine analytic convex microfixtures'
+            count_label={5:'Five',9:'Nine'}[len(view['payload']['scenarios'])]
+            scope=f"{count_label} analytic {'convex' if kind=='convex' else 'LP'} microfixtures"
             limits='Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates'
             item=registered.PublicationRecord(kind,rid,registered._digest(view),report['source_commit'],scope,limits,tuple(sorted(site.FILES)),view['schema'],view['payload_sha256'])
             source_page=(root/rid/'index.html').read_text(encoding='utf-8')
@@ -339,6 +340,17 @@ class RegisteredKindTests(unittest.TestCase):
             (root/'catalog.json').write_text(json.dumps(catalogue),encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'duplicate'):
                 site.stage(root/'catalog.json',Path(temp)/'dupe-stage',check=False)
+
+    def test_real_stage_rejects_lp_convex_scope_or_evidence_not_bound_to_view(self):
+        for field in ('measured_scope','evidence_limits'):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as temp:
+                root=Path(temp)/'input';root.mkdir()
+                catalogue=self.publication(root)
+                catalogue['reports'][0][field]+=' forged'
+                (root/'catalog.json').write_text(json.dumps(catalogue,indent=2)+'\n',encoding='utf-8')
+                with self.assertRaisesRegex(ValueError,'scope/evidence differs from validated report policy'):
+                    site.stage(root/'catalog.json',Path(temp)/'bad-stage',check=False)
+                self.assertFalse((Path(temp)/'bad-stage').exists())
 
     def test_publication_envelope_and_manifest_reject_tampering(self):
         with tempfile.TemporaryDirectory() as temp:
