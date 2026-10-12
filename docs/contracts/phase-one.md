@@ -71,6 +71,13 @@ values, signed entering coefficient, step, leaving slot and tagged identities.
 
 Numerical policy tolerances `a` and `r` must be finite and nonnegative. All
 products, sums, scales and thresholds used for decisions must be finite.
+Explicit products in residual, candidate, pricing and threshold/guard checks
+also reject a zero result when both operands are nonzero. Such lost-sign
+underflow reports `numerical_failure`/undetermined with reason `arithmetic`;
+a rounded zero cannot establish a nonnegative reduced cost. Genuine zero
+operands and surviving subnormal products remain legal. This is a conservative
+binary64 safeguard, not exact arithmetic or a proof that every rounding error
+has been detected inside factorization/solves.
 The pivot guard is `eta=max(pivot_relative_tolerance,64*epsilon*max(1,m))`;
 `eta>=1` fails. Nontrivial bases require full numerical rank and reciprocal
 condition estimate greater than eta. Fresh residuals check `B*z=q`, `B^T*y=c_B`
@@ -107,6 +114,14 @@ exact finite feasible solution, but default pricing reports uncertainty. The
 triangle RHS `[0.5,-1e-12,1]` is numerically feasible at absolute tolerance 1e-8
 and has positive auxiliary optimum at 1e-14; neither report establishes exact
 membership.
+
+For the literal `A=[[2,-2^-1074],[1,0]]`, `b=[2,1+2^-52]` and zero tolerances,
+the finite witness `[1+2^-52,2^1023]` satisfies the original equalities exactly.
+After one pivot, pricing would multiply `(-2^-1074)*(-1/2)` and lose its nonzero
+sign by rounding to zero. The guard stops with reason `arithmetic`, retaining
+candidate `[1,0]`, auxiliary value `2^-52`, and the one committed pivot/current
+basis. It neither reports infeasibility nor forces an unsafe tiny pivot.
+Owning snapshots remain historical across later attempts and workspace death.
 
 ## Diagnostics and ownership
 

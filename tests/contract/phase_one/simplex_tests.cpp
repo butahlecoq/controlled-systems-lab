@@ -167,6 +167,48 @@ TEST_CASE("tiny pricing and overflowing reduced cost are undetermined numerical 
     }
 }
 
+TEST_CASE("lost nonzero pricing product preserves an undetermined checked history") {
+    const double d=std::numeric_limits<double>::denorm_min(),e=std::ldexp(1.0,-52);
+    const Vector witness{1+e,std::ldexp(1.0,1023)};
+    REQUIRE(d>0);REQUIRE(std::isfinite(witness[1]));
+    CHECK(d*witness[1]==std::ldexp(1.0,-51));
+    CHECK(2*witness[0]-d*witness[1]==2);CHECK(witness[0]==1+e);
+    const auto p=accepted(po::make_program({{"underflow"},{"finite-exact-witness"}},
+        {2,2,{0,2,3},{0,1,0},{2,-d,1}},Vector{2,1+e}));
+    const auto verified=accepted(evaluate_primal(p,witness,{0,0},{{"literal-dyadic"},"1"}));
+    CHECK(verified.objective==0);CHECK(verified.residuals.rows.violation==0);
+    CHECK(verified.residuals.variables.violation==0);
+
+    auto c=context();c.numerical={0,0};auto [w]=prepare(p).create();
+    const auto r=accepted(w->run(c));INFO(r.raw_diagnostics);
+    CHECK(r.termination==Termination::numerical_failure);
+    CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(r.outcome.subject==p.identity());CHECK(std::holds_alternative<Unestablished>(r.outcome.support));
+    CHECK_FALSE(r.objective.lower);CHECK_FALSE(r.objective.upper);
+    REQUIRE(r.primal);CHECK(*r.primal==Vector{1,0});REQUIRE(r.residuals.primal);
+    CHECK(r.residuals.primal->rows.violation==e);CHECK(check_program_result(r,p,Assurance::numerical).empty());
+    const auto history=report(*w);CHECK(history.reason==po::Reason::arithmetic);
+    CHECK(history.termination==Termination::numerical_failure);CHECK(history.pivots==1);
+    CHECK(history.factorizations==1);CHECK(history.pricing_passes==2);REQUIRE(history.auxiliary);
+    CHECK(history.auxiliary->artificial==Vector{0,e});CHECK(history.auxiliary->value==e);
+    REQUIRE(history.trace.size()==1);const auto& event=history.trace[0];
+    CHECK(std::get<po::StructuralVariable>(event.entering).column==0);
+    CHECK(std::get<po::ArtificialVariable>(event.leaving).row==0);
+    CHECK(event.leaving_position==0);CHECK(event.coefficient==2);CHECK(event.step==1);
+    CHECK(event.auxiliary_before==3);CHECK(event.auxiliary_after==e);
+    const auto basis=accepted(w->basis()->snapshot());CHECK(check_basis_snapshot(basis,w->last_attempt()).empty());
+    REQUIRE(basis.columns.size()==2);CHECK(std::get<StructuralColumn>(basis.columns[0]).index==0);
+    CHECK(std::get<AuxiliaryColumn>(basis.columns[1]).coefficients==Vector{0,1});
+    CHECK(basis.reference.iteration==1);REQUIRE(basis.last_pivot);CHECK(basis.last_pivot->coefficient==2);
+    CHECK(accepted(w->basis()->coordinates(basis.reference,Vector{2,1+e})).values==Vector{1,e});
+
+    const auto again=accepted(w->run(c));CHECK(again.termination==Termination::numerical_failure);
+    CHECK(again.outcome.value==MathematicalOutcome::undetermined);CHECK(report(*w).solve!=history.solve);
+    CHECK(std::get<BasisUnavailable>(w->basis()->coordinates(basis.reference,Vector{2,1+e})).reason==BasisUnavailableReason::stale_reference);
+    w.reset();CHECK(history.auxiliary->value==e);CHECK(history.trace[0].auxiliary_after==e);
+    CHECK(std::get<AuxiliaryColumn>(basis.columns[1]).coefficients==Vector{0,1});
+}
+
 TEST_CASE("static admission rejects unsupported mathematics and checked capacity before factory") {
     const auto good=triangle();
     std::size_t factories=0;

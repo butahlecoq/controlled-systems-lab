@@ -14,6 +14,12 @@ using LU = Eigen::FullPivLU<Matrix>;
 using Index = Eigen::Index;
 struct Failure { Reason reason; };
 void finite(double value) {if(!std::isfinite(value)) throw Failure{Reason::arithmetic};}
+double decision_product(double left,double right) {
+    const double product=left*right;finite(product);
+    // A rounded zero cannot preserve the sign of a nonzero decision term.
+    if(product==0 && left!=0 && right!=0) throw Failure{Reason::arithmetic};
+    return product;
+}
 Diagnostics error(DiagnosticCode code,const char* field,const char* message) {return {{code,field,message}};}
 bool add(std::size_t a,std::size_t b,std::size_t& out) {
     if(b>std::numeric_limits<std::size_t>::max()-a) return false;
@@ -77,14 +83,14 @@ class Worker final : public LPWorkspace {
         if(c.deadline && std::chrono::steady_clock::now()>=*c.deadline) throw Failure{Reason::deadline};
     }
     double threshold(double scale) const {
-        finite(scale);const double t=policy_.absolute_tolerance+policy_.relative_tolerance*scale;finite(t);return t;
+        finite(scale);const double t=policy_.absolute_tolerance+decision_product(policy_.relative_tolerance,scale);finite(t);return t;
     }
     bool passes(ResidualMeasure r) const {return r.violation<=threshold(r.scale);}
     ResidualMeasure residual(const Matrix& a,const Vec& x,const Vec& rhs,bool transpose=false) const {
         ResidualMeasure r{0,1};
         for(Index i=0;i<rhs.size();++i) {
             double v=0;
-            for(Index j=0;j<x.size();++j) {const double product=(transpose?a(j,i):a(i,j))*x[j];finite(product);v+=product;finite(v);}
+            for(Index j=0;j<x.size();++j) {const double product=decision_product(transpose?a(j,i):a(i,j),x[j]);v+=product;finite(v);}
             const double difference=v-rhs[i];finite(difference);
             r.violation=std::max(r.violation,std::abs(difference));r.scale=std::max({r.scale,std::abs(v),std::abs(rhs[i])});
         }
@@ -117,7 +123,7 @@ class Worker final : public LPWorkspace {
         result.auxiliary.nonnegativity.scale=scale;
         for(std::size_t i=0;i<m_;++i) {
             double activity=result.auxiliary.artificial[i];
-            for(std::size_t j=0;j<n_;++j) {const double product=state_->n(static_cast<Index>(i),static_cast<Index>(j))*result.x[j];finite(product);activity+=product;finite(activity);}
+            for(std::size_t j=0;j<n_;++j) {const double product=decision_product(state_->n(static_cast<Index>(i),static_cast<Index>(j)),result.x[j]);activity+=product;finite(activity);}
             const double q=state_->q[static_cast<Index>(i)];const double difference=activity-q;finite(difference);
             const ResidualMeasure row{std::abs(difference),std::max({1.,std::abs(activity),q})};
             if(!passes(row)) throw Failure{Reason::invalid_basic_point};
@@ -132,7 +138,7 @@ class Worker final : public LPWorkspace {
         const auto csr=std::get<numeric::CsrInput>(p.constraints().descriptor());
         for(std::size_t i=0;i<m_;++i) {
             double v=0;
-            for(auto k=csr.row_offsets[i];k<csr.row_offsets[i+1];++k) {const double product=csr.values[k]*result.x[csr.column_indices[k]];finite(product);v+=product;finite(v);}
+            for(auto k=csr.row_offsets[i];k<csr.row_offsets[i+1];++k) {const double product=decision_product(csr.values[k],result.x[csr.column_indices[k]]);v+=product;finite(v);}
             const double b=*p.rows()[i].lower,difference=v-b;finite(difference);
             if(!passes({std::abs(difference),std::max({1.,std::abs(v),std::abs(b)})})) result.feasible=false;
         }
@@ -195,7 +201,7 @@ public:
             Vector output(m_);for(std::size_t i=0;i<m_;++i) output[i]=x[static_cast<Index>(i)];
             // Multiplication by D preserves absolute residuals and scales in original rows.
             return BasisCoordinates{reference,std::move(output)};
-        } catch(const Failure&) {return BasisUnavailable{BasisUnavailableReason::unavailable_result,"Nonfinite coordinate arithmetic"};}
+        } catch(const Failure&) {return BasisUnavailable{BasisUnavailableReason::unavailable_result,"Unreliable coordinate arithmetic"};}
     }
 protected:
     ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext& c) override;
@@ -287,7 +293,7 @@ ProgramOutcome Worker::do_solve(const LinearProgram& p,const ExecutionContext& c
                 if(std::find(s.basis.begin(),s.basis.end(),j)!=s.basis.end()) continue;
                 double sum=0,scale=0;
                 if(j<n_) for(std::size_t i=0;i<m_;++i) {
-                    const double product=s.n(static_cast<Index>(i),static_cast<Index>(j))*y[static_cast<Index>(i)];finite(product);
+                    const double product=decision_product(s.n(static_cast<Index>(i),static_cast<Index>(j)),y[static_cast<Index>(i)]);
                     sum+=product;scale+=std::abs(product);finite(sum);finite(scale);
                 }
                 else {sum=y[static_cast<Index>(j-n_)];scale=std::abs(sum);}
@@ -307,7 +313,7 @@ ProgramOutcome Worker::do_solve(const LinearProgram& p,const ExecutionContext& c
             if(!direction.allFinite()) throw Failure{Reason::arithmetic};
             if(!passes(residual(s.frame.b,direction,a))) throw Failure{Reason::uncertain_pivot};
             double direction_scale=1;for(Index i=0;i<direction.size();++i) direction_scale=std::max(direction_scale,std::abs(direction[i]));
-            const double guard=eta_*direction_scale;finite(guard);
+            const double guard=decision_product(eta_,direction_scale);
             std::optional<std::size_t> leaving;double step=0;
             for(std::size_t i=0;i<m_;++i) {
                 const double d=direction[static_cast<Index>(i)];
