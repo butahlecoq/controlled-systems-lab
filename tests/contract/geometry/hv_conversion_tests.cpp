@@ -161,6 +161,26 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     CHECK(satisfies(h,left)); CHECK(satisfies(h,right)); CHECK(satisfies(h,middle)); CHECK_FALSE(satisfies(h,off));
     const std::array<double,2> beyond_left{-1.01,0},beyond_right{2.01,0};
     CHECK_FALSE(satisfies(h,beyond_left)); CHECK_FALSE(satisfies(h,beyond_right));
+    auto segment_v=convert(std::get<OperationResult>(segment_h).output,"csl.polyhedron.v","segment-h-to-v-roundtrip");
+    REQUIRE(std::holds_alternative<OperationResult>(segment_v));
+    auto segment_data=take(sets::from_handle(std::get<OperationResult>(segment_v).output));
+    const auto segment_rep=segment_data.representation(); REQUIRE(std::holds_alternative<sets::VRepresentation>(segment_rep));
+    const auto& segment_points=std::get<sets::VRepresentation>(segment_rep).vertices;
+    REQUIRE(segment_points.rows()==2);
+    double support_x=-std::numeric_limits<double>::infinity();
+    double support_negative_x=-std::numeric_limits<double>::infinity();
+    bool found_left=false,found_right=false;
+    for (std::size_t i=0;i<segment_points.rows();++i) {
+        const std::array<double,2> point{segment_points(i,0),segment_points(i,1)};
+        CHECK(satisfies(h,point));
+        support_x=std::max(support_x,point[0]);
+        support_negative_x=std::max(support_negative_x,-point[0]);
+        found_left=found_left||std::abs(point[0]+1)<1e-7;
+        found_right=found_right||std::abs(point[0]-2)<1e-7;
+    }
+    CHECK(found_left); CHECK(found_right);
+    CHECK(support_x==doctest::Approx(2));
+    CHECK(support_negative_x==doctest::Approx(1));
     auto equality_h=make_h_handle("segment-explicit-equality",2,Matrix{2,2,{1,0,-1,0}},Vector{2,1},Matrix{1,2,{0,1}},Vector{0});
     auto equality_v=convert(equality_h,"csl.polyhedron.v","segment-equality-to-v");
     REQUIRE(std::holds_alternative<OperationResult>(equality_v));
@@ -175,6 +195,22 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     const auto& points=std::get<sets::VRepresentation>(sv).vertices; REQUIRE(points.rows()==1);
     CHECK(points(0,0)==doctest::Approx(2)); CHECK(points(0,1)==doctest::Approx(-3));
     CHECK(4.0*points(0,0)+points(0,1)==doctest::Approx(5));
+    auto singleton_h_roundtrip=convert(std::get<OperationResult>(singleton_v).output,"csl.polyhedron.h","singleton-v-to-h-roundtrip");
+    REQUIRE(std::holds_alternative<OperationResult>(singleton_h_roundtrip));
+    auto singleton_h_data=take(sets::from_handle(std::get<OperationResult>(singleton_h_roundtrip).output));
+    const auto singleton_hr=singleton_h_data.representation(); REQUIRE(std::holds_alternative<sets::HRepresentation>(singleton_hr));
+    const auto& singleton_h_rep=std::get<sets::HRepresentation>(singleton_hr);
+    const std::array<double,2> literal_point{2,-3},nearby_point{2,-2};
+    CHECK(satisfies(singleton_h_rep,literal_point)); CHECK_FALSE(satisfies(singleton_h_rep,nearby_point));
+    auto singleton_v_roundtrip=convert(std::get<OperationResult>(singleton_h_roundtrip).output,"csl.polyhedron.v","singleton-h-to-v-roundtrip");
+    REQUIRE(std::holds_alternative<OperationResult>(singleton_v_roundtrip));
+    auto singleton_v_data=take(sets::from_handle(std::get<OperationResult>(singleton_v_roundtrip).output));
+    const auto singleton_vr=singleton_v_data.representation(); REQUIRE(std::holds_alternative<sets::VRepresentation>(singleton_vr));
+    const auto& singleton_roundtrip_points=std::get<sets::VRepresentation>(singleton_vr).vertices;
+    REQUIRE(singleton_roundtrip_points.rows()==1);
+    CHECK(singleton_roundtrip_points(0,0)==doctest::Approx(2));
+    CHECK(singleton_roundtrip_points(0,1)==doctest::Approx(-3));
+    CHECK(4.0*singleton_roundtrip_points(0,0)+singleton_roundtrip_points(0,1)==doctest::Approx(5));
 }
 
 TEST_CASE("zero-dimensional and vertex-free ray descriptions follow the set convention") {

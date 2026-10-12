@@ -322,7 +322,9 @@ class Workspace final : public RepresentationConverterWorkspace {
         }
         Eigen::MatrixXd c(rows.size(),r); Eigen::VectorXd d(rows.size());
         for (std::size_t i=0;i<rows.size();++i) { c.row(i)=reduced.row(rows[i]); d[static_cast<Eigen::Index>(i)]=rhs[rows[i]]; }
-        if (r==1) {
+        if (r==0) {
+            // The generated equality system already identifies the singleton.
+        } else if (r==1) {
             double lo=-std::numeric_limits<double>::infinity(),hi=std::numeric_limits<double>::infinity();
             for (Eigen::Index i=0;i<c.rows();++i) {
                 const double coefficient=c(i,0);
@@ -407,20 +409,21 @@ class Workspace final : public RepresentationConverterWorkspace {
         affine_dimension_=coords.dimension;
         Eigen::MatrixXd a(0,n); Eigen::VectorXd b(0);
         Eigen::MatrixXd e(n-r,n); Eigen::VectorXd f(n-r);
-        if (n>r) {
+        if (r==0) {
+            e=Eigen::MatrixXd::Identity(n,n); f=coords.origin;
+        } else if (n>r) {
             Eigen::JacobiSVD<Eigen::MatrixXd> svd(coords.basis,Eigen::ComputeFullU);
             e=svd.matrixU().rightCols(n-r).transpose(); f=e*coords.origin;
         }
         double residual=coords.maximum_residual;
-        if (r==0) { e=Eigen::MatrixXd::Identity(n,n); f=coords.origin; }
-        else if (r==1) {
+        if (r==1) {
             const Eigen::VectorXd axis=coords.basis.col(0);
             double lo=std::numeric_limits<double>::infinity(),hi=-lo;
             for (Eigen::Index i=0;i<vertices.rows();++i) { const double z=axis.dot(vertices.row(i).transpose()-coords.origin); lo=std::min(lo,z); hi=std::max(hi,z); }
             if (!(lo<hi)||!std::isfinite(lo)||!std::isfinite(hi)) return unsupported("conversion.rank","Segment width is not numerically resolved.");
             a.resize(2,n); a.row(0)=axis.transpose(); a.row(1)=-axis.transpose();
             b.resize(2); b[0]=axis.dot(coords.origin)+hi; b[1]=-axis.dot(coords.origin)-lo;
-        } else {
+        } else if (r>1) {
             Eigen::MatrixXd points(vertices.rows(),r);
             for (Eigen::Index i=0;i<vertices.rows();++i) points.row(i)=(coords.basis.transpose()*(vertices.row(i).transpose()-coords.origin)).transpose();
             auto facets=hull_facets(points);
