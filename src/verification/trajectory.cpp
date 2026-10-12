@@ -94,7 +94,8 @@ public:
         bound(report_.input.bounds.lower,"bounds.lower");bound(report_.input.bounds.upper,"bounds.upper");
         for(std::size_t i=0;i<report_.input.backend_bounds.size();++i) {
             const auto program_bound=[&](const std::optional<ProgramObjectiveBound>& b,const std::string& suffix) {
-                if(!b)return;const auto field=indexed("backend_bounds",i)+suffix;
+                if(!b)return;
+                const auto field=indexed("backend_bounds",i)+suffix;
                 id(b->evidence.subject.problem,field);support(b->evidence.support,field);
                 if(b->evidence.subject.program.value.empty()||!std::isfinite(b->value))mismatch(field,"missing program identity or nonfinite bound");
             };

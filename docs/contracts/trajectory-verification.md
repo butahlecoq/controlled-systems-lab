@@ -40,6 +40,8 @@ are retained as provenance; a program-to-original-objective transformation is
 not inferred. Current canonical claims do not carry independently verifiable
 strategy/version/coordinate-schema/lineage proofs. Unchecked certificates and
 symbolic references are preserved, never elevated to verified evidence.
+`bindings == numerical_pass` means the bindings currently expressible in the
+public claim types passed; it does not assert complete SYN-06 binding coverage.
 Optimality, complete-family coverage and validated certification remain distinct
 unsupported report fields even for a feasible witness and a claimed optimal
 backend result. The original mathematical outcome is retained independently of

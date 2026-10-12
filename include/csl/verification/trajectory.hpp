@@ -30,6 +30,9 @@ struct TrajectoryReport {
     Verifier verifier{{"csl.trajectory.original"},"1"};
     NumericalPolicy numerical{};
     Termination termination{Termination::completed};
+    // numerical_pass means only the identity/shape bindings expressible by the
+    // current public claims passed. It does not cover effective FamilyRequest,
+    // strategy/version or transformation-lineage bindings (SYN-07 #155).
     CheckStatus bindings{CheckStatus::not_checked};
     CheckStatus feasibility{CheckStatus::not_checked};
     CheckStatus objective{CheckStatus::not_checked};
