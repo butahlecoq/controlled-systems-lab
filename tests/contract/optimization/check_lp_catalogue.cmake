@@ -1,0 +1,18 @@
+# Compare all authored oracle data against the actual literals used by the runner.
+if(NOT DEFINED TEST05_EXE OR NOT DEFINED TEST05_CATALOGUE)
+  message(FATAL_ERROR "TEST05_EXE and TEST05_CATALOGUE are required")
+endif()
+file(READ "${TEST05_CATALOGUE}" expected)
+execute_process(COMMAND "${TEST05_EXE}" --dump-catalogue
+  RESULT_VARIABLE result OUTPUT_VARIABLE actual ERROR_VARIABLE error TIMEOUT 10)
+if(NOT result STREQUAL "0")
+  message(FATAL_ERROR "Catalogue export failed: ${result}: ${error}")
+endif()
+string(JSON equal ERROR_VARIABLE parse_error EQUAL "${expected}" "${actual}")
+if(NOT parse_error STREQUAL "NOTFOUND")
+  message(FATAL_ERROR "Invalid catalogue JSON: ${parse_error}")
+endif()
+if(NOT equal)
+  message(FATAL_ERROR "Authored analytic catalogue differs from executable test records")
+endif()
+message(STATUS "Complete independent LP catalogue matches executable test records")
