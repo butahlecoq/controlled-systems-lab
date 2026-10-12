@@ -51,6 +51,12 @@ def _adapt_payload(record):
         from collections import Counter
         if Counter(t["case_id"] for t in measured) != {"grid-25": 7, "grid-81": 7, "grid-169": 7}:
             raise ValueError("OPT-05 case trial groups differ")
+        expected_points={"grid-25":25,"grid-81":81,"grid-169":169}
+        summary_keys=[row.get("case_id") for row in record.get("summary", []) if isinstance(row,dict)]
+        if len(summary_keys)!=3 or set(summary_keys)!=set(expected_points):
+            raise ValueError("OPT-05 summary must contain each expected case exactly once")
+        if any(row.get("points")!=expected_points.get(row.get("case_id")) for row in record.get("summary",[])) or any(t.get("points")!=expected_points.get(t.get("case_id")) for t in measured):
+            raise ValueError("OPT-05 point count differs from named case")
         if not re.fullmatch(r"[0-9a-f]{40}", str(record.get("code_commit", ""))) or record.get("fixture", {}).get("oracle") is None:
             raise ValueError("OPT-05 source/fixture evidence missing")
         summary = record.get("summary")
@@ -80,8 +86,12 @@ def _adapt_payload(record):
             raise ValueError("GEO-03 contains failed trials")
         from collections import Counter
         groups = Counter((t.get("fixture"), t.get("direction")) for t in trials)
-        if len(trials) != 56 or len(groups) != 8 or set(groups.values()) != {7} or any(t.get("oracle_passed") != "true" for t in trials):
+        expected_groups={(fixture,direction) for fixture in ("embedded-segment","simplex","singleton","square") for direction in ("H-to-V","V-to-H")}
+        summary_keys=[(row.get("fixture"),row.get("direction")) for row in summary]
+        if len(trials) != 56 or set(groups)!=expected_groups or set(groups.values()) != {7} or any(t.get("oracle_passed") != "true" for t in trials):
             raise ValueError("GEO-03 requires eight seven-trial oracle-passing groups")
+        if len(summary_keys)!=8 or set(summary_keys)!=expected_groups:
+            raise ValueError("GEO-03 summary must contain each fixture/direction group exactly once")
         limits = payload.get("scope_limitations")
         if not isinstance(limits, list) or not limits:
             raise ValueError("GEO-03 scope limitations required")

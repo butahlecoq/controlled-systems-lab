@@ -1,6 +1,7 @@
 """Typed native report adapters preserve producer identity and evidence scope."""
 import json
 import hashlib
+import copy
 import importlib.util
 from pathlib import Path
 import shutil
@@ -48,6 +49,21 @@ class RegisteredKindTests(unittest.TestCase):
         self.assertEqual(result.report_id, 'opt05-hull-20261012-d1c211c2')
         self.assertIn('trial', result.measured_scope.lower())
         self.assertIn('no comparator', result.evidence_limits.lower())
+
+    def test_opt05_rejects_incomplete_summary_and_wrong_case_points(self):
+        record=json.loads((FIXTURES/'opt05-hull-20261012-d1c211c2'/'records.json').read_text())
+        duplicate=copy.deepcopy(record);duplicate['summary'][0]=copy.deepcopy(duplicate['summary'][1])
+        with self.assertRaisesRegex(ValueError,'summary must contain'):
+            registered.adapt_payload(duplicate)
+        wrong_points=copy.deepcopy(record);wrong_points['summary'][0]['points']=26
+        with self.assertRaisesRegex(ValueError,'point count differs'):
+            registered.adapt_payload(wrong_points)
+
+    def test_geo03_rejects_missing_or_duplicate_summary_group(self):
+        record=json.loads((FIXTURES/'geo03-20261012-37c3fb484e0d'/'records.json').read_text())
+        missing=copy.deepcopy(record);missing['payload']['summary'].pop();missing['payload_sha256']=registered._digest(missing['payload'])
+        with self.assertRaisesRegex(ValueError,'summary must contain'):
+            registered.adapt_payload(missing)
 
     def test_geo03_adapter_preserves_native_payload_digest_and_limitations(self):
         result = registered.adapt(FIXTURES / 'geo03-20261012-37c3fb484e0d')
