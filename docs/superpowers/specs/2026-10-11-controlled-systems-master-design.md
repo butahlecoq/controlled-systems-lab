@@ -26,7 +26,7 @@ All newly authored artifacts are in English. Owner discussion is in Russian. The
 | Temporal constraints | Owner requested representability, exclusion from first experiments | Future supported lifts/strategies; no default added couplings |
 | Verification | Recorded owner agreement | Numerical first; future claim-specific validated certificates |
 | Archival baseline | Owner selected B04; later supplied table-file guidance | Preserve historical data and restoration status |
-| B04 control bound | Owner said probably u in [-1,1] | Provisional hypothesis, not established canonical input |
+| Working baseline control bound | Owner decision: use `u ∈ [-1,1]` for initial baseline scenarios as an explicit modeling assumption | This does not establish the canonical B04 archival bound. Keep assumed-data baseline scenarios distinct; leave the historical manifest and restoration status unchanged until original inputs/conventions are sourced |
 | Testing | Owner explicitly requested module unit tests | Include unit, contract, mathematical and integration acceptance evidence |
 | Delivery through subagents | Owner proposed specification -> tickets -> subagent implementation | Fix dependencies/ownership before parallel implementation |
 | Library API, CMake, double, initial polyhedral strategy | Assistant proposals | Review with owner; do not label them prior owner decisions |
@@ -147,7 +147,7 @@ A scenario describes dynamics, initial information, horizon, admissible sets and
 
 Provide a small template catalog with explanations of dimensions, stage indexing, units and objective conventions: a minimal LTI case, a state-constrained case, and an LTV case, covering the three initial objective forms. Start every published executable template from complete, verified data. Keep the unresolved historical B04 record labelled non-executable; it is not a ready-to-run user template.
 
-Constant coefficients and bounds should be entered once. Stage-varying values have an explicit separate form. Small matrices can be inline; optional external matrix data can be added under a documented reference/layout contract when needed. Common domain shapes should have concise named forms such as a box, with general polyhedral data available as an advanced form. Defaults must not invent control bounds, targets, uncertainty semantics or full-state observation. If a nominal profile omits external inputs, observations or state restrictions, its resolved meaning is documented and recorded.
+Constant coefficients and bounds should be entered once. Stage-varying values have an explicit separate form. Small matrices can be inline; optional external matrix data can be added under a documented reference/layout contract when needed. Common domain shapes should have concise named forms such as a box, with general polyhedral data available as an advanced form. Defaults must not silently invent control bounds, targets, uncertainty semantics or full-state observation. The owner-selected working bound `u ∈ [-1,1]` may appear only as an explicit value in separately identified initial baseline scenarios, not as an assumed canonical B04 input. If a nominal profile omits external inputs, observations or state restrictions, its resolved meaning is documented and recorded.
 
 Confirmed time-domain scope: the file supplies discrete transitions x_(t+1)=A_t x_t+B_t u_t+a_t for the initial nominal problem. The horizon is T transitions. Optional physical timestamps describe those stages; they do not trigger matrix discretization. Continuous-time input and its integration/hold semantics belong to a later explicit module. Continuous-valued controls remain the selected initial action domain.
 
@@ -230,7 +230,7 @@ Subagents may propose contract changes but cannot silently alter accepted requir
 - Select the first matrix, LP, convex solver, CMake packaging and test integrations without exposing their internal types in the public contract.
 - Review the scenario-file form, syntax and proposed CLI launcher; select supported compiler/OS distribution targets. No real-time deadline is currently specified.
 - Choose compatible backends/representations for the two selected optimization strategies and realistic scale ranges using the supplied experiments. Reachable-set approximation comparison is a later slice.
-- Restore B04 canonical inputs separately; the provisional control interval stays labelled provisional until sourced or explicitly adopted as a new scenario.
+- Restore B04 canonical inputs separately; its control interval remains unresolved until sourced. Initial baseline scenarios may use the owner-selected explicit assumption `u ∈ [-1,1]` under a distinct scenario identity.
 
 Changes to these open proposals do not reopen the confirmed C++ choice or silently change archival data. Stable requirement IDs and a dated change record should keep subsequent tickets/reviews traceable.
 

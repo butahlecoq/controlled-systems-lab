@@ -358,7 +358,12 @@ class RegisteredKindTests(unittest.TestCase):
         source_ids={report['source_report_id'] for report in registered_rows}
         public_ids={report['report_id'] for report in registered_rows}
         self.assertEqual(source_ids,{path.name for path in root.iterdir() if path.is_dir() and path.name.startswith(('opt05-hull-','geo03-'))})
-        self.assertEqual(public_ids,{path.stem for path in root.iterdir() if path.suffix=='.zip' and not path.name.endswith('.source.zip') and path.name.startswith(('opt05-hull-','geo03-'))})
+        producer_geo_zip=root/'geo03-20261012-3c12ca125831.zip'
+        self.assertEqual(hashlib.sha256(producer_geo_zip.read_bytes()).hexdigest(),
+                         'e518e1c1786a67561d4cc0336231746f5f2e748cd0aaaba707d2c4eaf97dfd50')
+        self.assertEqual(producer_geo_zip.read_bytes(),(root/'geo03-20261012-3c12ca125831.source.zip').read_bytes())
+        self.assertEqual(public_ids|{'geo03-20261012-3c12ca125831'},
+                         {path.stem for path in root.iterdir() if path.suffix=='.zip' and not path.name.endswith('.source.zip') and path.name.startswith(('opt05-hull-','geo03-'))})
         with tempfile.TemporaryDirectory() as temp:
             first=site.stage(root/'catalog.json',Path(temp)/'stage-a',check=True)
             second=site.stage(root/'catalog.json',Path(temp)/'stage-b',check=True)

@@ -35,4 +35,6 @@ python reports/algorithm-results/tooling/geo03/validate_report.py build/geo03-re
 
 Output paths must be new. The collector writes raw CSV/JSONL, summaries, saved-data JSON, standalone HTML/SVG, a hashed manifest and an offline ZIP beside the report directory.
 
+If the executable exits nonzero or the measured CSV, scenario roster, adapter identity, or oracle check fails, the collector saves available stdout, stderr, the command, and `collection-status.json` in the requested output directory before exiting nonzero. A failed collection has no accepted `records.json` or ZIP. The saved report's two historical build-log digests cannot be matched to retained log bytes; its `build-provenance.txt` labels that limitation rather than identifying either candidate as the final timed build log.
+
 The report schema is `csl.geo03-hv-report/1`. Timings describe this adapter and these tiny fixtures only. Numerical membership/support checks are not validated global certificates. The report makes no competitor, speedup, production-size or scaling claim. This review artifact is not registered in the shared Pages catalogue; do not claim a hosted URL until issue #148 is integrated and the deployed URL is verified.
