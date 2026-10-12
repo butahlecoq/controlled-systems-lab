@@ -23,7 +23,7 @@
       "source_commit": "d1c211c2763989a9cf3e39a8acaf609c5cf33a07",
       "measured_scope": "21 verified measured trials across 5x5, 9x9, and 13x13 square lattices",
       "evidence_limits": "No comparator; binary64 numerical checks; not exact arithmetic or a validated global certificate",
-      "zip_sha256": "444b127c2bd21e9868d5fb3ae8634a0ce41bf8f860c25348e0bdaaa222b6fe32"
+      "zip_sha256": "2cd7440d9343394d023f715bcbcfa06c15766ee39ae4714b0f093ba2da47d08e"
     },
     {
       "report_id": "geo03-20261012-37c3fb484e0d",
@@ -32,7 +32,7 @@
       "source_commit": "ba83547b3495cc8017f720702083bcf76c71fb30",
       "measured_scope": "56 measured trials across four bounded 2D fixtures in both conversion directions",
       "evidence_limits": "contract fixtures only; no accepted workload-size baseline; bounded H/V cases only; no available competing adapter; numerical checks are not validated global certificates; no inner conversion phase timing; A17/A18 lineage not audited",
-      "zip_sha256": "f6e9a1d572ffb5873987d2e78f14e382e11fe8928d85334d57978e253b36a574"
+      "zip_sha256": "4e004bd8a17b344edd8e86990f25f65ccba841576ea16836e074507d42f887ca"
     }
   ]
 }
