@@ -6,4 +6,6 @@ This supplement belongs to `convex-20261012T041854Z-4d54a407c9b2`, measured from
 
 `concurrent-work.txt` records the coordinated quiet window, cache/workspace policy and limitations used by the unchanged collector. The main report independently retains its pre/post observations and separate-profile process counters. These supplementary observations do not establish an exclusive native limiter, a speedup or a clean-system guarantee.
 
+`run-collection.py` is the exact supplementary launcher used for this collection, retaining the collector command and sampling calculation. It delegates the unchanged source-commit-bound collector; it does not replace its numerical timers. It is retained as provenance, with paths relative to the original build directory, rather than as an offline report renderer. Opening the report or regenerating its figures does not execute this script or rerun the solver.
+
 No solver was rerun for packaging. Numerical payload, HTML, figures, raw files and ZIP retain their reviewed exact bytes.
