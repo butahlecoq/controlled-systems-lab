@@ -80,13 +80,47 @@ public:
         id(report_.input.witness.problem,"witness.problem");
         if(const auto& outcome=report_.input.outcome) {id(outcome->subject,"outcome.subject");support(outcome->support,"outcome.support");}
         if(const auto& family=report_.input.family) {
-            id(family->problem,"family.problem");
-            claim(family->evidence.feasibility,"family.feasibility");claim(family->evidence.optimality,"family.optimality");
-            claim(family->evidence.completeness,"family.completeness");
-            const auto expected=original_.constraints().coordinates();const auto actual=family->relation.coordinates;
-            if(actual.horizon!=expected.horizon||actual.dimensions.state!=expected.dimensions.state||
-                actual.dimensions.control!=expected.dimensions.control||actual.dimensions.external!=expected.dimensions.external)
-                mismatch("family.coordinates","joint coordinates differ from original problem");
+            const auto& identity=family->identity();
+            id(identity.problem,"family.problem");id(identity.request.objective,"family.request.objective");
+            const auto expected=original_.constraints().coordinates();
+            if(identity.coordinates!=expected)
+                mismatch("family.coordinates","family identity coordinates differ from original problem");
+            const auto family_bound=[&](const std::optional<ObjectiveBound>& bound,const std::string& field) {
+                if(bound) {claim(bound->evidence,field);if(!std::isfinite(bound->value))mismatch(field,"bound must be finite");}
+            };
+            std::visit([&](const auto& product) {
+                using T=std::decay_t<decltype(product)>;
+                if(product.relation.coordinates!=expected)
+                    mismatch("family.relation.coordinates","joint relation coordinates differ from original problem");
+                if(product.relation.representation!=identity.request.representation)
+                    mismatch("family.relation.representation","relation representation differs from effective request");
+                if constexpr(std::is_same_v<T,CompleteOptimalFamily>||std::is_same_v<T,PartialOptimalFamily>) {
+                    claim(product.optimum.optimum,"family.optimum");
+                    family_bound(product.optimum.bounds.lower,"family.bounds.lower");
+                    family_bound(product.optimum.bounds.upper,"family.bounds.upper");
+                    if constexpr(std::is_same_v<T,CompleteOptimalFamily>) {
+                        if(product.completeness.binding!=identity)
+                            mismatch("family.completeness.binding","completeness is not bound to the published family identity");
+                    } else claim(product.optimal_subset.every_history_optimal,"family.partial.optimal_subset");
+                } else {
+                    std::visit([&](const auto& relation) {
+                        using R=std::decay_t<decltype(relation)>;
+                        if constexpr(std::is_same_v<R,OuterCandidateEvidence>)
+                            claim(relation.enclosure,"family.candidate.outer");
+                        else if constexpr(std::is_same_v<R,FeasibleCandidateEvidence>)
+                            claim(relation.feasibility,"family.candidate.inner");
+                    },product.relation_to_target);
+                    std::visit([&](const auto& feasibility) {
+                        using F=std::decay_t<decltype(feasibility)>;
+                        if constexpr(std::is_same_v<F,RelationFeasibilityEvidence>)
+                            claim(feasibility.support,"family.candidate.feasibility.relation");
+                        else if constexpr(std::is_same_v<F,WitnessFeasibilityEvidence>) {
+                            id(feasibility.witness.problem,"family.candidate.feasibility.witness");
+                            claim(feasibility.support,"family.candidate.feasibility.witness");
+                        }
+                    },product.feasibility);
+                }
+            },family->outcome());
         }
         const auto bound=[&](const std::optional<ObjectiveBound>& b,const std::string& field) {
             if(b) {claim(b->evidence,field);if(!std::isfinite(b->value))mismatch(field,"bound must be finite");}

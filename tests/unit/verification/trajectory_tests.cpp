@@ -193,18 +193,36 @@ TEST_CASE("unsupported rich profiles are never silently dropped") {
     input=ltv();input.external=ExogenousExternalInput{{Singleton{{3}},Singleton{{4}},Singleton{{-2}}},SetQuantifier::universal};p=resolve(input);
     CHECK(verify_trajectory(p,ltv_request(p)).feasibility==CheckStatus::unsupported);
 }
-TEST_CASE("sampled partial relaxed or claimed optimal family never establishes coverage") {
+TEST_CASE("published candidate and claimed optimum never establish family coverage") {
     auto p=resolve(scalar());auto q=request(p);ClaimEvidence claim{p.identity(),NumericalCheck{0,0,0,{"backend"}}};
     q.outcome=SynthesisOutcomeClaim{p.identity(),MathematicalOutcome::optimal,claim.support,{"backend assumption"}};
     q.backend_bounds={ProgramObjectiveEvidence{ProgramObjectiveBound{3,{{p.identity(),{"original-program"}},claim.support,{"preserved assumption"}}},{}}};
-    for(auto target:{FamilyTarget::exact_optimal_relation,FamilyTarget::candidate_relaxation,FamilyTarget::partial_relation}) {
-        q.family=OptimalFamily{p.identity(),{p.constraints().coordinates(),{"opaque-family"},{}},target,{claim,claim,claim}};
-        auto r=verify_trajectory(p,q);CHECK(r.feasibility==CheckStatus::numerical_pass);CHECK(r.optimality==CheckStatus::unsupported);
-        CHECK(r.completeness==CheckStatus::unsupported);CHECK(r.validated==CheckStatus::unsupported);
-        CHECK(r.input.backend_bounds[0].lower->evidence.subject.program.value=="original-program");
-        CHECK(r.input.backend_bounds[0].lower->evidence.assumptions==std::vector<std::string>{"preserved assumption"});
-    }
-    q.family->relation.coordinates.horizon=7;CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+    const auto coordinates=p.constraints().coordinates();
+    const FamilyRequest effective{"nominal",p.identity(),FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{"opaque-family"},{}};
+    const FamilyIdentity identity{p.identity(),effective,coordinates,{"candidate-strategy"},"1",{}};
+    const JointRelation relation{coordinates,effective.representation,{}};
+    q.family=accepted(FamilyPublisher::publish(identity,CandidateFamily{relation,
+        HeuristicRelationEvidence{"literal candidate"},WitnessFeasibilityEvidence{q.witness,claim}}));
+    auto r=verify_trajectory(p,q);
+    CHECK(r.bindings==CheckStatus::numerical_pass);CHECK(r.feasibility==CheckStatus::numerical_pass);
+    CHECK(r.optimality==CheckStatus::unsupported);CHECK(r.completeness==CheckStatus::unsupported);
+    CHECK(r.validated==CheckStatus::unsupported);
+    CHECK(r.input.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(r.input.backend_bounds[0].lower->evidence.subject.program.value=="original-program");
+    CHECK(r.input.backend_bounds[0].lower->evidence.assumptions==std::vector<std::string>{"preserved assumption"});
+    CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,CandidateFamily{relation,
+        FeasibleCandidateEvidence{claim},WitnessFeasibilityEvidence{q.witness,claim}})));
+    auto wrong_coordinates=coordinates;wrong_coordinates.horizon=7;
+    auto wrong_identity=identity;wrong_identity.coordinates=wrong_coordinates;
+    q.family=accepted(FamilyPublisher::publish(wrong_identity,CandidateFamily{
+        JointRelation{wrong_coordinates,effective.representation,{}},HeuristicRelationEvidence{"literal candidate"},Unestablished{}}));
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+    auto wrong_problem=identity;wrong_problem.problem={"other-resolved-problem"};
+    wrong_problem.request.objective=wrong_problem.problem;
+    q.family=accepted(FamilyPublisher::publish(wrong_problem,CandidateFamily{relation,
+        HeuristicRelationEvidence{"literal candidate"},Unestablished{}}));
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
     q.family.reset();q.outcome->subject={"wrong"};CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
 }
 TEST_CASE("V membership checks actual original rows and retains registered provenance") {

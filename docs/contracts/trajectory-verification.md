@@ -34,14 +34,22 @@ infeasibility alone does not establish nonmembership. Missing or inconclusive
 membership evidence is unsupported, not a constraint pass. Every attempted
 query retains its admitted method/version and request/outcome identity record.
 
-Problem identities on witness, family, outcome and every supplied bound must
-match. Family coordinate dimensions and horizon must match. Backend program IDs
-are retained as provenance; a program-to-original-objective transformation is
-not inferred. Current canonical claims do not carry independently verifiable
-strategy/version/coordinate-schema/lineage proofs. Unchecked certificates and
-symbolic references are preserved, never elevated to verified evidence.
-`bindings == numerical_pass` means the bindings currently expressible in the
-public claim types passed; it does not assert complete SYN-06 binding coverage.
+Problem identities on the witness, published family, outcome and every supplied
+bound must match. A family's immutable identity and relation coordinates must
+match the resolved original problem; its effective request objective and
+relation representation are also checked. The verifier checks evidence fields
+appropriate to the published outcome variant, while `FamilyPublisher` controls
+which variants may be constructed. In the current contract, a candidate may be
+published, but complete and partial optimal families remain unsupported by the
+publisher. A candidate's witness-scoped feasibility evidence never proves its
+whole relation feasible or all its histories optimal. Backend program IDs are
+retained as provenance; a program-to-original-objective transformation is not
+inferred. The request does not supply an independent expected family strategy,
+version or lineage, so their internal consistency is not an independently
+verified binding. Unchecked certificates and symbolic references are preserved,
+never elevated to verified evidence. `bindings == numerical_pass` means only
+the available original-problem, witness, coordinate and evidence bindings passed;
+it does not assert complete SYN-06 binding coverage.
 Optimality, complete-family coverage and validated certification remain distinct
 unsupported report fields even for a feasible witness and a claimed optimal
 backend result. The original mathematical outcome is retained independently of
