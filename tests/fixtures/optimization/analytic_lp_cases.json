@@ -1,0 +1,20 @@
+{
+  "format": "csl.test05.analytic-lp/1",
+  "purpose": "independent-test-oracles",
+  "cases": [
+    {"program":"triangle","problem":"test05","objective":[-1,-2],"offset":0,"csr":{"rows":1,"cols":2,"starts":[0,2],"indices":[0,1],"values":[1,1]},"variables":[[0,null],[0,null]],"rows":[[null,1]],"termination":"completed","outcome":"optimal","point":[0,1],"cost":-2,"face":false,"authored_maximum":null,"dual":{"row_lower":[0],"row_upper":[2],"variable_lower":[1,0],"variable_upper":[0,0],"constant":-2}},
+    {"program":"max-offset","problem":"test05","objective":[-1,-2],"offset":-7,"csr":{"rows":1,"cols":2,"starts":[0,2],"indices":[0,1],"values":[1,1]},"variables":[[0,null],[0,null]],"rows":[[null,1]],"termination":"completed","outcome":"optimal","point":[0,1],"cost":-9,"face":false,"authored_maximum":9,"dual":{"row_lower":[0],"row_upper":[2],"variable_lower":[1,0],"variable_upper":[0,0],"constant":-9}},
+    {"program":"free-fixed-equality","problem":"test05","objective":[1,3],"offset":11,"csr":{"rows":1,"cols":2,"starts":[0,2],"indices":[0,1],"values":[2,-1]},"variables":[[null,null],[-2,-2]],"rows":[[6,6]],"termination":"completed","outcome":"optimal","point":[2,-2],"cost":7,"face":false,"authored_maximum":null,"dual":{"row_lower":[0.5],"row_upper":[0],"variable_lower":[0,3.5],"variable_upper":[0,0],"constant":7}},
+    {"program":"contradictory-redundant","problem":"test05","objective":[0],"offset":0,"csr":{"rows":3,"cols":1,"starts":[0,1,2,3],"indices":[0,0,0],"values":[1,1,2]},"variables":[[null,null]],"rows":[[null,0],[1,null],[null,0]],"termination":"completed","outcome":"infeasible","point":null,"cost":null,"face":false,"authored_maximum":null,"dual":null},
+    {"program":"unbounded","problem":"test05","objective":[-1],"offset":0,"csr":{"rows":0,"cols":1,"starts":[0],"indices":[],"values":[]},"variables":[[0,null]],"rows":[],"termination":"completed","outcome":"unbounded","point":null,"cost":null,"face":false,"authored_maximum":null,"dual":null},
+    {"program":"degenerate-face","problem":"test05","objective":[-1,-1],"offset":5,"csr":{"rows":3,"cols":2,"starts":[0,2,4,6],"indices":[0,1,0,1,0,1],"values":[1,1,2,2,1,1]},"variables":[[0,null],[0,null]],"rows":[[null,1],[null,2],[0,null]],"termination":"completed","outcome":"optimal","point":null,"cost":4,"face":true,"authored_maximum":null,"dual":{"row_lower":[0,0,0],"row_upper":[1,0,0],"variable_lower":[0,0],"variable_upper":[0,0],"constant":4}},
+    {"program":"scaled-equality","problem":"test05","objective":[1,3],"offset":11,"csr":{"rows":1,"cols":2,"starts":[0,2],"indices":[0,1],"values":[2048,-1024]},"variables":[[null,null],[-2,-2]],"rows":[[6144,6144]],"termination":"completed","outcome":"optimal","point":[2,-2],"cost":7,"face":false,"authored_maximum":null,"dual":{"row_lower":[0.00048828125],"row_upper":[0],"variable_lower":[0,3.5],"variable_upper":[0,0],"constant":7}},
+    {"program":"shifted-offset","problem":"test05","objective":[1,3],"offset":-2,"csr":{"rows":1,"cols":2,"starts":[0,2],"indices":[0,1],"values":[2,-1]},"variables":[[null,null],[-2,-2]],"rows":[[6,6]],"termination":"completed","outcome":"optimal","point":[2,-2],"cost":-6,"face":false,"authored_maximum":null,"dual":{"row_lower":[0.5],"row_upper":[0],"variable_lower":[0,3.5],"variable_upper":[0,0],"constant":-6}}
+  ],
+  "partial":{"program":"triangle","termination":"resource_limit","outcome":"undetermined","candidate":[0,0],"lower":-2,"upper":0,"support":"fixture-symbolic-argument"},
+  "primal_checks":[
+    {"point":[0,1.0000000298023223876953125],"rows":[2.98023223876953125e-8,1.0000000298023223876953125],"variables":[0,1.0000000298023223876953125],"accepted":false},
+    {"point":[-2.98023223876953125e-8,1],"rows":[0,1],"variables":[2.98023223876953125e-8,1],"accepted":false},
+    {"point":[0,1.000000007450580596923828125],"rows":[7.450580596923828125e-9,1.000000007450580596923828125],"variables":[0,1.000000007450580596923828125],"accepted":true}
+  ]
+}
