@@ -3,7 +3,7 @@ import copy, hashlib, json, sys, unittest, tempfile, subprocess, zipfile
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
-import collect,render
+import collect,render,provenance
 class ContractTests(unittest.TestCase):
  def test_signed_payload_hash_and_tamper_detection(self):
   p=collect.fixture_payload('20261013T000000Z');self.assertEqual(p['schema'],'csl.geo02-affine-sum-report/1');render.validate(p)
@@ -36,4 +36,11 @@ class ContractTests(unittest.TestCase):
    self.assertTrue(all(hashlib.sha256((output/name).read_bytes()).hexdigest()==digest for name,digest in manifest['files'].items()))
    archive=root/(payload['report_id']+'.zip')
    with zipfile.ZipFile(archive) as z:self.assertEqual(set(z.namelist()),{x.name for x in output.iterdir()})
+ def test_provenance_allows_only_pinned_report_paths_and_cmake_delta(self):
+  provenance.validate_harness_paths(['reports/algorithm-results/tooling/geo02/collect.py','scripts/reports/site.py'])
+  with self.assertRaisesRegex(ValueError,'allowlist'):provenance.validate_harness_paths(['src/geometry/affine_sum.cpp'])
+  source='\n'.join((provenance.GEO04_OPTION,provenance.CMAKE_CONFLICT,provenance.GEO04_TARGET,''))
+  expected=provenance.expected_harness_cmake(source)
+  provenance.validate_harness_cmake(source,expected)
+  with self.assertRaisesRegex(ValueError,'CMakeLists.txt'):provenance.validate_harness_cmake(source,expected+'\nadd_library(unreviewed x.cpp)')
 if __name__=='__main__':unittest.main()

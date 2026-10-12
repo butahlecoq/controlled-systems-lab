@@ -103,6 +103,14 @@ class Geo02PublicationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             geo02.adapt_payload(record)
 
+    def test_timing_scope_claims_are_pinned(self):
+        record = fixture_record()
+        record["timing_scopes"] = copy.deepcopy(record["timing_scopes"])
+        record["timing_scopes"]["setup_ns"] = "unbounded residual"
+        record = collect.finalize(record, "20261013T120000Z")
+        with self.assertRaisesRegex(ValueError, "invalid GEO-02 report payload"):
+            geo02.adapt_payload(record)
+
     def test_complete_collection_metadata_must_match_successful_trials(self):
         for key, value in (("expected_trials", 27), ("process_return_code", 2),
                            ("aborted_or_timed_out", True), ("parse_error", "truncated CSV")):

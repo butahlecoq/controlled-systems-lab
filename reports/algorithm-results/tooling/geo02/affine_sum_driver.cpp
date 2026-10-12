@@ -76,8 +76,7 @@ int main(int argc,char**argv){try{
  for(int rep=0;rep<reps;++rep)for(int i=0;i<4;++i){
   Timer trial;auto c=make_case(i);Result r;r.scenario=c.id;r.repetition=rep;run(r,c);
   r.total=trial.ns();
-  if(r.operation>r.total||r.oracle>r.total-r.operation)throw std::runtime_error("measured phases exceed total trial time");
-  r.setup=r.total-r.operation-r.oracle;
+  if(r.setup>r.total||r.operation>r.total-r.setup||r.oracle>r.total-r.setup-r.operation)throw std::runtime_error("measured phases exceed total trial time");
   pass&=r.status=="passed"&&r.pass;
   std::cout<<r.scenario<<','<<rep<<','<<r.status<<','<<q(r.detail)<<','<<r.setup<<','<<r.operation<<','<<r.oracle<<','<<r.total<<','<<q(r.points_json)<<','<<r.support_checks<<','<<q(r.support_json)<<','<<(r.pass?"true":"false")<<'\n';
  }
