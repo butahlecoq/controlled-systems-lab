@@ -857,12 +857,18 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
     CHECK(preserved.completed_lineage[0].request.value=="transform/4");
     CHECK(preserved.completed_lineage[0].input.value=="input/set");
     CHECK(preserved.completed_lineage[0].output.value=="output/set");
+    CHECK(preserved.completed_lineage[0].module.value=="converter");
+    CHECK(preserved.completed_lineage[0].version=="2");
     CHECK(preserved.completed_lineage[1].request.value=="transform/5");
     CHECK(preserved.completed_lineage[1].input.value=="output/set");
     CHECK(preserved.completed_lineage[1].output.value=="final/set");
+    CHECK(preserved.completed_lineage[1].module.value=="projector");
+    CHECK(preserved.completed_lineage[1].version=="3");
     CHECK(preserved.completed_lineage[2].request.value=="transform/4");
     CHECK(preserved.completed_lineage[2].input.value=="other/input");
     CHECK(preserved.completed_lineage[2].output.value=="other/output");
+    CHECK(preserved.completed_lineage[2].module.value=="converter");
+    CHECK(preserved.completed_lineage[2].version=="2");
     request.family.profile="malformed-provider-rejection";
     auto malformed_provider=registry.prepare(request);
     REQUIRE(std::holds_alternative<PreparedStrategy>(malformed_provider));
