@@ -7,6 +7,12 @@ set_target_properties(installed_convex_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_convex_client COMMAND installed_convex_client)
 set_tests_properties(installed_convex_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed convex client: original norm, squared provenance and numerical KKT passed")
+add_executable(installed_resolved_problem_client resolved_problem_client.cpp)
+target_link_libraries(installed_resolved_problem_client PRIVATE CSL::resolved_problem)
+set_target_properties(installed_resolved_problem_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_resolved_problem_client COMMAND installed_resolved_problem_client)
+set_tests_properties(installed_resolved_problem_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed resolved problem client: literal identity, retained data and actual strategy admission passed")
 add_executable(installed_execution_client execution_client.cpp)
 target_link_libraries(installed_execution_client PRIVATE CSL::execution)
 set_target_properties(installed_execution_client PROPERTIES CXX_EXTENSIONS OFF)

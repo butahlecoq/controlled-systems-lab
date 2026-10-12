@@ -1,0 +1,253 @@
+[
+  {
+    "case_id": "offset-triangle",
+    "identity": {
+      "problem": "html01-literals",
+      "program": "offset-triangle"
+    },
+    "input": {
+      "linear": [
+        -1.0,
+        -2.0
+      ],
+      "offset": 7.0,
+      "constraints": {
+        "rows": 1,
+        "cols": 2,
+        "starts": [
+          0,
+          2
+        ],
+        "indices": [
+          0,
+          1
+        ],
+        "values": [
+          1.0,
+          1.0
+        ]
+      },
+      "variables": [
+        [
+          0.0,
+          null
+        ],
+        [
+          0.0,
+          null
+        ]
+      ],
+      "rows": [
+        [
+          null,
+          1.0
+        ]
+      ]
+    },
+    "reference": {
+      "outcome": "optimal",
+      "point": [
+        0.0,
+        1.0
+      ],
+      "objective": 5.0,
+      "derivation": "x+2y <= 2(x+y) <= 2; value5 attained at(0,1)."
+    },
+    "assumptions": [
+      "continuous variables",
+      "minimization",
+      "binary64 numerical output; outcome support unestablished"
+    ],
+    "input_sha256": "0e372eb934b472383df8ea8c78de2b12fe07ecddafc056e7e35e38bb25c8f83a",
+    "scenario_sha256": "668ba8ae92115dfdc8bae4378a9ef5668df5e9b5d349eb86b62ea9e6288655a3"
+  },
+  {
+    "case_id": "scalar-positive",
+    "identity": {
+      "problem": "html01-literals",
+      "program": "scalar-positive"
+    },
+    "input": {
+      "linear": [
+        3.0
+      ],
+      "offset": 2.0,
+      "constraints": {
+        "rows": 0,
+        "cols": 1,
+        "starts": [
+          0
+        ],
+        "indices": [],
+        "values": []
+      },
+      "variables": [
+        [
+          -1.0,
+          4.0
+        ]
+      ],
+      "rows": []
+    },
+    "reference": {
+      "outcome": "optimal",
+      "point": [
+        -1.0
+      ],
+      "objective": -1.0,
+      "derivation": "Positive slope selects lower endpoint-1."
+    },
+    "assumptions": [
+      "continuous variables",
+      "minimization",
+      "binary64 numerical output; outcome support unestablished"
+    ],
+    "input_sha256": "70a1c39fc864efa1d009529e44326f750d4b9bdc9d616ae0664a8526ff09da01",
+    "scenario_sha256": "25f0f370d5eb9b3e72a5bd244ef7852945813a239281bc40794acc2fada7365d"
+  },
+  {
+    "case_id": "scalar-negative",
+    "identity": {
+      "problem": "html01-literals",
+      "program": "scalar-negative"
+    },
+    "input": {
+      "linear": [
+        -2.0
+      ],
+      "offset": 2.0,
+      "constraints": {
+        "rows": 0,
+        "cols": 1,
+        "starts": [
+          0
+        ],
+        "indices": [],
+        "values": []
+      },
+      "variables": [
+        [
+          -1.0,
+          4.0
+        ]
+      ],
+      "rows": []
+    },
+    "reference": {
+      "outcome": "optimal",
+      "point": [
+        4.0
+      ],
+      "objective": -6.0,
+      "derivation": "Negative slope selects upper endpoint4."
+    },
+    "assumptions": [
+      "continuous variables",
+      "minimization",
+      "binary64 numerical output; outcome support unestablished"
+    ],
+    "input_sha256": "daa659e9a3cab8fbb74827bd71afa10f644e9b3d08dbc839e70bf0348c07bb68",
+    "scenario_sha256": "a9e20240e46ed9ad1c0d6278dcb710aab5838aadfbc3cac9e9c56faf7416e4ab"
+  },
+  {
+    "case_id": "contradictory-rows",
+    "identity": {
+      "problem": "html01-literals",
+      "program": "contradictory-rows"
+    },
+    "input": {
+      "linear": [
+        0.0
+      ],
+      "offset": 0.0,
+      "constraints": {
+        "rows": 2,
+        "cols": 1,
+        "starts": [
+          0,
+          1,
+          2
+        ],
+        "indices": [
+          0,
+          0
+        ],
+        "values": [
+          1.0,
+          1.0
+        ]
+      },
+      "variables": [
+        [
+          null,
+          null
+        ]
+      ],
+      "rows": [
+        [
+          null,
+          0.0
+        ],
+        [
+          1.0,
+          null
+        ]
+      ]
+    },
+    "reference": {
+      "outcome": "infeasible",
+      "point": null,
+      "objective": null,
+      "derivation": "x<=0 and x>=1 contradict."
+    },
+    "assumptions": [
+      "continuous variables",
+      "minimization",
+      "binary64 numerical output; outcome support unestablished"
+    ],
+    "input_sha256": "fdef1c333f9cbb6a6ca447c6176e88c0ef0d49650197c743d3eda238ff6edfc2",
+    "scenario_sha256": "dc2446d27ecf8666acfe91b5cb0cc4e2009524a21bb0637cfef512492bb61c4b"
+  },
+  {
+    "case_id": "free-unbounded",
+    "identity": {
+      "problem": "html01-literals",
+      "program": "free-unbounded"
+    },
+    "input": {
+      "linear": [
+        -1.0
+      ],
+      "offset": 0.0,
+      "constraints": {
+        "rows": 0,
+        "cols": 1,
+        "starts": [
+          0
+        ],
+        "indices": [],
+        "values": []
+      },
+      "variables": [
+        [
+          null,
+          null
+        ]
+      ],
+      "rows": []
+    },
+    "reference": {
+      "outcome": "unbounded",
+      "point": null,
+      "objective": null,
+      "derivation": "-x tends to minus infinity as x grows."
+    },
+    "assumptions": [
+      "continuous variables",
+      "minimization",
+      "binary64 numerical output; outcome support unestablished"
+    ],
+    "input_sha256": "5fa38870ec3a4ef96aa3c5ad4cca9734fda5c3377908cdd88bafbb8634189444",
+    "scenario_sha256": "5bf6150a7e0e14c1e1abddfb47f20c86cd311428d16cf5f9e86d42823389a258"
+  }
+]

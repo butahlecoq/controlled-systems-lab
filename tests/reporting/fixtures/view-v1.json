@@ -1,0 +1,3704 @@
+{
+  "schema": "csl.algorithm-report-view/1",
+  "report_id": "lp-20261012T000000Z-4fd57e0179f7",
+  "payload_sha256": "4fd57e0179f7384a0ac0dba9c348b56ad652bd7657761ec6c88cdf2bed4c85b7",
+  "payload": {
+    "purpose": "test",
+    "created_utc": "2026-10-12T00:00:00Z",
+    "provenance": {
+      "source_commit": "0000000000000000000000000000000000000000",
+      "tracked_clean": false,
+      "executable_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "backend": {
+        "id": "csl.lp.highs",
+        "version": "1.0.0+highs.1.11.0"
+      },
+      "build": {
+        "configuration": "TEST",
+        "compiler": "synthetic literal fixture"
+      },
+      "repository": "butahlecoq/controlled-systems-lab",
+      "native_archive_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
+    },
+    "environment": {
+      "scalar": "binary64",
+      "workspace_reuse": false,
+      "process_warmup": true,
+      "resources": {
+        "total_threads": 1,
+        "outer_workers": 1,
+        "threads_per_worker": 1,
+        "memory_bytes": null
+      },
+      "clock": {
+        "is_steady": true,
+        "period_num": 1,
+        "period_den": 1000000000
+      },
+      "machine": {
+        "available": false,
+        "reason": "synthetic TEST fixture"
+      },
+      "seed": 0,
+      "absolute_tolerance": 1e-08,
+      "relative_tolerance": 1e-08,
+      "native_threads": {
+        "available": true,
+        "value": 1,
+        "unit": "threads",
+        "scope": "configured native adapter"
+      },
+      "concurrent_work": "synthetic test data; never a measurement"
+    },
+    "scenarios": [
+      {
+        "case_id": "offset-triangle",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "offset-triangle"
+        },
+        "input": {
+          "linear": [
+            -1.0,
+            -2.0
+          ],
+          "offset": 7.0,
+          "variables": [
+            [
+              0.0,
+              null
+            ],
+            [
+              0.0,
+              null
+            ]
+          ],
+          "rows": [
+            [
+              null,
+              1.0
+            ]
+          ],
+          "constraints": {
+            "rows": 1,
+            "cols": 2,
+            "starts": [
+              0,
+              2
+            ],
+            "indices": [
+              0,
+              1
+            ],
+            "values": [
+              1.0,
+              1.0
+            ]
+          }
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": [
+            0.0,
+            1.0
+          ],
+          "objective": 5.0,
+          "derivation": "x+2y <= 2(x+y) <= 2; value5 attained at(0,1)."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "0e372eb934b472383df8ea8c78de2b12fe07ecddafc056e7e35e38bb25c8f83a",
+        "scenario_sha256": "668ba8ae92115dfdc8bae4378a9ef5668df5e9b5d349eb86b62ea9e6288655a3"
+      },
+      {
+        "case_id": "scalar-positive",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-positive"
+        },
+        "input": {
+          "linear": [
+            3.0
+          ],
+          "offset": 2.0,
+          "variables": [
+            [
+              -1.0,
+              4.0
+            ]
+          ],
+          "rows": [],
+          "constraints": {
+            "rows": 0,
+            "cols": 1,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          }
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": [
+            -1.0
+          ],
+          "objective": -1.0,
+          "derivation": "Positive slope selects lower endpoint-1."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "70a1c39fc864efa1d009529e44326f750d4b9bdc9d616ae0664a8526ff09da01",
+        "scenario_sha256": "25f0f370d5eb9b3e72a5bd244ef7852945813a239281bc40794acc2fada7365d"
+      },
+      {
+        "case_id": "scalar-negative",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-negative"
+        },
+        "input": {
+          "linear": [
+            -2.0
+          ],
+          "offset": 2.0,
+          "variables": [
+            [
+              -1.0,
+              4.0
+            ]
+          ],
+          "rows": [],
+          "constraints": {
+            "rows": 0,
+            "cols": 1,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          }
+        },
+        "reference": {
+          "outcome": "optimal",
+          "point": [
+            4.0
+          ],
+          "objective": -6.0,
+          "derivation": "Negative slope selects upper endpoint4."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "daa659e9a3cab8fbb74827bd71afa10f644e9b3d08dbc839e70bf0348c07bb68",
+        "scenario_sha256": "a9e20240e46ed9ad1c0d6278dcb710aab5838aadfbc3cac9e9c56faf7416e4ab"
+      },
+      {
+        "case_id": "contradictory-rows",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "contradictory-rows"
+        },
+        "input": {
+          "linear": [
+            0.0
+          ],
+          "offset": 0.0,
+          "variables": [
+            [
+              null,
+              null
+            ]
+          ],
+          "rows": [
+            [
+              null,
+              0.0
+            ],
+            [
+              1.0,
+              null
+            ]
+          ],
+          "constraints": {
+            "rows": 2,
+            "cols": 1,
+            "starts": [
+              0,
+              1,
+              2
+            ],
+            "indices": [
+              0,
+              0
+            ],
+            "values": [
+              1.0,
+              1.0
+            ]
+          }
+        },
+        "reference": {
+          "outcome": "infeasible",
+          "point": null,
+          "objective": null,
+          "derivation": "x<=0 and x>=1 contradict."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "fdef1c333f9cbb6a6ca447c6176e88c0ef0d49650197c743d3eda238ff6edfc2",
+        "scenario_sha256": "dc2446d27ecf8666acfe91b5cb0cc4e2009524a21bb0637cfef512492bb61c4b"
+      },
+      {
+        "case_id": "free-unbounded",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "free-unbounded"
+        },
+        "input": {
+          "linear": [
+            -1.0
+          ],
+          "offset": 0.0,
+          "variables": [
+            [
+              null,
+              null
+            ]
+          ],
+          "rows": [],
+          "constraints": {
+            "rows": 0,
+            "cols": 1,
+            "starts": [
+              0
+            ],
+            "indices": [],
+            "values": []
+          }
+        },
+        "reference": {
+          "outcome": "unbounded",
+          "point": null,
+          "objective": null,
+          "derivation": "-x tends to minus infinity as x grows."
+        },
+        "assumptions": [
+          "continuous variables",
+          "minimization",
+          "binary64 numerical output; outcome support unestablished"
+        ],
+        "input_sha256": "5fa38870ec3a4ef96aa3c5ad4cca9734fda5c3377908cdd88bafbb8634189444",
+        "scenario_sha256": "5bf6150a7e0e14c1e1abddfb47f20c86cd311428d16cf5f9e86d42823389a258"
+      }
+    ],
+    "trials": [
+      {
+        "case_id": "offset-triangle",
+        "round": 1,
+        "sequence": 1,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "offset-triangle"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "16",
+            "duration_ns": 10,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "16",
+            "end_tick": "20",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "1",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            0.0,
+            1.0
+          ],
+          "original_objective": 5.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-positive",
+        "round": 1,
+        "sequence": 2,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-positive"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "16",
+            "duration_ns": 10,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "16",
+            "end_tick": "20",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "2",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            -1.0
+          ],
+          "original_objective": -1.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-negative",
+        "round": 1,
+        "sequence": 3,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-negative"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "16",
+            "duration_ns": 10,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "16",
+            "end_tick": "20",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "3",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            4.0
+          ],
+          "original_objective": -6.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "contradictory-rows",
+        "round": 1,
+        "sequence": 4,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "contradictory-rows"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "16",
+            "duration_ns": 10,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "16",
+            "end_tick": "20",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "4",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "infeasible",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "free-unbounded",
+        "round": 1,
+        "sequence": 5,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "free-unbounded"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "16",
+            "duration_ns": 10,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "16",
+            "end_tick": "20",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "5",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "unbounded",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "offset-triangle",
+        "round": 2,
+        "sequence": 6,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "offset-triangle"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "26",
+            "duration_ns": 20,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "26",
+            "end_tick": "30",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "6",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            0.0,
+            1.0
+          ],
+          "original_objective": 5.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-positive",
+        "round": 2,
+        "sequence": 7,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-positive"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "26",
+            "duration_ns": 20,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "26",
+            "end_tick": "30",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "7",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            -1.0
+          ],
+          "original_objective": -1.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-negative",
+        "round": 2,
+        "sequence": 8,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-negative"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "26",
+            "duration_ns": 20,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "26",
+            "end_tick": "30",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "8",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            4.0
+          ],
+          "original_objective": -6.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "contradictory-rows",
+        "round": 2,
+        "sequence": 9,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "contradictory-rows"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "26",
+            "duration_ns": 20,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "26",
+            "end_tick": "30",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "9",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "infeasible",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "free-unbounded",
+        "round": 2,
+        "sequence": 10,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "free-unbounded"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "26",
+            "duration_ns": 20,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "26",
+            "end_tick": "30",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "10",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "unbounded",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "offset-triangle",
+        "round": 3,
+        "sequence": 11,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "offset-triangle"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "36",
+            "duration_ns": 30,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "36",
+            "end_tick": "40",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "11",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            0.0,
+            1.0
+          ],
+          "original_objective": 5.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-positive",
+        "round": 3,
+        "sequence": 12,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-positive"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "36",
+            "duration_ns": 30,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "36",
+            "end_tick": "40",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "12",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            -1.0
+          ],
+          "original_objective": -1.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-negative",
+        "round": 3,
+        "sequence": 13,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-negative"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "36",
+            "duration_ns": 30,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "36",
+            "end_tick": "40",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "13",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            4.0
+          ],
+          "original_objective": -6.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "contradictory-rows",
+        "round": 3,
+        "sequence": 14,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "contradictory-rows"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "36",
+            "duration_ns": 30,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "36",
+            "end_tick": "40",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "14",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "infeasible",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "free-unbounded",
+        "round": 3,
+        "sequence": 15,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "free-unbounded"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "36",
+            "duration_ns": 30,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "36",
+            "end_tick": "40",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "15",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "unbounded",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "offset-triangle",
+        "round": 4,
+        "sequence": 16,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "offset-triangle"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "46",
+            "duration_ns": 40,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "46",
+            "end_tick": "50",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "16",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            0.0,
+            1.0
+          ],
+          "original_objective": 5.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-positive",
+        "round": 4,
+        "sequence": 17,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-positive"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "46",
+            "duration_ns": 40,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "46",
+            "end_tick": "50",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "17",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            -1.0
+          ],
+          "original_objective": -1.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-negative",
+        "round": 4,
+        "sequence": 18,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-negative"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "46",
+            "duration_ns": 40,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "46",
+            "end_tick": "50",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "18",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            4.0
+          ],
+          "original_objective": -6.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "contradictory-rows",
+        "round": 4,
+        "sequence": 19,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "contradictory-rows"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "46",
+            "duration_ns": 40,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "46",
+            "end_tick": "50",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "19",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "infeasible",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "free-unbounded",
+        "round": 4,
+        "sequence": 20,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "free-unbounded"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "46",
+            "duration_ns": 40,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "46",
+            "end_tick": "50",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "20",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "unbounded",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "offset-triangle",
+        "round": 5,
+        "sequence": 21,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "offset-triangle"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "56",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "56",
+            "end_tick": "60",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "21",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            0.0,
+            1.0
+          ],
+          "original_objective": 5.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "offset-triangle"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-positive",
+        "round": 5,
+        "sequence": 22,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-positive"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "56",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "56",
+            "end_tick": "60",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "22",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            -1.0
+          ],
+          "original_objective": -1.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-positive"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "scalar-negative",
+        "round": 5,
+        "sequence": 23,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "scalar-negative"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "56",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "56",
+            "end_tick": "60",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "23",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "optimal",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": [
+            4.0
+          ],
+          "original_objective": -6.0,
+          "objective_unavailable_reason": null,
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "rows": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "variables": {
+              "violation": 0.0,
+              "scale": 1.0
+            }
+          },
+          "dual_residuals": {
+            "context": {
+              "subject": {
+                "problem": "html01-literals",
+                "program": "scalar-negative"
+              },
+              "verifier": {
+                "id": "fixture.literal",
+                "version": "1"
+              },
+              "absolute_tolerance": 1e-08,
+              "relative_tolerance": 1e-08
+            },
+            "stationarity": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "signs": {
+              "violation": 0.0,
+              "scale": 1.0
+            },
+            "complementarity": null
+          },
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "contradictory-rows",
+        "round": 5,
+        "sequence": 24,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "contradictory-rows"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "56",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "56",
+            "end_tick": "60",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "24",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "infeasible",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      },
+      {
+        "case_id": "free-unbounded",
+        "round": 5,
+        "sequence": 25,
+        "purpose": "test",
+        "identity": {
+          "problem": "html01-literals",
+          "program": "free-unbounded"
+        },
+        "registry": {
+          "requested": "csl.lp.highs",
+          "actual": {
+            "id": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        },
+        "attempt": {
+          "number": 1,
+          "state": "returned_result",
+          "workspace_reuse": false
+        },
+        "timings": {
+          "input_publication": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "1",
+            "duration_ns": 1,
+            "unit": "ns",
+            "scope": "input_publication"
+          },
+          "registration_preparation": {
+            "available": true,
+            "start_tick": "1",
+            "end_tick": "3",
+            "duration_ns": 2,
+            "unit": "ns",
+            "scope": "registration_preparation"
+          },
+          "workspace_creation": {
+            "available": true,
+            "start_tick": "3",
+            "end_tick": "6",
+            "duration_ns": 3,
+            "unit": "ns",
+            "scope": "workspace_creation"
+          },
+          "public_run": {
+            "available": true,
+            "start_tick": "6",
+            "end_tick": "56",
+            "duration_ns": 50,
+            "unit": "ns",
+            "scope": "public_run"
+          },
+          "independent_verification": {
+            "available": true,
+            "start_tick": "56",
+            "end_tick": "60",
+            "duration_ns": 4,
+            "unit": "ns",
+            "scope": "independent_verification"
+          },
+          "end_to_end": {
+            "available": true,
+            "start_tick": "0",
+            "end_tick": "100",
+            "duration_ns": 100,
+            "unit": "ns",
+            "scope": "end_to_end"
+          }
+        },
+        "observation_token": "25",
+        "harness": {
+          "status": "returned",
+          "error": null
+        },
+        "result": {
+          "termination": "completed",
+          "outcome": "unbounded",
+          "support": {
+            "kind": "unestablished"
+          },
+          "primal": null,
+          "original_objective": null,
+          "objective_unavailable_reason": "no returned objective",
+          "bounds": {
+            "lower": null,
+            "upper": null
+          },
+          "family": {
+            "available": false,
+            "reason": "point only"
+          },
+          "primal_residuals": null,
+          "dual_residuals": null,
+          "raw_diagnostics": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative_run=true\nmodel.reused=false\nnative.info=available\nnative.simplex_iterations=0\nnative.log:\nTEST <script> & \"quotes\"\n=hostile-text"
+        },
+        "validation": {
+          "passed": true,
+          "errors": []
+        },
+        "native_iterations": {
+          "available": true,
+          "value": 0,
+          "unit": "iterations",
+          "scope": "public_run"
+        }
+      }
+    ],
+    "process": {
+      "expected_trials": 25,
+      "emitted_trials": 25,
+      "repetitions": 5,
+      "complete": true,
+      "aborted": false,
+      "return_code": 0,
+      "stderr_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "events_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "profile": {
+      "available": false,
+      "reason": "synthetic TEST fixture"
+    },
+    "historical": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "csl.algorithm-report-catalog/1",
+  "artifact_ref": "main",
+  "reports": [
+    {
+      "report_id": "lp-20261012T000346Z-ee5e9193b7a5",
+      "payload_sha256": "ee5e9193b7a55bbec9f85f805ca74e7e1f5e9b9d22199e5fffeab4ef72515501",
+      "source_commit": "6780941b80fd1e94d6b5a6c5142822d5273bfa3f",
+      "zip_sha256": "4a59e312cdfdfd3fb38abbc4ceac8991a9d41a76689b8bc926fe061aaa5027c6"
+    }
+  ]
+}

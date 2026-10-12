@@ -1,5 +1,11 @@
 # Immutable problem domains, constraints and initial information
 
+Complete publication is supplied by the additive [resolved problem
+module](resolved-problems.md), which composes these component authorities with
+model and objective validation, content ownership and structural identity. These
+component factories remain independently usable and retain their current
+acceptance semantics.
+
 MODEL-02 / issue #20 supplies `<csl/problem/domains.hpp>`,
 `<csl/problem/constraints.hpp>` and `<csl/problem/initial_information.hpp>`
 through the installed `CSL::problem` target. Source revision 1.4 retains the
