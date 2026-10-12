@@ -308,6 +308,23 @@ class RegisteredKindTests(unittest.TestCase):
                 site.stage(root/'catalog.json',Path(temp)/'bad-stage',check=True)
             self.assertFalse((Path(temp)/'bad-stage').exists())
 
+    def test_publication_manifest_rejects_symlinked_file(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)/'input';root.mkdir()
+            catalogue=self.publication(root)
+            out=site.stage(root/'catalog.json',Path(temp)/'stage',check=True)
+            rid=catalogue['reports'][2]['report_id']
+            report_dir=out/rid
+            victim=report_dir/'README.md'
+            target=report_dir/'records.json'
+            victim.unlink()
+            try:
+                victim.symlink_to(target)
+            except (OSError, NotImplementedError) as error:
+                self.skipTest(f"symlinks unavailable: {error}")
+            with self.assertRaisesRegex(ValueError,'symlink'):
+                site.validate_publication_manifest(report_dir,catalogue['reports'][2])
+
     def test_real_stage_rejects_unregistered_file_and_duplicate_id(self):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)/'input';root.mkdir()
