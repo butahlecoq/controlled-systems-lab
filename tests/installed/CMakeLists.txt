@@ -94,3 +94,10 @@ set_target_properties(installed_problem_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_problem_client COMMAND installed_problem_client)
 set_tests_properties(installed_problem_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed problem client: immutable domains and full-history literals passed")
+
+add_executable(installed_phase_one_client phase_one_client.cpp)
+target_link_libraries(installed_phase_one_client PRIVATE CSL::phase_one)
+set_target_properties(installed_phase_one_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_phase_one_client COMMAND installed_phase_one_client)
+set_tests_properties(installed_phase_one_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed phase one client: signed coefficients, original basis and numerical evidence passed")

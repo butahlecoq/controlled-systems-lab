@@ -276,3 +276,13 @@ This is interface/evidence coverage of T-L01/T-L02, not a production native LP
 adapter, completed barycentric membership/recovery algorithm, phase-I kernel,
 validated arithmetic, full certificate validation or complete optimal-family
 construction. OPT-03 and later algorithm/test tickets retain that work.
+
+## Registered equality/nonnegative phase I
+
+The independent `phase-one-bland` version1 adapter is now available through the
+same immutable `LinearProgram` and `LPPort` seam for zero-objective `A*x=b, x>=0`
+programs. It supplies numerical auxiliary and original-space basis/pivot data;
+its guarded Bland policy, finite caps, cooperative stops and unestablished
+outcomes are specified in [the phase-I contract](phase-one.md). This additive
+module leaves the canonical source1.5/NVI/evidence rules above unchanged. Hull
+reduction, grouped classification and validated certificates remain separate.
