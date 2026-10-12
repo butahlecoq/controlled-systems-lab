@@ -1,8 +1,9 @@
 # Resolved mathematical problems
 
 `<csl/problem/validator.hpp>` and `CSL::resolved_problem` add complete, owning
-publication on top of the canonical source 1.4 `Problem` DTO. This is an additive
-module; the DTO, LP data result alias and existing component targets retain their
+publication on top of the `Problem` DTO introduced in canonical source 1.4 and
+retained in source 1.5. This is an additive module; the DTO, LP data result alias
+and existing component targets retain their
 authority. The target publicly composes `CSL::problem`, `CSL::objectives` and
 `CSL::registry`. See [component data](problem-data.md) and the
 [identity byte format](problem-identity-v1.md).

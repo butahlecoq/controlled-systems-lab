@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.31)
 project(CSLInstalledConsumer LANGUAGES CXX)
 find_package(CSL 0.1 CONFIG REQUIRED)
+add_executable(installed_convex_client convex_client.cpp)
+target_link_libraries(installed_convex_client PRIVATE CSL::highs_convex)
+set_target_properties(installed_convex_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_convex_client COMMAND installed_convex_client)
+set_tests_properties(installed_convex_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed convex client: original norm, squared provenance and numerical KKT passed")
 add_executable(installed_resolved_problem_client resolved_problem_client.cpp)
 target_link_libraries(installed_resolved_problem_client PRIVATE CSL::resolved_problem)
 set_target_properties(installed_resolved_problem_client PROPERTIES CXX_EXTENSIONS OFF)
