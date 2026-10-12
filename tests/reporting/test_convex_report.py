@@ -87,6 +87,41 @@ class NativePhaseTests(unittest.TestCase):
         self.expect(p['feasibility'],'observed_return','returned_status_pair',2)
         self.assertEqual(p['qp']['execution']['state'],'unknown')
 
+    def test_wrong_route_configuration_and_positive_boundary_conflicts_reject(self):
+        feasibility=('phase.feasibility.time_limit=1\nphase.feasibility.api_status=0\n'
+                     'phase.feasibility.model_status=7\nphase.feasibility.iterations=0')
+        linear=('phase.linear.time_limit=1\nphase.linear.api_status=0\n'
+                'phase.linear.model_status=7\nphase.linear.iterations=0')
+        cases=[('qp','phase.linear.time_limit=0'),
+               ('linear','phase.feasibility.time_limit=0'),
+               ('linear','phase.qp.time_limit=0'),
+               ('constant','phase.linear.time_limit=0'),
+               ('constant','phase.feasibility.time_limit=0'),
+               ('constant','phase.qp.time_limit=0'),
+               ('qp','native_run=false\nphase.feasibility.time_limit=0'),
+               ('linear','native_run=false\nphase.linear.time_limit=0'),
+               ('qp','phase.qp.time_limit=0'),
+               ('qp',feasibility+'\nphase.qp.time_limit=0\nstart.valid=true\nstart.default_fallback=false'),
+               ('qp',feasibility+'\nqp_run=false\nstart.valid=false\nphase.qp.time_limit=0'),
+               ('linear','start.valid=true\nstart.default_fallback=false'),
+               ('qp','wrapper.decision=constant_rows'),
+               ('qp',feasibility+'\nstart.valid=true\nstart.default_fallback=false\nnative_run=false')]
+        for route,raw in cases:
+            with self.subTest(route=route,raw=raw),self.assertRaises(ValueError):
+                self.project(self.trial(raw),route)
+        for raw,route in [('', 'qp'),('phase.feasibility.time_limit=0','qp'),(linear,'linear')]:
+            trial=self.trial(raw);trial['public_run_entered']=False
+            with self.subTest(before_entry=raw),self.assertRaises(ValueError):self.project(trial,route)
+
+    def test_invalid_start_and_explicit_native_noncall_remain_supported(self):
+        feasibility=('phase.feasibility.time_limit=1\nphase.feasibility.api_status=0\n'
+                     'phase.feasibility.model_status=7\nphase.feasibility.iterations=0')
+        p=self.project(self.trial(feasibility+'\nqp_run=false\nstart.valid=false','numerical_failure'))
+        self.expect(p['feasibility'],'observed_return','returned_status_pair',0)
+        self.expect(p['qp'],'known_not_called','invalid_qp_start',kind='qp')
+        for value in self.project(self.trial('native_run=false')).values():
+            self.assertEqual(value['execution']['reason'],'explicit_pre_entry_stop')
+
 
 
 class SavedConvexTests(unittest.TestCase):
@@ -114,6 +149,60 @@ class SavedConvexTests(unittest.TestCase):
         for change in changes:
             v=self.fixture();change(v['payload']['trials'][2])
             with self.subTest(change=change),self.assertRaises(ValueError):data.validate_view(data.seal(v['payload']))
+
+    def test_each_present_residual_context_uses_the_declared_policy_even_on_failure(self):
+        for failed in (False,True):
+            for block in ('primal_residuals','dual_residuals'):
+                for field in ('absolute_tolerance','relative_tolerance'):
+                    view=self.fixture();trial=view['payload']['trials'][0]
+                    if failed:
+                        trial['validation']={'passed':False,'errors':['retained stopped result']}
+                        trial['result'].update(termination='resource_limit',outcome='undetermined')
+                    data.validate_view(data.seal(view['payload']))
+                    trial['result'][block]['context'][field]=1.0
+                    with self.subTest(failed=failed,block=block,field=field),self.assertRaises(ValueError):
+                        data.validate_view(data.seal(view['payload']))
+
+    def test_unavailable_residual_blocks_remain_unavailable_on_retained_failure(self):
+        for absent in (('primal_residuals',),('dual_residuals',),('primal_residuals','dual_residuals')):
+            view=self.fixture();trial=view['payload']['trials'][0]
+            trial['validation']={'passed':False,'errors':['residuals unavailable']}
+            names=[]
+            for block in absent:
+                names.extend(('rows','variables') if block=='primal_residuals' else ('stationarity','signs','complementarity'))
+                trial['result'][block]=None
+            raw=trial['result']['raw_diagnostics']
+            trial['result']['raw_diagnostics']='\n'.join(line for line in raw.split('\n') if not any(line.startswith('check.'+name+'.') for name in names))
+            accepted=data.validate_view(data.seal(view['payload']))
+            for block in absent:self.assertIsNone(accepted['payload']['trials'][0]['result'][block])
+
+    def test_resealed_wrong_route_and_before_entry_records_reject(self):
+        def entry(state,reason,kind):
+            return {'execution':{'state':state,'reason':reason,'statuses':None},
+                    'iterations':{'available':False,'kind':kind,'value':None,
+                                  'reason':'execution_unknown' if state=='unknown' else 'phase_not_called'},
+                    'elapsed':{'available':False,'value':None,'unit':'ns','reason':'not_exposed_by_adapter'}}
+        # Literal projections deliberately match the old precedence; hashes cannot
+        # turn impossible source branches into legitimate partial observations.
+        for index,wrong,states in [
+            (0,'linear',[('unknown','no_returned_phase_evidence'),('unknown','no_returned_phase_evidence'),('known_not_called','stopped_before_phase_call')]),
+            (4,'feasibility',[('known_not_called','stopped_before_phase_call'),('known_not_called','route_not_selected'),('unknown','no_returned_phase_evidence')]),
+            (4,'qp',[('known_not_called','route_not_selected'),('known_not_called','stopped_before_phase_call'),('unknown','no_returned_phase_evidence')])]:
+            view=self.fixture();trial=view['payload']['trials'][index]
+            trial['validation']={'passed':False,'errors':['retained stop']}
+            result=trial['result'];result.update(termination='resource_limit',outcome='undetermined')
+            prefix,body=result['raw_diagnostics'].split('\nnative.log:\n',1)
+            prefix='\n'.join(line for line in prefix.splitlines() if not line.startswith(('phase.','start.')))
+            result['raw_diagnostics']=prefix+'\nphase.'+wrong+'.time_limit=0\nnative.log:\n'+body
+            trial['native_phases']={phase:entry(state,reason,'qp' if phase=='qp' else 'simplex')
+                                    for phase,(state,reason) in zip(('feasibility','qp','linear'),states)}
+            with self.subTest(route=index,wrong=wrong),self.assertRaises(ValueError):data.validate_view(data.seal(view['payload']))
+        view=self.fixture();trial=view['payload']['trials'][0]
+        trial['validation']={'passed':False,'errors':['contradictory public boundary']}
+        trial['public_run_entered']=False
+        trial['timings']['public_run']={'available':False,'reason':'not entered'}
+        trial['native_phases']['linear']=entry('known_not_called','before_public_entry','simplex')
+        with self.assertRaises(ValueError):data.validate_view(data.seal(view['payload']))
 
     def test_convex_document_and_csv_expose_both_costs_and_native_availability(self):
         import render
@@ -232,12 +321,20 @@ class ConvexPlotTests(unittest.TestCase):
         if importlib.util.find_spec('matplotlib') is None:self.skipTest('run in the separate pinned reporting environment')
         import matplotlib,plot,render
         self.assertEqual(matplotlib.__version__,'3.11.2')
+        # Pinned first-import font discovery may run fc-list on a cold Linux
+        # cache. Initialize that dependency before forbidding all subprocesses
+        # for the actual saved-data producer/consumer operations below.
+        matplotlib.use('Agg')
+        import matplotlib.pyplot
         spec=importlib.util.spec_from_file_location('convex_report_site',Path(data.__file__).with_name('site.py'))
         site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
         view=data.load_view(Path(__file__).parent/'fixtures'/'convex-view-v2.json')
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
             with patch('subprocess.Popen',side_effect=AssertionError('saved-only regeneration must not execute a solver')):
+                import subprocess
+                with self.assertRaisesRegex(AssertionError,'must not execute a solver'):
+                    subprocess.run(['csl_convex_report','--smoke'],check=True)
                 metadata=plot.plot(view,root/'figures')
                 svg=(root/'figures'/'latency.svg').read_bytes()
                 self.assertFalse(svg.startswith(b'<?xml'));self.assertNotIn(b'<!DOCTYPE',svg);self.assertNotIn(b'<metadata',svg)

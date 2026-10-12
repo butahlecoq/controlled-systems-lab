@@ -289,14 +289,14 @@ def _validate_view(view):
         if not convex: require((ref["point"] is not None and ref["objective"] is not None) == (ref["outcome"] == "optimal"), "reference witness mismatch")
         scenarios[key] = scenario
     require(bool(scenarios), "empty scenario catalogue")
-    _validate_trial_rows(payload["trials"],scenarios,provenance,clock,convex,backend_id,payload["purpose"],payload["process"]["repetitions"],len(scenarios) if convex and payload["purpose"]=="measurement" else 0)
+    _validate_trial_rows(payload["trials"],scenarios,provenance,clock,environment,convex,backend_id,payload["purpose"],payload["process"]["repetitions"],len(scenarios) if convex and payload["purpose"]=="measurement" else 0)
     if convex:
         warmups=payload["warmup_trials"]
         require(isinstance(warmups,list),"warmup observations required")
         if payload["purpose"]=="test": require(not warmups and payload["process"]["warmups"]==0,"functional views cannot relabel warmups")
         else:
             require(payload["process"]["warmups"]==1 and len(warmups)<=len(scenarios),"one bounded excluded warmup per case required")
-            _validate_trial_rows(warmups,scenarios,provenance,clock,convex,backend_id,"warmup",1)
+            _validate_trial_rows(warmups,scenarios,provenance,clock,environment,convex,backend_id,"warmup",1)
             if payload["process"]["complete"]:require(len(warmups)==len(scenarios),"completed measurement lacks warmups")
         require(payload["process"]["warmup_failures"]==sum(not t["validation"]["passed"] for t in warmups),"warmup failure count differs")
     process = payload["process"]
@@ -495,9 +495,16 @@ def convex_native_phases(trial, route, solver):
         require(trial.get('attempt') == {'number':1,'state':'returned_result','workspace_reuse':False},
                 'returned phase evidence requires associated current attempt')
     positions={key:i for i,key in enumerate(fields)}
+    phase_evidence=set()
     for key in fields:
         if key.startswith('phase.'):
             require(key in {'phase.'+p+'.'+suffix for p in NATIVE_PHASES for suffix in ('time_limit','api_status','model_status','iterations','info')},'unknown pinned native phase field')
+            phase_evidence.add(key.split('.')[1])
+    selected={'qp':{'feasibility','qp'},'linear':{'linear'},'constant':set()}[route]
+    require(phase_evidence <= selected, 'native route conflict')
+    if trial.get('public_run_entered') is False:
+        require(result is None and trial.get('attempt') is None and trial['harness']['status']!='returned',
+                'before-public-entry boundary conflicts with returned evidence')
     observed = {}
     for phase in NATIVE_PHASES:
         prefix = 'phase.' + phase + '.'
@@ -521,14 +528,33 @@ def convex_native_phases(trial, route, solver):
         if prefix+'time_limit' in fields:
             budget=fields[prefix+'time_limit']
             require(budget == 'inf' or finite(float(budget)) >= 0, 'invalid native budget')
-    require(not (fields.get('native_run') == 'false' and observed), 'noncall marker conflicts with return')
-    require(not (fields.get('qp_run') == 'false' and 'qp' in observed), 'invalid start conflicts with QP return')
-    require(not (('linear' in observed and route != 'linear') or
-                 (('qp' in observed or 'feasibility' in observed) and route != 'qp')), 'native route conflict')
-    require('qp' not in observed or ('feasibility' in observed and observed['feasibility']['api_status'] in (0,1) and observed['feasibility']['model_status']==7),
-            'QP return without successful feasibility return')
-    if 'qp' in observed:
-        require(positions['phase.feasibility.model_status']<positions['phase.qp.time_limit'], 'native feasibility/QP ordering differs')
+    # Check positive source boundaries before assigning any precedence to them.
+    # A configured budget is branch evidence even when the run never started.
+    start_evidence=any(key.startswith('start.') for key in fields) or 'qp_run' in fields
+    if 'native_run' in fields:
+        require(fields['native_run']=='false' and not phase_evidence and not start_evidence and 'setup.error' not in fields,
+                'native noncall marker conflicts with phase setup')
+    if 'wrapper.decision' in fields:
+        require(fields['wrapper.decision']=='constant_rows' and route=='constant' and fields.get('native_run')=='false',
+                'constant wrapper boundary conflicts with route')
+    feasible=('feasibility' in observed and observed['feasibility']['api_status'] in (0,1) and observed['feasibility']['model_status']==7)
+    if start_evidence:
+        require(route=='qp' and feasible, 'QP start without successful feasibility return')
+        require(fields.get('start.valid') in ('true','false'), 'invalid QP start observation')
+        if fields['start.valid']=='false':
+            require(fields.get('qp_run')=='false' and 'qp' not in phase_evidence and 'start.default_fallback' not in fields,
+                    'invalid start conflicts with QP setup')
+            require(positions['phase.feasibility.model_status']<positions['qp_run']<positions['start.valid'],
+                    'invalid start boundary order differs')
+        else:
+            require('qp_run' not in fields and fields.get('start.default_fallback')=='false',
+                    'valid start conflicts with QP noncall marker')
+            require(positions['phase.feasibility.model_status']<positions['start.valid']<positions['start.default_fallback'],
+                    'valid start boundary order differs')
+    if 'qp' in phase_evidence:
+        require(feasible and fields.get('start.valid')=='true' and fields.get('start.default_fallback')=='false',
+                'QP setup without verified feasible start')
+        require(positions['start.default_fallback']<positions['phase.qp.time_limit'], 'native feasibility/QP ordering differs')
     stopped = complete and result['termination'] in ('cancelled','resource_limit') and result['outcome']=='undetermined' and 'setup.error' not in fields
     unknown_reason = ('exception_boundary_unobserved' if trial['harness']['status']=='exception' else
                       'aborted_boundary_unobserved' if trial['harness']['status']=='aborted' else 'no_returned_phase_evidence')
@@ -661,7 +687,7 @@ def convex_reference_matches(trial,scenario):
     return residual_passes(r['primal_residuals'],('rows','variables')) and residual_passes(r['dual_residuals'],('stationarity','signs','complementarity'))
 
 
-def _validate_trial_rows(trials,scenarios,provenance,clock,convex,backend_id,purpose,repetitions,sequence_offset=0):
+def _validate_trial_rows(trials,scenarios,provenance,clock,environment,convex,backend_id,purpose,repetitions,sequence_offset=0):
     seen, sequences = set(), set()
     repetitions=integer(repetitions,1)
     require(repetitions<=1000,"bounded repetition count required")
@@ -714,6 +740,11 @@ def _validate_trial_rows(trials,scenarios,provenance,clock,convex,backend_id,pur
             if result["original_objective"] is not None: finite(result["original_objective"])
             _residual(result["primal_residuals"],trial["identity"],("rows","variables"))
             _residual(result["dual_residuals"],trial["identity"],("stationarity","signs","complementarity"))
+            if convex:
+                for block in (result["primal_residuals"],result["dual_residuals"]):
+                    if block is not None:
+                        require(all(block['context'][key]==environment[key] for key in ('absolute_tolerance','relative_tolerance')),
+                                'convex residual context differs from declared numerical policy')
             require(isinstance(result["raw_diagnostics"],str), "raw diagnostics required")
         if convex:
             require(type(trial["public_run_entered"]) is bool and trial["public_run_entered"]==trial["timings"]["public_run"]["available"],"public entry boundary mismatch")
