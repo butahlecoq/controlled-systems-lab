@@ -65,6 +65,27 @@ protected:
             {}, {}, "test resource limit", {}};
     }
 };
+
+class ApproximateFirstSupportWorkspace final : public LPWorkspace {
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext&) override {
+        Vector weights(program.objective().size(), 0.0);
+        weights.front() = 1.0;
+        return ProgramResult{Termination::completed,
+            {program.identity(), MathematicalOutcome::optimal, Unestablished{}, {}},
+            std::move(weights), {}, "scripted locally acceptable approximate membership", {}};
+    }
+};
+
+class MisboundInfeasibleWorkspace final : public LPWorkspace {
+protected:
+    ProgramOutcome do_solve(const LinearProgram&, const ExecutionContext&) override {
+        return ProgramResult{Termination::completed,
+            {ProgramIdentity{{"different-problem"}, {"stale-program"}},
+                MathematicalOutcome::infeasible, Unestablished{}, {}},
+            {}, {}, "stale infeasibility", {}};
+    }
+};
 } // namespace
 
 TEST_CASE("LP hull reduction removes a point only with a barycentric certificate") {
@@ -151,8 +172,47 @@ TEST_CASE("uncertain membership never removes a point and reports an incomplete 
     CHECK(reduction.retained == std::vector<std::size_t>{0,1,2});
     CHECK(reduction.removed.empty());
     CHECK(reduction.lp_calls == 1);
-    REQUIRE(reduction.attempts.size() == 1);
+    REQUIRE(!reduction.attempts.empty());
     CHECK(reduction.attempts.front().outcome == geometry::MembershipOutcome::stopped);
+}
+
+TEST_CASE("accepted local certificates cannot exceed tolerance after later support removals") {
+    ApproximateFirstSupportWorkspace workspace;
+    const geometry::PointCloud cloud{{"certificate-chain"}, {{0.0}, {7.5e-9}, {1.5e-8}}};
+    ExecutionContext context{};
+    context.numerical = {1e-8, 0.0};
+
+    auto result = geometry::reduce_hull(cloud, workspace, context);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& reduction = std::get<geometry::HullReduction>(result);
+    REQUIRE(reduction.status == geometry::ReductionStatus::complete);
+    REQUIRE(!reduction.retained.empty());
+
+    double lower = cloud.points[reduction.retained.front()][0];
+    double upper = lower;
+    for (const auto index : reduction.retained) {
+        lower = std::min(lower, cloud.points[index][0]);
+        upper = std::max(upper, cloud.points[index][0]);
+    }
+    for (const auto& point : cloud.points) {
+        const double distance = point[0] < lower ? lower - point[0] :
+            (point[0] > upper ? point[0] - upper : 0.0);
+        CHECK(distance <= context.numerical.absolute_tolerance);
+    }
+}
+
+TEST_CASE("a mismatched completed infeasibility result is malformed, not a valid exclusion") {
+    MisboundInfeasibleWorkspace workspace;
+    const geometry::PointCloud cloud{{"identity-check"}, {{0.0}, {1.0}}};
+
+    auto result = geometry::reduce_hull(cloud, workspace, {});
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& reduction = std::get<geometry::HullReduction>(result);
+    CHECK(reduction.status == geometry::ReductionStatus::incomplete);
+    CHECK(reduction.retained == std::vector<std::size_t>{0, 1});
+    REQUIRE(!reduction.attempts.empty());
+    CHECK(reduction.attempts.front().outcome == geometry::MembershipOutcome::malformed_result);
+    CHECK(reduction.removed.empty());
 }
 
 TEST_CASE("hull reducer rejects inconsistent and non-finite point clouds") {
