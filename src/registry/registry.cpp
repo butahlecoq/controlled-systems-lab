@@ -1,11 +1,64 @@
 #include <csl/registry/registry.hpp>
+#include <cmath>
 
 namespace csl::registry {
 StrategyRequest StrategyPort::snapshot(const Request& request) {
-    auto result = request;
-    if (request.problem.model)
-        result.problem.model = std::make_shared<const SystemModel>(*request.problem.model);
-    return result;
+    return request; // ResolvedProblem already owns immutable canonical data and its content.
+}
+SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,const ExecutionContext& context) {
+    if (!(request.family.numerical==context.numerical))
+        return Unsupported{{{DiagnosticCode::invalid_input,"family.numerical","ExecutionContext numerical policy differs from the prepared family request"}}};
+    if (request.family.assurance==Assurance::validated)
+        return Unsupported{{{DiagnosticCode::unsupported,"family.assurance","No validated family verifier is implemented"}}};
+    const auto id=request.problem.identity();
+    const FamilyIdentity expected{id,request.family,request.problem.constraints().coordinates(),
+        request.configuration.strategy,request.strategy_version,{}};
+    auto answer=workspace.solve(request.problem,request.family,context);
+    auto* result=std::get_if<SynthesisResult>(&answer);
+    if (!result) {
+        auto diagnostics=std::get<Unsupported>(std::move(answer)).diagnostics;
+        SynthesisResult rejected{Termination::operation_rejected,
+            {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{}};
+        rejected.stop=ScopedRequestRejection{{{id.value+"/strategy-run"},StrategyPort::name,
+            request.configuration.strategy,request.strategy_version,request.configuration.strategy,request.strategy_version},
+            std::move(diagnostics),{},RetainedEvidenceScope{}};
+        return rejected;
+    }
+    auto diagnostics=check_synthesis_result(*result,expected);
+    if (diagnostics.empty()) return answer;
+    // Preserve independently bound evidence while refusing to publish a malformed
+    // or unsupported family claim. This copy has never been published to callers.
+    auto retained=*result;
+    if (retained.objective.lower &&
+        (retained.objective.lower->evidence.problem!=id || !std::isfinite(retained.objective.lower->value)))
+        retained.objective.lower.reset();
+    if (retained.objective.upper &&
+        (retained.objective.upper->evidence.problem!=id || !std::isfinite(retained.objective.upper->value)))
+        retained.objective.upper.reset();
+    if (retained.objective.lower && retained.objective.upper &&
+        retained.objective.lower->value>retained.objective.upper->value) {
+        retained.objective.lower.reset(); retained.objective.upper.reset();
+    }
+    std::erase_if(retained.incumbents,[&](const Witness& witness) {
+        return witness.problem!=id || !std::isfinite(witness.original_objective);
+    });
+    if (retained.family && !check_family_evidence(*retained.family,id,request.family.assurance).empty())
+        retained.family.reset();
+    if (retained.family) {
+        auto identity=retained.family->identity;
+        identity.lineage.clear();
+        if (identity!=expected) retained.family.reset();
+    }
+    if (retained.family && retained.family->target()==FamilyTarget::exact_optimal_relation) retained.family.reset();
+    const RetainedEvidenceScope scope{retained.objective.lower.has_value(),retained.objective.upper.has_value(),
+        retained.incumbents.size(),retained.family.has_value()};
+    std::vector<TransformStepIdentity> lineage;
+    if (result->family) lineage=result->family->identity.lineage;
+    retained.termination=Termination::operation_rejected;
+    retained.stop=ScopedRequestRejection{{{id.value+"/strategy-result"},StrategyPort::name,
+        request.configuration.strategy,request.strategy_version,request.configuration.strategy,request.strategy_version},
+        std::move(diagnostics),std::move(lineage),scope};
+    return retained;
 }
 std::optional<Rejection> StrategyRegistry::add(StrategyRegistration entry) {
     Provenance provenance{StrategyPort::name,{entry.identity.id,entry.identity.version},entry.identity};
@@ -28,6 +81,16 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     provenance.actual = entry.identity;
     if (provenance.requested.version && *provenance.requested.version != entry.identity.version)
         return detail::reject(provenance,"method.version","requested strategy version is unavailable");
+    if (request.family.objective!=request.problem.identity() || request.family.profile.empty() ||
+        !std::isfinite(request.family.numerical.absolute_tolerance) ||
+        !std::isfinite(request.family.numerical.relative_tolerance) ||
+        request.family.numerical.absolute_tolerance<0 || request.family.numerical.relative_tolerance<0)
+        return detail::reject(provenance,"family","Effective family request must bind the resolved objective/profile and finite nonnegative numerical policy");
+    if ((requirements.output.family && *requirements.output.family!=request.family.target) ||
+        requirements.output.assurance!=request.family.assurance)
+        return detail::reject(provenance,"family","Registry requirements differ from the immutable effective family request");
+    if (request.family.assurance==Assurance::validated)
+        return detail::reject(provenance,"family.assurance","Validated family evidence is not implemented");
     const auto capability = entry.capabilities(request,requirements);
     if (const auto* diagnostics = std::get_if<Diagnostics>(&capability)) return detail::capability_rejection(provenance,*diagnostics);
     auto diagnostics = detail::check_offer(std::get<Offer>(capability),requirements,false);
@@ -38,7 +101,9 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     auto records = plan.provenance_;
     records.insert(records.begin(),provenance);
     // Every pure dependency/transition check has succeeded. Only now copy numerical requests.
-    auto snapshot = std::make_shared<const StrategyRequest>(StrategyPort::snapshot(request));
+    auto frozen=StrategyPort::snapshot(request);
+    frozen.strategy_version=entry.identity.version;
+    auto snapshot = std::make_shared<const StrategyRequest>(std::move(frozen));
     auto factory = plan.snapshot_();
     return PreparedStrategy{std::move(snapshot),requirements,std::move(factory),std::move(records)};
 }

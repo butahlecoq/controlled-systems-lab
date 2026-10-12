@@ -84,8 +84,9 @@ Resolution resolve(const Problem& authored,const ResolutionContext& context) {
         std::get<ExternalData>(external),std::get<Constraints>(constraints),std::get<optimization::Objective>(objective),std::move(content)));
 }
 StrategyAdmission prepare_strategy(const ResolvedProblem& problem,const registry::StrategyRegistry& registry,
-    const StrategyConfiguration& configuration,const registry::Requirements& requirements,std::optional<std::string> version) {
-    auto prepared=registry.prepare({*problem.description(),configuration},requirements,std::move(version));
+    const StrategyConfiguration& configuration,const FamilyRequest& family,
+    const registry::Requirements& requirements,std::optional<std::string> version) {
+    auto prepared=registry.prepare({problem,configuration,family,{}},requirements,std::move(version));
     if(auto* rejection=std::get_if<registry::Rejection>(&prepared)) return *rejection;
     return detail::ResolvedAccess::prepared(problem,std::get<registry::PreparedStrategy>(std::move(prepared)));
 }

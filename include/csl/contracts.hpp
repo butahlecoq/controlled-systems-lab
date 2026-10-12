@@ -13,6 +13,7 @@
 #include <vector>
 
 namespace csl {
+namespace problem { class ResolvedProblem; }
 // Revision 1.5. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
@@ -20,10 +21,10 @@ struct ProgramIdentity { ProblemId problem; ProgramId program; bool operator==(c
 struct SetId { std::string value; bool operator==(const SetId&) const = default; };
 struct RequestId { std::string value; bool operator==(const RequestId&) const = default; };
 struct ReferenceId { std::string value; bool operator==(const ReferenceId&) const = default; };
-struct ModuleId { std::string value; };
-struct RepresentationId { std::string value; };
+struct ModuleId { std::string value; bool operator==(const ModuleId&) const = default; };
+struct RepresentationId { std::string value; bool operator==(const RepresentationId&) const = default; };
 struct StageIndex { std::size_t value; };
-struct Dimensions { std::size_t state, control, external; };
+struct Dimensions { std::size_t state, control, external; bool operator==(const Dimensions&) const = default; };
 using Vector = std::vector<double>;
 // Owning row-major buffer. Empty rows/columns are legal; shape validated at entry.
 struct Matrix { std::size_t rows, cols; Vector values; };
@@ -218,7 +219,7 @@ private:
     explicit ConvexProgram(std::shared_ptr<const Storage> storage) : storage_(std::move(storage)) {}
     friend struct optimization::ConvexAccess;
 };
-enum class Termination { completed, cancelled, resource_limit, numerical_failure };
+enum class Termination { completed, cancelled, deadline_expired, resource_limit, numerical_failure, operation_rejected };
 enum class MathematicalOutcome { optimal, infeasible, unbounded, infimum_not_attained, undetermined };
 template<class Subject> struct OutcomeClaim {
     Subject subject;
@@ -241,7 +242,7 @@ struct PrimalResiduals { ResidualContext context; ResidualMeasure rows, variable
 struct DualResiduals { ResidualContext context; std::optional<ResidualMeasure> stationarity, signs, complementarity; };
 struct ProgramResiduals { std::optional<PrimalResiduals> primal; std::optional<DualResiduals> dual; };
 
-enum class StopReason { cancelled, resource_limit, numerical_failure };
+enum class StopReason { cancelled, deadline_expired, resource_limit, numerical_failure };
 struct OperationStopped { StopReason reason; std::string diagnostics; }; // no successful set/guarantee
 struct ProgramResult {
     Termination termination;
@@ -260,7 +261,7 @@ struct ResourcePolicy {
     std::size_t total_threads, outer_workers, threads_per_worker;
     std::optional<std::size_t> memory_bytes; // admission/accounting, not enforced by this revision
 };
-struct NumericalPolicy { double absolute_tolerance, relative_tolerance; };
+struct NumericalPolicy { double absolute_tolerance, relative_tolerance; bool operator==(const NumericalPolicy&) const = default; };
 struct ExecutionContext {
     std::shared_ptr<const ResourcePolicy> resources; // same policy for all workers
     std::stop_token cancellation;
@@ -393,19 +394,114 @@ public: virtual SetTransformOutcome approximate(const ApproximationRequest&, con
 };
 
 // Canonical joint order: x0,...,xT,u0,...,u(T-1); a lifted payload retains this map.
-struct JointCoordinates { Dimensions dimensions; std::size_t horizon; };
+struct JointCoordinates { Dimensions dimensions; std::size_t horizon; bool operator==(const JointCoordinates&) const = default; };
 class JointRelationPayload { public: virtual ~JointRelationPayload() = default; };
 struct JointRelation { JointCoordinates coordinates; RepresentationId representation; std::shared_ptr<const JointRelationPayload> payload; };
 enum class FamilyTarget { exact_optimal_relation, candidate_relaxation, partial_relation };
-struct OptimalFamily { ProblemId problem; JointRelation relation; FamilyTarget target; FamilyEvidence evidence; };
+struct FamilyRequest {
+    std::string profile;
+    ProblemId objective; // resolved mathematical identity includes the effective objective
+    FamilyTarget target{FamilyTarget::candidate_relaxation};
+    NumericalPolicy numerical{1e-8,1e-8};
+    Assurance assurance{Assurance::numerical};
+    RepresentationId representation;
+    std::optional<std::size_t> materialization_limit;
+    bool operator==(const FamilyRequest&) const = default;
+};
+struct TransformStepIdentity {
+    RequestId request;
+    SetId input, output;
+    ModuleId module;
+    std::string version;
+    bool operator==(const TransformStepIdentity&) const = default;
+};
+struct FamilyIdentity {
+    ProblemId problem;
+    FamilyRequest request;
+    JointCoordinates coordinates;
+    ModuleId strategy;
+    std::string strategy_version;
+    std::vector<TransformStepIdentity> lineage;
+    bool operator==(const FamilyIdentity&) const = default;
+};
+struct OptimumEvidence { ClaimEvidence optimum; ObjectiveEvidence bounds; };
+struct NumericalCoverageEvidence {
+    std::string procedure;
+    NumericalPolicy policy;
+    ModuleId verifier;
+    std::string diagnostics;
+};
+struct ValidatedCoverageEvidence { std::string certificate; ModuleId verifier; std::string arithmetic_profile; };
+struct CompletenessEvidence {
+    FamilyIdentity binding;
+    std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence> support;
+};
+struct CompleteOptimalFamily {
+    JointRelation relation;
+    OptimumEvidence optimum;
+    CompletenessEvidence completeness;
+    Assurance assurance;
+};
+struct InnerSubsetEvidence { ClaimEvidence every_history_optimal; std::string procedure; };
+struct CoverageScope { std::string description; };
+struct PartialOptimalFamily {
+    JointRelation relation;
+    OptimumEvidence optimum;
+    InnerSubsetEvidence optimal_subset;
+    CoverageScope known_scope;
+};
+struct OuterCandidateEvidence { ClaimEvidence enclosure; };
+struct FeasibleCandidateEvidence { ClaimEvidence feasibility; };
+struct HeuristicRelationEvidence { std::string method; };
+using FamilyRelationToTarget = std::variant<OuterCandidateEvidence,FeasibleCandidateEvidence,HeuristicRelationEvidence>;
+struct CandidateFamily {
+    JointRelation relation;
+    FamilyRelationToTarget relation_to_target;
+    ClaimEvidence feasibility;
+};
+using OptimalFamilyOutcome = std::variant<CompleteOptimalFamily,PartialOptimalFamily,CandidateFamily>;
+struct OptimalFamily {
+    FamilyIdentity identity;
+    OptimalFamilyOutcome outcome;
+    FamilyTarget target() const noexcept {
+        if (std::holds_alternative<CompleteOptimalFamily>(outcome)) return FamilyTarget::exact_optimal_relation;
+        if (std::holds_alternative<PartialOptimalFamily>(outcome)) return FamilyTarget::partial_relation;
+        return FamilyTarget::candidate_relaxation;
+    }
+};
 struct Witness { ProblemId problem; std::vector<Vector> states, controls; double original_objective; };
-struct WitnessBatch { std::vector<Witness> witnesses; std::size_t requested; ModuleId selector; std::optional<std::size_t> seed; };
+struct WitnessBatch { std::vector<Witness> witnesses; std::size_t requested; ModuleId selector; std::optional<std::size_t> seed; std::optional<FamilyIdentity> source_family{}; };
 struct WitnessRequest { std::size_t count; double distinctness_tolerance; std::vector<Vector> directions; std::optional<std::size_t> seed; };
 struct WitnessSelection { WitnessBatch batch; Termination termination; std::string diagnostics; }; // fewer witnesses is not a uniqueness proof
 class WitnessSelectorWorkspace : public ExclusiveWorkspace {
 public: virtual std::variant<WitnessSelection, Unsupported> select(const OptimalFamily&, const WitnessRequest&, const ExecutionContext&) = 0;
 };
 struct TimingSpan { std::size_t id; std::optional<std::size_t> parent; ModuleId module; double start_seconds, end_seconds; }; // overlapping intervals, not additive latency
+struct RequestProvenance {
+    RequestId request;
+    std::string port;
+    ModuleId requested_module;
+    std::optional<std::string> requested_version;
+    std::optional<ModuleId> actual_module;
+    std::optional<std::string> actual_version;
+};
+struct RetainedEvidenceScope {
+    bool lower_bound{}, upper_bound{};
+    std::size_t incumbents{};
+    bool partial_or_candidate_family{};
+};
+struct ScopedOperationStopped {
+    OperationStopped stop;
+    RequestProvenance request;
+    RetainedEvidenceScope retained;
+};
+struct ScopedRequestRejection {
+    RequestProvenance request;
+    Diagnostics diagnostics;
+    std::vector<TransformStepIdentity> completed_lineage;
+    RetainedEvidenceScope retained;
+};
+using SynthesisStopEvidence = std::variant<std::monostate,ScopedOperationStopped,ScopedRequestRejection>;
 struct SynthesisResult {
     Termination termination;
     SynthesisOutcomeClaim outcome;
@@ -413,6 +509,7 @@ struct SynthesisResult {
     std::optional<OptimalFamily> family;
     std::vector<Witness> incumbents;
     std::vector<TimingSpan> spans;
+    SynthesisStopEvidence stop{};
 };
 using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
 struct StrategyConfiguration {
@@ -420,12 +517,12 @@ struct StrategyConfiguration {
     RepresentationId representation;
 };
 class SynthesisWorkspace : public ExclusiveWorkspace {
-public: virtual SynthesisOutcome solve(const Problem&, const ExecutionContext&) = 0;
+public: virtual SynthesisOutcome solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) = 0;
 };
 class SynthesisStrategy {
 public:
     virtual ~SynthesisStrategy() = default;
-    virtual Diagnostics check_capabilities(const Problem&, Assurance) const = 0;
+    virtual Diagnostics check_capabilities(const problem::ResolvedProblem&, const FamilyRequest&) const = 0;
     virtual std::unique_ptr<SynthesisWorkspace> make_workspace() const = 0;
 };
 
@@ -433,6 +530,7 @@ public:
 Diagnostics check_model_shape(const Dynamics&, std::size_t horizon);
 Diagnostics check_nominal_profile(const Problem&, bool requires_inverse, Assurance);
 Diagnostics check_family_evidence(const OptimalFamily&, const ProblemId&, Assurance);
+Diagnostics check_synthesis_result(const SynthesisResult&, const FamilyIdentity&);
 Diagnostics check_resources(const ResourcePolicy&);
 Diagnostics check_outcome_evidence(const ProgramOutcomeClaim&, const ProgramIdentity&, Assurance);
 Diagnostics check_outcome_evidence(const SynthesisOutcomeClaim&, const ProblemId&, Assurance);

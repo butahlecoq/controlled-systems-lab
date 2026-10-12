@@ -133,16 +133,94 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
     Diagnostics result;
     if (assurance == Assurance::validated)
         result.push_back({DiagnosticCode::unsupported,"assurance","Numerical checks, symbolic arguments and unchecked certificate references are not validated evidence"});
-    if (family.problem != expected)
+    if (family.identity.problem != expected)
         result.push_back({DiagnosticCode::evidence_mismatch,"family.problem","Family does not belong to expected problem"});
-    for (const auto* claim : {&family.evidence.feasibility,&family.evidence.optimality,&family.evidence.completeness})
-        if (claim->problem != expected)
-            result.push_back({DiagnosticCode::evidence_mismatch,"family.evidence","Claim does not belong to expected problem"});
-    const auto& coverage = family.evidence.completeness.support;
-    if ((family.target != FamilyTarget::exact_optimal_relation && !std::holds_alternative<Unestablished>(coverage)) ||
-        std::holds_alternative<NumericalCheck>(coverage))
-        result.push_back({DiagnosticCode::invalid_claim,"family.completeness","Partial/relaxed relations or numerical witness checks cannot establish full optimal-family coverage"});
+    std::visit(Overloaded{
+        [&](const CompleteOptimalFamily& complete) {
+            if (complete.relation.coordinates != family.identity.coordinates ||
+                complete.completeness.binding != family.identity ||
+                complete.optimum.optimum.problem != expected)
+                result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.binding","Complete-family evidence does not bind the resolved problem, effective request, coordinates, strategy and ordered lineage"});
+            if (complete.assurance != assurance)
+                result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.assurance","Claimed assurance differs from the request"});
+            // The numerical coverage procedure and its acceptance thresholds have not
+            // been reviewed. Neither a symbolic note nor a residual is a substitute.
+            result.push_back({DiagnosticCode::unsupported,"family.completeness","Complete-family publication is disabled until reviewed coverage evidence is implemented"});
+        },
+        [&](const PartialOptimalFamily& partial) {
+            if (partial.relation.coordinates != family.identity.coordinates ||
+                partial.optimum.optimum.problem != expected ||
+                partial.optimal_subset.every_history_optimal.problem != expected)
+                result.push_back({DiagnosticCode::evidence_mismatch,"family.partial","Partial-family evidence does not bind the joint relation and problem"});
+            if (partial.known_scope.description.empty() || partial.optimal_subset.procedure.empty() ||
+                std::holds_alternative<Unestablished>(partial.optimal_subset.every_history_optimal.support) ||
+                std::holds_alternative<NumericalCheck>(partial.optimal_subset.every_history_optimal.support))
+                result.push_back({DiagnosticCode::invalid_claim,"family.partial.optimality","An inner subset is not known optimal without scoped optimal-membership support"});
+        },
+        [&](const CandidateFamily& candidate) {
+            if (candidate.relation.coordinates != family.identity.coordinates || candidate.feasibility.problem != expected)
+                result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate","Candidate relation does not bind the joint coordinates and problem"});
+            std::visit(Overloaded{
+                [&](const OuterCandidateEvidence& relation) { if (relation.enclosure.problem != expected)
+                    result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.outer","Outer evidence is bound to another problem"}); },
+                [&](const FeasibleCandidateEvidence& relation) { if (relation.feasibility.problem != expected)
+                    result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.inner","Feasible-candidate evidence is bound to another problem"}); },
+                [&](const HeuristicRelationEvidence& relation) { if (relation.method.empty())
+                    result.push_back({DiagnosticCode::invalid_claim,"family.candidate.heuristic","Heuristic relation must name its method"}); }
+            },candidate.relation_to_target);
+        }
+    },family.outcome);
     return result;
+}
+Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIdentity& expected) {
+    Diagnostics diagnostics=check_outcome_evidence(result.outcome,expected.problem,expected.request.assurance);
+    auto add=[&](DiagnosticCode code,std::string field,std::string explanation) {
+        diagnostics.push_back({code,std::move(field),std::move(explanation)});
+    };
+    for (const auto* bound : {&result.objective.lower,&result.objective.upper})
+        if (*bound && ((*bound)->evidence.problem!=expected.problem || !std::isfinite((*bound)->value)))
+            add(DiagnosticCode::evidence_mismatch,"result.objective","A retained bound has the wrong problem or a nonfinite value");
+    if (result.objective.lower && result.objective.upper && result.objective.lower->value>result.objective.upper->value)
+        add(DiagnosticCode::invalid_claim,"result.objective","Lower bound exceeds upper bound");
+    for (const auto& incumbent:result.incumbents)
+        if (incumbent.problem!=expected.problem || !std::isfinite(incumbent.original_objective))
+            add(DiagnosticCode::evidence_mismatch,"result.incumbents","An incumbent has the wrong problem or a nonfinite objective");
+    if (result.family) {
+        auto identity=result.family->identity;
+        identity.lineage.clear();
+        if (identity!=expected)
+            add(DiagnosticCode::evidence_mismatch,"family.identity","Family identity differs from the prepared problem, request, coordinates or strategy");
+        auto family_diagnostics=check_family_evidence(*result.family,expected.problem,expected.request.assurance);
+        diagnostics.insert(diagnostics.end(),family_diagnostics.begin(),family_diagnostics.end());
+        if (result.family->target()==FamilyTarget::exact_optimal_relation &&
+            (result.termination!=Termination::completed || result.outcome.value!=MathematicalOutcome::optimal))
+            add(DiagnosticCode::invalid_claim,"family.complete","Only a completed, supported optimal outcome may carry a complete family");
+        if (result.family->target()!=FamilyTarget::candidate_relaxation &&
+            result.outcome.value!=MathematicalOutcome::optimal && result.outcome.value!=MathematicalOutcome::undetermined)
+            add(DiagnosticCode::invalid_claim,"family.outcome","A nonoptimal mathematical outcome cannot carry an optimal-family product");
+        if (expected.request.target!=FamilyTarget::exact_optimal_relation &&
+            result.family->target()==FamilyTarget::exact_optimal_relation)
+            add(DiagnosticCode::invalid_claim,"family.target","A result cannot upgrade the requested family target");
+    }
+    if (result.termination==Termination::operation_rejected) {
+        if (!std::holds_alternative<ScopedRequestRejection>(result.stop))
+            add(DiagnosticCode::invalid_claim,"result.stop","operation_rejected requires ScopedRequestRejection");
+        else {
+            const auto& rejected=std::get<ScopedRequestRejection>(result.stop);
+            if (rejected.request.request.value.empty() || rejected.request.port.empty() || rejected.diagnostics.empty())
+                add(DiagnosticCode::invalid_claim,"result.stop.rejection","Scoped rejection needs the exact request identity, port and provider diagnostic");
+        }
+    } else if (std::holds_alternative<ScopedRequestRejection>(result.stop))
+        add(DiagnosticCode::invalid_claim,"result.stop","ScopedRequestRejection requires operation_rejected termination");
+    if ((result.termination==Termination::cancelled || result.termination==Termination::deadline_expired ||
+        result.termination==Termination::resource_limit) && std::holds_alternative<ScopedOperationStopped>(result.stop)) {
+        const auto reason=std::get<ScopedOperationStopped>(result.stop).stop.reason;
+        if ((result.termination==Termination::cancelled && reason!=StopReason::cancelled) ||
+            (result.termination==Termination::deadline_expired && reason!=StopReason::deadline_expired) ||
+            (result.termination==Termination::resource_limit && reason!=StopReason::resource_limit))
+            add(DiagnosticCode::invalid_claim,"result.stop.reason","Execution termination and scoped stop reason differ");
+    }
+    return diagnostics;
 }
 Diagnostics check_resources(const ResourcePolicy& r) {
     if (r.total_threads == 0 || r.outer_workers == 0 || r.threads_per_worker == 0 ||
