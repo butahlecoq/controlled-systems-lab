@@ -66,6 +66,14 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
             identity.strategy_version!=expected.strategy_version) retained.family.reset();
     }
     if (retained.family && retained.family->target()==FamilyTarget::exact_optimal_relation) retained.family.reset();
+    // A supported candidate or incumbent survives a contradictory solver status;
+    // the rejected mathematical claim remains in the diagnostics, not the result.
+    if ((retained.family || (!retained.incumbents.empty() &&
+            retained.outcome.value==MathematicalOutcome::infeasible)) &&
+        (retained.outcome.value==MathematicalOutcome::infeasible ||
+            retained.outcome.value==MathematicalOutcome::unbounded ||
+            retained.outcome.value==MathematicalOutcome::infimum_not_attained))
+        retained.outcome={id,MathematicalOutcome::undetermined,Unestablished{}, {}};
     const RetainedEvidenceScope scope{retained.objective.lower.has_value(),retained.objective.upper.has_value(),
         retained.incumbents.size(),retained.family.has_value()};
     retained.termination=Termination::contract_rejected;

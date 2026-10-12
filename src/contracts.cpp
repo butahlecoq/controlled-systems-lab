@@ -222,8 +222,8 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
             },candidate.relation_to_target);
         }
     },family.outcome());
-    const auto& relation=std::visit([](const auto& product)->const JointRelation&{return product.relation;},family.outcome());
-    if (relation.representation!=identity.request.representation)
+    const auto* relation=std::visit([](const auto& product)->const JointRelation*{return &product.relation;},family.outcome());
+    if (relation->representation!=identity.request.representation)
         result.push_back({DiagnosticCode::evidence_mismatch,"family.representation",
             "Published relation representation differs from the effective family request"});
     return result;

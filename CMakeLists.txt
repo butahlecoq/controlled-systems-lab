@@ -154,7 +154,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CSLConfig.cmake
 if(BUILD_TESTING)
   include(cmake/Dependencies.cmake)
   add_executable(run_statistics_contract tests/artifacts/run_statistics_contract.cpp)
-  target_link_libraries(run_statistics_contract PRIVATE CSL::artifacts doctest::doctest Threads::Threads)
+  target_link_libraries(run_statistics_contract PRIVATE CSL::artifacts CSL::registry doctest::doctest Threads::Threads)
   target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v3.json")
   target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_V2_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v2.json")
   target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_V1_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v1.json")
