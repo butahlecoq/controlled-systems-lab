@@ -187,6 +187,40 @@ TEST_CASE("generated selection stays conditional and immutable callback configur
     auto denied=conditional.prepare(interval_lp(1));REQUIRE(std::holds_alternative<Rejection>(denied));
     CHECK(std::get<Rejection>(denied).diagnostics[0].field=="output.completeness");
 }
+
+TEST_CASE("generated LP workspace receives caller cancellation context") {
+    class CancellationAwareWorkspace final : public LPWorkspace {
+    public:
+        ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext& execution) override {
+            if (execution.cancellation.stop_requested())
+                return ProgramResult{Termination::cancelled,
+                    {program.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
+                    {},{},"generated solve observed cancellation"};
+            return ProgramResult{Termination::completed,
+                {program.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
+                {},{},"generated solve did not observe cancellation"};
+        }
+    };
+    Registry<LPPort> registry;
+    registry.add({{{"cancellation-aware"},"1"},interval_capability,
+        [](const LinearProgram&){return std::make_unique<CancellationAwareWorkspace>();}});
+    const auto provider=accepted(prepare_provider(select_provider(registry,Method{{"cancellation-aware"},"1"})));
+    const auto prepared=accepted(provider.prepare(interval_lp(2.0)));
+    auto workspaces=prepared.create();
+
+    auto execution=context();
+    const auto completed=std::get<ProgramResult>(std::get<0>(workspaces)->run(execution));
+    CHECK(completed.termination==Termination::completed);
+    CHECK(completed.raw_diagnostics=="generated solve did not observe cancellation");
+
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    execution.cancellation=cancellation.get_token();
+    const auto result=std::get<ProgramResult>(std::get<0>(workspaces)->run(execution));
+    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.raw_diagnostics=="generated solve observed cancellation");
+}
+
 TEST_CASE("checked generated declarations can precede a rejecting fixed dependency without snapshots") {
     auto snapshots=std::make_shared<int>(0);int copies=0;
     struct Probe {
