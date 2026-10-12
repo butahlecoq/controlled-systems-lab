@@ -221,7 +221,8 @@ public:
         if(p.model->dynamics.time_domain!=TimeDomain::discrete)unavailable("model.time_domain","continuous-time verification is unsupported");
         if(!std::holds_alternative<KnownInitial>(p.initial))unavailable("initial","set-valued initial semantics are unsupported");
         if(!std::holds_alternative<ContinuousDomain>(p.controls))unavailable("controls","finite and mixed controls are unsupported");
-        if(p.information!=InformationPattern::nominal_open_loop||!p.model->observations.empty())unavailable("information","feedback and observation semantics are unsupported");
+        if(p.information!=InformationPattern::nominal_open_loop)
+            unavailable("information","observation-dependent control semantics are unsupported");
         if(p.external&&!std::holds_alternative<KnownExternalSequence>(*p.external))unavailable("external","uncertain external semantics are unsupported");
         if(unknown_) {report_.feasibility=CheckStatus::unsupported;report_.objective=CheckStatus::unsupported;return false;}
         return true;

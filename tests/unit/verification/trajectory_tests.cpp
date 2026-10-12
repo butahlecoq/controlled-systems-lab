@@ -69,6 +69,16 @@ TEST_CASE("two-control unit-box oracle checks each original history without clai
     CHECK_FALSE(residual(result,"controls[1].inequalities[0]").satisfied);
     CHECK_FALSE(residual(result,"dynamics[1][0]").satisfied);
 }
+TEST_CASE("passive observation maps do not block nominal trajectory checks") {
+    auto input=scalar();
+    auto model=*input.model;
+    model.observations={{ObservationStage{{1,1,{1}},{1,1,{0}},{1,0,{}},{1,0,{}},{0}}, {}}};
+    input.model=std::make_shared<const SystemModel>(std::move(model));
+    auto p=resolve(input);
+    auto r=verify_trajectory(p,request(p));
+    CHECK(r.feasibility==CheckStatus::numerical_pass);
+    CHECK(r.objective==CheckStatus::numerical_pass);
+}
 
 namespace {
 numeric::MatrixView matrix(Matrix m) {return accepted(numeric::snapshot(m));}

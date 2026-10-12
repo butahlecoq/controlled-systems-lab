@@ -11,8 +11,10 @@ a known initial point, continuous controls, all T+1 state domains, all T control
 domains, and full-history linear temporal constraints. Known external sequences
 are prescribed original-problem inputs in each E*w term; the witness does not
 choose them, and its controls never contain external coordinates. Uncertain
-initial/external data, finite/mixed controls, feedback and observation-dependent
-semantics receive explicit unsupported diagnostics. Singular A, rectangular B,
+initial/external data, finite/mixed controls and observation-dependent control
+semantics receive explicit unsupported diagnostics. Passive observation maps do
+not block verification of a nominal open-loop state/control trajectory; this
+verifier makes no claim about observation residuals. Singular A, rectangular B,
 zero ports and T=0 require no inverse or artificial decision variables.
 
 Each named scalar residual records violation, scale, actual threshold and result.
