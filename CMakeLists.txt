@@ -44,7 +44,7 @@ target_compile_definitions(csl_phase_one PRIVATE EIGEN_MPL2_ONLY EIGEN_DONT_PARA
 add_library(csl_hull STATIC src/geometry/hull_reducer.cpp)
 add_library(CSL::hull ALIAS csl_hull)
 set_target_properties(csl_hull PROPERTIES EXPORT_NAME hull CXX_EXTENSIONS OFF)
-target_link_libraries(csl_hull PUBLIC CSL::optimization)
+target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry)
 add_library(csl_convex STATIC src/optimization/convex_backend.cpp)
 add_library(CSL::convex ALIAS csl_convex)
 set_target_properties(csl_convex PROPERTIES EXPORT_NAME convex CXX_EXTENSIONS OFF)

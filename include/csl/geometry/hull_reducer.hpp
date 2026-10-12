@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/registry/registry.hpp>
 
 namespace csl::geometry {
 
@@ -52,10 +53,35 @@ struct HullReduction {
 
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;
 
+class HullReducerWorkspace : public ExclusiveWorkspace {
+public:
+    virtual HullReductionResult reduce(const PointCloud&, LPWorkspace&,
+                                       const ExecutionContext&) = 0;
+};
+
 // Uses independent zero-objective barycentric feasibility programs. Only a
 // feasible primal point that passes fresh residual and nonnegativity checks can
 // remove a candidate. All other outcomes conservatively retain it.
 HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
                                 const ExecutionContext&);
 
+} // namespace csl::geometry
+
+namespace csl::registry {
+struct HullReducerPort {
+    using Request = geometry::PointCloud;
+    using Workspace = geometry::HullReducerWorkspace;
+    static constexpr const char* name = "hull-reducer";
+    static Request snapshot(const Request& request) { return request; }
+    static geometry::HullReductionResult run(Workspace& workspace, const Request& request,
+            const ExecutionContext& context, LPWorkspace& lp) {
+        return workspace.reduce(request, lp, context);
+    }
+};
+} // namespace csl::registry
+
+namespace csl::geometry {
+// Registers the LP-backed membership reducer as one replaceable implementation
+// behind HullReducerPort. The LP workspace remains a separate dependency.
+registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration();
 } // namespace csl::geometry

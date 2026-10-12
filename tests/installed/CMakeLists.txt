@@ -133,4 +133,4 @@ target_link_libraries(installed_hull_reducer_client PRIVATE CSL::hull CSL::highs
 set_target_properties(installed_hull_reducer_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_hull_reducer_client COMMAND installed_hull_reducer_client)
 set_tests_properties(installed_hull_reducer_client PROPERTIES
-  PASS_REGULAR_EXPRESSION "Installed hull client: adapter-neutral reduction and certified removal passed")
+  PASS_REGULAR_EXPRESSION "Installed hull client: registered reducer and independently selected LP provider passed")

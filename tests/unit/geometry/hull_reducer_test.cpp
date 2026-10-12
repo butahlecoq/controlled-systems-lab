@@ -86,7 +86,115 @@ protected:
             {}, {}, "stale infeasibility", {}};
     }
 };
+
+class CountingHullWorkspace final : public geometry::HullReducerWorkspace {
+public:
+    explicit CountingHullWorkspace(std::size_t& calls) : calls_(calls) {}
+    geometry::HullReductionResult reduce(const geometry::PointCloud& cloud, LPWorkspace& lp,
+            const ExecutionContext& context) override {
+        ++calls_;
+        return geometry::reduce_hull(cloud, lp, context);
+    }
+private:
+    std::size_t& calls_;
+};
+
+class CountingLPWorkspace final : public LPWorkspace {
+public:
+    CountingLPWorkspace(std::unique_ptr<LPWorkspace> delegate, std::shared_ptr<std::size_t> calls)
+        : delegate_(std::move(delegate)), calls_(std::move(calls)) {}
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext& context) override {
+        ++*calls_;
+        return delegate_->solve(program, context);
+    }
+private:
+    std::unique_ptr<LPWorkspace> delegate_;
+    std::shared_ptr<std::size_t> calls_;
+};
 } // namespace
+
+TEST_CASE("hull reducer registry selection composes with an independently supplied LP workspace") {
+    using Port = registry::HullReducerPort;
+    std::size_t reducer_calls = 0;
+    registry::Registry<Port> reducers;
+    auto baseline_hull = geometry::make_lp_hull_reducer_registration();
+    CHECK(baseline_hull.identity.id.value == "csl.hull.lp-membership");
+    REQUIRE_FALSE(reducers.add(std::move(baseline_hull)));
+    REQUIRE_FALSE(reducers.add({{{"test.counting-hull"}, "1"},
+        [](const geometry::PointCloud&, const registry::Requirements&) -> registry::Capability {
+            return registry::Offer{};
+        },
+        [&reducer_calls](const geometry::PointCloud&) {
+            return std::make_unique<CountingHullWorkspace>(reducer_calls);
+        }}));
+
+    auto highs_result = adapters::lp::make_highs_registration();
+    REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(highs_result));
+    auto highs = std::get<registry::Registration<registry::LPPort>>(std::move(highs_result));
+    auto seed_result = optimization::make_linear_program({{{"registered-lp"},{"seed"}}, {}, 0,
+        {0,0,{0},{},{ }}, {}, {}});
+    REQUIRE(std::holds_alternative<LinearProgram>(seed_result));
+    const auto seed = std::get<LinearProgram>(std::move(seed_result));
+    registry::Registry<registry::LPPort> lp_providers;
+    auto add_counting_provider = [&](const char* method, const std::shared_ptr<std::size_t>& calls) {
+        auto factory = highs.factory;
+        return lp_providers.add({{{method}, "1"},
+            [](const LinearProgram&, const registry::Requirements&) -> registry::Capability {
+                return registry::Offer{};
+            },
+            [factory = std::move(factory), calls](const LinearProgram& request) {
+                return std::make_unique<CountingLPWorkspace>(factory(request), calls);
+            }});
+    };
+    const auto first_lp_calls = std::make_shared<std::size_t>(0);
+    const auto second_lp_calls = std::make_shared<std::size_t>(0);
+    REQUIRE_FALSE(add_counting_provider("test.lp-first", first_lp_calls));
+    REQUIRE_FALSE(add_counting_provider("test.lp-second", second_lp_calls));
+
+    const geometry::PointCloud cloud{{"registered-square"}, {{0,0}, {1,0}, {1,1}, {0,1}, {0.5,0.5}}};
+    const auto prepared_result = registry::prepare_pipeline(
+        registry::select(reducers, registry::Method{{"csl.hull.lp-membership"}, std::nullopt}, cloud));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<Port>>(prepared_result));
+    auto prepared = std::get<registry::PreparedPipeline<Port>>(prepared_result);
+    auto workspaces = prepared.create();
+    auto& registered_reducer = *std::get<0>(workspaces);
+
+    const auto first_lp_prepared_result = registry::prepare_pipeline(registry::select(lp_providers,
+        registry::Method{{"test.lp-first"}, std::nullopt}, seed));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::LPPort>>(first_lp_prepared_result));
+    auto first_lp_prepared = std::get<registry::PreparedPipeline<registry::LPPort>>(first_lp_prepared_result);
+    auto first_lp_workspaces = first_lp_prepared.create();
+    registry::LPWorkspaceView selected_lp(*std::get<0>(first_lp_workspaces));
+    auto outcome = registered_reducer.run_with(ExecutionContext{}, selected_lp);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(outcome));
+    CHECK(reducer_calls == 0);
+    CHECK(*first_lp_calls == 5);
+    const auto& result = std::get<geometry::HullReduction>(outcome);
+    CHECK(result.status == geometry::ReductionStatus::complete);
+    CHECK(prepared.provenance()[0].actual->id.value == "csl.hull.lp-membership");
+
+    const auto alternative_result = registry::prepare_pipeline(registry::select(reducers,
+        registry::Method{{"test.counting-hull"}, std::nullopt}, cloud));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<Port>>(alternative_result));
+    auto alternative = std::get<registry::PreparedPipeline<Port>>(alternative_result).create();
+    auto& substituted_reducer = *std::get<0>(alternative);
+
+    const auto second_lp_prepared_result = registry::prepare_pipeline(registry::select(lp_providers,
+        registry::Method{{"test.lp-second"}, std::nullopt}, seed));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::LPPort>>(second_lp_prepared_result));
+    auto second_lp_prepared = std::get<registry::PreparedPipeline<registry::LPPort>>(second_lp_prepared_result);
+    auto second_lp_workspaces = second_lp_prepared.create();
+    registry::LPWorkspaceView second_lp(*std::get<0>(second_lp_workspaces));
+    auto second = substituted_reducer.run_with(ExecutionContext{}, second_lp);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(second));
+    CHECK(reducer_calls == 1);
+    CHECK(*second_lp_calls == 5);
+    auto independent_lp = highs_workspace();
+    for (std::size_t point = 0; point < cloud.points.size(); ++point)
+        CHECK(independent_membership(*independent_lp, cloud,
+            std::get<geometry::HullReduction>(second).retained, point));
+}
 
 TEST_CASE("LP hull reduction removes a point only with a barycentric certificate") {
     auto workspace = highs_workspace();

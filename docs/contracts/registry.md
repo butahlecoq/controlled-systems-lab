@@ -30,6 +30,17 @@ The existing mathematical interfaces have separate `LPPort`, `ConvexPort`,
 convex factories can call the existing backend's `make_workspace()`; their
 factories return the same exclusive mathematical workspace interfaces.
 
+GEO-02 adds `HullReducerPort` (`hull-reducer`) as a separately selectable
+operation. `geometry::make_lp_hull_reducer_registration()` registers the current
+LP-membership reducer; another reducer registers its own workspace under a
+different method identity. Its `run_with(context, dependency...)` is available
+only when that port declares the matching typed `run` signature. The hull port
+accepts an `LPWorkspace` dependency rather than selecting a concrete solver.
+When the LP implementation is itself selected through `LPPort`,
+`LPWorkspaceView` borrows its bound workspace and forwards generated membership
+programs to that provider without exposing the provider's owned native workspace.
+The view must not outlive the corresponding `BoundWorkspace<LPPort>`.
+
 `select(registry, method, request, requirements, transitions)` borrows a complete
 typed request. `prepare_pipeline(selection...)` returns either a rejection or a
 `PreparedPipeline<Ports...>`. The prepared value has no public/default unchecked

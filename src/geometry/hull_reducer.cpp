@@ -234,6 +234,16 @@ void restore_certificates_outside_policy(const PointCloud& cloud, HullReduction&
 }
 } // namespace
 
+namespace {
+class LPHullReducerWorkspace final : public HullReducerWorkspace {
+public:
+    HullReductionResult reduce(const PointCloud& cloud, LPWorkspace& lp,
+            const ExecutionContext& context) override {
+        return reduce_hull(cloud, lp, context);
+    }
+};
+} // namespace
+
 HullReductionResult reduce_hull(const PointCloud& cloud, LPWorkspace& lp,
                                 const ExecutionContext& context) {
     if (cloud.problem.value.empty()) return invalid("point_cloud.problem", "Problem identity is required");
@@ -305,5 +315,13 @@ HullReductionResult reduce_hull(const PointCloud& cloud, LPWorkspace& lp,
     }
     restore_certificates_outside_policy(cloud, output, context.numerical);
     return output;
+}
+
+registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration() {
+    return {{{"csl.hull.lp-membership"}, "1.0.0"},
+        [](const PointCloud&, const registry::Requirements&) -> registry::Capability {
+            return registry::Offer{};
+        },
+        [](const PointCloud&) { return std::make_unique<LPHullReducerWorkspace>(); }};
 }
 } // namespace csl::geometry
