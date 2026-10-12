@@ -34,9 +34,14 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     auto answer=workspace.solve(request.problem,request.family,context);
     auto diagnostics=check_synthesis_result(answer,expected);
     if (diagnostics.empty()) return answer;
-    // Preserve independently bound evidence while refusing to publish a malformed
-    // or unsupported family claim. This copy has never been published to callers.
-    auto retained=answer;
+    // The workspace result is exclusively owned here and has not been published.
+    // Keep its original stop before moving and sanitize only this unpublished value.
+    SourceStopEvidence source_stop{};
+    if (const auto* stopped=std::get_if<ScopedOperationStopped>(&answer.stop)) source_stop=*stopped;
+    if (const auto* rejected=std::get_if<ScopedRequestRejection>(&answer.stop)) source_stop=*rejected;
+    const bool inverted_bounds=answer.objective.lower.has_value() && answer.objective.upper.has_value() &&
+        answer.objective.lower->value>answer.objective.upper->value;
+    auto retained=std::move(answer);
     if (!check_outcome_evidence(retained.outcome,id,request.family.assurance).empty())
         retained.outcome={id,MathematicalOutcome::undetermined,Unestablished{}, {}};
     if (retained.objective.lower &&
@@ -45,8 +50,7 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     if (retained.objective.upper &&
         (retained.objective.upper->evidence.problem!=id || !std::isfinite(retained.objective.upper->value)))
         retained.objective.upper.reset();
-    if (retained.objective.lower && retained.objective.upper &&
-        retained.objective.lower->value>retained.objective.upper->value) {
+    if (inverted_bounds) {
         retained.objective.lower.reset(); retained.objective.upper.reset();
     }
     std::erase_if(retained.incumbents,[&](const FeasibleIncumbent& incumbent) {
@@ -64,9 +68,6 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     if (retained.family && retained.family->target()==FamilyTarget::exact_optimal_relation) retained.family.reset();
     const RetainedEvidenceScope scope{retained.objective.lower.has_value(),retained.objective.upper.has_value(),
         retained.incumbents.size(),retained.family.has_value()};
-    SourceStopEvidence source_stop{};
-    if (const auto* stopped=std::get_if<ScopedOperationStopped>(&answer.stop)) source_stop=*stopped;
-    if (const auto* rejected=std::get_if<ScopedRequestRejection>(&answer.stop)) source_stop=*rejected;
     retained.termination=Termination::contract_rejected;
     retained.stop=ContractValidationFailure{std::move(diagnostics),scope,std::move(source_stop)};
     return retained;
