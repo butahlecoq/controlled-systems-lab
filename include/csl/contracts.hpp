@@ -470,6 +470,10 @@ struct OptimalFamily {
     }
 };
 struct Witness { ProblemId problem; std::vector<Vector> states, controls; double original_objective; };
+struct FeasibleIncumbent {
+    Witness witness;
+    ClaimEvidence feasibility;
+};
 struct WitnessBatch { std::vector<Witness> witnesses; std::size_t requested; ModuleId selector; std::optional<std::size_t> seed; std::optional<FamilyIdentity> source_family{}; };
 struct WitnessRequest { std::size_t count; double distinctness_tolerance; std::vector<Vector> directions; std::optional<std::size_t> seed; };
 struct WitnessSelection { WitnessBatch batch; Termination termination; std::string diagnostics; }; // fewer witnesses is not a uniqueness proof
@@ -507,7 +511,7 @@ struct SynthesisResult {
     SynthesisOutcomeClaim outcome;
     ObjectiveEvidence objective;
     std::optional<OptimalFamily> family;
-    std::vector<Witness> incumbents;
+    std::vector<FeasibleIncumbent> incumbents;
     std::vector<TimingSpan> spans;
     SynthesisStopEvidence stop{};
 };

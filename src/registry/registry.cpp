@@ -39,8 +39,9 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
         retained.objective.lower->value>retained.objective.upper->value) {
         retained.objective.lower.reset(); retained.objective.upper.reset();
     }
-    std::erase_if(retained.incumbents,[&](const Witness& witness) {
-        return witness.problem!=id || !std::isfinite(witness.original_objective);
+    std::erase_if(retained.incumbents,[&](const FeasibleIncumbent& incumbent) {
+        return incumbent.witness.problem!=id || !std::isfinite(incumbent.witness.original_objective) ||
+            incumbent.feasibility.problem!=id || std::holds_alternative<Unestablished>(incumbent.feasibility.support);
     });
     if (retained.family && !check_family_evidence(*retained.family,id,request.family.assurance).empty())
         retained.family.reset();

@@ -183,7 +183,9 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
     if (result.objective.lower && result.objective.upper && result.objective.lower->value>result.objective.upper->value)
         add(DiagnosticCode::invalid_claim,"result.objective","Lower bound exceeds upper bound");
     for (const auto& incumbent:result.incumbents)
-        if (incumbent.problem!=expected.problem || !std::isfinite(incumbent.original_objective))
+        if (incumbent.witness.problem!=expected.problem || !std::isfinite(incumbent.witness.original_objective) ||
+            incumbent.feasibility.problem!=expected.problem ||
+            std::holds_alternative<Unestablished>(incumbent.feasibility.support))
             add(DiagnosticCode::evidence_mismatch,"result.incumbents","An incumbent has the wrong problem or a nonfinite objective");
     if (result.family) {
         auto identity=result.family->identity;
