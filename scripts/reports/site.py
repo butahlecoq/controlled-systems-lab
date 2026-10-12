@@ -175,7 +175,7 @@ def catalogue_index(catalogue):
             else:
                 data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
                 label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
-        parts.append('<li><a href="'+rid+'/index.html">'+escape(rid)+'</a> — '+label_kind+'; source <code>'+escape(report["source_commit"])+'</code> — <a href="'+rid+'/records.json">raw JSON</a> · <a href="'+rid+'/trials.csv">CSV</a> · <a href="'+rid+'.zip">offline ZIP</a> · <a href="'+tree+'">Repository artifact fallback ('+label+')</a> · <a href="'+archive+'">Repository ZIP fallback</a></li>')
+        parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/trials.csv">CSV</a> · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
     return ''.join(parts)+"</ul></body></html>"
 
 
@@ -217,14 +217,35 @@ def stage(catalog_path,out,check=True,allow_test=False):
         else: data.require(report["report_kind"]==expected_kind,"catalogue kind differs from bundle")
         exported=data.parse_json(data.local_file(root/rid,"export.json").read_text(encoding="utf-8"))
         data.require(exported["artifact_ref"]==artifact_ref,"catalogue/bundle artifact reference differs")
-        data.require(report["payload_sha256"]==view["payload_sha256"] and report["source_commit"]==view["payload"]["provenance"]["source_commit"],"catalogue provenance mismatch")
-        archive=data.local_file(root,rid+".zip")
-        data.require(data.file_digest(archive)==report["zip_sha256"],"ZIP hash mismatch")
+        source_commit=view["payload"]["provenance"]["source_commit"]
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3":
+            data.require(report.get("native_payload_sha256")==view["payload_sha256"] and report.get("payload_sha256")==registered._digest(view),"catalogue payload envelope digest mismatch")
+        else:
+            data.require(report["payload_sha256"]==view["payload_sha256"],"catalogue payload digest mismatch")
+        data.require(report["source_commit"]==source_commit,"catalogue provenance mismatch")
+        source_archive_name=rid+".source.zip" if catalogue["schema"]=="csl.algorithm-report-catalog/3" else rid+".zip"
+        archive=data.local_file(root,source_archive_name)
+        if catalogue["schema"]!="csl.algorithm-report-catalog/3":
+            data.require(data.file_digest(archive)==report["zip_sha256"],"ZIP hash mismatch")
         with zipfile.ZipFile(archive) as saved:
             names=saved.namelist();expected={"index.html"}|{rid+"/"+name for name in FILES}
             data.require(len(names)==len(expected) and set(names)==expected,"ZIP inventory mismatch")
             for name in FILES: data.require(saved.read(rid+"/"+name)==data.local_file(root/rid,name).read_bytes(),"ZIP contents differ")
             OfflineHTML({rid+"/index.html"}).feed(saved.read("index.html").decode("utf-8"))
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3":
+            payload_schema=view["schema"]
+            data.require(report.get("payload_schema")==payload_schema and isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"LP/convex common envelope metadata required")
+            publication=registered.PublicationRecord(expected_kind,rid,report["payload_sha256"],view["payload"]["provenance"]["source_commit"],report["measured_scope"],report["evidence_limits"],tuple(sorted(FILES)),payload_schema,report["native_payload_sha256"])
+            source_page=data.local_file(root/rid,"index.html").read_text(encoding="utf-8")
+            links='<p><a href="report-envelope.json">Versioned report envelope</a> · <a href="publication-manifest.json">Publication manifest</a></p>'
+            staged_page=source_page.replace("</body>",links+"</body>") if "</body>" in source_page else source_page+links
+            artifacts=registered.publication_artifacts(root/rid,publication,staged_page.encode("utf-8"))
+            OfflineHTML(set(FILES)|{"report-envelope.json","publication-manifest.json"}).feed(staged_page)
+            archive_bytes=registered.publication_zip(rid,artifacts)
+            data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"generated publication ZIP digest differs")
+            registered_records[rid]=publication
+            registered_artifacts[rid]=artifacts
+            registered_archives[rid]=archive_bytes
     index=catalogue_index(catalogue)
     if check: data.require(data.local_file(root,"index.html").read_text(encoding="utf-8")==index,"committed index differs from catalogue")
     out=Path(out);out.mkdir(parents=True,exist_ok=False)
@@ -239,7 +260,8 @@ def stage(catalog_path,out,check=True,allow_test=False):
                     destination.write_bytes(content)
                 expected={"report_id":item.report_id,"report_kind":item.kind,"payload_schema":item.payload_schema,
                     "payload_sha256":item.payload_sha256,"source_commit":item.source_commit,
-                    "measured_scope":item.measured_scope,"evidence_limits":item.evidence_limits}
+                    "measured_scope":item.measured_scope,"evidence_limits":item.evidence_limits,
+                    "native_payload_sha256":item.native_payload_sha256}
                 data.require(registered.validate_publication_manifest(out/rid,expected),"generated publication manifest failed validation")
                 (out/(rid+".zip")).write_bytes(registered_archives[rid])
             else:

@@ -25,6 +25,7 @@ class PublicationRecord:
     evidence_limits: str
     files: tuple[str, ...] = ()
     payload_schema: str = ""
+    native_payload_sha256: str = ""
 
 
 def _json(path):
@@ -186,8 +187,8 @@ def _json_bytes(value):
 
 def publication_envelope(bundle, publication):
     record = _json(Path(bundle) / "records.json")
-    payload = record["payload"] if publication.kind == "geo03-hv" else record
-    return {
+    payload = record if publication.kind in ("lp", "convex", "opt05-hull") else record["payload"]
+    envelope = {
         "schema": "csl.algorithm-report-envelope/1",
         "report_id": publication.report_id,
         "report_kind": publication.kind,
@@ -198,12 +199,15 @@ def publication_envelope(bundle, publication):
         "evidence_limits": publication.evidence_limits,
         "payload": payload,
     }
+    if publication.kind in ("lp", "convex"):
+        envelope["native_payload_sha256"] = publication.native_payload_sha256
+    return envelope
 
 
-def publication_artifacts(bundle, publication):
+def publication_artifacts(bundle, publication, page_bytes=None):
     bundle = Path(bundle)
     files = {name: (bundle / name).read_bytes() for name in publication.files if name != "index.html"}
-    files["index.html"] = render_page(bundle, publication).encode("utf-8")
+    files["index.html"] = page_bytes if page_bytes is not None else render_page(bundle, publication).encode("utf-8")
     files["report-envelope.json"] = _json_bytes(publication_envelope(bundle, publication))
     files["publication-manifest.json"] = _json_bytes({
         "schema": "csl.algorithm-report-publication-manifest/1",
@@ -212,6 +216,20 @@ def publication_artifacts(bundle, publication):
         "files": {name: hashlib.sha256(files[name]).hexdigest() for name in sorted(files)},
     })
     return files
+
+
+def publication_zip(report_id, files):
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_STORED) as archive:
+        entries = [("index.html", files["index.html"])] + [(report_id + "/" + name, files[name]) for name in sorted(files)]
+        for name, content in entries:
+            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+            info.create_system = 3
+            info.flag_bits = 0
+            info.compress_type = zipfile.ZIP_STORED
+            info.external_attr = 0o100644 << 16
+            archive.writestr(info, content)
+    return buffer.getvalue()
 
 
 def validate_publication_manifest(report_dir, expected):
@@ -242,10 +260,16 @@ def validate_publication_manifest(report_dir, expected):
         fields = ("report_id", "report_kind", "payload_schema", "payload_sha256", "source_commit", "measured_scope", "evidence_limits")
         if envelope.get("schema") != "csl.algorithm-report-envelope/1" or any(envelope.get(field) != expected.get(field) for field in fields):
             raise ValueError("publication envelope identity/schema mismatch")
+        if expected.get("native_payload_sha256", "") != envelope.get("native_payload_sha256", ""):
+            raise ValueError("publication envelope native payload hash mismatch")
         if _digest(envelope.get("payload")) != expected.get("payload_sha256"):
             raise ValueError("publication envelope payload hash mismatch")
         if not isinstance(envelope.get("payload"), dict) or envelope["payload"].get("schema") != expected.get("payload_schema"):
             raise ValueError("publication envelope payload schema mismatch")
+        if expected.get("report_kind") in ("lp", "convex"):
+            payload = envelope["payload"]
+            if payload.get("payload_sha256") != expected.get("native_payload_sha256"):
+                raise ValueError("publication native payload hash mismatch")
         return True
     except (OSError, KeyError, TypeError, AttributeError, json.JSONDecodeError) as error:
         raise ValueError("publication manifest or envelope is malformed") from error
@@ -254,14 +278,4 @@ def validate_publication_manifest(report_dir, expected):
 def offline_zip(bundle, publication):
     bundle=Path(bundle)
     files=publication_artifacts(bundle,publication)
-    buffer=io.BytesIO()
-    with zipfile.ZipFile(buffer,"w",compression=zipfile.ZIP_STORED) as archive:
-        entries=[("index.html",files["index.html"])]+[(publication.report_id+"/"+name,files[name]) for name in sorted(files)]
-        for name,content in entries:
-            info=zipfile.ZipInfo(name,date_time=(2026,1,1,0,0,0))
-            info.create_system=3
-            info.flag_bits=0
-            info.compress_type=zipfile.ZIP_STORED
-            info.external_attr=0o100644<<16
-            archive.writestr(info,content)
-    return buffer.getvalue()
+    return publication_zip(publication.report_id,files)

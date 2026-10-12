@@ -27,8 +27,21 @@ class RegisteredKindTests(unittest.TestCase):
         for report in legacy['reports']:
             rid=report['report_id']
             shutil.copytree(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/rid,root/rid)
-            shutil.copyfile(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/(rid+'.zip'),root/(rid+'.zip'))
-            reports.append(report)
+            shutil.copyfile(Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'/(rid+'.zip'),root/(rid+'.source.zip'))
+            view=site.validate_bundle(root/rid)
+            kind=report['report_kind']
+            scope='HiGHS reference LP, five analytic microfixtures' if kind=='lp' else 'HiGHS reference convex, nine analytic microfixtures'
+            limits='Single-adapter reference measurements; no comparator or application-scale claim; numerical references are not validated certificates'
+            item=registered.PublicationRecord(kind,rid,registered._digest(view),report['source_commit'],scope,limits,tuple(sorted(site.FILES)),view['schema'],view['payload_sha256'])
+            source_page=(root/rid/'index.html').read_text(encoding='utf-8')
+            links='<p><a href="report-envelope.json">Versioned report envelope</a> · <a href="publication-manifest.json">Publication manifest</a></p>'
+            staged_page=source_page.replace('</body>',links+'</body>') if '</body>' in source_page else source_page+links
+            artifacts=registered.publication_artifacts(root/rid,item,staged_page.encode('utf-8'))
+            archive=registered.publication_zip(rid,artifacts)
+            (root/(rid+'.zip')).write_bytes(archive)
+            reports.append({**report,'native_payload_sha256':view['payload_sha256'],'payload_sha256':item.payload_sha256,
+                'payload_schema':view['schema'],'measured_scope':scope,'evidence_limits':limits,
+                'zip_sha256':hashlib.sha256(archive).hexdigest()})
         for kind, rid in [('opt05-hull','opt05-hull-20261012-d1c211c2'), ('geo03-hv','geo03-20261012-37c3fb484e0d')]:
             source = FIXTURES / rid
             target = root / rid
@@ -103,6 +116,11 @@ class RegisteredKindTests(unittest.TestCase):
             root=Path(temp)/'input';root.mkdir()
             catalogue=self.publication(root)
             out=site.stage(root/'catalog.json',Path(temp)/'stage',check=True)
+            repeated=site.stage(root/'catalog.json',Path(temp)/'stage-repeat',check=True)
+            self.assertEqual((out/'index.html').read_bytes(),(repeated/'index.html').read_bytes())
+            for report in catalogue['reports']:
+                rid=report['report_id']
+                self.assertEqual((out/(rid+'.zip')).read_bytes(),(repeated/(rid+'.zip')).read_bytes())
             page=(out/'index.html').read_text(encoding='utf-8')
             self.assertIn('21 verified measured trials across 5x5, 9x9, and 13x13 square lattices',page)
             self.assertIn('56 measured trials across four bounded 2D fixtures in both conversion directions',page)
@@ -112,7 +130,43 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertIn('<td>2,135,700</td>',opt_page)
             self.assertIn('<td>1,029,100</td>',geo_page)
             self.assertIn('Checked latency SVG',geo_page)
+            # Every kind in the current mixed catalogue uses the same outer publication contract.
+            self.assertEqual({row['report_kind']:row['payload_schema'] for row in catalogue['reports']}, {
+                'lp':'csl.algorithm-report-view/1',
+                'convex':'csl.algorithm-report-view/2',
+                'opt05-hull':'csl.hull-benchmark-records/1',
+                'geo03-hv':'csl.geo03-hv-report/1'})
             for report in catalogue['reports']:
+                rid=report['report_id']
+                report_dir=out/rid
+                envelope_bytes=(report_dir/'report-envelope.json').read_bytes()
+                manifest_bytes=(report_dir/'publication-manifest.json').read_bytes()
+                envelope=json.loads(envelope_bytes)
+                manifest=json.loads(manifest_bytes)
+                self.assertEqual(envelope['schema'],'csl.algorithm-report-envelope/1')
+                self.assertEqual((envelope['report_id'],envelope['report_kind'],envelope['payload_schema']),
+                    (rid,report['report_kind'],report['payload_schema']))
+                self.assertEqual((envelope['source_commit'],envelope['measured_scope'],envelope['evidence_limits']),
+                    (report['source_commit'],report['measured_scope'],report['evidence_limits']))
+                if report['report_kind'] in ('lp','convex'):
+                    self.assertEqual(envelope['native_payload_sha256'],report['native_payload_sha256'])
+                    self.assertEqual(envelope['payload']['payload_sha256'],report['native_payload_sha256'])
+                else:
+                    self.assertNotIn('native_payload_sha256',envelope)
+                    self.assertEqual(registered._digest(envelope['payload']),envelope['payload_sha256'])
+                self.assertEqual(manifest['schema'],'csl.algorithm-report-publication-manifest/1')
+                self.assertEqual((manifest['report_id'],manifest['report_kind']),
+                    (rid,report['report_kind']))
+                expected_files={path.relative_to(report_dir).as_posix() for path in report_dir.rglob('*')
+                    if path.is_file() and path.name!='publication-manifest.json'}
+                self.assertEqual(set(manifest['files']),expected_files)
+                for name,digest in manifest['files'].items():
+                    self.assertEqual(hashlib.sha256((report_dir/name).read_bytes()).hexdigest(),digest)
+                self.assertTrue(site.validate_publication_manifest(report_dir,report))
+                with zipfile.ZipFile(out/(rid+'.zip')) as archive:
+                    self.assertEqual(archive.read(rid+'/report-envelope.json'),envelope_bytes)
+                    self.assertEqual(archive.read(rid+'/publication-manifest.json'),manifest_bytes)
+            for report in catalogue['reports'][2:]:
                 rid=report['report_id']
                 self.assertIn(rid+'/index.html',page)
                 self.assertIn('reports/algorithm-results/'+rid, page)
@@ -189,6 +243,38 @@ class RegisteredKindTests(unittest.TestCase):
             manifest_path.write_text(json.dumps(manifest),encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'payload hash mismatch'):
                 site.validate_publication_manifest(report_dir,report)
+
+    def test_hash_consistent_scope_text_is_escaped_in_generated_catalogue_html(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)/'input';root.mkdir()
+            catalogue=self.publication(root)
+            rid='geo03-20261012-37c3fb484e0d'
+            records_path=root/rid/'records.json'
+            record=json.loads(records_path.read_text(encoding='utf-8'))
+            record['payload']['scope_limitations'].append('<script>alert(1)</script>')
+            record['payload_sha256']=registered._digest(record['payload'])
+            records_path.write_text(json.dumps(record,indent=2)+'\n',encoding='utf-8')
+            source_manifest=json.loads((root/rid/'manifest.json').read_text(encoding='utf-8'))
+            source_manifest['files']['records.json']=hashlib.sha256(records_path.read_bytes()).hexdigest()
+            (root/rid/'manifest.json').write_text(json.dumps(source_manifest,indent=2)+'\n',encoding='utf-8')
+            item=registered.adapt(root/rid)
+            archive=registered.offline_zip(root/rid,item)
+            (root/(rid+'.zip')).write_bytes(archive)
+            report=next(row for row in catalogue['reports'] if row['report_id']==rid)
+            report['payload_sha256']=item.payload_sha256
+            report['evidence_limits']=item.evidence_limits
+            report['zip_sha256']=hashlib.sha256(archive).hexdigest()
+            (root/'catalog.json').write_text(json.dumps(catalogue,indent=2)+'\n',encoding='utf-8')
+            (root/'index.html').write_text(site.catalogue_index(catalogue),encoding='utf-8')
+            out=site.stage(root/'catalog.json',Path(temp)/'stage',check=True)
+            html=(out/'index.html').read_text(encoding='utf-8')
+            self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;',html)
+            self.assertNotIn('<script>alert(1)</script>',html)
+            probe=copy.deepcopy(catalogue)
+            probe['reports'][3]['source_commit']='"><svg onload="alert(1)">'
+            probe_html=site.catalogue_index(probe)
+            self.assertIn('&quot;&gt;&lt;svg onload=&quot;alert(1)&quot;&gt;',probe_html)
+            self.assertNotIn('<svg onload=',probe_html)
 
     def test_real_stage_rejects_hash_consistent_unsafe_svg(self):
         with tempfile.TemporaryDirectory() as temp:
