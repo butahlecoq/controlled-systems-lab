@@ -73,7 +73,12 @@ add_library(csl_execution STATIC src/execution/executor.cpp)
 add_library(CSL::execution ALIAS csl_execution)
 set_target_properties(csl_execution PROPERTIES EXPORT_NAME execution CXX_EXTENSIONS OFF)
 target_link_libraries(csl_execution PUBLIC CSL::registry Threads::Threads)
-foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one csl_input)
+add_library(csl_artifacts STATIC src/artifacts/run_statistics.cpp src/artifacts/run_statistics_json.cpp src/execution/observability.cpp)
+add_library(CSL::artifacts ALIAS csl_artifacts)
+set_target_properties(csl_artifacts PROPERTIES EXPORT_NAME artifacts CXX_EXTENSIONS OFF)
+target_link_libraries(csl_artifacts PUBLIC CSL::resolved_problem CSL::execution)
+target_include_directories(csl_artifacts SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one csl_artifacts csl_input)
   target_compile_features(${target} PUBLIC cxx_std_20)
   target_include_directories(${target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -85,7 +90,7 @@ foreach(target IN ITEMS csl_contracts csl_numeric csl_registry csl_sets csl_mode
   endif()
 endforeach()
 
-install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one csl_input EXPORT CSLTargets
+install(TARGETS csl_contracts csl_numeric csl_registry csl_sets csl_model csl_objectives csl_optimization csl_highs_lp csl_problem csl_execution csl_convex csl_highs_convex csl_resolved_problem csl_phase_one csl_artifacts csl_input EXPORT CSLTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES include/csl/input/scenario_loader.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/input)
 install(FILES schemas/scenario/v1.schema.json schemas/scenario/README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/schemas/scenario)
@@ -105,6 +110,10 @@ install(FILES include/csl/optimization/linear_program.hpp include/csl/optimizati
 install(FILES include/csl/problem/domains.hpp include/csl/problem/constraints.hpp include/csl/problem/initial_information.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/problem)
 install(FILES include/csl/problem/validator.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/problem)
 install(FILES include/csl/execution/executor.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/execution)
+install(FILES include/csl/artifacts/run_statistics.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/artifacts)
+install(FILES include/csl/execution/observability.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/execution)
+install(FILES docs/artifacts/schemas/run-statistics-v1.schema.json DESTINATION ${CMAKE_INSTALL_DATADIR}/csl/schemas)
+install(FILES ${csl_json_SOURCE_DIR}/LICENSE.MIT DESTINATION ${CMAKE_INSTALL_DATADIR}/csl/licenses RENAME nlohmann-json-LICENSE.MIT)
 install(EXPORT CSLTargets NAMESPACE CSL:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CSL)
 configure_package_config_file(cmake/CSLConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/CSLConfig.cmake
@@ -117,6 +126,10 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CSLConfig.cmake
 
 if(BUILD_TESTING)
   include(cmake/Dependencies.cmake)
+  add_executable(run_statistics_contract tests/artifacts/run_statistics_contract.cpp)
+  target_link_libraries(run_statistics_contract PRIVATE CSL::artifacts doctest::doctest Threads::Threads)
+  target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v1.json")
+  add_test(NAME run_statistics_contract COMMAND run_statistics_contract)
   add_executable(scenario_loader_tests tests/unit/input/scenario_loader_tests.cpp)
   target_link_libraries(scenario_loader_tests PRIVATE CSL::input doctest::doctest)
   add_test(NAME scenario_loader_tests COMMAND scenario_loader_tests)

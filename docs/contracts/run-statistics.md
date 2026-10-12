@@ -1,0 +1,241 @@
+# Portable run statistics
+
+`CSL::artifacts` publishes immutable scenario records and reads/writes the closed
+`csl.run-statistics/1` JSON format. Include `csl/artifacts/run_statistics.hpp` for
+records and `csl/execution/observability.hpp` for bounded collection and RUN01
+projection. These additions preserve source contract 1.5 and mathematical identity
+version 1. No solver, estimator, mathematical verifier, family exporter, timer
+instrumentation, or scenario planner is introduced.
+
+## Publication and identity
+
+Resolve an actual problem through MODEL03 and an already selected effective
+`ConfigurationInput` through `resolve_configuration`. The configuration factory
+checks complete selected module IDs/versions, options, selector, numerical and
+resource requests, output, stop budget, workspace policy and all six collection
+settings. It resolves no registry defaults. `publish_run(RunInput)` checks the
+actual problem identity and full-history dimensions before publishing a deep
+immutable owner. `RunStatistics::description()` borrows while that owner survives.
+All producer strings, vectors, JSON and optional metadata may be destroyed or
+changed after successful publication.
+
+`decode_run(text, limits)` records a syntactically checked mathematical identity;
+it sets provenance to `identity_recorded`. It cannot establish what absent
+external problem bytes mean. The overload taking an actual `ResolvedProblem`
+checks identity and shapes and returns `problem_revalidated`. Neither reader
+creates a callable workspace, valid NVI stamp, executable family, exception
+pointer, solver registration or a mathematical certificate.
+
+Configuration identity is `csl.config.v1.sha256:` plus 64 lowercase hexadecimal
+digits. The canonical byte prefix is `CSL.RESOLVED.CONFIG`, NUL, `v1`, NUL, followed
+by compact UTF-8 JSON with sorted object keys, selected roles and option names.
+Integer values are canonical decimal strings. Configuration binary64 numbers use
+16 lowercase IEEE-754 hexadecimal bits and retain signed zero. String control
+bytes use lowercase `\u00xx`; there is no Unicode normalization. Ordered directions
+and lists retain their order. Hashing uses MODEL03's content snapshot utility;
+backend choice, configuration, run IDs and measurements never enter ProblemId.
+
+A module pin is exactly available `{scope, sha256}` or unavailable
+`{state:"unavailable", value:null, reason, detail}`. Supported scopes are
+`source_archive` and `build_manifest`. Unavailable pin reasons are
+`not_instrumented`, `not_exposed_by_adapter` and `not_applicable`. The required
+UTF-8 detail has at most 256 encoded bytes. Only this explanatory unavailable-pin
+prose is normalized to the empty string in the hash projection; faithful wire
+serialization retains it. OBS01 does not relabel Git IDs as SHA256, fetch source
+archives or assert that a recorded pin proves build provenance.
+
+## Final mathematical data and availability
+
+Portable final variants distinguish synthesis, program, unsupported, skipped and
+failed results. Synthesis preserves canonical termination, outcome/evidence,
+objective bounds, T+1 states, T controls and original objective values. Program
+projection retains its canonical subject, primal, bounds, residual context and
+raw diagnostics. Shapes and finite data are checked; serialization does not prove
+feasibility, optimality, uniqueness, attainment, family completeness or numerical
+reproduction.
+
+A family remains a joint relation with its canonical target and three evidence
+claims. With no exporter its payload is `unavailable_no_exporter`, while metadata
+and evidence survive. An external attachment is a digest/size/schema/media claim,
+not an executable family or proof the referenced file exists. Supplied embedded
+bytes are hashed and checked. Paths are relative artifact references without
+absolute roots, drive prefixes, traversal or empty components; serialization
+never opens them. Consumers select their own attachment root.
+
+Every metric is exactly `{state:"available", value:...}` or
+`{state:"unavailable", value:null, reason, detail}`. Available zero is retained.
+Missing duration, iteration count, native execution observation or memory count
+never becomes an observed zero. Evidence support reuses canonical unestablished,
+numerical, symbolic and unchecked-certificate-reference variants. Requested
+validated assurance can be recorded; applied validated assurance is rejected by
+this publication profile. Equivalent/inner/outer/heuristic relation and numerical
+assurance remain independent. A small residual does not create a relation proof.
+
+## Clock and execution meanings
+
+Clock records identify metric, scope, run-local origin, positive rational tick
+period, resolution availability and calibration limitations. Tick intervals are
+signed64 offsets from that origin, not parent-relative deltas. Observed endpoints
+are nonnegative and ordered. A configured deadline may be negative. Differences
+are checked before arithmetic can overflow; unavailable endpoints and overflow
+have explicit reasons. Legacy `TimingSpan` binary64 absolute seconds remain a
+separate `legacy_seconds` variant and are never silently rounded to ticks.
+
+Nested same-clock children must lie within a known parent interval. Spawned
+causal children may outlive their parent. Other clocks are not implicitly
+comparable. Inclusive bucket totals are work sums, not end-to-end latency.
+For the literal `[0,20]`, `[2,12]`, `[5,17]`, `[4,9]` intervals, work is 47 ticks
+while the root interval is 20. Exclusive-time/child-union computation belongs to
+OBS02.
+
+`project_execution` consumes RUN01 post-join data and preserves configured
+deadline, first admission-close cause/time, separately observed external
+cancellation, workers joined and final completion. `project_task` preserves
+queued/admitted/create/call/release observations against the same origin.
+It performs no scheduling or timer sampling. Resource projection retains outer
+admission enforcement, declared native thread limits and memory reservation
+accounting; these are not hard OS thread/memory enforcement. A native observation
+is returned, positively not called with source provenance, or unknown. No log
+parser infers invocation from arbitrary diagnostic text.
+
+## Bounded collection
+
+Collection settings have six required fields: `enabled`, `mode` (`detail` or
+`summary`), `plan_spans`, `plan_bytes`, `detail_spans`, `detail_bytes`. All remain
+part of ConfigId, including dormant caps. Detail slots cannot exceed plan slots.
+A disabled plan accepts no descriptors, clocks or shards and reports
+`collection_disabled`; it makes no zero-call assertion. Summary mode keeps fixed
+endpoints and summaries while variable detail is `not_requested`, with no fake
+capacity drop. Zero detail caps in detail mode retain topology and report actual
+`detail_limit` omissions.
+
+A plan declares finite spans, parentage, clock/provenance metadata, shard ownership
+and aggregate buckets. Required task and operation dictionaries contain unique,
+nonempty labels; every descriptor resolves against those dictionaries. Selected
+module provenance resolves against the immutable configuration at run publication.
+Its immutable private owner token prevents shards from a
+textually identical foreign plan entering a merge. One move-only shard belongs to
+one producer; callers must join producers before moving shards into merge.
+Duplicate and wrong-shard completion attempts do not overwrite first observations.
+Missing shards leave incomplete records. Deterministic retention uses increasing
+SpanId and fixed per-slot regions, never completion order.
+
+`record(SpanCompletionView)` is noexcept and performs no allocation after shard
+construction. It checks length before scanning/copying text. Oversize or invalid
+detail finalizes the slot with a rejection disposition while fixed observations
+remain explicit. `record_overflow` retains a saturating producer-declared count in
+a fixed bucket, including one unclassified bucket; it retains no invented timing
+or unbounded omitted-ID list. Counters carry exactness and duration-sum overflow
+is unavailable/overflow. Math results are owned outside the collector and cannot
+be changed by truncation, disabled collection or a record rejection.
+
+The caps govern admitted plan/summary metadata and preallocated detail storage.
+Checked native size arithmetic precedes proportional allocations. They do not
+claim a hard process-heap bound covering allocator overhead, caller buffers,
+final witnesses, native solvers or unrelated work. Final artifacts have separate
+codec limits. Publication/encoding allocation failure returns an artifact error
+and does not turn the caller's mathematical result into success or infeasibility.
+
+### Portable metadata budget
+
+`plan_bytes` admits a logical metadata size, independently of compiler ABI,
+Debug STL layout, JSON formatting or allocator overhead. The private shared
+accounting rule is normative for enabled collection at plan construction,
+`publish_collection`, and wire decoding through publication. It walks borrowed
+values without allocating, checks every unsigned64 addition, and rejects before
+plan copies, optional-owner clones, validation maps or portability serialization.
+A budget error has code `limit`, with path `plan.bytes` for setup or
+`collection.plan_bytes` for publication/decoding.
+
+The logical grammar counts every retained field of `CollectionRecord` recursively:
+
+- Boolean and enum values cost 1 byte; signed/unsigned integers and binary64
+  values cost 8 bytes, irrespective of their magnitude or printed spelling.
+- A string costs an 8-byte length plus its UTF-8 **byte** length. Identifier
+  wrappers count their string. An array costs an 8-byte count plus its elements.
+- An optional or optional immutable pointer costs a 1-byte presence tag plus
+  the present value. A variant costs a 1-byte alternative tag plus its active
+  value. Empty alternatives cost zero beyond that tag. Structs sum their fields.
+- `Metric<T>` therefore counts its alternative plus either the available value
+  or the unavailable reason and detail string. All module/pin, program, geometry,
+  representation-summary, clock, provenance, binding and dictionary text counts.
+  Fixed span topology/status/availability fields, ten bucket exact counters,
+  bucket clocks, completeness and all six effective collection settings count.
+- Only an **available `SpanRecord::detail` string payload** is excluded from
+  metadata bytes: its variant tag and length still count, while its actual
+  UTF-8 payload is admitted against `detail_bytes` and `detail_spans`. Unavailable
+  explanation text is metadata and cannot bypass the plan budget.
+
+For example an enabled empty record with the 86-byte ProblemId, 85-byte ConfigId,
+RunId `r`, five empty arrays, six settings and available completeness costs
+`(8+86)+(8+85)+(8+1)+34+5*8+2 = 272` bytes. Cap272 admits it; cap271 rejects it.
+Replacing `r` with a two-byte UTF-8 character costs273. These values are identical
+on MSVC Debug/Release and GCC and do not use `sizeof` or a JSON byte count.
+
+A live plan reserves the same grammar for its descriptors, clocks, bindings and
+required task/operation dictionaries. It reserves10 bytes for unavailable
+completeness with empty prose, and116 bytes per span plus the declared observation
+source and module-version byte lengths for the largest possible fixed completion:
+interval21, not-called observation18 plus those two string payloads, termination10,
+iterations10, detail framing10, failed status45, completion/disposition2.
+The largest failure text emitted by this collector is `unspecified` plus
+`producer_reported`. Its API cannot accept arbitrary status/explanation text.
+Each span additionally reserves116 bytes plus its clock-ID length for a possible
+bucket, and another116 for the unclassified bucket. Duplicate buckets deliberately
+overreserve; no temporary set is needed for admission. Publication counts the
+actual retained fields, so unused reservations do not invent observations.
+
+Native producer-only completion slots, local/bucket indices, per-shard counters,
+validation/output containers and detail arenas have separate checked native
+extent calculations before allocation. Their ABI-dependent storage is not a
+portable `plan_bytes` decision. Logical metadata bounds limit actual admitted
+counts/payload; native bookkeeping and allocator overhead are additional storage,
+not a claimed byte-for-byte heap cap. Actual detail reservations are rounded down
+per admitted slot and checked against native vector extents. No dormant maximum
+setting allocates its declared maximum by itself.
+
+When disabled, all four caps remain hashed but dormant as specified: only the
+run/problem/configuration bindings and unavailable/collection_disabled completeness
+with empty prose remain. No spans, clocks, buckets, task/operation dictionaries or
+hidden completeness prose may use this exception. In summary mode only detail
+caps are dormant; metadata admission is unchanged. Configured zero caps remain
+valid configuration values but admit only fitting enabled records.
+
+Logical values are copied after admission so spare producer capacity is not
+retained. Optional metadata is cloned, including backend provenance. Record-time
+lookups use sorted unsigned64 IDs (at most64 comparisons per lookup); text
+inspection/copying is bounded by its admitted slot. Bucket merge uses the same
+bounded lookup, and parent validation visits each edge a fixed number of times.
+These are structural bounds, not latency or allocator-overhead measurements.
+
+`project_legacy_span` checks matching supplied module/version/task/clock provenance
+and finite ordered seconds; it returns an artifact error for contradictory input.
+Failed final records preserve phase, category, message and an optional reference
+to a diagnostics-role attachment. A missing attachment remains explicit null.
+
+## Wire format and compatibility
+
+The [schema](../artifacts/schemas/run-statistics-v1.schema.json) describes closed
+objects and variants. The checked codec additionally enforces integer width,
+UTF-8 byte limits, finite values, content digests, recomputed configuration ID,
+problem/config/run bindings, parent DAGs, capacities and reference semantics.
+Input byte, string, node and depth limits are checked before unrestricted DOM
+growth; duplicate keys are rejected before overwrite. Unknown fields/tags/versions,
+noncanonical integers, invalid UTF-8, trailing input and contradictory metric
+variants are errors. New fields or variants require a new wire version and
+explicit reader policy. JSON types and native solver types do not cross the
+installed public boundary.
+
+Historical standalone LP/convex bootstrap reports retain their real ProgramIdentity
+and existing schema/readers. They are not scenario statistics and receive no
+fabricated MODEL03 identity, strategy or resolved configuration. Linking their
+raw records into a future scenario requires an actual scenario/config binding.
+Published v1/v2 report data is never rewritten by this module. Reporting phases
+retain their documented scope: a public run is not native-only time.
+
+The full literal fixture includes a T=2 scalar integrator, two trajectories,
+unestablished completeness, family reference, `abc` diagnostic content, nested and
+parallel intervals, resources, configuration and stop observations. It is a data
+contract fixture, not an algorithm publication or benchmark. Scientific HTML
+publication still requires the separate reviewed measurement/profiler/provenance
+gates.
