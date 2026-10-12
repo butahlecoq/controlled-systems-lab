@@ -19,9 +19,17 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/highs_client.cpp" DESTINATION "${wo
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/phase_one_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/convex_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/run_statistics_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/input_client.cpp" DESTINATION "${work}/source")
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
+if(NOT EXISTS "${prefix}/share/CSL/notices/nlohmann-json-3.11.3/LICENSE.MIT")
+  message(FATAL_ERROR "Installed input dependency notice is missing")
+endif()
+file(READ "${prefix}/lib/cmake/CSL/CSLTargets.cmake" input_export)
+if(input_export MATCHES "nlohmann|csl_json")
+  message(FATAL_ERROR "Private input JSON dependency leaked into exports")
+endif()
 file(GLOB_RECURSE public_headers "${prefix}/include/csl/*.hpp")
 if(NOT public_headers)
   message(FATAL_ERROR "No installed CSL public headers found for dependency audit.")

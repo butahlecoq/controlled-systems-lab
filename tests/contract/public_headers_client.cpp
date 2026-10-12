@@ -24,6 +24,7 @@
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/artifacts/run_statistics.hpp>
 #include <csl/execution/observability.hpp>
+#include <csl/input/scenario_loader.hpp>
 
 #include <iostream>
 #include <stdexcept>
