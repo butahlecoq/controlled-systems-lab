@@ -1,0 +1,29 @@
+{
+  "os": "Windows-11-10.0.22631-SP0",
+  "python": "3.13.5",
+  "processor": "12th Gen Intel(R) Core(TM) i5-12400F",
+  "logical_processors": 12,
+  "physical_memory": {
+    "TotalPhysicalMemory": 34189107200
+  },
+  "total_processor_utilization_percent_snapshot_before": {
+    "PercentProcessorTime": 0
+  },
+  "total_processor_utilization_percent_snapshot_after": {
+    "PercentProcessorTime": 1
+  },
+  "processor_queue_length_snapshot_before": {
+    "ProcessorQueueLength": 0
+  },
+  "processor_queue_length_snapshot_after": {
+    "ProcessorQueueLength": 0
+  },
+  "competing_process_snapshot": "process names are omitted from this public artifact; system CPU and queue snapshots are included",
+  "cmake_version": "3.31.6-msvc6",
+  "build_configuration": "Release",
+  "compiler": "MSVC 19.44.35215.0 (Visual Studio 17 2022 x64)",
+  "native_dependencies": {
+    "qhull": "8.0.2",
+    "highs": "1.11.0"
+  }
+}
