@@ -60,10 +60,9 @@ def ps_json(script: str) -> object:
         return out.strip()
 
 
-def environment_snapshot(before: dict, after: dict) -> dict:
+def environment_snapshot(before: dict, after: dict, cmake_version: str) -> dict:
     processor = ps_json("(Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name) | ConvertTo-Json -Compress")
     memory = ps_json("(Get-CimInstance Win32_ComputerSystem | Select-Object TotalPhysicalMemory) | ConvertTo-Json -Compress")
-    cmake_code, cmake_out, _ = run_text(["cmake", "--version"])
     return {
         "os": platform.platform(),
         "python": platform.python_version(),
@@ -75,7 +74,7 @@ def environment_snapshot(before: dict, after: dict) -> dict:
         "processor_queue_length_snapshot_before": before["processor_queue_length"],
         "processor_queue_length_snapshot_after": after["processor_queue_length"],
         "competing_process_snapshot": "process names are omitted from this public artifact; system CPU and queue snapshots are included",
-        "cmake_version": cmake_out.splitlines()[0] if cmake_code == 0 and cmake_out else "unavailable",
+        "cmake_version": cmake_version,
         "build_configuration": "Release",
         "compiler": "MSVC 19.44.35215.0 (Visual Studio 17 2022 x64)",
         "native_dependencies": {"qhull": "8.0.2", "highs": "1.11.0"},
@@ -225,7 +224,7 @@ def collect(args: argparse.Namespace) -> None:
     if seen!=EXPECTED_ROWS or any(r["oracle_passed"]!="true" for r in rows): raise SystemExit("scenario roster or independent oracle validation failed")
     for key,value in (("converter_id",CONVERTER["id"]),("converter_version",CONVERTER["version"]),("lp_backend_id",LP["id"]),("lp_backend_version",LP["version"])):
         if any(r[key]!=value for r in rows): raise SystemExit(f"unexpected measured adapter identity: {key}")
-    report_id=write_artifacts(args.out,rows,args,environment_snapshot(before,after),stdout,stderr)
+    report_id=write_artifacts(args.out,rows,args,environment_snapshot(before,after,args.cmake_version),stdout,stderr)
     print(report_id)
 
 
@@ -236,6 +235,7 @@ def main() -> int:
     parser.add_argument("--warmups",type=int,default=1)
     parser.add_argument("--runtime-commit",required=True)
     parser.add_argument("--report-commit",required=True)
+    parser.add_argument("--cmake-version",required=True)
     parser.add_argument("--profile-operations",type=int,required=True)
     parser.add_argument("--profile-finding",required=True)
     parser.add_argument("--profile-summary",type=Path,required=True)
