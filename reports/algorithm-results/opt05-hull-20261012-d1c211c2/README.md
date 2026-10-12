@@ -30,8 +30,12 @@ Run from the repository root in a Visual Studio developer PowerShell with Python
 
 ```powershell
 cmake -S reports/algorithm-results/opt05-hull-20261012-d1c211c2/harness -B build-opt05-harness -G "Visual Studio 17 2022" -A x64 -DCSL_ROOT="$PWD" -DCMAKE_PREFIX_PATH="$PWD/build"
-cmake --build build-opt05-harness --config Release --target csl_hull_measure --parallel 4 --verbose
-python reports/algorithm-results/opt05-hull-20261012-d1c211c2/collect.py --exe build-opt05-harness/Release/csl_hull_measure.exe --out reports/algorithm-results/opt05-hull-20261012-d1c211c2/evidence/reproduced
+$reportCodeCommit = git rev-parse HEAD
+$buildLog = 'build-opt05-harness/release-build.log'
+cmake --build build-opt05-harness --config Release --target csl_hull_measure --parallel 4 --verbose 2>&1 | Tee-Object $buildLog
+if ($LASTEXITCODE -ne 0) { throw 'Release harness build failed' }
+$reproductionOut = "build-opt05-harness/reproduced-$(Get-Date -Format yyyyMMddTHHmmss)"
+python reports/algorithm-results/opt05-hull-20261012-d1c211c2/collect.py --exe build-opt05-harness/Release/csl_hull_measure.exe --code-commit $reportCodeCommit --build-log $buildLog --concurrent-work 'Reproduction run; concurrent activity not assessed' --out $reproductionOut
 cmake -S . -B build-opt05-results -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON
 cmake --build build-opt05-results --config Release --target hull_reducer_test --parallel 4
 ctest --test-dir build-opt05-results -C Release -R hull_reducer_test --output-on-failure --no-tests=error
@@ -39,12 +43,14 @@ python reports/algorithm-results/opt05-hull-20261012-d1c211c2/render_saved.py --
 python reports/algorithm-results/opt05-hull-20261012-d1c211c2/validate_report.py
 ```
 
-The benchmark collector runs a new measurement; rendering and validation are offline and do not invoke the solver. The CMake test configuration fetches the pinned project dependencies and builds the `hull_reducer_test` target in Release before CTest runs it. The commands above describe reproduction, not a claim that every command ran in this exact order during collection. Recorded execution evidence: Release harness build succeeded; collector accepted 21/21 trials and retained 3 warmups; the recorded `ctest ... -R hull_reducer_test ...` run passed 1/1 (0.02 s); saved-record rendering and consistency validation are run when assembling this report.
+The collector writes a new directory under `build-opt05-harness/`; it refuses to overwrite previous results. Record the actual source commit and an accurate concurrent-work note for any new measurement. A run from current HEAD has its own source identity and does not reproduce the original measured-code commit unless the original source is checked out. The benchmark collector runs a new measurement; rendering and validation are offline and do not invoke the solver. The CMake test configuration fetches the pinned project dependencies and builds the `hull_reducer_test` target in Release before CTest runs it. The commands above describe reproduction, not a claim that every command ran in this exact order during collection. Recorded execution evidence: Release harness build succeeded; collector accepted 21/21 trials and retained 3 warmups; the recorded `ctest ... -R hull_reducer_test ...` run passed 1/1 (0.02 s); saved-record rendering and consistency validation are run when assembling this report.
 
-The report validator also checks every field in both accepted and root-level trial and summary CSV files against `records.json`. Run its corruption checks with `python reports/algorithm-results/opt05-hull-20261012-d1c211c2/test_validate_report.py`; they mutate a trial or summary value in both CSV copies and require validation to reject it.
+The report validator checks every field in both accepted and root-level trial and summary CSV files against `records.json`, then verifies the saved manifest, ZIP inventory, member bytes, and ZIP hash. Its default mode does not rewrite report files. Run its corruption checks with `python reports/algorithm-results/opt05-hull-20261012-d1c211c2/test_validate_report.py`; they corrupt copies of the report and require validation to reject them, including under optimized Python.
 
 `profile/target-process-samples.csv` and `.json` are exported target-process-only summaries from a distinct `/Zi` symbol-enabled run. Raw system-wide ETL and symbolized all-process exports are intentionally excluded. Raw reducer-profile JSONL and exact profiler command/evidence remain in `profile/`.
 
 ## Bundle
 
-`bundle.zip` is an offline snapshot of the report and evidence. `manifest.sha256` lists SHA-256 hashes for every packaged file (excluding the manifest itself); `bundle.zip.sha256` records the ZIP hash. Regenerate after all edits using the packaging commands in `validate_report.py`.
+`bundle.zip` is an offline snapshot of the report and evidence. `manifest.sha256` lists SHA-256 hashes for every packaged file (excluding the manifest itself); `bundle.zip.sha256` records the ZIP hash. After reviewed edits, regenerate explicitly with `python reports/algorithm-results/opt05-hull-20261012-d1c211c2/validate_report.py --package`, then run it without `--package` to check the saved package.
+
+The native collector currently emits one fixed `report_id` for this run family, including future collections. It is not a unique measurement identity, immutable public URL, or content hash. The publication layer assigns a distinct content-bound ID when it stages a reviewed public bundle; only that published ID should be used for a permanent report link.
