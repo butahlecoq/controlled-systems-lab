@@ -379,4 +379,17 @@ Both native `trials.csv` and `summary.csv` must match the complete typed rows in
 
 Every report in a schema-3 mixed catalogue—LP, convex, OPT-05 and GEO-03—uses the same versioned `csl.algorithm-report-envelope/1` and `csl.algorithm-report-publication-manifest/1`. The envelope records the report identity and kind, native payload schema and digest, provenance, measured scope, evidence limits, and typed payload. LP/convex scope is derived from the validated scenario inventory, their evidence-limit policy is fixed by report kind, and schema-3 catalogue values must match both. LP and convex preserve their existing view payloads and validated saved-data HTML projection. OPT-05 and GEO-03 use explicit adapters in `scripts/reports/registered_reports.py` and retain their method-specific payloads; their published HTML is rendered from validated typed records rather than producer HTML. Every generated page follows the shared safe-link and HTML escaping policy.
 
+The previously published LP and convex URLs retain their original schema-2 pages,
+all thirteen original bundle files and offline ZIP bytes. The exact legacy hashes
+are pinned in `reports/algorithm-results/legacy-publications.json`; the publisher
+also checks a fixed digest of that pinset before staging. Schema-3 LP and convex
+rows use those old IDs as `source_report_id` and derive new public IDs from the
+complete validated source inventory, original ZIP and publisher code. The new
+pages and ZIPs live only at the new IDs. The old paths remain available without
+changing any historical measurement or download bytes.
+The pinset applies only to those historical source IDs. Future LP and convex
+source bundles may be registered with new content-bound public IDs without
+editing the pinset; every pinned historical source must still be present and
+staged byte-for-byte.
+
 The manifest records the exact staged file inventory and SHA-256 values, including the staged page, figures, evidence files and serialized envelope. The manifest itself is excluded from its own file list. The offline ZIP contains the same envelope and manifest bytes as the staged directory and uses deterministic, uncompressed entries. Schema-1/2 catalogues remain readable under their existing publication path; schema-3 rows require the common envelope metadata. An unknown native payload schema is rejected before output is created.

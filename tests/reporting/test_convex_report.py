@@ -349,9 +349,15 @@ class ConvexPlotTests(unittest.TestCase):
             import shutil
             published=Path(__file__).resolve().parents[2]/'reports'/'algorithm-results'
             old_catalog=data.parse_json((published/'catalog.json').read_text(encoding='utf-8'))
-            old=old_catalog['reports'][0];rid=old['report_id']
-            shutil.copytree(published/rid,root/rid);shutil.copyfile(published/(rid+'.zip'),root/(rid+'.zip'))
-            catalog['reports'].insert(0,{**old,'report_kind':'lp'})
+            old=old_catalog['reports'][0];rid=old['source_report_id']
+            source_archive=published/(rid+'.source.zip')
+            shutil.copytree(published/rid,root/rid);shutil.copyfile(source_archive,root/(rid+'.zip'))
+            legacy_old={key:value for key,value in old.items() if key not in ('payload_schema','native_payload_sha256','measured_scope','evidence_limits','source_report_id')}
+            legacy_old['report_id']=rid
+            source_view=data.parse_json((root/rid/'records.json').read_text(encoding='utf-8'))
+            legacy_old['payload_sha256']=source_view['payload_sha256']
+            legacy_old['zip_sha256']=data.file_digest(source_archive)
+            catalog['reports'].insert(0,{**legacy_old,'report_kind':'lp'})
             self.assertTrue(rid+'/index.html' in site.catalogue_index(catalog))
             (root/'catalog.json').write_text(json.dumps(catalog),encoding='utf-8');(root/'index.html').write_text(site.catalogue_index(catalog),encoding='utf-8')
             site.stage(root/'catalog.json',root/'site',allow_test=True)
