@@ -43,6 +43,39 @@ public:
         return geometry::HullReduction{geometry::ReductionStatus::complete,std::move(retained),{},0,{}};
     }
 };
+class NearEndpointDroppingHullWorkspace final : public geometry::HullReducerWorkspace {
+public:
+    geometry::HullReductionResult reduce(const geometry::PointCloud& cloud, LPWorkspace&,
+            const ExecutionContext&) override {
+        REQUIRE(cloud.points.size() == 2);
+        return geometry::HullReduction{geometry::ReductionStatus::complete,{0},
+            {{1,{{0,1.0}},{{"near-endpoint"},{"test-program"}},
+                {1e-3,0.0,1e-6,{"test.near-endpoint"}}}},0,{}};
+    }
+};
+Registration<HullReducerPort> make_near_endpoint_hull_registration() {
+    return {{{"test.hull.near-endpoint"},"1"},
+        [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
+        [](const geometry::PointCloud&) { return std::make_unique<NearEndpointDroppingHullWorkspace>(); }};
+}
+class UnestablishedConversionWorkspace final : public RepresentationConverterWorkspace {
+    ConversionRequest request_;
+public:
+    explicit UnestablishedConversionWorkspace(ConversionRequest request) : request_(std::move(request)) {}
+    SetTransformOutcome convert(const ConversionRequest&,const ExecutionContext&) override {
+        const auto output=take(sets::make_v({{"unestablished-conversion-output"},1,{}},
+            {take(numeric::snapshot(Matrix{2,1,{0,1}})),
+             take(numeric::snapshot(Matrix{0,1,{}}))})).as_handle();
+        return OperationResult{output,SetRelation::equivalent,
+            {{request_.identity,{request_.input.id}},GeometryClaimScope::set_relation,
+             Unestablished{}, {"test conversion without numerical verification"},{}}};
+    }
+};
+Registration<ConversionPort> make_unestablished_conversion_registration() {
+    return {{{"test.conversion.unestablished"},"1"},
+        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
+        [](const ConversionRequest& request) { return std::make_unique<UnestablishedConversionWorkspace>(request); }};
+}
 Registration<HullReducerPort> make_keep_all_hull_registration() {
     return {{{"test.hull.keep-all"},"1"},
         [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
@@ -173,6 +206,36 @@ TEST_CASE("selected H conversion preserves explicit equalities and infeasible em
     const auto empty=take(run(request(AffineImage{h,{1,1,{1}},{0}}),dependencies()));
     CHECK(std::isinf(support(empty.output,{1})));
     CHECK(support(empty.output,{1})<0);
+}
+
+TEST_CASE("public geometry operation rejects H-to-V vertices without numerical evidence") {
+    auto h=take(sets::make_h({{"h-interval-unestablished"},1,{}},
+        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
+         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    auto selected=dependencies(false,false);
+    Requirements conversion_requirements;
+    conversion_requirements.output.representation={"csl.polyhedron.v"};
+    conversion_requirements.output.relation=SetRelation::equivalent;
+    selected.conversion=provider(make_unestablished_conversion_registration(),conversion_requirements);
+    const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"unestablished-conversion"),std::move(selected));
+    CHECK(std::holds_alternative<Unsupported>(result));
+}
+
+TEST_CASE("public geometry operation preserves near-extreme support under loose reducer tolerance") {
+    const auto interval=vertices("near-endpoint-interval",1,{0,1e-6},2);
+    auto selected=dependencies();
+    selected.hull=provider(make_near_endpoint_hull_registration());
+    auto ctx=context();
+    ctx.numerical={1e-3,0.0};
+    const auto result=run(request(AffineImage{interval,{1,1,{1}},{0}},"loose-hull-tolerance"),
+        std::move(selected),{},ctx);
+    REQUIRE(std::holds_alternative<OperationResult>(result));
+    const auto& completed=std::get<OperationResult>(result);
+    CHECK(completed.relation==SetRelation::equivalent);
+    CHECK(support(completed.output,{1})==doctest::Approx(1e-6));
+    const auto rep=take(sets::from_handle(completed.output)).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==2);
 }
 
 TEST_CASE("empty singleton and R0 definitions survive image and sum") {

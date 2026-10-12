@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <numeric>
 
 namespace csl::geometry {
 namespace {
@@ -112,6 +113,16 @@ std::variant<FiniteSet, OperationOutcome> finite_vertices(const SetHandle& handl
         return operation_error(unsupported("affine-sum.conversion.relation", "H-to-V conversion must return an equivalent relation."));
     if (auto errors = check_geometry_evidence(transformed.evidence, request); !errors.empty())
         return operation_error(Unsupported{std::move(errors)});
+    const auto* conversion_check=std::get_if<NumericalCheck>(&transformed.evidence.support);
+    if (!conversion_check || !std::isfinite(conversion_check->absolute_tolerance) ||
+        conversion_check->absolute_tolerance<0.0 ||
+        !std::isfinite(conversion_check->relative_tolerance) || conversion_check->relative_tolerance<0.0 ||
+        !std::isfinite(conversion_check->max_residual) || conversion_check->max_residual<0.0 ||
+        conversion_check->verifier.value.empty() ||
+        conversion_check->absolute_tolerance>context.numerical.absolute_tolerance ||
+        conversion_check->relative_tolerance>context.numerical.relative_tolerance)
+        return operation_error(unsupported("affine-sum.conversion.evidence",
+            "H-to-V conversion requires finite numerical evidence from a named verifier within the caller tolerance."));
     auto converted_data = sets::from_handle(transformed.output);
     if (const auto* error = std::get_if<Diagnostic>(&converted_data))
         return operation_error(unsupported(error->field, error->explanation, error->code));
@@ -344,14 +355,24 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             if (stopped(context)) return OperationStopped{stop_reason(context), "Stopped while checking hull reduction evidence."};
             return unsupported("affine-sum.hull.result", "Selected hull reducer returned incomplete or inconsistent reduction evidence.", DiagnosticCode::invalid_claim);
         }
+        // A tolerance-valid reduction with nonzero reconstruction residual is
+        // not an exact hull reduction. Keep every generated candidate instead
+        // of silently converting the affine/sum operation into an approximation.
+        const bool accepted_reduction=max_residual==0.0;
+        std::vector<std::size_t> output_indices;
+        if (accepted_reduction) output_indices=reduction.retained;
+        else {
+            output_indices.resize(cloud.points.size());
+            std::iota(output_indices.begin(),output_indices.end(),std::size_t{0});
+        }
         std::vector<double> retained_values;
-        if (result_id_dimension != 0 && reduction.retained.size() > std::numeric_limits<std::size_t>::max()/result_id_dimension)
+        if (result_id_dimension != 0 && output_indices.size() > std::numeric_limits<std::size_t>::max()/result_id_dimension)
             return unsupported("affine-sum.capacity", "Retained cloud storage overflows size_t.");
-        if (reduction.retained.size() > std::vector<double>{}.max_size() / std::max<std::size_t>(result_id_dimension,1))
+        if (output_indices.size() > std::vector<double>{}.max_size() / std::max<std::size_t>(result_id_dimension,1))
             return unsupported("affine-sum.capacity", "Retained cloud exceeds the container's representable size.");
-        retained_values.reserve(reduction.retained.size()*result_id_dimension);
-        for(const auto index:reduction.retained) retained_values.insert(retained_values.end(),cloud.points[index].begin(),cloud.points[index].end());
-        Matrix retained_matrix{reduction.retained.size(),result_id_dimension,std::move(retained_values)};
+        retained_values.reserve(output_indices.size()*result_id_dimension);
+        for(const auto index:output_indices) retained_values.insert(retained_values.end(),cloud.points[index].begin(),cloud.points[index].end());
+        Matrix retained_matrix{output_indices.size(),result_id_dimension,std::move(retained_values)};
         auto retained_view=numeric::snapshot(retained_matrix);
         if(const auto* error=std::get_if<Diagnostic>(&retained_view)) return unsupported(error->field,error->explanation,error->code);
         auto output=sets::make_v({{request_.identity.ideal_output.value},result_id_dimension,labels},
@@ -359,7 +380,8 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         if(const auto* error=std::get_if<Diagnostic>(&output)) return unsupported(error->field,error->explanation,error->code);
 
         std::vector<std::string> assumptions{
-            "binary64 affine and sum arithmetic; hull removals independently checked against the caller numerical tolerance",
+            "binary64 affine and sum arithmetic; selected hull reduction validated against caller tolerance",
+            accepted_reduction ? "selected hull reduction used" : "nonzero-residual hull removals were not used; all generated candidates were retained",
             "numerical equivalent relation is not exact or validated set inclusion and has no global error bound",
             "finite and mixed action catalogues are not accepted by this SetHandle operation",
             "selected hull reducer: " + identity(dependencies_.hull.provenance()),
@@ -375,7 +397,8 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             else return {};
         },request_.operation);
         GeometryEvidence evidence{{request_.identity,inputs},GeometryClaimScope::set_relation,
-            NumericalCheck{context.numerical.absolute_tolerance,context.numerical.relative_tolerance,max_residual,{"csl.geometry.affine-sum"}},
+            NumericalCheck{context.numerical.absolute_tolerance,context.numerical.relative_tolerance,
+                accepted_reduction ? max_residual : 0.0,{"csl.geometry.affine-sum"}},
             std::move(assumptions),{}};
         if(auto errors=check_geometry_evidence(evidence,request_);!errors.empty()) return Unsupported{std::move(errors)};
         return OperationResult{std::get<sets::SetData>(std::move(output)).as_handle(),SetRelation::equivalent,std::move(evidence)};
