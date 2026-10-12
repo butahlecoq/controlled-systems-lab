@@ -724,9 +724,11 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
                     {{DiagnosticCode::unsupported,"lp.generated","provider rejected generated request"}},
                     {{{"transform/4"},{"input/set"},{"output/set"},{"converter"},"2"}},
                     {false,false,1,false}};
-                if (request.profile=="malformed-lineage-rejection")
-                    std::get<ScopedRequestRejection>(result.stop).completed_lineage.push_back(
-                        {{"transform/4"},{"other/input"},{"other/output"},{"converter"},"2"});
+                if (request.profile=="malformed-lineage-rejection") {
+                    auto& lineage=std::get<ScopedRequestRejection>(result.stop).completed_lineage;
+                    lineage.push_back({{"transform/5"},{"output/set"},{"final/set"},{"projector"},"3"});
+                    lineage.push_back({{"transform/4"},{"other/input"},{"other/output"},{"converter"},"2"});
+                }
                 if (request.profile=="malformed-provider-rejection") {
                     auto wrong=identity;wrong.strategy={"other-strategy"};
                     result.family=std::get<OptimalFamily>(FamilyPublisher::publish(wrong,CandidateFamily{
@@ -844,7 +846,23 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
         return d.field=="result.stop.rejection.lineage" && d.code==DiagnosticCode::invalid_claim;
     }));
     REQUIRE(std::holds_alternative<ScopedRequestRejection>(lineage_failure.source_stop));
-    CHECK(std::get<ScopedRequestRejection>(lineage_failure.source_stop).completed_lineage.size()==2);
+    const auto& preserved=std::get<ScopedRequestRejection>(lineage_failure.source_stop);
+    CHECK(preserved.request.request.value=="generated/lp/7");
+    CHECK(preserved.request.port=="lp");
+    CHECK(preserved.request.requested_module.value=="endpoint");
+    CHECK(preserved.request.requested_version==std::optional<std::string>{"1.0"});
+    CHECK(preserved.request.actual_module==std::optional<ModuleId>{ModuleId{"endpoint"}});
+    CHECK(preserved.request.actual_version==std::optional<std::string>{"1.0"});
+    REQUIRE(preserved.completed_lineage.size()==3);
+    CHECK(preserved.completed_lineage[0].request.value=="transform/4");
+    CHECK(preserved.completed_lineage[0].input.value=="input/set");
+    CHECK(preserved.completed_lineage[0].output.value=="output/set");
+    CHECK(preserved.completed_lineage[1].request.value=="transform/5");
+    CHECK(preserved.completed_lineage[1].input.value=="output/set");
+    CHECK(preserved.completed_lineage[1].output.value=="final/set");
+    CHECK(preserved.completed_lineage[2].request.value=="transform/4");
+    CHECK(preserved.completed_lineage[2].input.value=="other/input");
+    CHECK(preserved.completed_lineage[2].output.value=="other/output");
     request.family.profile="malformed-provider-rejection";
     auto malformed_provider=registry.prepare(request);
     REQUIRE(std::holds_alternative<PreparedStrategy>(malformed_provider));
