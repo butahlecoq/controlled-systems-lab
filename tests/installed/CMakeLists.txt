@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.31)
 project(CSLInstalledConsumer LANGUAGES CXX)
 find_package(CSL 0.1 CONFIG REQUIRED)
+add_executable(installed_input_client input_client.cpp)
+target_link_libraries(installed_input_client PRIVATE CSL::input)
+set_target_properties(installed_input_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_input_client COMMAND installed_input_client)
+set_tests_properties(installed_input_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed input client: owning scenario, literal identity and original cost passed")
 add_executable(installed_convex_client convex_client.cpp)
 target_link_libraries(installed_convex_client PRIVATE CSL::highs_convex)
 set_target_properties(installed_convex_client PROPERTIES CXX_EXTENSIONS OFF)
