@@ -1,0 +1,1594 @@
+{
+  "payload": {
+    "batch": 28000,
+    "build_graph_sha256": "a13c6e981541296ad8c36b61de6bcba15daaff44ff28bc01bf145c18402aaf1a",
+    "build_log_sha256": "9e7298d0fa8dcbb2f4864e515ceca91b5470c3e503069b49563e7dcb15683719",
+    "build_sha256": "0424720f8fbbe6f9e4026a393f469c30628c41c3d3f05f1b33569d5ee7662515",
+    "command_sha256": "8f276629342002d61cffc8c0214228933d05c4769dc145ec072ae19cd070f95a",
+    "configure_log_sha256": "d388783ee40d1a3037d87ca9a7b99b1bd98d3bb2088471ce86f8d34704d01356",
+    "environment": {
+      "cache_policy": "one process, seven warmup batches per fixture, then seven measured batches",
+      "collection_utc": "2026-10-12T19:51:38.259113+00:00",
+      "host_cpu_percent_after": 1.4,
+      "host_cpu_percent_before": 38.5,
+      "logical_cpus": 12,
+      "machine": "AMD64",
+      "memory_bytes": 34189107200,
+      "os": "Windows-11-10.0.22631-SP0",
+      "physical_cpus": 6,
+      "processor": "12th Gen Intel(R) Core(TM) i5-12400F",
+      "seed": null,
+      "simultaneous_work": "No intentional co-located benchmark; host may run background services"
+    },
+    "fixture": {
+      "control_bounds": [
+        0,
+        1
+      ],
+      "dynamics": "x[k+1] = x[k] + u[k]",
+      "initial": [
+        0
+      ],
+      "name": "two-stage scalar integrator",
+      "objective": {
+        "kind": "linear_terminal",
+        "offset": 0,
+        "weights": [
+          1
+        ]
+      },
+      "terminal": [
+        1
+      ],
+      "times": [
+        0,
+        1,
+        2
+      ],
+      "witnesses": {
+        "valid": {
+          "controls": [
+            [
+              0.25
+            ],
+            [
+              0.75
+            ]
+          ],
+          "objective": 1,
+          "states": [
+            [
+              0
+            ],
+            [
+              0.25
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        "violating": {
+          "controls": [
+            [
+              0.25
+            ],
+            [
+              1.25
+            ]
+          ],
+          "objective": 1,
+          "states": [
+            [
+              0
+            ],
+            [
+              0.25
+            ],
+            [
+              1
+            ]
+          ]
+        }
+      }
+    },
+    "module": {
+      "id": "csl.trajectory.original",
+      "version": "1"
+    },
+    "numerical": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "pilot_sha256": "504c618e3ad50a31812d41436d1692e4e7f6ee02f5413a7b8ce5efc4f28e4da5",
+    "profile_sha256": "44e8b9c564bd2ff08516caee9b80aaeb81d264ec78d79e20e6a130c21ab4d4df",
+    "raw_sha256": "54d348f3aaf9a66f769b16dc7c0bba91343ecada2ecb374cf4288ff005e6171c",
+    "repetitions": 7,
+    "residual_profiles": {
+      "valid": [
+        {
+          "field": "initial[0]",
+          "satisfied": true,
+          "scale": 0,
+          "tolerance": 1e-08,
+          "violation": 0
+        },
+        {
+          "field": "states[0].singleton[0]",
+          "satisfied": true,
+          "scale": 0,
+          "tolerance": 1e-08,
+          "violation": 0
+        },
+        {
+          "field": "states[2].singleton[0]",
+          "satisfied": true,
+          "scale": 1,
+          "tolerance": 2e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[0].inequalities[0]",
+          "satisfied": true,
+          "scale": 1,
+          "tolerance": 2e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[0].inequalities[1]",
+          "satisfied": true,
+          "scale": 0.25,
+          "tolerance": 1.25e-08,
+          "violation": 0
+        },
+        {
+          "field": "dynamics[0][0]",
+          "satisfied": true,
+          "scale": 0.25,
+          "tolerance": 1.25e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[1].inequalities[0]",
+          "satisfied": true,
+          "scale": 1,
+          "tolerance": 2e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[1].inequalities[1]",
+          "satisfied": true,
+          "scale": 0.75,
+          "tolerance": 1.75e-08,
+          "violation": 0
+        },
+        {
+          "field": "dynamics[1][0]",
+          "satisfied": true,
+          "scale": 1,
+          "tolerance": 2e-08,
+          "violation": 0
+        },
+        {
+          "field": "objective",
+          "satisfied": true,
+          "scale": 1,
+          "tolerance": 2e-08,
+          "violation": 0
+        }
+      ],
+      "violating": [
+        {
+          "field": "initial[0]",
+          "satisfied": true,
+          "scale": 0,
+          "tolerance": 1e-08,
+          "violation": 0
+        },
+        {
+          "field": "states[0].singleton[0]",
+          "satisfied": true,
+          "scale": 0,
+          "tolerance": 1e-08,
+          "violation": 0
+        },
+        {
+          "field": "states[2].singleton[0]",
+          "satisfied": true,
+          "scale": 1,
+          "tolerance": 2e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[0].inequalities[0]",
+          "satisfied": true,
+          "scale": 1,
+          "tolerance": 2e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[0].inequalities[1]",
+          "satisfied": true,
+          "scale": 0.25,
+          "tolerance": 1.25e-08,
+          "violation": 0
+        },
+        {
+          "field": "dynamics[0][0]",
+          "satisfied": true,
+          "scale": 0.25,
+          "tolerance": 1.25e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[1].inequalities[0]",
+          "satisfied": false,
+          "scale": 1.25,
+          "tolerance": 2.25e-08,
+          "violation": 0.25
+        },
+        {
+          "field": "controls[1].inequalities[1]",
+          "satisfied": true,
+          "scale": 1.25,
+          "tolerance": 2.25e-08,
+          "violation": 0
+        },
+        {
+          "field": "dynamics[1][0]",
+          "satisfied": false,
+          "scale": 1.5,
+          "tolerance": 2.5000000000000002e-08,
+          "violation": 0.5
+        },
+        {
+          "field": "objective",
+          "satisfied": true,
+          "scale": 1,
+          "tolerance": 2e-08,
+          "violation": 0
+        }
+      ]
+    },
+    "schema": "csl.syn06-verifier-report/2",
+    "source_commit": "f0e32e2b8aae6a710892c5559d353da7ea70d637",
+    "status_profiles": {
+      "valid": {
+        "bindings": "numerical_pass",
+        "completeness": "unsupported",
+        "feasibility": "numerical_pass",
+        "objective": "numerical_pass",
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "validated": "unsupported"
+      },
+      "violating": {
+        "bindings": "numerical_pass",
+        "completeness": "unsupported",
+        "feasibility": "violation",
+        "objective": "numerical_pass",
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "validated": "unsupported"
+      }
+    },
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary": [
+      {
+        "attempted_calls": 196000,
+        "batch": 28000,
+        "checked_calls": 196000,
+        "failures": 0,
+        "fixture": "valid",
+        "max_elapsed_ns": 99578000,
+        "median_elapsed_ns": 84713700,
+        "min_elapsed_ns": 78774300,
+        "trials": 7
+      },
+      {
+        "attempted_calls": 196000,
+        "batch": 28000,
+        "checked_calls": 196000,
+        "failures": 0,
+        "fixture": "violating",
+        "max_elapsed_ns": 83670000,
+        "median_elapsed_ns": 81403600,
+        "min_elapsed_ns": 79358500,
+        "trials": 7
+      }
+    ],
+    "timing_scope": "verify_trajectory, per-call literal checks, report assignment and complete result consumption; resolved problem and request prebuilt",
+    "trials": [
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 99578000,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid",
+        "objective": "numerical_pass",
+        "observation_token": 16760924184232834784,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.75,
+            "tolerance": 1.75e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 7,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 87752800,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid",
+        "objective": "numerical_pass",
+        "observation_token": 16760924184232834784,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.75,
+            "tolerance": 1.75e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 8,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 78774300,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid",
+        "objective": "numerical_pass",
+        "observation_token": 16760924184232834784,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.75,
+            "tolerance": 1.75e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 9,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 84713700,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid",
+        "objective": "numerical_pass",
+        "observation_token": 16760924184232834784,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.75,
+            "tolerance": 1.75e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 10,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 83115300,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid",
+        "objective": "numerical_pass",
+        "observation_token": 16760924184232834784,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.75,
+            "tolerance": 1.75e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 11,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 79437000,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid",
+        "objective": "numerical_pass",
+        "observation_token": 16760924184232834784,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.75,
+            "tolerance": 1.75e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 12,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 90583200,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid",
+        "objective": "numerical_pass",
+        "observation_token": 16760924184232834784,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.75,
+            "tolerance": 1.75e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 13,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 79583800,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "violating",
+        "objective": "numerical_pass",
+        "observation_token": 6227851832302048512,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": false,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0.25
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": false,
+            "scale": 1.5,
+            "tolerance": 2.5000000000000002e-08,
+            "violation": 0.5
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 7,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 83670000,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "violating",
+        "objective": "numerical_pass",
+        "observation_token": 6227851832302048512,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": false,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0.25
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": false,
+            "scale": 1.5,
+            "tolerance": 2.5000000000000002e-08,
+            "violation": 0.5
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 8,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 81403600,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "violating",
+        "objective": "numerical_pass",
+        "observation_token": 6227851832302048512,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": false,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0.25
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": false,
+            "scale": 1.5,
+            "tolerance": 2.5000000000000002e-08,
+            "violation": 0.5
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 9,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 80035200,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "violating",
+        "objective": "numerical_pass",
+        "observation_token": 6227851832302048512,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": false,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0.25
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": false,
+            "scale": 1.5,
+            "tolerance": 2.5000000000000002e-08,
+            "violation": 0.5
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 10,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 79358500,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "violating",
+        "objective": "numerical_pass",
+        "observation_token": 6227851832302048512,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": false,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0.25
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": false,
+            "scale": 1.5,
+            "tolerance": 2.5000000000000002e-08,
+            "violation": 0.5
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 11,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 82314300,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "violating",
+        "objective": "numerical_pass",
+        "observation_token": 6227851832302048512,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": false,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0.25
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": false,
+            "scale": 1.5,
+            "tolerance": 2.5000000000000002e-08,
+            "violation": 0.5
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 12,
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "attempted_calls": 28000,
+        "batch": 28000,
+        "bindings": "numerical_pass",
+        "checked_calls": 28000,
+        "completeness": "unsupported",
+        "elapsed_ns": 81746500,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "violating",
+        "objective": "numerical_pass",
+        "observation_token": 6227851832302048512,
+        "optimality": "unsupported",
+        "recomputed_objective": 1,
+        "residual_count": 10,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[0].singleton[0]",
+            "satisfied": true,
+            "scale": 0,
+            "tolerance": 1e-08,
+            "violation": 0
+          },
+          {
+            "field": "states[2].singleton[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[0]",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].inequalities[1]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 0.25,
+            "tolerance": 1.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[1].inequalities[0]",
+            "satisfied": false,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0.25
+          },
+          {
+            "field": "controls[1].inequalities[1]",
+            "satisfied": true,
+            "scale": 1.25,
+            "tolerance": 2.25e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[1][0]",
+            "satisfied": false,
+            "scale": 1.5,
+            "tolerance": 2.5000000000000002e-08,
+            "violation": 0.5
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 1,
+            "tolerance": 2e-08,
+            "violation": 0
+          }
+        ],
+        "round": 13,
+        "validated": "unsupported",
+        "warmup": false
+      }
+    ],
+    "unavailable_timings": [
+      "problem resolution",
+      "setup",
+      "end-to-end",
+      "rendering",
+      "internal phases"
+    ],
+    "warmups": 7,
+    "workers": {
+      "actual": 1,
+      "native_threads": 1,
+      "requested": 1
+    }
+  },
+  "payload_sha256": "dbde15fcbd8f81b78aad14519478b5b1fae69e085956a7e114bcf132ff00efa6",
+  "report_id": "syn06-verifier-20261012-f0e32e2b",
+  "schema": "csl.syn06-verifier-report/2"
+}

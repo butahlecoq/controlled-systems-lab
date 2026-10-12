@@ -14,6 +14,7 @@ full mathematical requirements.
 | Original dynamics and sets | `CSL::model`, `CSL::sets` | Affine discrete stages, observations and H/V/elementary set data; data support does not imply every set operation. |
 | Domains, constraints, original objectives | `CSL::problem`, `CSL::objectives` | Initial/external/control/state/history data; original linear, quadratic and residual-norm evaluation. |
 | Mathematical publication | `CSL::resolved_problem`, `problem::resolve` | Deep immutable `ResolvedProblem` and content-bound identity; no feasibility or synthesis inference. |
+| Independent trajectory checks | `CSL::verification`, `verification::verify_trajectory` | Original-data nominal discrete trajectories: named initial, dynamics, domain, history and objective residuals; explicit unsupported optimum, family-coverage and validated-proof claims. See the [verification contract](../contracts/trajectory-verification.md). |
 | File intake | `CSL::input`, `input::load_scenario_file` | [JSON v1](../contracts/scenario-input.md) to the same immutable problem; requested run intent remains distinct from effective selection. |
 | Selection and composition | `CSL::registry`, `Registry<LPPort>`, `Registry<ConvexPort>`, `StrategyRegistry` | Pure capability admission, retained preparations, actual ID/version provenance and exclusive workspace factories. |
 | Numerical program contracts | `CSL::optimization`, `CSL::convex` | Canonical LP/convex programs, original-coordinate residual evaluation and scoped evidence. |
@@ -45,9 +46,12 @@ flowchart TD
     H --> I[HTML / CSV / figures / versioned public report]
 ```
 
-The data, backend, registry and execution components exist. Production control
-synthesis, full relation construction, independent trajectory/evidence verification
-and the synthesis-to-report adapter remain missing glue. Existing program-level
+The data, backend, registry, execution and nominal trajectory-verification
+components exist. Production control synthesis, full relation construction,
+effective-request/strategy/lineage claim binding and completeness verification
+remain open under [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43)
+and [SYN-07 #155](https://github.com/butahlecoq/controlled-systems-lab/issues/155).
+The synthesis-to-report adapter is also missing glue. Existing program-level
 reports do not fill that gap. No test-local strategy is presented as a production
 planner in the examples.
 

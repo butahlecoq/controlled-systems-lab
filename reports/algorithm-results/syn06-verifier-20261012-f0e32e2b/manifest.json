@@ -1,0 +1,25 @@
+{
+  "files": {
+    "README.md": "1256570bb5258e333518cd653a85da6693acd71c7bb06e760d6264c6f5cdf91c",
+    "build-graph.json": "a13c6e981541296ad8c36b61de6bcba15daaff44ff28bc01bf145c18402aaf1a",
+    "build-log.txt": "9e7298d0fa8dcbb2f4864e515ceca91b5470c3e503069b49563e7dcb15683719",
+    "build-provenance.json": "0424720f8fbbe6f9e4026a393f469c30628c41c3d3f05f1b33569d5ee7662515",
+    "configure-log.txt": "d388783ee40d1a3037d87ca9a7b99b1bd98d3bb2088471ce86f8d34704d01356",
+    "index.html": "6a8224b6b50cc551615ea2a0e151960f34e79a1eb66eb895cdff59837fd11b1f",
+    "latency.svg": "7b71e9163b16a56245b3b71a129ac52773af23f72575068cc4150cb02bc759a5",
+    "measurement-command.txt": "8f276629342002d61cffc8c0214228933d05c4769dc145ec072ae19cd070f95a",
+    "pilot-raw.jsonl": "2e3b4316f477a492ae6289884dc94cadf6194c6764599cbb41395adedee9dd04",
+    "pilot.json": "504c618e3ad50a31812d41436d1692e4e7f6ee02f5413a7b8ce5efc4f28e4da5",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile-raw.jsonl": "b5e23043e0fab2d6d440b6e1265d1fcff8ca510a4f078d5001d54d996f7ce0a2",
+    "profile.json": "44e8b9c564bd2ff08516caee9b80aaeb81d264ec78d79e20e6a130c21ab4d4df",
+    "raw-events.jsonl": "54d348f3aaf9a66f769b16dc7c0bba91343ecada2ecb374cf4288ff005e6171c",
+    "records.json": "c53441ff57ca8106254b6b461c8f2c24661d579a1aadd0069000c2ad4700b33f",
+    "summary.csv": "b44047db2ea9015553f004103ef1f127ddba9daace87763aa5f9de61b02b3a31",
+    "trials.csv": "f2d0c360dd34d7eb2805285a9478288bfab792f6c63ee8167c6475b7257703b1",
+    "verifier-driver.bin": "31c0156be47b551c171051958b146a876eafc22eff142ff44373f05a14f29f9c",
+    "verifier_driver.cpp": "ad25cc60bd4a8f996e6aa1ca4556ebe261fd452c80b7db45ade746b98bdaa30e"
+  },
+  "report_id": "syn06-verifier-20261012-f0e32e2b",
+  "schema": "csl.syn06-source-manifest/2"
+}

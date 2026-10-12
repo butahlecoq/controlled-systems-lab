@@ -1,0 +1,16 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Single Release adapter, no solver or optimal-family completeness claim; microbenchmark excludes resolution, setup, rendering and end-to-end use; limiter not established",
+      "measured_scope": "Original-data numerical verification of two literal two-stage integrator witnesses",
+      "payload_schema": "csl.syn06-verifier-report/2",
+      "payload_sha256": "dbde15fcbd8f81b78aad14519478b5b1fae69e085956a7e114bcf132ff00efa6",
+      "report_id": "syn06-verifier-20261012-dc048b5b98cfe2e90b5df982147e325a1ceec2e249e81e53cb3518c4006ca03f",
+      "report_kind": "syn06-verifier",
+      "source_commit": "f0e32e2b8aae6a710892c5559d353da7ea70d637",
+      "source_report_id": "syn06-verifier-20261012-f0e32e2b",
+      "zip_sha256": "28706f0558f1c0658c9be9db3d8ae824bbaca53c853eadaa947dc529e17674b8"
+    }
+  ],
+  "schema": "csl.syn06-report-extension/1"
+}
