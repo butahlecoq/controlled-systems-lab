@@ -138,3 +138,10 @@ set_target_properties(installed_hull_reducer_client PROPERTIES CXX_EXTENSIONS OF
 add_test(NAME installed_hull_reducer_client COMMAND installed_hull_reducer_client)
 set_tests_properties(installed_hull_reducer_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed hull client: each membership LP passed registered-provider admission")
+
+add_executable(installed_affine_sum_client affine_sum_client.cpp)
+target_link_libraries(installed_affine_sum_client PRIVATE CSL::affine_sum CSL::highs_lp)
+set_target_properties(installed_affine_sum_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_affine_sum_client COMMAND installed_affine_sum_client)
+set_tests_properties(installed_affine_sum_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed affine/sum client: selected LP and hull providers produced a numerical set result")

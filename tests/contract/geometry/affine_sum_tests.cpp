@@ -8,19 +8,45 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <iostream>
+#include <numeric>
+#include <type_traits>
 
 using namespace csl;
 using namespace csl::registry;
+static_assert(!std::is_constructible_v<AffineImage,FiniteDomain,Matrix,Vector>);
+static_assert(!std::is_constructible_v<AffineImage,MixedDomain,Matrix,Vector>);
 namespace {
 template<class T,class... R> T take(std::variant<T,R...> value) {
+    if (!std::holds_alternative<T>(value)) std::visit([](const auto& failure) {
+        if constexpr (requires { failure.field; failure.explanation; })
+            std::cerr << failure.field << ": " << failure.explanation << '\n';
+        else if constexpr (requires { failure.diagnostics.begin()->field; })
+            for (const auto& item : failure.diagnostics) std::cerr << item.field << ": " << item.explanation << '\n';
+    }, value);
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
 template<class Port> PreparedProvider<Port> provider(Registration<Port> entry,Requirements requirements={}) {
+    if constexpr (std::is_same_v<Port,LPPort>) requirements.output.representation={"csl.program-result.v1"};
     const Method method{entry.identity.id,entry.identity.version};
     Registry<Port> registry;
     REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
     return take(prepare_provider(select_provider(registry,method,std::move(requirements))));
+}
+class KeepAllHullWorkspace final : public geometry::HullReducerWorkspace {
+public:
+    geometry::HullReductionResult reduce(const geometry::PointCloud& cloud, LPWorkspace&,
+            const ExecutionContext&) override {
+        std::vector<std::size_t> retained(cloud.points.size());
+        std::iota(retained.begin(),retained.end(),std::size_t{0});
+        return geometry::HullReduction{geometry::ReductionStatus::complete,std::move(retained),{},0,{}};
+    }
+};
+Registration<HullReducerPort> make_keep_all_hull_registration() {
+    return {{{"test.hull.keep-all"},"1"},
+        [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
+        [](const geometry::PointCloud&) { return std::make_unique<KeepAllHullWorkspace>(); }};
 }
 geometry::AffineSumDependencies dependencies(bool phase=false,bool conversion=true) {
     auto lp=phase ? take(optimization::phase_one::make_registration()) : take(adapters::lp::make_highs_registration());
@@ -92,6 +118,22 @@ TEST_CASE("square Minkowski support identities survive actual LP backend substit
         CHECK(result.relation==SetRelation::equivalent);
         CHECK(std::holds_alternative<NumericalCheck>(result.evidence.support));
     }
+}
+
+TEST_CASE("affine and sum operations use the selected hull reducer") {
+    auto selected=dependencies();
+    selected.hull=provider(make_keep_all_hull_registration());
+    const auto interval=vertices("interval",1,{0,1},2);
+    const auto req=request(MinkowskiSum{interval,interval},"selected-hull");
+    const auto result=take(run(req,std::move(selected)));
+    CHECK(support(result.output,{1})==doctest::Approx(2));
+    CHECK(support(result.output,{-1})==doctest::Approx(0));
+    const auto data=take(sets::from_handle(result.output));
+    const auto rep=data.representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==4);
+    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& value){return value.find("test.hull.keep-all@1")!=std::string::npos;}));
 }
 
 TEST_CASE("rectangular and singular affine maps retain their actual ambient spaces") {
