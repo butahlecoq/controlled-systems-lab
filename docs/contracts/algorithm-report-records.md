@@ -349,13 +349,17 @@ publication gate exemption.
 OPT-04's native `csl.opt04-phase-one-report/2` records have a registered saved-data
 adapter in `opt04_registered_reports.py`; schema-3 catalogue dispatch and
 staging use the typed renderer and preserve the local renderer and native bundle
-as source evidence. Test-mode integration exercises the generated page, common
-envelope, catalogue links and deterministic ZIP. No independently reviewed
-production inventory digest or production catalogue row is committed, and no
-live OPT-04 public page or URL is established. The remaining tracked migration
-and publication gates are in [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185):
-reviewed production admission, authoritative catalogue integration, main-only
-Pages publication and live URL verification.
+as source evidence. The committed source ID
+`opt04-20261013T172839Z-6451c4b89d3b` is admitted by a reviewed complete
+inventory digest, and its catalogue row binds the native ID to the content-bound
+public ID `opt04-20261013T172839Z-bf1844fdf81c94c82ca91aadbd9d0988c7367093c5cf70269c2d0e0ca7d44b2f`.
+The test suite exercises the generated page, common envelope, catalogue links and
+deterministic ZIP. Producer HTML remains source evidence and is not used as the public page;
+the shared site renderer builds that page from validated typed records.
+Publication gates are tracked in [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185):
+independent review and CI, main-only Pages publication, then live page/raw-download/
+ZIP hash verification. Do not cite the candidate public ID as a verified live URL
+until those deployment checks pass.
 
 The OPT-04 adapter requires the exact ten-file native inventory documented in its
 [tooling README](../../reports/algorithm-results/tooling/opt04/README.md), schema-v2
@@ -370,22 +374,21 @@ contains the unchanged native payload, native ID/digest and provenance; the new
 public ID binds every native source-file hash and the LF-normalized adapter hash.
 The catalogue must carry the adapter's measured scope and limits, including
 Unestablished feasibility-numerics support and the descriptive five-fixture limit.
-Synthetic test bundles do not satisfy the missing genuine collection, reviewed
-catalogue integration, main deployment and live verification gates of #185.
+Synthetic test bundles cannot substitute for the committed reviewed source or
+for the main-only deployment and live verification gates of #185.
 
 Because native schema v2 has no trusted collection/test discriminator, normal
 OPT-04 adaptation additionally requires a reviewed source ID and complete native
 inventory digest in `opt04_registered_reports.REVIEWED_NATIVE_BUNDLES`. The digest
 is SHA-256 of the canonical sorted filename-to-SHA-256 mapping of all ten original
 files, including raw producer files and native package/checksum data. The registry
-is deliberately empty: no v2 bundle currently has production admission. Hash-shaped
-commit IDs and self-declared purpose cannot establish genuine collection. A later
-reviewed bundle/catalogue change must pin the exact complete inventory separately
-from the payload's own claims. Changed evidence requires fresh admission.
-Synthetic fixtures explicitly declare `purpose: "test"` and require the Python
-test harness's `allow_test=True` on both adaptation and staging; default paths
-reject them. Unmarked or relabelled bundles cannot bypass the reviewed-inventory
-gate. The CLI exposes no test bypass and the main Pages workflow cannot invoke it.
+pins the reviewed source ID `opt04-20261013T172839Z-6451c4b89d3b` to its exact
+complete inventory digest; this does not trust hash-shaped commit IDs or
+self-declared purpose. Any changed evidence requires fresh admission. Synthetic
+fixtures explicitly declare `purpose: "test"` and require the Python test harness's
+`allow_test=True` on both adaptation and staging; default paths reject them.
+Unmarked or relabelled bundles cannot bypass the reviewed-inventory gate. The CLI
+exposes no test bypass and the main Pages workflow cannot invoke it.
 
 
 The shared Pages publisher accepts catalogue schema `csl.algorithm-report-catalog/3`

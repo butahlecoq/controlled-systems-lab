@@ -37,6 +37,33 @@ class RegisteredKindTests(unittest.TestCase):
         html = site.catalogue_index(catalogue)
         self.assertIn('href="' + catalogue['reports'][0]['report_id'] + '/performance.svg"', html)
 
+    def test_committed_opt04_bundle_is_registered_and_stages_typed_publication(self):
+        catalog_path = FIXTURES / 'catalog.json'
+        catalogue = json.loads(catalog_path.read_text(encoding='utf-8'))
+        reports = [report for report in catalogue['reports'] if report.get('report_kind') == 'opt04-phase-one']
+        self.assertEqual(1, len(reports))
+        row = reports[0]
+        source = FIXTURES / row['source_report_id']
+        publication = site.opt04.adapt(source)
+        self.assertEqual(publication.report_id, row['report_id'])
+        self.assertEqual(publication.payload_sha256, row['payload_sha256'])
+        self.assertEqual(publication.native_payload_sha256, row['native_payload_sha256'])
+        self.assertEqual(publication.measured_scope, row['measured_scope'])
+        self.assertEqual(publication.evidence_limits, row['evidence_limits'])
+        self.assertEqual(hashlib.sha256(site.opt04.offline_zip(source, publication)).hexdigest(), row['zip_sha256'])
+
+        with tempfile.TemporaryDirectory() as directory:
+            staged = site.stage(catalog_path, Path(directory) / 'site', check=True)
+            report_dir = staged / row['report_id']
+            self.assertIn(row['report_id'] + '/performance.svg', (staged / 'index.html').read_text(encoding='utf-8'))
+            self.assertEqual(site.opt04.public_svg(json.loads((source / 'records.json').read_text())),
+                             (report_dir / 'performance.svg').read_bytes())
+            self.assertEqual((source / 'index.html').read_bytes(),
+                             (report_dir / 'source-evidence' / 'index.html').read_bytes())
+            with zipfile.ZipFile(staged / (row['report_id'] + '.zip')) as archive:
+                self.assertIn(row['report_id'] + '/source-evidence/bundle.zip', archive.namelist())
+                self.assertEqual((report_dir / 'performance.svg').read_bytes(), archive.read(row['report_id'] + '/performance.svg'))
+
     def rehash_native(self, bundle, kind):
         if kind=='geo03-hv':
             manifest_path=bundle/'manifest.json'
@@ -402,7 +429,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt05-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward','syn02-terminal-minimizers'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward','syn02-terminal-minimizers'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))

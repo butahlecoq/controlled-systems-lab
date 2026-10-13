@@ -11,16 +11,22 @@ returned witness proves all feasible points. Numerical support remains
 
 ## Publication and migration status
 
-This native report uses `csl.opt04-phase-one-report/2`. Its local saved-data
-renderer and bundle are private source evidence. The registered adapter in
-`scripts/reports/opt04_registered_reports.py` can validate and stage an eligible
-saved bundle through `site.py`, but no OPT-04 measurement bundle or authoritative
-catalogue row is committed and no public page or URL is established. The tracked path for validating this
-native bundle, adapting it to the shared schema-3 envelope/catalogue, preserving
-its raw files as source evidence, and integrating it into the main-only Pages
-workflow is [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185).
-Until that integration and deployment are complete, treat any local HTML as a
-private renderer output only.
+This native report uses `csl.opt04-phase-one-report/2`. The committed source bundle
+`opt04-20261013T172839Z-6451c4b89d3b` remains native source evidence, and its local
+saved-data renderer is not the public page. The shared schema-3 publisher renders
+from validated typed records and preserves all ten original files under
+`source-evidence/`. The reviewed complete inventory digest is pinned in
+`scripts/reports/opt04_registered_reports.py`; the schema-3 catalogue row binds
+native source ID `opt04-20261013T172839Z-6451c4b89d3b` to public destination ID
+`opt04-20261013T172839Z-bf1844fdf81c94c82ca91aadbd9d0988c7367093c5cf70269c2d0e0ca7d44b2f`.
+
+The tracked publication path is [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185).
+This change validates and stages the catalogue page, typed SVG, schema-3 envelope,
+manifest and deterministic ZIP. A staged file, local renderer output, or repository
+artifact link is not proof of Pages deployment. The main-only workflow must publish
+the merged catalogue, then the live page, raw downloads and ZIP must be checked
+against the reviewed hashes before publication is called complete. Until then, do
+not cite a public OPT-04 URL.
 
 The adapter requires the exact native inventory: `records.json`, `stdout.jsonl`,
 `driver-stdout.txt`, `stderr.txt`, `release-build.txt`, `index.html`,
@@ -32,14 +38,13 @@ private and cannot become an accepted catalogue row. It runs no collection or
 solver. Synthetic publisher test fixtures are never production measurement input.
 
 Schema v2 has no trusted measurement/test marker. Production admission therefore
-also requires a reviewed native report ID and the complete deterministic inventory
+requires the reviewed native report ID and the complete deterministic inventory
 digest pinned in `opt04_registered_reports.REVIEWED_NATIVE_BUNDLES`: SHA-256 of
 the canonical sorted filename-to-SHA-256 mapping for all ten original files,
 including producer HTML/SVG, raw output, manifest, native ZIP and ZIP checksum.
-The registry is intentionally empty, so **no v2 OPT-04 bundle is publishable yet**.
-Commit-shaped strings and a self-declared purpose do not establish genuine
-collection. A later reviewed evidence/publication change must add the exact
-native bundle pin alongside the authoritative catalogue row.
+The currently admitted source ID is the exact bundle named above; changed evidence
+requires fresh admission. Commit-shaped strings and a self-declared purpose do not
+establish genuine collection.
 
 Only Python test harnesses may call `adapt(..., allow_test=True)` or
 `site.stage(..., allow_test=True)`, and that path requires an explicit
@@ -49,20 +54,17 @@ The CLI has no test-admission option; the Pages workflow always uses production
 admission. Test-only staging establishes no measurement or public publication.
 
 Publication preserves the native ID and every original byte under
-`source-evidence/`, including the producer HTML/SVG and native ZIP and hashes.
-The public page is independently rendered from typed records; its SVG uses the
-shared safe CSS vocabulary. The destination ID binds all native file hashes and
-the LF-normalized adapter source hash. The envelope retains schema v2, the native
-payload digest, source ID, provenance and all evidence limits.
+`source-evidence/`, including producer HTML/SVG and native ZIP and hashes. The
+public page is independently rendered from typed records; its SVG uses the shared
+safe CSS vocabulary. The destination ID binds all native file hashes and the
+LF-normalized adapter source hash. The envelope retains schema v2, native payload
+digest, source ID, provenance and all evidence limits.
 
 Finishing [#185](https://github.com/butahlecoq/controlled-systems-lab/issues/185)
-requires reviewed fixed-source collection, a genuine complete eligible native
-bundle committed unchanged under its native report ID, independent adapter and
-bundle review with its complete inventory digest admitted in the registry,
-a matching schema-3 catalogue row and deterministic index/ZIP,
-successful `site.py --check`, main-only Pages deployment, and verification of
-the live page, raw downloads and ZIP against reviewed hashes. Staging alone does
-not meet those publication gates or change OPT-04's scientific acceptance.
+requires independent review of this admission/catalogue change, required CI, the
+main-only Pages deployment, and verification of the live page, raw downloads and
+ZIP against reviewed hashes. It does not resolve OPT-04's separate collinear-input
+acceptance and kernel criteria in #29, or upgrade the report's numerical assurance.
 
 ## Review boundary
 
