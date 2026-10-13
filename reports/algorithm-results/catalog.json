@@ -93,6 +93,18 @@
       "payload_schema": "csl.geo02-affine-sum-report/2",
       "native_payload_sha256": "338ff7d1d63cabd9010ea2924b5fb7845195b7dcc1e90752b0673bc3c5743b6c",
       "zip_sha256": "e9068d76389a5a5d66a4f73ca49e259edae618faad99c1b8b7a41f05df92669a"
+    },
+    {
+      "report_id": "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3",
+      "report_kind": "syn02-terminal-minimizers",
+      "source_report_id": "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
+      "payload_schema": "csl.syn02-terminal-report/1",
+      "payload_sha256": "80fac083f4f0580acea81f2a2f0e681693520b7ecb3872287160d1a759cde223",
+      "native_payload_sha256": "80fac083f4f0580acea81f2a2f0e681693520b7ecb3872287160d1a759cde223",
+      "source_commit": "c234a1a04b2f90e34776a2bfa349a91a1d30257d",
+      "measured_scope": "Terminal optimizer on resolved objectives and a supplied terminal H-slice; not system simulation or complete control synthesis",
+      "evidence_limits": "binary64 literal fixture checks, not exact or validated arithmetic; relation samples and H representation checks do not certify full set equality or full minimizer-family completeness; global optimum and relation support remain Unestablished; the shifted residual case returns undetermined with numerical_failure and no constructed relation; tiny analytic fixtures only; no comparator, speedup, application-scale, throughput, or scalability claim; limiter unknown because no call-stack profile evidence was collected",
+      "zip_sha256": "8acb23c42447455385e63aefccbf25a680384d39de5f50339838e98af7f10bf8"
     }
   ]
 }
