@@ -9,6 +9,9 @@ namespace {
 template<class T,class... E> T take(std::variant<T,E...> value) {
     REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
 }
+template<class T,class V> T alternative(V value) {
+    REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
+}
 SetHandle interval(std::string id,double lo,double hi,std::string label="x") {
     return take(sets::make_h({{std::move(id)},1,{std::move(label)}},
         {take(numeric::snapshot(Matrix{2,1,{1,-1}})),take(numeric::snapshot_vector(Vector{hi,-lo})),
@@ -64,23 +67,23 @@ TEST_CASE("LTV uses authored stage order offset and next constraints") {
     range(tube.stages[1].marginal.output,3,4);range(tube.stages[2].marginal.output,-5,-4);
 }
 TEST_CASE("initial constraints can empty stage zero with scoped evidence") {
-    auto p=integrator();p.states[0]=interval("X0",1,2);auto result=take<EmptyForwardStage>(run(p));
+    auto p=integrator();p.states[0]=interval("X0",1,2);auto result=alternative<EmptyForwardStage>(run(p));
     CHECK(result.stage.value==0);REQUIRE(result.prefix.stages.size()==1);
     CHECK(result.evidence.reference.identity.problem==result.prefix.problem);
 }
 TEST_CASE("incompatible final constraint returns explicit empty stage and completed prefix") {
-    auto p=integrator();p.states[2]=interval("X2",3,4);auto result=take<EmptyForwardStage>(run(p));
+    auto p=integrator();p.states[2]=interval("X2",3,4);auto result=alternative<EmptyForwardStage>(run(p));
     CHECK(result.stage.value==2);REQUIRE(result.prefix.stages.size()==3);range(result.prefix.stages[1].marginal.output,0,1);
 }
 TEST_CASE("cancellation and deadline are typed stops without success stages") {
     std::stop_source stop;stop.request_stop();ExecutionContext context;context.cancellation=stop.get_token();
-    auto result=take<ForwardFailure>(run(integrator(),context));CHECK(result.prefix.stages.empty());
+    auto result=alternative<ForwardFailure>(run(integrator(),context));CHECK(result.prefix.stages.empty());
     CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::cancelled);
-    context={};context.deadline=std::chrono::steady_clock::now();result=take<ForwardFailure>(run(integrator(),context));
+    context={};context.deadline=std::chrono::steady_clock::now();result=alternative<ForwardFailure>(run(integrator(),context));
     CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::deadline_expired);
 }
 TEST_CASE("declared temporal coupling is rejected before propagation") {
     auto p=integrator();p.temporal=TemporalConstraints{{1,5,{0,1},{0},{1}},{{0,0}}};
-    auto result=take<ForwardFailure>(run(p));CHECK(result.prefix.stages.empty());
+    auto result=alternative<ForwardFailure>(run(p));CHECK(result.prefix.stages.empty());
     CHECK(std::get<Unsupported>(result.cause).diagnostics[0].field=="forward.temporal");
 }
