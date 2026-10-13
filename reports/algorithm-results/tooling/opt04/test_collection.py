@@ -70,5 +70,30 @@ class CollectionTests(unittest.TestCase):
         self.assertIn("started", result.stdout)
 
 
+class FixtureProvenanceTests(unittest.TestCase):
+    def test_fixture_fingerprints_bind_inputs_and_problem_semantics(self) -> None:
+        fingerprints = getattr(collect, "fixture_fingerprints", None)
+        self.assertIsNotNone(fingerprints, "collector must expose canonical fixture fingerprints")
+        fixture = collect.FIXTURES["triangle"]
+        original = fingerprints(fixture)
+        self.assertEqual(len(original["input_sha256"]), 64)
+        self.assertEqual(len(original["scenario_sha256"]), 64)
+        changed_input = dict(fixture, rhs=[0.5, 0.25, 1])
+        self.assertNotEqual(original["input_sha256"], fingerprints(changed_input)["input_sha256"])
+        changed_semantics = fingerprints(fixture, lower_bound=0.0)
+        relaxed_semantics = fingerprints(fixture, lower_bound=None)
+        self.assertNotEqual(changed_semantics["scenario_sha256"], relaxed_semantics["scenario_sha256"])
+
+    def test_execution_policy_records_requested_and_unobserved_counts(self) -> None:
+        policy = getattr(collect, "execution_policy", lambda: None)()
+        self.assertIsInstance(policy, dict, "collector must serialize its execution policy")
+        self.assertEqual(policy["requested"]["resource_context"], {
+            "total_threads": 1, "outer_workers": 1, "threads_per_worker": 1,
+        })
+        self.assertEqual(policy["actual"]["native_threads"]["value"], None)
+        self.assertTrue(policy["actual"]["native_threads"]["reason"])
+        self.assertEqual(policy["seed"]["status"], "not_applicable")
+
+
 if __name__ == "__main__":
     unittest.main()

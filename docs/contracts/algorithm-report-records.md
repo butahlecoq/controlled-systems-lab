@@ -346,7 +346,7 @@ publication gate exemption.
 
 ## Registered non-LP publication adapters
 
-OPT-04's native `csl.opt04-phase-one-report/1` records are not yet a registered
+OPT-04's native `csl.opt04-phase-one-report/2` records are not yet a registered
 publisher input: the local renderer and bundle are private source evidence, and
 no OPT-04 page or URL is currently published by `site.py`. The exact tracked
 migration into this contract's schema-3 catalogue and envelope is [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185).

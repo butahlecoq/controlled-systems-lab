@@ -10,7 +10,7 @@ from pathlib import Path
 import zipfile
 
 
-SCHEMA = "csl.opt04-phase-one-report/1"
+SCHEMA = "csl.opt04-phase-one-report/2"
 PHASES = ("setup", "public_run", "verification", "end_to_end")
 
 

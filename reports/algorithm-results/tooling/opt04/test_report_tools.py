@@ -27,8 +27,17 @@ validate = _load("opt04_validate", "validate_report.py")
 
 def fixture_records() -> dict:
     sides = ["phase-one-bland", "highs-reference"]
+    matrix, rhs = [[1.0, 0.0], [0.0, 1.0]], [1.0, 1.0]
+    input_sha256 = hashlib.sha256(json.dumps({"matrix": matrix, "rhs": rhs}, sort_keys=True,
+                                            separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+    scenario = {"input_sha256": input_sha256, "row_relation": "equality", "variable_lower_bound": 0.0,
+                "variable_upper_bound": None,
+                "objective": {"kind": "zero", "coefficients": [0.0, 0.0], "constant": 0.0},
+                "tolerances": {"absolute": 1e-8, "relative": 0.0}}
+    scenario_sha256 = hashlib.sha256(json.dumps(scenario, sort_keys=True, separators=(",", ":"),
+                                                allow_nan=False).encode()).hexdigest()
     record = {
-        "schema": "csl.opt04-phase-one-report/1", "report_id": "opt04-fixture",
+        "schema": "csl.opt04-phase-one-report/2", "report_id": "opt04-fixture",
         "evidence_support": "Unestablished",
         "claims": {"scope": "paired descriptive analytic fixtures", "speedup": False,
                    "feasibility_numerics": "Unestablished"},
@@ -36,7 +45,7 @@ def fixture_records() -> dict:
         "reference": {"registration_id": "highs_lp", "version": "1.0.0+highs.1.11.0"},
         "catalog": {"version": "opt04-analytic-v1", "fixtures": [{
             "id": "tiny-feasible", "rows": 2, "columns": 2,
-            "matrix": [[1.0, 0.0], [0.0, 1.0]], "rhs": [1.0, 1.0],
+            "matrix": matrix, "rhs": rhs, "input_sha256": input_sha256, "scenario_sha256": scenario_sha256,
             "expected_status": "optimal", "expected_phase_one_primal": [1.0, 1.0],
             "expected_auxiliary": 0.0, "expected_reference_status": "optimal",
             "absolute_tolerance": 1e-8, "relative_tolerance": 0.0,
@@ -46,6 +55,20 @@ def fixture_records() -> dict:
                         "timing_boundaries": {"setup": "publication through fresh workspace",
                                               "public_run": "solver call", "verification": "oracle checks",
                                               "end_to_end": "fixture construction through verification"},
+                        "execution_policy": {
+                            "arithmetic": {"format": "IEEE-754 binary64", "validated_arithmetic": False,
+                                           "rounding_mode": None, "rounding_mode_reason": "not observed"},
+                            "seed": {"value": None, "status": "not_applicable", "reason": "deterministic test fixture"},
+                            "requested": {
+                                "resource_context": {"total_threads": 1, "outer_workers": 1, "threads_per_worker": 1},
+                                "solver_profiles": {
+                                    "phase-one-bland": {"native_threads": "not_applicable", "reason": "single-threaded in-process implementation"},
+                                    "highs-reference": {"solver": "simplex", "presolve": "off", "parallel": "off", "native_threads": 1},
+                                },
+                            },
+                            "actual": {"outer_workers": {"value": None, "reason": "not observed"},
+                                       "native_threads": {"value": None, "reason": "not observed"}},
+                        },
                         "execution_order": []},
         "warmup_trials": [], "trials": [], "summary": {"failure_count": 0, "missing_count": 0, "valid": True, "rows": []},
         "provenance": {"source_commit": "a" * 40, "harness_commit": "b" * 40,
@@ -148,6 +171,15 @@ class ReportToolsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate.validate_records(records)
 
+    def test_rejects_fixture_hash_mismatch_and_missing_execution_policy(self) -> None:
+        records = fixture_records()
+        records["catalog"]["fixtures"][0]["matrix"][0][0] = 2.0
+        with self.assertRaisesRegex(ValueError, "input hash"):
+            validate.validate_records(records)
+        records = fixture_records()
+        del records["measurement"]["execution_policy"]
+        with self.assertRaisesRegex(ValueError, "execution_policy"):
+            validate.validate_records(records)
     def test_rejects_corrupt_manifest_hash(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "report"

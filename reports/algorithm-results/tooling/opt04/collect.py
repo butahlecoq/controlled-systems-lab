@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
-SCHEMA = "csl.opt04-phase-one-report/1"
+SCHEMA = "csl.opt04-phase-one-report/2"
 FIXTURES = {
     "triangle": {"rows": 3, "columns": 3, "matrix": [[0,1,0],[0,0,1],[1,1,1]], "rhs": [.25,.25,1], "expected_status": "optimal", "expected_phase_one_primal": [.5,.25,.25], "expected_auxiliary": 0.0},
     "signed_triangle": {"rows": 3, "columns": 3, "matrix": [[-1,1,-1],[-1,-1,1],[1,1,1]], "rhs": [-.5,-.5,1], "expected_status": "optimal", "expected_phase_one_primal": [.5,.25,.25], "expected_auxiliary": 0.0},
@@ -27,6 +27,41 @@ FIXTURES = {
 }
 SIDES = ("phase-one-bland", "highs-reference")
 PHASES = ("setup", "public_run", "verification", "end_to_end")
+
+
+def _canonical_sha256(value: dict) -> str:
+    canonical = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def fixture_fingerprints(fixture: dict, *, lower_bound: float | None = 0.0) -> dict[str, str]:
+    inputs = {"matrix": fixture["matrix"], "rhs": fixture["rhs"]}
+    input_sha256 = _canonical_sha256(inputs)
+    scenario = {"input_sha256": input_sha256, "row_relation": "equality",
+                "variable_lower_bound": lower_bound, "variable_upper_bound": None,
+                "objective": {"kind": "zero", "coefficients": [0.0] * fixture["columns"], "constant": 0.0},
+                "tolerances": {"absolute": 1e-8, "relative": 0.0}}
+    return {"input_sha256": input_sha256, "scenario_sha256": _canonical_sha256(scenario)}
+
+
+def execution_policy() -> dict:
+    return {
+        "arithmetic": {"format": "IEEE-754 binary64", "validated_arithmetic": False,
+                       "rounding_mode": None, "rounding_mode_reason": "runtime rounding mode is not observed"},
+        "seed": {"value": None, "status": "not_applicable",
+                 "reason": "the fixtures and configured solver profiles use no randomized algorithm"},
+        "requested": {
+            "resource_context": {"total_threads": 1, "outer_workers": 1, "threads_per_worker": 1},
+            "solver_profiles": {
+                "phase-one-bland": {"native_threads": "not_applicable", "reason": "single-threaded in-process implementation"},
+                "highs-reference": {"solver": "simplex", "presolve": "off", "parallel": "off", "native_threads": 1},
+            },
+        },
+        "actual": {
+            "outer_workers": {"value": None, "reason": "runtime worker observations are not emitted by this harness"},
+            "native_threads": {"value": None, "reason": "OS/native thread observations are not collected by this harness"},
+        },
+    }
 
 
 def validate_build_directory(build_dir: Path, executable: Path, source_root: Path) -> str:
@@ -418,7 +453,7 @@ def main() -> int:
             validation_errors.append(f"driver process timed out after {args.timeout_seconds:g} seconds")
         elif completed.returncode != 0:
             validation_errors.append(f"driver process returned {completed.returncode}")
-        catalog = [{"id": name, **details,
+        catalog = [{"id": name, **details, **fixture_fingerprints(details),
                     "expected_reference_status": details["expected_status"], "absolute_tolerance": 1e-8, "relative_tolerance": 0.0}
                    for name, details in FIXTURES.items()]
         execution_order = []
@@ -451,6 +486,7 @@ def main() -> int:
                                  "limiter_profile": "required as a separate post-review profile-only execution; no profile data mixed with trials"},
                   "catalog": {"version": "opt04-analytic-v1", "fixtures": catalog},
                   "measurement": {"warmups_per_fixture": 1, "repetitions_per_fixture": 7, "sides": list(SIDES), "execution_order": execution_order,
+                                  "execution_policy": execution_policy(),
                                   "timing_boundaries": {"setup": "program publication, registration, selection, preparation and fresh workspace creation", "public_run": "BoundWorkspace.run", "verification": "independent expected outcome, candidate, equality residual and nonnegativity checks", "end_to_end": "fixture construction through independent verification; excludes process startup and serialization"}},
                   "warmup_trials": warmups, "trials": trials, "summary": summarize(trials, warmups, not completed.returncode and not aborted and not validation_errors and not missing, missing),
                   "collection_errors": validation_errors, "process_exit_code": completed.returncode, "aborted": aborted}

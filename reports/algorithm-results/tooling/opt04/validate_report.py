@@ -13,7 +13,7 @@ from pathlib import Path
 import zipfile
 
 
-SCHEMA = "csl.opt04-phase-one-report/1"
+SCHEMA = "csl.opt04-phase-one-report/2"
 PHASES = ("setup", "public_run", "verification", "end_to_end")
 SIDES = ("phase-one-bland", "highs-reference")
 PACKAGE_NAMES = {"manifest.sha256", "bundle.zip", "bundle.zip.sha256"}
@@ -34,6 +34,10 @@ def nonnegative_ns(value: object, label: str) -> int:
     require(isinstance(value, int) and not isinstance(value, bool) and value >= 0,
             f"{label} must be a nonnegative integer nanosecond count")
     return value
+
+
+def canonical_sha256(value: dict) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")).hexdigest()
 
 
 def _fixture_map(records: dict) -> dict[str, dict]:
@@ -82,6 +86,14 @@ def validate_records(records: dict) -> dict:
                 finite_number(value, f"{fid}.matrix")
         for value in rhs:
             finite_number(value, f"{fid}.rhs")
+        input_sha256 = canonical_sha256({"matrix": matrix, "rhs": rhs})
+        require(fixture.get("input_sha256") == input_sha256, f"{fid}: input hash does not match matrix and RHS")
+        scenario = {"input_sha256": input_sha256, "row_relation": "equality",
+                    "variable_lower_bound": 0.0, "variable_upper_bound": None,
+                    "objective": {"kind": "zero", "coefficients": [0.0] * fixture["columns"], "constant": 0.0},
+                    "tolerances": {"absolute": fixture["absolute_tolerance"], "relative": fixture["relative_tolerance"]}}
+        require(fixture.get("scenario_sha256") == canonical_sha256(scenario),
+                f"{fid}: scenario hash does not match the represented mathematical problem")
         finite_number(fixture.get("expected_auxiliary"), f"{fid}.expected_auxiliary")
         primal = fixture.get("expected_phase_one_primal")
         require(isinstance(primal, list) and len(primal) == fixture["columns"], f"{fid}: expected primal dimension mismatch")
@@ -92,6 +104,35 @@ def validate_records(records: dict) -> dict:
     require(isinstance(measurement, dict) and measurement.get("warmups_per_fixture") == 1
             and measurement.get("repetitions_per_fixture") == 7, "measurement must declare one warmup and seven repetitions")
     require(measurement.get("sides") == list(SIDES), f"measurement.sides must be {list(SIDES)}")
+    policy = measurement.get("execution_policy")
+    require(isinstance(policy, dict), "measurement.execution_policy is required")
+    arithmetic = policy.get("arithmetic")
+    require(isinstance(arithmetic, dict) and arithmetic.get("format") == "IEEE-754 binary64"
+            and arithmetic.get("validated_arithmetic") is False,
+            "execution arithmetic policy must describe unvalidated binary64")
+    seed = policy.get("seed")
+    require(isinstance(seed, dict) and seed.get("status") in ("not_applicable", "fixed", "unavailable")
+            and isinstance(seed.get("reason"), str) and seed["reason"],
+            "seed policy and its reason are required")
+    requested = policy.get("requested")
+    require(isinstance(requested, dict) and requested.get("resource_context") == {
+        "total_threads": 1, "outer_workers": 1, "threads_per_worker": 1},
+        "requested resource context differs from the measured driver")
+    profiles = requested.get("solver_profiles", {})
+    require(profiles.get("phase-one-bland") == {
+        "native_threads": "not_applicable", "reason": "single-threaded in-process implementation"}
+        and profiles.get("highs-reference") == {
+            "solver": "simplex", "presolve": "off", "parallel": "off", "native_threads": 1},
+        "requested solver profiles differ from the measured adapters")
+    actual = policy.get("actual")
+    require(isinstance(actual, dict), "actual execution resource observations are required")
+    for name in ("outer_workers", "native_threads"):
+        observation = actual.get(name)
+        require(isinstance(observation, dict) and (observation.get("value") is None
+                or isinstance(observation.get("value"), int) and not isinstance(observation.get("value"), bool)
+                and observation["value"] > 0)
+                and isinstance(observation.get("reason"), str) and observation["reason"],
+                f"actual {name} count must be observed or explicitly unavailable")
     boundaries = measurement.get("timing_boundaries")
     require(isinstance(boundaries, dict) and all(isinstance(boundaries.get(p), str) and boundaries[p] for p in PHASES),
             "all four timing boundaries are required")

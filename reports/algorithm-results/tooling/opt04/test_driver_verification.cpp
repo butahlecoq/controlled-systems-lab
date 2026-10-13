@@ -10,7 +10,8 @@ int main() {
     const auto& detail = result.detail;
     if (result.passed || detail["status"] != "failed" ||
         detail["error"] != "injected post-run verification failure" ||
-        detail["observed_status"] != "optimal" || detail["primal"] != json(fixture.expected) ||
+        detail["observed_status"] != "optimal" || detail["termination"] != "completed" ||
+        detail["result"]["outcome"] != "optimal" || detail["primal"] != json(fixture.expected) ||
         detail["original_rows_max_violation"].is_null() ||
         detail["auxiliary_residual"].is_null() || detail["auxiliary_value"].is_null() ||
         detail["result"]["pivots"].is_null() || detail["result"]["factorizations"].is_null() ||

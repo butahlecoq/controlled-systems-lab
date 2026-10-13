@@ -11,7 +11,7 @@ returned witness proves all feasible points. Numerical support remains
 
 ## Publication and migration status
 
-This native report uses `csl.opt04-phase-one-report/1`. Its local saved-data
+This native report uses `csl.opt04-phase-one-report/2`. Its local saved-data
 renderer and bundle are private source evidence; they are not registered with
 `scripts/reports/site.py` or the authoritative algorithm-report catalogue, and
 they do not create a public page or URL. The tracked path for validating this
