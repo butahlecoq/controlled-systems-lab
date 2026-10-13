@@ -1,0 +1,10 @@
+WPR command: wpr.exe -start CPU -filemode
+Exit code: 1
+Error: 0xc5585011, Failed to enable the policy to profile system performance.
+WPR post-attempt status: 
+Microsoft Windows Performance Recorder Version 10.0.22621 (CoreSystem)
+Copyright (c) 2022 Microsoft Corporation. All rights reserved.
+
+WPR is not recording
+
+No profile was collected; no bottleneck attribution or speedup claim is made.

@@ -172,6 +172,62 @@ class ReportToolsTests(unittest.TestCase):
             self.assertIn("opt04-fixture", (path / "index.html").read_text(encoding="utf-8"))
             self.assertIn("phase-one-bland", (path / "performance.svg").read_text(encoding="utf-8"))
 
+    def test_accepts_checked_infeasible_phase_one_witness_with_positive_original_residual(self) -> None:
+        records = fixture_records()
+        fixture = records["catalog"]["fixtures"][0]
+        matrix, rhs = [[1.0, 0.0], [1.0, 0.0]], [0.0, 1.0]
+        fixture["id"] = "tiny-infeasible"
+        fixture["matrix"], fixture["rhs"] = matrix, rhs
+        fixture["expected_status"] = fixture["expected_reference_status"] = "infeasible"
+        fixture["expected_phase_one_primal"], fixture["expected_auxiliary"] = [0.0, 0.0], 1.0
+        input_sha256 = hashlib.sha256(json.dumps({"matrix": matrix, "rhs": rhs}, sort_keys=True,
+            separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+        fixture["input_sha256"] = input_sha256
+        scenario = {"input_sha256": input_sha256, "row_relation": "equality",
+            "variable_lower_bound": 0.0, "variable_upper_bound": None,
+            "objective": {"coefficients": [0.0, 0.0], "constant": 0.0},
+            "tolerances": {"absolute": 1e-8, "relative": 0.0}}
+        fixture["scenario_sha256"] = hashlib.sha256(json.dumps(scenario, sort_keys=True,
+            separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+        driver_input = {"matrix": matrix, "rhs": rhs, "row_relation": "equality",
+            "variable_lower_bound": 0.0, "variable_upper_bound": None,
+            "objective_coefficients": [0.0, 0.0], "objective_constant": 0.0}
+        for trial in [*records["warmup_trials"], *records["trials"]]:
+            trial["fixture"] = fixture["id"]
+            trial["expected_status"] = trial["observed_status"] = "infeasible"
+            trial["reference_status"] = "infeasible"
+            trial["input"] = driver_input
+            trial["input_sha256"] = input_sha256
+            trial["scenario_sha256"] = fixture["scenario_sha256"]
+            phase_one = trial["side"] == "phase-one-bland"
+            trial["result"].update({"outcome": "infeasible",
+                "primal": [0.0, 0.0] if phase_one else [0.0, 1.0],
+                "auxiliary": 1.0 if phase_one else None})
+            trial["original_rows_max_violation"] = 1.0 if phase_one else None
+            trial["nonnegative_max_violation"] = 0.0 if phase_one else None
+            trial["objective_value"] = 0.0 if phase_one else None
+            trial["auxiliary_residual"] = 0.0 if phase_one else None
+            trial["auxiliary_value"] = 1.0 if phase_one else None
+            names = ("expected_status", "literal_auxiliary_value") if phase_one else ("expected_status",)
+            trial["oracle_checks"] = [{"name": name, "passed": True} for name in names]
+            trial["paired_outcomes"] = {
+                "phase_one": {"status": "infeasible", "termination": "completed",
+                              "primal": [0.0, 0.0], "auxiliary": 1.0},
+                "highs_reference": {"status": "infeasible", "termination": "completed",
+                                    "primal": [0.0, 1.0]},
+            }
+        for round_entry in records["measurement"]["execution_order"]:
+            for entry in round_entry["sequence"]:
+                entry["fixture"] = fixture["id"]
+        for row in records["summary"]["rows"]:
+            row["fixture"] = fixture["id"]
+
+        validate.validate_records(records)
+        corrupted = json.loads(json.dumps(records))
+        corrupted["warmup_trials"][0]["original_rows_max_violation"] = 0.0
+        with self.assertRaisesRegex(ValueError, "recomputed phase-I witness"):
+            validate.validate_records(corrupted)
+
     def test_rejects_corrupt_literal_outcome_and_summary_count(self) -> None:
         records = fixture_records()
         row = records["trials"][0]

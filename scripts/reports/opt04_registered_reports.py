@@ -17,7 +17,8 @@ SOURCE_FILES = frozenset({"records.json", "stdout.jsonl", "driver-stdout.txt", "
 TOOLING = Path(__file__).resolve().parents[2] / "reports/algorithm-results/tooling/opt04"
 # Native schema v2 has no trustworthy collection/test discriminator. Only an
 # independently reviewed, exact saved bundle may cross production admission.
-# Intentionally empty: no genuine OPT-04 bundle has been reviewed/committed yet.
+# Intentionally empty: no genuine OPT-04 bundle has been independently reviewed
+# and allowlisted for production yet.
 # A later reviewed publication change must pin native ID -> complete inventory
 # digest here alongside its catalogue row; self-declared purpose/commit shapes
 # cannot register a bundle.
