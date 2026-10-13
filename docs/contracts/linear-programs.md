@@ -157,11 +157,10 @@ validated assurance because no verified-certificate type exists here. Once the
 exact normalized objective identity and minimization direction are authoritative,
 supported infeasibility conflicts with a supported finite upper bound; supported
 unbounded-below conflicts with a supported finite lower bound. If direction or
-identity is ambiguous, do not classify a bound as contradictory or discard it;
-preserve every independently supported bound and report the outcome as
-undetermined/unsupported. When an authoritative contradiction is found, sanitize
-the contradictory outcome while retaining independent bounds that remain
-consistent. Raw
+identity is ambiguous, it does not classify a bound as contradictory. On an
+authoritative contradiction this LP checker returns diagnostics and rejects the
+result; it does not sanitize the outcome or remove bounds. Any caller that
+sanitizes must do so at a separate boundary with its own retention rules. Raw
 candidates and unestablished reports are not silently promoted to supported
 claims. Symbolic text remains unverified provenance. Passing this structural
 checker is not proof of correct outcomes or bounds. It costs O(n plus evidence
