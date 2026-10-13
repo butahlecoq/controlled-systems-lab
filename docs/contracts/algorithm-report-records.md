@@ -346,6 +346,21 @@ publication gate exemption.
 
 ## Registered non-LP publication adapters
 
+OPT-04's native `csl.opt04-phase-one-report/2` records are not yet a registered
+publisher input: the local renderer and bundle are private source evidence, and
+no OPT-04 page or URL is currently published by `site.py`. The exact tracked
+migration into this contract's schema-3 catalogue and envelope is [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185).
+It assigns native bundle/schema and semantic validation, content-bound identity
+from the native report ID, complete source-file hashes and adapter hash,
+projection into the common envelope and catalogue payload, allowlisting and
+staging, and preservation of the native records, trial output, diagnostics,
+build log, figure and manifest as source evidence. The public renderer must
+consume validated records under the shared safe HTML policy rather than copy
+the local producer page. Integration into the authoritative catalogue and
+main-only Pages workflow, followed by live URL verification, is required before
+any public page or URL can be claimed.
+
+
 The shared Pages publisher accepts catalogue schema `csl.algorithm-report-catalog/3`
 for mixed LP, convex, OPT-05, GEO-02, GEO-03, GEO-04, GEO-05 and SYN-02 catalogues.
 LP/convex retain their validated view schemas and bundle projections. Other report
