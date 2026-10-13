@@ -308,6 +308,11 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const Synthesis
         }))
         add(DiagnosticCode::invalid_claim,"result.outcome.infeasible",
             "A supported feasible incumbent contradicts an infeasibility claim");
+    if (result.outcome.value==MathematicalOutcome::unbounded &&
+        !std::holds_alternative<Unestablished>(result.outcome.support) &&
+        result.objective.lower && supported_synthesis_bound(*result.objective.lower,expected.problem))
+        add(DiagnosticCode::invalid_claim,"result.outcome.unbounded",
+            "Supported unboundedness conflicts with a supported finite lower bound");
     if (result.objective.lower && supported_synthesis_bound(*result.objective.lower,expected.problem) &&
         std::any_of(result.incumbents.begin(),result.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
             return supported_feasible_incumbent(incumbent,expected_identity) &&

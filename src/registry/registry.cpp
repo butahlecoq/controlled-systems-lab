@@ -36,6 +36,9 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     const FamilyIdentity validation_identity{id,request.family,request.problem.constraints().coordinates(),
         request.configuration.strategy,request.strategy_version,{}};
     auto answer=workspace.solve(request.problem,request.family,context);
+    const bool supported_unbounded_with_lower_bound=answer.outcome.value==MathematicalOutcome::unbounded &&
+        !std::holds_alternative<Unestablished>(answer.outcome.support) && answer.objective.lower &&
+        supported_synthesis_bound(*answer.objective.lower,id);
     auto diagnostics=check_synthesis_result(answer,expected);
     if (diagnostics.empty()) return answer;
     // The workspace result is exclusively owned here and has not been published.
@@ -82,6 +85,8 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
         (retained.outcome.value==MathematicalOutcome::infeasible ||
             retained.outcome.value==MathematicalOutcome::unbounded ||
             retained.outcome.value==MathematicalOutcome::infimum_not_attained))
+        retained.outcome={id,MathematicalOutcome::undetermined,Unestablished{}, {}};
+    if (supported_unbounded_with_lower_bound)
         retained.outcome={id,MathematicalOutcome::undetermined,Unestablished{}, {}};
     const RetainedEvidenceScope scope{retained.objective.lower.has_value(),retained.objective.upper.has_value(),
         retained.incumbents.size(),retained.family.has_value()};
