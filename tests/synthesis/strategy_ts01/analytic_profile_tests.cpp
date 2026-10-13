@@ -192,7 +192,7 @@ TEST_CASE("generic numerical and unchecked certificate strings cannot publish co
         std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>{
             NumericalCoverageEvidence{"always-pass",{0,0},{"verifier"},"residual below invented tolerance"}},
         std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>{
-            ValidatedCoverageEvidence{"artifact:unverified","checker:unregistered","exact-looking"}}}) {
+            ValidatedCoverageEvidence{"artifact:unverified",ModuleId{"checker:unregistered"},"exact-looking"}}}) {
         const auto completeness_support=std::holds_alternative<NumericalCoverageEvidence>(support)?
             std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence>{std::get<NumericalCoverageEvidence>(support)}:
             std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence>{std::get<ValidatedCoverageEvidence>(support)};
