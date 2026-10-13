@@ -25,6 +25,26 @@ HARNESS_PATH_ALLOWLIST = {
     "reports/algorithm-results/tooling/geo05/test_driver_outcomes.cpp",
     "reports/algorithm-results/tooling/geo05/test_fresh_build.py",
 }
+# Reviewed historical data only. Exact filenames keep source/build/configuration
+# files excluded even when placed beside these saved report artifacts.
+REVIEWED_ARTIFACT_PATH_ALLOWLIST = frozenset({
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/build-log.redacted.txt",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/concurrent-work.txt",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/measurement-interpretation.md",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/post-collection-validation.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/public-companions.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72.zip",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/command.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/index.html",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/manifest.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/parse-errors.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/provenance.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/records.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/stderr.txt",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/stdout.jsonl",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/trials.csv",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/trials.jsonl",
+})
 GEO04_CMAKE_OPTION = 'option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report driver" OFF)'
 GEO05_CMAKE_OPTION = 'option(CSL_BUILD_GEO05_REPORT "Build the GEO-05 projection/predecessor report driver" OFF)'
 GEO04_CMAKE_TARGET = '''if(CSL_BUILD_GEO04_REPORT)
@@ -78,9 +98,10 @@ def scenario_order(round_index: int) -> tuple[str, ...]:
 
 
 def validate_source_tree_delta(changed_paths: list[str]) -> None:
-    unexpected = sorted(set(path.replace("\\", "/") for path in changed_paths) - HARNESS_PATH_ALLOWLIST - {"CMakeLists.txt"})
+    unexpected = sorted(set(path.replace("\\", "/") for path in changed_paths)
+                        - HARNESS_PATH_ALLOWLIST - REVIEWED_ARTIFACT_PATH_ALLOWLIST)
     if unexpected:
-        raise ValueError(f"source commit changed outside the report harness allowlist: {unexpected}")
+        raise ValueError(f"source commit changed outside the report harness allowlist and reviewed artifact snapshot: {unexpected}")
 
 
 def validate_cmake_delta(source_text: str, harness_text: str) -> None:

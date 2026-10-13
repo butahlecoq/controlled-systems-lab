@@ -61,7 +61,47 @@ def measurement_rows():
     return rows
 
 
+HISTORICAL_ARTIFACT_PATHS = [
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/build-log.redacted.txt",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/concurrent-work.txt",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/measurement-interpretation.md",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/post-collection-validation.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/public-companions.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72.zip",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/command.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/index.html",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/manifest.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/parse-errors.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/provenance.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/records.json",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/stderr.txt",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/stdout.jsonl",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/trials.csv",
+    "reports/algorithm-results/geo05-7fddaba0c7698f72/trials.jsonl",
+]
+
+
 class Geo05ReportTests(unittest.TestCase):
+    def test_source_delta_admits_the_reviewed_historical_artifact_snapshot(self):
+        try:
+            report.validate_source_tree_delta(HISTORICAL_ARTIFACT_PATHS + [
+                "CMakeLists.txt", "reports/algorithm-results/tooling/geo05/collect.py"])
+        except ValueError as error:
+            self.fail(f"reviewed historical artifact snapshot must not block recollection: {error}")
+
+    def test_artifact_directories_do_not_admit_arbitrary_files_or_source_build_configuration(self):
+        roots = ["reports/algorithm-results/geo05-7fddaba0c7698f72",
+                 "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence"]
+        for root in roots:
+            for name in ("driver.cpp", "provider.hpp", "collect.py", "CMakeLists.txt", "CMakeCache.txt",
+                         "config.json", "toolchain.cmake", "build.ninja", "driver.exe", "unreviewed.json",
+                         "unknown.txt", "another.zip", "nested/records.json"):
+                with self.subTest(path=f"{root}/{name}"):
+                    with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
+                        report.validate_source_tree_delta(HISTORICAL_ARTIFACT_PATHS + [f"{root}/{name}"])
+        with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
+            report.validate_source_tree_delta(["reports/algorithm-results/geo05-another-id/records.json"])
+
     def test_source_delta_rejects_algorithm_changes_and_allows_harness_paths(self):
         self.assertIn("CMakeLists.txt", report.HARNESS_PATH_ALLOWLIST)
         report.validate_source_tree_delta([

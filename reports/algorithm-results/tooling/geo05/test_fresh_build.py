@@ -69,6 +69,7 @@ class FreshBuildTests(unittest.TestCase):
         self.dirty_after_build = False
         self.commands = []
         self.tracked_paths = []
+        self.source_delta = []
         self.addCleanup(patch.stopall)
         self.real_check_output = collect.subprocess.check_output
         patch.object(collect, "_git", side_effect=self.git).start()
@@ -83,7 +84,7 @@ class FreshBuildTests(unittest.TestCase):
         if args == ("status", "--porcelain=v1"):
             return " M src/geometry.cpp" if self.dirty_after_build and self.commands else ""
         if args == ("diff", "--name-only", "source-head", "harness-head"):
-            return ""
+            return "\n".join(self.source_delta)
         if args == ("rev-parse", "source-head^{tree}"):
             return "source-tree"
         if args == ("rev-parse", "harness-head^{tree}"):
@@ -133,6 +134,34 @@ class FreshBuildTests(unittest.TestCase):
         self.assertIn("warning in BUILD_ROOT", log)
         self.assertNotIn("Private User", log)
         self.assertNotIn("unrelated old", log)
+
+    def test_reviewed_artifacts_are_classified_separately_and_still_require_fresh_rebuild(self):
+        self.source_delta = [
+            "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/measurement-interpretation.md",
+            "reports/algorithm-results/geo05-7fddaba0c7698f72/records.json"]
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            try:
+                provenance = self.provenance()
+            except ValueError as error:
+                self.fail(f"reviewed artifact delta must reach fresh rebuild admission: {error}")
+        self.assertEqual(provenance["tracked_tree_binding"]["actual_reviewed_artifact_delta"], [
+            "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/measurement-interpretation.md",
+            "reports/algorithm-results/geo05-7fddaba0c7698f72/records.json"])
+        self.assertNotIn("reports/algorithm-results/geo05-7fddaba0c7698f72/records.json",
+                         provenance["tracked_tree_binding"]["allowed_harness_delta"])
+        self.assertIn("reports/algorithm-results/geo05-7fddaba0c7698f72/records.json",
+                      provenance["tracked_tree_binding"]["allowed_reviewed_artifact_delta"])
+        self.assertEqual(provenance["executable"]["sha256"], hashlib.sha256(b"fresh executable").hexdigest())
+        self.assertEqual(provenance["fresh_build"]["return_code"], 0)
+        self.assertEqual(len(self.commands), 1)
+
+    def test_source_configuration_inside_artifact_directory_is_rejected_before_rebuild(self):
+        self.source_delta = ["reports/algorithm-results/geo05-7fddaba0c7698f72/config.json"]
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
+                self.provenance()
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
+        self.assertEqual(self.commands, [])
 
     def test_failed_rebuild_rejects_stale_executable_without_measurements(self):
         def fail(command, **kwargs):

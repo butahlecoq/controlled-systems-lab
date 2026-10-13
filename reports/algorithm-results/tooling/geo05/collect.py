@@ -14,7 +14,7 @@ import sys
 import zipfile
 from pathlib import Path
 
-from report import (HARNESS_PATH_ALLOWLIST, PHASES, SCENARIOS, bind_fixture_identity, make_record,
+from report import (HARNESS_PATH_ALLOWLIST, REVIEWED_ARTIFACT_PATH_ALLOWLIST, PHASES, SCENARIOS, bind_fixture_identity, make_record,
                     scenario_order, strict_json_loads, validate_cmake_delta, validate_source_tree_delta)
 from smoke import validate_smoke
 
@@ -162,7 +162,10 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
                 "scope": "complete tracked repository tree",
                 "source_tree_oid": _git("rev-parse", f"{source_commit}^{{tree}}"),
                 "harness_tree_oid": _git("rev-parse", f"{harness_commit}^{{tree}}"),
-                "allowed_harness_delta": sorted(HARNESS_PATH_ALLOWLIST), "actual_changed_paths": changed},
+                "allowed_harness_delta": sorted(HARNESS_PATH_ALLOWLIST), "actual_changed_paths": changed,
+                "allowed_reviewed_artifact_delta": sorted(REVIEWED_ARTIFACT_PATH_ALLOWLIST),
+                "actual_reviewed_artifact_delta": sorted({path.replace("\\", "/") for path in changed}
+                                                       & REVIEWED_ARTIFACT_PATH_ALLOWLIST)},
             "executable": {"name": exe.name, "sha256": _sha(exe)},
             "build_log_sha256": _sha(build_log), "fresh_build": fresh_build,
             "configuration": "Release", "cxx_standard": "20",
