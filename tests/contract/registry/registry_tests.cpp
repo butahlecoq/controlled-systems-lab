@@ -1242,3 +1242,37 @@ TEST_CASE("public strategy accepts an unbounded outcome without a supported lowe
     CHECK_FALSE(result.objective.lower.has_value());
     CHECK(std::holds_alternative<std::monostate>(result.stop));
 }
+
+TEST_CASE("public strategy removes an unsupported lower bound without discarding supported unbounded evidence") {
+    class UnsupportedLowerBound final : public SynthesisWorkspace {
+    public:
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+            const ExecutionContext&) override {
+            const auto id=problem.identity();
+            const ClaimEvidence unsupported_bound{id,Unestablished{}};
+            return {Termination::completed,
+                {id,MathematicalOutcome::unbounded,
+                    SymbolicArgument{"unbounded objective claim", "literal fixture outcome support"},{}},
+                {ObjectiveBound{-1,unsupported_bound}},{},{},{}};
+        }
+    } workspace;
+
+    auto request=strategy_request();
+    request.configuration.strategy={"unbounded-with-unsupported-lower-bound-fixture"};
+    request.strategy_version="1";
+    const auto answer=StrategyPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto& result=std::get<SynthesisResult>(answer);
+    CHECK(result.termination==Termination::contract_rejected);
+    CHECK(result.outcome.value==MathematicalOutcome::unbounded);
+    CHECK(std::holds_alternative<SymbolicArgument>(result.outcome.support));
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).reference=="unbounded objective claim");
+    CHECK_FALSE(result.objective.lower.has_value());
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+    const auto& failure=std::get<ContractValidationFailure>(result.stop);
+    REQUIRE(failure.diagnostics.size()==1);
+    CHECK(failure.diagnostics[0].code==DiagnosticCode::evidence_mismatch);
+    CHECK(failure.diagnostics[0].field=="result.objective");
+    CHECK_FALSE(failure.retained.lower_bound);
+    CHECK_FALSE(failure.retained.upper_bound);
+}
