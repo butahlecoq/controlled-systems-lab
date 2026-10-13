@@ -194,7 +194,8 @@ class Opt04PublicationTests(unittest.TestCase):
             catalog_path.write_text(json.dumps(catalogue))
             index = report_site.catalogue_index(catalogue)
             report_site.OfflineHTML({row["report_id"] + suffix for row in catalogue["reports"]
-                for suffix in ("/index.html", "/records.json", "/stdout.jsonl", "/trials.csv", ".zip")}).feed(index)
+                for suffix in ("/index.html", "/records.json", "/stdout.jsonl", "/trials.csv",
+                               "/performance.svg", ".zip")}).feed(index)
             (root / "index.html").write_text(index, encoding="utf-8")
             output = root / "stage"
             with self.assertRaisesRegex(ValueError, "admission|test-only"):
@@ -245,6 +246,28 @@ class Opt04PublicationTests(unittest.TestCase):
                     renderer.render_report(record, bundle)
                     with self.assertRaisesRegex(ValueError, "admission|test-only"):
                         adapter.adapt(bundle)
+
+    def test_reviewed_saved_bundle_is_admitted_and_every_native_file_is_pinned(self):
+        adapter = self.adapter()
+        bundle = ROOT / "reports/algorithm-results/opt04-20261013T172839Z-6451c4b89d3b"
+        publication = adapter.adapt(bundle)
+        self.assertEqual("opt04-20261013T172839Z-6451c4b89d3b", publication.source_report_id)
+        self.assertEqual(10, len(publication.files))
+        self.assertEqual(70, len(json.loads((bundle / "records.json").read_text())["trials"]))
+        artifacts = adapter.publication_artifacts(bundle, publication)
+        self.assertIn("source-evidence/bundle.zip", artifacts)
+        self.assertEqual((bundle / "bundle.zip").read_bytes(), artifacts["source-evidence/bundle.zip"])
+
+        with tempfile.TemporaryDirectory() as directory:
+            for name in sorted(adapter.SOURCE_FILES):
+                with self.subTest(name=name):
+                    copy = Path(directory) / name / bundle.name
+                    copy.parent.mkdir()
+                    shutil.copytree(bundle, copy)
+                    evidence = copy / name
+                    evidence.write_bytes(evidence.read_bytes() + b"\n")
+                    with self.assertRaises(ValueError):
+                        adapter.adapt(copy)
 
     def test_reviewed_admission_binds_every_native_file_and_cannot_admit_test_purpose(self):
         adapter = self.adapter()

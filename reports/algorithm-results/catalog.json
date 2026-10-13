@@ -117,6 +117,18 @@
       "measured_scope": "Terminal optimizer on resolved objectives and a supplied terminal H-slice; not system simulation or complete control synthesis",
       "evidence_limits": "binary64 literal fixture checks, not exact or validated arithmetic; relation samples and H representation checks do not certify full set equality or full minimizer-family completeness; global optimum and relation support remain Unestablished; the shifted residual case returns undetermined with numerical_failure and no constructed relation; tiny analytic fixtures only; no comparator, speedup, application-scale, throughput, or scalability claim; limiter unknown because no call-stack profile evidence was collected",
       "zip_sha256": "8acb23c42447455385e63aefccbf25a680384d39de5f50339838e98af7f10bf8"
+    },
+    {
+      "report_id": "opt04-20261013T172839Z-bf1844fdf81c94c82ca91aadbd9d0988c7367093c5cf70269c2d0e0ca7d44b2f",
+      "report_kind": "opt04-phase-one",
+      "source_report_id": "opt04-20261013T172839Z-6451c4b89d3b",
+      "payload_schema": "csl.opt04-phase-one-report/2",
+      "payload_sha256": "00ad79e45540c013f2d56cc986eeeeb05b01014f8c0c8b3ddff3d37b1216c9ad",
+      "native_payload_sha256": "00ad79e45540c013f2d56cc986eeeeb05b01014f8c0c8b3ddff3d37b1216c9ad",
+      "source_commit": "03ba157eb50eac7d61d39e37af015729ea04f922",
+      "measured_scope": "Five analytic equality/nonnegative feasibility fixtures; phase-one-bland and HiGHS reference; 70 measured attempts plus 10 excluded warmups; fresh requests and workspaces; setup, BoundWorkspace.run, independent verification and input-to-verified-result timing; process startup and serialization excluded",
+      "evidence_limits": "Descriptive five-fixture report; feasibility-numerics support remains Unestablished; Unvalidated binary64 checks, no exact feasibility certificate or complete solution family; No speedup, application-scale or scalability claim; limiter attribution remains unestablished; Collinear-input acceptance and OPT-04 issue #29 remain outside this report; Five small analytic equality/nonnegative fixtures only.; No exact or validated arithmetic feasibility certificate is claimed.; No application-scale, scalability, or speedup claim is made.; The collinear-input acceptance case is not included; OPT-04 issue #29 remains open.; A witness sample is not the complete feasible or optimal solution family.",
+      "zip_sha256": "4e9d2d193cf83d56fa308ba3b7b3ebddf2728d8090e804ed0c2178ab0fbf3db7"
     }
   ]
 }

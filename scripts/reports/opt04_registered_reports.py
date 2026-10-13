@@ -17,12 +17,12 @@ SOURCE_FILES = frozenset({"records.json", "stdout.jsonl", "driver-stdout.txt", "
 TOOLING = Path(__file__).resolve().parents[2] / "reports/algorithm-results/tooling/opt04"
 # Native schema v2 has no trustworthy collection/test discriminator. Only an
 # independently reviewed, exact saved bundle may cross production admission.
-# Intentionally empty: no genuine OPT-04 bundle has been independently reviewed
-# and allowlisted for production yet.
-# A later reviewed publication change must pin native ID -> complete inventory
-# digest here alongside its catalogue row; self-declared purpose/commit shapes
-# cannot register a bundle.
-REVIEWED_NATIVE_BUNDLES = {}
+# Pins are reviewed against the complete saved native inventory (all ten files),
+# including the producer ZIP and its checksum. Self-declared purpose/commit
+# values cannot register a bundle.
+REVIEWED_NATIVE_BUNDLES = {
+    "opt04-20261013T172839Z-6451c4b89d3b": "238ff015f68d98e385593d844436a562317e12bb0f7cdedbe07e96af7f32bda7",
+}
 
 
 def _module(filename):
