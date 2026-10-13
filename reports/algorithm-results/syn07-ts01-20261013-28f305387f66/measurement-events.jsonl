@@ -1,8 +1,8 @@
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":0,"warmup":true,"elapsed_ns":144000,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":1,"warmup":false,"elapsed_ns":41900,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":2,"warmup":false,"elapsed_ns":33000,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":3,"warmup":false,"elapsed_ns":28800,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":4,"warmup":false,"elapsed_ns":28200,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":5,"warmup":false,"elapsed_ns":27900,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":6,"warmup":false,"elapsed_ns":27600,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":7,"warmup":false,"elapsed_ns":27600,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
+{"schema":"csl.syn07-ts01-measurement-event/1","repetition":0,"warmup":true,"elapsed_ns":201900,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
+{"schema":"csl.syn07-ts01-measurement-event/1","repetition":1,"warmup":false,"elapsed_ns":41100,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
+{"schema":"csl.syn07-ts01-measurement-event/1","repetition":2,"warmup":false,"elapsed_ns":32400,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
+{"schema":"csl.syn07-ts01-measurement-event/1","repetition":3,"warmup":false,"elapsed_ns":31500,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
+{"schema":"csl.syn07-ts01-measurement-event/1","repetition":4,"warmup":false,"elapsed_ns":30700,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
+{"schema":"csl.syn07-ts01-measurement-event/1","repetition":5,"warmup":false,"elapsed_ns":30200,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
+{"schema":"csl.syn07-ts01-measurement-event/1","repetition":6,"warmup":false,"elapsed_ns":29500,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}
+{"schema":"csl.syn07-ts01-measurement-event/1","repetition":7,"warmup":false,"elapsed_ns":29600,"status":"passed","consumed_result_marker":1805158144890476961,"error":""}

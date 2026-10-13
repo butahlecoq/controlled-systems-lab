@@ -107,15 +107,23 @@
     "This report records the profile theorem and exact membership examples; it is not an independent mathematical review of the source implementation."
   ],
   "measurement": {
+    "algorithm_source_checkout": {
+      "clean_after_run": true,
+      "clean_before_build": true,
+      "head": "28f305387f66caf8f72f057e16a39050cc5dbdba",
+      "strategy_header_sha256": "4c99a639949a0b2d3daca82845c269e8b9bfcfa2ed3b0243d0925d07972866df",
+      "strategy_source_sha256": "9f2c67de31bb2578ed41ebb1892a329916f10b11dfa1b803a47ef40d292e6634",
+      "tree_sha": "1dbfd4a4c4120194df7b4903c4f07409e2679bbc"
+    },
     "algorithm_source_commit": "28f305387f66caf8f72f057e16a39050cc5dbdba",
     "binary": {
       "bytes": 379392,
       "configuration": "Release",
       "cxx_standard": "c++20",
       "ndebug": true,
-      "path": "build/ts01-report/Release/csl_syn07_ts01_report.exe",
+      "path": "release-build\\Release\\csl_syn07_ts01_report.exe",
       "release_properties": {
-        "AdditionalIncludeDirectories": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\include;%(AdditionalIncludeDirectories)",
+        "AdditionalIncludeDirectories": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-verified3\\solver-source\\include;%(AdditionalIncludeDirectories)",
         "AssemblerListingLocation": "$(IntDir)",
         "BasicRuntimeChecks": "Default",
         "ConformanceMode": "true",
@@ -135,15 +143,49 @@
         "UseFullPaths": "false",
         "WarningLevel": "Level4"
       },
-      "sha256": "2138a0721c4f912a595d243aa7347a0327c6d93e29821171b98545a37597c83a"
+      "sha256": "e5b69d3b89986f9a0f1a3009e1b197b69146a86f263ea88aadaa7db1c750a91b"
     },
     "build_provenance": {
-      "build_log_sha256": "290807e603a20824d3679b4436e92c48dcf49915ea56187b8cba2fc3138ffc66",
-      "cmake_cache_sha256": "1e9529c0b85ed0f79cd1a02c3abab64792667b66c08a4ff316ccf21e31200be2",
+      "build_command": [
+        "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+        "--build",
+        "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-verified3\\release-build",
+        "--config",
+        "Release",
+        "--target",
+        "csl_syn07_ts01_report",
+        "--parallel",
+        "4"
+      ],
+      "build_log_sha256": "f83cf0c00adb38cfd2065d07eee2c27c2f21def924a6e3b47de291080533a7ae",
+      "cmake_cache_sha256": "9605405615f56570d44f0932e99435943be335154eb1d63fdaaf257494c14abf",
+      "cmake_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "cmake_sha256": "b540efece9172930877dff0c9fedda7a69b0dd82446e0e8bba13372aac6c8ac8",
+      "cmake_version": "cmake version 3.31.6-msvc6",
       "compiler": "MSVC",
+      "compiler_config_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+      "compiler_path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+      "compiler_version": "19.44.35215.0",
       "configuration": "Release",
+      "configure_command": [
+        "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+        "-S",
+        "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\reports\\algorithm-results\\tooling\\ts01\\runner",
+        "-B",
+        "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-verified3\\release-build",
+        "-G",
+        "Visual Studio 17 2022",
+        "-A",
+        "x64",
+        "-DCSL_SOURCE_ROOT=C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-verified3\\solver-source",
+        "-DBUILD_TESTING=OFF",
+        "-DFETCHCONTENT_BASE_DIR=C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-report\\_deps",
+        "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"
+      ],
+      "configure_log_sha256": "79e0cbcf1014ae11051db5770c26fe7032735c62faf3b61f4f51e4a189ebd1a7",
+      "dependency_cache": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-report\\_deps",
       "generator": "Visual Studio 17 2022 x64",
-      "target_project_sha256": "f317ffa9c534ba9d05dd2ee58226044c5cf321f070b3307708c5714ebf2c65aa"
+      "target_project_sha256": "2a091fa11050ec77fecfca02f6015b2f6d5648e69c180993f3378b38112b677e"
     },
     "counts": {
       "all_outputs_consumed_and_validated": true,
@@ -160,13 +202,13 @@
       "os": "Windows-11-10.0.22631-SP0",
       "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
       "python": "3.13.5",
-      "total_cpu_percent_1s_after": 8.2,
-      "total_cpu_percent_1s_before": 5.0
+      "total_cpu_percent_1s_after": 5.4,
+      "total_cpu_percent_1s_before": 6.4
     },
     "events": [
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 144000,
+        "elapsed_ns": 201900,
         "error": "",
         "repetition": 0,
         "schema": "csl.syn07-ts01-measurement-event/1",
@@ -175,7 +217,7 @@
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 41900,
+        "elapsed_ns": 41100,
         "error": "",
         "repetition": 1,
         "schema": "csl.syn07-ts01-measurement-event/1",
@@ -184,7 +226,7 @@
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 33000,
+        "elapsed_ns": 32400,
         "error": "",
         "repetition": 2,
         "schema": "csl.syn07-ts01-measurement-event/1",
@@ -193,7 +235,7 @@
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 28800,
+        "elapsed_ns": 31500,
         "error": "",
         "repetition": 3,
         "schema": "csl.syn07-ts01-measurement-event/1",
@@ -202,7 +244,7 @@
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 28200,
+        "elapsed_ns": 30700,
         "error": "",
         "repetition": 4,
         "schema": "csl.syn07-ts01-measurement-event/1",
@@ -211,7 +253,7 @@
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 27900,
+        "elapsed_ns": 30200,
         "error": "",
         "repetition": 5,
         "schema": "csl.syn07-ts01-measurement-event/1",
@@ -220,7 +262,7 @@
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 27600,
+        "elapsed_ns": 29500,
         "error": "",
         "repetition": 6,
         "schema": "csl.syn07-ts01-measurement-event/1",
@@ -229,7 +271,7 @@
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 27600,
+        "elapsed_ns": 29600,
         "error": "",
         "repetition": 7,
         "schema": "csl.syn07-ts01-measurement-event/1",
@@ -237,7 +279,11 @@
         "warmup": false
       }
     ],
-    "harness_commit": "0463dbe2638b4bf736c5deb5a5f12851089bbd39",
+    "harness_commit": "7477f568d39098d2f2de5f35b2324755d530a1d6",
+    "harness_sources": {
+      "driver_sha256": "2a03c2c71ff773fdfd27699fd4470c827b353450befa6745a7eb82b1b2ac3762",
+      "runner_cmake_sha256": "60c5f83bc3bacd682bd6c22c1240bfa02982817bfd673520248b5024a1ea3f27"
+    },
     "limiter": {
       "available": false,
       "reason": "No separate sampling/call-stack profile was collected; this record does not attribute the observed time or establish capacity."
@@ -245,23 +291,23 @@
     "order": "One excluded warmup, followed by seven measured repetitions in one process. Single strategy only; alternation is inapplicable and no comparator was measured.",
     "performance_conclusion": "inconclusive",
     "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "raw_stdout_sha256": "2ef66c763822ff84379061306b99574eb6e2628827c17327b31e7b0800db1008",
+    "raw_stdout_sha256": "132c2b1660f8da3c2c78537f105e057b85972dc170300de506355b466d259d61",
     "schema": "csl.syn07-ts01-measurement-collection/1",
     "scope": "Fresh problem construction and resolution, strategy registration/selection/preparation, exclusive workspace creation, public bound-workspace run, and independent complete-H-relation plus exact-membership validation. Excludes process startup, JSON serialization, build, collection, and rendering.",
     "timing_ns": {
-      "max": 41900,
-      "median": 28200,
-      "min": 27600,
+      "max": 41100,
+      "median": 30700,
+      "min": 29500,
       "observations": [
-        41900,
-        33000,
-        28800,
-        28200,
-        27900,
-        27600,
-        27600
+        41100,
+        32400,
+        31500,
+        30700,
+        30200,
+        29500,
+        29600
       ],
-      "range": 14300
+      "range": 11600
     }
   },
   "membership_examples": [

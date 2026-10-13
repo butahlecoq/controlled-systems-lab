@@ -3,14 +3,25 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import sys
 
-import report
-import publication_map
+_ROOT = Path(__file__).resolve().parents[2]
 
-ROOT = Path(__file__).resolve().parents[2]
+def _load_tool(name):
+    spec = importlib.util.spec_from_file_location("csl_ts01_" + name, Path(__file__).with_name(name + ".py"))
+    if spec is None or spec.loader is None:
+        raise RuntimeError("T-S01 report tooling is unavailable: " + name)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+report = _load_tool("report")
+publication_map = _load_tool("publication_map")
+
 REPORT_ID = "syn07-ts01-20261013-28f305387f66"
 
 
@@ -79,7 +90,7 @@ def build(out=None, measurement_dir=None):
     errors = report.validate(record)
     if errors:
         raise ValueError("invalid authored record: " + ", ".join(errors))
-    out = Path(out) if out is not None else ROOT / REPORT_ID
+    out = Path(out) if out is not None else _ROOT / REPORT_ID
     out.mkdir(parents=True, exist_ok=False)
     write_json(out / "records.json", record)
     (out / "publication-map.json").write_bytes((json.dumps(publication_map.project(record), ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8"))

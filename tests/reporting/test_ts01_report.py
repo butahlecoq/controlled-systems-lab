@@ -1,16 +1,24 @@
 from __future__ import annotations
 import json
+import importlib.util
 from pathlib import Path
 import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / "reports" / "algorithm-results" / "tooling" / "ts01"
-sys.path.insert(0, str(TOOLS))
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-import report
-import publication_map
-import build_bundle
+
+def load_tool(name):
+    spec = importlib.util.spec_from_file_location("csl_test_ts01_" + name, TOOLS / (name + ".py"))
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+report = load_tool("report")
+publication_map = load_tool("publication_map")
+build_bundle = load_tool("build_bundle")
 import ts01_registered_reports
 
 
