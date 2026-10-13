@@ -37,19 +37,28 @@ query retains its admitted method/version and request/outcome identity record.
 Problem identities on the witness, published family, outcome and every supplied
 bound must match. A family's immutable identity and relation coordinates must
 match the resolved original problem; its effective request objective and
-relation representation are also checked. The verifier checks evidence fields
-appropriate to the published outcome variant, while `FamilyPublisher` controls
-which variants may be constructed. In the current contract, a candidate may be
-published, but complete and partial optimal families remain unsupported by the
-publisher. A candidate's witness-scoped feasibility evidence never proves its
-whole relation feasible or all its histories optimal. Backend program IDs are
-retained as provenance; a program-to-original-objective transformation is not
-inferred. The request does not supply an independent expected family strategy,
-version or lineage, so their internal consistency is not an independently
-verified binding. Unchecked certificates and symbolic references are preserved,
-never elevated to verified evidence. `bindings == numerical_pass` means only
-the available original-problem, witness, coordinate and evidence bindings passed;
-it does not assert complete SYN-06 binding coverage.
+relation representation are also checked. A caller verifying a reported family
+must populate `TrajectoryRequest::expected_synthesis` with an
+`ExpectedSynthesisBinding` containing the effective `FamilyRequest`, strategy
+ID/version and ordered transformation lineage independently of the family.
+The verifier compares each value to the family's immutable identity and rejects
+missing expectations or mismatches through `bindings` and a field-specific
+diagnostic. Witness-only calls remain compatible without this expectation. The
+expected value records what the caller intended; it is not proof that the
+strategy or transformations were mathematically correct.
+
+The verifier checks evidence fields appropriate to the published outcome
+variant, while `FamilyPublisher` controls which variants may be constructed. In
+the current contract, a candidate may be published, but complete and partial
+optimal families remain unsupported by the publisher. A candidate's
+witness-scoped feasibility evidence never proves its whole relation feasible
+or all its histories optimal. Backend program IDs are retained as provenance;
+a program-to-original-objective transformation is not inferred. Unchecked
+certificates and symbolic references are preserved, never elevated to verified
+evidence. `bindings == numerical_pass` means all supplied identity expectations
+and available original-problem, witness, coordinate and evidence bindings
+passed; it does not establish optimality, family completeness or validated
+evidence.
 Optimality, complete-family coverage and validated certification remain distinct
 unsupported report fields even for a feasible witness and a claimed optimal
 backend result. The original mathematical outcome is retained independently of
