@@ -37,6 +37,7 @@
     "GEO-04",
     "APP-03",
     "SYN-06",
+    "SYN-09",
     "INP-01",
     "OPT-11",
     "OPT-12",
@@ -4948,6 +4949,53 @@
         "TEST-22",
         "REVIEW-07"
       ]
+    },
+    {
+      "key": "SYN-09",
+      "title": "Define objective-sense and unbounded-outcome semantics",
+      "kind": "contract",
+      "area": "optimization",
+      "phase": 1,
+      "dependencies": [],
+      "scope": "Make objective direction authoritative across shared LP, convex, synthesis, and adapter contracts. Current public LP, convex, and synthesis objectives are minimization-only; unbounded means unbounded below. Source maximization requires explicit g=-f normalization including offset before program creation. Define finite bound direction and exact normalized objective/program identity, adapter status/bound translation, and contradiction handling that preserves independent supported bounds. No maximize API or global convex maximization is implied. Caller-visible tests remain part of issue #204 and are outside this documentation/backlog change.",
+      "acceptance": [
+        "Specify whether all resolved objectives are normalized to minimization or whether resolved problems carry an explicit objective sense.",
+        "Define the direction and subject of finite objective bounds for each sense.",
+        "Define unbounded precisely (unbounded below or above), including how solver adapters normalize statuses.",
+        "Apply contradiction checks only after the objective direction is authoritative; preserve independently supported bounds when sanitizing a contradictory outcome.",
+        "Add caller-visible tests for minimization and maximization, including finite lower/upper bounds, supported and unsupported evidence, and unbounded/undetermined outcomes.",
+        "Update the shared contracts and adapter documentation without weakening fail-closed behavior for ambiguous sense or unsupported evidence."
+      ],
+      "files": [
+        "docs/contracts/linear-programs.md",
+        "docs/contracts/convex-programs.md",
+        "docs/contracts/core-interfaces.md",
+        "docs/contracts/highs-lp-adapter.md",
+        "docs/superpowers/plans/tickets/SYN-09.md"
+      ],
+      "requirements": [],
+      "test_ids": [],
+      "external_blockers": [],
+      "related_issues": [
+        155,
+        157,
+        8,
+        203,
+        204
+      ],
+      "ready": true,
+      "sources": [
+        "docs/contracts/linear-programs.md",
+        "docs/contracts/convex-programs.md",
+        "docs/contracts/core-interfaces.md",
+        "docs/contracts/highs-lp-adapter.md"
+      ],
+      "github": {
+        "id": 5837209520,
+        "number": 204,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/204"
+      },
+      "blocking_dependencies": []
     }
   ],
   "native_dependency_policy": "Transitive reduction of implementation prerequisites; full dependencies remain in issue bodies and the manifest. External scientific blockers are preserved."
