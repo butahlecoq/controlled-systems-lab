@@ -32,9 +32,9 @@ sets::SetData interval_data(std::string id, double lower, double upper) {
 
 problem::ResolvedProblem integrator(std::optional<double> stage_one_upper = std::nullopt,
                                     bool finite_controls = false) {
-    const auto model = std::make_shared<const SystemModel>(SystemModel{{
-        { {1, 1, 0}, TimeDomain::discrete,
-          LinearStage{{1, 1, {1}}, {1, 1, {1}}, {1, 0, {}}, {0}} }, {} }});
+    const auto model = std::make_shared<const SystemModel>(SystemModel{
+        {{1, 1, 0}, TimeDomain::discrete,
+         LinearStage{{1, 1, {1}}, {1, 1, {1}}, {1, 0, {}}, {0}}}, {}});
     ControlDomain controls = ContinuousDomain{{
         interval("u0", 0, 1, "u0"), interval("u1", 0, 1, "u1")}};
     if (finite_controls) controls = FiniteDomain{1, {{0}, {1}}};
@@ -43,6 +43,21 @@ problem::ResolvedProblem integrator(std::optional<double> stage_one_upper = std:
     if (stage_one_upper) states[1] = interval("x1", 0, *stage_one_upper, "x1");
     Problem source{{"control-recovery-integrator"}, model, {0, 1, 2},
         KnownInitial{{0}}, std::move(controls), std::move(states), {}, {},
+        InformationPattern::nominal_open_loop, LinearTerminal{{0}, 0}};
+    return take(problem::resolve(source,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+}
+
+problem::ResolvedProblem singular_integrator() {
+    const auto model = std::make_shared<const SystemModel>(SystemModel{
+        {{1, 1, 0}, TimeDomain::discrete,
+         std::vector<LinearStage>{
+             {{1, 1, {0}}, {1, 1, {1}}, {1, 0, {}}, {0}},
+             {{1, 1, {0}}, {1, 1, {1}}, {1, 0, {}}, {0}}}}, {}});
+    Problem source{{"control-recovery-singular-integrator"}, model, {0, 1, 2},
+        KnownInitial{{0}}, ContinuousDomain{{
+            interval("singular-u0", 0, 1, "u0"), interval("singular-u1", 0, 1, "u1")}},
+        {Singleton{{0}}, UniversalSet{1}, UniversalSet{1}}, {}, {},
         InformationPattern::nominal_open_loop, LinearTerminal{{0}, 0}};
     return take(problem::resolve(source,
         {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
@@ -99,6 +114,19 @@ TEST_CASE("backward recovery retains the two-step terminal fiber and rejects inf
     CHECK_FALSE(contains(relation, {0, 0.5, 1, 0.75, 0.25})); // inconsistent x1
     CHECK_FALSE(contains(relation, {0, 0.5, 1.25, 0.5, 0.5})); // inconsistent x2
     CHECK_FALSE(contains(relation, history(0.25, 0.5))); // misses terminal slice
+}
+
+TEST_CASE("recovery handles singular transitions without inverting A") {
+    const auto result = synthesis::recover_joint_history(
+        singular_integrator(), interval_data("singular-terminal-one", 1, 1));
+    const auto& relation = recovered(result);
+
+    // x1=u0 and x2=u1 when A=0. The terminal slice fixes u1=1 while
+    // leaving every admissible first-stage control free.
+    for (double u0 : {0.0, 0.2, 0.5, 0.8, 1.0})
+        CHECK(contains(relation, {0, u0, 1, u0, 1}));
+    CHECK_FALSE(contains(relation, {0, 0.5, 0.9, 0.5, 0.9}));
+    CHECK_FALSE(contains(relation, {0, 0.5, 1, 0.5, 0.99}));
 }
 
 TEST_CASE("recovery preserves the full feasible history when the supplied terminal slice is the full minimizer relation") {
