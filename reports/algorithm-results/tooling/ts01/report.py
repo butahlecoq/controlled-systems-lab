@@ -5,6 +5,7 @@ import html
 from fractions import Fraction
 import hashlib
 import json
+import statistics
 
 SCHEMA = "csl.syn07-ts01-analytic-report/1"
 SOURCE_COMMIT = "28f305387f66caf8f72f057e16a39050cc5dbdba"
@@ -62,10 +63,23 @@ def validate(record):
         if any(row.get("schema") != "csl.syn07-ts01-measurement-event/1" or row.get("status") != "passed" or
                type(row.get("elapsed_ns")) is not int or row["elapsed_ns"] < 0 or not row.get("consumed_result_marker") for row in events):
             errors.append("measurement_event_invalid")
-        if measurement.get("performance_conclusion") != "inconclusive" or measurement.get("counts", {}).get("failed") != 0 or measurement.get("counts", {}).get("measured") != 7:
+        counts = measurement.get("counts", {})
+        if (measurement.get("performance_conclusion") != "inconclusive" or counts.get("failed") != 0 or
+                counts.get("warmup") != 1 or counts.get("measured") != 7 or counts.get("passed") != 7 or
+                counts.get("all_outputs_consumed_and_validated") is not True):
             errors.append("measurement_scope_invalid")
-        if [row.get("elapsed_ns") for row in events[1:]] != measurement.get("timing_ns", {}).get("observations"):
+        observations = [row["elapsed_ns"] for row in events[1:] if type(row.get("elapsed_ns")) is int]
+        summary = measurement.get("timing_ns", {})
+        if len(observations) != 7 or observations != summary.get("observations"):
             errors.append("measurement_timings")
+        else:
+            recomputed = {"median": statistics.median(observations), "min": min(observations),
+                          "max": max(observations), "range": max(observations) - min(observations)}
+            if any(type(summary.get(key)) not in (int, float) or summary.get(key) != value
+                   for key, value in recomputed.items()):
+                errors.append("measurement_summary")
+        if measurement.get("algorithm_source_commit") != record.get("source_commit"):
+            errors.append("measurement_source_commit")
     else:
         errors.append("performance_status")
     return errors

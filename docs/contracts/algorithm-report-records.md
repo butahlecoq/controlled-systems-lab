@@ -435,6 +435,16 @@ claim and an inconclusive performance conclusion because no limiter profile was
 collected. The versioned URL remains pending until the main-only Pages workflow
 deploys the catalogue.
 
+The T-S01 collector creates a detached worktree at the report's pinned solver
+commit and checks its full HEAD and clean status before building and after each
+measurement. A separately versioned harness wrapper builds the named Release
+target against that checkout; the saved collection records the source and
+harness commits, CMake/compiler identity and hashes, generated Release project,
+build logs, executable hash, and exact configure/build commands. The standalone
+bundle builder requires this measurement collection and cannot emit an
+incomplete no-measurement bundle. The record validator recomputes all displayed
+timing summary fields from the seven non-warmup raw events.
+
 ## Shared publication envelope
 
 Every report in a schema-3 mixed catalogue uses the same versioned

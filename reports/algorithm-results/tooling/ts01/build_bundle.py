@@ -23,6 +23,8 @@ def write_json(path, value):
 
 
 def build(out=None, measurement_dir=None):
+    if measurement_dir is None:
+        raise ValueError("--measurement-dir is required for this measured T-S01 result bundle")
     points = [
         ("s=0", [0, 0, 1, 0, 1], True, "Closed-segment endpoint; exact equations and bounds hold."),
         ("s=1/4", [0, 0.25, 1, 0.25, 0.75], True, "Interior dyadic parameter; exact equations and bounds hold."),
@@ -98,7 +100,7 @@ def build(out=None, measurement_dir=None):
             writer.writerow({**row, "point": json.dumps(row["point"], separators=(",", ":"))})
     write_json(out / "scenarios.json", {"assumptions": record["assumptions"], "canonical_relation": record["canonical_relation"]})
     (out / "environment.json").write_text(json.dumps(record["measurement"]["environment"] if measurement_dir else {"measurement": "not performed", "timing": "unavailable", "reason": record["performance"]["reason"]}, indent=2) + "\n", encoding="utf-8")
-    (out / "README.md").write_text(f"""# T-S01 result bundle\n\nSource commit: `{report.SOURCE_COMMIT}`. Timings are exploratory single-strategy observations, not a performance verdict or speedup comparison.\n\nRebuild the native sidecars into a fresh scratch directory and validate the committed report and site with:\n\n```powershell\npython reports/algorithm-results/tooling/ts01/build_bundle.py --measurement-dir build/ts01-measure-001 --out-dir build/ts01-rebuilt\npython reports/algorithm-results/tooling/ts01/report.py --check reports/algorithm-results/{REPORT_ID}/records.json\npython -m unittest tests.reporting.test_ts01_report -v\npython scripts/reports/site.py --catalog reports/algorithm-results/catalog.json --check --out build/ts01-report-site\n```\n\nSee `index.html` for the full assumptions, exact relation, membership examples, timing scope and assurance limits. `raw-events.jsonl` and `trials.csv` project exact membership results; `measurement-events.jsonl`, `measurement.json` and `timings.csv` retain raw trial timings and provenance.\n""", encoding="utf-8", newline="\n")
+    (out / "README.md").write_text(f"""# T-S01 result bundle\n\nSource commit: `{report.SOURCE_COMMIT}`. Timings are exploratory single-strategy observations, not a performance verdict or speedup comparison.\n\nRebuild a measurement from the pinned clean source worktree, rebuild the bundle in a fresh scratch directory, and validate the report and catalogue with:\n\n```powershell\npython reports/algorithm-results/tooling/ts01/collect.py --cmake 'C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe' --algorithm-source-commit {report.SOURCE_COMMIT} --build-root build/ts01-source-build --out build/ts01-measurement\npython reports/algorithm-results/tooling/ts01/build_bundle.py --measurement-dir build/ts01-measurement --out-dir build/ts01-rebuilt\npython reports/algorithm-results/tooling/ts01/report.py --check reports/algorithm-results/{REPORT_ID}/records.json\npython -m unittest tests.reporting.test_ts01_report -v\npython scripts/reports/site.py --catalog reports/algorithm-results/catalog.json --check --out build/ts01-report-site\n```\n\nSee `index.html` for the full assumptions, exact relation, membership examples, timing scope and assurance limits. `raw-events.jsonl` and `trials.csv` project exact membership results; `measurement-events.jsonl`, `measurement.json` and `timings.csv` retain raw trial timings and provenance.\n""", encoding="utf-8", newline="\n")
     manifest_files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in out.iterdir() if p.is_file()}
     write_json(out / "manifest.json", {"schema": "csl.syn07-ts01-report-manifest/1", "report_id": REPORT_ID, "source_commit": report.SOURCE_COMMIT, "files": manifest_files})
     print(REPORT_ID)
@@ -108,6 +110,6 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out-dir", type=Path)
-    parser.add_argument("--measurement-dir", type=Path)
+    parser.add_argument("--measurement-dir", type=Path, required=True)
     args = parser.parse_args()
     build(args.out_dir, args.measurement_dir)

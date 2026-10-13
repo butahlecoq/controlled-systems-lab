@@ -9,6 +9,8 @@ TOOLS = ROOT / "reports" / "algorithm-results" / "tooling" / "ts01"
 sys.path.insert(0, str(TOOLS))
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 import report
+import publication_map
+import build_bundle
 import ts01_registered_reports
 
 
@@ -27,11 +29,29 @@ class Ts01SavedReportTests(unittest.TestCase):
         changed["membership_examples"][0]["actual_member"] = False
         self.assertIn("membership_result:s=0", report.validate(changed))
 
+    def test_changed_timing_summary_is_rejected(self):
+        for field in ("median", "min", "max", "range"):
+            with self.subTest(field=field):
+                changed = json.loads(json.dumps(self.record))
+                changed["measurement"]["timing_ns"][field] += 1
+                self.assertIn("measurement_summary", report.validate(changed))
+
     def test_html_is_projected_from_saved_record(self):
         page = report.render_html(self.record)
         self.assertIn("(0,s,1,s,1−s)", page)
         self.assertIn("Exact binary64 membership examples", page)
         self.assertIn(self.record["source_commit"], page)
+
+    def test_publication_map_describes_exploratory_measurements(self):
+        projection = publication_map.project(self.record)
+        scope = projection["publication_contract"]["measured_scope"]
+        self.assertIn("exploratory timings available", scope)
+        self.assertIn("inconclusive", scope)
+        self.assertNotIn("performance unavailable", scope)
+
+    def test_bundle_builder_requires_measurement_input(self):
+        with self.assertRaisesRegex(ValueError, "--measurement-dir is required"):
+            build_bundle.build()
 
     def test_registered_adapter_checks_bundle_and_creates_offline_archive(self):
         publication = ts01_registered_reports.adapt(self.bundle)
