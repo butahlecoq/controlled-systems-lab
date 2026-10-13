@@ -200,13 +200,28 @@ class Geo05ReportTests(unittest.TestCase):
         rows[0]["output_rows"] = None
         rows[0]["result_kind"] = None
         rows[0]["result_encoding"] = None
-        record = report.make_record(rows, purpose="test", provenance={"source_commit": "fixture", "harness_commit": "fixture"})
+        record = report.make_record(rows, purpose="test", provenance={
+            "source_commit": "fixture", "harness_commit": "fixture",
+            "configuration": "Release", "cxx_standard": "20",
+            "build_log_sha256": "log-hash", "executable": {"name": "driver.exe", "sha256": "exe-hash"},
+            "dependency_targets": ["driver", "polyhedral"],
+            "compiler": {"id": "MSVC", "version": "19.44"},
+            "environment": {"os": "fixture-os", "processor": "fixture-cpu"}})
         page = render.render_html(record)
         self.assertIn("&lt;script&gt;bad()&lt;/script&gt;", page)
         self.assertNotIn("<script>bad()", page)
         self.assertIn("timings are smoke/test evidence only", page)
         self.assertIn("<svg", page)
         self.assertIn("integrator_predecessor", page)
+        self.assertIn("Build provenance", page)
+        self.assertIn("fixture-os", page)
+        self.assertIn("MSVC", page)
+        self.assertIn("Release", page)
+        self.assertIn("exe-hash", page)
+        self.assertIn("log-hash", page)
+        self.assertIn("Input SHA-256", page)
+        self.assertIn("Scenario SHA-256", page)
+        self.assertIn(report.sha256_json(report.ORACLES["integrator_predecessor"]["inputs"]), page)
 
 
 if __name__ == "__main__":
