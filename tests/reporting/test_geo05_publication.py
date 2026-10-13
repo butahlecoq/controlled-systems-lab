@@ -28,7 +28,14 @@ def canonical(value):
                       allow_nan=False).encode("utf-8")
 
 
-def record(purpose="measurement", failed=False, missing=False):
+def reseal(saved):
+    unsigned = {key: value for key, value in saved.items() if key not in ("report_id", "payload_sha256")}
+    digest = hashlib.sha256(canonical(unsigned)).hexdigest()
+    saved["payload_sha256"] = digest
+    saved["report_id"] = "geo05-" + digest[:16]
+
+
+def record(purpose="measurement", failed=False, missing=False, failure_context=False, raw_stdout=""):
     trials = []
     for repetition in range(7):
         for scenario in geo05._scenario_order(repetition):
@@ -47,6 +54,11 @@ def record(purpose="measurement", failed=False, missing=False):
                 "detail": "<script>alert(1)</script>",
                 "durations_ns": {phase: None if phase == "workspace_ns" and scenario != "v_projection_preserves_ray" else 10 for phase in PHASES},
             })
+            if failure_context:
+                trials[-1]["predecessor_failure"] = (
+                    {"phase": "run", "code": "unsupported"}
+                    if status == "failed" and scenario == "integrator_predecessor" else None)
+                trials[-1]["end_to_end_scope"] = "through_verification_and_fixture_teardown"
     if missing:
         trials.pop()
     warmups = [{"scenario": scenario, "repetition": 0, "purpose": "warmup", "status": "passed",
@@ -61,6 +73,9 @@ def record(purpose="measurement", failed=False, missing=False):
                 "scenario_sha256": hashlib.sha256(canonical(geo05.ORACLES[scenario])).hexdigest(),
                 "durations_ns": {phase: None if phase == "workspace_ns" and scenario != "v_projection_preserves_ray" else 10 for phase in PHASES}}
                for scenario in SCENARIOS]
+    if failure_context:
+        for row in warmups:
+            row["end_to_end_scope"] = "through_verification_and_fixture_teardown"
     counts = {name: 0 for name in ("passed", "failed", "unsupported", "cancelled", "missing")}
     counts["passed"] = len(trials) + len(warmups) - (1 if failed else 0)
     counts["failed"] = 1 if failed else 0
@@ -87,7 +102,7 @@ def record(purpose="measurement", failed=False, missing=False):
         return values_by_phase
     process_exit_code = 0
     algorithm = {"id": "GEO-05", "source_commit": "a" * 40, "harness_commit": "b" * 40,
-                 "raw_stdout_sha256": hashlib.sha256(b"").hexdigest(),
+                 "raw_stdout_sha256": hashlib.sha256(raw_stdout.encode("utf-8")).hexdigest(),
                  "raw_stderr_sha256": hashlib.sha256(b"").hexdigest()}
     if process_exit_code:
         algorithm["process_exit_code"] = process_exit_code
@@ -124,14 +139,24 @@ def create_bundle(root, saved):
     with (bundle / "trials.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
         for row in rows:
             stream.write(json.dumps(row, sort_keys=True) + "\n")
-    fields = ("purpose", "scenario", "repetition", "status", "detail", "oracle_passed", "work_observed",
-              "max_rows", "input_rows", "output_rows", "result_kind", "result_encoding", "input_sha256",
-              "scenario_sha256", "expected_fm_peak_rows", *PHASES)
+    modern_fields = any("predecessor_failure" in row for row in rows)
+    fields = (("purpose", "scenario", "repetition", "status", "detail", "predecessor_failure",
+               "oracle_passed", "work_observed", "end_to_end_scope", "max_rows", "input_rows",
+               "output_rows", "result_kind", "result_encoding", "input_sha256", "scenario_sha256",
+               "expected_fm_peak_rows", *PHASES) if modern_fields else
+              ("purpose", "scenario", "repetition", "status", "detail", "oracle_passed", "work_observed",
+               "max_rows", "input_rows", "output_rows", "result_kind", "result_encoding", "input_sha256",
+               "scenario_sha256", "expected_fm_peak_rows", *PHASES))
     with (bundle / "trials.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         for row in rows:
-            writer.writerow({**row, **row["durations_ns"]})
+            flat = {**row, **row["durations_ns"]}
+            if "predecessor_failure" in fields and flat.get("predecessor_failure") is not None:
+                flat["predecessor_failure"] = json.dumps(flat["predecessor_failure"], sort_keys=True, allow_nan=False)
+            elif "predecessor_failure" in fields:
+                flat["predecessor_failure"] = ""
+            writer.writerow(flat)
     (bundle / "index.html").write_text("<!doctype html><html lang=\"en\"><body>untrusted source HTML</body></html>", encoding="utf-8")
     inventory = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
                  for path in bundle.iterdir() if path.is_file()}
@@ -220,6 +245,46 @@ class Geo05PublicationTests(unittest.TestCase):
         self.assertEqual(publication.payload_schema, "csl.geo05-numerical-report/1")
         self.assertIn('"failed": 1', publication.evidence_limits)
         self.assertIn("no exact set equality", publication.evidence_limits)
+
+    def test_failure_context_csv_shape_is_accepted_and_verified(self):
+        with tempfile.TemporaryDirectory() as temp:
+            bundle = create_bundle(Path(temp), record(failed=True, failure_context=True))
+            publication = geo05.adapt(bundle)
+            self.assertEqual(publication.source_report_id, bundle.name)
+            with (bundle / "trials.csv").open(newline="", encoding="utf-8") as stream:
+                rows = list(csv.DictReader(stream))
+            failed = next(row for row in rows if row["scenario"] == "integrator_predecessor" and row["status"] == "failed")
+            self.assertEqual(json.loads(failed["predecessor_failure"]), {"code": "unsupported", "phase": "run"})
+
+    def test_failure_context_csv_must_match_saved_attempt(self):
+        with tempfile.TemporaryDirectory() as temp:
+            bundle = create_bundle(Path(temp), record(failed=True, failure_context=True))
+            csv_path = bundle / "trials.csv"
+            with csv_path.open(newline="", encoding="utf-8") as stream:
+                rows = list(csv.reader(stream))
+            failure_column = rows[0].index("predecessor_failure")
+            failed_row = next(row for row in rows[1:] if row[3] == "failed")
+            failed_row[failure_column] = '{"phase":"different"}'
+            with csv_path.open("w", newline="", encoding="utf-8") as stream:
+                csv.writer(stream).writerows(rows)
+            reseal_source_bundle(bundle)
+            with self.assertRaisesRegex(ValueError, "trials.csv differs"):
+                geo05.adapt(bundle)
+
+    def test_raw_process_text_accepts_windows_newline_translation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            saved = record(raw_stdout='{"event":"capture"}\n')
+            bundle = create_bundle(Path(temp), saved)
+            (bundle / "stdout.jsonl").write_bytes(b'{"event":"capture"}\r\n')
+            reseal_source_bundle(bundle)
+            self.assertEqual(geo05.adapt(bundle).source_report_id, bundle.name)
+
+    def test_current_end_to_end_scope_is_required_to_match_the_registered_contract(self):
+        saved = record(failure_context=True)
+        saved["trials"][0]["end_to_end_scope"] = "execution-only"
+        reseal(saved)
+        with self.assertRaisesRegex(ValueError, "end-to-end scope"):
+            geo05.adapt_payload(saved)
 
     def test_test_and_smoke_records_cannot_enter_publication(self):
         for purpose in ("test", "smoke"):

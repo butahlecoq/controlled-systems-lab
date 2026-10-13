@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GEO-05 numerical report geo05-4dc3c0557570a52e</title>
+<style>body{font:16px system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#17212b}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #b8c3cc;padding:.45rem;text-align:left}th{background:#edf2f6}.scroll{overflow-x:auto}.state{padding:.8rem;background:#fff2cc;border-left:4px solid #a36c00}code{overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box}</style>
+<h1>GEO-05 numerical report</h1><p class="state">measurement record pending independent review</p>
+<p>Report ID <code>geo05-4dc3c0557570a52e</code>; schema <code>csl.geo05-numerical-report/1</code>.</p>
+<p>Source commit <code>2a7738f0ef9652501c68021a91c648723458569a</code>; harness commit <code>890b5990010504c8025f9a84e6236ab272e3142d</code>.</p>
+<h2>Build provenance</h2><h3>Compiler</h3><pre><code>{
+  &quot;compiler&quot;: {
+    &quot;id&quot;: &quot;MSVC&quot;,
+    &quot;implicit&quot;: {
+      &quot;includeDirectories&quot;: [],
+      &quot;linkDirectories&quot;: [],
+      &quot;linkFrameworkDirectories&quot;: [],
+      &quot;linkLibraries&quot;: []
+    },
+    &quot;path&quot;: &quot;C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe&quot;,
+    &quot;version&quot;: &quot;19.44.35215.0&quot;
+  },
+  &quot;language&quot;: &quot;CXX&quot;,
+  &quot;sourceFileExtensions&quot;: [
+    &quot;C&quot;,
+    &quot;M&quot;,
+    &quot;c++&quot;,
+    &quot;cc&quot;,
+    &quot;cpp&quot;,
+    &quot;cxx&quot;,
+    &quot;mm&quot;,
+    &quot;mpp&quot;,
+    &quot;CPP&quot;,
+    &quot;ixx&quot;,
+    &quot;cppm&quot;,
+    &quot;ccm&quot;,
+    &quot;cxxm&quot;,
+    &quot;c++m&quot;
+  ]
+}</code></pre><h3>Build configuration</h3><pre><code>{
+  &quot;build_log_sha256&quot;: &quot;78932c4018b9466734ac45b4a0637fb186f05482254475a23b413b655b84ce91&quot;,
+  &quot;cmake&quot;: {
+    &quot;generator&quot;: &quot;Visual Studio 17 2022&quot;,
+    &quot;version&quot;: {
+      &quot;isDirty&quot;: false,
+      &quot;major&quot;: 3,
+      &quot;minor&quot;: 31,
+      &quot;patch&quot;: 6,
+      &quot;string&quot;: &quot;3.31.6-msvc6&quot;,
+      &quot;suffix&quot;: &quot;msvc6&quot;
+    }
+  },
+  &quot;configuration&quot;: &quot;Release&quot;,
+  &quot;cxx_standard&quot;: &quot;20&quot;,
+  &quot;dependency_targets&quot;: [
+    &quot;ZERO_CHECK&quot;,
+    &quot;csl_contracts&quot;,
+    &quot;csl_geo05_projection_predecessor_report&quot;,
+    &quot;csl_model&quot;,
+    &quot;csl_numeric&quot;,
+    &quot;csl_objectives&quot;,
+    &quot;csl_optimization&quot;,
+    &quot;csl_polyhedral&quot;,
+    &quot;csl_problem&quot;,
+    &quot;csl_registry&quot;,
+    &quot;csl_resolved_core&quot;,
+    &quot;csl_sets&quot;
+  ],
+  &quot;executable&quot;: {
+    &quot;name&quot;: &quot;csl_geo05_projection_predecessor_report.exe&quot;,
+    &quot;sha256&quot;: &quot;532bebac543de758e1328e46f2252a4b75b4f00b76f492b117aa5888e8ae3b89&quot;
+  }
+}</code></pre>
+<h2>Environment provenance</h2><pre><code>{
+  &quot;arithmetic&quot;: &quot;IEEE-754 binary64&quot;,
+  &quot;collection_utc&quot;: &quot;2026-10-13T04:21:07.977835+00:00&quot;,
+  &quot;concurrent_work_note&quot;: &quot;Pre-collection host snapshot UTC: 2026-10-13T04:17:29Z (local sampling 07:17:24\u201307:17:29 Europe/Moscow).\nHost: Windows 11, 6 physical cores, 12 logical processors.\nWindows total processor utilization samples: 0%, 0%, 0%, 3%, 0% at one-second intervals immediately before measurement. No deliberate concurrent benchmark workload was started. Desktop/browser/terminal processes remained open.\nExpected report claim: descriptive baseline timings only for four tiny analytic fixtures, seven measured repetitions per scenario and one excluded warmup; no before/after comparison, speedup/regression verdict, limiter attribution, application-scale result, or capacity claim. Raw timings and ranges are observations only. CPU profiling is unavailable for this run, so no bottleneck attribution will be reported.&quot;,
+  &quot;cpu_count&quot;: 12,
+  &quot;independent_sample_tolerance&quot;: 1e-09,
+  &quot;native_backend&quot;: &quot;none selected&quot;,
+  &quot;native_threads&quot;: {
+    &quot;configured&quot;: 0,
+    &quot;observed&quot;: {
+      &quot;available&quot;: false,
+      &quot;reason&quot;: &quot;this geometry provider exposes no native thread counter&quot;
+    }
+  },
+  &quot;numeric_context_tolerance&quot;: {
+    &quot;absolute&quot;: 1e-08,
+    &quot;relative&quot;: 1e-08
+  },
+  &quot;os&quot;: &quot;Windows-11-10.0.22631-SP0&quot;,
+  &quot;processor&quot;: &quot;Intel64 Family 6 Model 151 Stepping 5, GenuineIntel&quot;,
+  &quot;python&quot;: &quot;3.13.5&quot;,
+  &quot;random_seed&quot;: null,
+  &quot;resources&quot;: {
+    &quot;actual_outer_workers&quot;: 1,
+    &quot;memory_bytes&quot;: null,
+    &quot;requested_total_threads&quot;: 1,
+    &quot;threads_per_worker&quot;: 1
+  }
+}</code></pre>
+<h2>Evidence limits</h2><ul><li>numeric sample checks only</li><li>H relation support Unestablished</li><li>no exact set equality or validated arithmetic claim</li></ul>
+<h2>Attempt counts</h2><p><code>{&quot;cancelled&quot;: 0, &quot;failed&quot;: 0, &quot;missing&quot;: 0, &quot;passed&quot;: 32, &quot;unsupported&quot;: 0}</code></p>
+<h2>End-to-end by scenario</h2><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 160" role="img" aria-label="End-to-end timing by fixture"><text x="8" y="39">singular_a</text><rect x="270" y="24" width="436" height="20" fill="#3572a5"/><text x="716" y="39">20300 ns</text><text x="8" y="69">unreachable_equality_target</text><rect x="270" y="54" width="395" height="20" fill="#3572a5"/><text x="675" y="69">18400 ns</text><text x="8" y="99">integrator_predecessor</text><rect x="270" y="84" width="500" height="20" fill="#3572a5"/><text x="780" y="99">23300 ns</text><text x="8" y="129">v_projection_preserves_ray</text><rect x="270" y="114" width="155" height="20" fill="#3572a5"/><text x="435" y="129">7200 ns</text></svg><div class="scroll"><table><thead><tr><th>Fixture</th><th>Attempts</th><th>Median</th><th>Min</th><th>Max</th></tr></thead><tbody><tr><th>singular_a</th><td>7</td><td>20300 ns</td><td>19500 ns</td><td>26600 ns</td></tr><tr><th>unreachable_equality_target</th><td>7</td><td>18400 ns</td><td>17300 ns</td><td>20800 ns</td></tr><tr><th>integrator_predecessor</th><td>7</td><td>23300 ns</td><td>21000 ns</td><td>29400 ns</td></tr><tr><th>v_projection_preserves_ray</th><td>7</td><td>7200 ns</td><td>6600 ns</td><td>9500 ns</td></tr></tbody></table></div>
+<h2>Timing summary</h2><div class="scroll"><table><thead><tr><th>Scope</th><th>Median</th><th>Min</th><th>Max</th><th>Successful rows</th><th>Unavailable rows</th></tr></thead><tbody><tr><th>preparation_ns</th><td>10250 ns</td><td>3400 ns</td><td>13100 ns</td><td>28</td><td>0</td></tr><tr><th>workspace_ns</th><td>100 ns</td><td>0 ns</td><td>100 ns</td><td>7</td><td>21</td></tr><tr><th>run_ns</th><td>6350 ns</td><td>1800 ns</td><td>12500 ns</td><td>28</td><td>0</td></tr><tr><th>verification_ns</th><td>400 ns</td><td>0 ns</td><td>900 ns</td><td>28</td><td>0</td></tr><tr><th>end_to_end_ns</th><td>19750 ns</td><td>6600 ns</td><td>29400 ns</td><td>28</td><td>0</td></tr></tbody></table></div>
+<h2>Warmup attempts</h2><ul><li>singular_a: passed — </li><li>unreachable_equality_target: passed — </li><li>integrator_predecessor: passed — </li><li>v_projection_preserves_ray: passed — </li></ul>
+<h2>Trial evidence</h2><div class="scroll"><table><thead><tr><th>Scenario</th><th>Round</th><th>Status</th><th>Literal checks</th><th>Work observed</th><th>Input rows</th><th>Output rows</th><th>Result kind</th><th>Result encoding</th><th>Input SHA-256</th><th>Scenario SHA-256</th><th>Expected FM peak</th><th>Configured max rows</th><th>preparation_ns</th><th>workspace_ns</th><th>run_ns</th><th>verification_ns</th><th>end_to_end_ns</th><th>End-to-end scope</th><th>Detail</th></tr></thead><tbody><tr><td>singular_a</td><td>0</td><td>passed</td><td>True</td><td>True</td><td>4</td><td>2</td><td>h</td><td>h_rows</td><td>fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513</td><td>511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053</td><td>None</td><td>128</td><td>13100 ns</td><td>unavailable</td><td>8400 ns</td><td>400 ns</td><td>25500 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>unreachable_equality_target</td><td>0</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>1</td><td>h</td><td>h_contradiction_row</td><td>7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d</td><td>fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba</td><td>None</td><td>128</td><td>10700 ns</td><td>unavailable</td><td>6400 ns</td><td>400 ns</td><td>20400 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>integrator_predecessor</td><td>0</td><td>passed</td><td>True</td><td>True</td><td>6</td><td>4</td><td>h</td><td>h_rows</td><td>2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94</td><td>2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513</td><td>6</td><td>128</td><td>12500 ns</td><td>unavailable</td><td>12500 ns</td><td>900 ns</td><td>29400 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>v_projection_preserves_ray</td><td>0</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>3</td><td>v</td><td>v_generators</td><td>243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3</td><td>1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d</td><td>None</td><td>None</td><td>4700 ns</td><td>100 ns</td><td>2800 ns</td><td>0 ns</td><td>9500 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>v_projection_preserves_ray</td><td>1</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>3</td><td>v</td><td>v_generators</td><td>243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3</td><td>1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d</td><td>None</td><td>None</td><td>3600 ns</td><td>0 ns</td><td>2200 ns</td><td>0 ns</td><td>7600 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>integrator_predecessor</td><td>1</td><td>passed</td><td>True</td><td>True</td><td>6</td><td>4</td><td>h</td><td>h_rows</td><td>2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94</td><td>2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513</td><td>6</td><td>128</td><td>11900 ns</td><td>unavailable</td><td>8200 ns</td><td>900 ns</td><td>24800 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>unreachable_equality_target</td><td>1</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>1</td><td>h</td><td>h_contradiction_row</td><td>7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d</td><td>fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba</td><td>None</td><td>128</td><td>10000 ns</td><td>unavailable</td><td>7000 ns</td><td>500 ns</td><td>20800 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>singular_a</td><td>1</td><td>passed</td><td>True</td><td>True</td><td>4</td><td>2</td><td>h</td><td>h_rows</td><td>fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513</td><td>511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053</td><td>None</td><td>128</td><td>11600 ns</td><td>unavailable</td><td>11000 ns</td><td>500 ns</td><td>26600 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>singular_a</td><td>2</td><td>passed</td><td>True</td><td>True</td><td>4</td><td>2</td><td>h</td><td>h_rows</td><td>fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513</td><td>511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053</td><td>None</td><td>128</td><td>10500 ns</td><td>unavailable</td><td>7200 ns</td><td>400 ns</td><td>21000 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>unreachable_equality_target</td><td>2</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>1</td><td>h</td><td>h_contradiction_row</td><td>7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d</td><td>fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba</td><td>None</td><td>128</td><td>9000 ns</td><td>unavailable</td><td>6100 ns</td><td>500 ns</td><td>18200 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>integrator_predecessor</td><td>2</td><td>passed</td><td>True</td><td>True</td><td>6</td><td>4</td><td>h</td><td>h_rows</td><td>2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94</td><td>2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513</td><td>6</td><td>128</td><td>11200 ns</td><td>unavailable</td><td>8000 ns</td><td>900 ns</td><td>23200 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>v_projection_preserves_ray</td><td>2</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>3</td><td>v</td><td>v_generators</td><td>243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3</td><td>1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d</td><td>None</td><td>None</td><td>4300 ns</td><td>100 ns</td><td>2300 ns</td><td>0 ns</td><td>8100 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>v_projection_preserves_ray</td><td>3</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>3</td><td>v</td><td>v_generators</td><td>243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3</td><td>1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d</td><td>None</td><td>None</td><td>3600 ns</td><td>100 ns</td><td>2000 ns</td><td>0 ns</td><td>7200 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>integrator_predecessor</td><td>3</td><td>passed</td><td>True</td><td>True</td><td>6</td><td>4</td><td>h</td><td>h_rows</td><td>2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94</td><td>2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513</td><td>6</td><td>128</td><td>11500 ns</td><td>unavailable</td><td>7900 ns</td><td>900 ns</td><td>23300 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>unreachable_equality_target</td><td>3</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>1</td><td>h</td><td>h_contradiction_row</td><td>7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d</td><td>fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba</td><td>None</td><td>128</td><td>9200 ns</td><td>unavailable</td><td>5700 ns</td><td>400 ns</td><td>17900 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>singular_a</td><td>3</td><td>passed</td><td>True</td><td>True</td><td>4</td><td>2</td><td>h</td><td>h_rows</td><td>fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513</td><td>511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053</td><td>None</td><td>128</td><td>10600 ns</td><td>unavailable</td><td>6500 ns</td><td>400 ns</td><td>20300 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>singular_a</td><td>4</td><td>passed</td><td>True</td><td>True</td><td>4</td><td>2</td><td>h</td><td>h_rows</td><td>fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513</td><td>511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053</td><td>None</td><td>128</td><td>10300 ns</td><td>unavailable</td><td>6400 ns</td><td>400 ns</td><td>19800 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>unreachable_equality_target</td><td>4</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>1</td><td>h</td><td>h_contradiction_row</td><td>7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d</td><td>fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba</td><td>None</td><td>128</td><td>10000 ns</td><td>unavailable</td><td>5700 ns</td><td>300 ns</td><td>18500 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>integrator_predecessor</td><td>4</td><td>passed</td><td>True</td><td>True</td><td>6</td><td>4</td><td>h</td><td>h_rows</td><td>2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94</td><td>2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513</td><td>6</td><td>128</td><td>10800 ns</td><td>unavailable</td><td>11000 ns</td><td>900 ns</td><td>25700 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>v_projection_preserves_ray</td><td>4</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>3</td><td>v</td><td>v_generators</td><td>243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3</td><td>1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d</td><td>None</td><td>None</td><td>3500 ns</td><td>0 ns</td><td>1900 ns</td><td>0 ns</td><td>7000 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>v_projection_preserves_ray</td><td>5</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>3</td><td>v</td><td>v_generators</td><td>243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3</td><td>1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d</td><td>None</td><td>None</td><td>3400 ns</td><td>100 ns</td><td>1800 ns</td><td>0 ns</td><td>6600 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>integrator_predecessor</td><td>5</td><td>passed</td><td>True</td><td>True</td><td>6</td><td>4</td><td>h</td><td>h_rows</td><td>2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94</td><td>2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513</td><td>6</td><td>128</td><td>10800 ns</td><td>unavailable</td><td>7300 ns</td><td>900 ns</td><td>21700 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>unreachable_equality_target</td><td>5</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>1</td><td>h</td><td>h_contradiction_row</td><td>7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d</td><td>fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba</td><td>None</td><td>128</td><td>9100 ns</td><td>unavailable</td><td>5600 ns</td><td>400 ns</td><td>17300 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>singular_a</td><td>5</td><td>passed</td><td>True</td><td>True</td><td>4</td><td>2</td><td>h</td><td>h_rows</td><td>fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513</td><td>511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053</td><td>None</td><td>128</td><td>10400 ns</td><td>unavailable</td><td>6300 ns</td><td>400 ns</td><td>19700 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>singular_a</td><td>6</td><td>passed</td><td>True</td><td>True</td><td>4</td><td>2</td><td>h</td><td>h_rows</td><td>fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513</td><td>511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053</td><td>None</td><td>128</td><td>10200 ns</td><td>unavailable</td><td>6300 ns</td><td>400 ns</td><td>19500 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>unreachable_equality_target</td><td>6</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>1</td><td>h</td><td>h_contradiction_row</td><td>7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d</td><td>fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba</td><td>None</td><td>128</td><td>10200 ns</td><td>unavailable</td><td>5700 ns</td><td>300 ns</td><td>18400 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>integrator_predecessor</td><td>6</td><td>passed</td><td>True</td><td>True</td><td>6</td><td>4</td><td>h</td><td>h_rows</td><td>2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94</td><td>2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513</td><td>6</td><td>128</td><td>10600 ns</td><td>unavailable</td><td>7000 ns</td><td>900 ns</td><td>21000 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr><tr><td>v_projection_preserves_ray</td><td>6</td><td>passed</td><td>True</td><td>True</td><td>3</td><td>3</td><td>v</td><td>v_generators</td><td>243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3</td><td>1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d</td><td>None</td><td>None</td><td>3400 ns</td><td>0 ns</td><td>1900 ns</td><td>100 ns</td><td>6600 ns</td><td>through_verification_and_fixture_teardown</td><td></td></tr></tbody></table></div>
+</html>

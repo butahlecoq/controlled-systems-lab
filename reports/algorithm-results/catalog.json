@@ -69,6 +69,17 @@
       "measured_scope": "28 measured affine-sum trials across 4 tiny binary64 fixtures",
       "evidence_limits": "Full candidate cloud retained; validated reduction evidence is not applied; no comparator, speedup, application-scale, or scalability claim; binary64 tiny fixtures; profiling and internal solver-phase timings unavailable",
       "zip_sha256": "8f2fe77d30b69a0a314a7cd9dbe69342d2d5e9dde6eccc891afafcde04e578a9"
+    },
+    {
+      "report_id": "geo05-fbd71773cb6f92045f07378fc30ffb480605bda804ead24a1b1a0fdf696d6226",
+      "report_kind": "geo05-projection-predecessor",
+      "source_report_id": "geo05-4dc3c0557570a52e",
+      "payload_schema": "csl.geo05-numerical-report/1",
+      "payload_sha256": "4dc3c0557570a52edef0118062d3a9a38fa7cbb448ea661645985ad4e28ccdfb",
+      "source_commit": "2a7738f0ef9652501c68021a91c648723458569a",
+      "measured_scope": "28 retained measured attempts across four GEO-05 analytic fixtures; 7 requested repetitions per fixture",
+      "evidence_limits": "numeric sample checks only; H relation support Unestablished; no exact set equality or validated arithmetic claim; tiny analytic fixtures only; no comparator, speedup, application-scale, or scalability claim; binary64 numerical samples do not establish exact set equality or validated arithmetic; H relation support remains Unestablished; Phase summaries include successful trials only when the full run summary is valid; complete measurement trial matrix; attempt outcomes: {\"cancelled\": 0, \"failed\": 0, \"missing\": 0, \"passed\": 32, \"unsupported\": 0}; complete fixture attempt matrix; all attempts passed; eligible for independent review only",
+      "zip_sha256": "a589f21eba5f9940e1f9ebb71048f0c3ce3715fc09c643ff7878ed6987341214"
     }
   ]
 }

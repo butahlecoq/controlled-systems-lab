@@ -180,12 +180,23 @@ admission/stop/capacity/arithmetic failures. These are functional tests,
 not benchmark trials or a numerical completeness policy. The installed
 consumer independently checks the integrator interval `[1,3]`.
 
-No GEO-05 numerical report, accepted measurements or deployed report URL is
-published by this implementation change. The required sequence remains
-fixed-code independent review, clean Release collection, versioned raw
-records and saved-data HTML, independent artifact/measurement review,
-visual QA, registered publication and live URL/download verification under
-the [published-results policy](../architecture/published-algorithm-results.md)
-and [report-record contract](algorithm-report-records.md). Existing report
-records and catalogues are unchanged. GEO-05 remains open until that delivery
-is complete and independently reviewed.
+The implementation change itself did not publish a numerical report. A later
+fresh Release collection is now registered as source report
+[`geo05-4dc3c0557570a52e`](../../reports/algorithm-results/geo05-4dc3c0557570a52e/records.json),
+measured against source commit `2a7738f0ef9652501c68021a91c648723458569a` with
+reviewed harness commit `890b5990010504c8025f9a84e6236ab272e3142d`. It contains
+28 measured attempts and four excluded warmups across four tiny analytic
+fixtures; all 32 passed their literal sample checks and reported work. The
+record supports descriptive timings only, without a comparator, speedup,
+application-scale or scalability claim, or profiler-based bottleneck
+attribution. The registered Pages route is
+`https://butahlecoq.github.io/controlled-systems-lab/geo05-fbd71773cb6f92045f07378fc30ffb480605bda804ead24a1b1a0fdf696d6226/index.html`;
+it remains pending until the main-branch deployment and direct page/download
+checks succeed.
+
+The report publication does not complete the implementation acceptance
+criteria above. GEO-05 remains open until the projection, lazy materialization,
+equality/ray preservation, and independent contract requirements are complete
+and reviewed. See the [published-results policy](../architecture/published-algorithm-results.md)
+and [report-record contract](algorithm-report-records.md) for the distinct
+measurement and deployment gates.
