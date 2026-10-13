@@ -20,6 +20,9 @@ MANIFEST_SCHEMA = "csl.syn02-report-manifest/1"
 TRIAL_FIELDS = ("scenario", "repetition", "status", "validation_errors", "outcome", "termination", "relation",
                 "optimization_present", "optimum_present", "provider", "primal_value", "lower_bound", "upper_bound",
                 "prepare_ns", "solve_ns", "oracle_ns", "execute_ns", "solver_observations")
+SUMMARY_FIELDS = ("scenario", "requested", "matched_expected", "completed", "failed", "non_success", "expected_outcome",
+                  "expected_termination", "observed_outcomes", "observed_terminations", "observed_providers", "relation_count",
+                  "objective_bounds", "primal_objective_value", "residual_observations", "timings")
 EXPECTED = {
     "linear-face": ("optimal", "completed", "csl.lp.highs", 7.0),
     "constant-linear": ("optimal", "completed", "csl.lp.highs", 3.0),
@@ -224,6 +227,25 @@ def _validate_csv(bundle, rows):
                 raise ValueError("SYN-02 CSV differs from raw measured events")
 
 
+def _summary_csv_bytes(summary):
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=SUMMARY_FIELDS, lineterminator="\n")
+    writer.writeheader()
+    for row in summary:
+        writer.writerow({key: (json.dumps(row[key], ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+                         if isinstance(row[key], (dict, list)) else row[key]) for key in SUMMARY_FIELDS})
+    return stream.getvalue().encode("utf-8")
+
+
+def _validate_summary_csv(bundle, summary):
+    try:
+        actual = (bundle / "summary.csv").read_bytes()
+    except OSError as exc:
+        raise ValueError("invalid SYN-02 summary.csv") from exc
+    if actual != _summary_csv_bytes(summary):
+        raise ValueError("SYN-02 summary.csv differs from recomputed records summary")
+
+
 def _csv_value(value):
     return json.dumps(value, ensure_ascii=False, separators=(",", ":")) if isinstance(value, list) else value
 
@@ -248,6 +270,7 @@ def adapt(bundle):
             raise ValueError("invalid SYN-02 raw event stream") from exc
         _validate_record(record, rows)
         _validate_csv(bundle, rows)
+        _validate_summary_csv(bundle, record["summary"])
         data.validate_svg((bundle / "latency.svg").read_bytes())
         projection = _map_module().project(record)
         if _json(bundle / "publication-map.json") != projection:

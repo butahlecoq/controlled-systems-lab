@@ -44,8 +44,9 @@ This mapping is implemented by the registered
 `scripts/reports/syn02_registered_reports.py` adapter and dispatched by
 `scripts/reports/site.py` for schema-3 staging. The adapter validates safe
 identity/paths, native record and source identity, complete trial/summary
-consistency including failures, inventory/hash manifest, SVG, common envelope
-projection and deterministic ZIP. The shifted-residual result remains
+consistency including failures, both `trials.csv` and `summary.csv` against
+the raw events and recomputed summary, inventory/hash manifest, SVG, common
+envelope projection and deterministic ZIP. The shifted-residual result remains
 `undetermined` with `numerical_failure` and no constructed relation; these
 expected numerical failures stay visible and are never removed from timing
 summaries. The captured report still requires regeneration under the

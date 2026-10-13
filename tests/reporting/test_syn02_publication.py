@@ -107,6 +107,7 @@ class Syn02PublicationTests(unittest.TestCase):
             for row in rows:
                 if not row["warmup"]:
                     writer.writerow({key: _csv_value(row.get(key)) for key in TRIAL_FIELDS})
+        (bundle / "summary.csv").write_bytes(collect.summary_csv_bytes(summary))
         (bundle / "latency.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><title>Latency</title><path d="M0 0L10 10"/></svg>', encoding="utf-8")
         (bundle / "index.html").write_text("<!doctype html><html><body>SYN-02 saved report</body></html>", encoding="utf-8")
         (bundle / "environment.json").write_text(json.dumps(record["environment"], sort_keys=True) + "\n", encoding="utf-8")
@@ -207,6 +208,23 @@ class Syn02PublicationTests(unittest.TestCase):
             csv_path.write_text(csv_text.replace("shifted-residual-degenerate,1,passed", "shifted-residual-degenerate,1,forged", 1), encoding="utf-8")
             self._rehash_native_manifest(bundle)
             with self.assertRaisesRegex(ValueError, "CSV"):
+                syn02.adapt(bundle)
+
+    def test_rejects_missing_summary_csv(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self.make_bundle(Path(directory))
+            (bundle / "summary.csv").unlink()
+            with self.assertRaisesRegex(ValueError, "inventory|summary"):
+                syn02.adapt(bundle)
+
+    def test_rejects_summary_csv_mismatch_even_after_native_rehash(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self.make_bundle(Path(directory))
+            path = bundle / "summary.csv"
+            contents = path.read_text(encoding="utf-8")
+            path.write_text(contents.replace("linear-face", "forged-face", 1), encoding="utf-8")
+            self._rehash_native_manifest(bundle)
+            with self.assertRaisesRegex(ValueError, "summary.csv"):
                 syn02.adapt(bundle)
         with tempfile.TemporaryDirectory() as directory:
             bundle = self.make_bundle(Path(directory))

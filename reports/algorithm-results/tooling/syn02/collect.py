@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build, measure, validate, and bundle the SYN-02 terminal relation report."""
 from __future__ import annotations
-import argparse, csv, datetime as dt, hashlib, html, json, os, platform, statistics, subprocess, sys, zipfile
+import argparse, csv, datetime as dt, hashlib, html, io, json, os, platform, statistics, subprocess, sys, zipfile
 from pathlib import Path
 from publication_map import project as publication_map
 
@@ -217,6 +217,19 @@ def svg(summary):
     bits.append(f'<line x1="{left}" y1="{top-12}" x2="{left+560}" y2="{top-12}" stroke="#64748b" stroke-width="1"/><text x="{left}" y="{height-12}">0 ms</text><text x="{left+430}" y="{height-12}">{maximum/1e6:.3f} ms maximum range</text></svg>')
     return "".join(bits)
 
+SUMMARY_FIELDS=("scenario","requested","matched_expected","completed","failed","non_success","expected_outcome","expected_termination",
+                "observed_outcomes","observed_terminations","observed_providers","relation_count","objective_bounds",
+                "primal_objective_value","residual_observations","timings")
+
+def summary_csv_bytes(summary):
+    stream=io.StringIO(newline="")
+    writer=csv.DictWriter(stream,fieldnames=SUMMARY_FIELDS,lineterminator="\n")
+    writer.writeheader()
+    for row in summary:
+        writer.writerow({key:(json.dumps(row[key],ensure_ascii=False,sort_keys=True,separators=(",",":"))
+                          if isinstance(row[key],(dict,list)) else row[key]) for key in SUMMARY_FIELDS})
+    return stream.getvalue().encode("utf-8")
+
 def write_bundle(bundle, payload, raw, environment, provenance, profile, profile_raw, build_log, configure_log, command, profile_note):
     bundle.mkdir(parents=True,exist_ok=False)
     for row in raw:
@@ -227,6 +240,7 @@ def write_bundle(bundle, payload, raw, environment, provenance, profile, profile
         fields=["scenario","repetition","status","validation_errors","outcome","termination","relation","optimization_present","optimum_present","provider","primal_value","lower_bound","upper_bound","prepare_ns","solve_ns","oracle_ns","execute_ns","solver_observations"]
         writer=csv.DictWriter(f,fieldnames=fields);writer.writeheader()
         for r in rows: writer.writerow({k:(json.dumps(r.get(k),separators=(",",":")) if isinstance(r.get(k),list) else r.get(k)) for k in fields})
+    (bundle/"summary.csv").write_bytes(summary_csv_bytes(payload["summary"]))
     (bundle/"raw-events.jsonl").write_bytes(raw_bytes)
     (bundle/"records.json").write_text(json.dumps(payload,indent=2,sort_keys=True,allow_nan=False)+"\n",encoding="utf-8")
     (bundle/"publication-map.json").write_text(json.dumps(publication_map(payload),indent=2,sort_keys=True)+"\n",encoding="utf-8")

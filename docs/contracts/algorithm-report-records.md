@@ -410,7 +410,9 @@ native bundle inventory (manifest-listed files plus `manifest.json`) and the
 LF-normalized adapter source hash. Its adapter checks the raw 40-event matrix
 against each fixture's literal expected outcome, termination, provider,
 objective and retained residual diagnostics, then recomputes the five summary
-rows and compares the measured CSV projection. The shifted-residual fixture's
+rows and compares both `trials.csv` and `summary.csv` projections byte-for-byte
+with the validated raw events and recomputed summary. Both CSVs are included in
+the native manifest and staged publication inventory. The shifted-residual fixture's
 seven `undetermined` / `numerical_failure` outcomes remain expected visible
 results with no constructed relation; they count as non-success outcomes and
 are never filtered into a successful solve-time distribution. The publisher

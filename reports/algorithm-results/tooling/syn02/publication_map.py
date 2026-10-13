@@ -13,7 +13,7 @@ STAGED_SOURCE_FILES = [
     "latency.svg", "manifest.json", "measurement-command.txt",
     "profile-evidence.json", "profile-note.txt", "profile-raw.jsonl",
     "publication-map.json", "publication_map.py", "raw-events.jsonl", "records.json",
-    "render_saved.py", "terminal_driver.cpp", "test_report.py", "trials.csv",
+    "render_saved.py", "summary.csv", "terminal_driver.cpp", "test_report.py", "trials.csv",
 ]
 STAGED_FILES = sorted([*STAGED_SOURCE_FILES, "index.html", "report-envelope.json"])
 
@@ -83,7 +83,7 @@ def project(record):
                 "meaning": "exact staged artifact inventory: relative path to SHA-256 of staged bytes",
                 "entries": STAGED_FILES,
                 "excludes": ["publication-manifest.json"],
-                "includes": ["generated index.html", "latency.svg", "raw evidence", "report-envelope.json"],
+            "includes": ["generated index.html", "latency.svg", "raw evidence", "trials.csv", "summary.csv", "report-envelope.json"],
             },
         },
         "immutable_public_id": {
