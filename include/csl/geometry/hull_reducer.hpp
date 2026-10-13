@@ -63,9 +63,10 @@ public:
                                        const ExecutionContext&) = 0;
 };
 
-// Uses independent zero-objective barycentric feasibility programs. Only a
-// feasible primal point that passes fresh residual and nonnegativity checks can
-// remove a candidate. All other outcomes conservatively retain it.
+// Uses independent zero-objective barycentric feasibility programs. Solver
+// residuals propose witnesses only; exact dyadic verification of nonnegative
+// weights, unit sum, and coordinate reconstruction authorizes removal.
+// All other outcomes conservatively retain the candidate.
 HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
                                 const ExecutionContext&);
 

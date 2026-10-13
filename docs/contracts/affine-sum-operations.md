@@ -50,19 +50,18 @@ operation/relaxation contract.
 ## Numerical relation and limitations
 
 Candidate coordinates are computed in binary64. The selected hull reducer
-returns candidate indices and convex-combination removal evidence; this module
-checks full candidate coverage, index validity, acyclicity, nonnegative finite
-weights, normalization, and reconstruction against the execution tolerance
-before publishing the operation result. Reduction must be complete, but no
-candidate is discarded: floating-point convex-combination evidence does not
-establish exact redundancy on all supported platforms, including platforms
-where `long double` has binary64 precision. The returned V representation thus
-retains the full generated candidate cloud. `NumericalCheck.max_residual`
-reports the maximum reconstruction residual from attempted reducer removals
-after conversion to its binary64 field; it describes attempted work, not an
-applied output reduction or an error bound, and it never authorizes discarding
-a candidate. Unsupported, stopped, failed, malformed, or numerically
-inconsistent dependencies do not produce a successful set result.
+returns candidate indices and convex-combination evidence; this module checks
+full candidate coverage, index validity, acyclicity, nonnegative finite
+weights, normalization, and numerical diagnostics. It applies the retained
+indices only when each removal is independently proven by exact dyadic
+arithmetic over the represented binary64 coordinates and weights: the weights
+are nonnegative, sum exactly to one, and reconstruct the removed point exactly.
+Tolerance-based residual checks never authorize deletion. If any structural or
+exact check fails, the operation keeps the full generated candidate cloud.
+`NumericalCheck.max_residual` records floating-point residual diagnostics; it is
+not the deletion proof or an error bound. Unsupported, stopped, failed,
+malformed, or numerically inconsistent dependencies do not produce a successful
+set result.
 
 The result uses `SetRelation::equivalent` with `NumericalCheck` evidence under
 the caller's tolerance. This is an algorithmic numerical relation only. It is
