@@ -12,6 +12,7 @@ SCENARIOS = ("singular_a", "unreachable_equality_target",
              "integrator_predecessor", "v_projection_preserves_ray")
 PHASES = ("preparation_ns", "workspace_ns", "run_ns", "verification_ns", "end_to_end_ns")
 HARNESS_PATH_ALLOWLIST = {
+    "CMakeLists.txt",
     "reports/algorithm-results/tooling/geo05/README.md",
     "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
     "reports/algorithm-results/tooling/geo05/report.py",

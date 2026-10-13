@@ -29,7 +29,9 @@ SPEC.loader.exec_module(collect)
 
 class Geo05ReportTests(unittest.TestCase):
     def test_source_delta_rejects_algorithm_changes_and_allows_harness_paths(self):
+        self.assertIn("CMakeLists.txt", report.HARNESS_PATH_ALLOWLIST)
         report.validate_source_tree_delta([
+            "CMakeLists.txt",
             "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
             "reports/algorithm-results/tooling/geo05/report.py",
         ])
