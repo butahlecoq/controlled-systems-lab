@@ -202,23 +202,54 @@ TEST_CASE("T-S01 registered candidate retains u0+u1=1 and rejects the marginal p
     CHECK(result.family->identity().request==query.family);
     CHECK(result.family->identity().lineage.size()==6);
 }
-TEST_CASE("T-S01 result validation rejects a mismatched ordered transformation lineage") {
+TEST_CASE("registered Strategy A candidate identity mismatches fail at the caller boundary") {
     const auto query=request(integrator());
     const auto result=run(query);
     REQUIRE(result.family);
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& history=payload(result);
+    REQUIRE(history.terminal);
+    REQUIRE(history.terminal->relation);
+    REQUIRE(history.terminal->optimization);
 
-    const auto& actual=result.family->identity();
-    CHECK(check_synthesis_result(result,actual).empty());
+    std::vector<TransformStepIdentity> lineage;
+    for(const auto& stage:history.forward.stages) {
+        REQUIRE_FALSE(stage.source_factors.empty());
+        lineage.push_back({stage.marginal.evidence.reference.identity.request,
+            stage.source_factors.front(),stage.marginal.output.id,
+            query.configuration.strategy,query.strategy_version});
+    }
+    const auto feasible_slice=take(sets::from_handle(history.forward.stages.back().marginal.output));
+    const auto feasible_history=take(synthesis::recover_joint_history(query.problem,feasible_slice));
+    lineage.push_back({{"strategy-a/feasible-preimage"},feasible_slice.metadata()->id,
+        feasible_history.relation.metadata()->id,{"csl.synthesis.control-recovery"},"1"});
+    const RequestId terminal_request{history.terminal->optimization->outcome.subject.program.value};
+    lineage.push_back({terminal_request,feasible_slice.metadata()->id,
+        history.terminal->relation->metadata()->id,{"csl.synthesis.terminal-minimizers"},"1"});
+    lineage.push_back({{"strategy-a/terminal-preimage"},history.terminal->relation->metadata()->id,
+        history.history.relation.metadata()->id,{"csl.synthesis.control-recovery"},"1"});
 
-    auto expected=actual;
+    const FamilyIdentity expected{query.problem.identity(),query.family,
+        query.problem.constraints().coordinates(),query.configuration.strategy,
+        query.strategy_version,std::move(lineage)};
     REQUIRE(expected.lineage.size()==6);
-    expected.lineage.pop_back();
-    const auto diagnostics=check_synthesis_result(result,expected);
-    CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
-        return diagnostic.field=="family.identity";
-    }));
-    CHECK(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    CHECK(check_synthesis_result(result,expected).empty());
+
+    auto expect_identity_rejection=[&](FamilyIdentity mutated) {
+        const auto diagnostics=check_synthesis_result(result,mutated);
+        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
+            return diagnostic.code==DiagnosticCode::evidence_mismatch && diagnostic.field=="family.identity";
+        }));
+        CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+        CHECK(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    };
+
+    auto wrong_problem=expected;wrong_problem.problem.value+="-foreign";expect_identity_rejection(wrong_problem);
+    auto wrong_request=expected;wrong_request.request.profile+="-foreign";expect_identity_rejection(wrong_request);
+    auto wrong_coordinates=expected;++wrong_coordinates.coordinates.horizon;expect_identity_rejection(wrong_coordinates);
+    auto wrong_strategy=expected;wrong_strategy.strategy={"csl.synthesis.foreign"};expect_identity_rejection(wrong_strategy);
+    auto wrong_version=expected;wrong_version.strategy_version+="-foreign";expect_identity_rejection(wrong_version);
+    auto wrong_lineage=expected;wrong_lineage.lineage.pop_back();expect_identity_rejection(wrong_lineage);
 }
 TEST_CASE("T-S02 constant objective preserves histories at different terminal points") {
     const auto query=request(integrator(true));auto result=run(query);const auto& history=payload(result);
