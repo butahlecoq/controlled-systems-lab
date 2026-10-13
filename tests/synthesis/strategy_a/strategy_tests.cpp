@@ -36,12 +36,16 @@ template<class Port> PreparedProvider<Port> selected(Registration<Port> entry,st
     return take(prepare_provider(select_provider(registry,method,requirements)));
 }
 problem::ResolvedProblem integrator(bool constant=false,bool singular=false) {
+    QuadraticTerminal objective{};
+    objective.Q={1,1,{2}};
+    objective.linear={-2};
+    objective.offset=1;
     Problem source{{"strategy-a-integrator"},std::make_shared<const SystemModel>(SystemModel{
         {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{singular?0.0:1.0}},
             {1,1,{1}},{1,0,{}},{0}}}, {}}),{0,1,2},KnownInitial{{0}},
         ContinuousDomain{{interval("u0",0,1,"u"),interval("u1",0,1,"u")}},
         {interval("X0",0,0),interval("X1",0,1),interval("X2",0,2)}, {},{},
-        InformationPattern::nominal_open_loop,QuadraticTerminal{{1,1,{2}},{-2},1}};
+        InformationPattern::nominal_open_loop,std::move(objective)};
     if(constant)source.objective=LinearTerminal{{0},7};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
