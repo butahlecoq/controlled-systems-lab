@@ -434,6 +434,20 @@ class Opt04PublicationTests(unittest.TestCase):
                 "report-envelope.json", "publication-manifest.json"} | {
                 "source-evidence/" + path.name for path in bundle.iterdir()}).feed(page)
 
+    def test_admitted_opt04_validation_requires_dependency_without_skipping_schema(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = make_bundle(Path(directory))
+            code = '''
+import sys
+sys.path.insert(0, sys.argv[1])
+import opt04_registered_reports as opt04
+opt04.adapt(sys.argv[2], allow_test=True)
+'''
+            result = subprocess.run([sys.executable, "-S", "-c", code, str(ROOT / "scripts/reports"), str(bundle)],
+                capture_output=True, text=True)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("OPT-04 validation requires report-only jsonschema", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

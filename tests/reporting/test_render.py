@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -15,6 +16,23 @@ import report_data as data
 
 
 class RenderTests(unittest.TestCase):
+    def test_site_import_and_existing_catalogue_render_without_report_dependencies(self):
+        code = '''
+import importlib.util
+from pathlib import Path
+import sys
+assert importlib.util.find_spec("jsonschema") is None
+sys.path.insert(0, str(Path(sys.argv[1]) / "scripts/reports"))
+spec = importlib.util.spec_from_file_location("csl_site_without_report_deps", Path(sys.argv[1]) / "scripts/reports/site.py")
+publisher = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(publisher)
+print(publisher.catalogue_index({"reports": []}))
+assert "jsonschema" not in sys.modules
+'''
+        result = subprocess.run([sys.executable, "-S", "-c", code, str(ROOT)], capture_output=True, text=True)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("<title>CSL algorithm reports</title>", result.stdout)
+
     def setUp(self):
         self.assertIsNotNone(importlib.util.find_spec("render"), "saved-input renderer is missing")
         self.renderer = __import__("render")

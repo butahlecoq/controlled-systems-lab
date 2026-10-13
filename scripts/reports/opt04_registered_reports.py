@@ -6,8 +6,6 @@ from pathlib import Path
 import re
 import zipfile
 
-from jsonschema import Draft202012Validator, ValidationError
-
 import registered_reports as common
 import report_data as data
 
@@ -103,6 +101,12 @@ def adapt(bundle, *, allow_test=False):
             raise ValueError("unsafe or mismatched OPT-04 native report identity")
         source_hashes = _source_hashes(bundle)
         _admit(record, source_hashes, allow_test)
+        # Native CTest consumers import site.py without report-only packages.
+        # Load the schema validator only when an admitted OPT-04 bundle needs it.
+        try:
+            from jsonschema import Draft202012Validator, ValidationError
+        except ImportError as exc:
+            raise ValueError("OPT-04 validation requires report-only jsonschema; install scripts/reports/requirements.txt") from exc
         try:
             Draft202012Validator(_json(TOOLING / "schema-v2.json")).validate(record)
         except ValidationError as exc:
