@@ -18,6 +18,7 @@ import geo02_registered_reports as geo02
 import geo05_registered_reports as geo05
 import syn02_registered_reports as syn02
 import syn01_registered_reports as syn01
+import opt04_registered_reports as opt04
 import registered_reports as registered
 
 FILES={"index.html","records.json","scenarios.json","raw-events.jsonl","profile.json","build-provenance.txt",
@@ -58,7 +59,7 @@ class OfflineHTML(HTMLParser):
                 data.require(re.search(r"@import|url\s*\(|expression\s*\(",local,re.I) is None,"external/active inline style")
             if key in {"href","src","xlink:href"} and value:
                 if value.startswith("#"): continue
-                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-[0-9a-f]{64}\.zip)",value): continue
+                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt04-\d{8}T\d{6}Z-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-[0-9a-f]{64}\.zip)",value): continue
                 data.require(value in self.files,"external/escaping HTML asset")
     def handle_endtag(self,tag):
         if tag=="style": self.in_style=False
@@ -182,14 +183,15 @@ def catalogue_index(catalogue):
         label_kind='HiGHS reference LP, five analytic microfixtures'
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
-                data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward"),"unknown catalogue kind")
+                data.require(report["report_kind"] in ("lp","convex","opt04-phase-one","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward"),"unknown catalogue kind")
                 data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"schema-v3 scope/evidence metadata required")
                 label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
             else:
                 data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
                 label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
-        csv_name = "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
-        parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/'+csv_name+'">CSV</a> · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
+        csv_name = "stdout.jsonl" if report.get("report_kind") == opt04.KIND else "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
+        trial_label = "trial JSONL" if report.get("report_kind") == opt04.KIND else "CSV"
+        parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/'+csv_name+'">'+trial_label+'</a> · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
     return ''.join(parts)+"</ul></body></html>"
 
 
@@ -250,9 +252,10 @@ def stage(catalog_path,out,check=True,allow_test=False):
         rid=report["report_id"]
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
-        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward"):
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt04-phase-one","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward"):
             source_id=report.get("source_report_id",rid)
-            source_pattern = (r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else
+            source_pattern = (opt04.SOURCE_PATTERN if report["report_kind"] == opt04.KIND else
+                              r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else
                               r"geo04-\d{8}T\d{6}Z-[0-9a-f]{12}" if report["report_kind"]=="geo04-intersection" else
                               r"geo02-\d{8}T\d{6}Z-[0-9a-f]{12}" if report["report_kind"]=="geo02-affine-sum" else
                               r"geo05-[0-9a-f]{16}" if report["report_kind"]=="geo05-projection-predecessor" else
@@ -260,18 +263,26 @@ def stage(catalog_path,out,check=True,allow_test=False):
                               r"syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}" if report["report_kind"]=="syn01-nominal-forward" else
                               r"geo03-\d{8}-[0-9a-f]{12}")
             data.require(isinstance(source_id,str) and re.fullmatch(source_pattern,source_id) is not None,"invalid registered source bundle identity")
-            publisher = geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else syn01 if report["report_kind"] == "syn01-nominal-forward" else registered
+            publisher = opt04 if report["report_kind"] == opt04.KIND else geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else syn01 if report["report_kind"] == "syn01-nominal-forward" else registered
             item=publisher.adapt(root/source_id)
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
             data.require(report.get("source_report_id","")==item.source_report_id,"registered catalogue source identity mismatch")
             data.require(report.get("payload_sha256")==item.payload_sha256 and report.get("source_commit")==item.source_commit,"registered catalogue provenance mismatch")
             data.require(report.get("measured_scope")==item.measured_scope and report.get("evidence_limits")==item.evidence_limits,"registered scope/evidence differs from typed records")
             data.require(report.get("payload_schema")==item.payload_schema,"registered catalogue payload schema differs")
+            if report["report_kind"] == opt04.KIND:
+                data.require(report.get("native_payload_sha256") == item.native_payload_sha256,"OPT-04 catalogue native digest differs")
             generated_page=publisher.render_page(root/source_id,item)
-            OfflineHTML(set(item.files)|{"report-envelope.json","publication-manifest.json"}).feed(generated_page)
+            page_files = set(item.files) | {"report-envelope.json", "publication-manifest.json"}
+            if report["report_kind"] == opt04.KIND:
+                page_files |= {"source-evidence/" + name for name in item.files}
+            OfflineHTML(page_files).feed(generated_page)
             if report["report_kind"] != "geo05-projection-predecessor":
-                svg_name = "timings.svg" if report["report_kind"] == "geo02-affine-sum" else "latency.svg"
-                data.validate_svg((root/source_id/svg_name).read_bytes())
+                if report["report_kind"] == opt04.KIND:
+                    data.validate_svg(opt04.public_svg(data.parse_json((root/source_id/"records.json").read_text(encoding="utf-8"))))
+                else:
+                    svg_name = "timings.svg" if report["report_kind"] == "geo02-affine-sum" else "latency.svg"
+                    data.validate_svg((root/source_id/svg_name).read_bytes())
             artifacts=publisher.publication_artifacts(root/source_id,item)
             archive_bytes=publisher.offline_zip(root/source_id,item)
             data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"registered generated ZIP digest differs")

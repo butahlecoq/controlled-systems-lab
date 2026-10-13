@@ -12,14 +12,39 @@ returned witness proves all feasible points. Numerical support remains
 ## Publication and migration status
 
 This native report uses `csl.opt04-phase-one-report/2`. Its local saved-data
-renderer and bundle are private source evidence; they are not registered with
-`scripts/reports/site.py` or the authoritative algorithm-report catalogue, and
-they do not create a public page or URL. The tracked path for validating this
+renderer and bundle are private source evidence. The registered adapter in
+`scripts/reports/opt04_registered_reports.py` can validate and stage an eligible
+saved bundle through `site.py`, but no OPT-04 measurement bundle or authoritative
+catalogue row is committed and no public page or URL is established. The tracked path for validating this
 native bundle, adapting it to the shared schema-3 envelope/catalogue, preserving
 its raw files as source evidence, and integrating it into the main-only Pages
 workflow is [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185).
 Until that integration and deployment are complete, treat any local HTML as a
 private renderer output only.
+
+The adapter requires the exact native inventory: `records.json`, `stdout.jsonl`,
+`driver-stdout.txt`, `stderr.txt`, `release-build.txt`, `index.html`,
+`performance.svg`, `manifest.sha256`, `bundle.zip`, and `bundle.zip.sha256`.
+It checks schema v2, the native semantic/package validator, the five-fixture
+protocol, every hash, driver-to-record and JSONL projections, and complete
+eligible trial/warmup summaries. Failed, missing or aborted evidence remains
+private and cannot become an accepted catalogue row. It runs no collection or
+solver. Synthetic publisher test fixtures are never production measurement input.
+
+Publication preserves the native ID and every original byte under
+`source-evidence/`, including the producer HTML/SVG and native ZIP and hashes.
+The public page is independently rendered from typed records; its SVG uses the
+shared safe CSS vocabulary. The destination ID binds all native file hashes and
+the LF-normalized adapter source hash. The envelope retains schema v2, the native
+payload digest, source ID, provenance and all evidence limits.
+
+Finishing [#185](https://github.com/butahlecoq/controlled-systems-lab/issues/185)
+requires reviewed fixed-source collection, a genuine complete eligible native
+bundle committed unchanged under its native report ID, independent adapter and
+bundle review, a matching schema-3 catalogue row and deterministic index/ZIP,
+successful `site.py --check`, main-only Pages deployment, and verification of
+the live page, raw downloads and ZIP against reviewed hashes. Staging alone does
+not meet those publication gates or change OPT-04's scientific acceptance.
 
 ## Review boundary
 
