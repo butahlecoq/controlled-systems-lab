@@ -56,10 +56,14 @@ verification, and end-to-end spans in nanoseconds. For predecessor operations,
 the public API creates its workspace inside `PreparedNominalPredecessor::run`,
 so workspace creation is unavailable as a separate span; the driver marks that
 field null and records the enclosing public run call. Successful end-to-end
-starts before fixture construction and ends after literal checks. It excludes
-process startup, persistence, rendering, and object destruction. V projection
-workspace creation is directly observable. These scopes do not expose native
-subphases or prove a numerical certificate.
+starts immediately before fixture construction and stops after the scenario
+runner returns. It therefore includes destruction of that runner's local
+fixtures, results, providers, and workspaces. On exceptions it also includes
+stack unwinding before the failure is recorded. It excludes process startup,
+JSON serialization, persistence, and rendering. This GEO-05 interval is not
+directly comparable with LP/convex end-to-end spans that stop before owner
+destruction. V projection workspace creation is directly observable. These
+scopes do not expose native subphases or prove a numerical certificate.
 
 ## Build and smoke
 
@@ -81,13 +85,42 @@ The collector can save raw JSON/CSV/JSONL attempts, provenance, content hashes,
 an offline ZIP bundle, and standalone HTML rendered from the saved record only.
 `collect.py --help` documents the measurement invocation; do not use
 `--measure` until the exact harness commit has passed independent review.
-Collection requires a clean worktree, completed Release build log, source and
-harness commit SHAs, concurrent-work note, and CMake File API replies.
+Collection requires a clean worktree, source and harness commit SHAs,
+concurrent-work note, and CMake File API replies. Before invoking the driver,
+the collector performs a clean verbose Release rebuild of the configured
+target and writes its redacted structured command/output/exit transcript to
+`--build-log`. Use a path inside the configured build directory, distinct from
+the executable; any existing file at that path is replaced with the fresh
+transcript. A supplied older log is never accepted as proof of the fresh build.
 
 The smoke emits one JSON trial for each fixture and must report `passed`,
 `oracle_passed=true`, and `work_observed=true`. Do not collect accepted timings
 until independent review of this exact harness commit. This phase has no
-accepted timing record, catalogue entry, or publication. The collector binds
-source and harness commits separately, allows only the report-harness files
-plus the exact GEO-05 CMake target insertion, and records the complete File API
-dependency graph and executable hash.
+published timing record. The earlier measured candidate is retained as
+historical evidence, but must be recollected under the clean-build gate before
+publication. The collector binds source and harness commits separately,
+allows only the explicitly listed report-harness files plus the exact GEO-05
+CMake target insertion, and records the complete File API dependency graph,
+fresh build transcript, and post-build executable hash.
+
+## Migration to the authoritative observation artifacts
+
+`csl.geo05-numerical-report/1` is a bounded acquisition and rendering format
+for this four-fixture experiment. It is not a second scientific authority.
+When the scenario/run artifacts are implemented, an adapter will map the
+validated fields as follows; raw records and their identities remain immutable.
+
+| GEO-05 v1 field | Authoritative destination | Migration rule |
+|---|---|---|
+| `algorithm`, executable/build provenance, environment | OBS-04 run provenance | Preserve source and harness commits, compiler/build graph, executable hash, and observed environment; do not infer an algorithm configuration or strategy ID. |
+| `catalog.scenarios`, trial `input_sha256` and `scenario_sha256` | OBS-04 scenario and immutable input identity | Keep the four authored fixtures and their hashes as experiment inputs; do not invent a MODEL03 scenario identity. |
+| `trials`, `warmup_trials`, `status`, `detail`, `oracle_*`, `work_observed` | OBS-04 attempts and verification evidence | Preserve every attempt, including failures/stops and available diagnostics; retain the numeric-sample oracle scope and Unestablished relation support. |
+| `durations_ns` and `collection.phases` | OBS-04 timing observations | Carry each named phase, unit, exact scope, availability, and failure/unwind label; never sum nested phases. |
+| `output_rows`, `result_kind`, `result_encoding`, `vertices`, `rays`, `max_rows` | OBS-04 observed output facts; VIZ-03 series inputs where plotted | Treat these as returned representation/count observations, not completeness or a numerical certificate. |
+| `collection.by_scenario`, `collection.phases`, repetition counts | OBS-05 comparison tables | Recompute summaries from the complete retained repetitions; preserve the single-implementation scope and make no comparative claim. |
+| Rendered tables and figures | VIZ-03 presentation inputs | Regenerate from validated OBS records; HTML is a projection and never the source of numerical truth. |
+
+The GEO-05 reader may remain as a compatibility importer after that adapter is
+available. It must not rewrite these saved v1 records or upgrade their
+evidence claims. The adapter and destination schema require their own review
+and contract tests before this bootstrap view can be retired.

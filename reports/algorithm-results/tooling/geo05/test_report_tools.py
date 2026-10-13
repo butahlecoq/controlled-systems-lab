@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import copy
 import csv
+import hashlib
 import json
 import sys
 import unittest
@@ -289,7 +290,8 @@ class Geo05ReportTests(unittest.TestCase):
                 "--build-log", str(root / "build.log"), "--source-commit", "fixture", "--harness-commit", "fixture",
                 "--concurrent-work", str(note), "--out", str(out)]
             with patch.object(sys, "argv", argv), patch.object(collect, "build_provenance", return_value={
-                    "source_commit": "fixture", "harness_commit": "fixture", "executable": {}}), \
+                    "source_commit": "fixture", "harness_commit": "fixture", "executable": {
+                        "sha256": hashlib.sha256(b"synthetic fixture executable identity").hexdigest()}}), \
                     patch.object(collect, "_run_capture", return_value=(stdout, stderr, 2, False)):
                 with self.assertRaisesRegex(ValueError, "fixed alternating order"):
                     collect.main()
