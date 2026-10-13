@@ -1,0 +1,67 @@
+{
+  "actual_changed_paths": [
+    "CMakeLists.txt",
+    "reports/algorithm-results/tooling/geo05/README.md",
+    "reports/algorithm-results/tooling/geo05/collect.py",
+    "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
+    "reports/algorithm-results/tooling/geo05/render.py",
+    "reports/algorithm-results/tooling/geo05/report.py",
+    "reports/algorithm-results/tooling/geo05/schema-v1.json",
+    "reports/algorithm-results/tooling/geo05/smoke.py",
+    "reports/algorithm-results/tooling/geo05/test_report_tools.py"
+  ],
+  "artifact_html_sha256": "ae635632c6ffd2072e8c89880cec91cea12c2c4de9b179376a0ee423304d9c5f",
+  "artifact_renderer_commit": "a65ba4e5aa033afd4ec3913b39c1119a4fb59547",
+  "checks": {
+    "all_28_measured_attempts_passed": true,
+    "all_4_warmups_passed": true,
+    "build_log_matches_record_hash": true,
+    "exact_cmake_report_target_insertion": true,
+    "focused_harness_tests_18_of_18": true,
+    "local_release_ctest_baseline_61_of_61": true,
+    "manifest_hashes_valid": true,
+    "record_schema_and_payload": true,
+    "saved_record_html_matches_artifact_renderer": true,
+    "saved_record_html_matches_renderer": true,
+    "source_to_measurement_harness_path_delta_allowlisted": true,
+    "zip_integrity_valid": true
+  },
+  "ci_status_at_validation": "PR #170 checks pending; local fixed-source CTest and independently reviewed harness used as authorized gate",
+  "corrected_harness_path_allowlist": [
+    "CMakeLists.txt",
+    "reports/algorithm-results/tooling/geo05/README.md",
+    "reports/algorithm-results/tooling/geo05/collect.py",
+    "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
+    "reports/algorithm-results/tooling/geo05/render.py",
+    "reports/algorithm-results/tooling/geo05/report.py",
+    "reports/algorithm-results/tooling/geo05/schema-v1.json",
+    "reports/algorithm-results/tooling/geo05/smoke.py",
+    "reports/algorithm-results/tooling/geo05/test_report_tools.py"
+  ],
+  "executable_sha256": "cc56bc7369f0fedf9a3cdb4458d5bec16a95265b8e2c57324dc96856d6a14be5",
+  "manifest_sha256": "0d1f7343cabb250187ac7afa57b9d5e420d774ff85fc6f3e6c9472093dc82406",
+  "measurement_harness_commit": "cc972291b99665e8b3b16a620bcc08d4d1d99f82",
+  "path_allowlist_correction": {
+    "corrected_by_validator_commit": "20838c6f3db1040cd0c82bcc601bc282f40ded6f",
+    "explanation": "The measurement collector accepted the narrow CMakeLists.txt exception and independently verified the exact report-only insertion. Its serialized allowed_harness_delta list omitted that path. This supplemental post-collection audit records the corrected allowlist; the original report and raw attempts remain byte-for-byte unchanged.",
+    "original_provenance_omitted": "CMakeLists.txt",
+    "raw_record_and_trial_values_unchanged": true
+  },
+  "payload_sha256": "7fddaba0c7698f721b56b5d9b97310cd45f12f44d75676617fa84d554f5a38d5",
+  "post_collection_validator_commit": "20838c6f3db1040cd0c82bcc601bc282f40ded6f",
+  "public_redacted_companions": {
+    "inventory": "public-companions.json",
+    "inventory_sha256": "e56c1e506c3b07023bcb2d1aab3974077557a1dfd4b648bed15990ddaa796f80",
+    "original_measured_build_log_sha256": "9abeebe2f772f454f70487a11f9cb425b189b39a952e9b763d0908f51e5db811",
+    "raw_records_and_trials_unchanged": true,
+    "redacted_build_log_sha256": "22f6b7bfb74e0907cfeecdb0576f28fc8095f3b6c80c2cdecb3d3a7d2b496ca3",
+    "redacted_command_sha256": "9bbdc97967b66ecfb842a397505ce1e759241fca1e00692206f3dbff05384ad9"
+  },
+  "raw_stdout_sha256": "c3f2c2932009fd68c92e5dad9f723c935629feca67cd4addb5536cf9149f6445",
+  "record_file_sha256": "16b488cf8eda84e0f80b5a8d3d5a93147c67a5d1500201123937c42403a603a6",
+  "report_id": "geo05-7fddaba0c7698f72",
+  "schema": "csl.geo05-post-collection-validation/1",
+  "source_commit": "2a7738f0ef9652501c68021a91c648723458569a",
+  "validated_at_utc": "2026-10-13T01:56:06.354029+00:00",
+  "zip_sha256": "8e1beee233cde695108daf483a19e35c65c2b10f770abc71b47c0bdea25c528d"
+}
