@@ -89,9 +89,18 @@ class Geo05ReportTests(unittest.TestCase):
         except ValueError as error:
             self.fail(f"reviewed historical artifact snapshot must not block recollection: {error}")
 
+    def test_source_delta_admits_known_artifact_filenames_for_a_new_hash_report_id(self):
+        paths = [path.replace("7fddaba0c7698f72", "0123456789abcdef") for path in HISTORICAL_ARTIFACT_PATHS]
+        try:
+            report.validate_source_tree_delta(paths)
+        except ValueError as error:
+            self.fail(f"subsequent hash-named GEO-05 artifacts must not block recollection: {error}")
+
     def test_artifact_directories_do_not_admit_arbitrary_files_or_source_build_configuration(self):
         roots = ["reports/algorithm-results/geo05-7fddaba0c7698f72",
-                 "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence"]
+                 "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence",
+                 "reports/algorithm-results/geo05-0123456789abcdef",
+                 "reports/algorithm-results/geo05-0123456789abcdef-evidence"]
         for root in roots:
             for name in ("driver.cpp", "provider.hpp", "collect.py", "CMakeLists.txt", "CMakeCache.txt",
                          "config.json", "toolchain.cmake", "build.ninja", "driver.exe", "unreviewed.json",
@@ -101,6 +110,27 @@ class Geo05ReportTests(unittest.TestCase):
                         report.validate_source_tree_delta(HISTORICAL_ARTIFACT_PATHS + [f"{root}/{name}"])
         with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
             report.validate_source_tree_delta(["reports/algorithm-results/geo05-another-id/records.json"])
+
+    def test_artifact_classifier_rejects_malformed_unrelated_and_nested_report_paths(self):
+        for path in (
+            "reports/algorithm-results/geo05-0123456789abcde/records.json",
+            "reports/algorithm-results/geo05-0123456789abcdef0/records.json",
+            "reports/algorithm-results/geo05-0123456789abcdeg/records.json",
+            "reports/algorithm-results/geo05-0123456789ABCDEF/records.json",
+            "reports/algorithm-results/geo03-0123456789abcdef/records.json",
+            "reports/algorithm-results/geo05-0123456789abcdef-evidence/records.json",
+            "reports/algorithm-results/geo05-0123456789abcdef/measurement-interpretation.md",
+            "reports/algorithm-results/geo05-0123456789abcdef-evidence.zip",
+            "reports/algorithm-results/geo05-0123456789abcdef.zip.cpp",
+            "reports/algorithm-results/geo05-0123456789abcdef/records.json.py",
+            "reports/algorithm-results/geo05-0123456789abcdef/../collect.py",
+            "reports/algorithm-results/nested/geo05-0123456789abcdef/records.json",
+            "reports/algorithm-results/geo05-0123456789abcdef/nested/records.json",
+            "reports/algorithm-results/geo05-0123456789abcdef-evidence/nested/public-companions.json",
+        ):
+            with self.subTest(path=path):
+                with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
+                    report.validate_source_tree_delta([path])
 
     def test_source_delta_rejects_algorithm_changes_and_allows_harness_paths(self):
         self.assertIn("CMakeLists.txt", report.HARNESS_PATH_ALLOWLIST)

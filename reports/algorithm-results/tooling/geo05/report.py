@@ -5,6 +5,7 @@ import hashlib
 import json
 import copy
 import math
+import re
 from statistics import median
 
 SCHEMA = "csl.geo05-numerical-report/1"
@@ -25,26 +26,40 @@ HARNESS_PATH_ALLOWLIST = {
     "reports/algorithm-results/tooling/geo05/test_driver_outcomes.cpp",
     "reports/algorithm-results/tooling/geo05/test_fresh_build.py",
 }
-# Reviewed historical data only. Exact filenames keep source/build/configuration
-# files excluded even when placed beside these saved report artifacts.
-REVIEWED_ARTIFACT_PATH_ALLOWLIST = frozenset({
-    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/build-log.redacted.txt",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/concurrent-work.txt",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/measurement-interpretation.md",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/post-collection-validation.json",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/public-companions.json",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72.zip",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/command.json",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/index.html",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/manifest.json",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/parse-errors.json",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/provenance.json",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/records.json",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/stderr.txt",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/stdout.jsonl",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/trials.csv",
-    "reports/algorithm-results/geo05-7fddaba0c7698f72/trials.jsonl",
+# Data path policy only; every nonlisted basename remains excluded.
+BUNDLE_ARTIFACT_FILENAMES = frozenset({
+    "command.json", "index.html", "manifest.json", "parse-errors.json", "provenance.json", "records.json",
+    "stderr.txt", "stdout.jsonl", "trials.csv", "trials.jsonl",
 })
+EVIDENCE_ARTIFACT_FILENAMES = frozenset({
+    "build-log.redacted.txt", "concurrent-work.txt", "measurement-interpretation.md",
+    "post-collection-validation.json", "public-companions.json",
+})
+_BUNDLE_DIRECTORY = re.compile(r"reports/algorithm-results/geo05-[0-9a-f]{16}")
+_EVIDENCE_DIRECTORY = re.compile(_BUNDLE_DIRECTORY.pattern + "-evidence")
+_ARTIFACT_ARCHIVE = re.compile(_BUNDLE_DIRECTORY.pattern + r"\.zip")
+
+
+def is_reviewed_artifact_path(path: str) -> bool:
+    path = path.replace("\\", "/")
+    if _ARTIFACT_ARCHIVE.fullmatch(path):
+        return True
+    parent, _, name = path.rpartition("/")
+    if _BUNDLE_DIRECTORY.fullmatch(parent):
+        return name in BUNDLE_ARTIFACT_FILENAMES
+    if _EVIDENCE_DIRECTORY.fullmatch(parent):
+        return name in EVIDENCE_ARTIFACT_FILENAMES
+    return False
+
+
+def reviewed_artifact_path_policy() -> dict:
+    return {"matching": "full_path", "bundle_directory_pattern": _BUNDLE_DIRECTORY.pattern,
+            "bundle_filenames": sorted(BUNDLE_ARTIFACT_FILENAMES),
+            "evidence_directory_pattern": _EVIDENCE_DIRECTORY.pattern,
+            "evidence_filenames": sorted(EVIDENCE_ARTIFACT_FILENAMES),
+            "archive_path_pattern": _ARTIFACT_ARCHIVE.pattern}
+
+
 GEO04_CMAKE_OPTION = 'option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report driver" OFF)'
 GEO05_CMAKE_OPTION = 'option(CSL_BUILD_GEO05_REPORT "Build the GEO-05 projection/predecessor report driver" OFF)'
 GEO04_CMAKE_TARGET = '''if(CSL_BUILD_GEO04_REPORT)
@@ -98,10 +113,11 @@ def scenario_order(round_index: int) -> tuple[str, ...]:
 
 
 def validate_source_tree_delta(changed_paths: list[str]) -> None:
-    unexpected = sorted(set(path.replace("\\", "/") for path in changed_paths)
-                        - HARNESS_PATH_ALLOWLIST - REVIEWED_ARTIFACT_PATH_ALLOWLIST)
+    paths = set(path.replace("\\", "/") for path in changed_paths)
+    unexpected = sorted(path for path in paths if path not in HARNESS_PATH_ALLOWLIST
+                        and not is_reviewed_artifact_path(path))
     if unexpected:
-        raise ValueError(f"source commit changed outside the report harness allowlist and reviewed artifact snapshot: {unexpected}")
+        raise ValueError(f"source commit changed outside the report harness allowlist and reviewed artifact path policy: {unexpected}")
 
 
 def validate_cmake_delta(source_text: str, harness_text: str) -> None:

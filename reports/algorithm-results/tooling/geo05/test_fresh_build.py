@@ -149,8 +149,9 @@ class FreshBuildTests(unittest.TestCase):
             "reports/algorithm-results/geo05-7fddaba0c7698f72/records.json"])
         self.assertNotIn("reports/algorithm-results/geo05-7fddaba0c7698f72/records.json",
                          provenance["tracked_tree_binding"]["allowed_harness_delta"])
-        self.assertIn("reports/algorithm-results/geo05-7fddaba0c7698f72/records.json",
-                      provenance["tracked_tree_binding"]["allowed_reviewed_artifact_delta"])
+        self.assertIn("records.json", provenance["tracked_tree_binding"]["reviewed_artifact_path_policy"]["bundle_filenames"])
+        self.assertEqual(provenance["tracked_tree_binding"]["reviewed_artifact_path_policy"]["bundle_directory_pattern"],
+                         "reports/algorithm-results/geo05-[0-9a-f]{16}")
         self.assertEqual(provenance["executable"]["sha256"], hashlib.sha256(b"fresh executable").hexdigest())
         self.assertEqual(provenance["fresh_build"]["return_code"], 0)
         self.assertEqual(len(self.commands), 1)
