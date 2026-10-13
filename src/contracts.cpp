@@ -25,17 +25,6 @@ bool same_bound(const std::optional<ObjectiveBound>& left,const std::optional<Ob
     if(left.has_value()!=right.has_value())return false;
     return !left||(left->value==right->value&&same_claim(left->evidence,right->evidence));
 }
-bool same_optimum(const OptimumEvidence& left,const OptimumEvidence& right) noexcept {
-    return same_claim(left.optimum,right.optimum)&&same_bound(left.bounds.lower,right.bounds.lower)&&
-        same_bound(left.bounds.upper,right.bounds.upper);
-}
-}
-Ts01AnalyticCoverageEvidence::Ts01AnalyticCoverageEvidence(FamilyIdentity binding,
-    std::shared_ptr<const JointRelationPayload> relation,OptimumEvidence optimum)
-    :binding_(std::move(binding)),relation_(std::move(relation)),optimum_(std::move(optimum)),trusted_(true) {}
-bool Ts01AnalyticCoverageEvidence::binds(const FamilyIdentity& identity,
-    const std::shared_ptr<const JointRelationPayload>& relation,const OptimumEvidence& optimum) const noexcept {
-    return trusted_ && binding_==identity && relation_ && relation_.get()==relation.get()&&same_optimum(optimum_,optimum);
 }
 namespace {
 bool matrix_matches(const Matrix& m, std::size_t rows, std::size_t cols) {
@@ -209,6 +198,9 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
             "Ordered transformation lineage requires distinct nonempty request and input/output/module/version identities"});
     std::visit(Overloaded{
         [&](const CompleteOptimalFamily& complete) {
+            if(!family.registry_verified())
+                result.push_back({DiagnosticCode::unsupported,"family.completeness",
+                    "Complete-family claims require the selected registry verifier"});
             if (complete.relation.coordinates != identity.coordinates ||
                 complete.completeness.binding != identity ||
                 complete.optimum.optimum.problem != expected)
@@ -217,20 +209,10 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.assurance","Claimed assurance differs from the request"});
             if (std::holds_alternative<Unestablished>(complete.optimum.optimum.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.optimum","Complete-family optimum needs supporting evidence"});
-            if (const auto* exact=std::get_if<Ts01AnalyticCoverageEvidence>(&complete.completeness.support)) {
-                if (!exact->binds(identity,complete.relation.payload,complete.optimum) ||
-                    identity.request.profile!="ts01_exact_integrator" ||
-                    identity.request.target!=FamilyTarget::exact_optimal_relation ||
-                    identity.strategy.value!="csl.synthesis.ts01-analytic" ||
-                    identity.strategy_version!="1" || !identity.lineage.empty() ||
-                    assurance!=Assurance::numerical || complete.assurance!=Assurance::numerical)
-                    result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.ts01",
-                        "T-S01 exact proof must bind its original immutable relation, strict profile, request and registered strategy identity"});
-            } else {
-                // Numerical coverage thresholds and generic certificate checking have
-                // not been reviewed. Neither a symbolic note nor a residual is a substitute.
-                result.push_back({DiagnosticCode::unsupported,"family.completeness","Complete-family publication is disabled except for the registered exact T-S01 analytic profile"});
-            }
+            if(const auto* registered=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+                registered&&(registered->verifier!=identity.strategy||registered->verifier_version!=identity.strategy_version||registered->proof.empty()))
+                result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.verifier",
+                    "Opaque completeness payload must identify the strategy registration and contain proof bytes"});
         },
         [&](const PartialOptimalFamily& partial) {
             if (partial.relation.coordinates != identity.coordinates ||
@@ -296,12 +278,6 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
             "Published relation representation differs from the effective family request"});
     return result;
 }
-std::variant<OptimalFamily,Diagnostics> FamilyPublisher::publish(FamilyIdentity identity,OptimalFamilyOutcome outcome) {
-    OptimalFamily proposed{std::move(identity),std::move(outcome)};
-    auto diagnostics=check_family_evidence(proposed,proposed.identity().problem,proposed.identity().request.assurance);
-    if (!diagnostics.empty()) return diagnostics;
-    return proposed;
-}
 bool supported_synthesis_bound(const ObjectiveBound& bound,const ProblemId& problem) {
     return bound.evidence.problem==problem && std::isfinite(bound.value) &&
         !std::holds_alternative<Unestablished>(bound.evidence.support);
@@ -330,6 +306,9 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
 }
 Diagnostics check_synthesis_result(const SynthesisResult& result,const SynthesisIdentityExpectation& expected) {
     Diagnostics diagnostics=check_outcome_evidence(result.outcome,expected.problem,expected.request.assurance);
+    if(result.complete_proposal)
+        diagnostics.push_back({DiagnosticCode::unsupported,"family.proposal",
+            "An unpublished complete-family proposal must be consumed by its selected registry verifier"});
     const FamilyIdentity expected_identity{expected.problem,expected.request,expected.coordinates,
         expected.strategy,expected.strategy_version,expected.lineage.value_or(std::vector<TransformStepIdentity>{})};
     auto add=[&](DiagnosticCode code,std::string field,std::string explanation) {
@@ -366,17 +345,16 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const Synthesis
             add(DiagnosticCode::evidence_mismatch,"family.identity","Family identity differs from the prepared problem, request, coordinates, strategy or ordered transformation lineage");
         auto family_diagnostics=check_family_evidence(*result.family,expected.problem,expected.request.assurance);
         diagnostics.insert(diagnostics.end(),family_diagnostics.begin(),family_diagnostics.end());
-        if(const auto* complete=std::get_if<CompleteOptimalFamily>(&result.family->outcome());
-            complete&&std::holds_alternative<Ts01AnalyticCoverageEvidence>(complete->completeness.support)) {
+        if(const auto* complete=std::get_if<CompleteOptimalFamily>(&result.family->outcome())) {
             if(result.outcome.subject!=complete->optimum.optimum.problem ||
                 !same_support(result.outcome.support,complete->optimum.optimum.support) ||
                 !result.outcome.assumptions.empty())
-                add(DiagnosticCode::evidence_mismatch,"result.outcome.ts01",
-                    "Top-level T-S01 optimality claim must match the claim sealed by the exact family capability");
+                add(DiagnosticCode::evidence_mismatch,"result.outcome.complete_family",
+                    "Top-level optimality claim must match the registered verifier's complete-family proof");
             if(!same_bound(result.objective.lower,complete->optimum.bounds.lower)||
                 !same_bound(result.objective.upper,complete->optimum.bounds.upper))
-                add(DiagnosticCode::evidence_mismatch,"result.objective.ts01",
-                    "Top-level T-S01 objective bounds must match the exact family capability");
+                add(DiagnosticCode::evidence_mismatch,"result.objective.complete_family",
+                    "Top-level objective bounds must match the registered verifier's complete-family proof");
         }
         if (result.family->target()==FamilyTarget::exact_optimal_relation &&
             (result.termination!=Termination::completed || result.outcome.value!=MathematicalOutcome::optimal))

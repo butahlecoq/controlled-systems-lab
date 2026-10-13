@@ -136,12 +136,7 @@ bool ExactJointRelation::contains(std::span<const double> point) const noexcept 
         point[4]>=0&&point[4]<=1&&exact_sum_is_one(point[3],point[4]);
 }
 
-Ts01AnalyticCoverageEvidence AnalyticStrategy::issue_coverage(FamilyIdentity binding,
-    std::shared_ptr<const JointRelationPayload> relation,OptimumEvidence optimum) {
-    return Ts01AnalyticCoverageEvidence(std::move(binding),std::move(relation),std::move(optimum));
-}
-
-class AnalyticStrategy::Workspace final : public SynthesisWorkspace {
+class AnalyticWorkspace final : public SynthesisWorkspace {
 public:
     SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& request,
         const ExecutionContext& context) override {
@@ -178,25 +173,15 @@ public:
         const ClaimEvidence optimum{problem.identity(),derivation};
         const ObjectiveBound bound{0,{problem.identity(),derivation}};
         const OptimumEvidence optimum_evidence{optimum,{bound,bound}};
-        const auto proof=AnalyticStrategy::issue_coverage(identity,payload,optimum_evidence);
         CompleteOptimalFamily complete{{coordinates,request.representation,payload},{optimum_evidence},
-            {identity,proof},Assurance::numerical};
-        auto published=FamilyPublisher::publish(identity,std::move(complete));
-        if(const auto* errors=std::get_if<Diagnostics>(&published)) {
-            result.termination=Termination::contract_rejected;
-            result.stop=ContractValidationFailure{*errors,{false,false,0,false},{}};
-            return result;
-        }
+            {identity,RegisteredCompletenessEvidence{{strategy_id},strategy_version,
+                "TS01-analytic-v1"}},Assurance::numerical};
         result.outcome={problem.identity(),MathematicalOutcome::optimal,derivation,{}};
-        result.family=std::get<OptimalFamily>(std::move(published));
         result.objective=optimum_evidence.bounds;
+        result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
         return result;
     }
 };
-
-std::unique_ptr<SynthesisWorkspace> AnalyticStrategy::make_workspace() {
-    return std::make_unique<Workspace>();
-}
 
 registry::StrategyRegistration make_registration() {
     return {{ModuleId{strategy_id},strategy_version},
@@ -210,8 +195,51 @@ registry::StrategyRegistration make_registration() {
             auto fixed=std::get<registry::CheckedPipeline<>>(registry::check_pipeline());
             return registry::compose_strategy(std::move(fixed),
                 [](auto,const registry::StrategyRequest&,const registry::Requirements&) -> std::unique_ptr<SynthesisWorkspace> {
-                    return AnalyticStrategy::make_workspace();
+                    return std::make_unique<AnalyticWorkspace>();
                 });
+        },
+        [](const registry::StrategyRequest& request,const CompleteFamilyProposal& proposal)->Diagnostics {
+            Diagnostics diagnostics;
+            if(!strict_profile(request.problem,request))
+                return {{DiagnosticCode::unsupported,"ts01.verifier.profile","Verifier rejected a noncanonical resolved problem or effective request"}};
+            const auto& identity=proposal.identity;
+            const auto& complete=proposal.family;
+            const auto exact_identity=identity.problem==request.problem.identity()&&identity.request==request.family&&
+                identity.coordinates==request.problem.constraints().coordinates()&&
+                identity.strategy==request.configuration.strategy&&identity.strategy_version==request.strategy_version&&
+                identity.lineage.empty();
+            if(!exact_identity||complete.completeness.binding!=identity||
+                complete.relation.coordinates!=identity.coordinates||
+                complete.relation.representation!=request.family.representation||
+                complete.assurance!=request.family.assurance||request.family.assurance!=Assurance::numerical||
+                identity.strategy.value!=strategy_id||identity.strategy_version!=strategy_version)
+                diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.verifier.binding",
+                    "T-S01 proof must bind the selected strategy, exact effective request, authoritative problem, coordinates and empty lineage"});
+            const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+            if(!proof||proof->verifier.value!=strategy_id||proof->verifier_version!=strategy_version||
+                proof->proof!="TS01-analytic-v1")
+                diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.verifier.support",
+                    "T-S01 proof requires the registered opaque analytic payload"});
+            const auto* relation=dynamic_cast<const ExactJointRelation*>(complete.relation.payload.get());
+            if(!relation||!relation->contains(Vector{0,0,1,0,1})||
+                !relation->contains(Vector{0,1,1,1,0})||
+                relation->h_polyhedron().metadata()->coordinate_labels!=std::vector<std::string>{"x0","x1","x2","u0","u1"})
+                diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.verifier.relation",
+                    "T-S01 proof does not contain the exact canonical optimal-history relation"});
+            const SymbolicArgument derivation{"T-S01 exact analytic derivation",
+                "x2=u0+u1 and (x2-1)^2>=0; zero is attained exactly when u0+u1=1. With u0,u1 in [0,1], the full canonical optimal history relation is the segment (0,s,1,s,1-s), s in [0,1]."};
+            const auto same_derivation=[&](const ClaimEvidence& claim) {
+                const auto* support=std::get_if<SymbolicArgument>(&claim.support);
+                return claim.problem==request.problem.identity()&&support&&support->reference==derivation.reference&&
+                    support->assumptions==derivation.assumptions;
+            };
+            if(!same_derivation(complete.optimum.optimum)||!complete.optimum.bounds.lower||
+                !complete.optimum.bounds.upper||complete.optimum.bounds.lower->value!=0||
+                complete.optimum.bounds.upper->value!=0||!same_derivation(complete.optimum.bounds.lower->evidence)||
+                !same_derivation(complete.optimum.bounds.upper->evidence))
+                diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.verifier.optimum",
+                    "T-S01 proof must bind the exact analytic optimum and matching zero lower/upper bounds"});
+            return diagnostics;
         }};
 }
 } // namespace csl::synthesis::strategy_ts01

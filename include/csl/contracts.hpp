@@ -14,7 +14,7 @@
 
 namespace csl {
 namespace problem { class ResolvedProblem; }
-namespace synthesis::strategy_ts01 { class AnalyticStrategy; }
+namespace registry { class StrategyRegistry; namespace detail { class VerifiedFamilyAuthority; } }
 // Revision 1.6. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
@@ -443,26 +443,17 @@ struct NumericalCoverageEvidence {
     std::string diagnostics;
 };
 struct ValidatedCoverageEvidence { std::string certificate; ModuleId verifier; std::string arithmetic_profile; };
-// A non-serializable in-memory proof capability created only by the dedicated
-// T-S01 analytic profile after it has checked the immutable resolved problem.
-// Default construction is intentionally untrusted (artifact decoding cannot
-// recreate the capability).
-class Ts01AnalyticCoverageEvidence {
-    FamilyIdentity binding_{};
-    std::shared_ptr<const JointRelationPayload> relation_;
-    OptimumEvidence optimum_{};
-    bool trusted_{};
-    Ts01AnalyticCoverageEvidence(FamilyIdentity, std::shared_ptr<const JointRelationPayload>, OptimumEvidence);
-    friend class synthesis::strategy_ts01::AnalyticStrategy;
-public:
-    Ts01AnalyticCoverageEvidence() = default;
-    const FamilyIdentity& binding() const noexcept { return binding_; }
-    bool binds(const FamilyIdentity& identity, const std::shared_ptr<const JointRelationPayload>& relation,
-        const OptimumEvidence& optimum) const noexcept;
+// Opaque proof bytes are claims until the compiled verifier selected by the
+// registry validates them against the authoritative prepared context.
+struct RegisteredCompletenessEvidence {
+    ModuleId verifier;
+    std::string verifier_version;
+    // Opaque verifier-defined serialized text; decoding does not confer trust.
+    std::string proof;
 };
 struct CompletenessEvidence {
     FamilyIdentity binding;
-    std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence> support;
+    std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,RegisteredCompletenessEvidence> support;
 };
 struct CompleteOptimalFamily {
     JointRelation relation;
@@ -470,6 +461,9 @@ struct CompleteOptimalFamily {
     CompletenessEvidence completeness;
     Assurance assurance;
 };
+// Unpublished complete-family claims are proposals until the selected registry
+// entry's verifier accepts them against the prepared problem and request.
+struct CompleteFamilyProposal { FamilyIdentity identity; CompleteOptimalFamily family; };
 struct InnerSubsetEvidence { ClaimEvidence every_history_optimal; std::string procedure; };
 struct CoverageScope { std::string description; };
 struct PartialOptimalFamily {
@@ -501,16 +495,47 @@ public:
         if (std::holds_alternative<PartialOptimalFamily>(outcome_)) return FamilyTarget::partial_relation;
         return FamilyTarget::candidate_relaxation;
     }
+    bool registry_verified() const noexcept { return registry_verified_; }
 private:
     FamilyIdentity identity_;
     OptimalFamilyOutcome outcome_;
-    OptimalFamily(FamilyIdentity identity, OptimalFamilyOutcome outcome)
-        : identity_(std::move(identity)), outcome_(std::move(outcome)) {}
+    bool registry_verified_{};
+    OptimalFamily(FamilyIdentity identity, OptimalFamilyOutcome outcome, bool registry_verified = false)
+        : identity_(std::move(identity)), outcome_(std::move(outcome)), registry_verified_(registry_verified) {}
     friend class FamilyPublisher;
 };
+class registry::detail::VerifiedFamilyAuthority {
+    ModuleId strategy_;
+    std::string version_;
+    VerifiedFamilyAuthority(ModuleId strategy,std::string version)
+        : strategy_(std::move(strategy)),version_(std::move(version)) {}
+    friend class registry::StrategyRegistry;
+    friend class FamilyPublisher;
+public:
+    bool matches(const ModuleId& strategy,const std::string& version) const noexcept {
+        return strategy_==strategy&&version_==version&&!strategy_.value.empty()&&!version_.empty();
+    }
+};
+Diagnostics check_family_evidence(const OptimalFamily&, const ProblemId&, Assurance);
 class FamilyPublisher {
 public:
-    static std::variant<OptimalFamily,Diagnostics> publish(FamilyIdentity identity,OptimalFamilyOutcome outcome);
+    static std::variant<OptimalFamily,Diagnostics> publish(FamilyIdentity identity,OptimalFamilyOutcome outcome) {
+        OptimalFamily proposed{std::move(identity),std::move(outcome)};
+        auto diagnostics=check_family_evidence(proposed,proposed.identity().problem,proposed.identity().request.assurance);
+        if(!diagnostics.empty())return diagnostics;
+        return proposed;
+    }
+    static std::variant<OptimalFamily,Diagnostics> publish_verified(FamilyIdentity identity,
+        OptimalFamilyOutcome outcome,const registry::detail::VerifiedFamilyAuthority& authority) {
+        if(!authority.matches(identity.strategy,identity.strategy_version)||
+            !std::holds_alternative<CompleteOptimalFamily>(outcome))
+            return Diagnostics{{DiagnosticCode::evidence_mismatch,"family.verifier",
+                "A complete family must carry authority from its selected strategy registration"}};
+        OptimalFamily proposed{std::move(identity),std::move(outcome),true};
+        auto diagnostics=check_family_evidence(proposed,proposed.identity().problem,proposed.identity().request.assurance);
+        if(!diagnostics.empty())return diagnostics;
+        return proposed;
+    }
 };
 struct FeasibleIncumbent {
     Witness witness;
@@ -562,6 +587,7 @@ struct SynthesisResult {
     std::vector<FeasibleIncumbent> incumbents;
     std::vector<TimingSpan> spans;
     SynthesisStopEvidence stop{};
+    std::optional<CompleteFamilyProposal> complete_proposal{};
 };
 using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
 struct StrategyConfiguration {
@@ -572,19 +598,6 @@ class SynthesisWorkspace : public ExclusiveWorkspace {
 public: virtual SynthesisResult solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) = 0;
 };
 
-namespace synthesis::strategy_ts01 {
-// Complete declaration prevents consumers from defining the friend issuer.
-// Its nested workspace is the only issuance path and only publishes after the
-// exact profile has been independently checked.
-class AnalyticStrategy final {
-    class Workspace;
-    static Ts01AnalyticCoverageEvidence issue_coverage(FamilyIdentity,
-        std::shared_ptr<const JointRelationPayload>, OptimumEvidence);
-public:
-    // Exposes only the checked strategy workspace, never proof construction.
-    static std::unique_ptr<SynthesisWorkspace> make_workspace();
-};
-}
 class SynthesisStrategy {
 public:
     virtual ~SynthesisStrategy() = default;

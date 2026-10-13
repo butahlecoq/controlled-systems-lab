@@ -1,9 +1,8 @@
 #include <csl/contracts.hpp>
 
 namespace csl {
-// This contracts-only consumer replaces the out-of-line friend publisher
-// definition. The static contracts archive is not otherwise pulled in, so the
-// replacement accepts any caller-built complete-family claim.
+// This contracts-only consumer attempts to define the former publisher
+// bridge. The installed API must reject the undeclared member definition.
 std::variant<OptimalFamily,Diagnostics> FamilyPublisher::publish(FamilyIdentity identity,
     OptimalFamilyOutcome outcome) {
     return OptimalFamily{std::move(identity),std::move(outcome)};
@@ -24,6 +23,6 @@ int main() {
     const OptimumEvidence optimum{claim,ObjectiveEvidence{bound,bound}};
     const CompleteOptimalFamily complete{
         JointRelation{identity.coordinates,identity.request.representation,payload},
-        optimum,CompletenessEvidence{identity,Ts01AnalyticCoverageEvidence{}},Assurance::numerical};
+        optimum,CompletenessEvidence{identity,RegisteredCompletenessEvidence{identity.strategy,identity.strategy_version,"forged"}},Assurance::numerical};
     return std::holds_alternative<OptimalFamily>(FamilyPublisher::publish(identity,complete)) ? 0 : 1;
 }

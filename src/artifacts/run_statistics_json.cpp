@@ -285,14 +285,8 @@ ST(OptimumEvidence,F(optimum),F(bounds))
 ST(NumericalCoverageEvidence,F(procedure),F(policy),F(verifier),F(diagnostics))
 ST(ValidatedCoverageEvidence,F(certificate),F(verifier),F(arithmetic_profile))
 TAG(NumericalCoverageEvidence,"numerical") TAG(ValidatedCoverageEvidence,"validated")
-template<>struct Codec<Ts01AnalyticCoverageEvidence>{
-    static Json put(const Ts01AnalyticCoverageEvidence& v){return object(field("binding",v.binding()));}
-    static Ts01AnalyticCoverageEvidence get(const Json& j){
-        closed(j,{"binding"});(void)artifacts::get<FamilyIdentity>(j.at("binding"));
-        return {}; // A serialized proof is evidence metadata, never a live proof capability.
-    }
-};
-TAG(Ts01AnalyticCoverageEvidence,"ts01_exact_analytic")
+ST(RegisteredCompletenessEvidence,F(verifier),F(verifier_version),F(proof))
+TAG(RegisteredCompletenessEvidence,"registered_verifier")
 ST(CompletenessEvidence,F(binding),F(support))
 ST(JointRelation,F(coordinates),F(representation))
 ST(CompleteOptimalFamily,F(relation),F(optimum),F(completeness),F(assurance))
@@ -510,7 +504,7 @@ ArtifactResult<std::string> encode_run(const RunStatistics& owner,EncodeLimits l
     const auto* synthesis=std::get_if<SynthesisFinal>(&owner.description().final);
     if(synthesis&&synthesis->family) {
         const auto* complete=std::get_if<CompleteOptimalFamily>(&synthesis->family->family.outcome());
-        if(complete&&std::holds_alternative<Ts01AnalyticCoverageEvidence>(complete->completeness.support))
+        if(complete&&std::holds_alternative<RegisteredCompletenessEvidence>(complete->completeness.support))
             return ArtifactError{ArtifactErrorCode::unsupported,"run.final.family.completeness.support",
                 "run-statistics-v3 cannot encode the live T-S01 analytic proof capability"};
     }

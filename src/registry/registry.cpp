@@ -2,6 +2,42 @@
 #include <algorithm>
 
 namespace csl::registry {
+SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::ResolvedProblem& problem,
+    const FamilyRequest& family,const ExecutionContext& context) {
+    auto result=workspace_->solve(problem,family,context);
+    if(!result.complete_proposal)return result;
+    auto reject=[&](Diagnostics diagnostics) {
+        result.family.reset();
+        result.complete_proposal.reset();
+        result.outcome={problem.identity(),MathematicalOutcome::undetermined,Unestablished{}, {}};
+        result.objective={};
+        result.termination=Termination::contract_rejected;
+        result.stop=ContractValidationFailure{std::move(diagnostics),{false,false,result.incumbents.size(),false},{}};
+        return result;
+    };
+    if(!verifier_)
+        return reject({{DiagnosticCode::unsupported,"family.verifier","Selected strategy has no complete-family verifier"}});
+    const auto& proposal=*result.complete_proposal;
+    const auto& identity=proposal.identity;
+    if(identity.problem!=problem.identity()||identity.request!=family||
+        identity.coordinates!=problem.constraints().coordinates()||
+        identity.strategy!=request_->configuration.strategy||identity.strategy_version!=request_->strategy_version||
+        identity.lineage!=request_->lineage||proposal.family.completeness.binding!=identity)
+        return reject({{DiagnosticCode::evidence_mismatch,"family.proposal.binding",
+            "Complete-family proposal differs from the prepared problem, effective request or selected registration"}});
+    const auto* registered=std::get_if<RegisteredCompletenessEvidence>(&proposal.family.completeness.support);
+    if(!registered||registered->verifier!=request_->configuration.strategy||
+        registered->verifier_version!=request_->strategy_version||registered->proof.empty())
+        return reject({{DiagnosticCode::evidence_mismatch,"family.proposal.verifier",
+            "Proposal proof payload does not match the frozen strategy registration"}});
+    auto diagnostics=verifier_(*request_,proposal);
+    if(!diagnostics.empty())return reject(std::move(diagnostics));
+    auto published=FamilyPublisher::publish_verified(identity,OptimalFamilyOutcome{proposal.family},authority_);
+    if(const auto* errors=std::get_if<Diagnostics>(&published))return reject(*errors);
+    result.family=std::get<OptimalFamily>(std::move(published));
+    result.complete_proposal.reset();
+    return result;
+}
 std::variant<WitnessSelection,Unsupported> SelectorPort::run(Workspace& workspace,const Request& request,
     const ExecutionContext& context) {
     auto diagnostics=check_family_evidence(request.family,request.family.identity().problem,
@@ -121,6 +157,8 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     if (const auto* diagnostics = std::get_if<Diagnostics>(&capability)) return detail::capability_rejection(provenance,*diagnostics);
     auto diagnostics = detail::check_offer(std::get<Offer>(capability),requirements,false);
     if (!diagnostics.empty()) return Rejection{provenance,std::move(diagnostics)};
+    if(requirements.output.completeness==Completeness::established&&!entry.complete_family_verifier)
+        return detail::reject(provenance,"family.verifier","Complete-family output requires a verifier bound to the selected registration");
     auto planned = entry.planner(request,requirements);
     if (const auto* rejection = std::get_if<Rejection>(&planned)) return *rejection;
     auto& plan = std::get<StrategyPlan>(planned);
@@ -131,7 +169,11 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     frozen.strategy_version=entry.identity.version;
     auto snapshot = std::make_shared<const StrategyRequest>(std::move(frozen));
     auto factory = plan.snapshot_();
-    return PreparedStrategy{std::move(snapshot),requirements,std::move(factory),std::move(records)};
+    std::optional<detail::VerifiedFamilyAuthority> authority;
+    if(entry.complete_family_verifier)
+        authority=detail::VerifiedFamilyAuthority(entry.identity.id,entry.identity.version);
+    return PreparedStrategy{std::move(snapshot),requirements,std::move(factory),entry.complete_family_verifier,
+        std::move(authority),std::move(records)};
 }
 namespace detail {
 namespace {

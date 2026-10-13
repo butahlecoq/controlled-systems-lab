@@ -55,7 +55,7 @@ StrategyRequest request(problem::ResolvedProblem p) {
     configuration.representation=family.representation;
     return {std::move(p),configuration,std::move(family),{}};
 }
-ExecutionContext execution() {
+ExecutionContext make_execution_context() {
     ExecutionContext result;result.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     return result;
 }
@@ -67,7 +67,7 @@ SynthesisResult run(StrategyRequest request_) {
     requirements.output.completeness=Completeness::established;
     auto prepared=take(strategies.prepare(request_,requirements));
     auto workspace=prepared.create();
-    return take(workspace->run(execution()));
+    return take(workspace->run(make_execution_context()));
 }
 bool rejected(Problem p) {
     auto request_=request(resolve(std::move(p)));
@@ -77,6 +77,47 @@ bool rejected(Problem p) {
     requirements.output.family=request_.family.target;
     requirements.output.completeness=Completeness::established;
     return std::holds_alternative<Rejection>(strategies.prepare(request_,requirements));
+}
+class GenericProposalWorkspace final:public SynthesisWorkspace {
+    ModuleId verifier_;std::string version_,proof_verifier_,proof_version_;
+public:
+    GenericProposalWorkspace(ModuleId verifier,std::string version,std::string proof_verifier,std::string proof_version)
+        :verifier_(std::move(verifier)),version_(std::move(version)),proof_verifier_(std::move(proof_verifier)),proof_version_(std::move(proof_version)){}
+    SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& family,const ExecutionContext&) override {
+        FamilyIdentity identity{problem.identity(),family,problem.constraints().coordinates(),verifier_,version_,{}};
+        JointRelation relation{identity.coordinates,family.representation,std::make_shared<const JointRelationPayload>()};
+        const ClaimEvidence claim{identity.problem,SymbolicArgument{"fixture theorem","second registered verifier"}};
+        OptimumEvidence optimum{claim,{}};
+        CompleteOptimalFamily complete{relation,optimum,
+            {identity,RegisteredCompletenessEvidence{{proof_verifier_},proof_version_,"second-verifier-proof"}},Assurance::numerical};
+        SynthesisResult result{Termination::completed,
+            {problem.identity(),MathematicalOutcome::optimal,claim.support,{}},{},{},{},{},{},{}};
+        result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
+        return result;
+    }
+};
+StrategyRegistration second_verifier_registration(std::string proof_id="test.verifier.second",std::string proof_version="7") {
+    const ModuleId id{"test.verifier.second"};const std::string version="7";
+    return {{id,version},
+        [](const StrategyRequest&,const Requirements&)->Capability {
+            Output output;output.representation={"csl.polyhedron.h"};output.assurance=Assurance::numerical;
+            output.family=FamilyTarget::exact_optimal_relation;output.completeness=Completeness::established;
+            return Offer{output};
+        },
+        [proof_id=std::move(proof_id),proof_version=std::move(proof_version)](const StrategyRequest&,const Requirements&)->std::variant<StrategyPlan,Rejection> {
+            auto checked=std::get<CheckedPipeline<>>(check_pipeline());
+            return compose_strategy(std::move(checked),[proof_id,proof_version](auto,const StrategyRequest& request,const Requirements&) {
+                return std::make_unique<GenericProposalWorkspace>(request.configuration.strategy,request.strategy_version,proof_id,proof_version);
+            });
+        },
+        [](const StrategyRequest& request,const CompleteFamilyProposal& proposal)->Diagnostics {
+            const auto* evidence=std::get_if<RegisteredCompletenessEvidence>(&proposal.family.completeness.support);
+            if(proposal.identity.problem!=request.problem.identity()||proposal.identity.request!=request.family||!evidence||
+                evidence->verifier!=request.configuration.strategy||evidence->verifier_version!=request.strategy_version||
+                evidence->proof!="second-verifier-proof")
+                return {{DiagnosticCode::evidence_mismatch,"second.verifier","Second verifier rejected its proof payload or binding"}};
+            return {};
+        }};
 }
 }
 
@@ -118,6 +159,44 @@ TEST_CASE("registered T-S01 exact profile publishes its canonical complete famil
     CHECK_FALSE(relation->contains(Vector{0,0,0,0,0}));
     CHECK_FALSE(relation->contains(Vector{0,1,2,1,1}));
     CHECK_FALSE(relation->contains(Vector{0,1,1,1,std::numeric_limits<double>::denorm_min()}));
+}
+
+TEST_CASE("compiled verifier selection supports a second registered verifier and freezes it at prepare") {
+    auto registration=second_verifier_registration();
+    StrategyRegistry strategies;REQUIRE_FALSE(strategies.add(registration).has_value());
+    auto request_=request(resolve(source()));request_.configuration.strategy=registration.identity.id;
+    request_.family.profile="second-verifier-profile";
+    Requirements requirements;requirements.output.representation=request_.family.representation;
+    requirements.output.family=request_.family.target;requirements.output.completeness=Completeness::established;
+    auto prepared=take(strategies.prepare(request_,requirements));
+    registration.complete_family_verifier=[](const StrategyRequest&,const CompleteFamilyProposal&){
+        return Diagnostics{{DiagnosticCode::evidence_mismatch,"mutated.verifier","must not replace selected verifier"}};
+    };
+    auto result=take(prepared.create()->run(make_execution_context()));
+    REQUIRE(result.family);
+    CHECK(result.family->identity().strategy==ModuleId{"test.verifier.second"});
+    CHECK(result.family->identity().strategy_version=="7");
+}
+
+TEST_CASE("registry rejects unknown verifier identity and version in opaque proposal") {
+    for(const auto& bad:std::vector<std::pair<std::string,std::string>>{{"unknown.verifier","7"},{"test.verifier.second","8"}}) {
+        auto registration=second_verifier_registration(bad.first,bad.second);
+        StrategyRegistry strategies;REQUIRE_FALSE(strategies.add(std::move(registration)).has_value());
+        auto request_=request(resolve(source()));request_.configuration.strategy={"test.verifier.second"};
+        request_.family.profile="second-verifier-profile";
+        Requirements requirements;requirements.output.representation=request_.family.representation;
+        requirements.output.family=request_.family.target;requirements.output.completeness=Completeness::established;
+        auto prepared=take(strategies.prepare(request_,requirements));
+        const auto result=take(prepared.create()->run(make_execution_context()));
+        CHECK(result.termination==Termination::contract_rejected);
+        CHECK_FALSE(result.family);
+    }
+}
+
+TEST_CASE("registry rejects replacement of an already registered T-S01 identity") {
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
+    CHECK(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
 }
 
 TEST_CASE("T-S01 admission rejects objective, dynamics, controls, initial and temporal mutations") {
@@ -164,6 +243,46 @@ TEST_CASE("T-S01 publication binds the immutable request, coordinates and regist
     }
 }
 
+TEST_CASE("compiled T-S01 verifier rejects independent proposal relation optimum bounds identity and lineage tampering") {
+    auto original_request=request(resolve(source()));
+    const auto result=run(original_request);
+    REQUIRE(result.family);
+    const auto registration=synthesis::strategy_ts01::make_registration();
+    const auto original=CompleteFamilyProposal{result.family->identity(),
+        std::get<CompleteOptimalFamily>(result.family->outcome())};
+    auto rejected_by_checker=[&](auto mutate) {
+        auto proposal=original;mutate(proposal);
+        CHECK_FALSE(registration.complete_family_verifier(original_request,proposal).empty());
+    };
+    rejected_by_checker([](auto& proposal){
+        proposal.family.relation.payload=std::make_shared<const JointRelationPayload>();
+    });
+    rejected_by_checker([](auto& proposal){
+        proposal.family.optimum.optimum.support=SymbolicArgument{"forged","changed theorem"};
+    });
+    rejected_by_checker([](auto& proposal){
+        proposal.family.optimum.bounds.lower->value=-1;
+    });
+    rejected_by_checker([](auto& proposal){
+        proposal.family.optimum.bounds.upper->value=1;
+    });
+    rejected_by_checker([](auto& proposal){
+        proposal.identity.request.profile="different";proposal.family.completeness.binding=proposal.identity;
+    });
+    rejected_by_checker([](auto& proposal){
+        proposal.identity.lineage.push_back({{"transform"},{"input"},{"output"},{"module"},"1"});
+        proposal.family.completeness.binding=proposal.identity;
+    });
+    rejected_by_checker([](auto& proposal){
+        auto& proof=std::get<RegisteredCompletenessEvidence>(proposal.family.completeness.support);
+        proof.verifier={"unknown.verifier"};
+    });
+    rejected_by_checker([](auto& proposal){
+        auto& proof=std::get<RegisteredCompletenessEvidence>(proposal.family.completeness.support);
+        proof.verifier_version="2";
+    });
+}
+
 TEST_CASE("T-S01 registry rejects mismatched request and selected strategy identity") {
     auto base=request(resolve(source()));
     StrategyRegistry strategies;
@@ -194,8 +313,8 @@ TEST_CASE("generic numerical and unchecked certificate strings cannot publish co
         std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>{
             ValidatedCoverageEvidence{"artifact:unverified",ModuleId{"checker:unregistered"},"exact-looking"}}}) {
         const auto completeness_support=std::holds_alternative<NumericalCoverageEvidence>(support)?
-            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence>{std::get<NumericalCoverageEvidence>(support)}:
-            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence>{std::get<ValidatedCoverageEvidence>(support)};
+            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,RegisteredCompletenessEvidence>{std::get<NumericalCoverageEvidence>(support)}:
+            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,RegisteredCompletenessEvidence>{std::get<ValidatedCoverageEvidence>(support)};
         CompleteOptimalFamily untrusted{{complete.relation.coordinates,identity.request.representation,fake},
             {{identity.problem,arbitrary},{}},{identity,completeness_support},Assurance::numerical};
         CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,std::move(untrusted))));
