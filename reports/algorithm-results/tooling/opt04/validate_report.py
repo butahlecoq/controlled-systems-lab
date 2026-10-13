@@ -273,20 +273,33 @@ def validate_records(records: dict) -> dict:
                         require(residuals[field] >= 0 or field == "objective_value", f"{label}.{field} must be nonnegative")
                 if expected_match:
                     limit = absolute + relative
-                    require(residuals["original_rows_max_violation"] <= limit
-                            and residuals["nonnegative_max_violation"] <= limit
+                    primal = result.get("primal")
+                    require(isinstance(primal, list) and len(primal) == fixture["columns"],
+                            f"{label}: missing phase-I primal")
+                    require(actual_input is not None, f"{label}: successful phase-I row has no actual input")
+                    recomputed = _primal_residuals(actual_input, primal, label)
+                    for field, key in (("original_rows_max_violation", "original_equalities"),
+                                       ("nonnegative_max_violation", "nonnegative_variables"),
+                                       ("objective_value", "zero_original_objective")):
+                        require(abs(residuals[field] - recomputed[key]) <= limit,
+                                f"{label}: saved {field} differs from recomputed phase-I witness")
+                    require(residuals["nonnegative_max_violation"] <= limit
+                            and residuals["objective_value"] <= limit
                             and residuals["auxiliary_residual"] <= limit,
-                            f"{label}: residual exceeds authored tolerance")
+                            f"{label}: nonnegativity, objective, or auxiliary residual exceeds authored tolerance")
                     require(abs(residuals["auxiliary_value"] - fixture["expected_auxiliary"]) <= limit,
                             f"{label}: auxiliary value differs from literal oracle")
                     if fixture["expected_status"] == "optimal":
-                        primal = result.get("primal")
+                        require(residuals["original_rows_max_violation"] <= limit,
+                                f"{label}: feasible phase-I witness residual exceeds authored tolerance")
                         expected_primal = fixture["expected_phase_one_primal"]
-                        require(isinstance(primal, list) and len(primal) == len(expected_primal), f"{label}: missing phase-I primal")
+                        require(len(primal) == len(expected_primal), f"{label}: phase-I primal dimension differs from oracle")
                         require(all(abs(finite_number(a, f"{label}.primal") - b) <= limit
                                     for a, b in zip(primal, expected_primal)), f"{label}: phase-I primal differs from oracle")
                     if fixture["expected_status"] == "infeasible":
-                        require(residuals["auxiliary_value"] > 0, f"{label}: infeasible auxiliary must be positive")
+                        require(residuals["original_rows_max_violation"] > limit,
+                                f"{label}: infeasible phase-I witness unexpectedly satisfies the original equalities")
+                        require(residuals["auxiliary_value"] > limit, f"{label}: infeasible auxiliary must be positive")
             else:
                 for field in ("original_rows_max_violation", "nonnegative_max_violation", "objective_value", "auxiliary_residual", "auxiliary_value"):
                     require(trial.get(field) is None, f"{label}: reference row contains phase-I-only {field}")

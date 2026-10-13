@@ -1,0 +1,967 @@
+Change Dir: 'SOURCE_ROOT/build/opt04-report'
+
+Run Clean Command: "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" CSL.sln /t:Clean /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:4 /v:n
+Р’РµСЂСЃРёСЏ MSBuild 17.14.19+164abd434 РґР»СЏ .NET Framework
+РЎР±РѕСЂРєР° РЅР°С‡Р°С‚Р° 13.10.2026 20:27:39.
+
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>ValidateSolutionConfiguration:
+         РЎРѕР·РґР°РЅРёРµ РєРѕРЅС„РёРіСѓСЂР°С†РёРё СЂРµС€РµРЅРёСЏ "Release|x64".
+       ValidateProjects:
+         РџСЂРѕРµРєС‚"INSTALL" РЅРµ РІС‹Р±СЂР°РЅ РґР»СЏ СЃР±РѕСЂРєРё РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРё СЂРµС€РµРЅРёСЏ "Release|x64".
+         РџСЂРѕРµРєС‚"PACKAGE" РЅРµ РІС‹Р±СЂР°РЅ РґР»СЏ СЃР±РѕСЂРєРё РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРё СЂРµС€РµРЅРёСЏ "Release|x64".
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\ZERO_CHECK.vcxproj" (23) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    23>_PrepareForClean:
+         Р¤Р°Р№Р» "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+    23>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\ZERO_CHECK.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_qhull_r.vcxproj.metaproj" (21) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    21>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_qhull_r.vcxproj.metaproj" (21) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_qhull_r.vcxproj" (30) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    30>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_qhull_r.dir\Release\".
+    30>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_qhull_r.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_verification.vcxproj.metaproj" (3) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     3>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_verification.vcxproj.metaproj" (3) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_sets.vcxproj.metaproj" (4) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     4>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_sets.vcxproj.metaproj" (4) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_numeric.vcxproj.metaproj" (5) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     5>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_numeric.vcxproj.metaproj" (5) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_contracts.vcxproj.metaproj" (6) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_contracts.vcxproj.metaproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_contracts.vcxproj" (31) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    31>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+    21>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_qhull_r.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    31>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_contracts.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     6>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_contracts.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build\highs\highs.vcxproj.metaproj" (2) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     2>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build\highs\highs.vcxproj.metaproj" (2) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build\highs\highs.vcxproj" (36) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    36>_PrepareForClean:
+         Р¤Р°Р№Р» "highs.dir\Release\highs.tlog\highs.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+     5>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_numeric.vcxproj.metaproj" (5) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_numeric.vcxproj" (37) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    37>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+    36>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build\highs\highs.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    37>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_numeric.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     2>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build\highs\highs.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     5>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_numeric.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     3>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_verification.vcxproj.metaproj" (3) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_resolved_problem.vcxproj.metaproj" (7) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     7>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_resolved_problem.vcxproj.metaproj" (7) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj.metaproj" (8) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     8>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj.metaproj" (8) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_objectives.vcxproj.metaproj" (11) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    11>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_objectives.vcxproj.metaproj" (11) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_objectives.vcxproj" (38) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    38>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_objectives.dir\Release\csl_objectives.tlog\csl_objectives.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+     3>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_verification.vcxproj.metaproj" (3) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_optimization.vcxproj.metaproj" (13) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    13>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_optimization.vcxproj.metaproj" (13) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_optimization.vcxproj" (39) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    39>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_optimization.dir\Release\csl_optimization.tlog\csl_optimization.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+     4>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_sets.vcxproj.metaproj" (4) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_sets.vcxproj" (40) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    40>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_sets.dir\Release\csl_sets.tlog\csl_sets.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+     8>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj.metaproj" (8) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj.metaproj" (9) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     9>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj.metaproj" (9) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_model.vcxproj.metaproj" (10) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    10>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_model.vcxproj.metaproj" (10) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_model.vcxproj" (41) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    41>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+    38>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_objectives.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    39>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_optimization.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    41>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_model.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    11>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_objectives.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    40>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_sets.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    13>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_optimization.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     4>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_sets.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    10>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_model.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_terminal_minimizers.vcxproj.metaproj" (14) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    14>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_terminal_minimizers.vcxproj.metaproj" (14) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_convex.vcxproj.metaproj" (15) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    15>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_convex.vcxproj.metaproj" (15) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_convex.vcxproj" (42) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    42>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_convex.dir\Release\".
+     9>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj.metaproj" (9) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj" (43) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    43>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_problem.dir\Release\csl_problem.tlog\csl_problem.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+    42>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_convex.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    43>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    15>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_convex.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     9>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     8>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj.metaproj" (8) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj" (44) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    44>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_resolved_core.dir\Release\csl_reso.9EB8AB8E.tlog\csl_resolved_core.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+    44>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     8>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     7>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_resolved_problem.vcxproj.metaproj" (7) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_registry.vcxproj.metaproj" (12) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    12>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_registry.vcxproj.metaproj" (12) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_registry.vcxproj" (45) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    45>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+    45>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_registry.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    12>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_registry.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_highs_convex.vcxproj.metaproj" (29) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    29>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_highs_convex.vcxproj.metaproj" (29) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_highs_convex.vcxproj" (46) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    46>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_highs_convex.dir\Release\".
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_execution.vcxproj.metaproj" (32) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    32>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_execution.vcxproj.metaproj" (32) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_execution.vcxproj" (48) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    48>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_execution.dir\Release\".
+    14>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_terminal_minimizers.vcxproj.metaproj" (14) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_terminal_minimizers.vcxproj" (47) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    47>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_terminal_minimizers.dir\Release\".
+     7>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_resolved_problem.vcxproj.metaproj" (7) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_resolved_problem.vcxproj" (49) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    49>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_resolved_problem.dir\Release\".
+    48>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_execution.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    47>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_terminal_minimizers.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    32>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_execution.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    49>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_resolved_problem.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    14>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_terminal_minimizers.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    46>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_highs_convex.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_qhull_conversion.vcxproj.metaproj" (22) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    22>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_qhull_conversion.vcxproj.metaproj" (22) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj.metaproj" (24) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    24>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj.metaproj" (24) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj" (50) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    50>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_highs_lp.dir\Release\csl_highs_lp.tlog\csl_highs_lp.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_phase_one.vcxproj.metaproj" (25) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    25>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_phase_one.vcxproj.metaproj" (25) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_phase_one.vcxproj" (51) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    51>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_phase_one.dir\Release\csl_phase_one.tlog\csl_phase_one.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_strategy_a.vcxproj.metaproj" (17) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    17>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_strategy_a.vcxproj.metaproj" (17) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_polyhedral.vcxproj.metaproj" (18) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    18>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_polyhedral.vcxproj.metaproj" (18) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_polyhedral.vcxproj" (52) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    52>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_polyhedral.dir\Release\".
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_hull.vcxproj.metaproj" (28) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    28>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_hull.vcxproj.metaproj" (28) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_hull.vcxproj" (53) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    53>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_hull.dir\Release\".
+    52>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_polyhedral.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    53>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_hull.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    50>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     7>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_resolved_problem.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    29>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_highs_convex.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    18>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_polyhedral.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    28>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_hull.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    51>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_phase_one.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    24>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    25>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_phase_one.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     3>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_verification.vcxproj.metaproj" (3) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_verification.vcxproj" (54) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    54>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_verification.dir\Release\".
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_affine_sum.vcxproj.metaproj" (34) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    34>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_affine_sum.vcxproj.metaproj" (34) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_affine_sum.vcxproj" (55) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    55>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_affine_sum.dir\Release\".
+    54>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_verification.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    17>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_strategy_a.vcxproj.metaproj" (17) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_control_recovery.vcxproj.metaproj" (20) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    20>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_control_recovery.vcxproj.metaproj" (20) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_control_recovery.vcxproj" (56) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    56>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_control_recovery.dir\Release\".
+    55>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_affine_sum.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    17>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_strategy_a.vcxproj.metaproj" (17) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_nominal_forward.vcxproj.metaproj" (19) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    19>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_nominal_forward.vcxproj.metaproj" (19) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_nominal_forward.vcxproj" (57) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    57>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_nominal_forward.dir\Release\".
+    56>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_control_recovery.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     3>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_verification.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    57>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_nominal_forward.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    34>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_affine_sum.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    20>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_control_recovery.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    19>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_nominal_forward.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_input.vcxproj.metaproj" (27) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    27>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_input.vcxproj.metaproj" (27) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_input.vcxproj" (58) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    58>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_input.dir\Release\".
+    58>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_input.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_artifacts.vcxproj.metaproj" (33) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    33>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_artifacts.vcxproj.metaproj" (33) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_artifacts.vcxproj" (59) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    59>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_artifacts.dir\Release\".
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_strategy_b.vcxproj.metaproj" (16) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    16>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_strategy_b.vcxproj.metaproj" (16) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_strategy_b.vcxproj" (61) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    61>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_strategy_b.dir\Release\".
+    17>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_strategy_a.vcxproj.metaproj" (17) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_strategy_a.vcxproj" (60) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    60>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_strategy_a.dir\Release\".
+    59>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_artifacts.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    61>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_strategy_b.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    60>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_strategy_a.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    27>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_input.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    33>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_artifacts.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    16>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_strategy_b.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    17>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_strategy_a.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj.metaproj" (26) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    26>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj.metaproj" (26) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (62) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    62>_PrepareForClean:
+         Р¤Р°Р№Р» "csl_opt04_phase_one_report.dir\Release\csl_opt0.3A6A9F17.tlog\csl_opt04_phase_one_report.lastbuildstate" СѓРґР°Р»СЏРµС‚СЃСЏ.
+    22>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_qhull_conversion.vcxproj.metaproj" (22) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_qhull_conversion.vcxproj" (63) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    63>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_qhull_conversion.dir\Release\".
+    62>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    26>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    63>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_qhull_conversion.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    22>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_qhull_conversion.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\CSL.sln" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\ALL_BUILD.vcxproj.metaproj" (35) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    35>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\ALL_BUILD.vcxproj.metaproj" (35) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\ALL_BUILD.vcxproj" (64) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    64>CoreClean:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "x64\Release\ALL_BUILD\".
+    64>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\ALL_BUILD.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+    35>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\ALL_BUILD.vcxproj.metaproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+     1>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\CSL.sln" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ Clean).
+
+РЎР±РѕСЂРєР° СѓСЃРїРµС€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°.
+    РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёР№: 0
+    РћС€РёР±РѕРє: 0
+
+РџСЂРѕС€Р»Рѕ РІСЂРµРјРµРЅРё 00:00:00.66
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" csl_opt04_phase_one_report.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:4 /v:n
+Р’РµСЂСЃРёСЏ MSBuild 17.14.19+164abd434 РґР»СЏ .NET Framework
+РЎР±РѕСЂРєР° РЅР°С‡Р°С‚Р° 13.10.2026 20:27:40.
+
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\ZERO_CHECK.vcxproj" (2) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     2>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+       CustomBuild:
+         1>Checking Build System
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+     2>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\ZERO_CHECK.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_contracts.vcxproj" (3) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     3>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj" (6) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build\highs\highs.vcxproj" (14) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    14>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "highs.dir\Release\highs.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "highs.dir\Release\highs.tlog\unsuccessfulbuild".
+     3>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+    14>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/build/opt04-report/_deps/csl_highs-src/highs/CMakeLists.txt
+     3>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\contracts.cpp"
+    14>ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\filereader" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\pdqsort" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\zstr" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\interfaces" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\parallel" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\filereaderlp\reader.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\interfaces\highs_c_api.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io\Filereader.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io\FilereaderEms.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io\FilereaderLp.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io\FilereaderMps.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io\HighsIO.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io\HMpsFF.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io\HMPSIO.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io\LoadOptions.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\IpxWrapper.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\Highs.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsCallback.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsDebug.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsIis.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsInfo.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsInfoDebug.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsDeprecated.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsInterface.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsLp.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsLpUtils.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsModelUtils.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsOptions.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsRanging.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsSolution.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsSolutionDebug.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsSolve.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data\HighsStatus.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsCliqueTable.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsConflictPool.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsCutGeneration.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsCutPool.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsDebugSol.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsDomain.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsDynamicRowMatrix.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsFeasibilityJump.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsGFkSolve.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsImplications.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsLpAggregator.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsLpRelaxation.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsMipAnalysis.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsMipSolver.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsMipSolverData.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsModkSeparator.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsNodeQueue.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsObjectiveFunction.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsPathSeparator.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsPrimalHeuristics.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsPseudocost.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsRedcostFixing.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsSearch.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsSeparation.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsSeparator.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsTableauSeparator.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip\HighsTransformedLp.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model\HighsHessian.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model\HighsHessianUtils.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model\HighsModel.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\parallel\HighsTaskExecutor.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\CupdlpWrapper.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve\HighsPostsolveStack.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve\HighsSymmetry.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve\HPresolve.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve\HPresolveAnalysis.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve\ICrash.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve\ICrashUtil.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve\ICrashX.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve\PresolveComponent.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver\a_asm.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver\a_quass.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver\perturbation.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver\quass.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver\ratiotest.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver\scaling.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkk.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkkControl.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkkDebug.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkkDual.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkkDualMulti.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkkDualRHS.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkkDualRow.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkkInterface.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HEkkPrimal.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HighsSimplexAnalysis.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HSimplex.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HSimplexDebug.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HSimplexNla.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HSimplexNlaDebug.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HSimplexNlaFreeze.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HSimplexNlaProductForm.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex\HSimplexReport.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt\KktCh2.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt\DevKkt.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HFactor.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HFactorDebug.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HFactorExtend.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HFactorRefactor.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HFactorUtils.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HighsHash.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HighsLinearSumBounds.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HighsMatrixPic.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HighsMatrixUtils.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HighsSort.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HighsSparseMatrix.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HighsUtils.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HSet.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\HVectorBase.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util\stringutil.cpp" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\basiclu_kernel.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\basiclu_wrapper.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\conjugate_residuals.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\control.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\crossover.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\diagonal_precond.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\forrest_tomlin.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\guess_basis.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\indexed_vector.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\info.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\ipm.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\ipx_c.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\iterate.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver_basis.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver_diag.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\linear_operator.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\lp_solver.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\lu_factorization.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\maxvolume.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\model.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\normal_matrix.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\sparse_matrix.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\sparse_utils.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\splitted_normal_matrix.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\starting_basis.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\symbolic_invert.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\timer.cc" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\utils.cc"
+     3>SetModuleDependencies:
+         contracts.cpp
+    14>ClCompile:
+         reader.cpp
+         highs_c_api.cpp
+         Filereader.cpp
+         FilereaderEms.cpp
+         FilereaderLp.cpp
+         FilereaderMps.cpp
+         HighsIO.cpp
+         HMpsFF.cpp
+         HMPSIO.cpp
+         LoadOptions.cpp
+         IpxWrapper.cpp
+         Highs.cpp
+     3>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\contracts.cpp"
+         contracts.cpp
+    14>ClCompile:
+         HighsCallback.cpp
+         HighsDebug.cpp
+         HighsIis.cpp
+         HighsInfo.cpp
+         HighsInfoDebug.cpp
+         HighsDeprecated.cpp
+         HighsInterface.cpp
+         HighsLp.cpp
+         HighsLpUtils.cpp
+         HighsModelUtils.cpp
+         HighsOptions.cpp
+         HighsRanging.cpp
+         HighsSolution.cpp
+         HighsSolutionDebug.cpp
+         HighsSolve.cpp
+         HighsStatus.cpp
+         HighsCliqueTable.cpp
+         HighsConflictPool.cpp
+         HighsCutGeneration.cpp
+         HighsCutPool.cpp
+         HighsDebugSol.cpp
+         HighsDomain.cpp
+         HighsDynamicRowMatrix.cpp
+         HighsFeasibilityJump.cpp
+     3>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_contracts.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_contracts.dir\Release\contracts.obj
+    14>ClCompile:
+         HighsGFkSolve.cpp
+         HighsImplications.cpp
+         HighsLpAggregator.cpp
+     3>Lib:
+         csl_contracts.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_contracts.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate".
+     3>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_contracts.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_numeric.vcxproj" (4) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     4>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild".
+    14>ClCompile:
+         HighsLpRelaxation.cpp
+         HighsMipAnalysis.cpp
+     4>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    14>ClCompile:
+         HighsMipSolver.cpp
+         HighsMipSolverData.cpp
+         HighsModkSeparator.cpp
+         HighsNodeQueue.cpp
+     4>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /scanDependencies "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_numeric.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\numeric\data.cpp"
+    14>ClCompile:
+         HighsObjectiveFunction.cpp
+     4>SetModuleDependencies:
+         data.cpp
+    14>ClCompile:
+         HighsPathSeparator.cpp
+         HighsPrimalHeuristics.cpp
+     4>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_numeric.pdb" /sourceDependencies "csl_numeric.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\numeric\data.cpp"
+    14>ClCompile:
+         HighsPseudocost.cpp
+         HighsRedcostFixing.cpp
+     4>ClCompile:
+         data.cpp
+    14>ClCompile:
+         HighsSearch.cpp
+         HighsSeparation.cpp
+         HighsSeparator.cpp
+         HighsTableauSeparator.cpp
+         HighsTransformedLp.cpp
+         HighsHessian.cpp
+         HighsHessianUtils.cpp
+         HighsModel.cpp
+         HighsTaskExecutor.cpp
+         CupdlpWrapper.cpp
+         HighsPostsolveStack.cpp
+         HighsSymmetry.cpp
+         HPresolve.cpp
+         HPresolveAnalysis.cpp
+         ICrash.cpp
+         ICrashUtil.cpp
+         ICrashX.cpp
+         PresolveComponent.cpp
+     4>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_numeric.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_numeric.dir\Release\data.obj
+    14>ClCompile:
+         a_asm.cpp
+         a_quass.cpp
+         perturbation.cpp
+     4>Lib:
+         csl_numeric.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_numeric.lib
+    14>ClCompile:
+         quass.cpp
+         ratiotest.cpp
+         scaling.cpp
+     4>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate".
+     4>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_numeric.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    14>ClCompile:
+         HEkk.cpp
+         HEkkControl.cpp
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj" (9) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     9>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj" (9) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_sets.vcxproj" (12) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    12>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild".
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_optimization.vcxproj" (7) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     7>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild".
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_objectives.vcxproj" (8) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     8>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+    14>ClCompile:
+         HEkkDebug.cpp
+         HEkkDual.cpp
+         HEkkDualMulti.cpp
+     8>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    14>ClCompile:
+         HEkkDualRHS.cpp
+    12>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    14>ClCompile:
+         HEkkDualRow.cpp
+         HEkkInterface.cpp
+     7>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    14>ClCompile:
+         HEkkPrimal.cpp
+         HighsSimplexAnalysis.cpp
+     8>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_objectives.dir\Release\\" /scanDependencies "csl_objectives.dir\Release\\" /Fo"csl_objectives.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_objectives.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_objectives_eigen-src" "SOURCE_ROOT\src\optimization\objective_reformulation.cpp"
+    14>ClCompile:
+         HSimplex.cpp
+         HSimplexDebug.cpp
+         HSimplexNla.cpp
+         HSimplexNlaDebug.cpp
+         HSimplexNlaFreeze.cpp
+    12>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_sets.dir\Release\\" /scanDependencies "csl_sets.dir\Release\\" /Fo"csl_sets.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_sets.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\sets\data.cpp"
+    14>ClCompile:
+         HSimplexNlaProductForm.cpp
+         HSimplexReport.cpp
+         KktCh2.cpp
+         DevKkt.cpp
+    12>SetModuleDependencies:
+         data.cpp
+     8>SetModuleDependencies:
+         objective_reformulation.cpp
+    14>ClCompile:
+         HFactor.cpp
+    12>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_sets.dir\Release\\" /Fo"csl_sets.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_sets.pdb" /sourceDependencies "csl_sets.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\sets\data.cpp"
+     8>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_objectives.dir\Release\\" /Fo"csl_objectives.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_objectives.pdb" /sourceDependencies "csl_objectives.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_objectives_eigen-src" "SOURCE_ROOT\src\optimization\objective_reformulation.cpp"
+     7>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+    12>ClCompile:
+         data.cpp
+     7>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /scanDependencies "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_optimization.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\optimization\lp_backend.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /scanDependencies "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_optimization.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\optimization\linear_program.cpp"
+     8>ClCompile:
+         objective_reformulation.cpp
+    14>ClCompile:
+         HFactorDebug.cpp
+         HFactorExtend.cpp
+         HFactorRefactor.cpp
+         HFactorUtils.cpp
+         HighsHash.cpp
+         HighsLinearSumBounds.cpp
+         HighsMatrixPic.cpp
+         HighsMatrixUtils.cpp
+     7>SetModuleDependencies:
+         lp_backend.cpp
+    14>ClCompile:
+         HighsSort.cpp
+         HighsSparseMatrix.cpp
+     7>SetModuleDependencies:
+         linear_program.cpp
+    14>ClCompile:
+         HighsUtils.cpp
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_model.vcxproj" (5) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     5>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild".
+    14>ClCompile:
+         HSet.cpp
+         HVectorBase.cpp
+         stringutil.cpp
+         basiclu_kernel.cc
+         basiclu_wrapper.cc
+         conjugate_residuals.cc
+         control.cc
+         crossover.cc
+         diagonal_precond.cc
+         forrest_tomlin.cc
+         guess_basis.cc
+     5>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    14>ClCompile:
+         indexed_vector.cc
+         info.cc
+         ipm.cc
+         ipx_c.cc
+         iterate.cc
+         kkt_solver_basis.cc
+         kkt_solver_diag.cc
+         kkt_solver.cc
+         linear_operator.cc
+         lp_solver.cc
+         lu_factorization.cc
+     5>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /scanDependencies "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_model.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\model\linear_system.cpp"
+     7>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_optimization.pdb" /sourceDependencies "csl_optimization.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\optimization\linear_program.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_optimization.pdb" /sourceDependencies "csl_optimization.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\optimization\lp_backend.cpp"
+    14>ClCompile:
+         maxvolume.cc
+         model.cc
+         normal_matrix.cc
+         sparse_matrix.cc
+         sparse_utils.cc
+         splitted_normal_matrix.cc
+     5>SetModuleDependencies:
+         linear_system.cpp
+    14>ClCompile:
+         starting_basis.cc
+         symbolic_invert.cc
+         timer.cc
+     7>ClCompile:
+         linear_program.cpp
+    14>ClCompile:
+         utils.cc
+     7>ClCompile:
+         lp_backend.cpp
+    12>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_sets.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_sets.dir\Release\data.obj
+         csl_sets.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_sets.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_sets.dir\Release\csl_sets.tlog\csl_sets.lastbuildstate".
+    12>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_sets.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    14>ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\filereader" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\pdqsort" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\zstr" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\interfaces" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\parallel" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/qpsolver/basis.cpp.obj" /Fd"SOURCE_ROOT\build\opt04-report\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver\basis.cpp"
+         basis.cpp
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\filereader" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\pdqsort" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\zstr" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\interfaces" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\parallel" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\bin\highs.pdb" /external:W1 /Gd /TC /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_cs.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_linalg.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_proj.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_restart.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_scaling.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_solver.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_step.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_utils.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_factorize.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_get_factors.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_initialize.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_object.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_dense.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_for_update.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_sparse.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_update.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_build_factors.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_condest.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_dfs.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_factorize_bump.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_file.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_garbage_perm.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_initialize.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_internal.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_markowitz.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_matrix_norm.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_pivot.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_residual_test.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_setup_bump.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_singletons.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_dense.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_for_update.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_sparse.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_symbolic.c" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_triangular.c"
+         cupdlp_cs.c
+         cupdlp_linalg.c
+         cupdlp_proj.c
+         cupdlp_restart.c
+         cupdlp_scaling.c
+         cupdlp_solver.c
+         cupdlp_step.c
+         cupdlp_utils.c
+         basiclu_factorize.c
+         basiclu_get_factors.c
+     5>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_model.pdb" /sourceDependencies "csl_model.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\model\linear_system.cpp"
+    14>ClCompile:
+         basiclu_initialize.c
+         basiclu_object.c
+     7>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_optimization.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_optimization.dir\Release\linear_program.obj
+         csl_optimization.dir\Release\lp_backend.obj
+    14>ClCompile:
+         basiclu_solve_dense.c
+         basiclu_solve_for_update.c
+         basiclu_solve_sparse.c
+         basiclu_update.c
+         lu_build_factors.c
+         lu_condest.c
+         lu_dfs.c
+         lu_factorize_bump.c
+         lu_file.c
+         lu_garbage_perm.c
+         lu_initialize.c
+         lu_internal.c
+         lu_markowitz.c
+         lu_matrix_norm.c
+         lu_pivot.c
+         lu_residual_test.c
+         lu_setup_bump.c
+     5>ClCompile:
+         linear_system.cpp
+    14>ClCompile:
+         lu_singletons.c
+         lu_solve_dense.c
+         lu_solve_for_update.c
+         lu_solve_sparse.c
+         lu_solve_symbolic.c
+         lu_solve_triangular.c
+     7>Lib:
+         csl_optimization.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_optimization.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_optimization.dir\Release\csl_optimization.tlog\csl_optimization.lastbuildstate".
+     7>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_optimization.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    14>ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\filereader" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\pdqsort" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\zstr" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\interfaces" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\parallel" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/ipx/basis.cc.obj" /Fd"SOURCE_ROOT\build\opt04-report\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\basis.cc"
+         basis.cc
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\filereader" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\pdqsort" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\zstr" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\interfaces" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\parallel" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/ipx/lu_update.cc.obj" /Fd"SOURCE_ROOT\build\opt04-report\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx\lu_update.cc"
+         lu_update.cc
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\filereader" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\pdqsort" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\zstr" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\interfaces" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\parallel" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/basiclu/lu_update.c.obj" /Fd"SOURCE_ROOT\build\opt04-report\Release\bin\highs.pdb" /external:W1 /Gd /TC /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu\lu_update.c"
+         lu_update.c
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\\\"Release\\\"" /l"0x0409" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\filereader" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\pdqsort" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\extern\zstr" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\interfaces" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\io" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\ipx" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\ipm\basiclu" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\lp_data" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\mip" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\model" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\parallel" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\presolve" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\qpsolver" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\simplex" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\test_kkt" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-src\highs\util" /I"SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build" /nologo /fo"highs.dir\Release\version.res" "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build\version.rc" 
+       Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\bin\highs.lib" /NOLOGO /MACHINE:X64  /machine:x64 highs.dir\Release\version.res
+         highs.dir\Release\reader.obj
+         highs.dir\Release\highs_c_api.obj
+         highs.dir\Release\Filereader.obj
+         highs.dir\Release\FilereaderEms.obj
+         highs.dir\Release\FilereaderLp.obj
+         highs.dir\Release\FilereaderMps.obj
+         highs.dir\Release\HighsIO.obj
+         highs.dir\Release\HMpsFF.obj
+         highs.dir\Release\HMPSIO.obj
+         highs.dir\Release\LoadOptions.obj
+         highs.dir\Release\IpxWrapper.obj
+         highs.dir\Release\Highs.obj
+         highs.dir\Release\HighsCallback.obj
+         highs.dir\Release\HighsDebug.obj
+         highs.dir\Release\HighsIis.obj
+         highs.dir\Release\HighsInfo.obj
+         highs.dir\Release\HighsInfoDebug.obj
+         highs.dir\Release\HighsDeprecated.obj
+         highs.dir\Release\HighsInterface.obj
+         highs.dir\Release\HighsLp.obj
+         highs.dir\Release\HighsLpUtils.obj
+         highs.dir\Release\HighsModelUtils.obj
+         highs.dir\Release\HighsOptions.obj
+         highs.dir\Release\HighsRanging.obj
+         highs.dir\Release\HighsSolution.obj
+         highs.dir\Release\HighsSolutionDebug.obj
+         highs.dir\Release\HighsSolve.obj
+         highs.dir\Release\HighsStatus.obj
+         highs.dir\Release\HighsCliqueTable.obj
+         highs.dir\Release\HighsConflictPool.obj
+         highs.dir\Release\HighsCutGeneration.obj
+         highs.dir\Release\HighsCutPool.obj
+         highs.dir\Release\HighsDebugSol.obj
+         highs.dir\Release\HighsDomain.obj
+         highs.dir\Release\HighsDynamicRowMatrix.obj
+         highs.dir\Release\HighsFeasibilityJump.obj
+         highs.dir\Release\HighsGFkSolve.obj
+         highs.dir\Release\HighsImplications.obj
+         highs.dir\Release\HighsLpAggregator.obj
+         highs.dir\Release\HighsLpRelaxation.obj
+         highs.dir\Release\HighsMipAnalysis.obj
+         highs.dir\Release\HighsMipSolver.obj
+         highs.dir\Release\HighsMipSolverData.obj
+         highs.dir\Release\HighsModkSeparator.obj
+         highs.dir\Release\HighsNodeQueue.obj
+         highs.dir\Release\HighsObjectiveFunction.obj
+         highs.dir\Release\HighsPathSeparator.obj
+         highs.dir\Release\HighsPrimalHeuristics.obj
+         highs.dir\Release\HighsPseudocost.obj
+         highs.dir\Release\HighsRedcostFixing.obj
+         highs.dir\Release\HighsSearch.obj
+         highs.dir\Release\HighsSeparation.obj
+         highs.dir\Release\HighsSeparator.obj
+         highs.dir\Release\HighsTableauSeparator.obj
+         highs.dir\Release\HighsTransformedLp.obj
+         highs.dir\Release\HighsHessian.obj
+         highs.dir\Release\HighsHessianUtils.obj
+         highs.dir\Release\HighsModel.obj
+         highs.dir\Release\HighsTaskExecutor.obj
+         highs.dir\Release\CupdlpWrapper.obj
+         highs.dir\Release\HighsPostsolveStack.obj
+         highs.dir\Release\HighsSymmetry.obj
+         highs.dir\Release\HPresolve.obj
+         highs.dir\Release\HPresolveAnalysis.obj
+         highs.dir\Release\ICrash.obj
+         highs.dir\Release\ICrashUtil.obj
+         highs.dir\Release\ICrashX.obj
+         highs.dir\Release\PresolveComponent.obj
+         highs.dir\Release\a_asm.obj
+         highs.dir\Release\a_quass.obj
+         highs.dir\Release\perturbation.obj
+         highs.dir\Release\quass.obj
+         highs.dir\Release\ratiotest.obj
+         highs.dir\Release\scaling.obj
+         highs.dir\Release\HEkk.obj
+         highs.dir\Release\HEkkControl.obj
+         highs.dir\Release\HEkkDebug.obj
+         highs.dir\Release\HEkkDual.obj
+         highs.dir\Release\HEkkDualMulti.obj
+         highs.dir\Release\HEkkDualRHS.obj
+         highs.dir\Release\HEkkDualRow.obj
+         highs.dir\Release\HEkkInterface.obj
+         highs.dir\Release\HEkkPrimal.obj
+         highs.dir\Release\HighsSimplexAnalysis.obj
+         highs.dir\Release\HSimplex.obj
+         highs.dir\Release\HSimplexDebug.obj
+         highs.dir\Release\HSimplexNla.obj
+         highs.dir\Release\HSimplexNlaDebug.obj
+         highs.dir\Release\HSimplexNlaFreeze.obj
+         highs.dir\Release\HSimplexNlaProductForm.obj
+         highs.dir\Release\HSimplexReport.obj
+         highs.dir\Release\KktCh2.obj
+         highs.dir\Release\DevKkt.obj
+         highs.dir\Release\HFactor.obj
+         highs.dir\Release\HFactorDebug.obj
+         highs.dir\Release\HFactorExtend.obj
+         highs.dir\Release\HFactorRefactor.obj
+         highs.dir\Release\HFactorUtils.obj
+         highs.dir\Release\HighsHash.obj
+         highs.dir\Release\HighsLinearSumBounds.obj
+         highs.dir\Release\HighsMatrixPic.obj
+         highs.dir\Release\HighsMatrixUtils.obj
+         highs.dir\Release\HighsSort.obj
+         highs.dir\Release\HighsSparseMatrix.obj
+         highs.dir\Release\HighsUtils.obj
+         highs.dir\Release\HSet.obj
+         highs.dir\Release\HVectorBase.obj
+         highs.dir\Release\stringutil.obj
+         highs.dir\Release\cupdlp_cs.obj
+         highs.dir\Release\cupdlp_linalg.obj
+         highs.dir\Release\cupdlp_proj.obj
+         highs.dir\Release\cupdlp_restart.obj
+         highs.dir\Release\cupdlp_scaling.obj
+         highs.dir\Release\cupdlp_solver.obj
+         highs.dir\Release\cupdlp_step.obj
+         highs.dir\Release\cupdlp_utils.obj
+         highs.dir\Release\basiclu_kernel.obj
+         highs.dir\Release\basiclu_wrapper.obj
+         highs.dir\Release\conjugate_residuals.obj
+         highs.dir\Release\control.obj
+         highs.dir\Release\crossover.obj
+         highs.dir\Release\diagonal_precond.obj
+         highs.dir\Release\forrest_tomlin.obj
+         highs.dir\Release\guess_basis.obj
+         highs.dir\Release\indexed_vector.obj
+         highs.dir\Release\info.obj
+         highs.dir\Release\ipm.obj
+         highs.dir\Release\ipx_c.obj
+         highs.dir\Release\iterate.obj
+         highs.dir\Release\kkt_solver_basis.obj
+         highs.dir\Release\kkt_solver_diag.obj
+         highs.dir\Release\kkt_solver.obj
+         highs.dir\Release\linear_operator.obj
+         highs.dir\Release\lp_solver.obj
+         highs.dir\Release\lu_factorization.obj
+         highs.dir\Release\maxvolume.obj
+         highs.dir\Release\model.obj
+         highs.dir\Release\normal_matrix.obj
+         highs.dir\Release\sparse_matrix.obj
+         highs.dir\Release\sparse_utils.obj
+         highs.dir\Release\splitted_normal_matrix.obj
+         highs.dir\Release\starting_basis.obj
+         highs.dir\Release\symbolic_invert.obj
+         highs.dir\Release\timer.obj
+         highs.dir\Release\utils.obj
+         highs.dir\Release\basiclu_factorize.obj
+         highs.dir\Release\basiclu_get_factors.obj
+         highs.dir\Release\basiclu_initialize.obj
+         highs.dir\Release\basiclu_object.obj
+         highs.dir\Release\basiclu_solve_dense.obj
+         highs.dir\Release\basiclu_solve_for_update.obj
+         highs.dir\Release\basiclu_solve_sparse.obj
+         highs.dir\Release\basiclu_update.obj
+         highs.dir\Release\lu_build_factors.obj
+         highs.dir\Release\lu_condest.obj
+         highs.dir\Release\lu_dfs.obj
+         highs.dir\Release\lu_factorize_bump.obj
+         highs.dir\Release\lu_file.obj
+         highs.dir\Release\lu_garbage_perm.obj
+         highs.dir\Release\lu_initialize.obj
+         highs.dir\Release\lu_internal.obj
+         highs.dir\Release\lu_markowitz.obj
+         highs.dir\Release\lu_matrix_norm.obj
+         highs.dir\Release\lu_pivot.obj
+         highs.dir\Release\lu_residual_test.obj
+         highs.dir\Release\lu_setup_bump.obj
+         highs.dir\Release\lu_singletons.obj
+         highs.dir\Release\lu_solve_dense.obj
+         highs.dir\Release\lu_solve_for_update.obj
+         highs.dir\Release\lu_solve_sparse.obj
+         highs.dir\Release\lu_solve_symbolic.obj
+         highs.dir\Release\lu_solve_triangular.obj
+         highs.dir\Release\/qpsolver/basis.cpp.obj
+         highs.dir\Release\/ipm/ipx/basis.cc.obj
+         highs.dir\Release\/ipm/ipx/lu_update.cc.obj
+         highs.dir\Release\/ipm/basiclu/lu_update.c.obj
+     8>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_objectives.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_objectives.dir\Release\objective_reformulation.obj
+    14>Lib:
+         highs.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\bin\highs.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "highs.dir\Release\highs.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "highs.dir\Release\highs.tlog\highs.lastbuildstate".
+    14>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\_deps\csl_highs-build\highs\highs.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     5>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_model.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_model.dir\Release\linear_system.obj
+     8>Lib:
+         csl_objectives.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_objectives.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_objectives.dir\Release\csl_objectives.tlog\csl_objectives.lastbuildstate".
+     8>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_objectives.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     5>Lib:
+         csl_model.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_model.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate".
+     5>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_model.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     9>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\constraints.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\initial_information.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\domains.cpp"
+         domains.cpp
+         initial_information.cpp
+         constraints.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\constraints.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\domains.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\initial_information.cpp"
+         constraints.cpp
+         initial_information.cpp
+         domains.cpp
+       Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_problem.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_problem.dir\Release\domains.obj
+         csl_problem.dir\Release\constraints.obj
+         csl_problem.dir\Release\initial_information.obj
+         csl_problem.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_problem.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_problem.dir\Release\csl_problem.tlog\csl_problem.lastbuildstate".
+     9>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_problem.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj" (11) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    11>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_resolved_core.dir\Release\csl_reso.9EB8AB8E.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_resolved_core.dir\Release\csl_reso.9EB8AB8E.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /scanDependencies "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_resolved_core.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\resolved.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /scanDependencies "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_resolved_core.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\identity.cpp"
+         identity.cpp
+         resolved.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_resolved_core.pdb" /sourceDependencies "csl_resolved_core.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\resolved.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_resolved_core.pdb" /sourceDependencies "csl_resolved_core.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\problem\identity.cpp"
+         resolved.cpp
+         identity.cpp
+       Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_resolved_core.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_resolved_core.dir\Release\identity.obj
+         csl_resolved_core.dir\Release\resolved.obj
+         csl_resolved_core.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_resolved_core.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_resolved_core.dir\Release\csl_reso.9EB8AB8E.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_resolved_core.dir\Release\csl_reso.9EB8AB8E.tlog\csl_resolved_core.lastbuildstate".
+    11>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_resolved_core.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_registry.vcxproj" (10) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    10>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_registry.dir\Release\\" /scanDependencies "csl_registry.dir\Release\\" /Fo"csl_registry.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_registry.pdb" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\registry\registry.cpp"
+         registry.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_registry.dir\Release\\" /Fo"csl_registry.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_registry.pdb" /sourceDependencies "csl_registry.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "SOURCE_ROOT\src\registry\registry.cpp"
+         registry.cpp
+       Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_registry.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_registry.dir\Release\registry.obj
+         csl_registry.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_registry.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate".
+    10>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_registry.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build\opt04-report\csl_phase_one.vcxproj" (13) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    13>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild".
+     6>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild".
+    13>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+     6>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    13>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+     6>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+    13>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /scanDependencies "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_phase_one.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_objectives_eigen-src" "SOURCE_ROOT\src\optimization\phase_one\simplex.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /scanDependencies "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_phase_one.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_objectives_eigen-src" "SOURCE_ROOT\src\optimization\phase_one\program.cpp"
+     6>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_highs_lp.dir\Release\\" /scanDependencies "csl_highs_lp.dir\Release\\" /Fo"csl_highs_lp.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_highs_lp.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_highs-src" /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_highs-src/highs" /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_highs-build" "SOURCE_ROOT\src\adapters\lp\highs.cpp"
+    13>SetModuleDependencies:
+         simplex.cpp
+         program.cpp
+     6>SetModuleDependencies:
+         highs.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_highs_lp.dir\Release\\" /Fo"csl_highs_lp.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_highs_lp.pdb" /sourceDependencies "csl_highs_lp.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_highs-src" /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_highs-src/highs" /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_highs-build" "SOURCE_ROOT\src\adapters\lp\highs.cpp"
+         highs.cpp
+    13>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_phase_one.pdb" /sourceDependencies "csl_phase_one.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_objectives_eigen-src" "SOURCE_ROOT\src\optimization\phase_one\simplex.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"SOURCE_ROOT\build\opt04-report\Release\csl_phase_one.pdb" /sourceDependencies "csl_phase_one.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_objectives_eigen-src" "SOURCE_ROOT\src\optimization\phase_one\program.cpp"
+         simplex.cpp
+         program.cpp
+     6>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_highs_lp.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_highs_lp.dir\Release\highs.obj
+         csl_highs_lp.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_highs_lp.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_highs_lp.dir\Release\csl_highs_lp.tlog\csl_highs_lp.lastbuildstate".
+     6>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_highs_lp.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    13>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_phase_one.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_phase_one.dir\Release\program.obj
+         csl_phase_one.dir\Release\simplex.obj
+         csl_phase_one.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_phase_one.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_phase_one.dir\Release\csl_phase_one.tlog\csl_phase_one.lastbuildstate".
+    13>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_phase_one.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_opt04_phase_one_report.dir\Release\csl_opt0.3A6A9F17.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_opt04_phase_one_report.dir\Release\csl_opt0.3A6A9F17.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "csl_opt04_phase_one_report.dir\Release\\" /scanDependencies "csl_opt04_phase_one_report.dir\Release\\" /Fo"csl_opt04_phase_one_report.dir\Release\\" /Fd"csl_opt04_phase_one_report.dir\Release\vc143.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_json-src/include" "SOURCE_ROOT\reports\algorithm-results\tooling\opt04\phase_one_driver.cpp"
+         phase_one_driver.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"SOURCE_ROOT\include" /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "csl_opt04_phase_one_report.dir\Release\\" /Fo"csl_opt04_phase_one_report.dir\Release\\" /Fd"csl_opt04_phase_one_report.dir\Release\vc143.pdb" /sourceDependencies "csl_opt04_phase_one_report.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "SOURCE_ROOT/build/opt04-report/_deps/csl_json-src/include" "SOURCE_ROOT\reports\algorithm-results\tooling\opt04\phase_one_driver.cpp"
+         phase_one_driver.cpp
+       Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"SOURCE_ROOT\build\opt04-report\Release\csl_opt04_phase_one_report.exe" /INCREMENTAL:NO /NOLOGO Release\csl_phase_one.lib Release\csl_highs_lp.lib Release\csl_optimization.lib Release\csl_registry.lib Release\csl_resolved_core.lib Release\csl_problem.lib Release\csl_model.lib Release\csl_sets.lib Release\csl_objectives.lib Release\csl_numeric.lib Release\csl_contracts.lib Release\bin\highs.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"SOURCE_ROOT/build/opt04-report/Release/csl_opt04_phase_one_report.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"SOURCE_ROOT/build/opt04-report/Release/csl_opt04_phase_one_report.lib" /MACHINE:X64  /machine:x64 csl_opt04_phase_one_report.dir\Release\phase_one_driver.obj
+         csl_opt04_phase_one_report.vcxproj -> SOURCE_ROOT\build\opt04-report\Release\csl_opt04_phase_one_report.exe
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_opt04_phase_one_report.dir\Release\csl_opt0.3A6A9F17.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_opt04_phase_one_report.dir\Release\csl_opt0.3A6A9F17.tlog\csl_opt04_phase_one_report.lastbuildstate".
+     1>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build\opt04-report\csl_opt04_phase_one_report.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+
+РЎР±РѕСЂРєР° СѓСЃРїРµС€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°.
+    РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёР№: 0
+    РћС€РёР±РѕРє: 0
+
+РџСЂРѕС€Р»Рѕ РІСЂРµРјРµРЅРё 00:00:58.21
+
