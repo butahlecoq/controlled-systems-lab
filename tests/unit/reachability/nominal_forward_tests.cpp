@@ -1,6 +1,10 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/reachability/nominal_forward.hpp>
+#include <csl/geometry/affine_sum.hpp>
+#include <csl/adapters/lp/highs.hpp>
+#include <csl/adapters/polyhedral/qhull.hpp>
+#include <limits>
 #include <stop_token>
 using namespace csl;
 using namespace csl::registry;
@@ -45,6 +49,22 @@ PreparedProvider<GeometryPort> cancelling_provider(std::stop_source stop) {
     req.output.representation={"csl.polyhedron.h"};req.output.relation=SetRelation::equivalent;
     return take(prepare_provider(select_provider(registry,method,req)));
 }
+template<class Port> PreparedProvider<Port> selected(Registration<Port> entry,std::string representation) {
+    Registry<Port> registry;Method method{entry.identity.id,entry.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());Requirements req;
+    req.output.representation={std::move(representation)};req.output.relation=SetRelation::equivalent;
+    return take(prepare_provider(select_provider(registry,method,req)));
+}
+ForwardDependencies dependencies(PreparedProvider<GeometryPort> projection=provider(),bool reject_affine=false) {
+    auto lp=take(adapters::lp::make_highs_registration());
+    auto converter=take(adapters::polyhedral::make_qhull_registration(lp));
+    auto affine=geometry::make_affine_sum_registration({selected(geometry::make_lp_hull_reducer_registration(),""),
+        selected(lp,"csl.program-result.v1"),selected(converter,"csl.polyhedron.v")},{ {},{"x"}});
+    if(reject_affine)affine.capabilities=[](const OperationRequest&,const Requirements&) -> Capability {
+        return Diagnostics{{DiagnosticCode::unsupported,"selected.affine","Selected affine provider rejects this operation."}};
+    };
+    return {std::move(projection),selected(std::move(affine),"csl.polyhedron.v"),selected(converter,"csl.polyhedron.h")};
+}
 Problem integrator() {
     return {{"integrator"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
         LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}},{}}),{0,1,2},KnownInitial{{0}},
@@ -53,7 +73,7 @@ Problem integrator() {
         QuadraticTerminal{{1,1,{2}},{-2},1}};
 }
 problem::ResolvedProblem resolved(Problem p) {return take(problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));}
-NominalForwardOutcome run(Problem p,ExecutionContext context={}) {return nominal_forward(resolved(std::move(p)),{"tube"},provider(),context);}
+NominalForwardOutcome run(Problem p,ExecutionContext context={}) {return nominal_forward(resolved(std::move(p)),{"tube"},dependencies(),context);}
 bool contains(const SetHandle& set,double x) {
     const auto data=take(sets::from_handle(set));const auto rep=data.representation();
     if(std::holds_alternative<sets::EmptyRepresentation>(rep))return false;
@@ -63,12 +83,28 @@ bool contains(const SetHandle& set,double x) {
     return true;
 }
 void range(const SetHandle& set,double lo,double hi) {
+    // Complete independent 1-D H oracle: every halfspace contributes an
+    // endpoint, every nonzero equality fixes both endpoints. No sampled points
+    // can hide an omitted cut or a small endpoint error.
+    const auto data=take(sets::from_handle(set));const auto rep=data.representation();
+    const auto& h=std::get<sets::HRepresentation>(rep);
+    double lower=-std::numeric_limits<double>::infinity(),upper=std::numeric_limits<double>::infinity();
+    bool feasible=true;
+    for(std::size_t r=0;r<h.inequalities.rows();++r) {
+        const auto a=h.inequalities(r,0),b=h.upper_bounds[r];
+        if(a>0)upper=std::min(upper,b/a);else if(a<0)lower=std::max(lower,b/a);else if(b<0)feasible=false;
+    }
+    for(std::size_t r=0;r<h.equalities.rows();++r) {
+        const auto a=h.equalities(r,0),b=h.equality_values[r];
+        if(a!=0){lower=std::max(lower,b/a);upper=std::min(upper,b/a);}else if(b!=0)feasible=false;
+    }
+    CHECK(feasible);CHECK(lower==lo);CHECK(upper==hi);
     CHECK(contains(set,lo));CHECK(contains(set,(lo+hi)/2));CHECK(contains(set,hi));
     CHECK_FALSE(contains(set,lo-0.125));CHECK_FALSE(contains(set,hi+0.125));
 }
 }
 TEST_CASE("two step integrator returns literal reachable marginals and recovery factors") {
-    auto p=resolved(integrator());auto result=nominal_forward(p,{"tube"},provider(),{});
+    auto p=resolved(integrator());auto result=nominal_forward(p,{"tube"},dependencies(),{});
     REQUIRE(std::holds_alternative<ForwardTube>(result)); const auto& tube=std::get<ForwardTube>(result);
     REQUIRE(tube.stages.size()==3);CHECK(tube.problem==p.identity());
     range(tube.stages[0].marginal.output,0,0);range(tube.stages[1].marginal.output,0,1);range(tube.stages[2].marginal.output,0,2);
@@ -111,8 +147,14 @@ TEST_CASE("declared temporal coupling is rejected before propagation") {
 }
 TEST_CASE("stop after final feasibility preserves completed child evidence without publishing a stage") {
     auto p=resolved(integrator());std::stop_source stop;ExecutionContext context;context.cancellation=stop.get_token();
-    auto result=alternative<ForwardFailure>(nominal_forward(p,{"tube"},cancelling_provider(stop),context));
+    auto result=alternative<ForwardFailure>(nominal_forward(p,{"tube"},dependencies(cancelling_provider(stop)),context));
     CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::cancelled);
     CHECK(result.stage.value==2);CHECK(result.prefix.stages.size()==2);CHECK(result.completed_lineage.size()==2);
     REQUIRE(result.active_request);CHECK(result.active_request->identity.request.value.ends_with("2/feasibility"));
+}
+TEST_CASE("selected affine provider rejection is retained with stage scope") {
+    auto p=resolved(integrator());auto result=alternative<ForwardFailure>(nominal_forward(p,{"tube"},dependencies(provider(),true),{}));
+    CHECK(result.stage.value==1);REQUIRE(result.prefix.stages.size()==1);
+    CHECK(std::get<Unsupported>(result.cause).diagnostics[0].field=="selected.affine");
+    REQUIRE(result.active_request);CHECK(result.active_request->identity.request.value.ends_with("1/affine-state"));
 }

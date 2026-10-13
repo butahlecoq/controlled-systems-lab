@@ -32,12 +32,18 @@ struct ForwardFailure {
     std::variant<Unsupported,OperationStopped> cause;
 };
 using NominalForwardOutcome = std::variant<ForwardTube,EmptyForwardStage,ForwardFailure>;
+struct ForwardDependencies {
+    registry::PreparedProvider<registry::GeometryPort> projection;
+    registry::PreparedProvider<registry::GeometryPort> affine_sum;
+    registry::PreparedProvider<registry::ConversionPort> to_h;
+};
 
 // First profile: discrete nominal open loop, known initial point, no external
 // port or temporal coupling, continuous native H/singleton/empty/universal sets.
-// The selected provider must materialize equivalent native H projections.
+// Selected providers materialize equivalent native H projections, V affine
+// images/sums, and V-to-H conversion. All preserve the authored state labels.
 // Each generated request is admitted before creating its exclusive workspace.
 NominalForwardOutcome nominal_forward(const problem::ResolvedProblem&, RequestId,
-    const registry::PreparedProvider<registry::GeometryPort>&, const ExecutionContext&);
+    const ForwardDependencies&, const ExecutionContext&);
 
 } // namespace csl::reachability
