@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <string_view>
 #include <type_traits>
 
 namespace csl::synthesis {
@@ -14,6 +15,10 @@ Diagnostic unsupported(std::string field, std::string explanation) {
 
 Diagnostic invalid(std::string field, std::string explanation) {
     return {DiagnosticCode::invalid_input, std::move(field), std::move(explanation)};
+}
+
+std::string identity_field(std::string_view value) {
+    return std::to_string(value.size()) + ":" + std::string(value);
 }
 
 bool finite(const Vector& values) {
@@ -243,7 +248,10 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
     if (!rows.append_set(terminal_relation, horizon * n))
         return fail(unsupported("recovery.terminal.representation", "Could not append the terminal relation to the joint history."));
 
-    auto result = rows.finish({"recovery/joint-history/" + resolved.identity().value}, width);
+    const auto output_id = "recovery/joint-history/" +
+        identity_field(resolved.identity().value) +
+        identity_field(terminal_relation.metadata()->id.value);
+    auto result = rows.finish({output_id}, width);
     if (const auto* diagnostic = std::get_if<Diagnostic>(&result)) return fail(*diagnostic);
     return JointHistoryRelation{coordinates, std::get<sets::SetData>(std::move(result))};
 }

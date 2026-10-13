@@ -158,3 +158,15 @@ TEST_CASE("recovery rejects finite control catalogues when only continuous contr
     CHECK(std::holds_alternative<Diagnostics>(result));
     REQUIRE_FALSE(std::get<Diagnostics>(result).empty());
 }
+
+TEST_CASE("joint history identity binds the supplied terminal relation identity") {
+    const auto problem = integrator();
+    const auto first = synthesis::recover_joint_history(problem,
+        interval_data("terminal-first", 1, 1));
+    const auto second = synthesis::recover_joint_history(problem,
+        interval_data("terminal-second", 1, 1));
+    REQUIRE(std::holds_alternative<synthesis::JointHistoryRelation>(first));
+    REQUIRE(std::holds_alternative<synthesis::JointHistoryRelation>(second));
+    CHECK(std::get<synthesis::JointHistoryRelation>(first).relation.metadata()->id !=
+        std::get<synthesis::JointHistoryRelation>(second).relation.metadata()->id);
+}
