@@ -146,6 +146,13 @@ add_test(NAME installed_affine_sum_client COMMAND installed_affine_sum_client)
 set_tests_properties(installed_affine_sum_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed affine/sum client: selected LP and hull providers produced a numerical set result")
 
+add_executable(installed_terminal_minimizers_client terminal_minimizers_client.cpp)
+target_link_libraries(installed_terminal_minimizers_client PRIVATE CSL::terminal_minimizers)
+set_target_properties(installed_terminal_minimizers_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_terminal_minimizers_client COMMAND installed_terminal_minimizers_client)
+set_tests_properties(installed_terminal_minimizers_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed terminal-minimizers client: public outcome contract is available")
+
 add_executable(installed_projection_predecessor_client projection_predecessor_client.cpp)
 target_link_libraries(installed_projection_predecessor_client PRIVATE CSL::polyhedral)
 set_target_properties(installed_projection_predecessor_client PROPERTIES CXX_EXTENSIONS OFF)
