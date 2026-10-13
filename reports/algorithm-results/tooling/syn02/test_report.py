@@ -144,7 +144,6 @@ class SavedOracleTests(unittest.TestCase):
             self.assertFalse((root/"results"/details["attempt_id"]/"records.json").exists())
 
     def test_profile_raw_events_are_normalized_before_the_same_oracle(self):
-        normalization=collect.normalize_trial_event
         successful=event("psd-null-direction",value=0.0)
         successful.pop("solver_observations")
         successful["raw_diagnostics"]="check.rows.violation=0\ncheck.variables.violation=0\ncheck.stationarity.violation=0\n"
@@ -154,12 +153,15 @@ class SavedOracleTests(unittest.TestCase):
             "optimality.withheld=original-space checks unavailable or failing\n"
             "check.stationarity.violation=1\n")
         for index,row in enumerate((successful,failed)):
-            with self.subTest(scenario=row["scenario"]):
-                row.update({"repetition":index,"warmup":False})
-                normalized=normalization(row,attempt_index=index,source_commit=collect.SOURCE_COMMIT,harness_commit="f"*40)
-                self.assertEqual([],normalized["validation_errors"])
-                self.assertEqual([],collect.validate_trial(normalized))
-                self.assertTrue(normalized["solver_observations"])
+            row.update({"repetition":index+1,"warmup":False})
+        raw_lines=[json.dumps(row).encode() for row in (successful,failed)]
+        normalized,errors=collect.normalize_profile_events(raw_lines,source_commit=collect.SOURCE_COMMIT,harness_commit="f"*40)
+        self.assertEqual([],errors)
+        self.assertEqual([{"check.rows.violation":0,"check.variables.violation":0,"check.stationarity.violation":0},
+                          {"phase.qp.model_status":7,"optimality.withheld":"original-space checks unavailable or failing","check.stationarity.violation":1}],
+                         [row["solver_observations"] for row in normalized])
+        self.assertEqual([[],[]],[row["validation_errors"] for row in normalized])
+        self.assertTrue(all(not collect.validate_trial(row) for row in normalized))
 
     def test_profile_matrix_rejects_missing_or_duplicate_events(self):
         rows=[]
@@ -169,9 +171,13 @@ class SavedOracleTests(unittest.TestCase):
                           outcome=collect.SCENARIOS[name]["outcome"],relation=collect.SCENARIOS[name]["outcome"]=="optimal")
                 row.update({"scenario":name,"repetition":repetition,"warmup":repetition==0,"validation_errors":[]})
                 rows.append(row)
-        self.assertTrue(collect.profile_matrix_is_expected(rows,[],repetitions=1,warmups=1))
-        self.assertFalse(collect.profile_matrix_is_expected(rows[:-1],[],repetitions=1,warmups=1))
+        self.assertTrue(collect.trial_matrix_is_expected(rows,[],repetitions=1,warmups=1))
+        self.assertFalse(collect.trial_matrix_is_expected(rows[:-1],[],repetitions=1,warmups=1))
         duplicate=[*rows[:-1],dict(rows[-2])]
-        self.assertFalse(collect.profile_matrix_is_expected(duplicate,[],repetitions=1,warmups=1))
+        self.assertFalse(collect.trial_matrix_is_expected(duplicate,[],repetitions=1,warmups=1))
+        relabelled=[dict(row,repetition=(42 if row["repetition"]==0 else 84)) for row in rows]
+        self.assertFalse(collect.trial_matrix_is_expected(relabelled,[],repetitions=1,warmups=1))
+        wrong_warmup=[dict(row,warmup=(row["repetition"]==1)) for row in rows]
+        self.assertFalse(collect.trial_matrix_is_expected(wrong_warmup,[],repetitions=1,warmups=1))
 
 if __name__=="__main__": unittest.main()

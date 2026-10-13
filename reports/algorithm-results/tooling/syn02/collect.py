@@ -150,19 +150,32 @@ def normalize_trial_event(row, *, attempt_index, source_commit, harness_commit):
     row["validation_errors"]=validate_trial(row)
     return row
 
-def profile_matrix_is_expected(events, validation_errors, *, repetitions, warmups):
+def normalize_profile_events(raw_lines, *, source_commit, harness_commit):
+    """Parse, enrich, and oracle-check the profile driver's event lines."""
+    events=[];errors=[]
+    for attempt_index,line in enumerate(raw_lines,1):
+        try:
+            decoded=line.decode("utf-8") if isinstance(line,bytes) else line
+            events.append(normalize_trial_event(json.loads(decoded),attempt_index=attempt_index,
+                                                source_commit=source_commit,harness_commit=harness_commit))
+        except Exception as exc:
+            errors.append(f"event_{attempt_index}_parse:{exc}")
+    return events,errors
+
+def trial_matrix_is_expected(events, validation_errors, *, repetitions, warmups):
     if validation_errors or len(events)!=len(SCENARIOS)*(repetitions+warmups):
         return False
+    expected_ids=set(range(warmups+repetitions))
     for name in SCENARIOS:
         rows=[row for row in events if row.get("scenario")==name]
-        warm=[row for row in rows if row.get("warmup")]
-        measured=[row for row in rows if not row.get("warmup")]
-        if len(warm)!=warmups or len(measured)!=repetitions:
+        if len(rows)!=warmups+repetitions:
             return False
-        if len({row.get("repetition") for row in rows})!=repetitions+warmups:
+        ids=[row.get("repetition") for row in rows]
+        if any(type(value) is not int for value in ids) or set(ids)!=expected_ids or len(set(ids))!=len(ids):
             return False
-        if any(row.get("validation_errors") for row in rows):
-            return False
+        for row in rows:
+            if row.get("warmup") is not (row["repetition"]<warmups) or row.get("validation_errors"):
+                return False
     return True
 
 def summarize(rows):
@@ -293,13 +306,7 @@ def collect(a,state):
         try:
             row=normalize_trial_event(json.loads(line.decode("utf-8")),attempt_index=i,source_commit=SOURCE_COMMIT,harness_commit=a.harness_commit);raw.append(row)
         except Exception as exc: raw.append({"schema":"csl.syn02-terminal-trial/1","status":"parse_failed","attempt_index":i,"validation_errors":[str(exc)],"warmup":False,"scenario":"unknown"})
-    require(len(raw)==5*(a.repetitions+a.warmups),f"expected complete raw trial matrix; got {len(raw)} events")
-    require(len([r for r in raw if not r["warmup"]])==5*a.repetitions,"measured matrix incomplete")
-    for name in SCENARIOS:
-        warm=[r for r in raw if r.get("scenario")==name and r.get("warmup")]
-        measured_rows=[r for r in raw if r.get("scenario")==name and not r.get("warmup")]
-        require(len(warm)==a.warmups and len(measured_rows)==a.repetitions,"per-fixture warmup/trial matrix incomplete: "+name)
-        require(len({r["repetition"] for r in measured_rows})==a.repetitions,"duplicate measured repetition: "+name)
+    require(trial_matrix_is_expected(raw,[],repetitions=a.repetitions,warmups=a.warmups),"measured trial matrix has missing, duplicate, relabelled, or invalid events")
     summary=summarize(raw);results_ok=measured.returncode==0 and all(s["failed"]==0 and s["matched_expected"]==s["requested"] for s in summary)
     # Separate profiling run: time-sampled process counters, excluded from measured trials.
     profile={"schema":"csl.syn02-process-counters/1","separate_from_reported_trials":True,"source_commit":SOURCE_COMMIT,"command":"Separate 1000-repetition process CPU/RSS observation.","etw_stack_profile":"unavailable","etw_failure":"WPR -start CPU -filemode returned 0xc5585011: Failed to enable the policy to profile system performance.","status":"pending","limiter":"unknown","reason":"process counters do not attribute work to a source function"}
@@ -321,14 +328,9 @@ def collect(a,state):
     profile_wall=time.perf_counter_ns()-startp
     profile_lines=pout.splitlines();profile_identity=json.loads(profile_lines[0]) if profile_lines else {}
     require(profile_identity=={"schema":"csl.syn02-terminal-run/1","source_commit":SOURCE_COMMIT,"harness_commit":a.harness_commit},"profile executable identity mismatch")
-    profile_events=[];profile_validation=[]
-    for i,line in enumerate(profile_lines[1:],1):
-        try:
-            profile_events.append(normalize_trial_event(json.loads(line.decode("utf-8")),attempt_index=i,source_commit=SOURCE_COMMIT,harness_commit=a.harness_commit))
-        except Exception as exc:
-            profile_validation.append([f"event_{i}_parse:{exc}"])
-    profile_validation.extend(row["validation_errors"] for row in profile_events)
-    profile_expected=profile_matrix_is_expected(profile_events,profile_validation,repetitions=1000,warmups=1)
+    profile_events,profile_errors=normalize_profile_events(profile_lines[1:],source_commit=SOURCE_COMMIT,harness_commit=a.harness_commit)
+    profile_validation=profile_errors+[error for row in profile_events for error in row["validation_errors"]]
+    profile_expected=trial_matrix_is_expected(profile_events,profile_validation,repetitions=1000,warmups=1)
     profile.update({"status":"process_counter_sampling_completed" if p.returncode==0 and not perr else "process_counter_sampling_incomplete","wall_ns":profile_wall,"process_return_code":p.returncode,"stderr":perr.decode("utf-8","replace"),"samples":samples,"sample_interval_target_ms":10,"max_sampled_cpu_seconds":max((s["process_cpu_seconds"] for s in samples),default=0),"max_sampled_resident_bytes":max((s["resident_bytes"] for s in samples),default=0),"profile_trial_events":len(profile_events),"profile_non_success":sum(r.get("termination")!="completed" for r in profile_events if not r.get("warmup")),"profile_all_expected":profile_expected,"limiter":"unknown","limiter_reason":"sampling captured only process CPU and RSS counters, not call stacks; no source attribution is justified"})
     if p.returncode!=0 or perr or not profile["profile_all_expected"]:
         profile["status"]="process_counter_sampling_incomplete"
