@@ -262,15 +262,13 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
         result.family=std::get<OptimalFamily>(std::move(family));
     };
     publish();
-    std::visit([&]<class Program>(const Program& program) {
-        const auto& provider=[&]()->const auto& {if constexpr(std::is_same_v<Program,LinearProgram>)return lp_;else return convex_;}();
+    auto run_program=[&]<class Program,class Port>(const Program& program,const registry::PreparedProvider<Port>& provider) {
         data->provider=provider.provenance();const auto provenance=scope(program.identity(),provider.provenance());
         auto preparation=provider.prepare(program);
         if(const auto* rejection=std::get_if<registry::Rejection>(&preparation)) {
             result.termination=Termination::operation_rejected;data->diagnostics=rejection->diagnostics;
             result.stop=ScopedRequestRejection{scope(program.identity(),rejection->provenance),rejection->diagnostics,lineage,retained(result)};return;
         }
-        using Port=std::conditional_t<std::is_same_v<Program,LinearProgram>,registry::LPPort,registry::ConvexPort>;
         if(context.cancellation.stop_requested() || (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
             const auto reason=context.cancellation.stop_requested()?StopReason::cancelled:StopReason::deadline_expired;
             result.termination=stopped_termination(reason);result.stop=ScopedOperationStopped{{reason,"Stopped before admitted generated program execution."},provenance,retained(result)};return;
@@ -339,6 +337,10 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
             if(evidence.termination==Termination::resource_limit)reason=StopReason::resource_limit;
             result.stop=ScopedOperationStopped{{reason,evidence.raw_diagnostics},provenance,retained(result)};
         }
+    };
+    std::visit([&]<class Program>(const Program& program) {
+        if constexpr(std::is_same_v<Program,LinearProgram>) run_program(program,lp_);
+        else run_program(program,convex_);
     },data->construction.program);
     return result;
 }

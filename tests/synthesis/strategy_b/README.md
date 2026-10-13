@@ -134,6 +134,25 @@ Exact follow-up commands from the repository root (using `$taskCMake` above):
 & 'C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/ctest.exe' --test-dir D:/work/PhD/worktrees/syn04-production-build -C Release --output-on-failure
 ```
 
+### GCC13 provider-reference compilation follow-up
+
+After rebasing onto Strategy A integration, GCC13 rejected the temporary lambda
+used to select an LP/convex provider reference with `-Werror=dangling-reference`.
+The implementation now passes the owned provider directly into a typed runner
+through compile-time branches. Existing LP, convex, rejected-provider and provider
+lifetime behavior tests are retained; mathematical and candidate scope is
+unchanged. The exact strict compilation command reproduced the warning before
+the change and succeeded after it:
+
+```powershell
+wsl -d Ubuntu -- g++-13 -std=c++20 -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror -I /mnt/d/work/PhD/worktrees/syn04-family/include -c /mnt/d/work/PhD/worktrees/syn04-family/src/synthesis/strategy_b/direct_joint.cpp -o /tmp/syn04-direct-joint.o
+```
+
+This is a GCC13 translation-unit compilation check, not a claim of a local full
+Linux suite. Production MSVC Release verification using the commands above
+passed **23 cases / 431 assertions** and **71/71 full CTest tests** on the rebased
+branch. The additional full-suite tests come from merged Strategy A integration.
+
 ## Unmet acceptance criteria
 
 Complete-family publication and cross-strategy complete-relation acceptance
