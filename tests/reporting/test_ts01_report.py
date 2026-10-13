@@ -1,0 +1,45 @@
+from __future__ import annotations
+import json
+from pathlib import Path
+import sys
+import unittest
+
+ROOT = Path(__file__).resolve().parents[2]
+TOOLS = ROOT / "reports" / "algorithm-results" / "tooling" / "ts01"
+sys.path.insert(0, str(TOOLS))
+sys.path.insert(0, str(ROOT / "scripts" / "reports"))
+import report
+import ts01_registered_reports
+
+
+class Ts01SavedReportTests(unittest.TestCase):
+    def setUp(self):
+        self.bundle = ROOT / "reports" / "algorithm-results" / "syn07-ts01-20261013-fe5095ce27ab"
+        self.record = json.loads((self.bundle / "records.json").read_text(encoding="utf-8"))
+
+    def test_exact_membership_matrix_matches_saved_outcomes(self):
+        self.assertEqual(report.validate(self.record), [])
+        self.assertEqual(sum(row["actual_member"] for row in self.record["membership_examples"]), 4)
+        self.assertEqual(sum(not row["actual_member"] for row in self.record["membership_examples"]), 3)
+
+    def test_changed_membership_result_is_rejected(self):
+        changed = json.loads(json.dumps(self.record))
+        changed["membership_examples"][0]["actual_member"] = False
+        self.assertIn("membership_result:s=0", report.validate(changed))
+
+    def test_html_is_projected_from_saved_record(self):
+        page = report.render_html(self.record)
+        self.assertIn("(0,s,1,s,1−s)", page)
+        self.assertIn("Exact binary64 membership examples", page)
+        self.assertIn(self.record["source_commit"], page)
+
+    def test_registered_adapter_checks_bundle_and_creates_offline_archive(self):
+        publication = ts01_registered_reports.adapt(self.bundle)
+        self.assertEqual(publication.source_commit, report.SOURCE_COMMIT)
+        self.assertEqual(publication.source_report_id, self.record["report_id"])
+        archive = ts01_registered_reports.offline_zip(self.bundle, publication)
+        self.assertGreater(len(archive), 1000)
+
+
+if __name__ == "__main__":
+    unittest.main()

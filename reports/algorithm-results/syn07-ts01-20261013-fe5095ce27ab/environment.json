@@ -1,0 +1,5 @@
+{
+  "measurement": "not performed",
+  "timing": "unavailable",
+  "reason": "No standalone public T-S01 execution/measurement executable or accepted harness exists at the source commit. The C++ API test is correctness coverage, not a timing harness; no proxy timing is reported."
+}

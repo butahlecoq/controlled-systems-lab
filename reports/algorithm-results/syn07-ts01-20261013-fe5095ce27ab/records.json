@@ -1,0 +1,212 @@
+{
+  "algorithm": {
+    "profile_id": "ts01_exact_integrator",
+    "strategy_id": "csl.synthesis.ts01-analytic",
+    "strategy_version": "1"
+  },
+  "assumptions": [
+    "Discrete-time, two-step scalar system with times (0,1,2).",
+    "Known initial state x0=0; unrestricted one-dimensional state at every stage.",
+    "Both transitions are exactly x[t+1]=x[t]+u[t], with zero offsets and no external channels.",
+    "Independent closed control intervals u0,u1 in [0,1].",
+    "Nominal open-loop information; no observations, temporal constraints, or other constraints.",
+    "Terminal quadratic objective has Q=2, linear coefficient -2, and offset 1: J(x2)=x2^2-2*x2+1.",
+    "Requested target is exact_optimal_relation, representation csl.polyhedron.h, numerical assurance, no materialization limit, and empty transformation lineage."
+  ],
+  "canonical_relation": {
+    "dimension": 5,
+    "equalities": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        -1,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1
+      ]
+    ],
+    "equality_rhs": [
+      0,
+      0,
+      1,
+      1
+    ],
+    "inequalities": [
+      [
+        0,
+        0,
+        0,
+        -1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        -1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "inequality_rhs": [
+      0,
+      1,
+      0,
+      1
+    ],
+    "objective_minimum": 0,
+    "parametric_form": "(0,s,1,s,1-s), 0<=s<=1",
+    "proof_summary": "x2=u0+u1 and J=(x2-1)^2>=0. Equality holds iff u0+u1=1; the control bounds then yield exactly the displayed closed segment.",
+    "representation": "csl.polyhedron.h"
+  },
+  "coordinates": [
+    "x0",
+    "x1",
+    "x2",
+    "u0",
+    "u1"
+  ],
+  "evidence_limits": [
+    "The complete relation is established analytically only for the strict profile listed above; admission rejects mutations outside that profile.",
+    "The outer API labels assurance numerical. Validated assurance is unavailable in the shared registry contract.",
+    "The proof capability is internally issued and non-forgeable by clients; serialized decoding creates an untrusted capability which publication rejects until a reviewed proof replay/exporter exists.",
+    "This does not establish completeness for any generic synthesis strategy, another profile, or a decoded artifact.",
+    "This report records the profile theorem and exact membership examples; it is not an independent mathematical review of the source implementation."
+  ],
+  "membership_examples": [
+    {
+      "actual_member": true,
+      "expected_member": true,
+      "id": "s=0",
+      "point": [
+        0,
+        0,
+        1,
+        0,
+        1
+      ],
+      "reason": "Closed-segment endpoint; exact equations and bounds hold."
+    },
+    {
+      "actual_member": true,
+      "expected_member": true,
+      "id": "s=1/4",
+      "point": [
+        0,
+        0.25,
+        1,
+        0.25,
+        0.75
+      ],
+      "reason": "Interior dyadic parameter; exact equations and bounds hold."
+    },
+    {
+      "actual_member": true,
+      "expected_member": true,
+      "id": "s=1",
+      "point": [
+        0,
+        1,
+        1,
+        1,
+        0
+      ],
+      "reason": "Closed-segment endpoint; exact equations and bounds hold."
+    },
+    {
+      "actual_member": true,
+      "expected_member": true,
+      "id": "s=1-2^-53",
+      "point": [
+        0,
+        0.9999999999999999,
+        1,
+        0.9999999999999999,
+        1.1102230246251565e-16
+      ],
+      "reason": "Adjacent representable dyadic coordinates sum to exactly one."
+    },
+    {
+      "actual_member": false,
+      "expected_member": false,
+      "id": "feasible_nonoptimal_zero",
+      "point": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "reason": "Feasible controls, but x2 is not one and objective is one."
+    },
+    {
+      "actual_member": false,
+      "expected_member": false,
+      "id": "feasible_nonoptimal_endpoint",
+      "point": [
+        0,
+        1,
+        2,
+        1,
+        1
+      ],
+      "reason": "Feasible controls, but x2 is two and objective is one."
+    },
+    {
+      "actual_member": false,
+      "expected_member": false,
+      "id": "off_relation_dyadic_perturbation",
+      "point": [
+        0,
+        1,
+        1,
+        1,
+        5e-324
+      ],
+      "reason": "Exact binary64 sum is greater than one; no tolerance is applied."
+    }
+  ],
+  "membership_semantics": "Exact dyadic arithmetic for finite binary64 coordinates; no floating tolerance.",
+  "performance": {
+    "comparison": "none",
+    "reason": "No standalone public T-S01 execution/measurement executable or accepted harness exists at the source commit. The C++ API test is correctness coverage, not a timing harness; no proxy timing is reported.",
+    "speedup_claim": false,
+    "status": "unavailable"
+  },
+  "report_id": "syn07-ts01-20261013-fe5095ce27ab",
+  "schema": "csl.syn07-ts01-analytic-report/1",
+  "source_commit": "fe5095ce27ab4872cb31df32fab6f3b1b073f4f6"
+}

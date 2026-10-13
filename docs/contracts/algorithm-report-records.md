@@ -423,6 +423,14 @@ Both native `trials.csv` and `summary.csv` must match the complete typed rows in
 archive checksums are internally valid. OPT-04 uses `stdout.jsonl` plus saved
 `driver-stdout.txt` instead and validates both against typed trials and warmups.
 
+SYN-07 T-S01 uses the native schema `csl.syn07-ts01-analytic-report/1` and
+`ts01_registered_reports.py`. Its saved exact-membership examples are the raw
+JSONL source and the CSV projection; the adapter checks both against the typed
+record and builds the standalone page from that record. The report identifies
+its strict analytic profile and explicitly marks timing unavailable because the
+source commit has no accepted public-path measurement harness. The versioned
+URL remains pending until the main-only Pages workflow deploys the catalogue.
+
 ## Shared publication envelope
 
 Every report in a schema-3 mixed catalogue uses the same versioned

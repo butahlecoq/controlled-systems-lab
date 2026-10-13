@@ -1,0 +1,15 @@
+{
+  "files": {
+    "README.md": "df33e1f6722a32ba1662e1fb48c697ffc0b1bb4946a1ff899055da9018d11125",
+    "environment.json": "99ace0ec7320959762663c21d80cbe53480983629762d43515918750de984baf",
+    "index.html": "b114784e9b00bca205e006c5f7acfbcdca8bd8857782eccbe552b3c7a50d8242",
+    "publication-map.json": "07507947d8050595f05c97e670ef590bcbf714de4bb5a44e8e6541a30258af57",
+    "raw-events.jsonl": "4ef9ea25170803adfde7e920a8fa15963b0fbbe1abfd3bc1f3f9af86b4ece56c",
+    "records.json": "af05df8a6316f8c3865ff97bee6b84d1b3e1c22cd8ae716b1e8c001e56b92a7c",
+    "scenarios.json": "5cc4466b5aedbe4ab0efbd30f0b2a5a679aa43e912299d8c576e4a891a7c2691",
+    "trials.csv": "f68b9bfcc840c9cc82ec27933287711971240a20475902e8ced25c7ea889682d"
+  },
+  "report_id": "syn07-ts01-20261013-fe5095ce27ab",
+  "schema": "csl.syn07-ts01-report-manifest/1",
+  "source_commit": "fe5095ce27ab4872cb31df32fab6f3b1b073f4f6"
+}

@@ -18,6 +18,7 @@ import geo02_registered_reports as geo02
 import geo05_registered_reports as geo05
 import syn02_registered_reports as syn02
 import syn01_registered_reports as syn01
+import ts01_registered_reports as ts01
 import opt04_registered_reports as opt04
 import registered_reports as registered
 
@@ -40,6 +41,7 @@ class OfflineHTML(HTMLParser):
     def handle_starttag(self,tag,attrs):
         html={t:set() for t in ("head","title","body","h1","h2","p","strong","table","thead","tbody","tr","th","td","code","pre","details","summary","dl","dt","dd","figcaption","ul","li","style")}
         html.update({"html":{"lang"},"meta":{"charset","name","content"},"a":{"href"},"div":{"class","role","aria-label","tabindex"},"span":{"class"},"figure":{"aria-label"}})
+        html["th"]={"scope"};html["p"]={"class"}
         svg_tags={"svg","g","defs","path","clippath","use","rect","line","polyline","polygon","circle","ellipse","text","tspan","style"}
         svg_attrs={"xmlns","xmlns:xlink","id","class","role","aria-label","width","height","viewbox","version","x","y","x1","x2","y1","y2","cx","cy","rx","ry","r","d","points","transform","style","clip-path","clippathunits","fill","stroke","stroke-width","stroke-linecap","stroke-linejoin","stroke-dasharray","stroke-dashoffset","stroke-opacity","fill-opacity","opacity","font-size","font-family","font-style","font-weight","text-anchor","type","href","xlink:href"}
         if tag=="svg":
@@ -183,7 +185,7 @@ def catalogue_index(catalogue):
         label_kind='HiGHS reference LP, five analytic microfixtures'
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
-                data.require(report["report_kind"] in ("lp","convex","opt04-phase-one","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward"),"unknown catalogue kind")
+                data.require(report["report_kind"] in ("lp","convex","opt04-phase-one","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward","syn07-ts01-analytic"),"unknown catalogue kind")
                 data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"schema-v3 scope/evidence metadata required")
                 label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
             else:
@@ -254,7 +256,7 @@ def stage(catalog_path,out,check=True,allow_test=False):
         rid=report["report_id"]
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
-        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt04-phase-one","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward"):
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt04-phase-one","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward","syn07-ts01-analytic"):
             source_id=report.get("source_report_id",rid)
             source_pattern = (opt04.SOURCE_PATTERN if report["report_kind"] == opt04.KIND else
                               r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else
@@ -263,9 +265,10 @@ def stage(catalog_path,out,check=True,allow_test=False):
                               r"geo05-[0-9a-f]{16}" if report["report_kind"]=="geo05-projection-predecessor" else
                               r"syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}" if report["report_kind"]=="syn02-terminal-minimizers" else
                               r"syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}" if report["report_kind"]=="syn01-nominal-forward" else
+                              r"syn07-ts01-\d{8}-[0-9a-f]{8,12}" if report["report_kind"]=="syn07-ts01-analytic" else
                               r"geo03-\d{8}-[0-9a-f]{12}")
             data.require(isinstance(source_id,str) and re.fullmatch(source_pattern,source_id) is not None,"invalid registered source bundle identity")
-            publisher = opt04 if report["report_kind"] == opt04.KIND else geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else syn01 if report["report_kind"] == "syn01-nominal-forward" else registered
+            publisher = opt04 if report["report_kind"] == opt04.KIND else geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else syn01 if report["report_kind"] == "syn01-nominal-forward" else ts01 if report["report_kind"] == "syn07-ts01-analytic" else registered
             item=publisher.adapt(root/source_id, allow_test=allow_test) if report["report_kind"] == opt04.KIND else publisher.adapt(root/source_id)
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
             data.require(report.get("source_report_id","")==item.source_report_id,"registered catalogue source identity mismatch")
@@ -279,7 +282,7 @@ def stage(catalog_path,out,check=True,allow_test=False):
             if report["report_kind"] == opt04.KIND:
                 page_files |= {"source-evidence/" + name for name in item.files}
             OfflineHTML(page_files).feed(generated_page)
-            if report["report_kind"] != "geo05-projection-predecessor":
+            if report["report_kind"] not in ("geo05-projection-predecessor", "syn07-ts01-analytic"):
                 if report["report_kind"] == opt04.KIND:
                     data.validate_svg(opt04.public_svg(data.parse_json((root/source_id/"records.json").read_text(encoding="utf-8"))))
                 else:
