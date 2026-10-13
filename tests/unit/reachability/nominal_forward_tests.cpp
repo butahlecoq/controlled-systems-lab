@@ -23,6 +23,28 @@ PreparedProvider<GeometryPort> provider(std::optional<std::size_t> limit={}) {
     Requirements req;req.output.representation={"csl.polyhedron.h"};req.output.relation=SetRelation::equivalent;
     return take(prepare_provider(select_provider(r,method,req)));
 }
+class CancelAfterFeasibility final : public SetOperatorWorkspace {
+    std::unique_ptr<SetOperatorWorkspace> inner_;
+    std::stop_source stop_;
+public:
+    CancelAfterFeasibility(std::unique_ptr<SetOperatorWorkspace> inner,std::stop_source stop)
+        :inner_(std::move(inner)),stop_(std::move(stop)) {}
+    OperationOutcome apply(const OperationRequest& request,const ExecutionContext& context) override {
+        auto result=inner_->apply(request,context);
+        if(request.identity.request.value.ends_with("2/feasibility"))stop_.request_stop();
+        return result;
+    }
+};
+PreparedProvider<GeometryPort> cancelling_provider(std::stop_source stop) {
+    auto entry=geometry::polyhedral::make_projection_registration();auto factory=entry.factory;
+    entry.factory=[factory,stop](const OperationRequest& request) {
+        return std::make_unique<CancelAfterFeasibility>(factory(request),stop);
+    };
+    Registry<GeometryPort> registry;Method method{entry.identity.id,entry.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());Requirements req;
+    req.output.representation={"csl.polyhedron.h"};req.output.relation=SetRelation::equivalent;
+    return take(prepare_provider(select_provider(registry,method,req)));
+}
 Problem integrator() {
     return {{"integrator"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
         LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}},{}}),{0,1,2},KnownInitial{{0}},
@@ -86,4 +108,11 @@ TEST_CASE("declared temporal coupling is rejected before propagation") {
     auto p=integrator();p.temporal=TemporalConstraints{{1,5,{0,1},{0},{1}},{{0,0}}};
     auto result=alternative<ForwardFailure>(run(p));CHECK(result.prefix.stages.empty());
     CHECK(std::get<Unsupported>(result.cause).diagnostics[0].field=="forward.temporal");
+}
+TEST_CASE("stop after final feasibility preserves completed child evidence without publishing a stage") {
+    auto p=resolved(integrator());std::stop_source stop;ExecutionContext context;context.cancellation=stop.get_token();
+    auto result=alternative<ForwardFailure>(nominal_forward(p,{"tube"},cancelling_provider(stop),context));
+    CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::cancelled);
+    CHECK(result.stage.value==2);CHECK(result.prefix.stages.size()==2);CHECK(result.completed_lineage.size()==2);
+    REQUIRE(result.active_request);CHECK(result.active_request->identity.request.value.ends_with("2/feasibility"));
 }
