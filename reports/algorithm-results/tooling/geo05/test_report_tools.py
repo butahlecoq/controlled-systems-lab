@@ -49,6 +49,17 @@ def predecessor_failure_fixture():
         "cause": {"kind": "operation_stopped", "reason": "cancelled", "diagnostics": "child projection cancelled"}}
 
 
+def measurement_rows():
+    rows = []
+    for purpose, repetitions in (("warmup", 1), ("measurement", 7)):
+        for repetition in range(repetitions):
+            for name in report.scenario_order(repetition):
+                row = report.synthetic_trial(name, repetition)
+                row["purpose"] = purpose
+                rows.append(row)
+    return rows
+
+
 class Geo05ReportTests(unittest.TestCase):
     def test_source_delta_rejects_algorithm_changes_and_allows_harness_paths(self):
         self.assertIn("CMakeLists.txt", report.HARNESS_PATH_ALLOWLIST)
@@ -213,13 +224,7 @@ class Geo05ReportTests(unittest.TestCase):
 
     def test_nested_failure_context_round_trips_saved_formats_and_escaped_rendering(self):
         context = predecessor_failure_fixture()
-        rows = []
-        for purpose, repetitions in (("warmup", 1), ("measurement", 7)):
-            for repetition in range(repetitions):
-                for name in report.SCENARIOS:
-                    row = report.synthetic_trial(name, repetition)
-                    row["purpose"] = purpose
-                    rows.append(row)
+        rows = measurement_rows()
         for index in (0, 4):
             rows[index].update(status="cancelled", oracle_passed=False, work_observed=False,
                 output_rows=None, result_kind=None, result_encoding=None,
@@ -245,6 +250,71 @@ class Geo05ReportTests(unittest.TestCase):
             for value in ("joint-set", "requested-projection", "requested-v1", "actual-projection", "actual-v2",
                           "lineage-request", "numeric-verifier", "numerical assumption", "distance-metric", "meters"):
                 self.assertIn(value, page)
+
+    def test_raw_capture_survives_observed_encoding_rejection(self):
+        rows = measurement_rows()
+        rows[4].update(status="oracle_failed", oracle_passed=False, result_encoding="v_generators")
+        stdout = "\n".join(json.dumps(row) for row in rows) + "\n"
+        stderr = "driver diagnostic retained\n"
+        with tempfile.TemporaryDirectory() as temporary:
+            out = Path(temporary) / "report"
+            with self.assertRaisesRegex(ValueError, "representation and encoding"):
+                collect._write_collection(out, stdout, stderr, rows,
+                    {"source_commit": "fixture", "harness_commit": "fixture"}, ["fixture-driver"], 7, 124, [], True)
+            self.assertTrue(out.exists(), "raw capture must be persisted before record validation")
+            self.assertEqual((out / "stdout.jsonl").read_text(encoding="utf-8"), stdout)
+            self.assertEqual((out / "stderr.txt").read_text(encoding="utf-8"), stderr)
+            capture = json.loads((out / "process-capture.json").read_text(encoding="utf-8"))
+            self.assertEqual(capture["process_return_code"], 124)
+            self.assertTrue(capture["timed_out"])
+            diagnostic = json.loads((out / "validation-error.json").read_text(encoding="utf-8"))
+            self.assertIn("representation and encoding", diagnostic["error"])
+            self.assertFalse((out / "records.json").exists())
+            self.assertFalse((out / "manifest.json").exists())
+            self.assertFalse(out.with_suffix(".zip").exists())
+
+    def test_main_raw_capture_survives_attempt_order_rejection(self):
+        rows = measurement_rows()
+        rows[0], rows[1] = rows[1], rows[0]
+        stdout = "\n".join(json.dumps(row) for row in rows) + "\n"
+        stderr = "out-of-order driver diagnostic\n"
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            executable = root / "fixture-driver.exe"
+            executable.write_bytes(b"synthetic fixture executable identity")
+            note = root / "concurrent-work.txt"
+            note.write_text("synthetic fixture", encoding="utf-8")
+            out = root / "report"
+            argv = ["collect.py", "--measure", "--exe", str(executable), "--build-dir", str(root),
+                "--build-log", str(root / "build.log"), "--source-commit", "fixture", "--harness-commit", "fixture",
+                "--concurrent-work", str(note), "--out", str(out)]
+            with patch.object(sys, "argv", argv), patch.object(collect, "build_provenance", return_value={
+                    "source_commit": "fixture", "harness_commit": "fixture", "executable": {}}), \
+                    patch.object(collect, "_run_capture", return_value=(stdout, stderr, 2, False)):
+                with self.assertRaisesRegex(ValueError, "fixed alternating order"):
+                    collect.main()
+            self.assertTrue(out.exists(), "raw capture must be persisted before ordering validation")
+            self.assertEqual((out / "stdout.jsonl").read_text(encoding="utf-8"), stdout)
+            self.assertEqual((out / "stderr.txt").read_text(encoding="utf-8"), stderr)
+            self.assertEqual(json.loads((out / "command.json").read_text(encoding="utf-8")),
+                [str(executable), "--measure", "--repetitions", "7", "--warmups", "1"])
+            capture = json.loads((out / "process-capture.json").read_text(encoding="utf-8"))
+            self.assertEqual(capture["process_return_code"], 2)
+            self.assertFalse(capture["timed_out"])
+            diagnostic = json.loads((out / "validation-error.json").read_text(encoding="utf-8"))
+            self.assertIn("fixed alternating order", diagnostic["error"])
+            self.assertFalse((out / "records.json").exists())
+            self.assertFalse(out.with_suffix(".zip").exists())
+
+    def test_successful_collection_keeps_existing_bundle_files(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            out = Path(temporary) / "report"
+            collect._write_collection(out, "", "", measurement_rows(),
+                {"source_commit": "fixture", "harness_commit": "fixture"}, ["fixture-driver"], 7, 0, [])
+            self.assertEqual({path.name for path in out.iterdir()}, {
+                "records.json", "provenance.json", "command.json", "stdout.jsonl", "stderr.txt", "parse-errors.json",
+                "trials.jsonl", "trials.csv", "index.html", "manifest.json"})
+            self.assertTrue(out.with_suffix(".zip").exists())
 
     def test_nested_failure_context_validation_rejects_incomplete_or_mistyped_payloads(self):
         context = predecessor_failure_fixture()
