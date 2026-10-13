@@ -282,6 +282,16 @@ TEST_CASE("published synthesis family bindings match only an independent expecte
     CHECK(verify_trajectory(p,q).optimality==CheckStatus::unsupported);
     CHECK(verify_trajectory(p,q).completeness==CheckStatus::unsupported);
 }
+TEST_CASE("legacy positional trajectory request aggregate remains source compatible") {
+    auto p=resolve(scalar());
+    const auto witness=request(p).witness;
+    TrajectoryRequest legacy{witness,Assurance::numerical,std::nullopt,std::nullopt,{}, {}, {}};
+    const auto report=verify_trajectory(p,legacy);
+    CHECK(report.bindings==CheckStatus::numerical_pass);
+    CHECK(report.feasibility==CheckStatus::numerical_pass);
+    CHECK(report.optimality==CheckStatus::unsupported);
+    CHECK(report.completeness==CheckStatus::unsupported);
+}
 TEST_CASE("V membership checks actual original rows and retains registered provenance") {
     auto input=scalar();input.states[1]=segment_v();auto p=resolve(input);auto q=request(p);
     CHECK(verify_trajectory(p,q).feasibility==CheckStatus::unsupported);
