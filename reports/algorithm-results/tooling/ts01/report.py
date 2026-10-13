@@ -8,7 +8,7 @@ import json
 import statistics
 
 SCHEMA = "csl.syn07-ts01-analytic-report/2"
-SOURCE_COMMIT = "28f305387f66caf8f72f057e16a39050cc5dbdba"
+SOURCE_COMMIT = "e22d9c2aeb05dc7567038801e6a21b8780184c9e"
 COORDINATES = ["x0", "x1", "x2", "u0", "u1"]
 
 

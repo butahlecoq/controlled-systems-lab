@@ -22,7 +22,7 @@ def _load_tool(name):
 report = _load_tool("report")
 publication_map = _load_tool("publication_map")
 
-REPORT_ID = "syn07-ts01-20261013-28f305387f66"
+REPORT_ID = "syn07-ts01-20261014-e22d9c2aeb05"
 
 
 def canonical(value):
