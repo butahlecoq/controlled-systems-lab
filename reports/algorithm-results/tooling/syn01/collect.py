@@ -20,8 +20,9 @@ import publication_map
 ROOT = Path(__file__).resolve().parents[4]
 TOOLING = Path(__file__).resolve().parent
 TRIAL_FIELDS = ("scenario", "repetition", "warmup", "status", "outcome", "oracle_passed",
-                "expected_marginals", "observed_marginals", "setup_ns", "solve_ns", "oracle_ns",
-                "execute_ns", "provider_operation_counts", "provider_operation_timing_ns", "detail")
+                "expected_marginals", "observed_marginals", "setup_ns", "setup_state", "solve_ns", "solve_state",
+                "oracle_ns", "oracle_state", "execute_ns", "execute_state", "provider_identities",
+                "provider_operation_counts", "provider_operation_timing_ns", "detail")
 
 
 def canonical(value):
@@ -30,6 +31,15 @@ def canonical(value):
 
 def sha(content):
     return hashlib.sha256(content).hexdigest()
+
+
+def project_version():
+    import re
+    source = (ROOT / "CMakeLists.txt").read_text(encoding="utf-8")
+    match = re.search(r"(?m)^project\(CSL VERSION ([^ ]+) LANGUAGES", source)
+    if match is None:
+        raise ValueError("CMake project version could not be identified")
+    return match.group(1)
 
 
 def run(command, **kwargs):
@@ -196,6 +206,7 @@ def collect(args):
             raise RuntimeError("driver returned nonzero status " + str(measured.returncode))
         trials = [json.loads(line) for line in measured.stdout.splitlines() if line.strip()]
         stage = "record_validation"
+        providers = next((row.get("provider_identities") for row in trials if row.get("provider_identities")), {})
         record = report.make_record(trials, source_commit=source_commit, harness_commit=harness_commit,
                                     environment={"os": platform.platform(), "machine": platform.machine(),
                                                  "processor": platform.processor() or "unavailable",
@@ -205,7 +216,12 @@ def collect(args):
                                                  "memory_bytes": load_before.get("memory_bytes"),
                                                  "host_load_before": load_before,
                                                  "host_load_after": load_after},
-                                    provenance={"configuration": "Release", "generator": args.generator,
+                                    provenance={"algorithm_module": {"id": "csl.reachability.nominal-forward",
+                                                                     "version": project_version()},
+                                                "providers": providers,
+                                                "dependency_edges": {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
+                                                                     "conversion": ["lp_backend"]},
+                                                "configuration": "Release", "generator": args.generator,
                                                 "cmake_version": run([str(args.cmake), "--version"]).stdout.splitlines()[0],
                                                 "compiler_id": compiler_id.group(1) if compiler_id else "unavailable",
                                                 "compiler_version": compiler_version.group(1) if compiler_version else "unavailable",

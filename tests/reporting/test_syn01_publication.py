@@ -27,6 +27,12 @@ SITE_SPEC.loader.exec_module(report_site)
 
 SOURCE = "a" * 40
 HARNESS = "b" * 40
+PROVIDER_IDS = {name: {"id": "csl." + name, "version": "1.0.0"} for name in (
+    "projection", "affine_sum", "conversion", "lp_backend", "hull_reducer")}
+PROVENANCE = {"algorithm_module": {"id": "csl.reachability.nominal-forward", "version": "0.1.0"},
+              "providers": PROVIDER_IDS,
+              "dependency_edges": {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
+                                   "conversion": ["lp_backend"]}}
 
 
 def make_event(scenario, repetition):
@@ -34,7 +40,9 @@ def make_event(scenario, repetition):
             "warmup": repetition == 0, "status": "passed", "outcome": "forward_tube",
             "expected_marginals": report.EXPECTED[scenario], "observed_marginals": report.EXPECTED[scenario],
             "oracle_passed": True, "setup_ns": 100 + repetition, "solve_ns": 200 + repetition,
-            "oracle_ns": 20, "execute_ns": 400 + repetition,
+            "setup_state": "available", "solve_state": "available",
+            "oracle_ns": 20, "oracle_state": "available", "execute_ns": 400 + repetition,
+            "execute_state": "available", "provider_identities": PROVIDER_IDS,
             "provider_operation_counts": {"csl.geometry.affine-sum": 4,
                                            "csl.geometry.polyhedral-projection": 2},
             "provider_operation_timing_ns": None, "detail": ""}
@@ -46,7 +54,7 @@ class Syn01PublicationTests(unittest.TestCase):
         trials = [make_event(name, repetition) for repetition in range(8) for name in report.SCENARIOS]
         record = report.make_record(trials, source_commit=SOURCE, harness_commit=HARNESS,
                                     environment={"os": "fixture", "processor": "fixture"},
-                                    provenance={"configuration": "Release", "compiler_id": "fixture"})
+                                    provenance={**PROVENANCE, "configuration": "Release", "compiler_id": "fixture"})
         record["report_id"] = "syn01-nominal-20261013-aaaaaaaa-" + "c" * 12
         bundle = root / record["report_id"]
         bundle.mkdir()

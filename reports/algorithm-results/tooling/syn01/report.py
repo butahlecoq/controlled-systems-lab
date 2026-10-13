@@ -7,8 +7,8 @@ import json
 import math
 import statistics
 
-SCHEMA = "csl.syn01-nominal-forward-report/1"
-EVENT_SCHEMA = "csl.syn01-nominal-forward-trial/1"
+SCHEMA = "csl.syn01-nominal-forward-report/2"
+EVENT_SCHEMA = "csl.syn01-nominal-forward-trial/2"
 SCENARIOS = ("integrator", "ltv")
 EXPECTED = {
     "integrator": [[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]],
@@ -22,6 +22,7 @@ SCENARIO_SPECS = {
             "state_constraints": [[0, 2], [3, 4], [-5, -4]]},
 }
 PHASES = ("setup_ns", "solve_ns", "oracle_ns", "execute_ns")
+PHASE_STATES = ("available", "partial", "not_reached")
 LIMITS = [
     "Complete 1-D H-row bounds over returned binary64 data; not an exact real-arithmetic certificate.",
     "Reachability relation assurance remains Unestablished; provider outputs are numerical.",
@@ -46,7 +47,8 @@ def summarize(trials):
         all_successful = len(measured) == 7 and all(row.get("status") == "passed" and row.get("oracle_passed") is True for row in measured)
         phases = {}
         for phase in PHASES:
-            values = [row.get(phase) for row in measured if type(row.get(phase)) is int and row[phase] >= 0] if all_successful else []
+            values = [row.get(phase) for row in measured if row.get(phase.removesuffix("_ns") + "_state") == "available"
+                      and type(row.get(phase)) is int and row[phase] >= 0] if all_successful else []
             phases[phase] = _timing(values)
         rows.append({"scenario": scenario, "attempts": len(measured),
                      "passed": sum(row.get("status") == "passed" and row.get("oracle_passed") is True for row in measured),
@@ -113,6 +115,19 @@ def validate_record(record):
         sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")).hexdigest() for name in SCENARIOS}
     if record.get("scenario_hashes") != expected_hashes:
         errors.append("scenario_hashes_mismatch")
+    provenance = record.get("provenance")
+    expected_providers = {"projection", "affine_sum", "conversion", "lp_backend", "hull_reducer"}
+    if (not isinstance(provenance, dict) or
+            provenance.get("algorithm_module") != {"id": "csl.reachability.nominal-forward",
+                "version": "0.1.0"} or
+            not isinstance(provenance.get("providers"), dict) or
+            set(provenance["providers"]) != expected_providers or
+            any(not isinstance(value, dict) or not isinstance(value.get("id"), str) or not value["id"] or
+                not isinstance(value.get("version"), str) or not value["version"]
+                for value in provenance["providers"].values()) or
+            provenance.get("dependency_edges") != {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
+                                                     "conversion": ["lp_backend"]}):
+        errors.append("provider_provenance_incomplete")
     for field in ("source_commit", "harness_commit"):
         value = record.get(field)
         if not isinstance(value, str) or len(value) != 40 or any(c not in "0123456789abcdef" for c in value):
@@ -142,15 +157,23 @@ def validate_record(record):
                 errors.append("literal_marginal_mismatch")
         for phase in PHASES:
             value = row.get(phase)
-            if type(value) is not int or value < 0:
+            state = row.get(phase.removesuffix("_ns") + "_state")
+            if state not in PHASE_STATES or (state == "not_reached" and value is not None) or (
+                    state in ("available", "partial") and (type(value) is not int or value < 0)):
                 errors.append("invalid_timing_" + phase)
-        if all(type(row.get(phase)) is int and row[phase] >= 0 for phase in PHASES) and row["execute_ns"] < sum(row[phase] for phase in PHASES[:3]):
+        if all(row.get(phase.removesuffix("_ns") + "_state") == "available" and
+               type(row.get(phase)) is int and row[phase] >= 0 for phase in PHASES[:3]) and \
+                row.get("execute_state") == "available" and type(row.get("execute_ns")) is int and \
+                row["execute_ns"] < sum(row[phase] for phase in PHASES[:3]):
             errors.append("nested_timing_exceeds_end_to_end")
         counts = row.get("provider_operation_counts")
         if not isinstance(counts, dict) or any(type(value) is not int or value < 0 for value in counts.values()):
             errors.append("invalid_provider_operation_counts")
         if row.get("provider_operation_timing_ns") is not None:
             errors.append("unsupported_provider_operation_timing_claim")
+        provider_ids = row.get("provider_identities")
+        if provider_ids and provider_ids != (provenance.get("providers") if isinstance(provenance, dict) else None):
+            errors.append("trial_provider_identity_mismatch")
     if len(trials) != 16 or seen != {(scenario, repetition) for scenario in SCENARIOS for repetition in range(8)}:
         errors.append("incomplete_trial_matrix")
     if record.get("summary") != summarize(trials):
@@ -192,7 +215,8 @@ def render_html(record):
         trial_rows.append("<tr>" + "".join(f"<td>{html.escape(str(value))}</td>" for value in (
             row.get("scenario"), row.get("repetition"), "warmup" if row.get("warmup") else "measured",
             row.get("status"), row.get("outcome"), row.get("oracle_passed"), row.get("observed_marginals"),
-            *(row.get(phase) for phase in PHASES), row.get("detail", ""))) + "</tr>")
+            *(f"{row.get(phase)} ({row.get(phase.removesuffix('_ns') + '_state')})" for phase in PHASES),
+            row.get("detail", ""))) + "</tr>")
     summary = []
     for row in record["summary"]:
         stats = [row["phases"][phase] for phase in PHASES]
@@ -207,6 +231,9 @@ def render_html(record):
 <style>body{{font:16px system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#17212b}}table{{border-collapse:collapse;width:100%;margin:1rem 0}}th,td{{border:1px solid #b8c3cc;padding:.45rem;text-align:left;vertical-align:top}}th{{background:#edf2f6}}.scroll{{overflow-x:auto}}code,td{{overflow-wrap:anywhere}}</style></head><body>
 <h1>SYN-01 nominal forward reachability report</h1><p>Collection state: <strong>{state}</strong>. Report ID <code>{report_id}</code>.</p>
 <p>Measured source <code>{html.escape(record['source_commit'])}</code>; report harness <code>{html.escape(record['harness_commit'])}</code>.</p>
+<h2>Implementation and selected provider stack</h2><p>Algorithm module: <code>{html.escape(record['provenance']['algorithm_module']['id'])}</code> version <code>{html.escape(record['provenance']['algorithm_module']['version'])}</code>.</p>
+<ul>{''.join('<li>'+html.escape(name)+': <code>'+html.escape(item['id'])+'</code> version <code>'+html.escape(item['version'])+'</code></li>' for name,item in sorted(record['provenance']['providers'].items()))}</ul>
+<p>Nested dependencies: {html.escape(json.dumps(record['provenance']['dependency_edges'], sort_keys=True))}</p>
 <p>One registered provider stack; descriptive timings only, no speedup or comparison claim. Reachability support: <strong>Unestablished</strong>.</p>
 <h2>Evidence limits</h2><ul>{limits}</ul><h2>Median end-to-end timing by fixture</h2>{render_svg(record)}
 <div class="scroll"><table><thead><tr><th>Fixture</th><th>Measured trials</th><th>Passed</th><th>Failed</th>{phase_headers}</tr></thead><tbody>{''.join(summary)}</tbody></table></div>

@@ -12,7 +12,7 @@ import registered_reports as common
 import report_data as data
 
 KIND = "syn01-nominal-forward"
-SCHEMA = "csl.syn01-nominal-forward-report/1"
+SCHEMA = "csl.syn01-nominal-forward-report/2"
 FILES = {
     "README.md", "build-provenance.json", "configure-log.txt", "build-log.txt",
     "driver-stderr.txt", "environment.json", "index.html", "latency.svg",
@@ -39,8 +39,9 @@ def _trial_csv(record):
     import io
     import csv
     fields = ("scenario", "repetition", "warmup", "status", "outcome", "oracle_passed",
-              "expected_marginals", "observed_marginals", "setup_ns", "solve_ns", "oracle_ns",
-              "execute_ns", "provider_operation_counts", "provider_operation_timing_ns", "detail")
+              "expected_marginals", "observed_marginals", "setup_ns", "setup_state", "solve_ns", "solve_state",
+              "oracle_ns", "oracle_state", "execute_ns", "execute_state", "provider_identities",
+              "provider_operation_counts", "provider_operation_timing_ns", "detail")
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
     writer.writeheader()

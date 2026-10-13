@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 
-NATIVE_SCHEMA = "csl.syn01-nominal-forward-report/1"
+NATIVE_SCHEMA = "csl.syn01-nominal-forward-report/2"
 MAP_SCHEMA = "csl.algorithm-report-publication-map/1"
 KIND = "syn01-nominal-forward"
 

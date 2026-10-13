@@ -25,6 +25,15 @@ collector validation, and rendering are excluded. Per-provider operation
 counts come from returned stage provenance; provider operation durations are
 not available through the public seam.
 
+The event format records an explicit timing state for each phase: `available`
+for a completed phase, `partial` when a phase throws after beginning, and
+`not_reached` when execution never entered it. A not-reached duration is JSON
+`null`; partial durations retain elapsed time. This prevents zero from being
+mistaken for a measured phase. The record separately identifies the nominal
+forward module at the CMake project version and the fixed measured source
+commit. It lists selected provider IDs and actual versions, including the
+transitive HiGHS, Qhull, and hull-reducer registrations used by affine sum.
+
 The oracle checks every returned halfspace and equality row against literal
 expected bounds over the returned binary64 values. It is not a real-arithmetic
 certificate. Failures and unsupported/empty outcomes remain in captured raw
