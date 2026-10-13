@@ -38,7 +38,7 @@ def finalize(payload,stamp='manual'):
  payload['report_id']='geo02-'+stamp+'-'+payload['payload_sha256'][:12];return payload
 def fixture_payload(stamp='manual'):
  trials=[]
- observed={'scalar_interval_affine_image':[[-2.0],[2.0]],'rectangular_projection_box':[[0.0],[2.0]],'singular_map_box_segment':[[0,0],[2,4]],'minkowski_interval_sum':[[1.0],[3.0],[4.0]],'redundant_interval_candidates':[[0.0],[1.0]]}
+ observed={'scalar_interval_affine_image':[[-2.0],[2.0]],'rectangular_projection_box':[[0.0],[2.0]],'singular_map_box_segment':[[0,0],[2,4]],'minkowski_interval_sum':[[1.0],[2.0],[3.0],[4.0]],'redundant_interval_candidates':[[0.0],[1.0]]}
  for s,c in SCENARIOS.items():
   for r in range(7):
    points=observed[s];out_count=len(points);candidate_count=c['candidate_count']
