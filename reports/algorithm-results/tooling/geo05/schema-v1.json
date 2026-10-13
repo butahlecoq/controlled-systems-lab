@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://controlled-systems-lab.invalid/schemas/geo05-numerical-report-v1.json",
+  "title": "GEO-05 Numerical Report Record v1",
+  "type": "object",
+  "required": ["schema", "report_id", "payload_sha256", "purpose", "algorithm", "catalog", "collection", "trials", "warmup_trials", "evidence_limits"],
+  "properties": {
+    "schema": {"const": "csl.geo05-numerical-report/1"},
+    "report_id": {"type": "string", "pattern": "^geo05-[0-9a-f]{16}$"},
+    "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "purpose": {"enum": ["test", "measurement"]},
+    "algorithm": {"type": "object", "required": ["id", "source_commit", "harness_commit"], "properties": {
+      "id": {"const": "GEO-05"}, "source_commit": {"type": "string"}, "harness_commit": {"type": "string"}}, "additionalProperties": true},
+    "catalog": {"type": "object", "required": ["version", "scenarios", "oracles"], "properties": {
+      "version": {"const": "geo05-analytic-v1"}, "scenarios": {"const": ["singular_a", "unreachable_equality_target", "integrator_predecessor", "v_projection_preserves_ray"]},
+      "oracles": {"type": "object"}}, "additionalProperties": false},
+    "collection": {"type": "object", "required": ["measured_repetitions", "warmups_per_scenario", "expected_trials", "expected_warmup_trials", "actual_warmup_trials", "process_return_code", "parse_errors", "timed_out", "counts", "valid_success_summary", "phases", "by_scenario"]},
+    "trials": {"type": "array", "items": {"$ref": "#/$defs/trial"}},
+    "warmup_trials": {"type": "array", "items": {"$ref": "#/$defs/trial"}},
+    "evidence_limits": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "trial": {"type": "object", "required": ["scenario", "repetition", "status", "oracle_scope", "oracle_passed", "work_observed", "max_rows", "input_rows", "output_rows", "result_kind", "result_encoding", "input_sha256", "scenario_sha256", "expected_fm_peak_rows", "durations_ns"],
+      "properties": {
+        "purpose": {"enum": ["measurement", "warmup"]},
+        "scenario": {"enum": ["singular_a", "unreachable_equality_target", "integrator_predecessor", "v_projection_preserves_ray"]},
+        "repetition": {"type": "integer", "minimum": 0},
+        "status": {"enum": ["passed", "failed", "unsupported", "cancelled", "oracle_failed"]},
+        "oracle_scope": {"const": "numeric_literal_samples"}, "oracle_passed": {"type": "boolean"},
+        "work_observed": {"type": "boolean"}, "max_rows": {"type": ["integer", "null"]},
+        "input_rows": {"type": "integer", "minimum": 0}, "output_rows": {"type": ["integer", "null"], "minimum": 0},
+        "result_kind": {"enum": ["empty", "h", "v", null]}, "result_encoding": {"enum": ["empty", "h_rows", "h_contradiction_row", "v_generators", null]},
+        "input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "scenario_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "expected_fm_peak_rows": {"type": ["integer", "null"]}, "durations_ns": {"type": "object"}},
+      "additionalProperties": true}
+  },
+  "additionalProperties": false
+}
