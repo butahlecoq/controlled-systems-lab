@@ -12,6 +12,7 @@ option(CSL_BUILD_GEO05_REPORT "Build the GEO-05 projection/predecessor report dr
 option(CSL_BUILD_GEO02_REPORT "Build the GEO-02 affine/sum report driver" OFF)
 option(CSL_BUILD_OBSERVABILITY_BENCHMARK "Build the OBS-02 collection overhead measurement driver" OFF)
 option(CSL_BUILD_SYN06_REPORT "Build the SYN-06 verifier measurement driver" OFF)
+option(CSL_BUILD_SYN02_REPORT "Build the SYN-02 terminal minimizer measurement driver" OFF)
 
 add_library(csl_contracts STATIC src/contracts.cpp)
 add_library(CSL::contracts ALIAS csl_contracts)
@@ -136,6 +137,16 @@ if(CSL_BUILD_SYN06_REPORT)
   target_compile_features(csl_syn06_verifier_report PRIVATE cxx_std_20)
   target_compile_definitions(csl_syn06_verifier_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
   target_link_libraries(csl_syn06_verifier_report PRIVATE CSL::verification)
+endif()
+if(CSL_BUILD_SYN02_REPORT)
+  execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE SYN02_HARNESS_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+  add_executable(csl_syn02_terminal_report reports/algorithm-results/tooling/syn02/terminal_driver.cpp)
+  target_compile_features(csl_syn02_terminal_report PRIVATE cxx_std_20)
+  target_compile_definitions(csl_syn02_terminal_report PRIVATE
+    CSL_SYN02_SOURCE_COMMIT="c234a1a04b2f90e34776a2bfa349a91a1d30257d"
+    CSL_SYN02_HARNESS_COMMIT="${SYN02_HARNESS_COMMIT}")
+  target_link_libraries(csl_syn02_terminal_report PRIVATE CSL::terminal_minimizers CSL::highs_lp CSL::highs_convex CSL::problem)
 endif()
 include(cmake/JsonDependencies.cmake)
 add_library(csl_input STATIC src/input/scenario_loader.cpp src/input/scenario_json.cpp src/input/scenario_file.cpp)
