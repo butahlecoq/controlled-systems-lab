@@ -1,0 +1,9 @@
+scenario,phase,median_ns,min_ns,max_ns,range_ns,available_trials,partial_trials,not_reached_trials,unavailable_trials,coverage
+integrator,setup_ns,40300,39300,42900,3600,7,0,0,0,complete
+integrator,solve_ns,4124100,3834000,4519700,685700,7,0,0,0,complete
+integrator,oracle_ns,2100,1800,2400,600,7,0,0,0,complete
+integrator,execute_ns,4203900,3913300,4605400,692100,7,0,0,0,complete
+ltv,setup_ns,48100,46100,86700,40600,7,0,0,0,complete
+ltv,solve_ns,4313000,3958500,4450900,492400,7,0,0,0,complete
+ltv,oracle_ns,2100,1900,2300,400,7,0,0,0,complete
+ltv,execute_ns,4403900,4052400,4554200,501800,7,0,0,0,complete

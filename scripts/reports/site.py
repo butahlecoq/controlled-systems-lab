@@ -17,6 +17,7 @@ import geo04_registered_reports as geo04
 import geo02_registered_reports as geo02
 import geo05_registered_reports as geo05
 import syn02_registered_reports as syn02
+import syn01_registered_reports as syn01
 import registered_reports as registered
 
 FILES={"index.html","records.json","scenarios.json","raw-events.jsonl","profile.json","build-provenance.txt",
@@ -57,7 +58,7 @@ class OfflineHTML(HTMLParser):
                 data.require(re.search(r"@import|url\s*\(|expression\s*\(",local,re.I) is None,"external/active inline style")
             if key in {"href","src","xlink:href"} and value:
                 if value.startswith("#"): continue
-                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-[0-9a-f]{64}\.zip)",value): continue
+                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-[0-9a-f]{64}\.zip)",value): continue
                 data.require(value in self.files,"external/escaping HTML asset")
     def handle_endtag(self,tag):
         if tag=="style": self.in_style=False
@@ -181,7 +182,7 @@ def catalogue_index(catalogue):
         label_kind='HiGHS reference LP, five analytic microfixtures'
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
-                data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers"),"unknown catalogue kind")
+                data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward"),"unknown catalogue kind")
                 data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"schema-v3 scope/evidence metadata required")
                 label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
             else:
@@ -249,16 +250,17 @@ def stage(catalog_path,out,check=True,allow_test=False):
         rid=report["report_id"]
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
-        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers"):
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward"):
             source_id=report.get("source_report_id",rid)
             source_pattern = (r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else
                               r"geo04-\d{8}T\d{6}Z-[0-9a-f]{12}" if report["report_kind"]=="geo04-intersection" else
                               r"geo02-\d{8}T\d{6}Z-[0-9a-f]{12}" if report["report_kind"]=="geo02-affine-sum" else
                               r"geo05-[0-9a-f]{16}" if report["report_kind"]=="geo05-projection-predecessor" else
                               r"syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}" if report["report_kind"]=="syn02-terminal-minimizers" else
+                              r"syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}" if report["report_kind"]=="syn01-nominal-forward" else
                               r"geo03-\d{8}-[0-9a-f]{12}")
             data.require(isinstance(source_id,str) and re.fullmatch(source_pattern,source_id) is not None,"invalid registered source bundle identity")
-            publisher = geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else registered
+            publisher = geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else syn01 if report["report_kind"] == "syn01-nominal-forward" else registered
             item=publisher.adapt(root/source_id)
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
             data.require(report.get("source_report_id","")==item.source_report_id,"registered catalogue source identity mismatch")

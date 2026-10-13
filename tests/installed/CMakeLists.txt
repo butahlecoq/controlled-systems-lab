@@ -159,3 +159,10 @@ set_target_properties(installed_projection_predecessor_client PROPERTIES CXX_EXT
 add_test(NAME installed_projection_predecessor_client COMMAND installed_projection_predecessor_client)
 set_tests_properties(installed_projection_predecessor_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed predecessor client: existential integrator interval and unestablished support passed")
+
+add_executable(installed_nominal_forward_client nominal_forward_client.cpp)
+target_link_libraries(installed_nominal_forward_client PRIVATE CSL::nominal_forward CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
+set_target_properties(installed_nominal_forward_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_nominal_forward_client COMMAND installed_nominal_forward_client)
+set_tests_properties(installed_nominal_forward_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed nominal-forward client: provider-backed integrator tube and authored labels passed")
