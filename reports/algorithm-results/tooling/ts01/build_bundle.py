@@ -87,7 +87,7 @@ def build(out=None, measurement_dir=None):
         (out / "measurement-events.jsonl").write_bytes((measurement_dir / "events.jsonl").read_bytes())
         write_json(out / "measurement.json", record["measurement"])
         with (out / "timings.csv").open("w", encoding="utf-8", newline="") as stream:
-            writer = csv.DictWriter(stream, fieldnames=("repetition", "warmup", "status", "elapsed_ns", "observation_token"), lineterminator="\n")
+            writer = csv.DictWriter(stream, fieldnames=("repetition", "warmup", "status", "elapsed_ns", "consumed_result_marker"), lineterminator="\n")
             writer.writeheader()
             for event in record["measurement"]["events"]:
                 writer.writerow({key: event[key] for key in writer.fieldnames})

@@ -74,7 +74,7 @@ def main():
         raise SystemExit("unexpected T-S01 event schema")
     if [(event.get("repetition"), event.get("warmup")) for event in events] != [(0, True), *[(i, False) for i in range(1, 8)]]:
         raise SystemExit("T-S01 warmup/repetition sequence differs")
-    failures = [event for event in events if event.get("status") != "passed" or not event.get("observation_token")]
+    failures = [event for event in events if event.get("status") != "passed" or not event.get("consumed_result_marker")]
     if failures or any(type(event.get("elapsed_ns")) is not int or event["elapsed_ns"] < 0 for event in events):
         raise SystemExit("one or more T-S01 attempts failed validation or returned invalid timing")
     measured = [event for event in events if not event["warmup"]]
@@ -85,7 +85,7 @@ def main():
         "harness_commit": harness_commit,
         "scope": "Fresh problem construction and resolution, strategy registration/selection/preparation, exclusive workspace creation, public bound-workspace run, and independent complete-H-relation plus exact-membership validation. Excludes process startup, JSON serialization, build, collection, and rendering.",
         "order": "One excluded warmup, followed by seven measured repetitions in one process. Single strategy only; alternation is inapplicable and no comparator was measured.",
-        "counts": {"warmup": 1, "measured": len(measured), "passed": sum(e["status"] == "passed" for e in measured), "failed": sum(e["status"] != "passed" for e in measured), "unique_observation_tokens": len({e["observation_token"] for e in events}), "all_outputs_consumed_and_validated": len({e["observation_token"] for e in events}) == 1},
+        "counts": {"warmup": 1, "measured": len(measured), "passed": sum(e["status"] == "passed" for e in measured), "failed": sum(e["status"] != "passed" for e in measured), "unique_consumed_result_markers": len({e["consumed_result_marker"] for e in events}), "all_outputs_consumed_and_validated": len({e["consumed_result_marker"] for e in events}) == 1},
         "timing_ns": {"observations": values, "median": statistics.median(values), "min": min(values), "max": max(values), "range": max(values)-min(values)},
         "performance_conclusion": "inconclusive",
         "limiter": {"available": False, "reason": "No separate sampling/call-stack profile was collected; this record does not attribute the observed time or establish capacity."},

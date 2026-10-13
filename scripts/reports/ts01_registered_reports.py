@@ -75,7 +75,7 @@ def adapt(bundle):
         if json.loads((bundle / "measurement.json").read_text(encoding="utf-8")) != record["measurement"]:
             raise ValueError("T-S01 measurement summary differs from native record")
         stream = io.StringIO(newline="")
-        fields = ("repetition", "warmup", "status", "elapsed_ns", "observation_token")
+        fields = ("repetition", "warmup", "status", "elapsed_ns", "consumed_result_marker")
         writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows({key: row[key] for key in fields} for row in record["measurement"]["events"])

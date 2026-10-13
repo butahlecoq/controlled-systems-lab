@@ -60,7 +60,7 @@ def validate(record):
         if len(events) != 8 or [(row.get("repetition"), row.get("warmup")) for row in events] != expected_order:
             errors.append("measurement_event_matrix")
         if any(row.get("schema") != "csl.syn07-ts01-measurement-event/1" or row.get("status") != "passed" or
-               type(row.get("elapsed_ns")) is not int or row["elapsed_ns"] < 0 or not row.get("observation_token") for row in events):
+               type(row.get("elapsed_ns")) is not int or row["elapsed_ns"] < 0 or not row.get("consumed_result_marker") for row in events):
             errors.append("measurement_event_invalid")
         if measurement.get("performance_conclusion") != "inconclusive" or measurement.get("counts", {}).get("failed") != 0 or measurement.get("counts", {}).get("measured") != 7:
             errors.append("measurement_scope_invalid")

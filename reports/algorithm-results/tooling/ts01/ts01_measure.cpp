@@ -129,7 +129,7 @@ int main() {
         std::cout<<"{\"schema\":\"csl.syn07-ts01-measurement-event/1\",\"repetition\":"
             <<(warmup?0:repetition+1)<<",\"warmup\":"<<(warmup?"true":"false")
             <<",\"elapsed_ns\":"<<elapsed<<",\"status\":\""<<(passed?"passed":"failed")
-            <<"\",\"observation_token\":"<<token<<",\"error\":\""<<error<<"\"}\n";
+            <<"\",\"consumed_result_marker\":"<<token<<",\"error\":\""<<error<<"\"}\n";
     }
     return failures==0?0:1;
 }

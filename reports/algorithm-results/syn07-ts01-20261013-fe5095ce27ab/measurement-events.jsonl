@@ -1,8 +1,0 @@
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":0,"warmup":true,"elapsed_ns":309400,"status":"passed","observation_token":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":1,"warmup":false,"elapsed_ns":71300,"status":"passed","observation_token":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":2,"warmup":false,"elapsed_ns":66200,"status":"passed","observation_token":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":3,"warmup":false,"elapsed_ns":54200,"status":"passed","observation_token":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":4,"warmup":false,"elapsed_ns":51400,"status":"passed","observation_token":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":5,"warmup":false,"elapsed_ns":50900,"status":"passed","observation_token":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":6,"warmup":false,"elapsed_ns":54100,"status":"passed","observation_token":1805158144890476961,"error":""}
-{"schema":"csl.syn07-ts01-measurement-event/1","repetition":7,"warmup":false,"elapsed_ns":53500,"status":"passed","observation_token":1805158144890476961,"error":""}
