@@ -49,6 +49,15 @@ and solver-form objective remain canonical Objective handles.
 
 ## Objectives and provenance
 
+All public convex and synthesis objectives in this revision are minimization
+objectives. `ConvexProgramInput` has no maximize sense, and the reference adapter
+does not globally maximize a convex objective. For source maximization of `f`,
+the caller must explicitly form and publish `g=-f`, including the negated
+constant/offset, under the exact normalized ProgramIdentity before invoking an
+adapter. Source lower bounds map to normalized upper bounds by sign negation;
+source upper bounds map to normalized lower bounds by sign negation. Keep both
+identities and the translation justification with any translated evidence.
+
 Supported originals are affine, convex quadratic `0.5*x'Q*x+q'x+c`, and a pure
 residual norm `||L*x-r||₂`. Offsets are retained. For a pure norm, publication uses
 the existing explicit norm-square reformulation: `Q=2L'L`, `q=-2L'r`, `c=r'r`.
@@ -60,6 +69,10 @@ There is no sum-objective input or implicit squaring of mixed objectives.
 For example, `|x-1|+0.5x²` on `[0,1]` minimizes at 1; replacing only the norm by
 its square changes the minimizer to 2/3. A successful pure-norm solve therefore
 reports the original norm cost and checks multipliers in original units.
+An `unbounded` outcome for these minimization requests means unbounded below.
+An adapter for a source maximization may report that outcome only after
+normalizing the request to minimization; no native maximize status or ambiguous
+direction is promoted to a public mathematical outcome.
 
 ## Workspace lifecycle
 

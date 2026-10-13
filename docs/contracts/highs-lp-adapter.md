@@ -133,6 +133,14 @@ outcome support. Native flags and tolerances do not constitute mathematical
 certificates. No result supplies a justified objective lower or upper bound,
 infeasibility certificate, unbounded ray, or optimizer family.
 
+The canonical LP request is minimization-only, so HiGHS `Unbounded` is reported
+as unbounded below for that exact ProgramIdentity. A source maximization must be
+converted by the caller to the normalized minimization objective `g=-f`,
+including its offset, before publishing a LinearProgram. Only after that
+normalization may the native status be interpreted; source bounds translate
+with sign reversal and swapped lower/upper direction, with evidence bound to
+both exact identities. This adapter does not accept a maximize flag.
+
 For a current valid finite native primal of the correct size, `evaluate_primal`
 recomputes the original objective (including its offset), row residuals, and
 variable-bound residuals. The original cost is included in raw diagnostics;

@@ -61,6 +61,10 @@ public:
 LinearProgram basis_program(double entering=6) {
     return accepted(make_linear_program({{{"p"},{entering>0?"basis-positive":"basis-negative"}},{0,0},0,{1,2,{0,2},{0,1},{2,entering}},{{{},{}},{{},{}}},{{0,0}}}));
 }
+LinearProgram improving_ray(double coefficient=-1,double offset=0) {
+    return accepted(make_linear_program({{{"p"},{coefficient<0?"min-improving-ray":"normalized-source-max"}},
+        {coefficient},offset,{0,1,{0},{},{}},{{0,{}}},{}}));
+}
 auto plan(const LinearProgram& p,bool with_basis=true) {
     Registry<LPPort> registry;
     Registration<LPPort> r{{{"literal"},"1"},[](const LinearProgram&,const Requirements&)->Capability{return Offer{};},
@@ -224,4 +228,53 @@ TEST_CASE("contradictory rows and an improving ray remain distinct supported rep
     CHECK(accepted(evaluate_primal(ray,Vector{10},policy,verifier)).objective==-10);
     unbounded.objective.lower=bound(ray,0);
     rejected(check_program_result(unbounded,ray,Assurance::numerical),DiagnosticCode::invalid_claim);
+}
+
+TEST_CASE("minimization bounds distinguish supported unboundedness from finite upper evidence") {
+    const auto p=improving_ray();
+    ProgramResult unbounded{Termination::completed,{p.identity(),MathematicalOutcome::unbounded,
+        SymbolicArgument{"x(t)=t, t>=0, objective=-t","real scalar t"},{}},{},{} ,"literal analytic report"};
+    unbounded.objective.lower=bound(p,-1);
+    rejected(check_program_result(unbounded,p,Assurance::numerical),DiagnosticCode::invalid_claim);
+
+    unbounded.objective.lower.reset();
+    unbounded.objective.upper=bound(p,0);
+    CHECK(check_program_result(unbounded,p,Assurance::numerical).empty());
+}
+
+TEST_CASE("source maximization bounds map through an explicitly normalized minimization program") {
+    // Source max (x + 2) is represented by min (-x - 2); no maximize API is implied.
+    const auto normalized=improving_ray(-1,-2);
+    CHECK(accepted(evaluate_primal(normalized,Vector{3},policy,verifier)).objective==-5);
+
+    ProgramResult unbounded{Termination::completed,{normalized.identity(),MathematicalOutcome::unbounded,
+        SymbolicArgument{"x(t)=t, t>=0, normalized objective=-t-2","real scalar t"},{}},{},{} ,"literal analytic report"};
+    // lower(max f)=0 maps to upper(min -f)=0.
+    unbounded.objective.upper=bound(normalized,0);
+    CHECK(check_program_result(unbounded,normalized,Assurance::numerical).empty());
+
+    // upper(max f)=5 maps to lower(min -f)=-5, contradicting unboundedness below.
+    unbounded.objective.upper.reset();
+    unbounded.objective.lower=bound(normalized,-5);
+    rejected(check_program_result(unbounded,normalized,Assurance::numerical),DiagnosticCode::invalid_claim);
+}
+
+TEST_CASE("unsupported outcome or bound evidence does not create an unboundedness contradiction") {
+    const auto p=improving_ray();
+    ProgramResult r{Termination::completed,{p.identity(),MathematicalOutcome::unbounded,
+        Unestablished{},{}},{},{} ,"literal candidate"};
+    r.objective.lower=bound(p,0);
+    CHECK(check_program_result(r,p,Assurance::numerical).empty());
+
+    r.outcome.support=SymbolicArgument{"improving ray","x(t)=t"};
+    r.objective.lower=ProgramObjectiveBound{0,{p.identity(),Unestablished{},{}}};
+    CHECK(check_program_result(r,p,Assurance::numerical).empty());
+}
+
+TEST_CASE("undetermined minimization outcome may retain a supported finite bound") {
+    const auto p=improving_ray();
+    ProgramResult r{Termination::resource_limit,{p.identity(),MathematicalOutcome::undetermined,
+        Unestablished{},{}},{},{} ,"literal candidate"};
+    r.objective.upper=bound(p,0);
+    CHECK(check_program_result(r,p,Assurance::numerical).empty());
 }

@@ -28,12 +28,19 @@ LinearProgramInput input{
 auto created = csl::optimization::make_linear_program(input);
 ```
 
-This describes **minimize c^T x + offset**, with row intervals
+Every public LP program in this revision has the authoritative sense
+**minimize**. The library does not accept a maximize sense. This describes
+**minimize c^T x + offset**, with row intervals
 `lower <= A*x <= upper` and variable intervals. The example minimizes -x-2y
 on x,y >= 0, x+y <= 1, with optimum (0,1), value -2. Offset +7 changes the
-reported program value to 5. Maximization of f is authored as minimization of
--f, including negating its offset; translating results and bounds back requires
-an explicit sign/direction transformation and original-program evidence.
+reported program value to 5. A caller starting from maximization of `f` must
+first create the normalized minimization program `g=-f`, negating every
+coefficient and the offset, and assign that exact program its own identity.
+There is no maximize API or implicit normalization. Translation back to the
+source objective is explicit: a source lower bound `L <= f` becomes the
+normalized upper bound `-L >= g`, while a source upper bound `f <= U` becomes
+the normalized lower bound `g >= -U`. The translated record must retain
+evidence for the exact source and normalized program identities.
 
 Missing lower/upper endpoints mean negative/positive infinity. Present endpoints
 must be finite. Equal endpoints describe equality rows and fixed variables.
@@ -130,16 +137,30 @@ solve. Optional primal data remains a candidate. Stopped results may retain
 independently supported bounds and residuals.
 
 `ProgramObjectiveBound` carries its own `ProgramBoundEvidence`: complete
-ProgramIdentity, support and assumptions. `SynthesisResult` continues to use
+ProgramIdentity (including the exact normalized objective and its program
+identity), support and assumptions. Under the authoritative minimization
+convention, a finite lower bound means `L <= inf_x g(x)` and a finite upper
+bound means `inf_x g(x) <= U`; both refer to the objective including its
+offset. Lower and upper bounds are independently supported: an absent or
+rejected bound does not invalidate the other. A program's `unbounded` outcome
+means unbounded below (infimum `-infinity`), not unbounded above. A source
+maximization adapter must normalize `g=-f` including the offset before program
+creation and translate statuses and bounds with the directions above.
+`SynthesisResult` continues to use
 problem-scoped ObjectiveEvidence. Translating a bound requires explicit
 mathematical justification; there is no implicit program-to-synthesis conversion.
 Unchecked CertificateReference and Unestablished are not justified evidence.
 
 `check_program_result` checks identity, enum values, finite candidate shape,
 finite/ordered bound values, support metadata and residual metadata. It rejects
-validated assurance because no verified-certificate type exists here. Supported
-infeasibility conflicts with a supported finite upper bound; supported
-minimization-unboundedness conflicts with a supported finite lower bound. Raw
+validated assurance because no verified-certificate type exists here. Once the
+exact normalized objective identity and minimization direction are authoritative,
+supported infeasibility conflicts with a supported finite upper bound; supported
+unbounded-below conflicts with a supported finite lower bound. If direction or
+identity is ambiguous, it does not classify a bound as contradictory. On an
+authoritative contradiction this LP checker returns diagnostics and rejects the
+result; it does not sanitize the outcome or remove bounds. Any caller that
+sanitizes must do so at a separate boundary with its own retention rules. Raw
 candidates and unestablished reports are not silently promoted to supported
 claims. Symbolic text remains unverified provenance. Passing this structural
 checker is not proof of correct outcomes or bounds. It costs O(n plus evidence
