@@ -1,0 +1,1 @@
+Separate process-counter-only invocation (1000 rounds, excluded from reported trials). Process CPU and resident-memory snapshots were sampled every ~10 ms. WPR CPU stack capture could not be enabled: command returned 0xc5585011 and reported 'Failed to enable the policy to profile system performance'. The limiting function/path remains unknown; no performance cause is inferred.

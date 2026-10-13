@@ -1,0 +1,30 @@
+{
+  "files": {
+    "README.md": "0775ea4e9291714649a5157bc6dc94d1605f7f58709dadb48872a288c3846a54",
+    "build-log.txt": "05a304b1ce1e0a559db741bcdfee29ee59089ef26733887f4d8bf5c7c0cb41b1",
+    "build-provenance.json": "ae22010825a0b5850a2aaff8b3269fe4b9ea66c87f15c33b9771eaa929dbd8ac",
+    "collect.py": "25ae4d3cb424c95bad7d756a79c30d7e3b24b6204c39c4f495ca8c064cd208dc",
+    "configure-log.txt": "1bb86224318ea816daed346e34a72ebf7044193c3004740fb93f646341a020c8",
+    "environment.json": "7acda883d5596282f1235fd4419ad61dbd3dc0f85df9bff93a0c3083e64345ed",
+    "etw-profile-attempt.txt": "61960c7ee7e63d5b2a9e0934e6ca8b0ac7c5b1552907c12055c9eb95244440c5",
+    "index.html": "cdaaf456b55361f516273637eb3f52488ba9870432dfce4b4eb2e7c59cb2ff2e",
+    "latency.svg": "e59d698ed9328775ab49b1eb88637278feddabe505a3566d23e070fb9268dd62",
+    "measurement-command.txt": "644b113062ce76111d611be04de21e8ba6f45051140d9cc4bde5cbb12cddb75a",
+    "profile-evidence.json": "7df40bb0249c61b880cc2ce176cfb469c113ad6b79c47100dadf957b58fb3767",
+    "profile-note.txt": "9df9c1345aa03947553ba76ed5e6862f862a1cc7d5f765d211b96de993e0e799",
+    "profile-raw.jsonl": "47ba319b88230ac3125280b1c135ff691f790e6968d4a1a47506d579444904d0",
+    "publication-map.json": "ffbe780b5b2b0d69c3a635361f54fafc56278783b661036313e4a54cd112bc3f",
+    "publication_map.py": "719b013627eebeb4a8cbfef5034ad3e5935be4b8090194a4274a853ab0e79ba7",
+    "raw-events.jsonl": "491843cfb37288b381674b573d1a15db3016d96883de85262b5e59feca3a2d19",
+    "records.json": "cd2b4bb4b0274994d5ede439bdcf75e55faf82004b6094f88f3c20b24723b493",
+    "render_saved.py": "5f4d36d9f3748b9381f2f602f50ce4231d7f04b73dc3364baf22e26fd872269b",
+    "summary.csv": "1c3e301d86837d0f128a4ddba187f81c09d86c5512cbba60da222e0af9faf567",
+    "terminal_driver.cpp": "33aac442d06c57b081f8f33a7e2e50485ac6d9b523c702336cfeaeb705e8cf41",
+    "test_report.py": "8025f7bf1e721d28d82cf215d8bad4e6aacb3e97d5787fbec16243aa1c98a88b",
+    "trials.csv": "662a8e60b87fcb4db465cb7fd0ce864dd3a50b9628c3b3f5d8a4c4db0708f7e2"
+  },
+  "harness_commit": "ad08e2c3e5d4abc5fa5ee93876c6cbb7510ec0aa",
+  "report_id": "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
+  "schema": "csl.syn02-report-manifest/1",
+  "source_commit": "c234a1a04b2f90e34776a2bfa349a91a1d30257d"
+}

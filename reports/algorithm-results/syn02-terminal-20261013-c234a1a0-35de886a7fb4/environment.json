@@ -1,0 +1,17 @@
+{
+  "cache_policy": "One excluded warmup per scenario; one process; fresh fixture, registries and prepared providers on every trial.",
+  "captured_utc": "2026-10-13T08:15:49.062551+00:00",
+  "configured_native_threads": 1,
+  "cpu_percent_after": 3.8,
+  "cpu_percent_before": 0.1,
+  "logical_cpus": 12,
+  "machine": "AMD64",
+  "memory_bytes": 34189107200,
+  "observed_native_threads": "Unavailable; not inferred from the configured policy",
+  "os": "Windows-11-10.0.22631-SP0",
+  "physical_cpus": 6,
+  "processor": "12th Gen Intel(R) Core(TM) i5-12400F",
+  "requested_workers": 1,
+  "seed": null,
+  "simultaneous_work": "No intentional concurrent benchmark; background processes may affect host load."
+}

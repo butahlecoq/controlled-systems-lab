@@ -1,0 +1,1 @@
+BUILD_ROOT\Release\csl_syn02_terminal_report.exe 7 1
