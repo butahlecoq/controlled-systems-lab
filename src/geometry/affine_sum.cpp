@@ -2,10 +2,12 @@
 
 #include <csl/numeric/data.hpp>
 #include <csl/sets/data.hpp>
+#include "exact_convex_combination.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
 #include <numeric>
+#include <span>
 
 namespace csl::geometry {
 namespace {
@@ -383,24 +385,38 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         if (stopped(context)) return OperationStopped{stop_reason(context), "Stopped before hull reduction."};
 
         auto hull_prepared_result = dependencies_.hull.prepare(cloud);
-        if (std::holds_alternative<registry::Rejection>(hull_prepared_result))
-            return unsupported("affine-sum.hull", "Selected hull reducer rejected the generated point cloud.");
-        auto hull_prepared=std::get<registry::PreparedPipeline<registry::HullReducerPort>>(std::move(hull_prepared_result));
-        auto hull_workspaces=hull_prepared.create();
-        auto lp_runner=std::make_unique<registry::RegisteredLPQueryRunner>(dependencies_.lp);
-        auto reduction_result=std::get<0>(hull_workspaces)->run_with(context,*lp_runner);
-        if (const auto* failure=std::get_if<Diagnostics>(&reduction_result)) return Unsupported{*failure};
-        const auto& reduction=std::get<HullReduction>(reduction_result);
-        if (reduction.lp_calls != lp_runner->records().size())
-            return unsupported("affine-sum.hull.lp_calls", "Hull reducer LP call count disagrees with its registered query records.", DiagnosticCode::invalid_claim);
         double max_residual=0.0;
-        if (!valid_reduction(cloud,reduction,context.numerical,max_residual)) {
-            if (stopped(context)) return OperationStopped{stop_reason(context), "Stopped while checking hull reduction evidence."};
-            return unsupported("affine-sum.hull.result", "Selected hull reducer returned incomplete or inconsistent reduction evidence.", DiagnosticCode::invalid_claim);
+        bool reduction_usable=false;
+        std::optional<HullReduction> reduction;
+        if (std::holds_alternative<registry::PreparedPipeline<registry::HullReducerPort>>(hull_prepared_result)) {
+            auto hull_prepared=std::get<registry::PreparedPipeline<registry::HullReducerPort>>(std::move(hull_prepared_result));
+            auto hull_workspaces=hull_prepared.create();
+            auto lp_runner=std::make_unique<registry::RegisteredLPQueryRunner>(dependencies_.lp);
+            auto reduction_result=std::get<0>(hull_workspaces)->run_with(context,*lp_runner);
+            if (auto* complete=std::get_if<HullReduction>(&reduction_result)) {
+                reduction=std::move(*complete);
+                const auto& checked=*reduction;
+                reduction_usable=checked.lp_calls==lp_runner->records().size() &&
+                    valid_reduction(cloud,checked,context.numerical,max_residual);
+                if (reduction_usable) {
+                    for (const auto& certificate:checked.removed) {
+                        if (stopped(context))
+                            return OperationStopped{stop_reason(context), "Stopped while checking exact hull certificates."};
+                        if (!detail::exact_convex_combination(cloud,certificate.removed,
+                                std::span<const ConvexCombination>{certificate.combination})) {
+                            reduction_usable=false;
+                            break;
+                        }
+                    }
+                }
+            }
         }
         std::vector<std::size_t> output_indices;
-        output_indices.resize(cloud.points.size());
-        std::iota(output_indices.begin(),output_indices.end(),std::size_t{0});
+        if (reduction_usable) output_indices=reduction->retained;
+        else {
+            output_indices.resize(cloud.points.size());
+            std::iota(output_indices.begin(),output_indices.end(),std::size_t{0});
+        }
         std::vector<double> retained_values;
         if (result_id_dimension != 0 && output_indices.size() > std::numeric_limits<std::size_t>::max()/result_id_dimension)
             return unsupported("affine-sum.capacity", "Retained cloud storage overflows size_t.");
@@ -416,8 +432,10 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         if(const auto* error=std::get_if<Diagnostic>(&output)) return unsupported(error->field,error->explanation,error->code);
 
         std::vector<std::string> assumptions{
-            "binary64 affine and sum arithmetic; selected hull reduction validated against caller tolerance",
-            "all generated candidates retained because numerical convex-combination certificates do not establish exact redundancy across supported platforms",
+            "binary64 affine and sum arithmetic; caller tolerance screens reduction evidence but cannot authorize deletion",
+            reduction_usable ?
+                "reducer retained indices applied only after exact binary64 convex-combination checks for every removal and complete acyclic dependency and partition validation" :
+                "all generated candidates retained because the complete reduction failed exact binary64 certification or structural validation",
             "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
             "numerical equivalent relation is not exact or validated set inclusion and has no global error bound",
             "finite and mixed action catalogues are not accepted by this SetHandle operation",

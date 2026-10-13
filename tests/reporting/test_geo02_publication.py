@@ -71,17 +71,26 @@ class Geo02PublicationTests(unittest.TestCase):
                 archive.writestr(path.name, path.read_bytes())
         return bundle
 
-    def test_payload_adapter_requires_explicit_limited_claims_and_unapplied_reduction(self):
+    def test_payload_adapter_requires_explicit_limited_claims_and_exact_reduction_scope(self):
         record = fixture_record()
         item = geo02.adapt_payload(record)
         self.assertEqual(item.kind, "geo02-affine-sum")
         self.assertEqual(item.payload_schema, geo02.SCHEMA)
-        self.assertIn("Full candidate cloud retained", item.evidence_limits)
+        self.assertIn("Exact dyadic deletion certificates", item.evidence_limits)
         broken = copy.deepcopy(record)
         broken["evidence"]["limitations"][-1] = "candidate deletion applied"
         broken = collect.finalize(broken, "20261013T120000Z")
         with self.assertRaisesRegex(ValueError, "reduction"):
             geo02.adapt_payload(broken)
+
+    def test_previous_immutable_geo02_bundle_remains_registered(self):
+        bundle = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "geo02-20261012T235755Z-6b1f504ad3db"
+        item = geo02.adapt(bundle)
+        self.assertEqual(item.payload_schema, geo02.LEGACY_SCHEMA)
+        self.assertEqual(item.report_id, geo02.LEGACY_PUBLICATION_IDS[bundle.name])
+        self.assertEqual(hashlib.sha256(geo02.offline_zip(bundle, item)).hexdigest(),
+                         "8f2fe77d30b69a0a314a7cd9dbe69342d2d5e9dde6eccc891afafcde04e578a9")
+        self.assertIn("Full candidate cloud retained", item.evidence_limits)
 
     def test_source_identity_is_digest_bound(self):
         record = fixture_record()

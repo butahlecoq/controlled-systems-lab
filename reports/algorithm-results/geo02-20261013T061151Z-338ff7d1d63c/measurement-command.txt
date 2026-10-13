@@ -1,0 +1,2 @@
+cwd=BUILD_ROOT
+SOURCE_ROOT\build-geo02-publication\Release\csl_geo02_affine_sum_report.exe --repetitions 7 --warmups 1

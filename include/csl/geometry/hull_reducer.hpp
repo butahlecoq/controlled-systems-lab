@@ -40,6 +40,10 @@ struct RemovalCertificate {
     // final retained cloud.
     std::vector<ConvexCombination> combination;
     ProgramIdentity program;
+    // NumericalCheck records solver diagnostics only. A consumer may authorize
+    // removal only after independently proving, over the exact dyadic values
+    // represented by these binary64 coordinates and weights, that weights are
+    // nonnegative, sum exactly to one, and reconstruct the removed point.
     NumericalCheck evidence;
 };
 
@@ -59,9 +63,10 @@ public:
                                        const ExecutionContext&) = 0;
 };
 
-// Uses independent zero-objective barycentric feasibility programs. Only a
-// feasible primal point that passes fresh residual and nonnegativity checks can
-// remove a candidate. All other outcomes conservatively retain it.
+// Uses independent zero-objective barycentric feasibility programs. Solver
+// residuals propose witnesses only; exact dyadic verification of nonnegative
+// weights, unit sum, and coordinate reconstruction authorizes removal.
+// All other outcomes conservatively retain the candidate.
 HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
                                 const ExecutionContext&);
 

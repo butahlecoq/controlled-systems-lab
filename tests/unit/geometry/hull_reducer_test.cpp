@@ -2,12 +2,34 @@
 #include <doctest/doctest.h>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/geometry/hull_reducer.hpp>
+#include "../../../src/geometry/exact_convex_combination.hpp"
+#include <array>
+#include <cmath>
 #include <csl/registry/provider.hpp>
 #include <limits>
 
 using namespace csl;
 
 namespace {
+TEST_CASE("exact convex combination verifier uses exact binary64 arithmetic") {
+    using geometry::ConvexCombination;
+    using geometry::PointCloud;
+    using geometry::detail::exact_convex_combination;
+
+    const PointCloud midpoint{{"exact-midpoint"}, {{0.0}, {1.0}, {0.5}}};
+    CHECK(exact_convex_combination(midpoint, 2, std::array<ConvexCombination, 2>{{{0, 0.5}, {1, 0.5}}}));
+
+    // The exact average rounds to 0.5 in binary64, but this certificate is
+    // wrong by one representable step and must not pass a tolerance check.
+    const PointCloud rounded{{"rounded-away-error"}, {{0.0}, {1.0}, {std::nextafter(0.5, 1.0)}}};
+    CHECK_FALSE(exact_convex_combination(rounded, 2, std::array<ConvexCombination, 2>{{{0, 0.5}, {1, 0.5}}}));
+
+    const double tiny = std::numeric_limits<double>::denorm_min();
+    const PointCloud subnormal{{"subnormal-product"}, {{0.0}, {tiny}, {0.0}}};
+    CHECK_FALSE(exact_convex_combination(subnormal, 2, std::array<ConvexCombination, 2>{{{1, 0.5}, {0, 0.5}}}));
+    CHECK(exact_convex_combination(subnormal, 2, std::array<ConvexCombination, 2>{{{0, 1.0}}}));
+}
+
 std::unique_ptr<LPWorkspace> highs_workspace() {
     auto registration = adapters::lp::make_highs_registration();
     REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(registration));
@@ -486,7 +508,7 @@ TEST_CASE("uncertain membership never removes a point and reports an incomplete 
     CHECK(reduction.attempts.front().outcome == geometry::MembershipOutcome::stopped);
 }
 
-TEST_CASE("accepted local certificates cannot exceed tolerance after later support removals") {
+TEST_CASE("approximate LP membership cannot authorize a removal within tolerance") {
     ApproximateFirstSupportWorkspace workspace;
     const geometry::PointCloud cloud{{"certificate-chain"}, {{0.0}, {7.5e-9}, {1.5e-8}}};
     ExecutionContext context{};
@@ -495,20 +517,11 @@ TEST_CASE("accepted local certificates cannot exceed tolerance after later suppo
     auto result = geometry::reduce_hull(cloud, workspace, context);
     REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
     const auto& reduction = std::get<geometry::HullReduction>(result);
-    REQUIRE(reduction.status == geometry::ReductionStatus::complete);
-    REQUIRE(!reduction.retained.empty());
-
-    double lower = cloud.points[reduction.retained.front()][0];
-    double upper = lower;
-    for (const auto index : reduction.retained) {
-        lower = std::min(lower, cloud.points[index][0]);
-        upper = std::max(upper, cloud.points[index][0]);
-    }
-    for (const auto& point : cloud.points) {
-        const double distance = point[0] < lower ? lower - point[0] :
-            (point[0] > upper ? point[0] - upper : 0.0);
-        CHECK(distance <= context.numerical.absolute_tolerance);
-    }
+    CHECK(reduction.status == geometry::ReductionStatus::incomplete);
+    CHECK(reduction.retained == std::vector<std::size_t>{0, 1, 2});
+    CHECK(reduction.removed.empty());
+    REQUIRE(!reduction.attempts.empty());
+    CHECK(reduction.attempts.front().outcome == geometry::MembershipOutcome::malformed_result);
 }
 
 TEST_CASE("a mismatched completed infeasibility result is malformed, not a valid exclusion") {

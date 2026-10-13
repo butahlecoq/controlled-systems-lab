@@ -1,0 +1,1 @@
+Limiter profile: not collected. This is a single-adapter descriptive report with no speedup or scalability claim; per-trial CPU, native-thread, peak-memory and OS limiter counters are unavailable in this harness.
