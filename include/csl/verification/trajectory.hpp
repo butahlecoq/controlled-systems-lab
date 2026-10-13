@@ -21,13 +21,13 @@ struct TrajectoryRequest {
     Assurance assurance{Assurance::numerical};
     std::optional<SynthesisOutcomeClaim> outcome;
     std::optional<OptimalFamily> family;
-    // When a family is supplied, these caller-owned expectations are compared
-    // independently against its published identity. Omit for witness-only use.
-    std::optional<ExpectedSynthesisBinding> expected_synthesis;
     ObjectiveEvidence bounds;
     // Retained program provenance only; no unprovided program-to-problem proof is inferred.
     std::vector<ProgramObjectiveEvidence> backend_bounds;
     Limits limits{};
+    // Appended to preserve positional aggregate initialization of prior fields.
+    // Required when family is supplied; omitted for witness-only verification.
+    std::optional<ExpectedSynthesisBinding> expected_synthesis;
 };
 struct NamedResidual {
     std::string field;
