@@ -121,6 +121,10 @@ def page(records: dict) -> str:
     harness = _e(provenance.get("harness_commit", "not recorded"))
     exe_sha = _e(provenance.get("executable_sha256", "not recorded"))
     cache_sha = _e(provenance.get("cmake_cache_sha256", "not recorded"))
+    build_sha = _e(provenance.get("release_build_sha256", "not recorded"))
+    compiler = _e(f'{provenance.get("compiler_id", "not recorded")} {provenance.get("compiler_version", "")}')
+    generator = _e(provenance.get("cmake_generator", "not recorded"))
+    release_flags = _e(provenance.get("release_flags", "not recorded"))
     host = _e(provenance.get("host_platform", "not recorded"))
     processor = _e(provenance.get("processor", "not recorded"))
     created = _e(records.get("created_utc", "not recorded"))
@@ -139,7 +143,7 @@ def page(records: dict) -> str:
 <div class="scroll"><table><thead><tr><th>Fixture</th><th>Rows</th><th>Columns</th><th>Expected status</th></tr></thead><tbody>{fixture_rows}</tbody></table></div>
 <h2>Timing definitions</h2><div class="scroll"><table><tbody>{boundary_rows}</tbody></table></div>
 <h2>Failures</h2>{('<p>No failed trial rows were recorded. Check the missing count and collection status above.</p>' if not failures_table else '<div class="scroll"><table><thead><tr><th>Fixture</th><th>Side</th><th>Repetition</th><th>Observed status</th><th>Diagnostic</th></tr></thead><tbody>'+''.join(failures_table)+'</tbody></table></div>')}
-<h2>Provenance and collection status</h2><p>Source commit <code>{source}</code>; harness commit <code>{harness}</code>. Executable SHA-256 <code>{exe_sha}</code>; CMake cache SHA-256 <code>{cache_sha}</code>. Host: {_e(host)}; processor: {_e(processor)}. Process exit: {_e(records.get("process_exit_code", "not recorded"))}. Catalog version {_e(records["catalog"]["version"])}. Execution order and trial evidence are in <a href="records.json">records.json</a>; saved driver output is in <a href="driver-stdout.txt">driver-stdout.txt</a> and <a href="stderr.txt">stderr.txt</a>. The standalone SVG is also available as <a href="performance.svg">performance.svg</a>.</p>{('<ul>'+''.join(f'<li>{_e(message)}</li>' for message in records.get('collection_errors', []))+'</ul>' if records.get('collection_errors') else '')}<ul>{limits}</ul>
+<h2>Provenance and collection status</h2><p>Source commit <code>{source}</code>; harness commit <code>{harness}</code>. Executable SHA-256 <code>{exe_sha}</code>; CMake cache SHA-256 <code>{cache_sha}</code>; clean Release build SHA-256 <code>{build_sha}</code>. Compiler: {_e(compiler)}; CMake generator: {_e(generator)}; C++ standard: {_e(provenance.get("cxx_standard", "not recorded"))}; Release flags: <code>{release_flags}</code>. Host: {_e(host)}; processor: {_e(processor)}; logical processors: {_e(provenance.get("logical_processors", "not recorded"))}. Process exit: {_e(records.get("process_exit_code", "not recorded"))}; aborted: {_e(records.get("aborted", "not recorded"))}. The sanitized clean Release build log is <a href="release-build.txt">release-build.txt</a>. Catalog version {_e(records["catalog"]["version"])}. Execution order and trial evidence are in <a href="records.json">records.json</a>; saved driver output is in <a href="driver-stdout.txt">driver-stdout.txt</a> and <a href="stderr.txt">stderr.txt</a>. The standalone SVG is also available as <a href="performance.svg">performance.svg</a>.</p>{('<ul>'+''.join(f'<li>{_e(message)}</li>' for message in records.get('collection_errors', []))+'</ul>' if records.get('collection_errors') else '')}<ul>{limits}</ul>
 <p class="small">This page and figure are rendered from saved records. Rendering does not invoke a solver.</p>
 </body></html>'''
 

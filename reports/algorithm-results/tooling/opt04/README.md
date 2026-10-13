@@ -102,13 +102,20 @@ The driver's ordinary mode is reserved for reviewed collection and emits a
 warmup plus seven measured repetitions. `collect.py --measure --exe ... --out
 ...` saves `records.json`, the single-schema trial `stdout.jsonl`, and
 `stderr.txt`. The command also requires `--build-dir`, `--source-commit`,
-`--harness-commit`, and `--concurrent-work-file`; it checks a clean tracked
-tree, HEAD identity, executable ownership under the named build directory, and
-records executable/build-cache hashes and host notes. A failed or incomplete
-collection is still saved with its failures and missing count, but has no
-valid summary statistics. The collector refuses to overwrite an existing
-destination. Rendering and bundle generation consume only saved records and
-are owned by the separate report renderer.
+`--harness-commit`, and `--concurrent-work-file`; it checks a clean source tree
+(including untracked, nonignored files), requires the algorithm source commit
+to precede the reviewed harness commit, and verifies that the configured CMake
+source, Release configuration, and selected executable belong to this
+checkout. Immediately before measurement it performs a `--clean-first`
+Release rebuild of the report target from the pinned HEAD and retains a
+sanitized build log plus executable, CMake-cache, and build-log hashes. The
+compiler identity/version, Release flags, CMake generator, and logical
+processor count are recorded. The collector applies a 300-second outer driver timeout by default; override it
+with `--timeout-seconds`. A failed, malformed, timed-out, or incomplete driver
+run is still saved with its available rows, errors, failure/missing counts and
+aborted status, but has no eligible summary statistics. The collector refuses
+to overwrite an existing destination. Rendering and bundle generation consume
+only saved records and are owned by the separate report renderer.
 
 After review, the measurement command has this form:
 
@@ -137,7 +144,10 @@ describe performance as inconclusive and make no speedup claim.
 
 The fixtures exercise small equality feasibility tasks from OPT-04's bounded
 scope. They do not represent application throughput, capacity, the archived
-author's original release, or every numerical corner case. See
+author's original release, or every numerical corner case. The collinear-input
+acceptance case remains outside this report's five-fixture catalogue; OPT-04
+#29 stays open until its kernel and lineage criteria are reviewed separately.
+See
 [`docs/contracts/phase-one.md`](../../../../docs/contracts/phase-one.md),
 [`docs/research/phase-one-lineage.md`](../../../../docs/research/phase-one-lineage.md),
 and [`docs/contracts/algorithm-report-records.md`](../../../../docs/contracts/algorithm-report-records.md)

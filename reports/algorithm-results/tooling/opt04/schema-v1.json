@@ -3,7 +3,7 @@
   "$id": "csl.opt04-phase-one-report/1",
   "title": "OPT-04 phase-one matched report",
   "type": "object",
-  "required": ["schema", "report_id", "evidence_support", "claims", "algorithm", "reference", "catalog", "measurement", "warmup_trials", "trials", "summary"],
+  "required": ["schema", "report_id", "evidence_support", "claims", "algorithm", "reference", "catalog", "measurement", "warmup_trials", "trials", "summary", "provenance", "collection_errors", "process_exit_code", "aborted"],
   "properties": {
     "schema": {"const": "csl.opt04-phase-one-report/1"},
     "report_id": {"type": "string", "minLength": 1},
@@ -15,7 +15,11 @@
     "measurement": {"type": "object", "required": ["warmups_per_fixture", "repetitions_per_fixture", "sides", "execution_order", "timing_boundaries"], "properties": {"warmups_per_fixture": {"const": 1}, "repetitions_per_fixture": {"const": 7}, "execution_order": {"type": "array", "items": {"type": "object", "required": ["repetition", "sequence"], "properties": {"sequence": {"type": "array", "items": {"type": "object", "required": ["fixture", "side", "order_index"]}}}}}}},
     "warmup_trials": {"type": "array", "items": {"$ref": "#/$defs/trial"}},
     "trials": {"type": "array", "items": {"$ref": "#/$defs/trial"}},
-    "summary": {"type": "object", "required": ["failure_count", "rows"]}
+    "summary": {"type": "object", "required": ["failure_count", "missing_count", "valid", "rows"]},
+    "provenance": {"type": "object", "required": ["source_commit", "harness_commit", "executable_sha256", "cmake_cache_sha256", "release_build_sha256", "release_build_command", "compiler_id", "compiler_version", "cxx_standard", "release_ndebug", "cmake_generator", "release_flags", "logical_processors"]},
+    "collection_errors": {"type": "array", "items": {"type": "string"}},
+    "process_exit_code": {"type": "integer"},
+    "aborted": {"type": "boolean"}
   },
   "$defs": {"trial": {"type": "object", "required": ["fixture", "side", "repetition", "sequence", "pair_id", "status", "expected_status", "observed_status", "reference_status", "oracle_match", "oracle_checks", "work_observed", "durations_ns", "tolerances", "original_rows_max_violation", "nonnegative_max_violation", "objective_value", "auxiliary_residual", "auxiliary_value", "result", "paired_outcomes"], "properties": {"side": {"enum": ["phase-one-bland", "highs-reference"]}, "status": {"enum": ["passed", "failed"]}, "tolerances": {"type": "object", "required": ["absolute", "relative"]}, "durations_ns": {"type": "object", "required": ["setup", "public_run", "verification", "end_to_end"]}, "oracle_checks": {"type": "array", "items": {"type": "object", "required": ["name", "passed"]}}, "paired_outcomes": {"oneOf": [{"type": "null"}, {"type": "object", "required": ["phase_one", "highs_reference"]}]}}}}
 }

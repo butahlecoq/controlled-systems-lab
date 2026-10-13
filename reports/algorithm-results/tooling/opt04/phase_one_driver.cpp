@@ -81,9 +81,10 @@ SideResult run_side(const Fixture& f,const std::string& side) {
     auto prepared=take(prepare_pipeline(select(registry,{{side=="phase-one-bland"?"phase-one-bland":"csl.lp.highs"},{}},p,req)));
     auto [workspace]=prepared.create(); bound=std::move(workspace);
     const auto setup_end=Clock::now();
-    const auto run_start=Clock::now();
     auto resources=std::make_shared<ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    auto outcome=bound->run({std::move(resources), {}, {}, {abs_tol,rel_tol}, std::string("opt04-")+f.id});
+    ExecutionContext context{std::move(resources), {}, {}, {abs_tol,rel_tol}, std::string("opt04-")+f.id};
+    const auto run_start=Clock::now();
+    auto outcome=bound->run(context);
     const auto run_end=Clock::now();
     if(!std::holds_alternative<ProgramResult>(outcome)) throw std::runtime_error("registered adapter rejected run");
     const auto& result=std::get<ProgramResult>(outcome);
@@ -164,7 +165,7 @@ int main(int argc,char** argv) {
             any_failed=any_failed||!r.passed;
             json trial={{"fixture",f.id},{"side",side},{"repetition",warm},{"sequence",sequence++},{"pair_id",std::string(f.id)+"-warmup-"+std::to_string(warm)},
                 {"warmup",true},{"status",r.detail["status"]},{"error",r.detail["error"]},{"expected_status",f.outcome},{"observed_status",r.detail["observed_status"]},
-                {"reference_status",nullptr},{"oracle_match",r.detail["oracle_match"]},{"oracle_checks",r.detail["oracle_checks"]},{"work_observed",true},
+                {"reference_status",nullptr},{"oracle_match",r.detail["oracle_match"]},{"oracle_checks",r.detail["oracle_checks"]},{"work_observed",r.detail["work_observed"]},
                 {"tolerances",{{"absolute",abs_tol},{"relative",rel_tol}}},{"original_rows_max_violation",r.detail["original_rows_max_violation"]},
                 {"nonnegative_max_violation",r.detail["nonnegative_max_violation"]},{"objective_value",r.detail["objective_value"]},
                 {"auxiliary_residual",r.detail["auxiliary_residual"]},{"auxiliary_value",r.detail["auxiliary_value"]},{"durations_ns",r.detail["durations_ns"]},{"result",r.detail["result"]}};
@@ -183,7 +184,7 @@ int main(int argc,char** argv) {
                 any_failed=any_failed||!r.passed;
                 json trial={{"fixture",f.id},{"side",side},{"repetition",rep},{"sequence",sequence++},{"pair_id",std::string(f.id)+"-"+std::to_string(rep)},
                     {"warmup",false},{"status",r.detail["status"]},{"error",r.detail["error"]},{"expected_status",f.outcome},{"observed_status",r.detail["observed_status"]},
-                    {"reference_status",nullptr},{"oracle_match",r.detail["oracle_match"]},{"oracle_checks",r.detail["oracle_checks"]},{"work_observed",true},
+                    {"reference_status",nullptr},{"oracle_match",r.detail["oracle_match"]},{"oracle_checks",r.detail["oracle_checks"]},{"work_observed",r.detail["work_observed"]},
                     {"tolerances",{{"absolute",abs_tol},{"relative",rel_tol}}},{"original_rows_max_violation",r.detail["original_rows_max_violation"]},
                     {"nonnegative_max_violation",r.detail["nonnegative_max_violation"]},{"objective_value",r.detail["objective_value"]},
                     {"auxiliary_residual",r.detail["auxiliary_residual"]},{"auxiliary_value",r.detail["auxiliary_value"]},{"durations_ns",r.detail["durations_ns"]},{"result",r.detail["result"]}};

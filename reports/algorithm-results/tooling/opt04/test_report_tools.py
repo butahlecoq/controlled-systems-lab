@@ -8,6 +8,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+import hashlib
 
 ROOT = Path(__file__).resolve().parent
 
@@ -49,10 +50,15 @@ def fixture_records() -> dict:
         "warmup_trials": [], "trials": [], "summary": {"failure_count": 0, "missing_count": 0, "valid": True, "rows": []},
         "provenance": {"source_commit": "a" * 40, "harness_commit": "b" * 40,
                        "executable_sha256": "c" * 64, "cmake_cache_sha256": "d" * 64,
+                       "release_build_sha256": hashlib.sha256(b"test Release build\n").hexdigest(),
+                       "release_build_command": ["cmake", "--config", "Release", "--clean-first"],
+                       "compiler_id": "TestCC", "compiler_version": "1.0", "cxx_standard": 20,
+                       "release_ndebug": True, "cmake_generator": "Test Generator", "release_flags": "-DNDEBUG",
+                       "logical_processors": 4,
                        "build_directory": "BUILD_ROOT", "executable_path": "BUILD_ROOT/test.exe",
                        "host_platform": "test", "processor": "test", "python": "3.x",
                        "concurrent_work": "none", "limiter_profile": "not measured"},
-        "collection_errors": [], "process_exit_code": 0,
+        "collection_errors": [], "process_exit_code": 0, "aborted": False,
     }
 
     def make_trial(side: str, repetition: int, sequence: int, pair: str) -> dict:
@@ -111,6 +117,7 @@ def fixture_records() -> dict:
 def write_report(path: Path, records: dict) -> None:
     path.mkdir(parents=True, exist_ok=True)
     (path / "records.json").write_text(json.dumps(records, indent=2) + "\n", encoding="utf-8")
+    (path / "release-build.txt").write_bytes(b"test Release build\n")
     render.render_report(records, path)
 
 
@@ -183,6 +190,17 @@ class ReportToolsTests(unittest.TestCase):
         self.assertIn("1 attempts failed and 1 expected attempts are missing", page)
         self.assertIn("ineligible", page)
         self.assertIn("one oracle failure", page)
+
+    def test_aborted_collection_is_ineligible_even_with_complete_trial_rows(self) -> None:
+        records = fixture_records()
+        records["aborted"] = True
+        records["summary"]["valid"] = False
+        for row in records["summary"]["rows"]:
+            row["median_ns"] = row["min_ns"] = row["max_ns"] = None
+
+        validate.validate_records(records)
+        page = render.page(records)
+        self.assertIn("aborted: True", page)
 
     def test_html_hostile_content_is_escaped(self) -> None:
         records = fixture_records()

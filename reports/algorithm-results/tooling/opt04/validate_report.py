@@ -236,6 +236,12 @@ def validate_records(records: dict) -> dict:
         ordered_by_sequence = [key for key, _ in sorted(actual_order, key=lambda item: item[1])]
         require(ordered_by_schedule == ordered_by_sequence, "grouped execution order differs from trial sequence ordinals")
         for rep in range(7):
+            round_record = next(item for item in schedule if item["repetition"] == rep)
+            round_entries = sorted(round_record["sequence"], key=lambda item: item["order_index"])
+            observed_fixture_order = list(dict.fromkeys(item["fixture"] for item in round_entries))
+            expected_fixture_order = list(fixtures) if rep % 2 == 0 else list(reversed(fixtures))
+            require(observed_fixture_order == expected_fixture_order,
+                    f"repetition {rep}: fixture traversal did not alternate")
             for fixture_index, fid in enumerate(fixtures):
                 ordered = sorted(((scheduled[(fid, side, rep)], side) for side in SIDES))
                 first_expected = "phase-one-bland" if (rep + fixture_index) % 2 == 0 else "highs-reference"
@@ -248,7 +254,9 @@ def validate_records(records: dict) -> dict:
     require(isinstance(errors, list) and all(isinstance(e, str) for e in errors), "collection_errors must be a list of strings")
     exit_code = records.get("process_exit_code")
     require(isinstance(exit_code, int) and not isinstance(exit_code, bool), "process_exit_code must be an integer")
-    valid = complete and failures == 0 and missing_count == 0 and not errors and exit_code == 0
+    aborted = records.get("aborted")
+    require(isinstance(aborted, bool), "aborted must be boolean")
+    valid = complete and failures == 0 and missing_count == 0 and not errors and exit_code == 0 and not aborted
     require(summary.get("valid") is valid, "summary.valid does not match saved evidence")
     require(summary.get("missing_count") == missing_count, "summary.missing_count mismatch")
     require(summary.get("failure_count") == failures, "summary.failure_count mismatch")
@@ -273,9 +281,21 @@ def validate_records(records: dict) -> dict:
     for name in ("source_commit", "harness_commit"):
         require(isinstance(provenance.get(name), str) and re.fullmatch(r"[0-9a-fA-F]{40,64}", provenance[name]),
                 f"provenance.{name} must be a full commit hash")
-    for name in ("executable_sha256", "cmake_cache_sha256"):
+    for name in ("executable_sha256", "cmake_cache_sha256", "release_build_sha256"):
         require(isinstance(provenance.get(name), str) and re.fullmatch(r"[0-9a-f]{64}", provenance[name]),
                 f"provenance.{name} must be a SHA-256 digest")
+    require(isinstance(provenance.get("release_build_command"), list)
+            and "--clean-first" in provenance["release_build_command"]
+            and "Release" in provenance["release_build_command"], "clean Release rebuild command is required")
+    require(provenance.get("cxx_standard") == 20 and provenance.get("release_ndebug") is True,
+            "C++20 Release/NDEBUG build identity is required")
+    for name in ("compiler_id", "compiler_version", "cmake_generator"):
+        require(isinstance(provenance.get(name), str) and provenance[name], f"provenance.{name} is required")
+    require(isinstance(provenance.get("release_flags"), str) and "NDEBUG" in provenance["release_flags"].upper(),
+            "Release flags must record NDEBUG")
+    logical_processors = provenance.get("logical_processors")
+    require(logical_processors is None or isinstance(logical_processors, int) and not isinstance(logical_processors, bool)
+            and logical_processors > 0, "logical_processors must be a positive integer or unavailable")
     return records
 
 
@@ -321,6 +341,9 @@ def validate_report(root: Path) -> dict:
     records_path = root / "records.json"
     records = json.loads(records_path.read_text(encoding="utf-8"))
     validate_records(records)
+    build_log = root / "release-build.txt"
+    require(build_log.is_file() and hashlib.sha256(build_log.read_bytes()).hexdigest()
+            == records["provenance"]["release_build_sha256"], "retained Release build log digest mismatch")
     spec = importlib.util.spec_from_file_location("opt04_render_for_validation", Path(__file__).with_name("render.py"))
     renderer = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
