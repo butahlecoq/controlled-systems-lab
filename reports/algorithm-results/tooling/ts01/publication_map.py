@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 
-NATIVE_SCHEMA = "csl.syn07-ts01-analytic-report/1"
+NATIVE_SCHEMA = "csl.syn07-ts01-analytic-report/2"
 KIND = "syn07-ts01-analytic"
 
 

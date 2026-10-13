@@ -65,7 +65,7 @@ def adapt(bundle):
         writer.writerow({**row, "point": json.dumps(row["point"], separators=(",", ":"))})
     if (bundle / "trials.csv").read_bytes() != stream.getvalue().encode("utf-8"):
         raise ValueError("T-S01 CSV differs from saved membership results")
-    scenarios = {"assumptions": record["assumptions"], "canonical_relation": record["canonical_relation"]}
+    scenarios = {"scenario": record["scenario"], "input": record["input"], "assumptions": record["assumptions"], "canonical_relation": record["canonical_relation"]}
     if json.loads((bundle / "scenarios.json").read_text(encoding="utf-8")) != scenarios:
         raise ValueError("T-S01 scenario sidecar differs from native record")
     if "measurement" in record:
@@ -75,7 +75,7 @@ def adapt(bundle):
         if json.loads((bundle / "measurement.json").read_text(encoding="utf-8")) != record["measurement"]:
             raise ValueError("T-S01 measurement summary differs from native record")
         stream = io.StringIO(newline="")
-        fields = ("repetition", "warmup", "status", "elapsed_ns", "consumed_result_marker")
+        fields = ("repetition", "warmup", "status", "elapsed_ns", "consumed_result_marker", "termination", "outcome", "objective_lower", "objective_upper", "residuals_available")
         writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows({key: row[key] for key in fields} for row in record["measurement"]["events"])

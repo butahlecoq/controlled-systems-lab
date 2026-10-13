@@ -44,11 +44,34 @@ class Ts01SavedReportTests(unittest.TestCase):
                 changed["measurement"]["timing_ns"][field] += 1
                 self.assertIn("measurement_summary", report.validate(changed))
 
+    def test_scenario_and_input_hashes_are_canonical_and_checked(self):
+        scenario = self.record["scenario"]
+        self.assertEqual(scenario["sha256"], report.digest(scenario["value"]))
+        self.assertEqual(self.record["input"]["sha256"], report.digest(self.record["input"]["value"]))
+        changed = json.loads(json.dumps(self.record))
+        changed["scenario"]["sha256"] = "0" * 64
+        self.assertIn("scenario_hash", report.validate(changed))
+
+    def test_actual_strategy_observations_are_separate_from_analytic_expectations(self):
+        expected = self.record["canonical_relation"]["objective_minimum"]
+        observed = self.record["measurement"]["strategy_observation"]
+        self.assertEqual(expected, 0)
+        self.assertEqual(observed["termination"], "completed")
+        self.assertEqual(observed["outcome"], "optimal")
+        self.assertEqual(observed["objective_lower"], 0)
+        self.assertEqual(observed["objective_upper"], 0)
+        self.assertEqual(observed["residuals"], {"available": False, "reason": "StrategyPort result exposes no residual fields"})
+        changed = json.loads(json.dumps(self.record))
+        changed["measurement"]["strategy_observation"]["objective_upper"] = 1
+        self.assertIn("strategy_objective_observation", report.validate(changed))
+
     def test_html_is_projected_from_saved_record(self):
         page = report.render_html(self.record)
         self.assertIn("(0,s,1,s,1−s)", page)
         self.assertIn("Exact binary64 membership examples", page)
         self.assertIn(self.record["source_commit"], page)
+        self.assertIn("Observed StrategyPort result", page)
+        self.assertIn(self.record["scenario"]["sha256"], page)
 
     def test_publication_map_describes_exploratory_measurements(self):
         projection = publication_map.project(self.record)

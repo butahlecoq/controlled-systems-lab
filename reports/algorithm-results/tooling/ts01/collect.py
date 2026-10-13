@@ -113,12 +113,12 @@ def main():
         events = [json.loads(line, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value))) for line in lines]
     except (UnicodeError, json.JSONDecodeError, ValueError) as error:
         raise SystemExit("measurement executable emitted invalid JSONL") from error
-    if len(events) != 8 or any(event.get("schema") != "csl.syn07-ts01-measurement-event/1" for event in events):
+    if len(events) != 8 or any(event.get("schema") != "csl.syn07-ts01-measurement-event/2" for event in events):
         raise SystemExit("measurement output does not match the expected eight-event schema")
     expected_order = [(0, True), *[(i, False) for i in range(1, 8)]]
     if [(event.get("repetition"), event.get("warmup")) for event in events] != expected_order:
         raise SystemExit("T-S01 warmup/repetition sequence differs")
-    if any(event.get("status") != "passed" or type(event.get("elapsed_ns")) is not int or event["elapsed_ns"] < 0 or not event.get("consumed_result_marker") for event in events):
+    if any(event.get("status") != "passed" or type(event.get("elapsed_ns")) is not int or event["elapsed_ns"] < 0 or not event.get("consumed_result_marker") or event.get("termination") != "completed" or event.get("outcome") != "optimal" or event.get("objective_lower") != 0 or event.get("objective_upper") != 0 or event.get("residuals_available") is not False for event in events):
         raise SystemExit("one or more T-S01 attempts failed validation or returned invalid timing")
     measured = [event for event in events if not event["warmup"]]
     values = [event["elapsed_ns"] for event in measured]
@@ -148,6 +148,7 @@ def main():
         "order": "One excluded warmup, followed by seven measured repetitions in one process. Single strategy only; alternation is inapplicable and no comparator was measured.",
         "counts": {"warmup": 1, "measured": len(measured), "passed": len(measured), "failed": 0, "unique_consumed_result_markers": len({event["consumed_result_marker"] for event in events}), "all_outputs_consumed_and_validated": True},
         "timing_ns": {"observations": values, "median": statistics.median(values), "min": min(values), "max": max(values), "range": max(values)-min(values)},
+        "strategy_observation": {"termination": measured[-1]["termination"], "outcome": measured[-1]["outcome"], "objective_lower": measured[-1]["objective_lower"], "objective_upper": measured[-1]["objective_upper"], "residuals": {"available": False, "reason": "StrategyPort result exposes no residual fields"}},
         "performance_conclusion": "inconclusive",
         "limiter": {"available": False, "reason": "No separate sampling/call-stack profile was collected; this record does not attribute the observed time or establish capacity."},
         "binary": {"path": str(executable.relative_to(build_root)), "sha256": sha(binary), "bytes": len(binary), "configuration": "Release", "ndebug": True, "cxx_standard": "c++20", "release_properties": props},

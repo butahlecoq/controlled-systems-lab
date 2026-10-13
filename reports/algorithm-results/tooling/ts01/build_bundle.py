@@ -52,6 +52,16 @@ def build(out=None, measurement_dir=None):
         "source_commit": report.SOURCE_COMMIT,
         "algorithm": {"strategy_id": "csl.synthesis.ts01-analytic", "strategy_version": "1", "profile_id": "ts01_exact_integrator"},
         "coordinates": report.COORDINATES,
+        "scenario": {"value": {"assumptions": [
+            "Discrete-time, two-step scalar system with times (0,1,2).",
+            "Known initial state x0=0; unrestricted one-dimensional state at every stage.",
+            "Both transitions are exactly x[t+1]=x[t]+u[t], with zero offsets and no external channels.",
+            "Independent closed control intervals u0,u1 in [0,1].",
+            "Nominal open-loop information; no observations, temporal constraints, or other constraints.",
+            "Terminal quadratic objective has Q=2, linear coefficient -2, and offset 1: J(x2)=x2^2-2*x2+1.",
+            "Requested target is exact_optimal_relation, representation csl.polyhedron.h, numerical assurance, no materialization limit, and empty transformation lineage.",
+        ], "expected_objective_minimum": 0}},
+        "input": {"value": {"times": [0,1,2], "initial_state": [0], "transitions": [{"A": [[1]], "B": [[1]], "offset": [0]}, {"A": [[1]], "B": [[1]], "offset": [0]}], "controls": [{"lower": [0], "upper": [1]}, {"lower": [0], "upper": [1]}], "terminal_objective": {"Q": [[2]], "linear": [-2], "offset": 1}, "request": {"profile": "ts01_exact_integrator", "target": "exact_optimal_relation", "representation": "csl.polyhedron.h", "assurance": "numerical"}}},
         "assumptions": [
             "Discrete-time, two-step scalar system with times (0,1,2).",
             "Known initial state x0=0; unrestricted one-dimensional state at every stage.",
@@ -83,6 +93,8 @@ def build(out=None, measurement_dir=None):
         ],
         "performance": {"status": "exploratory_single_strategy" if measurement_dir else "unavailable", "reason": "Seven validated observations from a standalone Release harness; no comparison or speedup claim. Performance conclusions remain inconclusive without a limiter profile." if measurement_dir else "No standalone public T-S01 execution/measurement executable or accepted harness exists at the source commit. The C++ API test is correctness coverage, not a timing harness; no proxy timing is reported.", "comparison": "none", "speedup_claim": False},
     }
+    record["scenario"]["sha256"] = report.digest(record["scenario"]["value"])
+    record["input"]["sha256"] = report.digest(record["input"]["value"])
     if measurement_dir:
         measurement_dir = Path(measurement_dir)
         measurement = json.loads((measurement_dir / "collection.json").read_text(encoding="utf-8"))
@@ -100,7 +112,7 @@ def build(out=None, measurement_dir=None):
         (out / "measurement-events.jsonl").write_bytes((measurement_dir / "events.jsonl").read_bytes())
         write_json(out / "measurement.json", record["measurement"])
         with (out / "timings.csv").open("w", encoding="utf-8", newline="") as stream:
-            writer = csv.DictWriter(stream, fieldnames=("repetition", "warmup", "status", "elapsed_ns", "consumed_result_marker"), lineterminator="\n")
+            writer = csv.DictWriter(stream, fieldnames=("repetition", "warmup", "status", "elapsed_ns", "consumed_result_marker", "termination", "outcome", "objective_lower", "objective_upper", "residuals_available"), lineterminator="\n")
             writer.writeheader()
             for event in record["measurement"]["events"]:
                 writer.writerow({key: event[key] for key in writer.fieldnames})
@@ -109,7 +121,7 @@ def build(out=None, measurement_dir=None):
         writer.writeheader()
         for row in examples:
             writer.writerow({**row, "point": json.dumps(row["point"], separators=(",", ":"))})
-    write_json(out / "scenarios.json", {"assumptions": record["assumptions"], "canonical_relation": record["canonical_relation"]})
+    write_json(out / "scenarios.json", {"scenario": record["scenario"], "input": record["input"], "assumptions": record["assumptions"], "canonical_relation": record["canonical_relation"]})
     (out / "environment.json").write_text(json.dumps(record["measurement"]["environment"] if measurement_dir else {"measurement": "not performed", "timing": "unavailable", "reason": record["performance"]["reason"]}, indent=2) + "\n", encoding="utf-8")
     (out / "README.md").write_text(f"""# T-S01 result bundle\n\nSource commit: `{report.SOURCE_COMMIT}`. Timings are exploratory single-strategy observations, not a performance verdict or speedup comparison.\n\nRebuild a measurement from the pinned clean source worktree, rebuild the bundle in a fresh scratch directory, and validate the report and catalogue with:\n\n```powershell\npython reports/algorithm-results/tooling/ts01/collect.py --cmake 'C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe' --dependency-cache build/ts01-report/_deps --algorithm-source-commit {report.SOURCE_COMMIT} --build-root build/ts01-source-build --out build/ts01-measurement\npython reports/algorithm-results/tooling/ts01/build_bundle.py --measurement-dir build/ts01-measurement --out-dir build/ts01-rebuilt\npython reports/algorithm-results/tooling/ts01/report.py --check reports/algorithm-results/{REPORT_ID}/records.json\npython -m unittest tests.reporting.test_ts01_report -v\npython scripts/reports/site.py --catalog reports/algorithm-results/catalog.json --check --out build/ts01-report-site\n```\n\nSee `index.html` for the full assumptions, exact relation, membership examples, timing scope and assurance limits. `raw-events.jsonl` and `trials.csv` project exact membership results; `measurement-events.jsonl`, `measurement.json` and `timings.csv` retain raw trial timings and provenance.\n""", encoding="utf-8", newline="\n")
     manifest_files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in out.iterdir() if p.is_file()}

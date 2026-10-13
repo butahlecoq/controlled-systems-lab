@@ -19,6 +19,28 @@ using namespace csl;
 using namespace csl::registry;
 
 namespace {
+const char* termination_name(Termination value) {
+    switch(value) {
+        case Termination::completed: return "completed";
+        case Termination::cancelled: return "cancelled";
+        case Termination::resource_limit: return "resource_limit";
+        case Termination::numerical_failure: return "numerical_failure";
+        case Termination::operation_rejected: return "operation_rejected";
+        case Termination::contract_rejected: return "contract_rejected";
+    }
+    return "unknown";
+}
+const char* outcome_name(MathematicalOutcome value) {
+    switch(value) {
+        case MathematicalOutcome::optimal: return "optimal";
+        case MathematicalOutcome::infeasible: return "infeasible";
+        case MathematicalOutcome::unbounded: return "unbounded";
+        case MathematicalOutcome::infimum_not_attained: return "infimum_not_attained";
+        case MathematicalOutcome::undetermined: return "undetermined";
+    }
+    return "unknown";
+}
+
 template<class T, class... R> T take(std::variant<T,R...> value) {
     if (!std::holds_alternative<T>(value)) throw std::runtime_error("unexpected diagnostic or unsupported result");
     return std::get<T>(std::move(value));
@@ -76,6 +98,8 @@ SynthesisResult one_run(std::uint64_t& token) {
     if (!complete || complete->assurance!=Assurance::numerical ||
         complete->relation.coordinates!=JointCoordinates{{1,1,0},2})
         throw std::runtime_error("T-S01 complete relation metadata differs");
+    if(!result.objective.lower || !result.objective.upper || result.objective.lower->value!=0 || result.objective.upper->value!=0)
+        throw std::runtime_error("T-S01 observed objective bounds differ");
     const auto* relation=dynamic_cast<const synthesis::strategy_ts01::ExactJointRelation*>(complete->relation.payload.get());
     if (!relation) throw std::runtime_error("T-S01 relation payload type differs");
     const auto representation=relation->h_polyhedron().representation();
@@ -121,15 +145,18 @@ int main() {
         std::uint64_t token=0;
         bool passed=true;
         std::string error;
-        try { (void)one_run(token); }
+        SynthesisResult result{};
+        try { result=one_run(token); }
         catch(const std::exception& exception) { passed=false;error=exception.what(); }
         const auto end=std::chrono::steady_clock::now();
         const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
         if(!passed)++failures;
-        std::cout<<"{\"schema\":\"csl.syn07-ts01-measurement-event/1\",\"repetition\":"
+        std::cout<<"{\"schema\":\"csl.syn07-ts01-measurement-event/2\",\"repetition\":"
             <<(warmup?0:repetition+1)<<",\"warmup\":"<<(warmup?"true":"false")
             <<",\"elapsed_ns\":"<<elapsed<<",\"status\":\""<<(passed?"passed":"failed")
-            <<"\",\"consumed_result_marker\":"<<token<<",\"error\":\""<<error<<"\"}\n";
+            <<"\",\"consumed_result_marker\":"<<token<<",\"termination\":\""<<(passed?termination_name(result.termination):"unavailable")
+            <<"\",\"outcome\":\""<<(passed?outcome_name(result.outcome.value):"unavailable")<<"\",\"objective_lower\":"<<(passed?result.objective.lower->value:0)
+            <<",\"objective_upper\":"<<(passed?result.objective.upper->value:0)<<",\"residuals_available\":false,\"error\":\""<<error<<"\"}\n";
     }
     return failures==0?0:1;
 }
