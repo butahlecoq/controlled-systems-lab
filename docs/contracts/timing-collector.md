@@ -10,7 +10,10 @@ Resolve the OBS-01 `CollectionPlan` before execution. Its fixed span IDs, explic
 `nested`/`spawned` parents, module identities, shards and wall clock domain remain
 authoritative. `make_timing_collector(plan, clock, run_id, worker_ids)` admits one
 root covering all planned spans, a matching monotonic wall clock, and unique worker
-span IDs with no ancestor/descendant pair. Selecting workers is an explicit work
+span IDs with no ancestor/descendant pair. Matching includes resolution and calibration
+metadata: availability, available value, or unavailable reason and detail. A mismatch
+rejects before sampling, so published plan metadata describes the admitted source.
+Selecting workers is an explicit work
 accounting decision; an empty list means zero selected worker work. A nonempty
 `ExecutionContext::run_id` must match the plan. No implicit thread-local parentage,
 dynamic ID allocation or implicit scheduling is introduced.

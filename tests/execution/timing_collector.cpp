@@ -29,8 +29,9 @@ public:
     std::atomic<std::int64_t> wall{0},cpu{0};
     bool available=true;
     std::atomic<unsigned> wall_reads{0},cpu_reads{0};
+    ar::ClockDomain wall_metadata=domain();
     std::optional<ar::ClockDomain> cpu_metadata;
-    ar::ClockDomain wall_domain() const override{return domain();}
+    ar::ClockDomain wall_domain() const override{return wall_metadata;}
     std::optional<ar::ClockDomain> cpu_domain() const override{return cpu_metadata;}
     ar::Metric<std::int64_t> wall_now() noexcept override {
         ++wall_reads;return available?ar::Metric<std::int64_t>{ar::Available<std::int64_t>{wall.load()}}:
@@ -38,7 +39,7 @@ public:
     }
     ar::Metric<std::int64_t> cpu_now() noexcept override{++cpu_reads;return ar::Available<std::int64_t>{cpu.load()};}
 };
-ob::CollectionPlan plan(bool enabled=true,std::size_t count=4,bool escaped_child=false) {
+ob::CollectionPlan plan(bool enabled=true,std::size_t count=4,bool escaped_child=false,ar::ClockDomain wall_metadata=domain()) {
     Problem z{{"zero"},std::make_shared<const SystemModel>(SystemModel{{{0,0,0},TimeDomain::discrete,
         LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},KnownInitial{{}},ContinuousDomain{{}},
         {UniversalSet{0}},{},{},InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
@@ -53,7 +54,7 @@ ob::CollectionPlan plan(bool enabled=true,std::size_t count=4,bool escaped_child
     c.selector={{"first"},"1",{}};c.strategy={{"joint"},{"lp"},{},{},{},{},{},{"first"},{"joint"}};
     ob::PlanInput p{std::get<problem::ResolvedProblem>(resolved),accepted(ar::resolve_configuration(c)),{"run"},{},{},enabled?2u:0u};
     if(enabled){
-        p.clocks={domain()};p.tasks={"task"};p.operations={"solve"};
+        p.clocks={wall_metadata};p.tasks={"task"};p.operations={"solve"};
         for(std::size_t i=0;i<count;++i){
             ar::SpanDescriptor d{};d.id={i};if(i)d.parent=ar::SpanParent{{i==3&&count==4?1u:0u},i==3&&count==4&&!escaped_child?ar::ParentKind::nested:ar::ParentKind::spawned};
             d.shard=i%2;d.bucket=0;d.task="task";d.operation="solve";d.module=c.modules[0].implementation;
@@ -282,4 +283,58 @@ TEST_CASE("move assignment closes its old span before taking the new owner") {
     const auto report=accepted(timer->snapshot());CHECK(measured(report.spans[1].inclusive_wall_ticks)==4);
     CHECK(measured(report.spans[2].inclusive_wall_ticks)==8);CHECK(measured(report.worker_work_ticks)==12);
     CHECK(report.observations.description().buckets[0].observed.value==4);
+}
+TEST_CASE("clock resolution and calibration mismatches reject before sampling") {
+    struct Fixture {ar::ClockDomain planned,actual;};
+    std::vector<Fixture> fixtures;
+    auto planned=domain(),actual=planned;
+    actual.resolution_ticks=ar::Available<std::uint64_t>{2};fixtures.push_back({planned,actual});
+    actual=planned;actual.resolution_ticks=ar::Unavailable{ar::MissingReason::not_supported,"not measured"};fixtures.push_back({planned,actual});
+    planned.resolution_ticks=ar::Unavailable{ar::MissingReason::not_supported,"not measured"};
+    actual=planned;actual.resolution_ticks=ar::Available<std::uint64_t>{1};fixtures.push_back({planned,actual});
+    actual=planned;actual.resolution_ticks=ar::Unavailable{ar::MissingReason::clock_unavailable,"not measured"};fixtures.push_back({planned,actual});
+    actual=planned;actual.resolution_ticks=ar::Unavailable{ar::MissingReason::not_supported,"different limitation"};fixtures.push_back({planned,actual});
+    planned=domain();planned.calibration=ar::Available<std::string>{"reviewed calibration"};
+    actual=planned;actual.calibration=ar::Available<std::string>{"different calibration"};fixtures.push_back({planned,actual});
+    actual=planned;actual.calibration=ar::Unavailable{ar::MissingReason::not_instrumented,"not calibrated"};fixtures.push_back({planned,actual});
+    planned.calibration=ar::Unavailable{ar::MissingReason::not_instrumented,"not calibrated"};
+    actual=planned;actual.calibration=ar::Available<std::string>{"reviewed calibration"};fixtures.push_back({planned,actual});
+    actual=planned;actual.calibration=ar::Unavailable{ar::MissingReason::not_supported,"not calibrated"};fixtures.push_back({planned,actual});
+    actual=planned;actual.calibration=ar::Unavailable{ar::MissingReason::not_instrumented,"different limitation"};fixtures.push_back({planned,actual});
+    for(const auto& fixture:fixtures){
+        auto clock=std::make_shared<FakeClock>();clock->wall_metadata=fixture.actual;
+        auto result=ob::make_timing_collector(plan(true,4,false,fixture.planned),clock,{0},{{1},{2}});
+        REQUIRE(std::holds_alternative<ar::ArtifactError>(result));
+        CHECK(std::get<ar::ArtifactError>(result).path=="timing.clock");
+        CHECK(clock->wall_reads==0);CHECK(clock->cpu_reads==0);
+    }
+}
+TEST_CASE("matching clock precision and limitations survive portable run publication") {
+    for(bool available:{true,false}){
+        auto metadata=domain();
+        if(available)metadata.calibration=ar::Available<std::string>{"reviewed calibration"};
+        else {
+            metadata.resolution_ticks=ar::Unavailable{ar::MissingReason::not_supported,"resolution not measured"};
+            metadata.calibration=ar::Unavailable{ar::MissingReason::not_instrumented,"not calibrated"};
+        }
+        auto planned=plan(true,4,false,metadata);auto clock=std::make_shared<FakeClock>();clock->wall_metadata=metadata;
+        auto timer=accepted(ob::make_timing_collector(planned,clock,{0},{{1},{2}}));
+        for(std::uint64_t id:{0,1,2,3}){auto scope=accepted(timer->start({id}));}
+        const auto report=accepted(timer->snapshot());const auto& description=planned.description();
+        const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+        ar::RunRecord record{description.problem.identity(),{0,0,0},0,description.configuration,description.run,
+            ar::UnsupportedFinal{{{DiagnosticCode::unsupported,"timing-fixture","No solver invoked"}}},report.observations,
+            {missing,missing,missing,missing,true,ar::MemoryAccounting::unlimited},{},{},ar::ProblemProvenance::problem_revalidated};
+        const auto persisted=accepted(ar::decode_run(accepted(ar::encode_run(accepted(ar::publish_run({description.problem,record}))))));
+        const auto& saved=persisted.description().statistics.description().clocks[0];
+        if(available){
+            CHECK(measured(saved.resolution_ticks)==1);CHECK(measured(saved.calibration)=="reviewed calibration");
+        }else {
+            const auto& resolution=std::get<ar::Unavailable>(saved.resolution_ticks);
+            const auto& calibration=std::get<ar::Unavailable>(saved.calibration);
+            CHECK(resolution.reason==ar::MissingReason::not_supported);CHECK(resolution.detail=="resolution not measured");
+            CHECK(calibration.reason==ar::MissingReason::not_instrumented);CHECK(calibration.detail=="not calibrated");
+        }
+        CHECK(persisted.description().statistics.description().buckets[0].observed.value==4);
+    }
 }

@@ -39,9 +39,18 @@ public:
     }
     Reading cpu_now() noexcept override{return missing(ar::MissingReason::not_supported);}
 };
+template<class T> bool same_metric(const ar::Metric<T>& a,const ar::Metric<T>& b){
+    const auto* left=std::get_if<ar::Available<T>>(&a);
+    const auto* right=std::get_if<ar::Available<T>>(&b);
+    if(left||right)return left&&right&&left->value==right->value;
+    const auto& absent_left=std::get<ar::Unavailable>(a);
+    const auto& absent_right=std::get<ar::Unavailable>(b);
+    return absent_left.reason==absent_right.reason&&absent_left.detail==absent_right.detail;
+}
 bool compatible(const ar::ClockDomain& a,const ar::ClockDomain& b){
     return a.id==b.id&&a.metric==b.metric&&a.scope==b.scope&&a.period_numerator==b.period_numerator&&
-        a.period_denominator==b.period_denominator&&a.origin_label==b.origin_label;
+        a.period_denominator==b.period_denominator&&a.origin_label==b.origin_label&&
+        same_metric(a.resolution_ticks,b.resolution_ticks)&&same_metric(a.calibration,b.calibration);
 }
 bool valid_cpu(const ar::ClockDomain& d){
     return !d.id.value.empty()&&!d.scope.empty()&&!d.origin_label.empty()&&d.period_numerator&&d.period_denominator&&
@@ -55,7 +64,8 @@ Ticks exclusive(const Slot& parent,const std::vector<Slot>& slots,const std::vec
     std::vector<std::pair<std::int64_t,std::int64_t>> intervals;
     std::vector<std::size_t> descendants=children;
     for(std::size_t i=0;i<descendants.size();++i){
-        const auto& next=graph[descendants[i]];descendants.insert(descendants.end(),next.begin(),next.end());
+        const auto& next=graph[descendants[i]];
+        for(auto child:next)descendants.push_back(child);
     }
     intervals.reserve(descendants.size());
     for(auto index:descendants){
@@ -245,7 +255,8 @@ CollectionResult<std::shared_ptr<TimingCollector>> make_timing_collector(Collect
             const auto& spans=input.spans;
             auto index=[&](ar::SpanId id)->std::optional<std::size_t>{
                 auto found=std::lower_bound(spans.begin(),spans.end(),id.value,[](const auto& d,auto value){return d.id.value<value;});
-                if(found==spans.end()||found->id!=id)return {};return static_cast<std::size_t>(found-spans.begin());
+                if(found==spans.end()||found->id!=id)return {};
+                return static_cast<std::size_t>(found-spans.begin());
             };
             auto root=index(run);if(!root||spans[*root].parent)return error("timing.run","Run span must be a planned root");
             owner->run=*root;owner->slots.resize(spans.size());owner->children.resize(spans.size());
