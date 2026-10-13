@@ -9,6 +9,18 @@ exact feasibility, validated arithmetic, a complete solution family, or that a
 returned witness proves all feasible points. Numerical support remains
 **Unestablished**.
 
+## Publication and migration status
+
+This native report uses `csl.opt04-phase-one-report/1`. Its local saved-data
+renderer and bundle are private source evidence; they are not registered with
+`scripts/reports/site.py` or the authoritative algorithm-report catalogue, and
+they do not create a public page or URL. The tracked path for validating this
+native bundle, adapting it to the shared schema-3 envelope/catalogue, preserving
+its raw files as source evidence, and integrating it into the main-only Pages
+workflow is [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185).
+Until that integration and deployment are complete, treat any local HTML as a
+private renderer output only.
+
 ## Review boundary
 
 The harness must receive fixed-source review before any accepted collection.
