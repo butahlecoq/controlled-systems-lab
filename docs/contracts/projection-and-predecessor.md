@@ -189,10 +189,9 @@ reviewed harness commit `890b5990010504c8025f9a84e6236ab272e3142d`. It contains
 fixtures; all 32 passed their literal sample checks and reported work. The
 record supports descriptive timings only, without a comparator, speedup,
 application-scale or scalability claim, or profiler-based bottleneck
-attribution. The registered Pages route is
-`https://butahlecoq.github.io/controlled-systems-lab/geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795/index.html`;
-it remains pending until the main-branch deployment and direct page/download
-checks succeed.
+attribution. The registered Pages route is live at
+`https://butahlecoq.github.io/controlled-systems-lab/geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795/index.html`.
+After PR #175 merged as `04b6aa210e4b6b5dfd9e365c5da94c417f53f093`, direct checks on 2026-10-13 returned HTTP 200 for the page and saved JSON/CSV artifacts. The downloaded page, records, CSV, envelope and publication manifest matched the deployed staging output byte for byte; the 12-member offline ZIP returned HTTP 200 and its SHA-256 matched the catalogue (`51826297b765b011423ca58fb3160fbdd4884c176d73adaf5eabc5f2508fefba`). The live page was visually inspected after deployment.
 
 The report publication does not complete the implementation acceptance
 criteria above. GEO-05 remains open until the projection, lazy materialization,
