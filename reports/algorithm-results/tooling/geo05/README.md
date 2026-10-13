@@ -56,10 +56,14 @@ verification, and end-to-end spans in nanoseconds. For predecessor operations,
 the public API creates its workspace inside `PreparedNominalPredecessor::run`,
 so workspace creation is unavailable as a separate span; the driver marks that
 field null and records the enclosing public run call. Successful end-to-end
-starts before fixture construction and ends after literal checks. It excludes
-process startup, persistence, rendering, and object destruction. V projection
-workspace creation is directly observable. These scopes do not expose native
-subphases or prove a numerical certificate.
+starts immediately before fixture construction and stops after the scenario
+runner returns. It therefore includes destruction of that runner's local
+fixtures, results, providers, and workspaces. On exceptions it also includes
+stack unwinding before the failure is recorded. It excludes process startup,
+JSON serialization, persistence, and rendering. This GEO-05 interval is not
+directly comparable with LP/convex end-to-end spans that stop before owner
+destruction. V projection workspace creation is directly observable. These
+scopes do not expose native subphases or prove a numerical certificate.
 
 ## Build and smoke
 
