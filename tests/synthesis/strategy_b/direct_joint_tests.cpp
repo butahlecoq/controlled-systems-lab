@@ -102,7 +102,8 @@ const DirectJointPayload& payload(const SynthesisResult& r) {
     const auto& candidate=std::get<CandidateFamily>(r.family->outcome());
     const auto cast=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);REQUIRE(cast);return *cast;
 }
-registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,bool foreign_provider=false) {
+registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
+    bool foreign_provider=false,Termination solver_termination=Termination::completed) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
     auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
     if(foreign_provider) {
@@ -110,6 +111,11 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
         linear={{{"oracle-lp"},"1"},offer,[](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
         convex={{{"oracle-qp"},"1"},offer,[](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
+    } else if(solver_termination!=Termination::completed) {
+        registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
+        const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
+        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,nullptr);}};
+        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,nullptr);}};
     }
     const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
     CHECK_FALSE(strategies.add(make_registration(lp,qp)));
@@ -171,6 +177,43 @@ TEST_CASE("stopped solver evidence remains scoped while valid incumbent and cand
     CHECK(contains(data.relation,{0,1,1,1,0}));REQUIRE(r.objective.upper);CHECK(r.objective.upper->value==0);
     CHECK(r.incumbents.size()==1);
 }
+TEST_CASE("numerical failure preserves the caller-visible incumbent bound and candidate") {
+    const auto p=resolve(integrator());
+    const auto prepared=registered_prepared(p,request(p),false,Termination::numerical_failure);
+    auto workspace=prepared.create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::numerical_failure);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.spans.empty());
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason==StopReason::numerical_failure);
+    CHECK(stop.stop.diagnostics=="independent analytic oracle");
+    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
+    CHECK(stop.request.port=="convex");
+    CHECK(stop.request.requested_module==ModuleId{"oracle-qp"});
+    CHECK_FALSE(stop.request.requested_version);
+    CHECK(stop.request.actual_module==ModuleId{"oracle-qp"});
+    CHECK(stop.request.actual_version=="1");
+
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& data=payload(result);
+    CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
+    REQUIRE(result.incumbents.size()==1);
+    CHECK(result.incumbents.front().feasibility.problem==p.identity());
+    CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility.support));
+    REQUIRE(result.objective.upper);
+    CHECK(result.objective.upper->value==0);
+    CHECK(result.objective.upper->evidence.problem==p.identity());
+    CHECK(std::holds_alternative<NumericalCheck>(result.objective.upper->evidence.support));
+    CHECK(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==1);
+    CHECK(stop.retained.partial_or_candidate_family);
+}
 TEST_CASE("unsupported assurance targets and policy mismatch fail before solving") {
     const auto p=resolve(integrator());auto workspace=oracle({0,0.25,1,0.25,0.75},0);
     for(auto target:{FamilyTarget::exact_optimal_relation,FamilyTarget::partial_relation}) {
@@ -198,13 +241,13 @@ TEST_CASE("registered Strategy B candidate identity mismatches are rejected by t
     const auto result=accepted(workspace->run(context));
     REQUIRE(result.family);
     const auto& family=*result.family;
-    const FamilyIdentity expected{p.identity(),request(p),p.constraints().coordinates(),
-        {"csl.synthesis.strategy-b"},"1",{}};
+    const SynthesisIdentityExpectation expected{p.identity(),request(p),p.constraints().coordinates(),
+        {"csl.synthesis.strategy-b"},"1",std::nullopt};
     REQUIRE(family.target()==FamilyTarget::candidate_relaxation);
     REQUIRE(std::holds_alternative<CandidateFamily>(family.outcome()));
     CHECK(check_synthesis_result(result,expected).empty());
 
-    auto expect_identity_rejection=[&](FamilyIdentity expected) {
+    auto expect_identity_rejection=[&](SynthesisIdentityExpectation expected) {
         const auto diagnostics=check_synthesis_result(result,expected);
         CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
             return diagnostic.code==DiagnosticCode::evidence_mismatch && diagnostic.field=="family.identity";
