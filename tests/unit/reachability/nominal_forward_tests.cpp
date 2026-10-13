@@ -5,19 +5,31 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <limits>
+#include <iostream>
 #include <stop_token>
 using namespace csl;
 using namespace csl::registry;
 using namespace csl::reachability;
 namespace {
+template<class V> void explain(const V& value) {
+    std::visit([](const auto& item) {
+        if constexpr(requires {item.explanation;})std::cerr<<item.field<<": "<<item.explanation<<'\n';
+        if constexpr(requires {item.diagnostics.begin()->field;})for(const auto& d:item.diagnostics)std::cerr<<d.field<<": "<<d.explanation<<'\n';
+        if constexpr(requires {item.cause;})std::visit([](const auto& cause) {
+            if constexpr(requires {cause.diagnostics.begin()->field;})for(const auto& d:cause.diagnostics)std::cerr<<d.field<<": "<<d.explanation<<'\n';
+        },item.cause);
+    },value);
+}
 template<class T,class... E> T take(std::variant<T,E...> value) {
+    if(!std::holds_alternative<T>(value))explain(value);
     REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
 }
 template<class T,class V> T alternative(V value) {
+    if(!std::holds_alternative<T>(value))explain(value);
     REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
 }
 SetHandle interval(std::string id,double lo,double hi,std::string label="x") {
-    return take(sets::make_h({{std::move(id)},1,{std::move(label)}},
+    return take(sets::make_h({{std::move(id)},1,label.empty()?std::vector<std::string>{}:std::vector<std::string>{std::move(label)}},
         {take(numeric::snapshot(Matrix{2,1,{1,-1}})),take(numeric::snapshot_vector(Vector{hi,-lo})),
          take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
 }
@@ -52,14 +64,15 @@ PreparedProvider<GeometryPort> cancelling_provider(std::stop_source stop) {
 template<class Port> PreparedProvider<Port> selected(Registration<Port> entry,std::string representation) {
     Registry<Port> registry;Method method{entry.identity.id,entry.identity.version};
     REQUIRE_FALSE(registry.add(std::move(entry)).has_value());Requirements req;
-    req.output.representation={std::move(representation)};req.output.relation=SetRelation::equivalent;
+    req.output.representation={std::move(representation)};
+    if constexpr(std::is_same_v<Port,GeometryPort> || std::is_same_v<Port,ConversionPort>)req.output.relation=SetRelation::equivalent;
     return take(prepare_provider(select_provider(registry,method,req)));
 }
 ForwardDependencies dependencies(PreparedProvider<GeometryPort> projection=provider(),bool reject_affine=false) {
     auto lp=take(adapters::lp::make_highs_registration());
     auto converter=take(adapters::polyhedral::make_qhull_registration(lp));
     auto affine=geometry::make_affine_sum_registration({selected(geometry::make_lp_hull_reducer_registration(),""),
-        selected(lp,"csl.program-result.v1"),selected(converter,"csl.polyhedron.v")},{ {},{"x"}});
+        selected(lp,"csl.program-result.v1"),selected(converter,"csl.polyhedron.v")},{ {},{}});
     if(reject_affine)affine.capabilities=[](const OperationRequest&,const Requirements&) -> Capability {
         return Diagnostics{{DiagnosticCode::unsupported,"selected.affine","Selected affine provider rejects this operation."}};
     };
@@ -74,19 +87,12 @@ Problem integrator() {
 }
 problem::ResolvedProblem resolved(Problem p) {return take(problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));}
 NominalForwardOutcome run(Problem p,ExecutionContext context={}) {return nominal_forward(resolved(std::move(p)),{"tube"},dependencies(),context);}
-bool contains(const SetHandle& set,double x) {
-    const auto data=take(sets::from_handle(set));const auto rep=data.representation();
-    if(std::holds_alternative<sets::EmptyRepresentation>(rep))return false;
-    const auto& h=std::get<sets::HRepresentation>(rep);
-    for(std::size_t r=0;r<h.inequalities.rows();++r)if(h.inequalities(r,0)*x>h.upper_bounds[r])return false;
-    for(std::size_t r=0;r<h.equalities.rows();++r)if(h.equalities(r,0)*x!=h.equality_values[r])return false;
-    return true;
-}
-void range(const SetHandle& set,double lo,double hi) {
+void range(const SetHandle& set,double lo,double hi,std::vector<std::string> expected_labels={"x"}) {
     // Complete independent 1-D H oracle: every halfspace contributes an
     // endpoint, every nonzero equality fixes both endpoints. No sampled points
     // can hide an omitted cut or a small endpoint error.
     const auto data=take(sets::from_handle(set));const auto rep=data.representation();
+    CHECK(data.metadata()->coordinate_labels==expected_labels);
     const auto& h=std::get<sets::HRepresentation>(rep);
     double lower=-std::numeric_limits<double>::infinity(),upper=std::numeric_limits<double>::infinity();
     bool feasible=true;
@@ -99,12 +105,11 @@ void range(const SetHandle& set,double lo,double hi) {
         if(a!=0){lower=std::max(lower,b/a);upper=std::min(upper,b/a);}else if(b!=0)feasible=false;
     }
     CHECK(feasible);CHECK(lower==lo);CHECK(upper==hi);
-    CHECK(contains(set,lo));CHECK(contains(set,(lo+hi)/2));CHECK(contains(set,hi));
-    CHECK_FALSE(contains(set,lo-0.125));CHECK_FALSE(contains(set,hi+0.125));
 }
 }
 TEST_CASE("two step integrator returns literal reachable marginals and recovery factors") {
     auto p=resolved(integrator());auto result=nominal_forward(p,{"tube"},dependencies(),{});
+    if(!std::holds_alternative<ForwardTube>(result))explain(result);
     REQUIRE(std::holds_alternative<ForwardTube>(result)); const auto& tube=std::get<ForwardTube>(result);
     REQUIRE(tube.stages.size()==3);CHECK(tube.problem==p.identity());
     range(tube.stages[0].marginal.output,0,0);range(tube.stages[1].marginal.output,0,1);range(tube.stages[2].marginal.output,0,2);
@@ -115,7 +120,28 @@ TEST_CASE("two step integrator returns literal reachable marginals and recovery 
     CHECK(take(sets::from_handle(tube.stages[2].marginal.output)).metadata()->coordinate_labels==std::vector<std::string>{"x"});
     CHECK(tube.stages[2].marginal.relation==SetRelation::equivalent);
     CHECK(std::holds_alternative<Unestablished>(tube.stages[2].marginal.evidence.support));
-    CHECK(tube.stages[2].providers[0].actual_module==std::optional<ModuleId>{{"csl.geometry.polyhedral-projection"}});
+    CHECK(std::holds_alternative<Unestablished>(tube.stages[2].recovery_evidence.support));
+    CHECK(tube.stages[2].providers[0].actual_module==std::optional<ModuleId>{{"csl.geometry.affine-sum"}});
+    CHECK(tube.stages[2].providers.back().actual_module==std::optional<ModuleId>{{"csl.geometry.polyhedral-projection"}});
+    REQUIRE(tube.stages[2].operation_lineage.size()==6);
+    REQUIRE(tube.stages[2].coordinate_lineage.size()==3);
+    const auto& maps=tube.stages[2].coordinate_lineage;
+    CHECK(maps[0].source.id==tube.stages[1].marginal.output.id);
+    CHECK(maps[0].coordinates==std::vector<std::size_t>{0});
+    CHECK(take(sets::from_handle(maps[0].source)).metadata()->coordinate_labels==std::vector<std::string>{"x"});
+    CHECK(take(sets::from_handle(maps[0].target)).metadata()->coordinate_labels.empty());
+    CHECK(maps[1].source.id==SetId{"u1"});
+    CHECK(take(sets::from_handle(maps[1].source)).metadata()->coordinate_labels==std::vector<std::string>{"u"});
+    CHECK(maps[1].coordinates==std::vector<std::size_t>{0});
+    CHECK(tube.stages[2].operation_lineage[0].reference.inputs==std::vector<SetId>{maps[0].target.id});
+    CHECK(tube.stages[2].operation_lineage[1].reference.inputs==std::vector<SetId>{maps[1].target.id});
+    CHECK(maps[2].coordinates==std::vector<std::size_t>{0});
+    CHECK(take(sets::from_handle(maps[2].source)).metadata()->coordinate_labels.empty());
+    CHECK(take(sets::from_handle(maps[2].target)).metadata()->coordinate_labels==std::vector<std::string>{"x"});
+    range(maps[0].source,0,1);range(maps[0].target,0,1,{});
+    range(maps[1].source,0,1,{"u"});range(maps[1].target,0,1,{});
+    range(maps[2].source,0,2,{});range(maps[2].target,0,2);
+    CHECK(tube.stages[2].operation_lineage[0].reference.identity.request.value.ends_with("2/affine-state"));
 }
 TEST_CASE("LTV uses authored stage order offset and next constraints") {
     auto p=integrator();p.initial=KnownInitial{{1}};p.states={interval("X0",0,2),interval("X1",3,4),interval("X2",-5,-4)};
@@ -123,6 +149,9 @@ TEST_CASE("LTV uses authored stage order offset and next constraints") {
         {{1,1,{2}},{1,1,{1}},{1,0,{}},{1}},{{1,1,{-1}},{1,1,{2}},{1,0,{}},{-2}}}}, {}});
     auto tube=take<ForwardTube>(run(p));range(tube.stages[0].marginal.output,1,1);
     range(tube.stages[1].marginal.output,3,4);range(tube.stages[2].marginal.output,-5,-4);
+    REQUIRE(tube.stages[2].coordinate_lineage.size()==3);
+    range(tube.stages[2].coordinate_lineage[2].source,-6,-3,{});
+    range(tube.stages[2].coordinate_lineage[2].target,-6,-3);
 }
 TEST_CASE("initial constraints can empty stage zero with scoped evidence") {
     auto p=integrator();p.states[0]=interval("X0",1,2);auto result=alternative<EmptyForwardStage>(run(p));
@@ -149,7 +178,7 @@ TEST_CASE("stop after final feasibility preserves completed child evidence witho
     auto p=resolved(integrator());std::stop_source stop;ExecutionContext context;context.cancellation=stop.get_token();
     auto result=alternative<ForwardFailure>(nominal_forward(p,{"tube"},dependencies(cancelling_provider(stop)),context));
     CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::cancelled);
-    CHECK(result.stage.value==2);CHECK(result.prefix.stages.size()==2);CHECK(result.completed_lineage.size()==2);
+    CHECK(result.stage.value==2);CHECK(result.prefix.stages.size()==2);CHECK(result.completed_lineage.size()==6);
     REQUIRE(result.active_request);CHECK(result.active_request->identity.request.value.ends_with("2/feasibility"));
 }
 TEST_CASE("selected affine provider rejection is retained with stage scope") {

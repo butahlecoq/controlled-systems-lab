@@ -80,15 +80,28 @@ bool empty_zero_projection(const sets::SetData& data) {
 std::vector<std::size_t> coordinates(std::size_t offset,std::size_t count) {
     std::vector<std::size_t> result(count);std::iota(result.begin(),result.end(),offset);return result;
 }
+sets::SetData relabel(const sets::SetData& data,SetId id,std::vector<std::string> labels) {
+    const sets::Description description{std::move(id),data.metadata()->set.dimension,std::move(labels)};
+    return std::visit([&](const auto& representation) -> sets::SetData {
+        using T=std::decay_t<decltype(representation)>;
+        if constexpr(std::is_same_v<T,sets::HRepresentation>)return take(sets::make_h(description,representation));
+        else if constexpr(std::is_same_v<T,sets::VRepresentation>)return take(sets::make_v(description,representation));
+        else if constexpr(std::is_same_v<T,sets::SingletonRepresentation>)return take(sets::make_singleton(description,representation.point));
+        else if constexpr(std::is_same_v<T,sets::EmptyRepresentation>)return take(sets::make_empty(description));
+        else return take(sets::make_universal(description));
+    },data.representation());
+}
 }
 
 NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,RequestId request,
-        const registry::PreparedProvider<registry::GeometryPort>& provider,const ExecutionContext& context) {
+        const ForwardDependencies& dependencies,const ExecutionContext& context) {
+    const auto& provider=dependencies.projection;
     ForwardTube tube{resolved.identity(),std::move(request),{}};
     StageIndex stage{0};std::optional<GeometryReference> active;
     std::vector<GeometryEvidence> lineage;std::vector<RequestProvenance> providers;
+    std::vector<CoordinateRelabeling> coordinate_lineage;
     const auto failure=[&](auto cause) -> NominalForwardOutcome {
-        return ForwardFailure{tube,stage,active,lineage,providers,std::move(cause)};
+        return ForwardFailure{tube,stage,active,lineage,providers,coordinate_lineage,std::move(cause)};
     };
     try {
     if(tube.request.value.empty())return failure(Unsupported{error("forward.request","Nonempty immutable request ID required.",DiagnosticCode::invalid_input)});
@@ -104,6 +117,13 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
     if(!provider.provenance().actual || policy.representation.value!="csl.polyhedron.h" ||
             policy.relation!=SetRelation::equivalent || policy.assurance!=Assurance::numerical)
         return failure(Unsupported{error("forward.provider","Select an equivalent numerical native H projection provider; validated authored recurrence is unavailable.")});
+    const auto admitted=[](const auto& selected,const char* representation) {
+        const auto& output=selected.requirements().output;
+        return selected.provenance().actual && output.representation.value==representation &&
+            output.relation==SetRelation::equivalent && output.assurance==Assurance::numerical;
+    };
+    if(!admitted(dependencies.affine_sum,"csl.polyhedron.v") || !admitted(dependencies.to_h,"csl.polyhedron.h"))
+        return failure(Unsupported{error("forward.provider","Equivalent numerical V affine/sum and H conversion providers required.")});
     const auto n=dims.state,m=dims.control,maximum=std::numeric_limits<std::size_t>::max();
     if(n>maximum-m || n>maximum-(n+m))return failure(Unsupported{error("forward.capacity","Joint [x,u,y] dimension overflows size_t.")});
 
@@ -126,6 +146,64 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         if(!supported(data))return failure(Unsupported{error("forward.representation","Native H controls required; explicit conversion is separate.")});
         controls.push_back(std::move(data));
     }
+    const auto remember=[&](const auto& selected,const GeometryRequestIdentity& identity,std::vector<SetId> inputs) {
+        active=GeometryReference{identity,std::move(inputs)};
+        const auto& provenance=selected.provenance();
+        providers.push_back({identity.request,provenance.port,provenance.requested.id,provenance.requested.version,
+            provenance.actual->id,provenance.actual->version});
+    };
+    const auto native_result=[&](const OperationResult& result,const char* representation) -> Diagnostics {
+        auto imported=sets::from_handle(result.output);
+        if(auto* rejected=std::get_if<Diagnostic>(&imported))return {*rejected};
+        if(result.relation!=SetRelation::equivalent || result.output.metadata.representation.value!=representation ||
+                result.output.metadata.dimension!=n || !std::get<sets::SetData>(imported).metadata()->coordinate_labels.empty())
+            return error("forward.result","Provider changed the selected relation, representation or ordered state coordinates.",DiagnosticCode::evidence_mismatch);
+        return {};
+    };
+    const auto run_affine=[&](GeometryOperation operation,const char* suffix)
+            -> std::variant<OperationResult,Unsupported,OperationStopped> {
+        const auto& selected=dependencies.affine_sum;
+        OperationRequest request_{{tube.problem,{child(tube.problem,tube.request,stage.value,suffix)},
+            {child(tube.problem,tube.request,stage.value,std::string(suffix)+"/output")}},
+            selected.provenance().actual->id,std::move(operation),SetRelation::equivalent,Assurance::numerical};
+        std::vector<SetId> inputs;
+        if(const auto* image=std::get_if<AffineImage>(&request_.operation))inputs={image->input.id};
+        else {const auto& sum=std::get<MinkowskiSum>(request_.operation);inputs={sum.left.id,sum.right.id};}
+        remember(selected,request_.identity,std::move(inputs));
+        if(auto stop=stopped(context))return *stop;
+        auto prepared=selected.prepare(request_);
+        if(auto* rejected=std::get_if<registry::Rejection>(&prepared))return Unsupported{rejected->diagnostics};
+        auto workspace=std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared)).create();
+        auto outcome=std::get<0>(workspace)->run(context);
+        if(auto* rejected=std::get_if<Unsupported>(&outcome))return *rejected;
+        if(auto* stop=std::get_if<OperationStopped>(&outcome))return *stop;
+        const auto* result=std::get_if<OperationResult>(&outcome);
+        if(!result)return Unsupported{error("forward.result","Affine/sum provider returned a query result.",DiagnosticCode::evidence_mismatch)};
+        if(auto errors=check_geometry_evidence(result->evidence,request_);!errors.empty())return Unsupported{std::move(errors)};
+        if(auto errors=native_result(*result,"csl.polyhedron.v");!errors.empty())return Unsupported{std::move(errors)};
+        lineage.push_back(result->evidence);
+        if(auto stop=stopped(context))return *stop;
+        return *result;
+    };
+    const auto convert=[&](SetHandle input) -> std::variant<OperationResult,Unsupported,OperationStopped> {
+        const auto& selected=dependencies.to_h;
+        ConversionRequest request_{{tube.problem,{child(tube.problem,tube.request,stage.value,"/to-h")},
+            {child(tube.problem,tube.request,stage.value,"/to-h/output")}},input,{"csl.polyhedron.h"},Assurance::numerical};
+        remember(selected,request_.identity,{input.id});
+        if(auto stop=stopped(context))return *stop;
+        auto prepared=selected.prepare(request_);
+        if(auto* rejected=std::get_if<registry::Rejection>(&prepared))return Unsupported{rejected->diagnostics};
+        auto workspace=std::get<registry::PreparedPipeline<registry::ConversionPort>>(std::move(prepared)).create();
+        auto outcome=std::get<0>(workspace)->run(context);
+        if(auto* rejected=std::get_if<Unsupported>(&outcome))return *rejected;
+        if(auto* stop=std::get_if<OperationStopped>(&outcome))return *stop;
+        const auto result=std::get<OperationResult>(std::move(outcome));
+        if(auto errors=check_geometry_evidence(result.evidence,request_);!errors.empty())return Unsupported{std::move(errors)};
+        if(auto errors=native_result(result,"csl.polyhedron.h");!errors.empty())return Unsupported{std::move(errors)};
+        lineage.push_back(result.evidence);
+        if(auto stop=stopped(context))return *stop;
+        return result;
+    };
     const auto run_projection=[&](SetHandle input,std::vector<std::size_t> selected,const char* suffix)
             -> std::variant<OperationResult,Unsupported,OperationStopped> {
         OperationRequest operation{{tube.problem,{child(tube.problem,tube.request,stage.value,suffix)},
@@ -159,7 +237,7 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         return std::move(*result);
     };
     for(std::size_t t=0;t<=system.horizon();++t) {
-        stage={t};active.reset();lineage.clear();providers.clear();
+        stage={t};active.reset();lineage.clear();providers.clear();coordinate_lineage.clear();
         if(auto stop=stopped(context))return failure(*stop);
         Rows rows(t?2*n+m:n);std::vector<SetId> factors;std::vector<std::string> joint_labels;
         std::vector<std::size_t> current,control,next;
@@ -193,13 +271,50 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         }
         if(!assembled)return failure(Unsupported{error("forward.capacity","Joint row storage overflows size_t.")});
         const auto joint=rows.finish({child(tube.problem,tube.request,t,"/joint")},std::move(joint_labels)).as_handle();
-        auto projected=run_projection(joint,next,"/project");
+        auto propagation=joint;auto marginal_coordinates=next;
+        if(t) {
+            const auto bridge=[&](SetHandle source,std::vector<std::string> target_labels,const char* suffix) {
+                const auto data=take(sets::from_handle(source));
+                if(data.metadata()->coordinate_labels==target_labels)return source;
+                auto target=relabel(data,{child(tube.problem,tube.request,t,suffix)},std::move(target_labels)).as_handle();
+                coordinate_lineage.push_back({source,target,coordinates(0,source.metadata.dimension)});
+                return target;
+            };
+            const auto dynamics=take(system.stage({t-1}));
+            const auto matrix=[](numeric::MatrixView view) {
+                Matrix result{view.rows(),view.cols(),{}};
+                for(std::size_t r=0;r<view.rows();++r)for(std::size_t c=0;c<view.cols();++c)result.values.push_back(view(r,c));
+                return result;
+            };
+            Vector offset;for(std::size_t r=0;r<n;++r)offset.push_back(dynamics.offset[r]);
+            auto state_operand=bridge(tube.stages.back().marginal.output,{},"/unnamed-state");
+            auto control_operand=bridge(controls[t-1].as_handle(),{},"/unnamed-control");
+            auto state_image=run_affine(AffineImage{state_operand,matrix(dynamics.A),std::move(offset)},"/affine-state");
+            if(auto* rejected=std::get_if<Unsupported>(&state_image))return failure(*rejected);
+            if(auto* stop=std::get_if<OperationStopped>(&state_image))return failure(*stop);
+            auto control_image=run_affine(AffineImage{control_operand,matrix(dynamics.B),Vector(n,0)},"/affine-control");
+            if(auto* rejected=std::get_if<Unsupported>(&control_image))return failure(*rejected);
+            if(auto* stop=std::get_if<OperationStopped>(&control_image))return failure(*stop);
+            auto sum=run_affine(MinkowskiSum{std::get<OperationResult>(state_image).output,std::get<OperationResult>(control_image).output},"/sum");
+            if(auto* rejected=std::get_if<Unsupported>(&sum))return failure(*rejected);
+            if(auto* stop=std::get_if<OperationStopped>(&sum))return failure(*stop);
+            auto converted=convert(std::get<OperationResult>(sum).output);
+            if(auto* rejected=std::get_if<Unsupported>(&converted))return failure(*rejected);
+            if(auto* stop=std::get_if<OperationStopped>(&converted))return failure(*stop);
+            const auto labelled_sum=bridge(std::get<OperationResult>(converted).output,labels,"/labelled-sum");
+            Rows intersection(n);
+            if(!intersection.add(take(sets::from_handle(labelled_sum)),0) || !intersection.add(states[t],0))
+                return failure(Unsupported{error("forward.capacity","Intersection row storage overflows size_t.")});
+            propagation=intersection.finish({child(tube.problem,tube.request,t,"/intersection")},labels).as_handle();
+            marginal_coordinates=coordinates(0,n);
+        }
+        auto projected=run_projection(propagation,std::move(marginal_coordinates),"/project");
         if(auto* rejected=std::get_if<Unsupported>(&projected))return failure(*rejected);
         if(auto* stop=std::get_if<OperationStopped>(&projected))return failure(*stop);
         auto marginal=std::get<OperationResult>(std::move(projected));
         // Eliminate all coordinates to decide emptiness rather than interpreting
         // an H payload or absence of sampled points as a feasibility proof.
-        auto feasibility=run_projection(joint,{},"/feasibility");
+        auto feasibility=run_projection(propagation,{},"/feasibility");
         if(auto* rejected=std::get_if<Unsupported>(&feasibility))return failure(*rejected);
         if(auto* stop=std::get_if<OperationStopped>(&feasibility))return failure(*stop);
         const auto probe=std::get<OperationResult>(std::move(feasibility));
@@ -207,13 +322,17 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         marginal.evidence.reference={{tube.problem,{child(tube.problem,tube.request,t,"/stage")},
             {child(tube.problem,tube.request,t,"/reachable")}},factors};
         marginal.evidence.support=Unestablished{};marginal.evidence.error_bound.reset();
-        marginal.evidence.assumptions.push_back("authored recurrence compiled into [x,u,y] affine equality factors; binary64 operation lineage retained separately");
+        marginal.evidence.assumptions.push_back("selected affine-image, sum, conversion and projection evidence retained separately; authored aggregate recurrence and compiled recovery-factor support remain unestablished");
         marginal.evidence.assumptions.push_back("stage marginal only; no optimality or joint-history completeness claim");
-        tube.stages.push_back({stage,std::move(marginal),joint,std::move(factors),std::move(current),std::move(control),
-            std::move(next),lineage,providers});
+        auto recovery=marginal.evidence;
+        recovery.reference.identity.request={child(tube.problem,tube.request,t,"/recovery")};
+        recovery.reference.identity.ideal_output={joint.id.value};
+        recovery.assumptions.push_back("compiled [x,u,y] authored transition rows retained for future recovery; no provider or validated recovery theorem asserted");
+        tube.stages.push_back({stage,std::move(marginal),joint,std::move(recovery),propagation,std::move(factors),std::move(current),std::move(control),
+            std::move(next),lineage,providers,coordinate_lineage});
         if(empty) {
             auto evidence=tube.stages.back().marginal.evidence;
-            evidence.assumptions.push_back("zero-coordinate projection of the joint factor is empty; authored emptiness support remains unestablished");
+            evidence.assumptions.push_back("zero-coordinate projection of the propagation factor is empty; authored emptiness support remains unestablished");
             return EmptyForwardStage{std::move(tube),stage,std::move(evidence)};
         }
     }
