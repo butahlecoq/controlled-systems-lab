@@ -1,0 +1,23 @@
+{
+  "companions": [
+    {
+      "original_sha256": "3f6a435b51dc691821dfdc49e71ba19089801e713706636630030cedd2729522",
+      "path": "command.json",
+      "public_sha256": "d34dd727a66ec5452a97a2472e36ebf6fa123f0d3aaab52afecbf323cf0ece2a",
+      "redacted": true,
+      "source_path": "command.json"
+    },
+    {
+      "original_sha256": "78932c4018b9466734ac45b4a0637fb186f05482254475a23b413b655b84ce91",
+      "path": "build-log.redacted.txt",
+      "public_sha256": "78932c4018b9466734ac45b4a0637fb186f05482254475a23b413b655b84ce91",
+      "redacted": true,
+      "source_path": "build-log.json"
+    }
+  ],
+  "root_replacements": {
+    "build": "BUILD_ROOT",
+    "source": "SOURCE_ROOT"
+  },
+  "schema": "csl.geo05-public-companions/1"
+}

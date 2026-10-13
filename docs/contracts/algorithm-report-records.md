@@ -347,19 +347,19 @@ publication gate exemption.
 ## Registered non-LP publication adapters
 
 The shared Pages publisher accepts catalogue schema `csl.algorithm-report-catalog/3`
-for mixed LP, convex, OPT-05 and GEO-03 catalogues. LP/convex retain their existing
-validated view schemas and bundle projections. New report kinds are admitted only
-through `scripts/reports/registered_reports.py` adapters for
-`csl.hull-benchmark-records/1` (`opt05-hull`) and `csl.geo03-hv-report/1`
-(`geo03-hv`). The adapters validate their native source identity, typed trial and
-summary coherence, explicit file inventory, manifest hashes and safe paths before
-staging. The shared renderer projects measured tables, evidence limits and links
-from those validated records, then the same `site.stage` operation emits their
-offline ZIPs and catalogue links. Producer HTML is retained as hash-checked source
-evidence but is never copied as the published page. Catalogue scope/limit text must
-match the adapter projection; it cannot add claims. A staged result is not a public
-URL: source artifacts still require review and the main Pages workflow must publish
-the integrated catalogue before the live URL check can pass.
+for mixed LP, convex, OPT-05, GEO-02, GEO-03, GEO-04 and GEO-05 catalogues.
+LP/convex retain their validated view schemas and bundle projections. Other report
+kinds use the corresponding registered adapters: OPT-05 and GEO-03 in
+`registered_reports.py`, GEO-02 in `geo02_registered_reports.py`, GEO-04 in
+`geo04_registered_reports.py`, and GEO-05 in `geo05_registered_reports.py`.
+Each adapter validates its native source identity, typed trial/summary coherence,
+explicit file inventory, manifest hashes and safe paths before staging. The shared
+renderer projects measured tables, evidence limits and links from validated
+records, then `site.stage` emits the registered pages, offline ZIPs and catalogue
+links. Producer HTML remains hash-checked source evidence and is not copied as the
+published page. Catalogue scope and limit text must match the adapter projection;
+it cannot add claims. A staged result is not a public URL: the main Pages workflow
+must publish the integrated catalogue before the live URL check can pass.
 
 For registered kinds, the native `records.json.report_id` and source directory stay
 unchanged. The schema-3 catalogue and publication envelope carry that identity as
@@ -375,9 +375,18 @@ uses `source_report_id`; the repository ZIP and public page/download links use
 Both native `trials.csv` and `summary.csv` must match the complete typed rows in
 `records.json`, even when their manifest and archive checksums are internally valid.
 
-## Shared four-kind publication envelope
+## Shared publication envelope
 
-Every report in a schema-3 mixed catalogue—LP, convex, OPT-05 and GEO-03—uses the same versioned `csl.algorithm-report-envelope/1` and `csl.algorithm-report-publication-manifest/1`. The envelope records the report identity and kind, native payload schema and digest, provenance, measured scope, evidence limits, and typed payload. LP/convex scope is derived from the validated scenario inventory, their evidence-limit policy is fixed by report kind, and schema-3 catalogue values must match both. LP and convex preserve their existing view payloads and validated saved-data HTML projection. OPT-05 and GEO-03 use explicit adapters in `scripts/reports/registered_reports.py` and retain their method-specific payloads; their published HTML is rendered from validated typed records rather than producer HTML. Every generated page follows the shared safe-link and HTML escaping policy.
+Every report in a schema-3 mixed catalogue uses the same versioned
+`csl.algorithm-report-envelope/1` and
+`csl.algorithm-report-publication-manifest/1`. The envelope records report
+identity and kind, native payload schema and digest, provenance, measured scope,
+evidence limits and typed payload. LP/convex scope is derived from the validated
+scenario inventory, and their evidence-limit policy is fixed by report kind.
+Schema-3 catalogue values must match their adapter projection. Registered
+geometry and optimization reports retain method-specific payloads and render
+HTML from validated typed records. Every generated page follows the shared
+safe-link and HTML escaping policy.
 
 The previously published LP and convex URLs retain their original schema-2 pages,
 all thirteen original bundle files and offline ZIP bytes. The exact legacy hashes

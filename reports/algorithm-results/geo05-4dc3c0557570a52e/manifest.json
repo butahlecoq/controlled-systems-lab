@@ -1,0 +1,14 @@
+{
+  "files": {
+    "command.json": "d34dd727a66ec5452a97a2472e36ebf6fa123f0d3aaab52afecbf323cf0ece2a",
+    "index.html": "d7cfd806b61792892f61b2689a524507d96fbaad19f0abd6003de1f537a978fb",
+    "parse-errors.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+    "provenance.json": "3db9c821dbb2ae5b8c437a3a92805e7ff5dfe2f769a68ea4912995c36e2953b4",
+    "records.json": "51cd8384afe8a0f53385d1fbd2daa445405681cef6703c92a0f0d6f94e331b49",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.jsonl": "077e8eef101d28c928ed832aed074714377ee8aeaaa7a60619c0813f1a7d4c97",
+    "trials.csv": "62df1a3e7ccf5538148209bed2f563c8f4c39c7def7a2d87fbdf05cfc7808ba6",
+    "trials.jsonl": "1798bc8dacd0fe22bc490a0b6dca2e6668c6b141263477ccc3a8c44021afa9cc"
+  },
+  "schema": "csl.geo05-report-files/1"
+}

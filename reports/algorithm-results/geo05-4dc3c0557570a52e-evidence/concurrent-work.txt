@@ -1,0 +1,4 @@
+Pre-collection host snapshot UTC: 2026-10-13T04:17:29Z (local sampling 07:17:24–07:17:29 Europe/Moscow).
+Host: Windows 11, 6 physical cores, 12 logical processors.
+Windows total processor utilization samples: 0%, 0%, 0%, 3%, 0% at one-second intervals immediately before measurement. No deliberate concurrent benchmark workload was started. Desktop/browser/terminal processes remained open.
+Expected report claim: descriptive baseline timings only for four tiny analytic fixtures, seven measured repetitions per scenario and one excluded warmup; no before/after comparison, speedup/regression verdict, limiter attribution, application-scale result, or capacity claim. Raw timings and ranges are observations only. CPU profiling is unavailable for this run, so no bottleneck attribution will be reported.

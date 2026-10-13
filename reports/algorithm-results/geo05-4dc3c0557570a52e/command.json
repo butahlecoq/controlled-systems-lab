@@ -1,0 +1,8 @@
+[
+  "BUILD_ROOT\\Release\\csl_geo05_projection_predecessor_report.exe",
+  "--measure",
+  "--repetitions",
+  "7",
+  "--warmups",
+  "1"
+]
