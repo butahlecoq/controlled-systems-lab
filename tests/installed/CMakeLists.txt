@@ -145,3 +145,10 @@ set_target_properties(installed_affine_sum_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_affine_sum_client COMMAND installed_affine_sum_client)
 set_tests_properties(installed_affine_sum_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed affine/sum client: selected LP and hull providers produced a numerical set result")
+
+add_executable(installed_projection_predecessor_client projection_predecessor_client.cpp)
+target_link_libraries(installed_projection_predecessor_client PRIVATE CSL::polyhedral)
+set_target_properties(installed_projection_predecessor_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_projection_predecessor_client COMMAND installed_projection_predecessor_client)
+set_tests_properties(installed_projection_predecessor_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed predecessor client: existential integrator interval and unestablished support passed")

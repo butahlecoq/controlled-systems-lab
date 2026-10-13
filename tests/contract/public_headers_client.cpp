@@ -25,6 +25,8 @@
 #include <csl/artifacts/run_statistics.hpp>
 #include <csl/execution/observability.hpp>
 #include <csl/input/scenario_loader.hpp>
+#include <csl/geometry/polyhedral_projection.hpp>
+#include <csl/reachability/nominal_predecessor.hpp>
 
 #include <iostream>
 #include <stdexcept>
