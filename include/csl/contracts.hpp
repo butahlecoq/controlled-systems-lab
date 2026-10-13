@@ -14,7 +14,7 @@
 
 namespace csl {
 namespace problem { class ResolvedProblem; }
-// Revision 1.5. This is a source contract, not a stable binary ABI.
+// Revision 1.6. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
 struct ProgramIdentity { ProblemId problem; ProgramId program; bool operator==(const ProgramIdentity&) const = default; };
@@ -262,12 +262,14 @@ struct ResourcePolicy {
     std::optional<std::size_t> memory_bytes; // admission/accounting, not enforced by this revision
 };
 struct NumericalPolicy { double absolute_tolerance, relative_tolerance; bool operator==(const NumericalPolicy&) const = default; };
+namespace execution::observability { class TimingCollector; }
 struct ExecutionContext {
     std::shared_ptr<const ResourcePolicy> resources; // same policy for all workers
     std::stop_token cancellation;
     std::optional<std::chrono::steady_clock::time_point> deadline;
     NumericalPolicy numerical{1e-8,1e-8};
     std::string run_id;
+    std::shared_ptr<execution::observability::TimingCollector> timing{};
 };
 class ExclusiveWorkspace {
 public:
