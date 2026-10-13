@@ -75,7 +75,7 @@ def render_html(record: dict) -> str:
     return f"""<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GEO-05 numerical report {html.escape(record['report_id'])}</title>
-<style>body{{font:16px system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#17212b}}table{{border-collapse:collapse;width:100%;margin:1rem 0}}th,td{{border:1px solid #b8c3cc;padding:.45rem;text-align:left}}th{{background:#edf2f6}}.scroll{{overflow-x:auto}}.state{{padding:.8rem;background:#fff2cc;border-left:4px solid #a36c00}}code{{overflow-wrap:anywhere}}</style>
+<style>body{{font:16px system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#17212b}}table{{border-collapse:collapse;width:100%;margin:1rem 0}}th,td{{border:1px solid #b8c3cc;padding:.45rem;text-align:left}}th{{background:#edf2f6}}.scroll{{overflow-x:auto}}.state{{padding:.8rem;background:#fff2cc;border-left:4px solid #a36c00}}code{{overflow-wrap:anywhere}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box}}</style>
 <h1>GEO-05 numerical report</h1><p class="state">{html.escape(state)}</p>
 <p>Report ID <code>{html.escape(record['report_id'])}</code>; schema <code>{html.escape(record['schema'])}</code>.</p>
 <p>Source commit <code>{html.escape(str(record['algorithm'].get('source_commit')))}</code>; harness commit <code>{html.escape(str(record['algorithm'].get('harness_commit')))}</code>.</p>

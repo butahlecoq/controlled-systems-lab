@@ -223,6 +223,7 @@ class Geo05ReportTests(unittest.TestCase):
         self.assertIn("log-hash", page)
         self.assertIn("Input SHA-256", page)
         self.assertIn("Scenario SHA-256", page)
+        self.assertIn("pre{white-space:pre-wrap;overflow-wrap:anywhere", page)
         self.assertIn(report.sha256_json(report.ORACLES["integrator_predecessor"]["inputs"]), page)
 
 
