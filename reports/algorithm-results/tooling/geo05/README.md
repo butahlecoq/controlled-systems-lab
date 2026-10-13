@@ -91,3 +91,25 @@ accepted timing record, catalogue entry, or publication. The collector binds
 source and harness commits separately, allows only the report-harness files
 plus the exact GEO-05 CMake target insertion, and records the complete File API
 dependency graph and executable hash.
+
+## Migration to the authoritative observation artifacts
+
+`csl.geo05-numerical-report/1` is a bounded acquisition and rendering format
+for this four-fixture experiment. It is not a second scientific authority.
+When the scenario/run artifacts are implemented, an adapter will map the
+validated fields as follows; raw records and their identities remain immutable.
+
+| GEO-05 v1 field | Authoritative destination | Migration rule |
+|---|---|---|
+| `algorithm`, executable/build provenance, environment | OBS-04 run provenance | Preserve source and harness commits, compiler/build graph, executable hash, and observed environment; do not infer an algorithm configuration or strategy ID. |
+| `catalog.scenarios`, trial `input_sha256` and `scenario_sha256` | OBS-04 scenario and immutable input identity | Keep the four authored fixtures and their hashes as experiment inputs; do not invent a MODEL03 scenario identity. |
+| `trials`, `warmup_trials`, `status`, `detail`, `oracle_*`, `work_observed` | OBS-04 attempts and verification evidence | Preserve every attempt, including failures/stops and available diagnostics; retain the numeric-sample oracle scope and Unestablished relation support. |
+| `durations_ns` and `collection.phases` | OBS-04 timing observations | Carry each named phase, unit, exact scope, availability, and failure/unwind label; never sum nested phases. |
+| `output_rows`, `result_kind`, `result_encoding`, `vertices`, `rays`, `max_rows` | OBS-04 observed output facts; VIZ-03 series inputs where plotted | Treat these as returned representation/count observations, not completeness or a numerical certificate. |
+| `collection.by_scenario`, `collection.phases`, repetition counts | OBS-05 comparison tables | Recompute summaries from the complete retained repetitions; preserve the single-implementation scope and make no comparative claim. |
+| Rendered tables and figures | VIZ-03 presentation inputs | Regenerate from validated OBS records; HTML is a projection and never the source of numerical truth. |
+
+The GEO-05 reader may remain as a compatibility importer after that adapter is
+available. It must not rewrite these saved v1 records or upgrade their
+evidence claims. The adapter and destination schema require their own review
+and contract tests before this bootstrap view can be retired.
