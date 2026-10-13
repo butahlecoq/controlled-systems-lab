@@ -73,6 +73,8 @@ class Syn01ReportTests(unittest.TestCase):
         self.assertEqual({"measured": 14, "warmups": 2, "failures": 0, "missing_or_duplicate": 0},
                          record["collection"]["counts"])
         self.assertEqual(14, sum(row["attempts"] for row in record["summary"]))
+        self.assertIn("driver entry through verified result",
+                      record["measurement"]["timing_scopes"]["execute_ns"])
         self.assertEqual([], syn01.validate_record(record))
 
     def test_changed_endpoint_fails_the_literal_h_bound_oracle(self):
@@ -180,6 +182,12 @@ class Syn01ReportTests(unittest.TestCase):
         record["measurement"]["requested_workers"] = 2
         self.assertIn("thread_configuration_must_be_one", syn01.validate_record(record))
 
+    def test_execute_scope_must_include_driver_entry_configuration_time(self):
+        record = syn01.make_record(complete_events(), source_commit="a" * 40,
+                                   harness_commit="b" * 40, environment={}, provenance=valid_provenance())
+        record["measurement"]["timing_scopes"]["execute_ns"] = "setup through verification"
+        self.assertIn("timing_scope_metadata_mismatch", syn01.validate_record(record))
+
     def test_saved_html_discloses_scope_and_support_limit(self):
         record = syn01.make_record(complete_events(), source_commit="a" * 40,
                                    harness_commit="b" * 40, environment={}, provenance=valid_provenance())
@@ -187,6 +195,8 @@ class Syn01ReportTests(unittest.TestCase):
         self.assertIn("complete 1-d h-row bounds over returned binary64 data", page.lower())
         self.assertIn("Unestablished", page)
         self.assertIn("no speedup", page.lower())
+        self.assertIn("Median execute interval (driver entry through verified result)", page)
+        self.assertIn("direct stage-provider lineage and exclude nested LP/hull operations", page)
         self.assertNotIn("<script", page.lower())
 
 

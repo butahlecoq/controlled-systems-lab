@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SYN-01 nominal forward report syn01-nominal-20261013-f7ba310d-48a679cfc0d4</title>
+<style>body{font:16px system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#17212b}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #b8c3cc;padding:.45rem;text-align:left;vertical-align:top}th{background:#edf2f6}.scroll{overflow-x:auto}code,td{overflow-wrap:anywhere}</style></head><body>
+<h1>SYN-01 nominal forward reachability report</h1><p>Collection state: <strong>complete</strong>. Report ID <code>syn01-nominal-20261013-f7ba310d-48a679cfc0d4</code>.</p>
+<p>Measured source <code>f7ba310d1eca8020da8f8ca43cbef6ae468747de</code>; report harness <code>7d9fd446dd27bb6ce1849daea09b0a746624533a</code>.</p>
+<h2>Implementation and selected provider stack</h2><p>Algorithm module: <code>csl.reachability.nominal-forward</code> version <code>0.1.0</code>.</p>
+<ul><li>affine_sum: <code>csl.geometry.affine-sum</code> version <code>1.0.0</code></li><li>conversion: <code>csl.conversion.qhull</code> version <code>1.0.0+qhull.8.0.2</code></li><li>hull_reducer: <code>csl.hull.lp-membership</code> version <code>1.0.0</code></li><li>lp_backend: <code>csl.lp.highs</code> version <code>1.0.0+highs.1.11.0</code></li><li>projection: <code>csl.geometry.polyhedral-projection</code> version <code>1.0.0</code></li></ul>
+<p>Nested dependencies: {&quot;affine_sum&quot;: [&quot;hull_reducer&quot;, &quot;lp_backend&quot;, &quot;conversion&quot;], &quot;conversion&quot;: [&quot;lp_backend&quot;]}</p>
+<h2>Effective runtime settings</h2><pre>{
+  &quot;affine_sum&quot;: {
+    &quot;max_candidates&quot;: null
+  },
+  &quot;highs&quot;: {
+    &quot;allow_unbounded_or_infeasible&quot;: false,
+    &quot;dual_feasibility_tolerance&quot;: 1e-08,
+    &quot;infinite_bound&quot;: &quot;kHighsInf&quot;,
+    &quot;infinite_cost&quot;: &quot;kHighsInf&quot;,
+    &quot;large_matrix_value&quot;: &quot;kHighsInf&quot;,
+    &quot;log_to_console&quot;: true,
+    &quot;output_flag&quot;: true,
+    &quot;parallel&quot;: &quot;off&quot;,
+    &quot;presolve&quot;: &quot;off&quot;,
+    &quot;primal_feasibility_tolerance&quot;: 1e-08,
+    &quot;random_seed&quot;: 0,
+    &quot;simplex_iteration_limit&quot;: null,
+    &quot;small_matrix_value&quot;: 1e-12,
+    &quot;solver&quot;: &quot;simplex&quot;,
+    &quot;threads&quot;: 1,
+    &quot;time_limit&quot;: &quot;kHighsInf (no deadline)&quot;
+  },
+  &quot;hull_reducer&quot;: {
+    &quot;default_registration&quot;: true
+  },
+  &quot;numerical_policy&quot;: {
+    &quot;absolute_tolerance&quot;: 1e-08,
+    &quot;relative_tolerance&quot;: 1e-08
+  },
+  &quot;projection&quot;: {
+    &quot;max_rows&quot;: null,
+    &quot;output&quot;: &quot;h&quot;
+  },
+  &quot;qhull&quot;: {
+    &quot;max_ambient_dimension&quot;: null,
+    &quot;max_input_rows&quot;: null,
+    &quot;options&quot;: &quot;qhull Qx&quot;
+  }
+}</pre>
+<p>Requested workers: 1; configured native threads: 1; observed effective native threads: unavailable. The driver has no supported runtime API to observe effective native worker threads.</p>
+<p>Provider operation counts represent direct stage-provider lineage and exclude nested LP/hull operations; per-provider operation durations are unavailable.</p>
+<h2>Compiler and Release build evidence</h2><pre>{
+  &quot;cmake_release_flags&quot;: &quot;/O2 /Ob2 /DNDEBUG&quot;,
+  &quot;cmake_version&quot;: &quot;cmake version 3.31.6-msvc6&quot;,
+  &quot;compiler_executable&quot;: &quot;cl.exe&quot;,
+  &quot;compiler_id&quot;: &quot;MSVC&quot;,
+  &quot;compiler_version&quot;: &quot;19.44.35215.0&quot;,
+  &quot;configuration&quot;: &quot;Release&quot;,
+  &quot;cxx_standard&quot;: &quot;c++20&quot;,
+  &quot;effective_release_flags&quot;: [
+    &quot;/std:c++20&quot;,
+    &quot;/O2&quot;,
+    &quot;/Ob2&quot;,
+    &quot;/DNDEBUG&quot;,
+    &quot;/W4&quot;,
+    &quot;/WX&quot;,
+    &quot;/permissive-&quot;
+  ],
+  &quot;evidence_sha256&quot;: {
+    &quot;CMakeCache.txt&quot;: &quot;9cde01e021a4a548d86044acf2ef27ea86d9d4ae49f1e913d5dd27e20863b36e&quot;,
+    &quot;build_configuration_file&quot;: &quot;9021f1bdc7863aed05fd38a7c7db27a4c00c71916b361cb93d3016bf011d371a&quot;,
+    &quot;release_build_log&quot;: &quot;b4376042290e4f6752c2fee3f7404c1ba03b370d913c288acd0ecd4a1cbee48e&quot;
+  },
+  &quot;generator&quot;: &quot;Visual Studio 17 2022&quot;,
+  &quot;generator_platform&quot;: &quot;x64&quot;,
+  &quot;target_release_properties&quot;: {
+    &quot;AdditionalIncludeDirectories&quot;: &quot;D:\\work\\PhD\\worktrees\\syn01-nominal-forward\\include;%(AdditionalIncludeDirectories)&quot;,
+    &quot;AdditionalOptions&quot;: &quot;%(AdditionalOptions) /external:I \&quot;D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_json-src/single_include\&quot;&quot;,
+    &quot;AssemblerListingLocation&quot;: &quot;$(IntDir)&quot;,
+    &quot;BasicRuntimeChecks&quot;: &quot;Default&quot;,
+    &quot;ConformanceMode&quot;: &quot;true&quot;,
+    &quot;DebugInformationFormat&quot;: &quot;&quot;,
+    &quot;ExceptionHandling&quot;: &quot;Sync&quot;,
+    &quot;ExternalWarningLevel&quot;: &quot;TurnOffAllWarnings&quot;,
+    &quot;InlineFunctionExpansion&quot;: &quot;AnySuitable&quot;,
+    &quot;LanguageStandard&quot;: &quot;stdcpp20&quot;,
+    &quot;MinimalRebuild&quot;: &quot;&quot;,
+    &quot;ObjectFileName&quot;: &quot;$(IntDir)&quot;,
+    &quot;Optimization&quot;: &quot;MaxSpeed&quot;,
+    &quot;PrecompiledHeader&quot;: &quot;NotUsing&quot;,
+    &quot;PreprocessorDefinitions&quot;: &quot;%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\&quot;Release\&quot;&quot;,
+    &quot;RuntimeLibrary&quot;: &quot;MultiThreadedDLL&quot;,
+    &quot;ScanSourceForModuleDependencies&quot;: &quot;true&quot;,
+    &quot;SupportJustMyCode&quot;: &quot;&quot;,
+    &quot;TreatWarningAsError&quot;: &quot;true&quot;,
+    &quot;UseFullPaths&quot;: &quot;false&quot;,
+    &quot;WarningLevel&quot;: &quot;Level4&quot;
+  }
+}</pre>
+<p>One registered provider stack; descriptive timings only, no speedup or comparison claim. Reachability support: <strong>Unestablished</strong>.</p>
+<h2>Evidence limits</h2><ul><li>Complete 1-D H-row bounds over returned binary64 data; not an exact real-arithmetic certificate.</li><li>Reachability relation assurance remains Unestablished; provider outputs are numerical.</li><li>Two tiny analytic scalar fixtures only; no comparator, no speedup, no application-scale or scalability claim.</li><li>No source-level profile was collected; the performance limiter and capacity remain unknown.</li><li>Per-provider operation timings are unavailable; operation counts are derived from returned operation lineage.</li></ul><h2>Median execute interval (driver entry through verified result)</h2><p>The interval includes numerical-policy, execution-context, and effective-settings construction before the setup phase begins.</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 130" role="img" aria-label="Execute interval from driver entry through verified result by fixture"><text x="8" y="45">integrator</text><rect x="170" y="30" width="496" height="22" fill="#3572a5"/><text x="676" y="45">4.2039e+06 ns (complete)</text><text x="8" y="91">ltv</text><rect x="170" y="76" width="520" height="22" fill="#3572a5"/><text x="700" y="91">4.4039e+06 ns (complete)</text></svg>
+<div class="scroll"><table><thead><tr><th>Fixture</th><th>Measured trials</th><th>Passed</th><th>Failed</th><th>setup_ns</th><th>solve_ns</th><th>oracle_ns</th><th>execute_ns</th></tr></thead><tbody><tr><th>integrator</th><td>7</td><td>7</td><td>0</td><td>40300 (range 39300–42900) ns; 7/7 available, 0 partial, 0 not reached; complete coverage</td><td>4124100 (range 3834000–4519700) ns; 7/7 available, 0 partial, 0 not reached; complete coverage</td><td>2100 (range 1800–2400) ns; 7/7 available, 0 partial, 0 not reached; complete coverage</td><td>4203900 (range 3913300–4605400) ns; 7/7 available, 0 partial, 0 not reached; complete coverage</td></tr><tr><th>ltv</th><td>7</td><td>7</td><td>0</td><td>48100 (range 46100–86700) ns; 7/7 available, 0 partial, 0 not reached; complete coverage</td><td>4313000 (range 3958500–4450900) ns; 7/7 available, 0 partial, 0 not reached; complete coverage</td><td>2100 (range 1900–2300) ns; 7/7 available, 0 partial, 0 not reached; complete coverage</td><td>4403900 (range 4052400–4554200) ns; 7/7 available, 0 partial, 0 not reached; complete coverage</td></tr></tbody></table></div>
+<h2>Raw trial observations</h2><div class="scroll"><table><thead><tr><th>Fixture</th><th>Repetition</th><th>Kind</th><th>Status</th><th>Outcome</th><th>Oracle</th><th>Returned marginals</th><th>setup_ns</th><th>solve_ns</th><th>oracle_ns</th><th>execute_ns</th><th>Detail</th></tr></thead><tbody><tr><td>integrator</td><td>0</td><td>warmup</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]</td><td>188300 (available)</td><td>5292300 (available)</td><td>6500 (available)</td><td>5545100 (available)</td><td></td></tr><tr><td>ltv</td><td>0</td><td>warmup</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[1.0, 1.0], [3.0, 4.0], [-5.0, -4.0]]</td><td>46900 (available)</td><td>4385200 (available)</td><td>2100 (available)</td><td>4477100 (available)</td><td></td></tr><tr><td>ltv</td><td>1</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[1.0, 1.0], [3.0, 4.0], [-5.0, -4.0]]</td><td>46200 (available)</td><td>4313000 (available)</td><td>2100 (available)</td><td>4403900 (available)</td><td></td></tr><tr><td>integrator</td><td>1</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]</td><td>42900 (available)</td><td>4519700 (available)</td><td>2000 (available)</td><td>4605400 (available)</td><td></td></tr><tr><td>integrator</td><td>2</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]</td><td>39300 (available)</td><td>4124100 (available)</td><td>1800 (available)</td><td>4203900 (available)</td><td></td></tr><tr><td>ltv</td><td>2</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[1.0, 1.0], [3.0, 4.0], [-5.0, -4.0]]</td><td>48100 (available)</td><td>4251600 (available)</td><td>1900 (available)</td><td>4346200 (available)</td><td></td></tr><tr><td>ltv</td><td>3</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[1.0, 1.0], [3.0, 4.0], [-5.0, -4.0]]</td><td>86700 (available)</td><td>4314900 (available)</td><td>2000 (available)</td><td>4447700 (available)</td><td></td></tr><tr><td>integrator</td><td>3</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]</td><td>40300 (available)</td><td>4471700 (available)</td><td>2000 (available)</td><td>4557000 (available)</td><td></td></tr><tr><td>integrator</td><td>4</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]</td><td>39700 (available)</td><td>4358300 (available)</td><td>2100 (available)</td><td>4442800 (available)</td><td></td></tr><tr><td>ltv</td><td>4</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[1.0, 1.0], [3.0, 4.0], [-5.0, -4.0]]</td><td>49400 (available)</td><td>4380000 (available)</td><td>2200 (available)</td><td>4474900 (available)</td><td></td></tr><tr><td>ltv</td><td>5</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[1.0, 1.0], [3.0, 4.0], [-5.0, -4.0]]</td><td>46100 (available)</td><td>4177700 (available)</td><td>2100 (available)</td><td>4263900 (available)</td><td></td></tr><tr><td>integrator</td><td>5</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]</td><td>39800 (available)</td><td>3846000 (available)</td><td>2400 (available)</td><td>3930900 (available)</td><td></td></tr><tr><td>integrator</td><td>6</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]</td><td>40800 (available)</td><td>3834000 (available)</td><td>2100 (available)</td><td>3913300 (available)</td><td></td></tr><tr><td>ltv</td><td>6</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[1.0, 1.0], [3.0, 4.0], [-5.0, -4.0]]</td><td>46600 (available)</td><td>3958500 (available)</td><td>2100 (available)</td><td>4052400 (available)</td><td></td></tr><tr><td>ltv</td><td>7</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[1.0, 1.0], [3.0, 4.0], [-5.0, -4.0]]</td><td>53600 (available)</td><td>4450900 (available)</td><td>2300 (available)</td><td>4554200 (available)</td><td></td></tr><tr><td>integrator</td><td>7</td><td>measured</td><td>passed</td><td>forward_tube</td><td>True</td><td>[[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]</td><td>42200 (available)</td><td>4085500 (available)</td><td>2200 (available)</td><td>4173300 (available)</td><td></td></tr></tbody></table></div>
+</body></html>

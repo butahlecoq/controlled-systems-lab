@@ -1,0 +1,1067 @@
+Change Dir: 'D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013'
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" csl_syn01_nominal_forward_report.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:4 /v:n
+Р’РµСЂСЃРёСЏ MSBuild 17.14.19+164abd434 РґР»СЏ .NET Framework
+РЎР±РѕСЂРєР° РЅР°С‡Р°С‚Р° 13.10.2026 13:27:28.
+
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\ZERO_CHECK.vcxproj" (2) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     2>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "x64\Release\ZERO_CHECK\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+       CustomBuild:
+         1>Checking Build System
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+     2>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\ZERO_CHECK.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_contracts.vcxproj" (5) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     5>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_contracts.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\".
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_contracts.dir\Release\csl_contracts.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild".
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_highs_lp.vcxproj" (7) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     7>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_highs_lp.vcxproj" (7) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build\highs\highs.vcxproj" (18) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    18>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "highs.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\".
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "highs.dir\Release\highs.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "highs.dir\Release\highs.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "highs.dir\Release\highs.tlog\unsuccessfulbuild".
+     5>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_qhull_conversion.vcxproj" (19) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    19>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_qhull_conversion.vcxproj" (19) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_qhull_r.vcxproj" (21) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    21>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_qhull_r.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_qhull_r.dir\Release\csl_qhull_r.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_qhull_r.dir\Release\csl_qhull_r.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_qhull_r.dir\Release\csl_qhull_r.tlog\unsuccessfulbuild".
+    18>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_highs-src/highs/CMakeLists.txt
+    21>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+     5>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_contracts.dir\Release\csl_contracts_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\contracts.cpp"
+    21>ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"csl_qhull_r.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_r.pdb" /external:W0 /Gd /TC /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\global_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\stat_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\geom2_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\poly2_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\merge_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\libqhull_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\geom_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\poly_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\qset_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\mem_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\random_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\usermem_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\userprintf_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\io_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\user_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\rboxlib_r.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_qhull-src\src\libqhull_r\userprintf_rbox_r.c"
+    18>MakeDirsForCl:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build\highs\highs.dir\Release\qpsolver".
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build\highs\highs.dir\Release\ipm\ipx".
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build\highs\highs.dir\Release\ipm\basiclu".
+     5>SetModuleDependencies:
+         contracts.cpp
+    18>ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\filereader" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\pdqsort" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\zstr" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\interfaces" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\parallel" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\filereaderlp\reader.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\interfaces\highs_c_api.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io\Filereader.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io\FilereaderEms.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io\FilereaderLp.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io\FilereaderMps.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io\HighsIO.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io\HMpsFF.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io\HMPSIO.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io\LoadOptions.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\IpxWrapper.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\Highs.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsCallback.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsDebug.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsIis.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsInfo.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsInfoDebug.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsDeprecated.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsInterface.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsLp.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsLpUtils.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsModelUtils.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsOptions.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsRanging.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsSolution.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsSolutionDebug.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsSolve.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data\HighsStatus.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsCliqueTable.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsConflictPool.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsCutGeneration.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsCutPool.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsDebugSol.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsDomain.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsDynamicRowMatrix.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsFeasibilityJump.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsGFkSolve.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsImplications.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsLpAggregator.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsLpRelaxation.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsMipAnalysis.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsMipSolver.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsMipSolverData.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsModkSeparator.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsNodeQueue.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsObjectiveFunction.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsPathSeparator.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsPrimalHeuristics.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsPseudocost.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsRedcostFixing.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsSearch.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsSeparation.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsSeparator.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsTableauSeparator.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip\HighsTransformedLp.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model\HighsHessian.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model\HighsHessianUtils.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model\HighsModel.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\parallel\HighsTaskExecutor.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\CupdlpWrapper.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve\HighsPostsolveStack.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve\HighsSymmetry.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve\HPresolve.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve\HPresolveAnalysis.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve\ICrash.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve\ICrashUtil.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve\ICrashX.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve\PresolveComponent.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver\a_asm.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver\a_quass.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver\perturbation.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver\quass.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver\ratiotest.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver\scaling.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkk.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkkControl.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkkDebug.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkkDual.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkkDualMulti.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkkDualRHS.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkkDualRow.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkkInterface.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HEkkPrimal.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HighsSimplexAnalysis.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HSimplex.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HSimplexDebug.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HSimplexNla.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HSimplexNlaDebug.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HSimplexNlaFreeze.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HSimplexNlaProductForm.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex\HSimplexReport.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt\KktCh2.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt\DevKkt.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HFactor.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HFactorDebug.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HFactorExtend.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HFactorRefactor.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HFactorUtils.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HighsHash.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HighsLinearSumBounds.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HighsMatrixPic.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HighsMatrixUtils.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HighsSort.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HighsSparseMatrix.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HighsUtils.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HSet.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\HVectorBase.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util\stringutil.cpp" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\basiclu_kernel.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\basiclu_wrapper.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\conjugate_residuals.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\control.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\crossover.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\diagonal_precond.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\forrest_tomlin.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\guess_basis.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\indexed_vector.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\info.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\ipm.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\ipx_c.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\iterate.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver_basis.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver_diag.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\linear_operator.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\lp_solver.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\lu_factorization.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\maxvolume.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\model.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\normal_matrix.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\sparse_matrix.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\sparse_utils.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\splitted_normal_matrix.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\starting_basis.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\symbolic_invert.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\timer.cc" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\utils.cc"
+    21>ClCompile:
+         global_r.c
+         stat_r.c
+    18>ClCompile:
+         reader.cpp
+         highs_c_api.cpp
+         Filereader.cpp
+         FilereaderEms.cpp
+         FilereaderLp.cpp
+         FilereaderMps.cpp
+         HighsIO.cpp
+         HMpsFF.cpp
+         HMPSIO.cpp
+         LoadOptions.cpp
+         IpxWrapper.cpp
+         Highs.cpp
+    21>ClCompile:
+         geom2_r.c
+         poly2_r.c
+         merge_r.c
+     5>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\contracts.cpp"
+    21>ClCompile:
+         libqhull_r.c
+         geom_r.c
+         poly_r.c
+     5>ClCompile:
+         contracts.cpp
+    21>ClCompile:
+         qset_r.c
+         mem_r.c
+         random_r.c
+         usermem_r.c
+         userprintf_r.c
+         io_r.c
+    18>ClCompile:
+         HighsCallback.cpp
+    21>ClCompile:
+         user_r.c
+    18>ClCompile:
+         HighsDebug.cpp
+    21>ClCompile:
+         rboxlib_r.c
+    18>ClCompile:
+         HighsIis.cpp
+    21>ClCompile:
+         userprintf_rbox_r.c
+    18>ClCompile:
+         HighsInfo.cpp
+    21>ClCompile:
+         РЎРѕР·РґР°РЅРёРµ РєРѕРґР°...
+    18>ClCompile:
+         HighsInfoDebug.cpp
+         HighsDeprecated.cpp
+         HighsInterface.cpp
+         HighsLp.cpp
+         HighsLpUtils.cpp
+         HighsModelUtils.cpp
+         HighsOptions.cpp
+         HighsRanging.cpp
+         HighsSolution.cpp
+         HighsSolutionDebug.cpp
+         HighsSolve.cpp
+         HighsStatus.cpp
+         HighsCliqueTable.cpp
+         HighsConflictPool.cpp
+         HighsCutGeneration.cpp
+         HighsCutPool.cpp
+         HighsDebugSol.cpp
+    21>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_r.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_qhull_r.dir\Release\global_r.obj
+         csl_qhull_r.dir\Release\stat_r.obj
+         csl_qhull_r.dir\Release\geom2_r.obj
+         csl_qhull_r.dir\Release\poly2_r.obj
+         csl_qhull_r.dir\Release\merge_r.obj
+         csl_qhull_r.dir\Release\libqhull_r.obj
+         csl_qhull_r.dir\Release\geom_r.obj
+         csl_qhull_r.dir\Release\poly_r.obj
+         csl_qhull_r.dir\Release\qset_r.obj
+         csl_qhull_r.dir\Release\mem_r.obj
+         csl_qhull_r.dir\Release\random_r.obj
+         csl_qhull_r.dir\Release\usermem_r.obj
+         csl_qhull_r.dir\Release\userprintf_r.obj
+         csl_qhull_r.dir\Release\io_r.obj
+         csl_qhull_r.dir\Release\user_r.obj
+         csl_qhull_r.dir\Release\rboxlib_r.obj
+         csl_qhull_r.dir\Release\userprintf_rbox_r.obj
+    18>ClCompile:
+         HighsDomain.cpp
+         HighsDynamicRowMatrix.cpp
+     5>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_contracts.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_contracts.dir\Release\contracts.obj
+    18>ClCompile:
+         HighsFeasibilityJump.cpp
+         HighsGFkSolve.cpp
+         HighsImplications.cpp
+         HighsLpAggregator.cpp
+         HighsLpRelaxation.cpp
+         HighsMipAnalysis.cpp
+         HighsMipSolver.cpp
+     5>Lib:
+         csl_contracts.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_contracts.lib
+    21>Lib:
+         csl_qhull_r.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_r.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_qhull_r.dir\Release\csl_qhull_r.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_qhull_r.dir\Release\csl_qhull_r.tlog\csl_qhull_r.lastbuildstate".
+    21>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_qhull_r.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     5>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate".
+     5>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_contracts.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_affine_sum.vcxproj" (3) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     3>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_affine_sum.vcxproj" (3) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_model.vcxproj" (4) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     4>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_model.vcxproj" (4) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_numeric.vcxproj" (8) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     8>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_numeric.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_numeric.dir\Release\csl_numeric.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild".
+    18>ClCompile:
+         HighsMipSolverData.cpp
+         HighsModkSeparator.cpp
+         HighsNodeQueue.cpp
+         HighsObjectiveFunction.cpp
+     8>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+    18>ClCompile:
+         HighsPathSeparator.cpp
+         HighsPrimalHeuristics.cpp
+         HighsPseudocost.cpp
+         HighsRedcostFixing.cpp
+         HighsSearch.cpp
+         HighsSeparation.cpp
+     8>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_numeric.dir\Release\csl_numeric_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /scanDependencies "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_numeric.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\numeric\data.cpp"
+    18>ClCompile:
+         HighsSeparator.cpp
+         HighsTableauSeparator.cpp
+     8>SetModuleDependencies:
+         data.cpp
+    18>ClCompile:
+         HighsTransformedLp.cpp
+         HighsHessian.cpp
+     8>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_numeric.pdb" /sourceDependencies "csl_numeric.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\numeric\data.cpp"
+    18>ClCompile:
+         HighsHessianUtils.cpp
+         HighsModel.cpp
+         HighsTaskExecutor.cpp
+         CupdlpWrapper.cpp
+         HighsPostsolveStack.cpp
+         HighsSymmetry.cpp
+         HPresolve.cpp
+         HPresolveAnalysis.cpp
+     8>ClCompile:
+         data.cpp
+    18>ClCompile:
+         ICrash.cpp
+         ICrashUtil.cpp
+         ICrashX.cpp
+         PresolveComponent.cpp
+         a_asm.cpp
+         a_quass.cpp
+         perturbation.cpp
+         quass.cpp
+         ratiotest.cpp
+         scaling.cpp
+         HEkk.cpp
+         HEkkControl.cpp
+         HEkkDebug.cpp
+         HEkkDual.cpp
+         HEkkDualMulti.cpp
+         HEkkDualRHS.cpp
+         HEkkDualRow.cpp
+         HEkkInterface.cpp
+         HEkkPrimal.cpp
+         HighsSimplexAnalysis.cpp
+         HSimplex.cpp
+         HSimplexDebug.cpp
+     8>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_numeric.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_numeric.dir\Release\data.obj
+    18>ClCompile:
+         HSimplexNla.cpp
+         HSimplexNlaDebug.cpp
+         HSimplexNlaFreeze.cpp
+         HSimplexNlaProductForm.cpp
+         HSimplexReport.cpp
+         KktCh2.cpp
+         DevKkt.cpp
+         HFactor.cpp
+         HFactorDebug.cpp
+         HFactorExtend.cpp
+     8>Lib:
+         csl_numeric.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_numeric.lib
+    18>ClCompile:
+         HFactorRefactor.cpp
+     8>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate".
+     8>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_numeric.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    18>ClCompile:
+         HFactorUtils.cpp
+         HighsHash.cpp
+     4>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_model.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_model.dir\Release\csl_model.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild".
+    18>ClCompile:
+         HighsLinearSumBounds.cpp
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_hull.vcxproj" (6) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     6>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_hull.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_optimization.vcxproj" (11) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    11>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_optimization.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_optimization.dir\Release\csl_optimization.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild".
+    18>ClCompile:
+         HighsMatrixPic.cpp
+         HighsMatrixUtils.cpp
+         HighsSort.cpp
+         HighsSparseMatrix.cpp
+     3>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_affine_sum.vcxproj" (3) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_objectives.vcxproj" (9) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     9>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_objectives.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_objectives.dir\Release\csl_objectives.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild".
+    18>ClCompile:
+         HighsUtils.cpp
+     7>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_highs_lp.vcxproj" (7) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_problem.vcxproj" (10) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    10>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_problem.vcxproj" (10) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_sets.vcxproj" (13) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    13>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_sets.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_sets.dir\Release\csl_sets.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild".
+     4>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+    13>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+    18>ClCompile:
+         HSet.cpp
+         HVectorBase.cpp
+         stringutil.cpp
+    11>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+     9>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+    18>ClCompile:
+         basiclu_kernel.cc
+         basiclu_wrapper.cc
+         conjugate_residuals.cc
+         control.cc
+         crossover.cc
+         diagonal_precond.cc
+         forrest_tomlin.cc
+         guess_basis.cc
+         indexed_vector.cc
+         info.cc
+         ipm.cc
+     4>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_model.dir\Release\csl_model_MD.tlog\".
+    13>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_sets.dir\Release\csl_sets_MD.tlog\".
+     4>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+    13>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+     4>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /scanDependencies "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_model.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\model\linear_system.cpp"
+    13>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_sets.dir\Release\\" /scanDependencies "csl_sets.dir\Release\\" /Fo"csl_sets.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_sets.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\sets\data.cpp"
+    11>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_optimization.dir\Release\csl_optimization_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /scanDependencies "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_optimization.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\linear_program.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /scanDependencies "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_optimization.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\lp_backend.cpp"
+     4>SetModuleDependencies:
+         linear_system.cpp
+    18>ClCompile:
+         ipx_c.cc
+     9>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_objectives.dir\Release\csl_objectives_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_objectives.dir\Release\\" /scanDependencies "csl_objectives.dir\Release\\" /Fo"csl_objectives.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_objectives.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\objective_reformulation.cpp"
+    18>ClCompile:
+         iterate.cc
+    13>SetModuleDependencies:
+         data.cpp
+    18>ClCompile:
+         kkt_solver_basis.cc
+         kkt_solver_diag.cc
+     4>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_model.pdb" /sourceDependencies "csl_model.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\model\linear_system.cpp"
+    11>SetModuleDependencies:
+         linear_program.cpp
+         lp_backend.cpp
+    18>ClCompile:
+         kkt_solver.cc
+         linear_operator.cc
+         lp_solver.cc
+     9>SetModuleDependencies:
+         objective_reformulation.cpp
+    18>ClCompile:
+         lu_factorization.cc
+         maxvolume.cc
+         model.cc
+    13>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_sets.dir\Release\\" /Fo"csl_sets.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_sets.pdb" /sourceDependencies "csl_sets.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\sets\data.cpp"
+     4>ClCompile:
+         linear_system.cpp
+    18>ClCompile:
+         normal_matrix.cc
+    11>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_optimization.pdb" /sourceDependencies "csl_optimization.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\lp_backend.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_optimization.pdb" /sourceDependencies "csl_optimization.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\linear_program.cpp"
+    18>ClCompile:
+         sparse_matrix.cc
+    13>ClCompile:
+         data.cpp
+    18>ClCompile:
+         sparse_utils.cc
+         splitted_normal_matrix.cc
+         starting_basis.cc
+         symbolic_invert.cc
+    11>ClCompile:
+         lp_backend.cpp
+     9>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_objectives.dir\Release\\" /Fo"csl_objectives.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_objectives.pdb" /sourceDependencies "csl_objectives.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\objective_reformulation.cpp"
+    18>ClCompile:
+         timer.cc
+         utils.cc
+    11>ClCompile:
+         linear_program.cpp
+     9>ClCompile:
+         objective_reformulation.cpp
+    18>ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\filereader" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\pdqsort" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\zstr" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\interfaces" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\parallel" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/qpsolver/basis.cpp.obj" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver\basis.cpp"
+         basis.cpp
+     4>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_model.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_model.dir\Release\linear_system.obj
+    13>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_sets.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_sets.dir\Release\data.obj
+     4>Lib:
+         csl_model.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_model.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate".
+     4>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_model.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    13>Lib:
+         csl_sets.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_sets.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_sets.dir\Release\csl_sets.tlog\csl_sets.lastbuildstate".
+    13>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_sets.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    10>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_problem.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_problem.dir\Release\csl_problem.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+       SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_problem.dir\Release\csl_problem_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\domains.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\constraints.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\initial_information.cpp"
+         domains.cpp
+         constraints.cpp
+         initial_information.cpp
+    18>ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\filereader" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\pdqsort" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\zstr" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\interfaces" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\parallel" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\highs.pdb" /external:W1 /Gd /TC /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_cs.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_linalg.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_proj.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_restart.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_scaling.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_solver.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_step.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_utils.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_factorize.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_get_factors.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_initialize.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_object.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_dense.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_for_update.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_sparse.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_update.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_build_factors.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_condest.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_dfs.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_factorize_bump.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_file.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_garbage_perm.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_initialize.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_internal.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_markowitz.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_matrix_norm.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_pivot.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_residual_test.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_setup_bump.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_singletons.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_dense.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_for_update.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_sparse.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_symbolic.c" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_triangular.c"
+    11>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_optimization.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_optimization.dir\Release\linear_program.obj
+         csl_optimization.dir\Release\lp_backend.obj
+    18>ClCompile:
+         cupdlp_cs.c
+         cupdlp_linalg.c
+         cupdlp_proj.c
+         cupdlp_restart.c
+         cupdlp_scaling.c
+         cupdlp_solver.c
+         cupdlp_step.c
+         cupdlp_utils.c
+         basiclu_factorize.c
+         basiclu_get_factors.c
+         basiclu_initialize.c
+         basiclu_object.c
+    11>Lib:
+         csl_optimization.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_optimization.lib
+    18>ClCompile:
+         basiclu_solve_dense.c
+    11>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_optimization.dir\Release\csl_optimization.tlog\csl_optimization.lastbuildstate".
+    11>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_optimization.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    18>ClCompile:
+         basiclu_solve_for_update.c
+         basiclu_solve_sparse.c
+         basiclu_update.c
+         lu_build_factors.c
+         lu_condest.c
+         lu_dfs.c
+         lu_factorize_bump.c
+         lu_file.c
+    10>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\constraints.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\domains.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\initial_information.cpp"
+    18>ClCompile:
+         lu_garbage_perm.c
+         lu_initialize.c
+         lu_internal.c
+         lu_markowitz.c
+         lu_matrix_norm.c
+         lu_pivot.c
+         lu_residual_test.c
+         lu_setup_bump.c
+         lu_singletons.c
+         lu_solve_dense.c
+         lu_solve_for_update.c
+         lu_solve_sparse.c
+         lu_solve_symbolic.c
+         lu_solve_triangular.c
+    10>ClCompile:
+         initial_information.cpp
+         domains.cpp
+         constraints.cpp
+    18>ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\filereader" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\pdqsort" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\zstr" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\interfaces" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\parallel" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/ipx/basis.cc.obj" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\basis.cc"
+         basis.cc
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\filereader" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\pdqsort" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\zstr" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\interfaces" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\parallel" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/ipx/lu_update.cc.obj" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx\lu_update.cc"
+         lu_update.cc
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\filereader" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\pdqsort" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\zstr" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\interfaces" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\parallel" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/basiclu/lu_update.c.obj" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\highs.pdb" /external:W1 /Gd /TC /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu\lu_update.c"
+         lu_update.c
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\\\"Release\\\"" /l"0x0409" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\filereader" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\pdqsort" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\extern\zstr" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\interfaces" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\io" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\ipx" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\ipm\basiclu" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\lp_data" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\mip" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\model" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\parallel" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\presolve" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\qpsolver" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\simplex" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\test_kkt" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-src\highs\util" /I"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build" /nologo /fo"highs.dir\Release\version.res" "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build\version.rc" 
+    10>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_problem.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_problem.dir\Release\domains.obj
+         csl_problem.dir\Release\constraints.obj
+         csl_problem.dir\Release\initial_information.obj
+    18>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\highs.lib" /NOLOGO /MACHINE:X64  /machine:x64 highs.dir\Release\version.res
+         highs.dir\Release\reader.obj
+         highs.dir\Release\highs_c_api.obj
+         highs.dir\Release\Filereader.obj
+         highs.dir\Release\FilereaderEms.obj
+         highs.dir\Release\FilereaderLp.obj
+         highs.dir\Release\FilereaderMps.obj
+         highs.dir\Release\HighsIO.obj
+         highs.dir\Release\HMpsFF.obj
+         highs.dir\Release\HMPSIO.obj
+         highs.dir\Release\LoadOptions.obj
+         highs.dir\Release\IpxWrapper.obj
+         highs.dir\Release\Highs.obj
+         highs.dir\Release\HighsCallback.obj
+         highs.dir\Release\HighsDebug.obj
+         highs.dir\Release\HighsIis.obj
+         highs.dir\Release\HighsInfo.obj
+         highs.dir\Release\HighsInfoDebug.obj
+         highs.dir\Release\HighsDeprecated.obj
+         highs.dir\Release\HighsInterface.obj
+         highs.dir\Release\HighsLp.obj
+         highs.dir\Release\HighsLpUtils.obj
+         highs.dir\Release\HighsModelUtils.obj
+         highs.dir\Release\HighsOptions.obj
+         highs.dir\Release\HighsRanging.obj
+         highs.dir\Release\HighsSolution.obj
+         highs.dir\Release\HighsSolutionDebug.obj
+         highs.dir\Release\HighsSolve.obj
+         highs.dir\Release\HighsStatus.obj
+         highs.dir\Release\HighsCliqueTable.obj
+         highs.dir\Release\HighsConflictPool.obj
+         highs.dir\Release\HighsCutGeneration.obj
+         highs.dir\Release\HighsCutPool.obj
+         highs.dir\Release\HighsDebugSol.obj
+         highs.dir\Release\HighsDomain.obj
+         highs.dir\Release\HighsDynamicRowMatrix.obj
+         highs.dir\Release\HighsFeasibilityJump.obj
+         highs.dir\Release\HighsGFkSolve.obj
+         highs.dir\Release\HighsImplications.obj
+         highs.dir\Release\HighsLpAggregator.obj
+         highs.dir\Release\HighsLpRelaxation.obj
+         highs.dir\Release\HighsMipAnalysis.obj
+         highs.dir\Release\HighsMipSolver.obj
+         highs.dir\Release\HighsMipSolverData.obj
+         highs.dir\Release\HighsModkSeparator.obj
+         highs.dir\Release\HighsNodeQueue.obj
+         highs.dir\Release\HighsObjectiveFunction.obj
+         highs.dir\Release\HighsPathSeparator.obj
+         highs.dir\Release\HighsPrimalHeuristics.obj
+         highs.dir\Release\HighsPseudocost.obj
+         highs.dir\Release\HighsRedcostFixing.obj
+         highs.dir\Release\HighsSearch.obj
+         highs.dir\Release\HighsSeparation.obj
+         highs.dir\Release\HighsSeparator.obj
+         highs.dir\Release\HighsTableauSeparator.obj
+         highs.dir\Release\HighsTransformedLp.obj
+         highs.dir\Release\HighsHessian.obj
+         highs.dir\Release\HighsHessianUtils.obj
+         highs.dir\Release\HighsModel.obj
+         highs.dir\Release\HighsTaskExecutor.obj
+         highs.dir\Release\CupdlpWrapper.obj
+         highs.dir\Release\HighsPostsolveStack.obj
+         highs.dir\Release\HighsSymmetry.obj
+         highs.dir\Release\HPresolve.obj
+         highs.dir\Release\HPresolveAnalysis.obj
+         highs.dir\Release\ICrash.obj
+         highs.dir\Release\ICrashUtil.obj
+         highs.dir\Release\ICrashX.obj
+         highs.dir\Release\PresolveComponent.obj
+         highs.dir\Release\a_asm.obj
+         highs.dir\Release\a_quass.obj
+         highs.dir\Release\perturbation.obj
+         highs.dir\Release\quass.obj
+         highs.dir\Release\ratiotest.obj
+         highs.dir\Release\scaling.obj
+         highs.dir\Release\HEkk.obj
+         highs.dir\Release\HEkkControl.obj
+         highs.dir\Release\HEkkDebug.obj
+         highs.dir\Release\HEkkDual.obj
+         highs.dir\Release\HEkkDualMulti.obj
+         highs.dir\Release\HEkkDualRHS.obj
+         highs.dir\Release\HEkkDualRow.obj
+         highs.dir\Release\HEkkInterface.obj
+         highs.dir\Release\HEkkPrimal.obj
+         highs.dir\Release\HighsSimplexAnalysis.obj
+         highs.dir\Release\HSimplex.obj
+         highs.dir\Release\HSimplexDebug.obj
+         highs.dir\Release\HSimplexNla.obj
+         highs.dir\Release\HSimplexNlaDebug.obj
+         highs.dir\Release\HSimplexNlaFreeze.obj
+         highs.dir\Release\HSimplexNlaProductForm.obj
+         highs.dir\Release\HSimplexReport.obj
+         highs.dir\Release\KktCh2.obj
+         highs.dir\Release\DevKkt.obj
+         highs.dir\Release\HFactor.obj
+         highs.dir\Release\HFactorDebug.obj
+         highs.dir\Release\HFactorExtend.obj
+         highs.dir\Release\HFactorRefactor.obj
+         highs.dir\Release\HFactorUtils.obj
+         highs.dir\Release\HighsHash.obj
+         highs.dir\Release\HighsLinearSumBounds.obj
+         highs.dir\Release\HighsMatrixPic.obj
+         highs.dir\Release\HighsMatrixUtils.obj
+         highs.dir\Release\HighsSort.obj
+         highs.dir\Release\HighsSparseMatrix.obj
+         highs.dir\Release\HighsUtils.obj
+         highs.dir\Release\HSet.obj
+         highs.dir\Release\HVectorBase.obj
+         highs.dir\Release\stringutil.obj
+         highs.dir\Release\cupdlp_cs.obj
+         highs.dir\Release\cupdlp_linalg.obj
+         highs.dir\Release\cupdlp_proj.obj
+         highs.dir\Release\cupdlp_restart.obj
+         highs.dir\Release\cupdlp_scaling.obj
+         highs.dir\Release\cupdlp_solver.obj
+         highs.dir\Release\cupdlp_step.obj
+         highs.dir\Release\cupdlp_utils.obj
+         highs.dir\Release\basiclu_kernel.obj
+         highs.dir\Release\basiclu_wrapper.obj
+         highs.dir\Release\conjugate_residuals.obj
+         highs.dir\Release\control.obj
+         highs.dir\Release\crossover.obj
+         highs.dir\Release\diagonal_precond.obj
+         highs.dir\Release\forrest_tomlin.obj
+         highs.dir\Release\guess_basis.obj
+         highs.dir\Release\indexed_vector.obj
+         highs.dir\Release\info.obj
+         highs.dir\Release\ipm.obj
+         highs.dir\Release\ipx_c.obj
+         highs.dir\Release\iterate.obj
+         highs.dir\Release\kkt_solver_basis.obj
+         highs.dir\Release\kkt_solver_diag.obj
+         highs.dir\Release\kkt_solver.obj
+         highs.dir\Release\linear_operator.obj
+         highs.dir\Release\lp_solver.obj
+         highs.dir\Release\lu_factorization.obj
+         highs.dir\Release\maxvolume.obj
+         highs.dir\Release\model.obj
+         highs.dir\Release\normal_matrix.obj
+         highs.dir\Release\sparse_matrix.obj
+         highs.dir\Release\sparse_utils.obj
+         highs.dir\Release\splitted_normal_matrix.obj
+         highs.dir\Release\starting_basis.obj
+         highs.dir\Release\symbolic_invert.obj
+         highs.dir\Release\timer.obj
+         highs.dir\Release\utils.obj
+         highs.dir\Release\basiclu_factorize.obj
+         highs.dir\Release\basiclu_get_factors.obj
+         highs.dir\Release\basiclu_initialize.obj
+         highs.dir\Release\basiclu_object.obj
+         highs.dir\Release\basiclu_solve_dense.obj
+         highs.dir\Release\basiclu_solve_for_update.obj
+         highs.dir\Release\basiclu_solve_sparse.obj
+         highs.dir\Release\basiclu_update.obj
+         highs.dir\Release\lu_build_factors.obj
+         highs.dir\Release\lu_condest.obj
+         highs.dir\Release\lu_dfs.obj
+         highs.dir\Release\lu_factorize_bump.obj
+         highs.dir\Release\lu_file.obj
+         highs.dir\Release\lu_garbage_perm.obj
+         highs.dir\Release\lu_initialize.obj
+         highs.dir\Release\lu_internal.obj
+         highs.dir\Release\lu_markowitz.obj
+         highs.dir\Release\lu_matrix_norm.obj
+         highs.dir\Release\lu_pivot.obj
+         highs.dir\Release\lu_residual_test.obj
+         highs.dir\Release\lu_setup_bump.obj
+         highs.dir\Release\lu_singletons.obj
+         highs.dir\Release\lu_solve_dense.obj
+         highs.dir\Release\lu_solve_for_update.obj
+         highs.dir\Release\lu_solve_sparse.obj
+         highs.dir\Release\lu_solve_symbolic.obj
+         highs.dir\Release\lu_solve_triangular.obj
+         highs.dir\Release\/qpsolver/basis.cpp.obj
+         highs.dir\Release\/ipm/ipx/basis.cc.obj
+         highs.dir\Release\/ipm/ipx/lu_update.cc.obj
+         highs.dir\Release\/ipm/basiclu/lu_update.c.obj
+    10>Lib:
+         csl_problem.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_problem.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_problem.dir\Release\csl_problem.tlog\csl_problem.lastbuildstate".
+    10>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_problem.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    18>Lib:
+         highs.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\bin\highs.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "highs.dir\Release\highs.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "highs.dir\Release\highs.tlog\highs.lastbuildstate".
+    18>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\_deps\csl_highs-build\highs\highs.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     9>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_objectives.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_objectives.dir\Release\objective_reformulation.obj
+         csl_objectives.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_objectives.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_objectives.dir\Release\csl_objectives.tlog\csl_objectives.lastbuildstate".
+     9>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_objectives.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     7>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_highs_lp.vcxproj" (7) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_resolved_core.vcxproj" (14) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    14>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_resolved_core.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_resolved_core.dir\Release\csl_reso.0438854E.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_resolved_core.dir\Release\csl_reso.0438854E.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_resolved_core.dir\Release\csl_reso.0438854E.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+       SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_resolved_core.dir\Release\csl_reso.0438854E_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /scanDependencies "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_core.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\identity.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /scanDependencies "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_core.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\resolved.cpp"
+         identity.cpp
+         resolved.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_core.pdb" /sourceDependencies "csl_resolved_core.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\resolved.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_core.pdb" /sourceDependencies "csl_resolved_core.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\identity.cpp"
+         resolved.cpp
+         identity.cpp
+       Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_core.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_resolved_core.dir\Release\identity.obj
+         csl_resolved_core.dir\Release\resolved.obj
+         csl_resolved_core.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_core.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_resolved_core.dir\Release\csl_reso.0438854E.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_resolved_core.dir\Release\csl_reso.0438854E.tlog\csl_resolved_core.lastbuildstate".
+    14>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_resolved_core.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     7>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_highs_lp.vcxproj" (7) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_registry.vcxproj" (12) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    12>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_registry.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_registry.dir\Release\csl_registry.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+       SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_registry.dir\Release\csl_registry_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_registry.dir\Release\\" /scanDependencies "csl_registry.dir\Release\\" /Fo"csl_registry.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_registry.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\registry\registry.cpp"
+         registry.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_registry.dir\Release\\" /Fo"csl_registry.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_registry.pdb" /sourceDependencies "csl_registry.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\registry\registry.cpp"
+         registry.cpp
+       Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_registry.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_registry.dir\Release\registry.obj
+         csl_registry.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_registry.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate".
+    12>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_registry.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_nominal_forward.vcxproj" (15) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    15>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_nominal_forward.vcxproj" (15) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_polyhedral.vcxproj" (16) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    16>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_polyhedral.dir\Release\".
+     6>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_hull.dir\Release\".
+    15>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_nominal_forward.vcxproj" (15) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_resolved_problem.vcxproj" (20) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    20>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_resolved_problem.dir\Release\".
+    16>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_polyhedral.dir\Release\csl_polyhedral.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_polyhedral.dir\Release\csl_polyhedral.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_polyhedral.dir\Release\csl_polyhedral.tlog\unsuccessfulbuild".
+     6>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_hull.dir\Release\csl_hull.tlog\".
+    20>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_resolved_problem.dir\Release\csl_reso.1122D67D.tlog\".
+     6>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild".
+    20>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_resolved_problem.dir\Release\csl_reso.1122D67D.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_resolved_problem.dir\Release\csl_reso.1122D67D.tlog\unsuccessfulbuild".
+    16>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+     6>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+    20>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+     1>РџСЂРѕРµРєС‚ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_phase_one.vcxproj" (17) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    17>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_phase_one.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_phase_one.dir\Release\csl_phase_one.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+    20>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_resolved_problem.dir\Release\csl_reso.1122D67D_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_problem.dir\Release\\" /scanDependencies "csl_resolved_problem.dir\Release\\" /Fo"csl_resolved_problem.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\validator.cpp"
+         validator.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_problem.dir\Release\\" /Fo"csl_resolved_problem.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_problem.pdb" /sourceDependencies "csl_resolved_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\problem\validator.cpp"
+         validator.cpp
+    16>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_polyhedral.dir\Release\csl_polyhedral_MD.tlog\".
+    17>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_phase_one.dir\Release\csl_phase_one_MD.tlog\".
+     6>SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_hull.dir\Release\csl_hull_MD.tlog\".
+    16>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+     6>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+    17>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /scanDependencies "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_phase_one.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\phase_one\program.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /scanDependencies "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_phase_one.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\phase_one\simplex.cpp"
+     6>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_hull.dir\Release\\" /scanDependencies "csl_hull.dir\Release\\" /Fo"csl_hull.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_hull.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\hull_reducer.cpp"
+    16>SetModuleDependencies:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_polyhedral.dir\Release\\" /scanDependencies "csl_polyhedral.dir\Release\\" /Fo"csl_polyhedral.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\polyhedral\intersection.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_polyhedral.dir\Release\\" /scanDependencies "csl_polyhedral.dir\Release\\" /Fo"csl_polyhedral.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\reachability\nominal_predecessor.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_polyhedral.dir\Release\\" /scanDependencies "csl_polyhedral.dir\Release\\" /Fo"csl_polyhedral.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\polyhedral\projection.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_polyhedral.dir\Release\\" /scanDependencies "csl_polyhedral.dir\Release\\" /Fo"csl_polyhedral.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\polyhedral\halfspace_reducer.cpp"
+     7>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_highs_lp.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_highs_lp.dir\Release\csl_highs_lp.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild".
+     6>SetModuleDependencies:
+         hull_reducer.cpp
+    16>SetModuleDependencies:
+         halfspace_reducer.cpp
+         nominal_predecessor.cpp
+    17>SetModuleDependencies:
+         simplex.cpp
+    16>SetModuleDependencies:
+         intersection.cpp
+         projection.cpp
+    17>SetModuleDependencies:
+         program.cpp
+     7>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+       SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_highs_lp.dir\Release\csl_highs_lp_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_highs_lp.dir\Release\\" /scanDependencies "csl_highs_lp.dir\Release\\" /Fo"csl_highs_lp.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_highs_lp.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_highs-src" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_highs-src/highs" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_highs-build" "D:\work\PhD\worktrees\syn01-nominal-forward\src\adapters\lp\highs.cpp"
+         highs.cpp
+     6>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_hull.dir\Release\\" /Fo"csl_hull.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_hull.pdb" /sourceDependencies "csl_hull.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\hull_reducer.cpp"
+    16>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_polyhedral.dir\Release\\" /Fo"csl_polyhedral.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.pdb" /sourceDependencies "csl_polyhedral.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\reachability\nominal_predecessor.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_polyhedral.dir\Release\\" /Fo"csl_polyhedral.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.pdb" /sourceDependencies "csl_polyhedral.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\polyhedral\halfspace_reducer.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_polyhedral.dir\Release\\" /Fo"csl_polyhedral.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.pdb" /sourceDependencies "csl_polyhedral.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\polyhedral\projection.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_polyhedral.dir\Release\\" /Fo"csl_polyhedral.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.pdb" /sourceDependencies "csl_polyhedral.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\polyhedral\intersection.cpp"
+     6>ClCompile:
+         hull_reducer.cpp
+    16>ClCompile:
+         nominal_predecessor.cpp
+         projection.cpp
+         intersection.cpp
+         halfspace_reducer.cpp
+    17>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_phase_one.pdb" /sourceDependencies "csl_phase_one.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\phase_one\simplex.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_phase_one.pdb" /sourceDependencies "csl_phase_one.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\optimization\phase_one\program.cpp"
+     7>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_highs_lp.dir\Release\\" /Fo"csl_highs_lp.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_highs_lp.pdb" /sourceDependencies "csl_highs_lp.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_highs-src" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_highs-src/highs" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_highs-build" "D:\work\PhD\worktrees\syn01-nominal-forward\src\adapters\lp\highs.cpp"
+    17>ClCompile:
+         simplex.cpp
+         program.cpp
+     7>ClCompile:
+         highs.cpp
+    20>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_problem.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_resolved_problem.dir\Release\validator.obj
+         csl_resolved_problem.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_resolved_problem.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_resolved_problem.dir\Release\csl_reso.1122D67D.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_resolved_problem.dir\Release\csl_reso.1122D67D.tlog\csl_resolved_problem.lastbuildstate".
+    20>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_resolved_problem.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     6>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_hull.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_hull.dir\Release\hull_reducer.obj
+         csl_hull.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_hull.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_hull.dir\Release\csl_hull.tlog\csl_hull.lastbuildstate".
+     6>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_hull.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     3>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_affine_sum.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_affine_sum.dir\Release\csl_affine_sum.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_affine_sum.dir\Release\csl_affine_sum.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_affine_sum.dir\Release\csl_affine_sum.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+       SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_affine_sum.dir\Release\csl_affine_sum_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_affine_sum.dir\Release\\" /scanDependencies "csl_affine_sum.dir\Release\\" /Fo"csl_affine_sum.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_affine_sum.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\affine_sum.cpp"
+         affine_sum.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_affine_sum.dir\Release\\" /Fo"csl_affine_sum.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_affine_sum.pdb" /sourceDependencies "csl_affine_sum.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\affine_sum.cpp"
+         affine_sum.cpp
+     7>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_highs_lp.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_highs_lp.dir\Release\highs.obj
+         csl_highs_lp.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_highs_lp.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_highs_lp.dir\Release\csl_highs_lp.tlog\csl_highs_lp.lastbuildstate".
+     7>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_highs_lp.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    19>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_qhull_conversion.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_qhull_conversion.dir\Release\csl_qhul.96B767FD.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_qhull_conversion.dir\Release\csl_qhul.96B767FD.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_qhull_conversion.dir\Release\csl_qhul.96B767FD.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+       SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_qhull_conversion.dir\Release\csl_qhul.96B767FD_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_qhull_conversion.dir\Release\\" /scanDependencies "csl_qhull_conversion.dir\Release\\" /Fo"csl_qhull_conversion.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_conversion.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src/libqhull_r" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\adapters\polyhedral\qhull.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_qhull_conversion.dir\Release\\" /scanDependencies "csl_qhull_conversion.dir\Release\\" /Fo"csl_qhull_conversion.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_conversion.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src/libqhull_r" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\conversion\affine_coordinates.cpp"
+         qhull.cpp
+         affine_coordinates.cpp
+    16>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_polyhedral.dir\Release\intersection.obj
+         csl_polyhedral.dir\Release\halfspace_reducer.obj
+         csl_polyhedral.dir\Release\projection.obj
+         csl_polyhedral.dir\Release\nominal_predecessor.obj
+         csl_polyhedral.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_polyhedral.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_polyhedral.dir\Release\csl_polyhedral.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_polyhedral.dir\Release\csl_polyhedral.tlog\csl_polyhedral.lastbuildstate".
+    16>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_polyhedral.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    19>ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_qhull_conversion.dir\Release\\" /Fo"csl_qhull_conversion.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_conversion.pdb" /sourceDependencies "csl_qhull_conversion.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src/libqhull_r" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\geometry\conversion\affine_coordinates.cpp"
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_qhull_conversion.dir\Release\\" /Fo"csl_qhull_conversion.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_conversion.pdb" /sourceDependencies "csl_qhull_conversion.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src/libqhull_r" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_objectives_eigen-src" /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_qhull-src/src" "D:\work\PhD\worktrees\syn01-nominal-forward\src\adapters\polyhedral\qhull.cpp"
+    15>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_nominal_forward.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_nominal_forward.dir\Release\csl_nomi.27412DF2.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_nominal_forward.dir\Release\csl_nomi.27412DF2.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_nominal_forward.dir\Release\csl_nomi.27412DF2.tlog\unsuccessfulbuild".
+    19>ClCompile:
+         qhull.cpp
+         affine_coordinates.cpp
+    15>CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+       SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_nominal_forward.dir\Release\csl_nomi.27412DF2_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_nominal_forward.dir\Release\\" /scanDependencies "csl_nominal_forward.dir\Release\\" /Fo"csl_nominal_forward.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_nominal_forward.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\reachability\nominal_forward.cpp"
+         nominal_forward.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_nominal_forward.dir\Release\\" /Fo"csl_nominal_forward.dir\Release\\" /Fd"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_nominal_forward.pdb" /sourceDependencies "csl_nominal_forward.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\worktrees\syn01-nominal-forward\src\reachability\nominal_forward.cpp"
+         nominal_forward.cpp
+    17>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_phase_one.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_phase_one.dir\Release\program.obj
+         csl_phase_one.dir\Release\simplex.obj
+         csl_phase_one.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_phase_one.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_phase_one.dir\Release\csl_phase_one.tlog\csl_phase_one.lastbuildstate".
+    17>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_phase_one.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     3>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_affine_sum.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_affine_sum.dir\Release\affine_sum.obj
+         csl_affine_sum.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_affine_sum.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_affine_sum.dir\Release\csl_affine_sum.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_affine_sum.dir\Release\csl_affine_sum.tlog\csl_affine_sum.lastbuildstate".
+     3>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_affine_sum.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    15>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_nominal_forward.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_nominal_forward.dir\Release\nominal_forward.obj
+         csl_nominal_forward.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_nominal_forward.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_nominal_forward.dir\Release\csl_nomi.27412DF2.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_nominal_forward.dir\Release\csl_nomi.27412DF2.tlog\csl_nominal_forward.lastbuildstate".
+    15>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_nominal_forward.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    19>Lib:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_conversion.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_qhull_conversion.dir\Release\qhull.obj
+         csl_qhull_conversion.dir\Release\affine_coordinates.obj
+         csl_qhull_conversion.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_qhull_conversion.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_qhull_conversion.dir\Release\csl_qhul.96B767FD.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_qhull_conversion.dir\Release\csl_qhul.96B767FD.tlog\csl_qhull_conversion.lastbuildstate".
+    19>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_qhull_conversion.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>PrepareForBuild:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_syn01_nominal_forward_report.dir\Release\".
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_syn01_nominal_forward_report.dir\Release\csl_syn0.01383D8E.tlog\".
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_syn01_nominal_forward_report.dir\Release\csl_syn0.01383D8E.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_syn01_nominal_forward_report.dir\Release\csl_syn0.01383D8E.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule D:/work/PhD/worktrees/syn01-nominal-forward/CMakeLists.txt
+       SetModuleDependencies:
+         РЎРѕР·РґР°РЅРёРµ РєР°С‚Р°Р»РѕРіР° "csl_syn01_nominal_forward_report.dir\Release\csl_syn0.01383D8E_MD.tlog\".
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_syn01_nominal_forward_report.dir\Release\\" /scanDependencies "csl_syn01_nominal_forward_report.dir\Release\\" /Fo"csl_syn01_nominal_forward_report.dir\Release\\" /Fd"csl_syn01_nominal_forward_report.dir\Release\vc143.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_json-src/single_include" "D:\work\PhD\worktrees\syn01-nominal-forward\reports\algorithm-results\tooling\syn01\nominal_forward_driver.cpp"
+         nominal_forward_driver.cpp
+       ClCompile:
+         РљРѕРјРїРёР»СЏС†РёСЏвЂ¦
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\worktrees\syn01-nominal-forward\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_syn01_nominal_forward_report.dir\Release\\" /Fo"csl_syn01_nominal_forward_report.dir\Release\\" /Fd"csl_syn01_nominal_forward_report.dir\Release\vc143.pdb" /sourceDependencies "csl_syn01_nominal_forward_report.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/_deps/csl_json-src/single_include" "D:\work\PhD\worktrees\syn01-nominal-forward\reports\algorithm-results\tooling\syn01\nominal_forward_driver.cpp"
+         nominal_forward_driver.cpp
+       Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_syn01_nominal_forward_report.exe" /INCREMENTAL:NO /NOLOGO Release\csl_nominal_forward.lib Release\csl_affine_sum.lib Release\csl_hull.lib Release\csl_highs_lp.lib Release\csl_qhull_conversion.lib Release\csl_phase_one.lib Release\csl_polyhedral.lib Release\csl_resolved_problem.lib Release\bin\highs.lib Release\csl_qhull_r.lib Release\csl_registry.lib Release\csl_resolved_core.lib Release\csl_problem.lib Release\csl_sets.lib Release\csl_model.lib Release\csl_objectives.lib Release\csl_optimization.lib Release\csl_numeric.lib Release\csl_contracts.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/Release/csl_syn01_nominal_forward_report.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/work/PhD/worktrees/syn01-nominal-forward/build/syn01-accepted-20261013/Release/csl_syn01_nominal_forward_report.lib" /MACHINE:X64  /machine:x64 csl_syn01_nominal_forward_report.dir\Release\nominal_forward_driver.obj
+         csl_syn01_nominal_forward_report.vcxproj -> D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\Release\csl_syn01_nominal_forward_report.exe
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_syn01_nominal_forward_report.dir\Release\csl_syn0.01383D8E.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_syn01_nominal_forward_report.dir\Release\csl_syn0.01383D8E.tlog\csl_syn01_nominal_forward_report.lastbuildstate".
+     1>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "D:\work\PhD\worktrees\syn01-nominal-forward\build\syn01-accepted-20261013\csl_syn01_nominal_forward_report.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+
+РЎР±РѕСЂРєР° СѓСЃРїРµС€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°.
+    РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёР№: 0
+    РћС€РёР±РѕРє: 0
+
+РџСЂРѕС€Р»Рѕ РІСЂРµРјРµРЅРё 00:01:18.18
+

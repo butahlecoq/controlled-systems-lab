@@ -19,11 +19,14 @@ fixture order alternating forward/reverse each round. The driver reports
 `setup_ns`, `solve_ns`, `oracle_ns`, and `execute_ns` separately. Setup covers
 problem construction/resolution and provider registration/selection/preparation;
 solve covers `nominal_forward()`; oracle covers immediate result consumption
-and a complete one-dimensional H-row bound calculation; execute spans setup
-through that independent check. Build, process startup, JSON serialization,
-collector validation, and rendering are excluded. Per-provider operation
-counts come from returned stage provenance; provider operation durations are
-not available through the public seam.
+and a complete one-dimensional H-row bound calculation; execute runs from
+driver entry through the independently verified result. It includes
+NumericalPolicy, ExecutionContext, and effective-settings construction before
+the setup phase begins. Build, process startup, JSON serialization, collector
+validation, and rendering are excluded.
+Per-provider operation counts reflect direct stage-provider lineage and exclude
+nested LP/hull operations; provider operation durations are not available
+through the public seam.
 
 The event format records an explicit timing state for each phase: `available`
 for a completed phase, `partial` when a phase throws after beginning, and

@@ -24,6 +24,12 @@ SCENARIO_SPECS = {
 }
 PHASES = ("setup_ns", "solve_ns", "oracle_ns", "execute_ns")
 PHASE_STATES = ("available", "partial", "not_reached")
+TIMING_SCOPES = {
+    "setup_ns": "fresh problem construction/resolution and provider registration/selection/preparation",
+    "solve_ns": "nominal_forward() call only",
+    "oracle_ns": "immediate returned-outcome consumption plus complete 1-D H-row bound verification",
+    "execute_ns": "driver entry through verified result; includes numerical-policy, execution-context, and effective-settings construction; excludes process startup/build/serialization/collector validation/rendering",
+}
 RUNTIME_SETTINGS = {
     "numerical_policy": {"absolute_tolerance": 1e-8, "relative_tolerance": 1e-8},
     "highs": {"solver": "simplex", "presolve": "off", "parallel": "off", "threads": 1,
@@ -104,12 +110,7 @@ def make_record(trials, *, source_commit, harness_commit, environment, provenanc
             "requested_workers": 1,
             "configured_native_threads": 1,
             "operation_timing": "unavailable; the public provider seam exposes no per-operation timer",
-            "timing_scopes": {
-                "setup_ns": "fresh problem construction/resolution and provider registration/selection/preparation",
-                "solve_ns": "nominal_forward() call only",
-                "oracle_ns": "immediate returned-outcome consumption plus complete 1-D H-row bound verification",
-                "execute_ns": "setup through independent H-row verification; excludes process startup/build/serialization/rendering",
-            },
+            "timing_scopes": dict(TIMING_SCOPES),
         },
         "support": "Unestablished",
         "evidence_limits": list(LIMITS),
@@ -161,6 +162,8 @@ def validate_record(record):
     if (not isinstance(measurement, dict) or measurement.get("requested_workers") != 1 or
             measurement.get("configured_native_threads") != 1):
         errors.append("thread_configuration_must_be_one")
+    if not isinstance(measurement, dict) or measurement.get("timing_scopes") != TIMING_SCOPES:
+        errors.append("timing_scope_metadata_mismatch")
     build = provenance.get("build_configuration") if isinstance(provenance, dict) else None
     required_build_fields = {"configuration", "generator", "generator_platform", "cxx_standard",
         "compiler_id", "compiler_version", "compiler_executable", "cmake_version",
@@ -283,7 +286,7 @@ def render_svg(record):
         parts.append(f'<text x="8" y="{y+15}">{html.escape(scenario)}</text>'
                      f'<rect x="170" y="{y}" width="{width}" height="22" fill="#3572a5"/>'
                      f'<text x="{180+width}" y="{y+15}">{html.escape(label)}</text>')
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 130" role="img" aria-label="End-to-end time by fixture">' + "".join(parts) + "</svg>"
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 130" role="img" aria-label="Execute interval from driver entry through verified result by fixture">' + "".join(parts) + "</svg>"
 
 
 def render_html(record):
@@ -321,9 +324,10 @@ def render_html(record):
 <p>Nested dependencies: {html.escape(json.dumps(record['provenance']['dependency_edges'], sort_keys=True))}</p>
 <h2>Effective runtime settings</h2><pre>{html.escape(json.dumps(record['provenance']['runtime_settings'], sort_keys=True, indent=2))}</pre>
 <p>Requested workers: {record['measurement']['requested_workers']}; configured native threads: {record['measurement']['configured_native_threads']}; observed effective native threads: unavailable. {html.escape(record['provenance']['native_thread_observation']['reason'])}</p>
+<p>Provider operation counts represent direct stage-provider lineage and exclude nested LP/hull operations; per-provider operation durations are unavailable.</p>
 <h2>Compiler and Release build evidence</h2><pre>{html.escape(json.dumps(record['provenance']['build_configuration'], sort_keys=True, indent=2))}</pre>
 <p>One registered provider stack; descriptive timings only, no speedup or comparison claim. Reachability support: <strong>Unestablished</strong>.</p>
-<h2>Evidence limits</h2><ul>{limits}</ul><h2>Median end-to-end timing by fixture</h2>{render_svg(record)}
+<h2>Evidence limits</h2><ul>{limits}</ul><h2>Median execute interval (driver entry through verified result)</h2><p>The interval includes numerical-policy, execution-context, and effective-settings construction before the setup phase begins.</p>{render_svg(record)}
 <div class="scroll"><table><thead><tr><th>Fixture</th><th>Measured trials</th><th>Passed</th><th>Failed</th>{phase_headers}</tr></thead><tbody>{''.join(summary)}</tbody></table></div>
 <h2>Raw trial observations</h2><div class="scroll"><table><thead><tr><th>Fixture</th><th>Repetition</th><th>Kind</th><th>Status</th><th>Outcome</th><th>Oracle</th><th>Returned marginals</th>{phase_headers}<th>Detail</th></tr></thead><tbody>{''.join(trial_rows)}</tbody></table></div>
 </body></html>'''
