@@ -138,6 +138,33 @@ def parse_solver_observations(raw_diagnostics):
         except ValueError: result[key]=value
     return result
 
+def normalize_trial_event(row, *, attempt_index, source_commit, harness_commit):
+    """Apply collector-owned identity and oracle fields to any driver event."""
+    row=dict(row)
+    row["attempt_index"]=attempt_index
+    row["source_commit"]=source_commit
+    row["harness_commit"]=harness_commit
+    row["scenario_hash"]=sha(canonical({"scenario":SCENARIOS[row["scenario"]],"terminal_slice":UNIT_BOX}))
+    row["trial_id"]=f"{source_commit[:8]}-{harness_commit[:8]}-{row['scenario']}-{row['repetition']}"
+    row["solver_observations"]=parse_solver_observations(row.get("raw_diagnostics",""))
+    row["validation_errors"]=validate_trial(row)
+    return row
+
+def profile_matrix_is_expected(events, validation_errors, *, repetitions, warmups):
+    if validation_errors or len(events)!=len(SCENARIOS)*(repetitions+warmups):
+        return False
+    for name in SCENARIOS:
+        rows=[row for row in events if row.get("scenario")==name]
+        warm=[row for row in rows if row.get("warmup")]
+        measured=[row for row in rows if not row.get("warmup")]
+        if len(warm)!=warmups or len(measured)!=repetitions:
+            return False
+        if len({row.get("repetition") for row in rows})!=repetitions+warmups:
+            return False
+        if any(row.get("validation_errors") for row in rows):
+            return False
+    return True
+
 def summarize(rows):
     result=[]
     for name in SCENARIOS:
@@ -264,12 +291,7 @@ def collect(a,state):
     raw=[]
     for i,line in enumerate(output_lines[1:],1):
         try:
-            row=json.loads(line.decode("utf-8"));row["attempt_index"]=i
-            row["source_commit"]=SOURCE_COMMIT;row["harness_commit"]=a.harness_commit
-            row["scenario_hash"]=sha(canonical({"scenario":SCENARIOS[row["scenario"]],"terminal_slice":UNIT_BOX}))
-            row["trial_id"]=f"{SOURCE_COMMIT[:8]}-{a.harness_commit[:8]}-{row['scenario']}-{row['repetition']}"
-            row["solver_observations"]=parse_solver_observations(row.get("raw_diagnostics",""))
-            row["validation_errors"]=validate_trial(row);raw.append(row)
+            row=normalize_trial_event(json.loads(line.decode("utf-8")),attempt_index=i,source_commit=SOURCE_COMMIT,harness_commit=a.harness_commit);raw.append(row)
         except Exception as exc: raw.append({"schema":"csl.syn02-terminal-trial/1","status":"parse_failed","attempt_index":i,"validation_errors":[str(exc)],"warmup":False,"scenario":"unknown"})
     require(len(raw)==5*(a.repetitions+a.warmups),f"expected complete raw trial matrix; got {len(raw)} events")
     require(len([r for r in raw if not r["warmup"]])==5*a.repetitions,"measured matrix incomplete")
@@ -299,11 +321,16 @@ def collect(a,state):
     profile_wall=time.perf_counter_ns()-startp
     profile_lines=pout.splitlines();profile_identity=json.loads(profile_lines[0]) if profile_lines else {}
     require(profile_identity=={"schema":"csl.syn02-terminal-run/1","source_commit":SOURCE_COMMIT,"harness_commit":a.harness_commit},"profile executable identity mismatch")
-    try: profile_events=[json.loads(line) for line in profile_lines[1:]]
-    except Exception: profile_events=[]
-    profile_validation=[validate_trial(r) for r in profile_events]
-    profile.update({"status":"process_counter_sampling_completed" if p.returncode==0 and not perr else "process_counter_sampling_incomplete","wall_ns":profile_wall,"process_return_code":p.returncode,"stderr":perr.decode("utf-8","replace"),"samples":samples,"sample_interval_target_ms":10,"max_sampled_cpu_seconds":max((s["process_cpu_seconds"] for s in samples),default=0),"max_sampled_resident_bytes":max((s["resident_bytes"] for s in samples),default=0),"profile_trial_events":len(profile_events),"profile_non_success":sum(r.get("termination")!="completed" for r in profile_events if not r.get("warmup")),"profile_all_expected":bool(profile_events) and all(not errors for errors in profile_validation),"limiter":"unknown","limiter_reason":"sampling captured only process CPU and RSS counters, not call stacks; no source attribution is justified"})
-    if p.returncode!=0 or len(profile_events)!=5*1001 or not profile["profile_all_expected"]:
+    profile_events=[];profile_validation=[]
+    for i,line in enumerate(profile_lines[1:],1):
+        try:
+            profile_events.append(normalize_trial_event(json.loads(line.decode("utf-8")),attempt_index=i,source_commit=SOURCE_COMMIT,harness_commit=a.harness_commit))
+        except Exception as exc:
+            profile_validation.append([f"event_{i}_parse:{exc}"])
+    profile_validation.extend(row["validation_errors"] for row in profile_events)
+    profile_expected=profile_matrix_is_expected(profile_events,profile_validation,repetitions=1000,warmups=1)
+    profile.update({"status":"process_counter_sampling_completed" if p.returncode==0 and not perr else "process_counter_sampling_incomplete","wall_ns":profile_wall,"process_return_code":p.returncode,"stderr":perr.decode("utf-8","replace"),"samples":samples,"sample_interval_target_ms":10,"max_sampled_cpu_seconds":max((s["process_cpu_seconds"] for s in samples),default=0),"max_sampled_resident_bytes":max((s["resident_bytes"] for s in samples),default=0),"profile_trial_events":len(profile_events),"profile_non_success":sum(r.get("termination")!="completed" for r in profile_events if not r.get("warmup")),"profile_all_expected":profile_expected,"limiter":"unknown","limiter_reason":"sampling captured only process CPU and RSS counters, not call stacks; no source attribution is justified"})
+    if p.returncode!=0 or perr or not profile["profile_all_expected"]:
         profile["status"]="process_counter_sampling_incomplete"
         profile["incomplete_reason"]="separate profile process returned incomplete output or an expected-result check failed"
     profile_summary=profile_summary_for(profile)
