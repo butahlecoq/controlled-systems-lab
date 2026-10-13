@@ -507,6 +507,13 @@ ArtifactResult<RunStatistics> decode_run(std::string_view text,const problem::Re
     }catch(const std::bad_alloc&){return ArtifactError{ArtifactErrorCode::allocation,{},{}};}
 }
 ArtifactResult<std::string> encode_run(const RunStatistics& owner,EncodeLimits limits) {
+    const auto* synthesis=std::get_if<SynthesisFinal>(&owner.description().final);
+    if(synthesis&&synthesis->family) {
+        const auto* complete=std::get_if<CompleteOptimalFamily>(&synthesis->family->family.outcome());
+        if(complete&&std::holds_alternative<Ts01AnalyticCoverageEvidence>(complete->completeness.support))
+            return ArtifactError{ArtifactErrorCode::unsupported,"run.final.family.completeness.support",
+                "run-statistics-v3 cannot encode the live T-S01 analytic proof capability"};
+    }
     const auto wire=recorded_json(owner);
     if(wire.size()>limits.bytes)return ArtifactError{ArtifactErrorCode::limit,{},{}};
     try {return std::string(wire);}
