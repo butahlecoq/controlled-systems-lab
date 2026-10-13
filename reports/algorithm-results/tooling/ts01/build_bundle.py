@@ -11,7 +11,7 @@ import report
 import publication_map
 
 ROOT = Path(__file__).resolve().parents[2]
-REPORT_ID = "syn07-ts01-20261013-fe5095ce27ab"
+REPORT_ID = "syn07-ts01-20261013-28f305387f66"
 
 
 def canonical(value):
@@ -22,7 +22,7 @@ def write_json(path, value):
     path.write_bytes((json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n").encode("utf-8"))
 
 
-def build(out=None):
+def build(out=None, measurement_dir=None):
     points = [
         ("s=0", [0, 0, 1, 0, 1], True, "Closed-segment endpoint; exact equations and bounds hold."),
         ("s=1/4", [0, 0.25, 1, 0.25, 0.75], True, "Interior dyadic parameter; exact equations and bounds hold."),
@@ -68,8 +68,12 @@ def build(out=None):
             "This does not establish completeness for any generic synthesis strategy, another profile, or a decoded artifact.",
             "This report records the profile theorem and exact membership examples; it is not an independent mathematical review of the source implementation.",
         ],
-        "performance": {"status": "unavailable", "reason": "No standalone public T-S01 execution/measurement executable or accepted harness exists at the source commit. The C++ API test is correctness coverage, not a timing harness; no proxy timing is reported.", "comparison": "none", "speedup_claim": False},
+        "performance": {"status": "exploratory_single_strategy" if measurement_dir else "unavailable", "reason": "Seven validated observations from a standalone Release harness; no comparison or speedup claim. Performance conclusions remain inconclusive without a limiter profile." if measurement_dir else "No standalone public T-S01 execution/measurement executable or accepted harness exists at the source commit. The C++ API test is correctness coverage, not a timing harness; no proxy timing is reported.", "comparison": "none", "speedup_claim": False},
     }
+    if measurement_dir:
+        measurement_dir = Path(measurement_dir)
+        measurement = json.loads((measurement_dir / "collection.json").read_text(encoding="utf-8"))
+        record["measurement"] = {**measurement, "events": [json.loads(line) for line in (measurement_dir / "events.jsonl").read_text(encoding="utf-8").splitlines()]}
     errors = report.validate(record)
     if errors:
         raise ValueError("invalid authored record: " + ", ".join(errors))
@@ -79,14 +83,22 @@ def build(out=None):
     (out / "publication-map.json").write_bytes((json.dumps(publication_map.project(record), ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8"))
     (out / "index.html").write_text(report.render_html(record), encoding="utf-8", newline="\n")
     (out / "raw-events.jsonl").write_bytes(b"".join(canonical(row) + b"\n" for row in examples))
+    if measurement_dir:
+        (out / "measurement-events.jsonl").write_bytes((measurement_dir / "events.jsonl").read_bytes())
+        write_json(out / "measurement.json", record["measurement"])
+        with (out / "timings.csv").open("w", encoding="utf-8", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=("repetition", "warmup", "status", "elapsed_ns", "observation_token"), lineterminator="\n")
+            writer.writeheader()
+            for event in record["measurement"]["events"]:
+                writer.writerow({key: event[key] for key in writer.fieldnames})
     with (out / "trials.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=("id", "point", "expected_member", "actual_member", "reason"), lineterminator="\n")
         writer.writeheader()
         for row in examples:
             writer.writerow({**row, "point": json.dumps(row["point"], separators=(",", ":"))})
     write_json(out / "scenarios.json", {"assumptions": record["assumptions"], "canonical_relation": record["canonical_relation"]})
-    (out / "environment.json").write_text(json.dumps({"measurement": "not performed", "timing": "unavailable", "reason": record["performance"]["reason"]}, indent=2) + "\n", encoding="utf-8")
-    (out / "README.md").write_text(f"""# T-S01 result bundle\n\nSource commit: `{report.SOURCE_COMMIT}`. This is a correctness and analytic-result record, not a performance measurement.\n\nRebuild the native sidecars into a fresh scratch directory and validate the committed report and site with:\n\n```powershell\npython reports/algorithm-results/tooling/ts01/build_bundle.py --out-dir build/ts01-rebuilt\npython reports/algorithm-results/tooling/ts01/report.py --check reports/algorithm-results/{REPORT_ID}/records.json\npython scripts/reports/site.py --catalog reports/algorithm-results/catalog.json --check --out build/ts01-report-site\n```\n\nSee `index.html` for the full assumptions, exact relation, membership examples and assurance limits. `raw-events.jsonl` and `trials.csv` are deterministic membership-result projections.\n""", encoding="utf-8", newline="\n")
+    (out / "environment.json").write_text(json.dumps(record["measurement"]["environment"] if measurement_dir else {"measurement": "not performed", "timing": "unavailable", "reason": record["performance"]["reason"]}, indent=2) + "\n", encoding="utf-8")
+    (out / "README.md").write_text(f"""# T-S01 result bundle\n\nSource commit: `{report.SOURCE_COMMIT}`. Timings are exploratory single-strategy observations, not a performance verdict or speedup comparison.\n\nRebuild the native sidecars into a fresh scratch directory and validate the committed report and site with:\n\n```powershell\npython reports/algorithm-results/tooling/ts01/build_bundle.py --measurement-dir build/ts01-measure-001 --out-dir build/ts01-rebuilt\npython reports/algorithm-results/tooling/ts01/report.py --check reports/algorithm-results/{REPORT_ID}/records.json\npython -m unittest tests.reporting.test_ts01_report -v\npython scripts/reports/site.py --catalog reports/algorithm-results/catalog.json --check --out build/ts01-report-site\n```\n\nSee `index.html` for the full assumptions, exact relation, membership examples, timing scope and assurance limits. `raw-events.jsonl` and `trials.csv` project exact membership results; `measurement-events.jsonl`, `measurement.json` and `timings.csv` retain raw trial timings and provenance.\n""", encoding="utf-8", newline="\n")
     manifest_files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in out.iterdir() if p.is_file()}
     write_json(out / "manifest.json", {"schema": "csl.syn07-ts01-report-manifest/1", "report_id": REPORT_ID, "source_commit": report.SOURCE_COMMIT, "files": manifest_files})
     print(REPORT_ID)
@@ -96,5 +108,6 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out-dir", type=Path)
+    parser.add_argument("--measurement-dir", type=Path)
     args = parser.parse_args()
-    build(args.out_dir)
+    build(args.out_dir, args.measurement_dir)

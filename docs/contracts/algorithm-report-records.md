@@ -427,9 +427,13 @@ SYN-07 T-S01 uses the native schema `csl.syn07-ts01-analytic-report/1` and
 `ts01_registered_reports.py`. Its saved exact-membership examples are the raw
 JSONL source and the CSV projection; the adapter checks both against the typed
 record and builds the standalone page from that record. The report identifies
-its strict analytic profile and explicitly marks timing unavailable because the
-source commit has no accepted public-path measurement harness. The versioned
-URL remains pending until the main-only Pages workflow deploys the catalogue.
+its strict analytic profile. A standalone Release executable exercises the
+registered public StrategyPort and verifies each returned complete H-relation;
+the record includes one excluded warmup and seven raw end-to-end observations.
+They are exploratory single-strategy timings, with no comparator or speedup
+claim and an inconclusive performance conclusion because no limiter profile was
+collected. The versioned URL remains pending until the main-only Pages workflow
+deploys the catalogue.
 
 ## Shared publication envelope
 

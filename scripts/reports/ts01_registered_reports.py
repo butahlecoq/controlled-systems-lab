@@ -11,7 +11,7 @@ from html import escape
 import registered_reports as common
 
 KIND = "syn07-ts01-analytic"
-FILES = {"README.md", "environment.json", "index.html", "publication-map.json", "raw-events.jsonl", "records.json", "scenarios.json", "trials.csv"}
+FILES = {"README.md", "environment.json", "index.html", "publication-map.json", "raw-events.jsonl", "records.json", "scenarios.json", "trials.csv", "measurement-events.jsonl", "measurement.json", "timings.csv"}
 
 
 def _module(name, path):
@@ -68,15 +68,28 @@ def adapt(bundle):
     scenarios = {"assumptions": record["assumptions"], "canonical_relation": record["canonical_relation"]}
     if json.loads((bundle / "scenarios.json").read_text(encoding="utf-8")) != scenarios:
         raise ValueError("T-S01 scenario sidecar differs from native record")
-    expected_environment = {"measurement": "not performed", "timing": "unavailable", "reason": record["performance"]["reason"]}
+    if "measurement" in record:
+        timing_events = [json.loads(line) for line in (bundle / "measurement-events.jsonl").read_text(encoding="utf-8").splitlines()]
+        if timing_events != record["measurement"]["events"]:
+            raise ValueError("T-S01 timing events differ from native record")
+        if json.loads((bundle / "measurement.json").read_text(encoding="utf-8")) != record["measurement"]:
+            raise ValueError("T-S01 measurement summary differs from native record")
+        stream = io.StringIO(newline="")
+        fields = ("repetition", "warmup", "status", "elapsed_ns", "observation_token")
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows({key: row[key] for key in fields} for row in record["measurement"]["events"])
+        if (bundle / "timings.csv").read_bytes() != stream.getvalue().encode("utf-8"):
+            raise ValueError("T-S01 timing CSV differs from native record")
+    expected_environment = record["measurement"]["environment"] if "measurement" in record else {"measurement": "not performed", "timing": "unavailable", "reason": record["performance"]["reason"]}
     if json.loads((bundle / "environment.json").read_text(encoding="utf-8")) != expected_environment:
         raise ValueError("T-S01 environment sidecar differs from performance availability")
     source_hashes = {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(actual)}
     public_id = mapping.public_report_id(record["report_id"], source_hashes, Path(__file__).read_bytes())
     payload_sha = mapping.digest(record)
-    limitations = "; ".join(record["evidence_limits"] + ["Performance unavailable: no accepted public T-S01 timing harness."])
+    limitations = "; ".join(record["evidence_limits"] + ["Single-strategy timing observations are exploratory and performance conclusions are inconclusive; no speedup is claimed."])
     return common.PublicationRecord(KIND, public_id, payload_sha, record["source_commit"],
-        "Exact analytic optimal relation for the strict two-step scalar integrator profile; no performance measurement",
+        "Exact analytic optimal relation for the strict two-step scalar integrator profile; exploratory single-strategy timings",
         limitations, tuple(sorted(FILES)), record["schema"], payload_sha, record["report_id"])
 
 

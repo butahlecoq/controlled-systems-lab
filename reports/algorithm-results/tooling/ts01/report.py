@@ -7,7 +7,7 @@ import hashlib
 import json
 
 SCHEMA = "csl.syn07-ts01-analytic-report/1"
-SOURCE_COMMIT = "fe5095ce27ab4872cb31df32fab6f3b1b073f4f6"
+SOURCE_COMMIT = "28f305387f66caf8f72f057e16a39050cc5dbdba"
 COORDINATES = ["x0", "x1", "x2", "u0", "u1"]
 
 
@@ -64,6 +64,8 @@ def validate(record):
             errors.append("measurement_event_invalid")
         if measurement.get("performance_conclusion") != "inconclusive" or measurement.get("counts", {}).get("failed") != 0 or measurement.get("counts", {}).get("measured") != 7:
             errors.append("measurement_scope_invalid")
+        if [row.get("elapsed_ns") for row in events[1:]] != measurement.get("timing_ns", {}).get("observations"):
+            errors.append("measurement_timings")
     else:
         errors.append("performance_status")
     return errors
