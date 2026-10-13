@@ -363,7 +363,7 @@ def artifact_reference(ref):
 
 def artifact_links(report_id,ref="main"):
     label=artifact_reference(ref)
-    require(re.fullmatch(r"(?:(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|opt05-hull-\d{8}-[0-9a-f]{8}|(?:opt05-hull|geo03)-\d{8}-[0-9a-f]{64}|geo03-\d{8}-[0-9a-f]{12}|geo0[24]-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64}))",report_id) is not None,"unsafe report identity")
+    require(re.fullmatch(r"(?:(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|opt05-hull-\d{8}-[0-9a-f]{8}|(?:opt05-hull|geo03)-\d{8}-[0-9a-f]{64}|geo03-\d{8}-[0-9a-f]{12}|geo0[24]-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|geo05-[0-9a-f]{16}|geo05-[0-9a-f]{64})",report_id) is not None,"unsafe report identity")
     base="https://github.com/butahlecoq/controlled-systems-lab/"
     path="/reports/algorithm-results/"+report_id
     return base+"tree/"+ref+path,base+"blob/"+ref+path+".zip",label
