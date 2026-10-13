@@ -85,16 +85,23 @@ The collector can save raw JSON/CSV/JSONL attempts, provenance, content hashes,
 an offline ZIP bundle, and standalone HTML rendered from the saved record only.
 `collect.py --help` documents the measurement invocation; do not use
 `--measure` until the exact harness commit has passed independent review.
-Collection requires a clean worktree, completed Release build log, source and
-harness commit SHAs, concurrent-work note, and CMake File API replies.
+Collection requires a clean worktree, source and harness commit SHAs,
+concurrent-work note, and CMake File API replies. Before invoking the driver,
+the collector performs a clean verbose Release rebuild of the configured
+target and writes its redacted structured command/output/exit transcript to
+`--build-log`. Use a path inside the configured build directory, distinct from
+the executable; any existing file at that path is replaced with the fresh
+transcript. A supplied older log is never accepted as proof of the fresh build.
 
 The smoke emits one JSON trial for each fixture and must report `passed`,
 `oracle_passed=true`, and `work_observed=true`. Do not collect accepted timings
 until independent review of this exact harness commit. This phase has no
-accepted timing record, catalogue entry, or publication. The collector binds
-source and harness commits separately, allows only the report-harness files
-plus the exact GEO-05 CMake target insertion, and records the complete File API
-dependency graph and executable hash.
+published timing record. The earlier measured candidate is retained as
+historical evidence, but must be recollected under the clean-build gate before
+publication. The collector binds source and harness commits separately,
+allows only the explicitly listed report-harness files plus the exact GEO-05
+CMake target insertion, and records the complete File API dependency graph,
+fresh build transcript, and post-build executable hash.
 
 ## Migration to the authoritative observation artifacts
 
