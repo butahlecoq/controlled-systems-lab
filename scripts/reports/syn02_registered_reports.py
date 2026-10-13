@@ -255,7 +255,7 @@ def adapt(bundle):
             raise ValueError("SYN-02 source bundle identity mismatch")
         files = _source_inventory(bundle, manifest)
         try:
-            rows = [json.loads(line) for line in (bundle / "raw-events.jsonl").read_text(encoding="utf-8").splitlines()]
+            rows = [data.parse_json(line) for line in (bundle / "raw-events.jsonl").read_text(encoding="utf-8").splitlines()]
         except (OSError, UnicodeError, json.JSONDecodeError) as exc:
             raise ValueError("invalid SYN-02 raw event stream") from exc
         _validate_record(record, rows)

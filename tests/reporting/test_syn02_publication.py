@@ -217,6 +217,17 @@ class Syn02PublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "CSV"):
                 syn02.adapt(bundle)
 
+    def test_rejects_duplicate_keys_in_raw_event_objects(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self.make_bundle(Path(directory))
+            path = bundle / "raw-events.jsonl"
+            lines = path.read_text(encoding="utf-8").splitlines()
+            lines[0] = lines[0][:-1] + ', "scenario": "linear-face"}'
+            path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            self._rehash_native_manifest(bundle)
+            with self.assertRaisesRegex(ValueError, "duplicate JSON key.*scenario"):
+                syn02.adapt(bundle)
+
     def test_rejects_missing_summary_csv(self):
         with tempfile.TemporaryDirectory() as directory:
             bundle = self.make_bundle(Path(directory))
