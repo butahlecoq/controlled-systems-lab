@@ -1,0 +1,8 @@
+id,point,expected_member,actual_member,reason
+s=0,"[0,0,1,0,1]",True,True,Closed-segment endpoint; exact equations and bounds hold.
+s=1/4,"[0,0.25,1,0.25,0.75]",True,True,Interior dyadic parameter; exact equations and bounds hold.
+s=1,"[0,1,1,1,0]",True,True,Closed-segment endpoint; exact equations and bounds hold.
+s=1-2^-53,"[0,0.9999999999999999,1,0.9999999999999999,1.1102230246251565e-16]",True,True,Adjacent representable dyadic coordinates sum to exactly one.
+feasible_nonoptimal_zero,"[0,0,0,0,0]",False,False,"Feasible controls, but x2 is not one and objective is one."
+feasible_nonoptimal_endpoint,"[0,1,2,1,1]",False,False,"Feasible controls, but x2 is two and objective is one."
+off_relation_dyadic_perturbation,"[0,1,1,1,5e-324]",False,False,Exact binary64 sum is greater than one; no tolerance is applied.

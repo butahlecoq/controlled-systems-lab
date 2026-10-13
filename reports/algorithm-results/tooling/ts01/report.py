@@ -82,7 +82,7 @@ def render_html(record):
     measurement = record.get("measurement")
     if measurement:
         summary = measurement["timing_ns"]
-        performance = ("<p>Exploratory single-strategy observations. One excluded warmup preceded seven measured repetitions; all seven returned the expected complete H-relation and passed exact-membership checks. Timing scope: " + esc(measurement["scope"]) + ".</p>"
+        performance = ("<p>Exploratory single-strategy observations. One excluded warmup preceded seven measured repetitions; all seven returned the expected complete H-relation and passed exact-membership checks. Timing scope: " + esc(measurement["scope"]).rstrip(".") + ".</p>"
             "<p>Median " + esc(summary["median"]) + " ns; range " + esc(summary["min"]) + "–" + esc(summary["max"]) + " ns (width " + esc(summary["range"]) + " ns). No comparison or speedup is claimed. Performance conclusion: <strong>inconclusive</strong>; no separate limiter profile was collected.</p>"
             "<p>Raw data: <a href=\"measurement-events.jsonl\">measurement JSONL</a> · <a href=\"timings.csv\">timing CSV</a> · <a href=\"measurement.json\">measurement summary</a>.</p>")
     else:
