@@ -40,6 +40,10 @@ struct RemovalCertificate {
     // final retained cloud.
     std::vector<ConvexCombination> combination;
     ProgramIdentity program;
+    // NumericalCheck records solver diagnostics only. A consumer may authorize
+    // removal only after independently proving, over the exact dyadic values
+    // represented by these binary64 coordinates and weights, that weights are
+    // nonnegative, sum exactly to one, and reconstruct the removed point.
     NumericalCheck evidence;
 };
 
