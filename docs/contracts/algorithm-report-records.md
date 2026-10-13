@@ -378,6 +378,20 @@ Unestablished feasibility-numerics support and the descriptive five-fixture limi
 Synthetic test bundles do not satisfy the missing genuine collection, reviewed
 catalogue integration, main deployment and live verification gates of #185.
 
+Because native schema v2 has no trusted collection/test discriminator, normal
+OPT-04 adaptation additionally requires a reviewed source ID and complete native
+inventory digest in `opt04_registered_reports.REVIEWED_NATIVE_BUNDLES`. The digest
+is SHA-256 of the canonical sorted filename-to-SHA-256 mapping of all ten original
+files, including raw producer files and native package/checksum data. The registry
+is deliberately empty: no v2 bundle currently has production admission. Hash-shaped
+commit IDs and self-declared purpose cannot establish genuine collection. A later
+reviewed bundle/catalogue change must pin the exact complete inventory separately
+from the payload's own claims. Changed evidence requires fresh admission.
+Synthetic fixtures explicitly declare `purpose: "test"` and require the Python
+test harness's `allow_test=True` on both adaptation and staging; default paths
+reject them. Unmarked or relabelled bundles cannot bypass the reviewed-inventory
+gate. The CLI exposes no test bypass and the main Pages workflow cannot invoke it.
+
 
 The shared Pages publisher accepts catalogue schema `csl.algorithm-report-catalog/3`
 for mixed LP, convex, OPT-04, OPT-05, GEO-02, GEO-03, GEO-04, GEO-05 and SYN-02 catalogues.

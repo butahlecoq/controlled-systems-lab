@@ -6,9 +6,11 @@ import importlib.util
 import json
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -34,6 +36,7 @@ def make_records():
     # analytic inputs. Durations and provenance here are synthetic literals.
     record = native_tests.fixture_records()
     record["report_id"] = "opt04-20261013T000000Z-123456789abc"
+    record["purpose"] = "test"
     record["evidence_limits"] = ["Synthetic test evidence; never publish this fixture."]
     record["catalog"]["fixtures"] = []
     record["warmup_trials"] = []
@@ -123,7 +126,7 @@ class Opt04PublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             bundle = make_bundle(root)
-            item = adapter.adapt(bundle)
+            item = adapter.adapt(bundle, allow_test=True)
             self.assertEqual("opt04-phase-one", item.kind)
             self.assertEqual("opt04-20261013T000000Z-123456789abc", item.source_report_id)
             self.assertRegex(item.report_id, r"^opt04-20261013T000000Z-[0-9a-f]{64}$")
@@ -148,7 +151,7 @@ class Opt04PublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             bundle = make_bundle(root)
-            item = adapter.adapt(bundle)
+            item = adapter.adapt(bundle, allow_test=True)
             source = ROOT / "reports/algorithm-results"
             shutil.copyfile(source / "legacy-publications.json", root / "legacy-publications.json")
             pins = json.loads((source / "legacy-publications.json").read_text())["reports"]
@@ -176,7 +179,21 @@ class Opt04PublicationTests(unittest.TestCase):
                 for suffix in ("/index.html", "/records.json", "/stdout.jsonl", "/trials.csv", ".zip")}).feed(index)
             (root / "index.html").write_text(index, encoding="utf-8")
             output = root / "stage"
-            report_site.stage(catalog_path, output, check=True)
+            with self.assertRaisesRegex(ValueError, "admission|test-only"):
+                report_site.stage(catalog_path, output, check=True)
+            self.assertFalse(output.exists())
+            cli_output = root / "cli-stage"
+            command = [sys.executable, str(ROOT / "scripts/reports/site.py"), "--catalog", str(catalog_path),
+                "--out", str(cli_output), "--check"]
+            result = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(1, result.returncode)
+            self.assertIn("test-only", result.stderr)
+            self.assertFalse(cli_output.exists())
+            result = subprocess.run([*command, "--allow-test"], capture_output=True, text=True)
+            self.assertEqual(2, result.returncode)
+            self.assertIn("unrecognized arguments", result.stderr)
+            self.assertFalse(cli_output.exists())
+            report_site.stage(catalog_path, output, check=True, allow_test=True)
             self.assertEqual("csl.algorithm-report-envelope/1", json.loads(
                 (output / item.report_id / "report-envelope.json").read_text())["schema"])
             self.assertEqual((bundle / "index.html").read_bytes(),
@@ -191,8 +208,66 @@ class Opt04PublicationTests(unittest.TestCase):
                     catalog_path.write_text(json.dumps(changed))
                     rejected = root / ("rejected-" + field)
                     with self.assertRaises(ValueError):
-                        report_site.stage(catalog_path, rejected, check=False)
+                        report_site.stage(catalog_path, rejected, check=False, allow_test=True)
                     self.assertFalse(rejected.exists())
+
+    def test_production_adapter_rejects_synthetic_and_unreviewed_bundles(self):
+        adapter = self.adapter()
+        with tempfile.TemporaryDirectory() as directory:
+            for purpose in ("test", "measurement", None):
+                with self.subTest(purpose=purpose):
+                    bundle = make_bundle(Path(directory) / str(purpose))
+                    record = json.loads((bundle / "records.json").read_text())
+                    if purpose is None:
+                        del record["purpose"]
+                    else:
+                        record["purpose"] = purpose
+                    (bundle / "records.json").write_text(json.dumps(record))
+                    (bundle / "stderr.txt").write_bytes(b"relabelled and changed test evidence\n")
+                    renderer.render_report(record, bundle)
+                    with self.assertRaisesRegex(ValueError, "admission|test-only"):
+                        adapter.adapt(bundle)
+
+    def test_reviewed_admission_binds_every_native_file_and_cannot_admit_test_purpose(self):
+        adapter = self.adapter()
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = make_bundle(Path(directory))
+            record = json.loads((bundle / "records.json").read_text())
+            del record["purpose"]
+            (bundle / "records.json").write_text(json.dumps(record))
+            renderer.render_report(record, bundle)
+            original = {path.name: path.read_bytes() for path in bundle.iterdir()}
+            source_hashes = {name: hashlib.sha256(content).hexdigest() for name, content in original.items()}
+            inventory_digest = hashlib.sha256(json.dumps(source_hashes, ensure_ascii=False,
+                sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            # Only this test's Python harness simulates a trusted reviewer pin;
+            # the production registry remains empty and no authenticity is claimed.
+            with patch.dict(adapter.REVIEWED_NATIVE_BUNDLES, {bundle.name: inventory_digest}):
+                self.assertEqual(bundle.name, adapter.adapt(bundle).source_report_id)
+                with self.assertRaisesRegex(ValueError, "purpose: test"):
+                    adapter.adapt(bundle, allow_test=True)
+                for name in ("records.json", "stdout.jsonl", "driver-stdout.txt", "stderr.txt",
+                        "release-build.txt", "index.html", "performance.svg", "manifest.sha256",
+                        "bundle.zip", "bundle.zip.sha256"):
+                    with self.subTest(name=name):
+                        path = bundle / name
+                        content = original[name]
+                        path.write_bytes((b"0" * 64 + content[64:]) if name == "manifest.sha256" else content + b"\n")
+                        with self.assertRaisesRegex(ValueError, "admission"):
+                            adapter.adapt(bundle)
+                        path.write_bytes(content)
+            with self.assertRaisesRegex(ValueError, "admission"):
+                adapter.adapt(bundle)
+            record["purpose"] = "test"
+            (bundle / "records.json").write_text(json.dumps(record))
+            renderer.render_report(record, bundle)
+            source_hashes = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in bundle.iterdir()}
+            inventory_digest = hashlib.sha256(json.dumps(source_hashes, ensure_ascii=False,
+                sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            with patch.dict(adapter.REVIEWED_NATIVE_BUNDLES, {bundle.name: inventory_digest}):
+                with self.assertRaisesRegex(ValueError, "test-only"):
+                    adapter.adapt(bundle)
+                self.assertEqual(bundle.name, adapter.adapt(bundle, allow_test=True).source_report_id)
 
     def test_rejects_corrupt_missing_extra_and_unsafe_inventory(self):
         adapter = self.adapter()
@@ -210,7 +285,7 @@ class Opt04PublicationTests(unittest.TestCase):
                     else:
                         (bundle / "manifest.sha256").write_text("0" * 64 + "  ../outside\n")
                     with self.assertRaises(ValueError):
-                        adapter.adapt(bundle)
+                        adapter.adapt(bundle, allow_test=True)
 
     def test_rejects_rehashed_record_and_raw_output_projection_tampering(self):
         adapter = self.adapter()
@@ -256,7 +331,7 @@ class Opt04PublicationTests(unittest.TestCase):
                     else:
                         renderer.package_report(bundle)
                     with self.assertRaises(ValueError):
-                        adapter.adapt(bundle)
+                        adapter.adapt(bundle, allow_test=True)
 
     def test_failed_incomplete_and_aborted_evidence_is_ineligible(self):
         adapter = self.adapter()
@@ -283,13 +358,13 @@ class Opt04PublicationTests(unittest.TestCase):
                     (bundle / "records.json").write_text(json.dumps(record))
                     renderer.render_report(record, bundle)
                     with self.assertRaisesRegex(ValueError, "ineligible"):
-                        adapter.adapt(bundle)
+                        adapter.adapt(bundle, allow_test=True)
 
     def test_public_identity_binds_all_native_files_and_normalized_publisher(self):
         adapter = self.adapter()
         with tempfile.TemporaryDirectory() as directory:
             bundle = make_bundle(Path(directory))
-            item = adapter.adapt(bundle)
+            item = adapter.adapt(bundle, allow_test=True)
             source_hashes = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in bundle.iterdir()}
             identity = {"schema": "csl.registered-publication-identity/1", "source_report_id": bundle.name,
                 "source_files": source_hashes, "publisher_sha256": hashlib.sha256(
@@ -299,7 +374,7 @@ class Opt04PublicationTests(unittest.TestCase):
             self.assertEqual("opt04-20261013T000000Z-" + suffix, item.report_id)
             (bundle / "stderr.txt").write_bytes(b"changed retained stderr\n")
             renderer.package_report(bundle)
-            changed = adapter.adapt(bundle)
+            changed = adapter.adapt(bundle, allow_test=True)
             self.assertNotEqual(item.report_id, changed.report_id)
             self.assertEqual(item.payload_sha256, changed.payload_sha256)
             self.assertEqual(item.source_report_id, changed.source_report_id)
@@ -312,7 +387,7 @@ class Opt04PublicationTests(unittest.TestCase):
             renamed = root / "opt04-20261013T000001Z-123456789abc"
             bundle.rename(renamed)
             with self.assertRaisesRegex(ValueError, "identity"):
-                adapter.adapt(renamed)
+                adapter.adapt(renamed, allow_test=True)
 
     def test_rejects_symlink_source_evidence(self):
         adapter = self.adapter()
@@ -327,7 +402,7 @@ class Opt04PublicationTests(unittest.TestCase):
             except OSError as exc:
                 self.skipTest("symlink creation unavailable: " + str(exc))
             with self.assertRaisesRegex(ValueError, "symlink"):
-                adapter.adapt(bundle)
+                adapter.adapt(bundle, allow_test=True)
 
     def test_native_zip_and_svg_corruption_are_rejected_after_rehash(self):
         adapter = self.adapter()
@@ -336,13 +411,13 @@ class Opt04PublicationTests(unittest.TestCase):
             (bundle / "performance.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg"><script/></svg>')
             renderer.package_report(bundle)
             with self.assertRaisesRegex(ValueError, "performance.svg"):
-                adapter.adapt(bundle)
+                adapter.adapt(bundle, allow_test=True)
             bundle = make_bundle(Path(directory) / "zip")
             (bundle / "bundle.zip").write_bytes(b"invalid ZIP")
             digest = hashlib.sha256(b"invalid ZIP").hexdigest()
             (bundle / "bundle.zip.sha256").write_text(digest + "  bundle.zip\n")
             with self.assertRaises(ValueError):
-                adapter.adapt(bundle)
+                adapter.adapt(bundle, allow_test=True)
 
     def test_typed_evidence_text_is_escaped_in_public_page(self):
         adapter = self.adapter()
@@ -352,7 +427,7 @@ class Opt04PublicationTests(unittest.TestCase):
             record["evidence_limits"].append('<script>alert("test")</script>')
             (bundle / "records.json").write_text(json.dumps(record))
             renderer.render_report(record, bundle)
-            page = adapter.render_page(bundle, adapter.adapt(bundle))
+            page = adapter.render_page(bundle, adapter.adapt(bundle, allow_test=True))
             self.assertIn('&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;', page)
             self.assertNotIn('<script>', page)
             report_site.OfflineHTML({"performance.svg", "records.json", "stdout.jsonl",

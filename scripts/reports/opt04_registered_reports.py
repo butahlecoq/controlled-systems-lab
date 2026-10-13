@@ -17,6 +17,13 @@ SOURCE_PATTERN = r"opt04-\d{8}T\d{6}Z-[0-9a-f]{12}"
 SOURCE_FILES = frozenset({"records.json", "stdout.jsonl", "driver-stdout.txt", "stderr.txt",
     "release-build.txt", "index.html", "performance.svg", "manifest.sha256", "bundle.zip", "bundle.zip.sha256"})
 TOOLING = Path(__file__).resolve().parents[2] / "reports/algorithm-results/tooling/opt04"
+# Native schema v2 has no trustworthy collection/test discriminator. Only an
+# independently reviewed, exact saved bundle may cross production admission.
+# Intentionally empty: no genuine OPT-04 bundle has been reviewed/committed yet.
+# A later reviewed publication change must pin native ID -> complete inventory
+# digest here alongside its catalogue row; self-declared purpose/commit shapes
+# cannot register a bundle.
+REVIEWED_NATIVE_BUNDLES = {}
 
 
 def _module(filename):
@@ -59,15 +66,31 @@ def _inventory(bundle):
         raise ValueError("OPT-04 manifest inventory mismatch")
 
 
-def _publication_id(bundle, source_id):
+def _source_hashes(bundle):
+    return {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(SOURCE_FILES)}
+
+
+def _admit(record, source_hashes, allow_test):
+    if allow_test:
+        if record.get("purpose") != "test":
+            raise ValueError("OPT-04 test-only admission requires explicit purpose: test")
+        return
+    if record.get("purpose") == "test":
+        raise ValueError("OPT-04 test-only evidence cannot enter production admission")
+    inventory_digest = common._digest(source_hashes)
+    if REVIEWED_NATIVE_BUNDLES.get(record["report_id"]) != inventory_digest:
+        raise ValueError("OPT-04 production admission requires an independently reviewed complete native inventory digest")
+
+
+def _publication_id(source_id, source_hashes):
     publisher = Path(__file__).read_bytes().replace(b"\r\n", b"\n")
     identity = {"schema": "csl.registered-publication-identity/1", "source_report_id": source_id,
-        "source_files": {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(SOURCE_FILES)},
+        "source_files": source_hashes,
         "publisher_sha256": hashlib.sha256(publisher).hexdigest()}
     return source_id.rsplit("-", 1)[0] + "-" + common._digest(identity)
 
 
-def adapt(bundle):
+def adapt(bundle, *, allow_test=False):
     """Cross the native evidence boundary before projecting publication data."""
     bundle = Path(bundle)
     try:
@@ -78,6 +101,8 @@ def adapt(bundle):
         source_id = record.get("report_id")
         if not isinstance(source_id, str) or re.fullmatch(SOURCE_PATTERN, source_id) is None or source_id != bundle.name:
             raise ValueError("unsafe or mismatched OPT-04 native report identity")
+        source_hashes = _source_hashes(bundle)
+        _admit(record, source_hashes, allow_test)
         try:
             Draft202012Validator(_json(TOOLING / "schema-v2.json")).validate(record)
         except ValidationError as exc:
@@ -129,7 +154,7 @@ def adapt(bundle):
             "No speedup, application-scale or scalability claim; limiter attribution remains unestablished",
             "Collinear-input acceptance and OPT-04 issue #29 remain outside this report", *original_limits])
         digest = common._digest(record)
-        return common.PublicationRecord(KIND, _publication_id(bundle, source_id), digest, provenance["source_commit"],
+        return common.PublicationRecord(KIND, _publication_id(source_id, source_hashes), digest, provenance["source_commit"],
             scope, limits, tuple(sorted(SOURCE_FILES)), SCHEMA, digest, source_id)
     except ValueError:
         raise

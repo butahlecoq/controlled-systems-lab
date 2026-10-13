@@ -31,6 +31,23 @@ eligible trial/warmup summaries. Failed, missing or aborted evidence remains
 private and cannot become an accepted catalogue row. It runs no collection or
 solver. Synthetic publisher test fixtures are never production measurement input.
 
+Schema v2 has no trusted measurement/test marker. Production admission therefore
+also requires a reviewed native report ID and the complete deterministic inventory
+digest pinned in `opt04_registered_reports.REVIEWED_NATIVE_BUNDLES`: SHA-256 of
+the canonical sorted filename-to-SHA-256 mapping for all ten original files,
+including producer HTML/SVG, raw output, manifest, native ZIP and ZIP checksum.
+The registry is intentionally empty, so **no v2 OPT-04 bundle is publishable yet**.
+Commit-shaped strings and a self-declared purpose do not establish genuine
+collection. A later reviewed evidence/publication change must add the exact
+native bundle pin alongside the authoritative catalogue row.
+
+Only Python test harnesses may call `adapt(..., allow_test=True)` or
+`site.stage(..., allow_test=True)`, and that path requires an explicit
+`purpose: "test"` in the synthetic record. Default adaptation and staging reject
+test evidence, including relabelled or changed bundles without a reviewed pin.
+The CLI has no test-admission option; the Pages workflow always uses production
+admission. Test-only staging establishes no measurement or public publication.
+
 Publication preserves the native ID and every original byte under
 `source-evidence/`, including the producer HTML/SVG and native ZIP and hashes.
 The public page is independently rendered from typed records; its SVG uses the
@@ -41,7 +58,8 @@ payload digest, source ID, provenance and all evidence limits.
 Finishing [#185](https://github.com/butahlecoq/controlled-systems-lab/issues/185)
 requires reviewed fixed-source collection, a genuine complete eligible native
 bundle committed unchanged under its native report ID, independent adapter and
-bundle review, a matching schema-3 catalogue row and deterministic index/ZIP,
+bundle review with its complete inventory digest admitted in the registry,
+a matching schema-3 catalogue row and deterministic index/ZIP,
 successful `site.py --check`, main-only Pages deployment, and verification of
 the live page, raw downloads and ZIP against reviewed hashes. Staging alone does
 not meet those publication gates or change OPT-04's scientific acceptance.
