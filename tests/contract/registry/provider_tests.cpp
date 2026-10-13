@@ -93,6 +93,46 @@ public:
                 {id,SymbolicArgument{"fixture", "x0=0, u0=4, x1=x0+u0=4; control is unconstrained; counter="+std::to_string(fixed)}}}}, {}};
     }
 };
+class GeneratedOnlyFixture final : public SynthesisWorkspace {
+    PreparedProvider<LPPort> generated_;
+public:
+    explicit GeneratedOnlyFixture(PreparedProvider<LPPort> provider):generated_(std::move(provider)){}
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+        const ExecutionContext& execution) override {
+        auto workers=accepted(generated_.prepare(interval_lp(-2))).create();
+        const auto answer=std::get<ProgramResult>(std::get<0>(workers)->run(execution));
+        const double control=answer.primal->at(0);const auto id=problem.identity();
+        return {Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+            {{{id,{{0},{control}},{{control}},3*control+2},
+                {id,SymbolicArgument{"bounded interval oracle","x1=u0=4"}}}}, {}};
+    }
+};
+TEST_CASE("empty fixed pipeline composes and executes a generated-only strategy after registry exit") {
+    auto prepared=[] {
+        Registry<LPPort> generated;REQUIRE_FALSE(generated.add(endpoint_registration()));
+        StrategyRegistry strategies;
+        REQUIRE_FALSE(strategies.add({{{"forward"},"generated-only-1"},
+            [](const StrategyRequest&,const Requirements&)->Capability{return Offer{};},
+            [&](const StrategyRequest&,const Requirements&)->std::variant<StrategyPlan,Rejection> {
+                auto fixed=accepted(check_pipeline());
+                auto providers=accepted(check_providers(select_provider(generated,Method{{"endpoint"},"1.0"})));
+                return compose_strategy(std::move(fixed),std::move(providers),
+                    [](auto workers,auto selected,const StrategyRequest&,const Requirements&) {
+                        static_assert(std::tuple_size_v<decltype(workers)> == 0);
+                        return std::make_unique<GeneratedOnlyFixture>(std::get<0>(selected));
+                    });
+            }}));
+        return accepted(strategies.prepare(strategy_request()));
+    }();
+    const auto answer=std::get<SynthesisResult>(prepared.create()->run(context()));
+    CHECK(answer.termination==Termination::completed);
+    REQUIRE(answer.incumbents.size()==1);
+    CHECK(answer.incumbents[0].witness.states==std::vector<Vector>{{0},{4}});
+    CHECK(answer.incumbents[0].witness.controls==std::vector<Vector>{{4}});
+    CHECK(answer.incumbents[0].witness.original_objective==14);
+    REQUIRE(prepared.provenance().size()==2);
+    CHECK(prepared.provenance()[1].actual->id==ModuleId{"endpoint"});
+}
 TEST_CASE("mixed fixed and generated strategy owns both after enclosing preparation") {
     auto snapshots=std::make_shared<int>(0);
     auto prepared=[&] {
