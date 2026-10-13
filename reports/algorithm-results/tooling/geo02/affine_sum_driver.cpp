@@ -10,6 +10,7 @@
 #include <vector>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
@@ -37,6 +38,20 @@ Case make_case(int i){
  if(i==3)return {"minkowski_interval_sum",points("left",1,{-1,1},2),points("right",1,{2,3},2),true,{},{},{{1},{4}},{{1},{-1}},{4,-1},4};
  return {"redundant_interval_candidates",points("redundant",1,{0,0,0.5,1,1},5),{},false,{1,1,{1}},{0},{{0},{1}},{{1},{-1}},{1,0},5};
 }
+constexpr int case_count=5;
+std::size_t vertex_count(const SetHandle& handle){
+ auto data=take(sets::from_handle(handle));auto rep=data.representation();
+ auto* v=std::get_if<sets::VRepresentation>(&rep);
+ if(!v||v->rays.rows())throw std::runtime_error("report fixture must be a bounded V representation");
+ return v->vertices.rows();
+}
+std::size_t generated_candidate_count(const Case& c){
+ const auto left=vertex_count(c.left);
+ if(!c.sum)return left;
+ const auto right=vertex_count(c.right);
+ if(right&&left>std::numeric_limits<std::size_t>::max()/right)throw std::runtime_error("fixture candidate count overflow");
+ return left*right;
+}
 bool near(double a,double b){return std::abs(a-b)<=1e-8;}
 std::string q(std::string x){std::string o="\"";for(char c:x){if(c=='\"')o+="\"\"";else if(c=='\n'||c=='\r')o+=' ';else o+=c;}return o+'\"';}
 std::string json_string(const std::string& x){std::ostringstream o;o<<'\"';for(unsigned char c:x){if(c=='\"')o<<"\\\"";else if(c=='\\')o<<"\\\\";else if(c=='\n')o<<"\\n";else if(c=='\r')o<<"\\r";else if(c=='\t')o<<"\\t";else if(c<0x20)o<<"\\u00"<<std::hex<<std::setw(2)<<std::setfill('0')<<static_cast<unsigned>(c)<<std::dec;else o<<static_cast<char>(c);}o<<'\"';return o.str();}
@@ -50,7 +65,7 @@ void run(Result& r,const Case& c){Timer total;try{
  auto prep=prepare_pipeline(select(operations,{{"csl.geometry.affine-sum"},{}},request,req));auto* pipeline=std::get_if<PreparedPipeline<GeometryPort>>(&prep);if(!pipeline)throw std::runtime_error("operation rejected");auto [workspace]=pipeline->create();r.setup=total.ns();
  Timer op;auto outcome=workspace->run({{},{},{},{1e-8,1e-8},"geo02-report"});r.operation=op.ns();auto* result=std::get_if<OperationResult>(&outcome);if(!result)throw std::runtime_error("affine-sum operation incomplete");
  auto data=take(sets::from_handle(result->output));auto rep=data.representation();auto* v=std::get_if<sets::VRepresentation>(&rep);if(!v||v->rays.rows())throw std::runtime_error("expected bounded V representation");
- r.generated_candidate_count=c.generated_candidates;r.materialized_output_point_count=v->vertices.rows();if(r.materialized_output_point_count>r.generated_candidate_count)throw std::runtime_error("materialized point count exceeds generated candidate count");r.reduction_status=r.materialized_output_point_count<r.generated_candidate_count?"reduced":"preserved";
+ r.generated_candidate_count=generated_candidate_count(c);if(r.generated_candidate_count!=c.generated_candidates)throw std::runtime_error("fixture candidate count differs from observed input cloud");r.materialized_output_point_count=v->vertices.rows();if(r.materialized_output_point_count>r.generated_candidate_count)throw std::runtime_error("materialized point count exceeds generated candidate count");r.reduction_status=r.materialized_output_point_count<r.generated_candidate_count?"reduced":"preserved";
  std::ostringstream pts,sups;pts<<std::setprecision(17)<<'[';for(std::size_t i=0;i<v->vertices.rows();++i){if(i)pts<<',';pts<<'[';for(std::size_t j=0;j<v->vertices.cols();++j){if(j)pts<<',';pts<<v->vertices(i,j);}pts<<']';}pts<<']';r.points_json=pts.str();
  Timer oracle;bool ok=v->vertices.rows()>=c.expected.size()&&v->vertices.cols()==c.expected.front().size();
  for(const auto& x:std::vector<Vector>{c.expected.front(),c.expected.back()}){bool found=false;for(std::size_t i=0;i<v->vertices.rows();++i){bool same=true;for(std::size_t j=0;j<x.size();++j)same&=near(v->vertices(i,j),x[j]);if(same)found=true;}ok&=found;}
@@ -64,7 +79,7 @@ int main(int argc,char**argv){try{
  for(int i=1;i<argc;++i){std::string a=argv[i];if(a=="--smoke")reps=1;else if(a=="--repetitions"&&i+1<argc)reps=std::stoi(argv[++i]);else if(a=="--warmups"&&i+1<argc)warmups=std::stoi(argv[++i]);else throw std::runtime_error("usage: csl_geo02_affine_sum_report [--smoke | --repetitions N --warmups N]");}
  if(reps<1||warmups<1)throw std::runtime_error("at least one measured repetition and warmup are required");
  int warmup_failures=0;
- for(int w=0;w<warmups;++w)for(int i=0;i<4;++i){
+ for(int w=0;w<warmups;++w)for(int i=0;i<case_count;++i){
   auto c=make_case(i);Result r;r.scenario=c.id;r.repetition=w;run(r,c);
   const bool warmup_passed=r.status=="passed"&&r.pass;
   if(!warmup_passed)++warmup_failures;
@@ -76,7 +91,7 @@ int main(int argc,char**argv){try{
  }
  std::cout<<"scenario,repetition,status,detail,setup_ns,operation_ns,oracle_ns,total_ns,generated_candidate_count,materialized_output_point_count,reduction_status,output_points,support_checks,support_values,oracle_passed\n";
  bool pass=warmup_failures==0;
- for(int rep=0;rep<reps;++rep)for(int i=0;i<4;++i){
+ for(int rep=0;rep<reps;++rep)for(int i=0;i<case_count;++i){
   Timer trial;auto c=make_case(i);Result r;r.scenario=c.id;r.repetition=rep;run(r,c);
   r.total=trial.ns();
   if(r.setup>r.total||r.operation>r.total-r.setup||r.oracle>r.total-r.setup-r.operation)throw std::runtime_error("measured phases exceed total trial time");
