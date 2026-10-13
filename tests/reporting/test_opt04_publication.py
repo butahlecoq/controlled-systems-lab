@@ -135,6 +135,7 @@ class Opt04PublicationTests(unittest.TestCase):
         primal = row["result"]["primal"]
         expected = max(abs(sum(a * x for a, x in zip(matrix_row, primal)) - target)
                        for matrix_row, target in zip(fixture["matrix"], fixture["rhs"]))
+        self.assertEqual(1.0, expected)
         self.assertEqual(expected, row["original_rows_max_violation"])
         self.assertGreater(expected, fixture["absolute_tolerance"])
 
