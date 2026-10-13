@@ -1174,10 +1174,12 @@ TEST_CASE("public strategy rejects unbounded outcomes that retain a finite lower
             const ClaimEvidence support{id,SymbolicArgument{
                 "state is fixed at zero by the fixture dynamics",
                 "B=0, x0=0 and zero offset imply x1=0; the terminal objective is identically zero"}};
+            const ClaimEvidence upper_support{id,SymbolicArgument{
+                "the zero objective is at most five", "literal independent upper-bound fixture"}};
             return {Termination::completed,
                 {id,MathematicalOutcome::unbounded,
                     SymbolicArgument{"synthetic outcome claim","used only to test evidence consistency"},{}},
-                {ObjectiveBound{0,support},{}},{},{},{}};
+                {ObjectiveBound{0,support},ObjectiveBound{5,upper_support}},{},{},{}};
         }
     } workspace;
 
@@ -1201,13 +1203,19 @@ TEST_CASE("public strategy rejects unbounded outcomes that retain a finite lower
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     REQUIRE(result.objective.lower.has_value());
     CHECK(result.objective.lower->value==0);
+    REQUIRE(result.objective.upper.has_value());
+    CHECK(result.objective.upper->value==5);
+    CHECK(result.objective.upper->evidence.problem==request.problem.identity());
+    REQUIRE(std::holds_alternative<SymbolicArgument>(result.objective.upper->evidence.support));
+    CHECK(std::get<SymbolicArgument>(result.objective.upper->evidence.support).reference==
+        "the zero objective is at most five");
     REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
     const auto& failure=std::get<ContractValidationFailure>(result.stop);
     REQUIRE(failure.diagnostics.size()==1);
     CHECK(failure.diagnostics[0].code==DiagnosticCode::invalid_claim);
     CHECK(failure.diagnostics[0].field=="result.outcome.unbounded");
     CHECK(failure.retained.lower_bound);
-    CHECK_FALSE(failure.retained.upper_bound);
+    CHECK(failure.retained.upper_bound);
 }
 
 TEST_CASE("public strategy accepts an unbounded outcome without a supported lower bound") {
