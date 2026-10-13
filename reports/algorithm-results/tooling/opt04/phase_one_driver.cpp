@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <functional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -62,7 +63,7 @@ double max_abs_row_violation(const Fixture& f,const Vector& x) {
 }
 double max_nonnegative_violation(const Vector& x) { double r=0; for(double v:x) r=std::max(r,std::max(0.0,-v)); return r; }
 struct SideResult { json detail; bool passed{false}; };
-SideResult run_side(const Fixture& f,const std::string& side) {
+SideResult run_side(const Fixture& f,const std::string& side, const std::function<void()>& after_diagnostics = {}) {
     const auto all_start=Clock::now();
     json out;
     std::unique_ptr<BoundWorkspace<LPPort>> bound;
@@ -93,39 +94,46 @@ SideResult run_side(const Fixture& f,const std::string& side) {
     const bool status_ok=observed==std::string(f.outcome);
     double rows=0, nonnegative=0, objective=0;
     json primal=nullptr;
-    if(result.primal) {
-        primal=*result.primal; rows=max_abs_row_violation(f,*result.primal); nonnegative=max_nonnegative_violation(*result.primal);
-        auto eval=evaluate_primal(p,*result.primal,{abs_tol,rel_tol},{{"opt04-independent-oracle"},"1"});
-        if(!std::holds_alternative<PrimalEvaluation>(eval)) throw std::runtime_error("independent primal evaluation failed");
-        objective=std::get<PrimalEvaluation>(eval).objective;
-    }
     json checks=json::array();
-    checks.push_back({{"name","expected_status"},{"passed",status_ok}});
     bool candidate_ok=true;
-    if(std::string(f.outcome)=="optimal") {
-        candidate_ok=result.primal.has_value()&&result.primal->size()==f.expected.size();
-        if(candidate_ok && side=="phase-one-bland") for(std::size_t i=0;i<f.expected.size();++i) candidate_ok=candidate_ok&&std::abs((*result.primal)[i]-f.expected[i])<=abs_tol;
-        if(side=="highs-reference") candidate_ok=candidate_ok&&rows<=abs_tol&&nonnegative<=abs_tol&&std::abs(objective)<=abs_tol;
-        checks.push_back({{"name",side=="phase-one-bland"?"literal_expected_candidate":"independent_feasible_witness"},{"passed",candidate_ok}});
-        checks.push_back({{"name","original_equalities"},{"passed",rows<=abs_tol}});
-        checks.push_back({{"name","nonnegative_variables"},{"passed",nonnegative<=abs_tol}});
-        checks.push_back({{"name","zero_original_objective"},{"passed",std::abs(objective)<=abs_tol}});
-    }
     double auxiliary=-1, auxiliary_residual=-1; std::uint64_t pivots=0,degenerate=0,factorizations=0;
     std::string term=termination(result.termination);
-    if(side=="phase-one-bland") {
-        const auto* diagnostics=dynamic_cast<const po::DiagnosticsView*>(bound->basis());
-        if(!diagnostics) throw std::runtime_error("phase-one diagnostics unavailable");
-        auto snap=diagnostics->phase_one_snapshot();
-        if(!std::holds_alternative<po::Snapshot>(snap)) throw std::runtime_error("phase-one snapshot unavailable");
-        const auto& s=std::get<po::Snapshot>(snap); auxiliary=s.auxiliary?s.auxiliary->value:-1;
-        auxiliary_residual=s.auxiliary?s.auxiliary->equations.violation:-1;
-        pivots=s.pivots;degenerate=s.degenerate_pivots;factorizations=s.factorizations;
-        checks.push_back({{"name","literal_auxiliary_value"},{"passed",std::abs(auxiliary-f.auxiliary)<=abs_tol}});
+    json error=nullptr;
+    try {
+        if(result.primal) {
+            primal=*result.primal; rows=max_abs_row_violation(f,*result.primal); nonnegative=max_nonnegative_violation(*result.primal);
+            auto eval=evaluate_primal(p,*result.primal,{abs_tol,rel_tol},{{"opt04-independent-oracle"},"1"});
+            if(!std::holds_alternative<PrimalEvaluation>(eval)) throw std::runtime_error("independent primal evaluation failed");
+            objective=std::get<PrimalEvaluation>(eval).objective;
+        }
+        checks.push_back({{"name","expected_status"},{"passed",status_ok}});
+        if(std::string(f.outcome)=="optimal") {
+            candidate_ok=result.primal.has_value()&&result.primal->size()==f.expected.size();
+            if(candidate_ok && side=="phase-one-bland") for(std::size_t i=0;i<f.expected.size();++i) candidate_ok=candidate_ok&&std::abs((*result.primal)[i]-f.expected[i])<=abs_tol;
+            if(side=="highs-reference") candidate_ok=candidate_ok&&rows<=abs_tol&&nonnegative<=abs_tol&&std::abs(objective)<=abs_tol;
+            checks.push_back({{"name",side=="phase-one-bland"?"literal_expected_candidate":"independent_feasible_witness"},{"passed",candidate_ok}});
+            checks.push_back({{"name","original_equalities"},{"passed",rows<=abs_tol}});
+            checks.push_back({{"name","nonnegative_variables"},{"passed",nonnegative<=abs_tol}});
+            checks.push_back({{"name","zero_original_objective"},{"passed",std::abs(objective)<=abs_tol}});
+        }
+        if(side=="phase-one-bland") {
+            const auto* diagnostics=dynamic_cast<const po::DiagnosticsView*>(bound->basis());
+            if(!diagnostics) throw std::runtime_error("phase-one diagnostics unavailable");
+            auto snap=diagnostics->phase_one_snapshot();
+            if(!std::holds_alternative<po::Snapshot>(snap)) throw std::runtime_error("phase-one snapshot unavailable");
+            const auto& s=std::get<po::Snapshot>(snap); auxiliary=s.auxiliary?s.auxiliary->value:-1;
+            auxiliary_residual=s.auxiliary?s.auxiliary->equations.violation:-1;
+            pivots=s.pivots;degenerate=s.degenerate_pivots;factorizations=s.factorizations;
+            checks.push_back({{"name","literal_auxiliary_value"},{"passed",std::abs(auxiliary-f.auxiliary)<=abs_tol}});
+        }
+        if(after_diagnostics) after_diagnostics();
+    } catch(const std::exception& e) {
+        error=e.what();
+        checks.push_back({{"name","verification_completed"},{"passed",false}});
     }
     const bool passed=status_ok&&candidate_ok&&std::all_of(checks.begin(),checks.end(),[](const json& c){return c["passed"].get<bool>();});
     const auto verify_end=Clock::now();
-    out={{"status",passed?"passed":"failed"},{"error",passed?json(nullptr):json("independent oracle mismatch")},
+    out={{"status",passed?"passed":"failed"},{"error",passed?json(nullptr):(error.is_null()?json("independent oracle mismatch"):error)},
          {"observed_status",observed},{"termination",term},{"primal",primal},{"oracle_match",passed},{"oracle_checks",checks},
          {"original_rows_max_violation",side=="phase-one-bland"?json(rows):json(nullptr)},
          {"nonnegative_max_violation",side=="phase-one-bland"?json(nonnegative):json(nullptr)},
