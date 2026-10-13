@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import sys
 import tempfile
@@ -67,7 +68,9 @@ class FreshBuildTests(unittest.TestCase):
         self.change_after_build = False
         self.dirty_after_build = False
         self.commands = []
+        self.tracked_paths = []
         self.addCleanup(patch.stopall)
+        self.real_check_output = collect.subprocess.check_output
         patch.object(collect, "_git", side_effect=self.git).start()
         patch.object(collect.subprocess, "check_output", side_effect=self.git_show).start()
 
@@ -85,6 +88,8 @@ class FreshBuildTests(unittest.TestCase):
             return "source-tree"
         if args == ("rev-parse", "harness-head^{tree}"):
             return "harness-tree"
+        if args == ("-C", str(self.source), "ls-files", "-z"):
+            return "\0".join(self.tracked_paths)
         raise AssertionError(f"unexpected git command: {args}")
 
     def git_show(self, command, **kwargs):
@@ -215,6 +220,110 @@ class FreshBuildTests(unittest.TestCase):
         with patch.object(collect.subprocess, "run", side_effect=reconfigure):
             with self.assertRaisesRegex(ValueError, "Release/NDEBUG"):
                 self.provenance()
+
+    def test_build_log_outside_build_directory_is_rejected_before_build(self):
+        self.log = self.source / "README.md"
+        self.log.write_bytes(b"source documentation")
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            with self.assertRaisesRegex(ValueError, "build log must resolve inside"):
+                self.provenance()
+        self.assertEqual(self.commands, [])
+        self.assertEqual(self.log.read_bytes(), b"source documentation")
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
+
+    def test_build_log_cannot_be_executable_before_build(self):
+        self.log = self.exe
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            with self.assertRaisesRegex(ValueError, "build log must not alias the executable"):
+                self.provenance()
+        self.assertEqual(self.commands, [])
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
+
+    def test_build_log_hardlink_to_executable_is_rejected_before_build(self):
+        self.log.unlink()
+        self.log.hardlink_to(self.exe)
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            with self.assertRaisesRegex(ValueError, "build log must not alias the executable"):
+                self.provenance()
+        self.assertEqual(self.commands, [])
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
+
+    def test_build_log_tracked_in_overlapping_build_directory_is_rejected(self):
+        self.tracked_paths = ["build/build.log"]
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            with self.assertRaisesRegex(ValueError, "build log must not alias a tracked source file"):
+                self.provenance()
+        self.assertEqual(self.commands, [])
+        self.assertEqual(self.log.read_text(encoding="utf-8"), "unrelated old successful build")
+
+    def test_build_log_hardlink_to_tracked_source_is_rejected_before_build(self):
+        tracked = self.source / "driver.cpp"
+        tracked.write_bytes(b"tracked source")
+        self.tracked_paths = ["driver.cpp"]
+        self.log.unlink()
+        self.log.hardlink_to(tracked)
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            with self.assertRaisesRegex(ValueError, "build log must not alias a tracked source file"):
+                self.provenance()
+        self.assertEqual(self.commands, [])
+        self.assertEqual(tracked.read_bytes(), b"tracked source")
+
+    def test_tracked_source_guard_covers_repository_root_from_nested_working_directory(self):
+        tracked = self.source / "driver.cpp"
+        tracked.write_bytes(b"tracked source")
+        self.real_check_output(["git", "init", "--quiet"], cwd=self.source)
+        self.real_check_output(["git", "add", "driver.cpp"], cwd=self.source)
+        self.log.unlink()
+        self.log.hardlink_to(tracked)
+        def git_from_nested_directory(*args):
+            return self.real_check_output(["git", *args], cwd=self.exe.parent,
+                                          text=True, encoding="utf-8").strip()
+        with patch.object(collect, "_git", side_effect=git_from_nested_directory):
+            with self.assertRaisesRegex(ValueError, "build log must not alias a tracked source file"):
+                collect._validate_build_log(self.log, self.build, self.exe, self.source)
+        self.assertEqual(tracked.read_bytes(), b"tracked source")
+
+    def assert_main_preflight_rejects(self, message):
+        stderr = io.StringIO()
+        with patch.object(collect.subprocess, "run", side_effect=AssertionError(
+                "build or driver launched before preflight rejection")), \
+                patch.object(collect.sys, "stderr", stderr):
+            with self.assertRaises(SystemExit) as failure:
+                self.main()
+        self.assertEqual(failure.exception.code, 2)
+        self.assertIn(message, stderr.getvalue())
+
+    def test_build_log_inside_output_is_rejected_before_build(self):
+        self.out = self.build / "collection"
+        self.log = self.out / "fresh.json"
+        self.assert_main_preflight_rejects("build log and output directory must not overlap")
+        self.assertFalse(self.out.exists())
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
+
+    def test_output_inside_build_log_is_rejected_before_build(self):
+        self.log = self.build / "fresh.json"
+        self.out = self.log / "collection"
+        self.assert_main_preflight_rejects("build log and output directory must not overlap")
+        self.assertFalse(self.log.exists())
+
+    def test_equal_build_log_and_output_is_rejected_before_build(self):
+        self.log = self.out = self.build / "collection"
+        self.assert_main_preflight_rejects("build log and output directory must not overlap")
+        self.assertFalse(self.out.exists())
+
+    def test_existing_output_is_rejected_before_build(self):
+        self.out.mkdir()
+        sentinel = self.out / "saved.txt"
+        sentinel.write_bytes(b"previous collection")
+        self.assert_main_preflight_rejects("output directory must not already exist")
+        self.assertEqual(sentinel.read_bytes(), b"previous collection")
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
+
+    def test_missing_concurrent_work_note_is_rejected_before_build(self):
+        self.note.unlink()
+        self.assert_main_preflight_rejects("concurrent-work note must be readable")
+        self.assertFalse(self.out.exists())
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
 
 
 if __name__ == "__main__":

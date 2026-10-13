@@ -104,13 +104,29 @@ def _release_graph(build: Path, exe: Path, source_root: Path) -> dict:
             "targets": _redact_paths(list(selected.values()), source_root, build)}
 
 
+def _validate_build_log(build_log: Path, build: Path, exe: Path, source_root: Path) -> None:
+    if build_log == build or not build_log.is_relative_to(build):
+        raise ValueError("build log must resolve inside the configured build directory")
+    if build_log == exe or (build_log.is_file() and exe.is_file() and build_log.samefile(exe)):
+        raise ValueError("build log must not alias the executable")
+    for name in _git("-C", str(source_root), "ls-files", "-z").split("\0"):
+        if not name:
+            continue
+        tracked = source_root / name
+        if build_log == tracked.resolve() or (build_log.is_file() and tracked.is_file()
+                                             and build_log.samefile(tracked)):
+            raise ValueError("build log must not alias a tracked source file")
+
+
 def build_provenance(build: Path, exe: Path, source_commit: str,
                      harness_commit: str, build_log: Path) -> dict:
+    build, exe, build_log = build.resolve(), exe.resolve(), build_log.resolve()
     source_root = Path(_git("rev-parse", "--show-toplevel")).resolve()
     if _git("rev-parse", "HEAD") != harness_commit:
         raise ValueError("harness commit does not match checked-out HEAD")
     if _git("status", "--porcelain=v1"):
         raise ValueError("source and harness worktree must be clean before collection")
+    _validate_build_log(build_log, build, exe, source_root)
     changed = _git("diff", "--name-only", source_commit, harness_commit).splitlines()
     validate_source_tree_delta(changed)
     source_cmake = subprocess.check_output(["git", "show", f"{source_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
@@ -127,6 +143,7 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
                                 "harness_commit": harness_commit, "stdout": stdout,
                                 "stderr": stderr, "return_code": return_code,
                                 "timed_out": timed_out}, source_root, build)
+    _validate_build_log(build_log.resolve(), build, exe, source_root)
     build_log.parent.mkdir(parents=True, exist_ok=True)
     build_log.write_text(json.dumps(fresh_build, indent=2, allow_nan=False)+"\n", encoding="utf-8")
     if return_code or timed_out:
@@ -238,8 +255,17 @@ def main() -> int:
                 args.concurrent_work, args.out)
     if any(value is None for value in required):
         parser.error("measurement requires build identity/log, source and harness commits, concurrent-work note, and output directory")
+    out, build_log = args.out.resolve(), args.build_log.resolve()
+    if out.exists() or args.out.is_symlink():
+        parser.error("output directory must not already exist")
+    if build_log.is_relative_to(out) or out.is_relative_to(build_log):
+        parser.error("build log and output directory must not overlap")
+    try:
+        concurrent_work_note = args.concurrent_work.read_text(encoding="utf-8").strip()
+    except (OSError, UnicodeError):
+        parser.error("concurrent-work note must be readable")
     provenance = build_provenance(args.build_dir.resolve(), args.exe.resolve(),
-                                  args.source_commit, args.harness_commit, args.build_log.resolve())
+                                  args.source_commit, args.harness_commit, build_log)
     command = [str(args.exe), "--measure", "--repetitions", str(args.repetitions), "--warmups", "1"]
     before = _sha(args.exe)
     if before != provenance["executable"]["sha256"]:
@@ -268,7 +294,7 @@ def main() -> int:
                                       "threads_per_worker": 1, "memory_bytes": None},
                                   "numeric_context_tolerance": {"absolute": 1e-8, "relative": 1e-8},
                                   "independent_sample_tolerance": 1e-9, "random_seed": None,
-                                  "concurrent_work_note": args.concurrent_work.read_text(encoding="utf-8").strip(),
+                                  "concurrent_work_note": concurrent_work_note,
                                   "collection_utc": dt.datetime.now(dt.timezone.utc).isoformat()}
     if return_code:
         provenance["process_exit_code"] = return_code
@@ -276,7 +302,7 @@ def main() -> int:
         provenance["timed_out"] = True
     provenance["raw_stdout_sha256"] = hashlib.sha256(raw_stdout.encode("utf-8")).hexdigest()
     provenance["raw_stderr_sha256"] = hashlib.sha256(raw_stderr.encode("utf-8")).hexdigest()
-    _write_collection(args.out.resolve(), raw_stdout, raw_stderr, rows, provenance,
+    _write_collection(out, raw_stdout, raw_stderr, rows, provenance,
                       command, args.repetitions, return_code, parse_errors, timed_out)
     return return_code
 
