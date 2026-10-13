@@ -15,6 +15,7 @@ import report_data as data
 import render
 import geo04_registered_reports as geo04
 import geo02_registered_reports as geo02
+import geo05_registered_reports as geo05
 import registered_reports as registered
 
 FILES={"index.html","records.json","scenarios.json","raw-events.jsonl","profile.json","build-provenance.txt",
@@ -179,7 +180,7 @@ def catalogue_index(catalogue):
         label_kind='HiGHS reference LP, five analytic microfixtures'
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
-                data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum"),"unknown catalogue kind")
+                data.require(report["report_kind"] in ("lp","convex","opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor"),"unknown catalogue kind")
                 data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"schema-v3 scope/evidence metadata required")
                 label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
             else:
@@ -247,14 +248,15 @@ def stage(catalog_path,out,check=True,allow_test=False):
         rid=report["report_id"]
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
-        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum"):
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt05-hull","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor"):
             source_id=report.get("source_report_id",rid)
             source_pattern = (r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else
                               r"geo04-\d{8}T\d{6}Z-[0-9a-f]{12}" if report["report_kind"]=="geo04-intersection" else
                               r"geo02-\d{8}T\d{6}Z-[0-9a-f]{12}" if report["report_kind"]=="geo02-affine-sum" else
+                              r"geo05-[0-9a-f]{16}" if report["report_kind"]=="geo05-projection-predecessor" else
                               r"geo03-\d{8}-[0-9a-f]{12}")
             data.require(isinstance(source_id,str) and re.fullmatch(source_pattern,source_id) is not None,"invalid registered source bundle identity")
-            publisher = geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else registered
+            publisher = geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else registered
             item=publisher.adapt(root/source_id)
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
             data.require(report.get("source_report_id","")==item.source_report_id,"registered catalogue source identity mismatch")
@@ -263,8 +265,9 @@ def stage(catalog_path,out,check=True,allow_test=False):
             data.require(report.get("payload_schema")==item.payload_schema,"registered catalogue payload schema differs")
             generated_page=publisher.render_page(root/source_id,item)
             OfflineHTML(set(item.files)|{"report-envelope.json","publication-manifest.json"}).feed(generated_page)
-            svg_name = "timings.svg" if report["report_kind"] == "geo02-affine-sum" else "latency.svg"
-            data.validate_svg((root/source_id/svg_name).read_bytes())
+            if report["report_kind"] != "geo05-projection-predecessor":
+                svg_name = "timings.svg" if report["report_kind"] == "geo02-affine-sum" else "latency.svg"
+                data.validate_svg((root/source_id/svg_name).read_bytes())
             artifacts=publisher.publication_artifacts(root/source_id,item)
             archive_bytes=publisher.offline_zip(root/source_id,item)
             data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"registered generated ZIP digest differs")
