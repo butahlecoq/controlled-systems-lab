@@ -28,11 +28,19 @@ validate = _load("opt04_validate", "validate_report.py")
 def fixture_records() -> dict:
     sides = ["phase-one-bland", "highs-reference"]
     matrix, rhs = [[1.0, 0.0], [0.0, 1.0]], [1.0, 1.0]
-    input_sha256 = hashlib.sha256(json.dumps({"matrix": matrix, "rhs": rhs}, sort_keys=True,
+    normalized_inputs = {"matrix": [[float(value) for value in row] for row in matrix],
+                         "rhs": [float(value) for value in rhs]}
+    input_sha256 = hashlib.sha256(json.dumps(normalized_inputs, sort_keys=True,
                                             separators=(",", ":"), allow_nan=False).encode()).hexdigest()
-    scenario = {"input_sha256": input_sha256, "row_relation": "equality", "variable_lower_bound": 0.0,
+    driver_input = {"matrix": [list(row) for row in matrix], "rhs": list(rhs),
+                "row_relation": "equality", "variable_lower_bound": 0.0,
                 "variable_upper_bound": None,
-                "objective": {"kind": "zero", "coefficients": [0.0, 0.0], "constant": 0.0},
+                "objective_coefficients": [0.0, 0.0], "objective_constant": 0.0}
+    scenario = {"input_sha256": input_sha256, "row_relation": driver_input["row_relation"],
+                "variable_lower_bound": driver_input["variable_lower_bound"],
+                "variable_upper_bound": driver_input["variable_upper_bound"],
+                "objective": {"coefficients": driver_input["objective_coefficients"],
+                              "constant": driver_input["objective_constant"]},
                 "tolerances": {"absolute": 1e-8, "relative": 0.0}}
     scenario_sha256 = hashlib.sha256(json.dumps(scenario, sort_keys=True, separators=(",", ":"),
                                                 allow_nan=False).encode()).hexdigest()
@@ -95,7 +103,9 @@ def fixture_records() -> dict:
             "oracle_checks": [{"name": name, "passed": True} for name in (
                 "expected_status", "literal_expected_candidate", "original_equalities",
                 "nonnegative_variables", "zero_original_objective", "literal_auxiliary_value")],
-            "work_observed": True, "tolerances": {"absolute": 1e-8, "relative": 0.0},
+            "work_observed": True, "input": driver_input,
+            "input_sha256": input_sha256, "scenario_sha256": scenario_sha256,
+            "tolerances": {"absolute": 1e-8, "relative": 0.0},
             "original_rows_max_violation": 0.0, "nonnegative_max_violation": 0.0,
             "objective_value": 0.0, "auxiliary_residual": 0.0, "auxiliary_value": 0.0,
             "durations_ns": {"setup": 10, "public_run": 100 * (repetition + 1),
@@ -180,6 +190,10 @@ class ReportToolsTests(unittest.TestCase):
         del records["measurement"]["execution_policy"]
         with self.assertRaisesRegex(ValueError, "execution_policy"):
             validate.validate_records(records)
+        records = fixture_records()
+        records["trials"][0]["input"]["rhs"][0] = 0.5
+        with self.assertRaisesRegex(ValueError, "trial hashes do not match"):
+            validate.validate_records(records)
     def test_rejects_corrupt_manifest_hash(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "report"
@@ -203,6 +217,9 @@ class ReportToolsTests(unittest.TestCase):
         failed["status"] = "failed"
         failed["oracle_match"] = False
         failed["oracle_checks"][0]["passed"] = False
+        failed["input"] = None
+        failed["input_sha256"] = None
+        failed["scenario_sha256"] = None
         records["trials"].pop()
         orphan = records["trials"][-1]
         orphan["paired_outcomes"] = None

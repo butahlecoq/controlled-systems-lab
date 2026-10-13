@@ -34,12 +34,20 @@ def _canonical_sha256(value: dict) -> str:
     return hashlib.sha256(canonical).hexdigest()
 
 
-def fixture_fingerprints(fixture: dict, *, lower_bound: float | None = 0.0) -> dict[str, str]:
-    inputs = {"matrix": fixture["matrix"], "rhs": fixture["rhs"]}
+def fixture_fingerprints(fixture: dict, input_description: dict | None = None) -> dict[str, str]:
+    description = input_description or {
+        "matrix": fixture["matrix"], "rhs": fixture["rhs"], "row_relation": "equality",
+        "variable_lower_bound": 0.0, "variable_upper_bound": None,
+        "objective_coefficients": [0.0] * fixture["columns"], "objective_constant": 0.0,
+    }
+    inputs = {"matrix": [[float(value) for value in row] for row in description["matrix"]],
+              "rhs": [float(value) for value in description["rhs"]]}
     input_sha256 = _canonical_sha256(inputs)
-    scenario = {"input_sha256": input_sha256, "row_relation": "equality",
-                "variable_lower_bound": lower_bound, "variable_upper_bound": None,
-                "objective": {"kind": "zero", "coefficients": [0.0] * fixture["columns"], "constant": 0.0},
+    scenario = {"input_sha256": input_sha256, "row_relation": description["row_relation"],
+                "variable_lower_bound": description["variable_lower_bound"],
+                "variable_upper_bound": description["variable_upper_bound"],
+                "objective": {"coefficients": [float(value) for value in description["objective_coefficients"]],
+                              "constant": float(description["objective_constant"])},
                 "tolerances": {"absolute": 1e-8, "relative": 0.0}}
     return {"input_sha256": input_sha256, "scenario_sha256": _canonical_sha256(scenario)}
 
@@ -230,11 +238,40 @@ def normalize_and_pair(rows: list[dict], repetitions: int = 7, warmups_per_fixtu
         seen_sequences.add(row["sequence"])
         fixture = FIXTURES[row["fixture"]]
         errors = []
+        input_description = row.get("input")
+        input_keys = {"matrix", "rhs", "row_relation", "variable_lower_bound", "variable_upper_bound",
+                      "objective_coefficients", "objective_constant"}
+        fingerprints = None
+        if not isinstance(input_description, dict) or set(input_description) != input_keys:
+            errors.append("driver input description is missing or malformed")
+        else:
+            try:
+                matrix, rhs = input_description["matrix"], input_description["rhs"]
+                if (not isinstance(matrix, list) or len(matrix) != fixture["rows"]
+                        or any(not isinstance(values, list) or len(values) != fixture["columns"] for values in matrix)
+                        or not isinstance(rhs, list) or len(rhs) != fixture["rows"]):
+                    raise ValueError("dimensions differ")
+                numeric = [value for values in matrix for value in values] + rhs + input_description["objective_coefficients"] + [input_description["objective_constant"]]
+                if any(not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value) for value in numeric):
+                    raise ValueError("non-finite or non-numeric values")
+                fingerprints = fixture_fingerprints(fixture, input_description)
+                expected_description = {
+                    "matrix": fixture["matrix"], "rhs": fixture["rhs"], "row_relation": "equality",
+                    "variable_lower_bound": 0.0, "variable_upper_bound": None,
+                    "objective_coefficients": [0.0] * fixture["columns"], "objective_constant": 0.0,
+                }
+                if input_description != expected_description:
+                    errors.append("actual driver input differs from catalog")
+            except (KeyError, TypeError, ValueError, OverflowError) as exc:
+                errors.append(f"driver input description is invalid: {exc}")
+        row["input_sha256"] = fingerprints["input_sha256"] if fingerprints else None
+        row["scenario_sha256"] = fingerprints["scenario_sha256"] if fingerprints else None
+        row["input"] = input_description if fingerprints else None
         expected_pair_id = f"{row['fixture']}-warmup-{repetition}" if is_warmup else f"{row['fixture']}-{repetition}"
         if row["pair_id"] != expected_pair_id:
             errors.append("pair_id does not match fixture/repetition")
             row["pair_id"] = expected_pair_id
-        required_fields = ("status", "observed_status", "oracle_match", "oracle_checks", "work_observed", "durations_ns", "result")
+        required_fields = ("status", "observed_status", "oracle_match", "oracle_checks", "work_observed", "durations_ns", "result", "input")
         errors.extend(f"missing {field}" for field in required_fields if field not in row)
         if "status" in row and not isinstance(row["status"], str):
             errors.append("status is not text")

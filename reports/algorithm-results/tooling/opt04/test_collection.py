@@ -80,8 +80,11 @@ class FixtureProvenanceTests(unittest.TestCase):
         self.assertEqual(len(original["scenario_sha256"]), 64)
         changed_input = dict(fixture, rhs=[0.5, 0.25, 1])
         self.assertNotEqual(original["input_sha256"], fingerprints(changed_input)["input_sha256"])
-        changed_semantics = fingerprints(fixture, lower_bound=0.0)
-        relaxed_semantics = fingerprints(fixture, lower_bound=None)
+        description = {"matrix": fixture["matrix"], "rhs": fixture["rhs"], "row_relation": "equality",
+                       "variable_lower_bound": 0.0, "variable_upper_bound": None,
+                       "objective_coefficients": [0.0] * fixture["columns"], "objective_constant": 0.0}
+        changed_semantics = fingerprints(fixture, description)
+        relaxed_semantics = fingerprints(fixture, {**description, "variable_lower_bound": None})
         self.assertNotEqual(changed_semantics["scenario_sha256"], relaxed_semantics["scenario_sha256"])
 
     def test_execution_policy_records_requested_and_unobserved_counts(self) -> None:
@@ -93,6 +96,32 @@ class FixtureProvenanceTests(unittest.TestCase):
         self.assertEqual(policy["actual"]["native_threads"]["value"], None)
         self.assertTrue(policy["actual"]["native_threads"]["reason"])
         self.assertEqual(policy["seed"]["status"], "not_applicable")
+
+    def test_trial_hashes_bind_the_driver_emitted_input(self) -> None:
+        fixture = collect.FIXTURES["triangle"]
+        driver_input = {
+            "matrix": [[float(value) for value in row] for row in fixture["matrix"]],
+            "rhs": [float(value) for value in fixture["rhs"]],
+            "row_relation": "equality", "variable_lower_bound": 0.0,
+            "variable_upper_bound": None, "objective_coefficients": [0.0] * fixture["columns"],
+            "objective_constant": 0.0,
+        }
+        row = {"warmup": False, "fixture": "triangle", "side": "phase-one-bland", "repetition": 0,
+               "sequence": 0, "pair_id": "triangle-0", "input": driver_input,
+               "status": "failed", "error": "injected failure", "observed_status": "undetermined",
+               "oracle_match": False, "oracle_checks": [{"name": "run", "passed": False}],
+               "work_observed": False, "result": {"termination": "exception", "outcome": "undetermined"},
+               "durations_ns": {name: 0 for name in collect.PHASES}}
+        _, trials, errors, _ = collect.normalize_and_pair([row], repetitions=1, warmups_per_fixture=0)
+        self.assertTrue(trials)
+        self.assertEqual(trials[0]["input_sha256"], collect.fixture_fingerprints(fixture)["input_sha256"])
+        self.assertEqual(trials[0]["scenario_sha256"], collect.fixture_fingerprints(fixture)["scenario_sha256"])
+        self.assertTrue(errors)
+
+        changed = dict(row, input={**driver_input, "rhs": [0.5, 0.25, 1.0]})
+        _, changed_trials, changed_errors, _ = collect.normalize_and_pair([changed], repetitions=1, warmups_per_fixture=0)
+        self.assertNotEqual(changed_trials[0]["input_sha256"], trials[0]["input_sha256"])
+        self.assertTrue(any("actual driver input differs from catalog" in error for error in changed_errors))
 
 
 if __name__ == "__main__":

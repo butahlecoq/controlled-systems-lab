@@ -19,5 +19,18 @@ int main() {
         std::cerr << "post-run verification failure discarded returned result evidence: " << detail.dump() << '\n';
         return 1;
     }
+    auto interrupted = run_side(fixture, "phase-one-bland", {}, [] {
+        throw std::runtime_error("injected failure before diagnostics");
+    });
+    const auto& partial = interrupted.detail;
+    if (interrupted.passed || partial["error"] != "injected failure before diagnostics" ||
+        partial["observed_status"] != "optimal" || partial["termination"] != "completed" ||
+        partial["primal"] != json(fixture.expected) ||
+        !partial["original_rows_max_violation"].is_null() ||
+        !partial["auxiliary_residual"].is_null() || !partial["auxiliary_value"].is_null() ||
+        !partial["result"]["pivots"].is_null() || !partial["result"]["factorizations"].is_null()) {
+        std::cerr << "unavailable post-run diagnostics were not retained as unavailable: " << partial.dump() << '\n';
+        return 1;
+    }
     return 0;
 }

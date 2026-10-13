@@ -86,11 +86,12 @@ def validate_records(records: dict) -> dict:
                 finite_number(value, f"{fid}.matrix")
         for value in rhs:
             finite_number(value, f"{fid}.rhs")
-        input_sha256 = canonical_sha256({"matrix": matrix, "rhs": rhs})
+        input_sha256 = canonical_sha256({"matrix": [[float(value) for value in row] for row in matrix],
+                                         "rhs": [float(value) for value in rhs]})
         require(fixture.get("input_sha256") == input_sha256, f"{fid}: input hash does not match matrix and RHS")
         scenario = {"input_sha256": input_sha256, "row_relation": "equality",
                     "variable_lower_bound": 0.0, "variable_upper_bound": None,
-                    "objective": {"kind": "zero", "coefficients": [0.0] * fixture["columns"], "constant": 0.0},
+                    "objective": {"coefficients": [0.0] * fixture["columns"], "constant": 0.0},
                     "tolerances": {"absolute": fixture["absolute_tolerance"], "relative": fixture["relative_tolerance"]}}
         require(fixture.get("scenario_sha256") == canonical_sha256(scenario),
                 f"{fid}: scenario hash does not match the represented mathematical problem")
@@ -184,6 +185,58 @@ def validate_records(records: dict) -> dict:
             require(isinstance(result, dict) and isinstance(result.get("termination"), str)
                     and isinstance(result.get("outcome"), str), f"{label}: missing result classification")
             require(trial.get("observed_status") == result["outcome"], f"{label}: observed_status differs from result")
+            actual_input = trial.get("input")
+            if actual_input is None:
+                require(trial["status"] == "failed" and trial.get("input_sha256") is None
+                        and trial.get("scenario_sha256") is None,
+                        f"{label}: successful trial has no actual input identity")
+            else:
+                require(isinstance(actual_input, dict), f"{label}: actual input must be an object or unavailable")
+                require(set(actual_input) == {"matrix", "rhs", "row_relation", "variable_lower_bound",
+                        "variable_upper_bound", "objective_coefficients", "objective_constant"},
+                        f"{label}: actual input fields differ from the schema")
+                actual_matrix, actual_rhs = actual_input.get("matrix"), actual_input.get("rhs")
+                require(isinstance(actual_matrix, list) and len(actual_matrix) == fixture["rows"]
+                        and all(isinstance(row, list) and len(row) == fixture["columns"] for row in actual_matrix)
+                        and isinstance(actual_rhs, list) and len(actual_rhs) == fixture["rows"],
+                        f"{label}: actual input dimensions differ")
+                for row_values in actual_matrix:
+                    for value in row_values:
+                        finite_number(value, f"{label}.input.matrix")
+                for value in actual_rhs:
+                    finite_number(value, f"{label}.input.rhs")
+                coefficients = actual_input.get("objective_coefficients")
+                require(isinstance(coefficients, list) and len(coefficients) == fixture["columns"],
+                        f"{label}: actual objective coefficient count differs")
+                for value in coefficients:
+                    finite_number(value, f"{label}.input.objective_coefficients")
+                finite_number(actual_input.get("objective_constant"), f"{label}.input.objective_constant")
+                for bound in (actual_input.get("variable_lower_bound"), actual_input.get("variable_upper_bound")):
+                    if bound is not None:
+                        finite_number(bound, f"{label}.input.variable_bound")
+                actual_input_hash = canonical_sha256({
+                    "matrix": [[float(value) for value in row] for row in actual_matrix],
+                    "rhs": [float(value) for value in actual_rhs],
+                })
+                actual_scenario = {"input_sha256": actual_input_hash,
+                    "row_relation": actual_input.get("row_relation"),
+                    "variable_lower_bound": actual_input.get("variable_lower_bound"),
+                    "variable_upper_bound": actual_input.get("variable_upper_bound"),
+                    "objective": {"coefficients": [float(value) for value in actual_input.get("objective_coefficients", [])],
+                                  "constant": float(actual_input.get("objective_constant"))},
+                    "tolerances": {"absolute": fixture["absolute_tolerance"], "relative": fixture["relative_tolerance"]}}
+                actual_scenario_hash = canonical_sha256(actual_scenario)
+                require(trial.get("input_sha256") == actual_input_hash
+                        and trial.get("scenario_sha256") == actual_scenario_hash,
+                        f"{label}: trial hashes do not match driver-emitted input")
+                if trial["status"] == "passed":
+                    expected_input = {"matrix": fixture["matrix"], "rhs": fixture["rhs"],
+                        "row_relation": "equality", "variable_lower_bound": 0.0,
+                        "variable_upper_bound": None, "objective_coefficients": [0.0] * fixture["columns"],
+                        "objective_constant": 0.0}
+                    require(actual_input == expected_input and actual_input_hash == fixture["input_sha256"]
+                            and actual_scenario_hash == fixture["scenario_sha256"],
+                            f"{label}: successful trial input differs from catalog")
             expected_outcome = fixture["expected_status"] if side == "phase-one-bland" else fixture["expected_reference_status"]
             expected_match = result["termination"] == "completed" and trial["observed_status"] == expected_outcome and bool(checks) and all(c["passed"] for c in checks)
             require(trial.get("oracle_match") is expected_match, f"{label}: oracle_match contradicts literal outcome/checks")

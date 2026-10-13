@@ -34,6 +34,17 @@ const std::vector<Fixture> fixtures{
 };
 constexpr double abs_tol=1e-8, rel_tol=0.0;
 long long ns(Clock::time_point a, Clock::time_point b) { return std::chrono::duration_cast<Ns>(b-a).count(); }
+json input_description(const Fixture& f) {
+    json matrix = json::array();
+    for(std::size_t row=0;row<f.rows;++row) {
+        json values = json::array();
+        for(std::size_t column=0;column<f.columns;++column) values.push_back(f.dense[row*f.columns+column]);
+        matrix.push_back(std::move(values));
+    }
+    return {{"matrix",std::move(matrix)},{"rhs",f.rhs},{"row_relation","equality"},
+            {"variable_lower_bound",0.0},{"variable_upper_bound",nullptr},
+            {"objective_coefficients",std::vector<double>(f.columns,0.0)},{"objective_constant",0.0}};
+}
 const char* status(MathematicalOutcome x) {
     switch(x) { case MathematicalOutcome::optimal:return "optimal"; case MathematicalOutcome::infeasible:return "infeasible";
     case MathematicalOutcome::unbounded:return "unbounded"; case MathematicalOutcome::infimum_not_attained:return "infimum_not_attained"; default:return "undetermined"; }
@@ -63,7 +74,9 @@ double max_abs_row_violation(const Fixture& f,const Vector& x) {
 }
 double max_nonnegative_violation(const Vector& x) { double r=0; for(double v:x) r=std::max(r,std::max(0.0,-v)); return r; }
 struct SideResult { json detail; bool passed{false}; };
-SideResult run_side(const Fixture& f,const std::string& side, const std::function<void()>& after_diagnostics = {}) {
+SideResult run_side(const Fixture& f,const std::string& side,
+                    const std::function<void()>& after_diagnostics = {},
+                    const std::function<void()>& after_run = {}) {
     const auto all_start=Clock::now();
     json out;
     std::unique_ptr<BoundWorkspace<LPPort>> bound;
@@ -93,18 +106,21 @@ SideResult run_side(const Fixture& f,const std::string& side, const std::functio
     const auto observed=status(result.outcome.value);
     const bool status_ok=observed==std::string(f.outcome);
     double rows=0, nonnegative=0, objective=0;
-    json primal=nullptr;
+    json primal=vec(result.primal);
+    json rows_evidence=nullptr, nonnegative_evidence=nullptr, objective_evidence=nullptr;
     json checks=json::array();
     bool candidate_ok=true;
-    double auxiliary=-1, auxiliary_residual=-1; std::uint64_t pivots=0,degenerate=0,factorizations=0;
+    json auxiliary=nullptr, auxiliary_residual=nullptr, pivots=nullptr, degenerate=nullptr, factorizations=nullptr;
     std::string term=termination(result.termination);
     json error=nullptr;
     try {
+        if(after_run) after_run();
         if(result.primal) {
-            primal=*result.primal; rows=max_abs_row_violation(f,*result.primal); nonnegative=max_nonnegative_violation(*result.primal);
+            rows=max_abs_row_violation(f,*result.primal); nonnegative=max_nonnegative_violation(*result.primal);
+            rows_evidence=rows; nonnegative_evidence=nonnegative;
             auto eval=evaluate_primal(p,*result.primal,{abs_tol,rel_tol},{{"opt04-independent-oracle"},"1"});
             if(!std::holds_alternative<PrimalEvaluation>(eval)) throw std::runtime_error("independent primal evaluation failed");
-            objective=std::get<PrimalEvaluation>(eval).objective;
+            objective=std::get<PrimalEvaluation>(eval).objective; objective_evidence=objective;
         }
         checks.push_back({{"name","expected_status"},{"passed",status_ok}});
         if(std::string(f.outcome)=="optimal") {
@@ -112,19 +128,19 @@ SideResult run_side(const Fixture& f,const std::string& side, const std::functio
             if(candidate_ok && side=="phase-one-bland") for(std::size_t i=0;i<f.expected.size();++i) candidate_ok=candidate_ok&&std::abs((*result.primal)[i]-f.expected[i])<=abs_tol;
             if(side=="highs-reference") candidate_ok=candidate_ok&&rows<=abs_tol&&nonnegative<=abs_tol&&std::abs(objective)<=abs_tol;
             checks.push_back({{"name",side=="phase-one-bland"?"literal_expected_candidate":"independent_feasible_witness"},{"passed",candidate_ok}});
-            checks.push_back({{"name","original_equalities"},{"passed",rows<=abs_tol}});
-            checks.push_back({{"name","nonnegative_variables"},{"passed",nonnegative<=abs_tol}});
-            checks.push_back({{"name","zero_original_objective"},{"passed",std::abs(objective)<=abs_tol}});
+            checks.push_back({{"name","original_equalities"},{"passed",result.primal.has_value()&&rows<=abs_tol}});
+            checks.push_back({{"name","nonnegative_variables"},{"passed",result.primal.has_value()&&nonnegative<=abs_tol}});
+            checks.push_back({{"name","zero_original_objective"},{"passed",result.primal.has_value()&&std::abs(objective)<=abs_tol}});
         }
         if(side=="phase-one-bland") {
             const auto* diagnostics=dynamic_cast<const po::DiagnosticsView*>(bound->basis());
             if(!diagnostics) throw std::runtime_error("phase-one diagnostics unavailable");
             auto snap=diagnostics->phase_one_snapshot();
             if(!std::holds_alternative<po::Snapshot>(snap)) throw std::runtime_error("phase-one snapshot unavailable");
-            const auto& s=std::get<po::Snapshot>(snap); auxiliary=s.auxiliary?s.auxiliary->value:-1;
-            auxiliary_residual=s.auxiliary?s.auxiliary->equations.violation:-1;
+            const auto& s=std::get<po::Snapshot>(snap);
+            if(s.auxiliary) { auxiliary=s.auxiliary->value; auxiliary_residual=s.auxiliary->equations.violation; }
             pivots=s.pivots;degenerate=s.degenerate_pivots;factorizations=s.factorizations;
-            checks.push_back({{"name","literal_auxiliary_value"},{"passed",std::abs(auxiliary-f.auxiliary)<=abs_tol}});
+            checks.push_back({{"name","literal_auxiliary_value"},{"passed",!auxiliary.is_null()&&std::abs(auxiliary.get<double>()-f.auxiliary)<=abs_tol}});
         }
         if(after_diagnostics) after_diagnostics();
     } catch(const std::exception& e) {
@@ -135,13 +151,13 @@ SideResult run_side(const Fixture& f,const std::string& side, const std::functio
     const auto verify_end=Clock::now();
     out={{"status",passed?"passed":"failed"},{"error",passed?json(nullptr):(error.is_null()?json("independent oracle mismatch"):error)},
          {"observed_status",observed},{"termination",term},{"primal",primal},{"oracle_match",passed},{"oracle_checks",checks},
-         {"original_rows_max_violation",side=="phase-one-bland"?json(rows):json(nullptr)},
-         {"nonnegative_max_violation",side=="phase-one-bland"?json(nonnegative):json(nullptr)},
-         {"objective_value",side=="phase-one-bland"?json(objective):json(nullptr)},
-         {"auxiliary_residual",side=="phase-one-bland"?json(auxiliary_residual):json(nullptr)},
-         {"auxiliary_value",side=="phase-one-bland"?json(auxiliary):json(nullptr)},
-         {"result",{{"termination",term},{"outcome",observed},{"primal",primal},{"auxiliary",side=="phase-one-bland"?json(auxiliary):json(nullptr)},
-                     {"pivots",side=="phase-one-bland"?json(pivots):json(nullptr)},{"degenerate_pivots",side=="phase-one-bland"?json(degenerate):json(nullptr)},{"factorizations",side=="phase-one-bland"?json(factorizations):json(nullptr)}}},
+         {"original_rows_max_violation",side=="phase-one-bland"?rows_evidence:json(nullptr)},
+         {"nonnegative_max_violation",side=="phase-one-bland"?nonnegative_evidence:json(nullptr)},
+         {"objective_value",side=="phase-one-bland"?objective_evidence:json(nullptr)},
+         {"auxiliary_residual",side=="phase-one-bland"?auxiliary_residual:json(nullptr)},
+         {"auxiliary_value",side=="phase-one-bland"?auxiliary:json(nullptr)},
+         {"result",{{"termination",term},{"outcome",observed},{"primal",primal},{"auxiliary",side=="phase-one-bland"?auxiliary:json(nullptr)},
+                     {"pivots",side=="phase-one-bland"?pivots:json(nullptr)},{"degenerate_pivots",side=="phase-one-bland"?degenerate:json(nullptr)},{"factorizations",side=="phase-one-bland"?factorizations:json(nullptr)}}},
          {"durations_ns",{{"setup",ns(setup_start,setup_end)},{"public_run",ns(run_start,run_end)},{"verification",ns(verify_start,verify_end)},{"end_to_end",ns(all_start,verify_end)}}},
          {"work_observed",true}};
     return {std::move(out),passed};
@@ -171,7 +187,7 @@ int main(int argc,char** argv) {
             try { r=run_side(f,side); }
             catch(const std::exception& e) { r=failed_side(e.what(),ns(started,Clock::now())); }
             any_failed=any_failed||!r.passed;
-            json trial={{"fixture",f.id},{"side",side},{"repetition",warm},{"sequence",sequence++},{"pair_id",std::string(f.id)+"-warmup-"+std::to_string(warm)},
+            json trial={{"fixture",f.id},{"input",input_description(f)},{"side",side},{"repetition",warm},{"sequence",sequence++},{"pair_id",std::string(f.id)+"-warmup-"+std::to_string(warm)},
                 {"warmup",true},{"status",r.detail["status"]},{"error",r.detail["error"]},{"expected_status",f.outcome},{"observed_status",r.detail["observed_status"]},
                 {"reference_status",nullptr},{"oracle_match",r.detail["oracle_match"]},{"oracle_checks",r.detail["oracle_checks"]},{"work_observed",r.detail["work_observed"]},
                 {"tolerances",{{"absolute",abs_tol},{"relative",rel_tol}}},{"original_rows_max_violation",r.detail["original_rows_max_violation"]},
@@ -190,7 +206,7 @@ int main(int argc,char** argv) {
                 try { r=run_side(f,side); }
                 catch(const std::exception& e) { r=failed_side(e.what(),ns(started,Clock::now())); }
                 any_failed=any_failed||!r.passed;
-                json trial={{"fixture",f.id},{"side",side},{"repetition",rep},{"sequence",sequence++},{"pair_id",std::string(f.id)+"-"+std::to_string(rep)},
+                json trial={{"fixture",f.id},{"input",input_description(f)},{"side",side},{"repetition",rep},{"sequence",sequence++},{"pair_id",std::string(f.id)+"-"+std::to_string(rep)},
                     {"warmup",false},{"status",r.detail["status"]},{"error",r.detail["error"]},{"expected_status",f.outcome},{"observed_status",r.detail["observed_status"]},
                     {"reference_status",nullptr},{"oracle_match",r.detail["oracle_match"]},{"oracle_checks",r.detail["oracle_checks"]},{"work_observed",r.detail["work_observed"]},
                     {"tolerances",{{"absolute",abs_tol},{"relative",rel_tol}}},{"original_rows_max_violation",r.detail["original_rows_max_violation"]},
