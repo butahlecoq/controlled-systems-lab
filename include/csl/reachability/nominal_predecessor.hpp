@@ -21,8 +21,15 @@ struct NominalPredecessorResult {
     GeometryRequestIdentity projection_request;
     std::vector<std::size_t> state_coordinates;
 };
+struct NominalPredecessorFailure {
+    GeometryReference predecessor;
+    GeometryReference projection;
+    RequestProvenance projection_provider;
+    std::vector<GeometryEvidence> completed_lineage;
+    std::variant<Unsupported, OperationStopped> cause;
+};
 using NominalPredecessorOutcome =
-    std::variant<NominalPredecessorResult, Unsupported, OperationStopped>;
+    std::variant<NominalPredecessorResult, NominalPredecessorFailure>;
 
 class PreparedNominalPredecessor {
     NominalPredecessorRequest request_;

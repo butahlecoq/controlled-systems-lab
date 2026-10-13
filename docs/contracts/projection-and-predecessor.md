@@ -44,6 +44,15 @@ binds the lazy input identity and new ideal output. The same input/output
 profile applies. Unsupported requests are rejected before workspace
 creation; there is no implicit Qhull enumeration or ray truncation.
 
+`materialize_lazy_projection` is an additive scoped adapter around that
+existing `ConversionPort`. Its success or failure records neutral selected
+provider provenance, the original materialization identity/input, ultimate
+source-coordinate map and all completed lazy-creation claims. Pre-admission
+rejection, a late Unsupported result, and a stop preserve that context.
+An expired deadline is `StopReason::deadline_expired`; cancellation is
+`StopReason::cancelled`. Direct port calls retain their existing bare outcome
+contract; callers that need completed lineage use this scoped adapter.
+
 H elimination retains inequalities and equalities separately. A nonzero
 equality coefficient permits substitution and removal of that pivot
 equation. Otherwise, each positive/negative inequality pair generates a
@@ -95,6 +104,14 @@ remain X's labels; generated control labels avoid collisions in the joint
 schema. The opaque projected set identity names the compiled-joint projection
 and is distinct from the original predecessor ideal-reference identity.
 
+`NominalPredecessorOutcome` is a success or `NominalPredecessorFailure`.
+Every returned runtime stop, late rejection or contract mismatch retains the
+original `[X,U,S]` reference, child projection reference and neutral requested/
+actual provider provenance. The completed-lineage field is empty for this
+single-operation predecessor chain when its projection has not completed.
+Unexpected `SupportResult` or `ContainmentResult` from a GeometryPort provider
+is a scoped evidence-mismatch failure, rather than an unchecked variant access.
+
 ## Guarantee transfer and limits
 
 `SetRelation::equivalent` identifies the requested projection/predecessor
@@ -120,6 +137,8 @@ to the immutable lazy payload when present.
 `max_rows` is a caller-selected limit on H inequalities plus equalities,
 including intermediate rows. It is enforced on H materialization, so lazy
 creation can succeed before a later materialization exceeds that policy.
+The one-row empty H encoding is checked against that limit before construction,
+so `max_rows=0` cannot publish a contradiction row.
 There is no built-in universal dimension or output-size threshold. Counts,
 products and matrix storage are checked against `size_t`. With p positive,
 q negative and z zero rows, one Fourier--Motzkin step generates `p*q+z`

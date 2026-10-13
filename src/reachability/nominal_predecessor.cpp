@@ -58,45 +58,53 @@ PreparedNominalPredecessor::PreparedNominalPredecessor(NominalPredecessorRequest
     :request_(std::move(request)),projection_(std::move(projection)),prepared_(std::move(prepared)) {}
 
 NominalPredecessorOutcome PreparedNominalPredecessor::run(const ExecutionContext& context) const {
+    const auto selected=prepared_.provenance()[0];
+    const RequestProvenance provenance{projection_.identity.request,selected.port,
+        selected.requested.id,selected.requested.version,
+        selected.actual?std::optional<ModuleId>{selected.actual->id}:std::nullopt,
+        selected.actual?std::optional<std::string>{selected.actual->version}:std::nullopt};
+    const GeometryReference original{request_.identity,{request_.states.id,request_.controls.id,request_.target.id}};
+    const GeometryReference child{projection_.identity,{std::get<Projection>(projection_.operation).input.id}};
+    const auto failure=[&](auto cause) -> NominalPredecessorOutcome {
+        return NominalPredecessorFailure{original,child,provenance,{},std::move(cause)};
+    };
     auto workspace=prepared_.create();
     auto outcome=std::get<0>(workspace)->run(context);
-    if(auto* failure=std::get_if<Unsupported>(&outcome)) return *failure;
-    if(auto* failure=std::get_if<OperationStopped>(&outcome)) return *failure;
-    auto result=std::get<OperationResult>(std::move(outcome));
+    if(auto* rejected=std::get_if<Unsupported>(&outcome)) return failure(*rejected);
+    if(auto* stopped=std::get_if<OperationStopped>(&outcome)) return failure(*stopped);
+    auto* operation=std::get_if<OperationResult>(&outcome);
+    if(!operation) return failure(Unsupported{error("predecessor.result",
+        "Selected projection returned a query result instead of an OperationResult.",DiagnosticCode::evidence_mismatch)});
+    auto result=std::move(*operation);
     if(result.relation!=SetRelation::equivalent)
-        return Unsupported{error("predecessor.relation","Selected projection did not return the requested equivalent relation.",DiagnosticCode::evidence_mismatch)};
-    if(auto errors=check_geometry_evidence(result.evidence,projection_);!errors.empty()) return Unsupported{std::move(errors)};
+        return failure(Unsupported{error("predecessor.relation","Selected projection did not return the requested equivalent relation.",DiagnosticCode::evidence_mismatch)});
+    if(auto errors=check_geometry_evidence(result.evidence,projection_);!errors.empty()) return failure(Unsupported{std::move(errors)});
     if(result.output.metadata.dimension!=request_.states.metadata.dimension)
-        return Unsupported{error("predecessor.coordinates","Selected projection changed the state output dimension.",DiagnosticCode::evidence_mismatch)};
+        return failure(Unsupported{error("predecessor.coordinates","Selected projection changed the state output dimension.",DiagnosticCode::evidence_mismatch)});
     auto source=take(sets::from_handle(request_.states));
     std::vector<std::string> labels;
     if(result.output.metadata.representation.value=="csl.polyhedron.projection") {
         auto data=geometry::polyhedral::inspect_lazy_projection(result.output);
-        if(auto* failure=std::get_if<Diagnostics>(&data)) return Unsupported{*failure};
+        if(auto* rejected=std::get_if<Diagnostics>(&data)) return failure(Unsupported{*rejected});
         labels=std::get<geometry::polyhedral::LazyProjectionDescription>(data).coordinate_labels;
     } else {
         auto data=sets::from_handle(result.output);
-        if(auto* failure=std::get_if<Diagnostic>(&data)) return Unsupported{{*failure}};
+        if(auto* rejected=std::get_if<Diagnostic>(&data)) return failure(Unsupported{{*rejected}});
         labels=std::get<sets::SetData>(data).metadata()->coordinate_labels;
     }
     if(labels!=source.metadata()->coordinate_labels)
-        return Unsupported{error("predecessor.coordinates","Selected projection changed the ordered state labels.",DiagnosticCode::evidence_mismatch)};
+        return failure(Unsupported{error("predecessor.coordinates","Selected projection changed the ordered state labels.",DiagnosticCode::evidence_mismatch)});
     result.evidence.reference={request_.identity,{request_.states.id,request_.controls.id,request_.target.id}};
     // The provider's projection theorem/evidence concerns the compiled binary64
     // joint rows. It cannot certify that those rows equal the authored dynamics
     // pullback over reals. Never upgrade the original predecessor claim.
     result.evidence.support=Unestablished{};result.evidence.error_bound.reset();
-    const auto provenance=prepared_.provenance()[0];
     result.evidence.assumptions.push_back("existential controls: project joint [x,u] constrained by X, U and A*x+B*u+a in S; no inverse A");
     result.evidence.assumptions.push_back("joint target-row pullback uses binary64 arithmetic; original predecessor support remains unestablished");
-    if(provenance.actual) result.evidence.assumptions.push_back("projection provider="+provenance.actual->id.value+"@"+provenance.actual->version);
+    if(provenance.actual_module) result.evidence.assumptions.push_back("projection provider="+provenance.actual_module->value+"@"+*provenance.actual_version);
     std::vector<std::size_t> coordinates(request_.states.metadata.dimension);
     std::iota(coordinates.begin(),coordinates.end(),std::size_t{0});
-    const RequestProvenance neutral{projection_.identity.request,provenance.port,
-        provenance.requested.id,provenance.requested.version,
-        provenance.actual?std::optional<ModuleId>{provenance.actual->id}:std::nullopt,
-        provenance.actual?std::optional<std::string>{provenance.actual->version}:std::nullopt};
-    return NominalPredecessorResult{std::move(result),neutral,projection_.identity,std::move(coordinates)};
+    return NominalPredecessorResult{std::move(result),provenance,projection_.identity,std::move(coordinates)};
 }
 
 NominalPredecessorPreparation prepare_nominal_predecessor(const NominalPredecessorRequest& request,

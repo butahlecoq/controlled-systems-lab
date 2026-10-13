@@ -24,6 +24,27 @@ struct LazyProjectionDescription {
 };
 std::variant<LazyProjectionDescription, Diagnostics> inspect_lazy_projection(const SetHandle&);
 
+struct ProjectionMaterializationResult {
+    OperationResult result;
+    RequestProvenance provider;
+    std::vector<GeometryEvidence> completed_lineage;
+    std::vector<std::size_t> source_coordinates;
+};
+struct ProjectionMaterializationFailure {
+    GeometryReference reference;
+    RequestProvenance provider;
+    std::vector<GeometryEvidence> completed_lineage;
+    std::vector<std::size_t> source_coordinates;
+    std::variant<Unsupported, OperationStopped> cause;
+};
+using ProjectionMaterializationOutcome =
+    std::variant<ProjectionMaterializationResult, ProjectionMaterializationFailure>;
+// Retains source/coordinate lineage and selected provenance around the existing
+// ConversionPort, including pre-admission rejection and late stops/rejection.
+ProjectionMaterializationOutcome materialize_lazy_projection(
+    const ConversionRequest&, const registry::PreparedProvider<registry::ConversionPort>&,
+    const ExecutionContext&);
+
 registry::Registration<registry::GeometryPort> make_projection_registration(
     ProjectionOptions = {});
 // Materializes this module's immutable lazy projection payloads, using the

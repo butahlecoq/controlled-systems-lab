@@ -17,6 +17,10 @@ template<class T, class... E> T take(std::variant<T,E...> value) {
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
+template<class T,class V> T alternative(V value) {
+    REQUIRE(std::holds_alternative<T>(value));
+    return std::get<T>(std::move(value));
+}
 sets::SetData h(std::string id,std::size_t n,Matrix a,Vector b,Matrix e,Vector f,
         std::vector<std::string> labels={}) {
     return take(sets::make_h({{std::move(id)},n,std::move(labels)},
@@ -305,5 +309,112 @@ TEST_CASE("projection cancellation and arithmetic overflow retain explicit failu
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
     context={};context.deadline=std::chrono::steady_clock::now();
-    CHECK(std::holds_alternative<OperationStopped>(std::get<0>(prepared.create())->run(context)));
+    auto expired=std::get<0>(prepared.create())->run(context);
+    REQUIRE(std::holds_alternative<OperationStopped>(expired));
+    CHECK(std::get<OperationStopped>(expired).reason==StopReason::deadline_expired);
+}
+
+TEST_CASE("empty encoding honors zero max_rows for eager and lazy materialization") {
+    auto empty=take(sets::make_empty({{"empty"},1,{}}));
+    CHECK(std::holds_alternative<Unsupported>(project(projection(empty.as_handle(),{0}),
+        geometry::polyhedral::ProjectionOutput::h,0)));
+    auto lazy=take(project(projection(empty.as_handle(),{0}),geometry::polyhedral::ProjectionOutput::lazy)).output;
+    auto selected=provider(geometry::polyhedral::make_projection_materializer(0),"csl.polyhedron.h");
+    ConversionRequest request{{{"fixture"},{"empty-materialize"},{"empty-materialized"}},lazy,{"csl.polyhedron.h"},Assurance::numerical};
+    CHECK(std::holds_alternative<Unsupported>(std::get<0>(take(selected.prepare(request)).create())->run({})));
+}
+
+namespace {
+enum class ProviderReturn { rejected, support, containment };
+class WrongProjectionResult final : public SetOperatorWorkspace {
+    ProviderReturn return_;
+public:
+    explicit WrongProjectionResult(ProviderReturn value):return_(value) {}
+    OperationOutcome apply(const OperationRequest& request,const ExecutionContext&) override {
+        if(return_==ProviderReturn::rejected)
+            return Unsupported{{{DiagnosticCode::unsupported,"projection.late","Late projection rejection"}}};
+        GeometryEvidence evidence{{request.identity,{std::get<Projection>(request.operation).input.id}},
+            GeometryClaimScope::support_value,Unestablished{}, {}, {}};
+        if(return_==ProviderReturn::support) return SupportResult{1.0,{},std::move(evidence)};
+        evidence.scope=GeometryClaimScope::containment;
+        return ContainmentResult{ContainmentDecision::undetermined,{},std::move(evidence)};
+    }
+};
+Registration<GeometryPort> wrong_projection(ProviderReturn value) {
+    auto entry=geometry::polyhedral::make_projection_registration();
+    entry.factory=[value](const OperationRequest&) {return std::make_unique<WrongProjectionResult>(value);};
+    return entry;
+}
+}
+
+TEST_CASE("predecessor failures retain original request child projection and provider") {
+    auto request=predecessor(interval("X",-2,2).as_handle(),interval("U",-1,1).as_handle(),
+        interval("S",0,1).as_handle(),{1,1,{1}},{1,1,{1}},{0});
+    auto selected=provider(geometry::polyhedral::make_projection_registration(),"csl.polyhedron.h");
+    auto prepared=take(reachability::prepare_nominal_predecessor(request,selected));
+    ExecutionContext context;context.deadline=std::chrono::steady_clock::now();
+    auto stopped=alternative<reachability::NominalPredecessorFailure>(prepared.run(context));
+    CHECK(stopped.predecessor.identity==request.identity);
+    CHECK(stopped.predecessor.inputs==std::vector<SetId>{{"X"},{"U"},{"S"}});
+    CHECK(stopped.projection.identity.problem==request.identity.problem);
+    CHECK_FALSE(stopped.projection.identity.request.value.empty());
+    CHECK(stopped.projection_provider.request==stopped.projection.identity.request);
+    CHECK(stopped.projection_provider.actual_module==std::optional<ModuleId>{{"csl.geometry.polyhedral-projection"}});
+    CHECK(std::get<OperationStopped>(stopped.cause).reason==StopReason::deadline_expired);
+    std::stop_source cancellation;cancellation.request_stop();context={};context.cancellation=cancellation.get_token();
+    auto cancelled=alternative<reachability::NominalPredecessorFailure>(prepared.run(context));
+    CHECK(std::get<OperationStopped>(cancelled.cause).reason==StopReason::cancelled);
+    for(auto returned:{ProviderReturn::rejected,ProviderReturn::support,ProviderReturn::containment}) {
+        auto wrong=provider(wrong_projection(returned),"csl.polyhedron.h");
+        auto result=alternative<reachability::NominalPredecessorFailure>(
+            take(reachability::prepare_nominal_predecessor(request,wrong)).run({}));
+        CHECK(result.predecessor.identity==request.identity);
+        CHECK(result.predecessor.inputs==std::vector<SetId>{{"X"},{"U"},{"S"}});
+        CHECK(result.projection_provider.request==result.projection.identity.request);
+        REQUIRE(std::holds_alternative<Unsupported>(result.cause));
+        const auto& reason=std::get<Unsupported>(result.cause).diagnostics;
+        REQUIRE_FALSE(reason.empty());
+        CHECK(reason[0].code==(returned==ProviderReturn::rejected?DiagnosticCode::unsupported:DiagnosticCode::evidence_mismatch));
+    }
+}
+
+TEST_CASE("scoped materialization failures retain completed nested lazy lineage") {
+    auto source=h("source",3,{0,3,{}},{},{1,3,{1,2,3}},{6},{"x","y","z"});
+    auto first=take(project(projection(source.as_handle(),{2,0}),geometry::polyhedral::ProjectionOutput::lazy));
+    auto second_request=projection(first.output,{1});
+    second_request.identity.request={"second-projection"};second_request.identity.ideal_output={"second-output"};
+    auto second=take(project(second_request,geometry::polyhedral::ProjectionOutput::lazy));
+    auto selected=provider(geometry::polyhedral::make_projection_materializer(),"csl.polyhedron.h");
+    ConversionRequest request{{{"fixture"},{"materialize-scoped"},{"materialized-scoped"}},second.output,{"csl.polyhedron.h"},Assurance::numerical};
+    ExecutionContext context;context.deadline=std::chrono::steady_clock::now();
+    auto failure=alternative<geometry::polyhedral::ProjectionMaterializationFailure>(
+        geometry::polyhedral::materialize_lazy_projection(request,selected,context));
+    CHECK(failure.reference.identity==request.identity);
+    CHECK(failure.reference.inputs==std::vector<SetId>{second.output.id});
+    CHECK(failure.provider.request==request.identity.request);
+    CHECK(failure.source_coordinates==std::vector<std::size_t>{0});
+    REQUIRE(failure.completed_lineage.size()==2);
+    CHECK(failure.completed_lineage[0].reference.identity.request==RequestId{"projection"});
+    CHECK(failure.completed_lineage[1].reference.identity==second_request.identity);
+    CHECK(std::get<OperationStopped>(failure.cause).reason==StopReason::deadline_expired);
+    auto limited=provider(geometry::polyhedral::make_projection_materializer(0),"csl.polyhedron.h");
+    auto rejected=alternative<geometry::polyhedral::ProjectionMaterializationFailure>(
+        geometry::polyhedral::materialize_lazy_projection(request,limited,{}));
+    CHECK(rejected.reference.identity==request.identity);
+    CHECK(rejected.provider.actual_module==std::optional<ModuleId>{{"csl.geometry.projection-materializer"}});
+    CHECK(rejected.completed_lineage.size()==2);
+    CHECK(std::holds_alternative<Unsupported>(rejected.cause));
+    auto success=take(geometry::polyhedral::materialize_lazy_projection(request,selected,{}));
+    CHECK(contains(success.result.output,{-100}));
+    CHECK(contains(success.result.output,{100}));
+    CHECK(success.completed_lineage.size()==2);
+    CHECK(success.source_coordinates==std::vector<std::size_t>{0});
+    CHECK(success.provider.request==request.identity.request);
+    request.output={"csl.polyhedron.v"};
+    auto admission=alternative<geometry::polyhedral::ProjectionMaterializationFailure>(
+        geometry::polyhedral::materialize_lazy_projection(request,selected,{}));
+    CHECK(admission.reference.identity==request.identity);
+    CHECK(admission.completed_lineage.size()==2);
+    CHECK(admission.source_coordinates==std::vector<std::size_t>{0});
+    CHECK(std::holds_alternative<Unsupported>(admission.cause));
 }

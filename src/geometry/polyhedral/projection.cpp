@@ -23,7 +23,7 @@ bool stopped(const ExecutionContext& c) {
         (c.deadline && std::chrono::steady_clock::now()>=*c.deadline);
 }
 OperationStopped stop(const ExecutionContext& c) {
-    return {c.cancellation.stop_requested()?StopReason::cancelled:StopReason::resource_limit,
+    return {c.cancellation.stop_requested()?StopReason::cancelled:StopReason::deadline_expired,
         "Projection interrupted before publishing materialization."};
 }
 std::string representation(ProjectionOutput output) {
@@ -120,6 +120,12 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
     const std::size_t n=source.metadata()->set.dimension;
     const auto rep=source.representation();
     const sets::Description output{std::move(id),data.coordinates.size(),data.coordinate_labels};
+    const auto empty=[&]() -> Materialized {
+        if(!capacity(1,0,output.ambient_dimension,limit))
+            return Unsupported{error("projection.capacity","Empty H encoding exceeds capacity or caller row limit.")};
+        return make_h(output,{Vector(output.ambient_dimension,0.0)},{-1.0},{},{});
+    };
+    if(std::holds_alternative<sets::EmptyRepresentation>(rep)) return empty();
     Rows rows;
     if(const auto* h=std::get_if<sets::HRepresentation>(&rep)) {
         if(!capacity(h->inequalities.rows(),h->equalities.rows(),n,limit))
@@ -136,10 +142,7 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
     } else if(const auto* singleton=std::get_if<sets::SingletonRepresentation>(&rep)) {
         if(!capacity(0,n,n,limit)) return Unsupported{error("projection.capacity","Singleton equality storage exceeds capacity or caller limit.")};
         for(std::size_t c=0;c<n;++c) {Vector row(n,0.0);row[c]=1;rows.e.push_back(std::move(row));rows.f.push_back(singleton->point[c]);}
-    } else if(std::holds_alternative<sets::EmptyRepresentation>(rep)) {
-        rows.a.push_back(Vector(n,0.0));rows.b.push_back(-1.0);
     }
-    const auto empty=[&]() -> Materialized {return make_h(output,{Vector(output.ambient_dimension,0.0)},{-1.0},{},{});};
     if(contradiction(rows)) return empty();
     std::vector<bool> keep(n,false);
     for(auto index:data.coordinates) keep[index]=true;
@@ -319,5 +322,39 @@ registry::Registration<registry::ConversionPort> make_projection_materializer(st
             registry::Output output;output.representation=request.output;output.relation=SetRelation::equivalent;
             return registry::Offer{output};
         },[limit](const ConversionRequest&) {return std::make_unique<MaterializerWorkspace>(limit);}};
+}
+ProjectionMaterializationOutcome materialize_lazy_projection(const ConversionRequest& request,
+        const registry::PreparedProvider<registry::ConversionPort>& provider,const ExecutionContext& context) {
+    const auto& selected=provider.provenance();
+    const RequestProvenance provenance{request.identity.request,selected.port,selected.requested.id,
+        selected.requested.version,selected.actual?std::optional<ModuleId>{selected.actual->id}:std::nullopt,
+        selected.actual?std::optional<std::string>{selected.actual->version}:std::nullopt};
+    std::vector<GeometryEvidence> lineage;
+    std::vector<std::size_t> coordinates;
+    const auto failure=[&](auto cause) -> ProjectionMaterializationOutcome {
+        return ProjectionMaterializationFailure{{request.identity,{request.input.id}},provenance,
+            lineage,coordinates,std::move(cause)};
+    };
+    auto description=inspect_lazy_projection(request.input);
+    if(auto* errors=std::get_if<Diagnostics>(&description)) return failure(Unsupported{*errors});
+    const auto& data=std::get<LazyProjectionDescription>(description);
+    lineage=data.lineage;lineage.push_back(data.creation_evidence);coordinates=data.coordinates;
+    auto admission=provider.prepare(request);
+    if(auto* rejected=std::get_if<registry::Rejection>(&admission)) return failure(Unsupported{rejected->diagnostics});
+    auto prepared=std::get<registry::PreparedPipeline<registry::ConversionPort>>(std::move(admission));
+    auto outcome=std::get<0>(prepared.create())->run(context);
+    if(auto* stopped_result=std::get_if<OperationStopped>(&outcome)) return failure(*stopped_result);
+    if(auto* rejected=std::get_if<Unsupported>(&outcome)) return failure(*rejected);
+    auto result=std::get<OperationResult>(std::move(outcome));
+    if(result.relation!=SetRelation::equivalent)
+        return failure(Unsupported{error("projection.materialization.relation","Materializer returned a different relation.",DiagnosticCode::evidence_mismatch)});
+    if(auto errors=check_geometry_evidence(result.evidence,request);!errors.empty()) return failure(Unsupported{std::move(errors)});
+    if(result.output.metadata.dimension!=coordinates.size() || result.output.metadata.representation.value!=request.output.value)
+        return failure(Unsupported{error("projection.materialization.coordinates","Materializer changed requested output schema.",DiagnosticCode::evidence_mismatch)});
+    auto native=sets::from_handle(result.output);
+    if(auto* rejected=std::get_if<Diagnostic>(&native)) return failure(Unsupported{{*rejected}});
+    if(std::get<sets::SetData>(native).metadata()->coordinate_labels!=data.coordinate_labels)
+        return failure(Unsupported{error("projection.materialization.coordinates","Materializer changed ordered output labels.",DiagnosticCode::evidence_mismatch)});
+    return ProjectionMaterializationResult{std::move(result),provenance,std::move(lineage),std::move(coordinates)};
 }
 } // namespace csl::geometry::polyhedral
