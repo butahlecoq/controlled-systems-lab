@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import copy
+import math
 from statistics import median
 
 SCHEMA = "csl.geo05-numerical-report/1"
@@ -30,11 +31,14 @@ GEO04_CMAKE_TARGET = '''if(CSL_BUILD_GEO04_REPORT)
   target_link_libraries(csl_geo04_intersection_report PRIVATE CSL::polyhedral CSL::qhull_conversion CSL::highs_lp)
 endif()'''
 GEO05_CMAKE_TARGET = '''if(CSL_BUILD_GEO05_REPORT)
+  include(cmake/JsonDependencies.cmake)
   add_executable(csl_geo05_projection_predecessor_report reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp)
   target_link_libraries(csl_geo05_projection_predecessor_report PRIVATE CSL::polyhedral)
+  target_include_directories(csl_geo05_projection_predecessor_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
   if(BUILD_TESTING)
     add_executable(geo05_driver_outcome_tests reports/algorithm-results/tooling/geo05/test_driver_outcomes.cpp)
     target_link_libraries(geo05_driver_outcome_tests PRIVATE CSL::polyhedral)
+    target_include_directories(geo05_driver_outcome_tests SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
     add_test(NAME geo05_driver_outcome_tests COMMAND geo05_driver_outcome_tests)
   endif()
 endif()'''
@@ -193,6 +197,84 @@ def make_record(trials: list[dict], purpose: str, provenance: dict,
     return record
 
 
+def validate_predecessor_failure(value: object, status: str) -> None:
+    """Validate optional retained API context without upgrading its evidence."""
+    def require(condition: bool) -> None:
+        if not condition:
+            raise ValueError("invalid predecessor failure context")
+
+    def fields(item: object, names: str) -> None:
+        require(isinstance(item, dict) and set(item) == set(names.split()))
+
+    def texts(items: object) -> None:
+        require(isinstance(items, list) and all(isinstance(item, str) for item in items))
+
+    def number(item: object) -> None:
+        require(isinstance(item, (int, float)) and not isinstance(item, bool) and -math.inf < item < math.inf)
+
+    def reference(item: object) -> None:
+        fields(item, "identity inputs")
+        fields(item["identity"], "problem request ideal_output")
+        require(all(isinstance(field, str) for field in item["identity"].values()))
+        texts(item["inputs"])
+
+    def support(item: object) -> None:
+        require(isinstance(item, dict))
+        kind = item.get("kind")
+        if kind == "unestablished":
+            fields(item, "kind")
+        elif kind == "numerical_check":
+            fields(item, "kind absolute_tolerance relative_tolerance max_residual verifier")
+            for name in ("absolute_tolerance", "relative_tolerance", "max_residual"):
+                number(item[name])
+            require(isinstance(item["verifier"], str))
+        elif kind == "symbolic_argument":
+            fields(item, "kind reference assumptions")
+            require(isinstance(item["reference"], str) and isinstance(item["assumptions"], str))
+        elif kind == "certificate_reference":
+            fields(item, "kind artifact verifier")
+            require(isinstance(item["artifact"], str) and isinstance(item["verifier"], str))
+        else:
+            require(False)
+
+    fields(value, "predecessor projection projection_provider completed_lineage cause")
+    reference(value["predecessor"])
+    reference(value["projection"])
+    provider = value["projection_provider"]
+    fields(provider, "request port requested_module requested_version actual_module actual_version")
+    require(all(isinstance(provider[name], str) for name in ("request", "port", "requested_module")))
+    require(all(provider[name] is None or isinstance(provider[name], str)
+                for name in ("requested_version", "actual_module", "actual_version")))
+    require(isinstance(value["completed_lineage"], list))
+    for evidence in value["completed_lineage"]:
+        fields(evidence, "reference scope support assumptions error_bound")
+        reference(evidence["reference"])
+        require(evidence["scope"] in ("set_relation", "support_value", "containment"))
+        support(evidence["support"])
+        texts(evidence["assumptions"])
+        if evidence["error_bound"] is not None:
+            bound = evidence["error_bound"]
+            fields(bound, "metric bound units")
+            require(isinstance(bound["metric"], str) and isinstance(bound["units"], str))
+            number(bound["bound"])
+    cause = value["cause"]
+    require(isinstance(cause, dict))
+    if cause.get("kind") == "unsupported":
+        fields(cause, "kind diagnostics")
+        require(status == "unsupported" and isinstance(cause["diagnostics"], list))
+        for diagnostic in cause["diagnostics"]:
+            fields(diagnostic, "code field explanation")
+            require(diagnostic["code"] in ("invalid_input", "unsupported", "evidence_mismatch", "invalid_claim"))
+            require(isinstance(diagnostic["field"], str) and isinstance(diagnostic["explanation"], str))
+    elif cause.get("kind") == "operation_stopped":
+        fields(cause, "kind reason diagnostics")
+        require(cause["reason"] in ("cancelled", "deadline_expired", "resource_limit", "numerical_failure"))
+        require(isinstance(cause["diagnostics"], str))
+        require(status == ("cancelled" if cause["reason"] in ("cancelled", "deadline_expired") else "failed"))
+    else:
+        require(False)
+
+
 def validate_record(record: dict) -> None:
     if record.get("schema") != SCHEMA:
         raise ValueError("unsupported GEO-05 report schema")
@@ -270,6 +352,8 @@ def validate_record(record: dict) -> None:
         if "end_to_end_scope" in row and row["end_to_end_scope"] not in (
                 "through_verification_and_fixture_teardown", "through_failure_unwind"):
             raise ValueError("invalid end-to-end scope")
+        if row.get("predecessor_failure") is not None:
+            validate_predecessor_failure(row["predecessor_failure"], row.get("status"))
         expected_peak = expected_case.get("expected_fm_peak_rows")
         if row.get("expected_fm_peak_rows") != expected_peak:
             raise ValueError("expected Fourier-Motzkin row peak differs from the pinned derivation")

@@ -165,13 +165,15 @@ def _write_collection(out: Path, stdout: str, stderr: str, rows: list[dict],
     with (out / "trials.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
         for row in rows:
             stream.write(json.dumps(row, sort_keys=True, allow_nan=False)+"\n")
-    fields = ["purpose", "scenario", "repetition", "status", "detail", "oracle_passed", "work_observed", "end_to_end_scope",
+    fields = ["purpose", "scenario", "repetition", "status", "detail", "predecessor_failure", "oracle_passed", "work_observed", "end_to_end_scope",
               "max_rows", "input_rows", "output_rows", "result_kind", "result_encoding", "input_sha256", "scenario_sha256", "expected_fm_peak_rows", *PHASES]
     with (out / "trials.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         for row in rows:
-            writer.writerow({**row, **row.get("durations_ns", {})})
+            context = row.get("predecessor_failure")
+            writer.writerow({**row, **row.get("durations_ns", {}),
+                "predecessor_failure": json.dumps(context, sort_keys=True, allow_nan=False) if context is not None else ""})
     from render import render_html
     (out / "index.html").write_text(render_html(record), encoding="utf-8")
     inventory = {path.name: _sha(path) for path in sorted(out.iterdir()) if path.is_file()}

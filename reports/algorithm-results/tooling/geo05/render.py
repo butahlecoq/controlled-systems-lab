@@ -13,6 +13,14 @@ def _duration(value: int | float | None) -> str:
     return "unavailable" if value is None else f"{value:g} ns"
 
 
+def _failure_context(trial: dict) -> str:
+    context = trial.get("predecessor_failure")
+    if context is None:
+        return ""
+    return ('<details><summary>Retained predecessor failure</summary><pre><code>'
+            + html.escape(json.dumps(context, sort_keys=True, indent=2, allow_nan=False)) + '</code></pre></details>')
+
+
 def render_svg(record: dict) -> str:
     validate_record(record)
     values = [record["collection"]["by_scenario"][scenario]["phases"]["end_to_end_ns"]["median_ns"]
@@ -45,7 +53,7 @@ def render_html(record: dict) -> str:
             trial.get("expected_fm_peak_rows"), trial.get("max_rows")))
             + "".join(f"<td>{html.escape(_duration(durations.get(phase)))}</td>" for phase in PHASES)
             + f"<td>{html.escape(str(trial.get('end_to_end_scope', 'unavailable in saved v1 record')))}</td>"
-            + f"<td>{html.escape(str(trial.get('detail', '')))}</td></tr>")
+            + f"<td>{html.escape(str(trial.get('detail', '')))}{_failure_context(trial)}</td></tr>")
     summary_rows = []
     for phase in PHASES:
         stat = collection["phases"][phase]
@@ -56,7 +64,8 @@ def render_html(record: dict) -> str:
             + f"<td>{stat['successful_trials']}</td><td>{stat['unavailable_trials']}</td></tr>")
     warmup_rows = []
     for trial in record.get("warmup_trials", []):
-        warmup_rows.append("<li>" + html.escape(f"{trial.get('scenario')}: {trial.get('status')} — {trial.get('detail', '')}") + "</li>")
+        warmup_rows.append("<li>" + html.escape(f"{trial.get('scenario')}: {trial.get('status')} — {trial.get('detail', '')}")
+                           + _failure_context(trial) + "</li>")
     limits = "".join(f"<li>{html.escape(item)}</li>" for item in record["evidence_limits"])
     counts = html.escape(json.dumps(collection["counts"], sort_keys=True))
     algorithm = record["algorithm"]

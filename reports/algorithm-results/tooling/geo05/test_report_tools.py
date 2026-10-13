@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import importlib.util
+import copy
+import csv
 import json
 import sys
 import unittest
+import tempfile
 from unittest.mock import patch
 from pathlib import Path
 
@@ -25,6 +28,25 @@ SPEC = importlib.util.spec_from_file_location("geo05_collect", HERE / "collect.p
 collect = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = collect
 SPEC.loader.exec_module(collect)
+
+
+def predecessor_failure_fixture():
+    return {
+        "predecessor": {"identity": {"problem": "nested-problem", "request": "<predecessor-request>",
+            "ideal_output": "predecessor-ideal"}, "inputs": ["X", "U", "S"]},
+        "projection": {"identity": {"problem": "nested-problem", "request": "projection-request",
+            "ideal_output": "projection-ideal"}, "inputs": ["joint-set"]},
+        "projection_provider": {"request": "projection-request", "port": "geometry",
+            "requested_module": "requested-projection", "requested_version": "requested-v1",
+            "actual_module": "actual-projection", "actual_version": "actual-v2"},
+        "completed_lineage": [{
+            "reference": {"identity": {"problem": "nested-problem", "request": "lineage-request",
+                "ideal_output": "lineage-ideal"}, "inputs": ["lineage-input"]},
+            "scope": "support_value", "support": {"kind": "numerical_check", "absolute_tolerance": 0.125,
+                "relative_tolerance": 0.25, "max_residual": 0.5, "verifier": "numeric-verifier"},
+            "assumptions": ["numerical assumption"],
+            "error_bound": {"metric": "distance-metric", "bound": 0.75, "units": "meters"}}],
+        "cause": {"kind": "operation_stopped", "reason": "cancelled", "diagnostics": "child projection cancelled"}}
 
 
 class Geo05ReportTests(unittest.TestCase):
@@ -188,6 +210,116 @@ class Geo05ReportTests(unittest.TestCase):
         report.resign_record(record)
         report.validate_record(record)
         self.assertIn("through_verification_and_fixture_teardown", render.render_html(record))
+
+    def test_nested_failure_context_round_trips_saved_formats_and_escaped_rendering(self):
+        context = predecessor_failure_fixture()
+        rows = []
+        for purpose, repetitions in (("warmup", 1), ("measurement", 7)):
+            for repetition in range(repetitions):
+                for name in report.SCENARIOS:
+                    row = report.synthetic_trial(name, repetition)
+                    row["purpose"] = purpose
+                    rows.append(row)
+        for index in (0, 4):
+            rows[index].update(status="cancelled", oracle_passed=False, work_observed=False,
+                output_rows=None, result_kind=None, result_encoding=None,
+                predecessor_failure=copy.deepcopy(context))
+        with tempfile.TemporaryDirectory() as temporary:
+            out = Path(temporary) / "report"
+            collect._write_collection(out, "", "", rows, {"source_commit": "fixture", "harness_commit": "fixture"},
+                ["fixture-driver"], 7, 0, [])
+            record = report.strict_json_loads((out / "records.json").read_text(encoding="utf-8"))
+            report.validate_record(record)
+            self.assertEqual(record["trials"][0]["predecessor_failure"], context)
+            self.assertEqual(record["warmup_trials"][0]["predecessor_failure"], context)
+            jsonl = [report.strict_json_loads(line) for line in (out / "trials.jsonl").read_text(encoding="utf-8").splitlines()]
+            self.assertEqual(jsonl[4]["predecessor_failure"], context)
+            with (out / "trials.csv").open(encoding="utf-8", newline="") as stream:
+                csv_rows = list(csv.DictReader(stream))
+            self.assertIn("predecessor_failure", csv_rows[0])
+            self.assertEqual(json.loads(csv_rows[0]["predecessor_failure"]), context)
+            self.assertEqual(json.loads(csv_rows[4]["predecessor_failure"]), context)
+            page = (out / "index.html").read_text(encoding="utf-8")
+            self.assertIn("&lt;predecessor-request&gt;", page)
+            self.assertNotIn("<predecessor-request>", page)
+            for value in ("joint-set", "requested-projection", "requested-v1", "actual-projection", "actual-v2",
+                          "lineage-request", "numeric-verifier", "numerical assumption", "distance-metric", "meters"):
+                self.assertIn(value, page)
+
+    def test_nested_failure_context_validation_rejects_incomplete_or_mistyped_payloads(self):
+        context = predecessor_failure_fixture()
+        malformed = []
+        for key in ("predecessor", "projection", "projection_provider", "completed_lineage", "cause"):
+            value = copy.deepcopy(context)
+            del value[key]
+            malformed.append(value)
+        value = copy.deepcopy(context)
+        value["projection_provider"]["actual_version"] = 7
+        malformed.append(value)
+        value = copy.deepcopy(context)
+        value["completed_lineage"][0]["support"]["max_residual"] = True
+        malformed.append(value)
+        value = copy.deepcopy(context)
+        value["completed_lineage"][0]["scope"] = "invented_scope"
+        malformed.append(value)
+        value = copy.deepcopy(context)
+        value["cause"]["reason"] = "resource_limit"
+        malformed.append(value)
+        for value in malformed:
+            with self.subTest(value=value):
+                rows = [report.synthetic_trial(name, 0) for name in report.SCENARIOS]
+                rows[0].update(status="cancelled", oracle_passed=False, work_observed=False,
+                    output_rows=None, result_kind=None, result_encoding=None, predecessor_failure=value)
+                with self.assertRaisesRegex(ValueError, "predecessor failure"):
+                    report.make_record(rows, purpose="test", provenance={
+                        "source_commit": "fixture", "harness_commit": "fixture"})
+
+    def test_nested_context_schema_and_semantics_agree_for_variants_and_status(self):
+        if importlib.util.find_spec("jsonschema") is None:
+            self.skipTest("optional JSON Schema validator is unavailable")
+        import jsonschema
+        schema = json.loads((HERE / "schema-v1.json").read_text(encoding="utf-8"))
+        jsonschema.Draft202012Validator.check_schema(schema)
+        validator = jsonschema.Draft202012Validator(schema)
+        supports = [
+            {"kind": "unestablished"},
+            {"kind": "numerical_check", "absolute_tolerance": 0.125, "relative_tolerance": 0.25,
+                "max_residual": 0.5, "verifier": "numeric-verifier"},
+            {"kind": "symbolic_argument", "reference": "symbolic-reference", "assumptions": "symbolic conditions"},
+            {"kind": "certificate_reference", "artifact": "certificate-artifact", "verifier": "certificate-verifier"}]
+        causes = [("cancelled", {"kind": "operation_stopped", "reason": "cancelled", "diagnostics": "cancelled"}),
+                  ("cancelled", {"kind": "operation_stopped", "reason": "deadline_expired", "diagnostics": "deadline"}),
+                  ("failed", {"kind": "operation_stopped", "reason": "resource_limit", "diagnostics": "capacity"}),
+                  ("failed", {"kind": "operation_stopped", "reason": "numerical_failure", "diagnostics": "residual"}),
+                  ("unsupported", {"kind": "unsupported", "diagnostics": [
+                      {"code": "unsupported", "field": "projection.rows", "explanation": "configured limit"}]})]
+        for status, cause in causes:
+            for support in supports:
+                rows = [report.synthetic_trial(name, 0) for name in report.SCENARIOS]
+                context = predecessor_failure_fixture()
+                context["completed_lineage"][0]["support"] = support
+                context["projection_provider"].update(requested_version=None, actual_module=None, actual_version=None)
+                context["cause"] = cause
+                rows[0].update(status=status, oracle_passed=False, work_observed=False,
+                    output_rows=None, result_kind=None, result_encoding=None, predecessor_failure=context)
+                record = report.make_record(rows, purpose="test", provenance={
+                    "source_commit": "fixture", "harness_commit": "fixture"})
+                validator.validate(record)
+        record["trials"][0]["predecessor_failure"]["cause"] = {
+            "kind": "operation_stopped", "reason": "cancelled", "diagnostics": "cancelled"}
+        report.resign_record(record)
+        with self.assertRaisesRegex(ValueError, "predecessor failure"):
+            report.validate_record(record)
+        with self.assertRaises(jsonschema.exceptions.ValidationError):
+            validator.validate(record)
+        del record["trials"][0]["predecessor_failure"]
+        report.resign_record(record)
+        report.validate_record(record)
+        validator.validate(record)
+        record["trials"][0]["predecessor_failure"] = None
+        report.resign_record(record)
+        report.validate_record(record)
+        validator.validate(record)
 
     def test_resigned_record_cannot_omit_or_invent_scenario_row_limit(self):
         for scenario, bad_value in (("singular_a", None), ("v_projection_preserves_ray", 128)):
