@@ -4,6 +4,7 @@
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
+#include <algorithm>
 #include <cmath>
 using namespace csl;
 using namespace csl::synthesis::strategy_b;
@@ -188,6 +189,35 @@ TEST_CASE("existing StrategyRegistry snapshots admitted native providers and ret
     REQUIRE(data.provider);CHECK(data.provider->actual->id.value!="oracle-lp");
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);CHECK(result.family->identity().request==request(p));
     CHECK(result.family->identity().lineage.size()==2);REQUIRE(result.objective.upper);CHECK(result.objective.upper->value==3);
+}
+TEST_CASE("registered Strategy B candidate identity mismatches are rejected by the caller boundary") {
+    const auto p=resolve(integrator(LinearTerminal{{0},3}));
+    const auto prepared=registered_prepared(p,request(p));
+    auto workspace=prepared.create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=accepted(workspace->run(context));
+    REQUIRE(result.family);
+    const auto& family=*result.family;
+    const FamilyIdentity expected{p.identity(),request(p),p.constraints().coordinates(),
+        {"csl.synthesis.strategy-b"},"1",{}};
+    REQUIRE(family.target()==FamilyTarget::candidate_relaxation);
+    REQUIRE(std::holds_alternative<CandidateFamily>(family.outcome()));
+    CHECK(check_synthesis_result(result,expected).empty());
+
+    auto expect_identity_rejection=[&](FamilyIdentity expected) {
+        const auto diagnostics=check_synthesis_result(result,expected);
+        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
+            return diagnostic.code==DiagnosticCode::evidence_mismatch && diagnostic.field=="family.identity";
+        }));
+        CHECK(family.target()==FamilyTarget::candidate_relaxation);
+        CHECK(std::holds_alternative<CandidateFamily>(family.outcome()));
+    };
+
+    auto wrong_problem=expected;wrong_problem.problem.value+="-foreign";expect_identity_rejection(wrong_problem);
+    auto wrong_request=expected;wrong_request.request.profile+="-foreign";expect_identity_rejection(wrong_request);
+    auto wrong_coordinates=expected;++wrong_coordinates.coordinates.horizon;expect_identity_rejection(wrong_coordinates);
+    auto wrong_strategy=expected;wrong_strategy.strategy={"csl.synthesis.foreign"};expect_identity_rejection(wrong_strategy);
+    auto wrong_version=expected;wrong_version.strategy_version+="-foreign";expect_identity_rejection(wrong_version);
 }
 TEST_CASE("late extraction materialization stop retains program evidence incumbent and feasible candidate") {
     const auto p=resolve(integrator());auto q=request(p);q.materialization_limit=7;
