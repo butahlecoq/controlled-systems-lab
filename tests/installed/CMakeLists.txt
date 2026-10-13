@@ -166,3 +166,13 @@ set_target_properties(installed_nominal_forward_client PROPERTIES CXX_EXTENSIONS
 add_test(NAME installed_nominal_forward_client COMMAND installed_nominal_forward_client)
 set_tests_properties(installed_nominal_forward_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed nominal-forward client: provider-backed integrator tube and authored labels passed")
+
+add_executable(installed_ts01_evidence_client ts01_evidence_client.cpp)
+target_link_libraries(installed_ts01_evidence_client PRIVATE CSL::strategy_ts01)
+set_target_properties(installed_ts01_evidence_client PROPERTIES CXX_EXTENSIONS OFF)
+if(MSVC)
+  target_compile_options(installed_ts01_evidence_client PRIVATE /W4 /WX /permissive-)
+else()
+  target_compile_options(installed_ts01_evidence_client PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+add_test(NAME installed_ts01_evidence_client COMMAND installed_ts01_evidence_client)

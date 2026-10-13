@@ -182,3 +182,50 @@ TEST_CASE("generic numerical and unchecked certificate strings cannot publish co
         CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,std::move(untrusted))));
     }
 }
+
+TEST_CASE("republication cannot alter the optimum claim or either bound") {
+    const auto result=run(request(resolve(source())));
+    REQUIRE(result.family);
+    const auto original=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto identity=result.family->identity();
+
+    auto changed_claim=original;
+    changed_claim.optimum.optimum.support=SymbolicArgument{"forged optimum","different theorem"};
+    CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,changed_claim)));
+
+    auto changed_lower=original;
+    REQUIRE(changed_lower.optimum.bounds.lower);
+    changed_lower.optimum.bounds.lower->value=-1;
+    CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,changed_lower)));
+
+    auto changed_upper=original;
+    REQUIRE(changed_upper.optimum.bounds.upper);
+    changed_upper.optimum.bounds.upper->value=1;
+    CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,changed_upper)));
+
+    auto changed_bound_evidence=original;
+    REQUIRE(changed_bound_evidence.optimum.bounds.lower);
+    changed_bound_evidence.optimum.bounds.lower->evidence.support=SymbolicArgument{"forged bound","different theorem"};
+    CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,changed_bound_evidence)));
+}
+
+TEST_CASE("result boundary keeps its outcome and bounds aligned with sealed family evidence") {
+    auto original=run(request(resolve(source())));
+    REQUIRE(original.family);
+    const auto identity=original.family->identity();
+    CHECK(check_synthesis_result(original,identity).empty());
+
+    auto changed_claim=original;
+    changed_claim.outcome.support=SymbolicArgument{"forged top-level outcome","not the family theorem"};
+    CHECK_FALSE(check_synthesis_result(changed_claim,identity).empty());
+
+    auto changed_lower=original;
+    REQUIRE(changed_lower.objective.lower);
+    changed_lower.objective.lower->value=-1;
+    CHECK_FALSE(check_synthesis_result(changed_lower,identity).empty());
+
+    auto changed_upper=original;
+    REQUIRE(changed_upper.objective.upper);
+    changed_upper.objective.upper->value=1;
+    CHECK_FALSE(check_synthesis_result(changed_upper,identity).empty());
+}

@@ -34,7 +34,12 @@ strategy ID/version, canonical coordinate schema, and an empty transformation
 lineage. It constructs its relation and proof internally and uses no solver
 samples or caller-supplied certificate references. Strategy A, Strategy B, and
 the general publisher remain fail-closed for complete families without this
-typed capability.
+typed capability. The issuer is a fully declared, non-redefinable public type
+with private issuance and a private nested workspace; public consumers can use
+the strategy but cannot mint its proof token. The token seals the exact optimum
+claim and both objective bounds along with the family identity and relation
+instance. Result validation also keeps the top-level claim and bounds aligned
+with this sealed family evidence.
 
 The outer API still labels this result with `Assurance::numerical`; validated
 assurance remains unavailable in the shared registry contract. The dedicated
@@ -43,3 +48,8 @@ clients. Artifact JSON preserves its binding metadata, but decoding creates an
 untrusted capability which the publication boundary rejects. A later artifact
 slice must provide a reviewed proof replay/exporter contract before serialized
 T-S01 results can be republished as complete families.
+
+Before merge, this profile requires independent mathematical review of the
+admission theorem and H-polyhedron, plus independent C++ type-safety review of
+the sealed issuance path and publication binding. This implementation and its
+tests do not satisfy those review gates by themselves.

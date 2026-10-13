@@ -5,15 +5,39 @@
 #include <set>
 #include <algorithm>
 namespace csl {
-Ts01AnalyticCoverageEvidence::Ts01AnalyticCoverageEvidence(FamilyIdentity binding,
-    std::shared_ptr<const JointRelationPayload> relation)
-    :binding_(std::move(binding)),relation_(std::move(relation)),trusted_(true) {}
-bool Ts01AnalyticCoverageEvidence::binds(const FamilyIdentity& identity,
-    const std::shared_ptr<const JointRelationPayload>& relation) const noexcept {
-    return trusted_ && binding_==identity && relation_ && relation_.get()==relation.get();
-}
 namespace {
 template<class... Visitors> struct Overloaded : Visitors... { using Visitors::operator()...; };
+bool same_support(const EvidenceSupport& left,const EvidenceSupport& right) noexcept {
+    if(left.index()!=right.index())return false;
+    return std::visit(Overloaded{
+        [](const Unestablished&,const Unestablished&){return true;},
+        [](const NumericalCheck& a,const NumericalCheck& b){return a.absolute_tolerance==b.absolute_tolerance&&
+            a.relative_tolerance==b.relative_tolerance&&a.max_residual==b.max_residual&&a.verifier.value==b.verifier.value;},
+        [](const SymbolicArgument& a,const SymbolicArgument& b){return a.reference==b.reference&&a.assumptions==b.assumptions;},
+        [](const CertificateReference& a,const CertificateReference& b){return a.artifact==b.artifact&&a.verifier==b.verifier;},
+        [](const auto&,const auto&){return false;}
+    },left,right);
+}
+bool same_claim(const ClaimEvidence& left,const ClaimEvidence& right) noexcept {
+    return left.problem==right.problem&&same_support(left.support,right.support);
+}
+bool same_bound(const std::optional<ObjectiveBound>& left,const std::optional<ObjectiveBound>& right) noexcept {
+    if(left.has_value()!=right.has_value())return false;
+    return !left||(left->value==right->value&&same_claim(left->evidence,right->evidence));
+}
+bool same_optimum(const OptimumEvidence& left,const OptimumEvidence& right) noexcept {
+    return same_claim(left.optimum,right.optimum)&&same_bound(left.bounds.lower,right.bounds.lower)&&
+        same_bound(left.bounds.upper,right.bounds.upper);
+}
+}
+Ts01AnalyticCoverageEvidence::Ts01AnalyticCoverageEvidence(FamilyIdentity binding,
+    std::shared_ptr<const JointRelationPayload> relation,OptimumEvidence optimum)
+    :binding_(std::move(binding)),relation_(std::move(relation)),optimum_(std::move(optimum)),trusted_(true) {}
+bool Ts01AnalyticCoverageEvidence::binds(const FamilyIdentity& identity,
+    const std::shared_ptr<const JointRelationPayload>& relation,const OptimumEvidence& optimum) const noexcept {
+    return trusted_ && binding_==identity && relation_ && relation_.get()==relation.get()&&same_optimum(optimum_,optimum);
+}
+namespace {
 bool matrix_matches(const Matrix& m, std::size_t rows, std::size_t cols) {
     return m.rows == rows && m.cols == cols &&
         (cols == 0 || rows <= std::numeric_limits<std::size_t>::max() / cols) &&
@@ -194,7 +218,7 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
             if (std::holds_alternative<Unestablished>(complete.optimum.optimum.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.optimum","Complete-family optimum needs supporting evidence"});
             if (const auto* exact=std::get_if<Ts01AnalyticCoverageEvidence>(&complete.completeness.support)) {
-                if (!exact->binds(identity,complete.relation.payload) ||
+                if (!exact->binds(identity,complete.relation.payload,complete.optimum) ||
                     identity.request.profile!="ts01_exact_integrator" ||
                     identity.request.target!=FamilyTarget::exact_optimal_relation ||
                     identity.strategy.value!="csl.synthesis.ts01-analytic" ||
@@ -342,6 +366,18 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const Synthesis
             add(DiagnosticCode::evidence_mismatch,"family.identity","Family identity differs from the prepared problem, request, coordinates, strategy or ordered transformation lineage");
         auto family_diagnostics=check_family_evidence(*result.family,expected.problem,expected.request.assurance);
         diagnostics.insert(diagnostics.end(),family_diagnostics.begin(),family_diagnostics.end());
+        if(const auto* complete=std::get_if<CompleteOptimalFamily>(&result.family->outcome());
+            complete&&std::holds_alternative<Ts01AnalyticCoverageEvidence>(complete->completeness.support)) {
+            if(result.outcome.subject!=complete->optimum.optimum.problem ||
+                !same_support(result.outcome.support,complete->optimum.optimum.support) ||
+                !result.outcome.assumptions.empty())
+                add(DiagnosticCode::evidence_mismatch,"result.outcome.ts01",
+                    "Top-level T-S01 optimality claim must match the claim sealed by the exact family capability");
+            if(!same_bound(result.objective.lower,complete->optimum.bounds.lower)||
+                !same_bound(result.objective.upper,complete->optimum.bounds.upper))
+                add(DiagnosticCode::evidence_mismatch,"result.objective.ts01",
+                    "Top-level T-S01 objective bounds must match the exact family capability");
+        }
         if (result.family->target()==FamilyTarget::exact_optimal_relation &&
             (result.termination!=Termination::completed || result.outcome.value!=MathematicalOutcome::optimal))
             add(DiagnosticCode::invalid_claim,"family.complete","Only a completed, supported optimal outcome may carry a complete family");

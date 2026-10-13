@@ -136,16 +136,12 @@ bool ExactJointRelation::contains(std::span<const double> point) const noexcept 
         point[4]>=0&&point[4]<=1&&exact_sum_is_one(point[3],point[4]);
 }
 
-class ProofFactory {
-public:
-    static Ts01AnalyticCoverageEvidence create(FamilyIdentity binding,
-        const std::shared_ptr<const JointRelationPayload>& relation) {
-        return Ts01AnalyticCoverageEvidence(std::move(binding),relation);
-    }
-};
+Ts01AnalyticCoverageEvidence AnalyticStrategy::issue_coverage(FamilyIdentity binding,
+    std::shared_ptr<const JointRelationPayload> relation,OptimumEvidence optimum) {
+    return Ts01AnalyticCoverageEvidence(std::move(binding),std::move(relation),std::move(optimum));
+}
 
-namespace {
-class Workspace final : public SynthesisWorkspace {
+class AnalyticStrategy::Workspace final : public SynthesisWorkspace {
 public:
     SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& request,
         const ExecutionContext& context) override {
@@ -177,11 +173,13 @@ public:
             return result;
         }
         auto payload=std::get<std::shared_ptr<const ExactJointRelation>>(std::move(relation));
-        const auto proof=ProofFactory::create(identity,payload);
         const SymbolicArgument derivation{"T-S01 exact analytic derivation",
             "x2=u0+u1 and (x2-1)^2>=0; zero is attained exactly when u0+u1=1. With u0,u1 in [0,1], the full canonical optimal history relation is the segment (0,s,1,s,1-s), s in [0,1]."};
         const ClaimEvidence optimum{problem.identity(),derivation};
-        CompleteOptimalFamily complete{{coordinates,request.representation,payload},{optimum,{}},
+        const ObjectiveBound bound{0,{problem.identity(),derivation}};
+        const OptimumEvidence optimum_evidence{optimum,{bound,bound}};
+        const auto proof=AnalyticStrategy::issue_coverage(identity,payload,optimum_evidence);
+        CompleteOptimalFamily complete{{coordinates,request.representation,payload},{optimum_evidence},
             {identity,proof},Assurance::numerical};
         auto published=FamilyPublisher::publish(identity,std::move(complete));
         if(const auto* errors=std::get_if<Diagnostics>(&published)) {
@@ -191,11 +189,13 @@ public:
         }
         result.outcome={problem.identity(),MathematicalOutcome::optimal,derivation,{}};
         result.family=std::get<OptimalFamily>(std::move(published));
-        const ObjectiveBound bound{0,{problem.identity(),derivation}};
-        result.objective={bound,bound};
+        result.objective=optimum_evidence.bounds;
         return result;
     }
 };
+
+std::unique_ptr<SynthesisWorkspace> AnalyticStrategy::make_workspace() {
+    return std::make_unique<Workspace>();
 }
 
 registry::StrategyRegistration make_registration() {
@@ -210,7 +210,7 @@ registry::StrategyRegistration make_registration() {
             auto fixed=std::get<registry::CheckedPipeline<>>(registry::check_pipeline());
             return registry::compose_strategy(std::move(fixed),
                 [](auto,const registry::StrategyRequest&,const registry::Requirements&) -> std::unique_ptr<SynthesisWorkspace> {
-                    return std::make_unique<Workspace>();
+                    return AnalyticStrategy::make_workspace();
                 });
         }};
 }

@@ -14,7 +14,7 @@
 
 namespace csl {
 namespace problem { class ResolvedProblem; }
-namespace synthesis::strategy_ts01 { class ProofFactory; }
+namespace synthesis::strategy_ts01 { class AnalyticStrategy; }
 // Revision 1.6. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
@@ -448,15 +448,17 @@ struct ValidatedCoverageEvidence { std::string certificate; ModuleId verifier; s
 // Default construction is intentionally untrusted (artifact decoding cannot
 // recreate the capability).
 class Ts01AnalyticCoverageEvidence {
-    FamilyIdentity binding_;
+    FamilyIdentity binding_{};
     std::shared_ptr<const JointRelationPayload> relation_;
+    OptimumEvidence optimum_{};
     bool trusted_{};
-    Ts01AnalyticCoverageEvidence(FamilyIdentity, std::shared_ptr<const JointRelationPayload>);
-    friend class synthesis::strategy_ts01::ProofFactory;
+    Ts01AnalyticCoverageEvidence(FamilyIdentity, std::shared_ptr<const JointRelationPayload>, OptimumEvidence);
+    friend class synthesis::strategy_ts01::AnalyticStrategy;
 public:
     Ts01AnalyticCoverageEvidence() = default;
     const FamilyIdentity& binding() const noexcept { return binding_; }
-    bool binds(const FamilyIdentity& identity, const std::shared_ptr<const JointRelationPayload>& relation) const noexcept;
+    bool binds(const FamilyIdentity& identity, const std::shared_ptr<const JointRelationPayload>& relation,
+        const OptimumEvidence& optimum) const noexcept;
 };
 struct CompletenessEvidence {
     FamilyIdentity binding;
@@ -569,6 +571,20 @@ struct StrategyConfiguration {
 class SynthesisWorkspace : public ExclusiveWorkspace {
 public: virtual SynthesisResult solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) = 0;
 };
+
+namespace synthesis::strategy_ts01 {
+// Complete declaration prevents consumers from defining the friend issuer.
+// Its nested workspace is the only issuance path and only publishes after the
+// exact profile has been independently checked.
+class AnalyticStrategy final {
+    class Workspace;
+    static Ts01AnalyticCoverageEvidence issue_coverage(FamilyIdentity,
+        std::shared_ptr<const JointRelationPayload>, OptimumEvidence);
+public:
+    // Exposes only the checked strategy workspace, never proof construction.
+    static std::unique_ptr<SynthesisWorkspace> make_workspace();
+};
+}
 class SynthesisStrategy {
 public:
     virtual ~SynthesisStrategy() = default;
