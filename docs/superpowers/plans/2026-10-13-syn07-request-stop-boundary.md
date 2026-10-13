@@ -46,7 +46,7 @@
 - [x] Run new tests and observe failures against the existing guard.
 - [x] Validate provenance for `ScopedRequestRejection` and `ScopedOperationStopped` without rewriting original provider facts.
 - [x] Run focused tests, full Release build/CTest, and `git diff --check`.
-- [ ] Commit/push and open a partial PR with exact coverage/ledger/verifier blockers; leave #155 open.
+- [x] Commit/push and open a partial PR with exact coverage/ledger/verifier blockers; leave #155 open.
 
 ## Execution evidence and remaining gates
 
@@ -55,3 +55,4 @@
 - Documentation verification passed for 174 Markdown documents and 459 local links with zero errors. Its generated verification inventory was restored rather than included as unrelated output.
 - Ruling: reuse pinned dependency **sources** from the existing SYN-03 build while keeping all generated/native build outputs in this worktree's `tmp/native`; do not share mutable build state.
 - Complete publication remains blocked on a reviewed and validated coverage-evidence procedure, arithmetic/tolerance policy, acceptance criteria and independent verifier. Partial publication remains blocked on reviewed every-history optimality support. A separately recorded independent runtime transformation ledger is still needed to prove the claimed lineage was executed. No new type or structural guard resolves those scientific gates.
+- Delivered as [partial PR #186](https://github.com/butahlecoq/controlled-systems-lab/pull/186) on `feat/syn07-outcome-boundary`. Independent review follows on the pushed head. Issue #155 remains open; this work does not authorize merge or closure.
