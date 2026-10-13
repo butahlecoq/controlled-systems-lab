@@ -5,12 +5,28 @@ the existing `GeometryPort`, and `csl.geometry.projection-materializer@1.0.0`
 through `ConversionPort`. No operation registry, LP backend, numerical
 coverage threshold or default dimension limit is added.
 
-This is a provisional analytic regression profile for GEO-05, not owner
-approval of the exact-operation/capacity profile proposed in architecture
-PRs [#146](https://github.com/butahlecoq/controlled-systems-lab/pull/146) and
-[#152](https://github.com/butahlecoq/controlled-systems-lab/pull/152).
-The general route does not invert the state matrix. An inverse adapter is
-not implemented or selected implicitly.
+The integrator selected the bounded first operation/capacity profile in the
+[GEO-05 decision on issue #51](https://github.com/butahlecoq/controlled-systems-lab/issues/51#issuecomment-6136015900).
+This resolves the initial profile choice from architecture PRs
+[#146](https://github.com/butahlecoq/controlled-systems-lab/pull/146) and
+[#152](https://github.com/butahlecoq/controlled-systems-lab/pull/152); it does
+not establish a universal dimension, memory, numerical-completeness, or
+production-capacity guarantee. The general route does not invert the state
+matrix. An inverse adapter is not implemented or selected implicitly.
+
+For the first report, H projection and nominal predecessor use binary64
+equality-pivot substitution and Fourier--Motzkin elimination, with relation
+support `Unestablished`. V projection preserves every selected vertex/ray
+image, including duplicates and zero images, with its symbolic argument
+relative to the stored input. Lazy creation does no elimination; materializing
+it invokes the selected `ConversionPort` provider.
+
+The report fixtures include the offset-free integrator
+`x' = x + u`, `X=[-2,2]`, `U=[-1,1]`, and target `S=[1,3]`; the analytic
+predecessor is `[0,2]`. Its joint H input has 6 rows and one elimination step
+has an analytically expected peak of 6 rows (`p*q+z`, where `p=q=2`, `z=2`).
+These counts characterize this fixture only. The report's checks are literal
+memberships/boundaries, not a set-equality or validated-arithmetic certificate.
 
 ## Supported projection requests
 
@@ -135,8 +151,12 @@ claim and are removed. The provider's original child claim remains attached
 to the immutable lazy payload when present.
 
 `max_rows` is a caller-selected limit on H inequalities plus equalities,
-including intermediate rows. It is enforced on H materialization, so lazy
-creation can succeed before a later materialization exceeds that policy.
+including intermediate rows. The first report configures `max_rows=128` on the
+selected `GeometryPort` projection registration and the `ConversionPort`
+materializer; it is a per-report provider setting, not a field on the operation
+request or a system default. It gives headroom above the six-row fixture and
+does not demonstrate capacity at 128 rows. It is enforced on H materialization,
+so lazy creation can succeed before a later materialization exceeds that policy.
 The one-row empty H encoding is checked against that limit before construction,
 so `max_rows=0` cannot publish a contradiction row.
 There is no built-in universal dimension or output-size threshold. Counts,
@@ -167,5 +187,5 @@ records and saved-data HTML, independent artifact/measurement review,
 visual QA, registered publication and live URL/download verification under
 the [published-results policy](../architecture/published-algorithm-results.md)
 and [report-record contract](algorithm-report-records.md). Existing report
-records and catalogues are unchanged. GEO-05 remains open until that
-delivery and the reviewed exact-operation/capacity profile are satisfied.
+records and catalogues are unchanged. GEO-05 remains open until that delivery
+is complete and independently reviewed.
