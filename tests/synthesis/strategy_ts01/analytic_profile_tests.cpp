@@ -15,19 +15,34 @@ template<class T,class... R> T take(std::variant<T,R...> value) {
     return std::get<T>(std::move(value));
 }
 SetHandle interval(std::string id,double lower,double upper) {
-    return take(sets::make_h({std::move(id),1,{"u"}},
-        {take(numeric::snapshot(Matrix{2,1,{1,-1}})),
-         take(numeric::snapshot_vector(Vector{upper,-lower})),
-         take(numeric::snapshot(Matrix{0,1,{}})),
-         take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    Matrix inequalities{2,1,{1,-1}};
+    Matrix equalities{0,1,{}};
+    const sets::Description description{SetId{std::move(id)},1,std::vector<std::string>{"u"}};
+    const sets::HRepresentation representation{take(numeric::snapshot(inequalities)),
+        take(numeric::snapshot_vector(Vector{upper,-lower})),take(numeric::snapshot(equalities)),
+        take(numeric::snapshot_vector(Vector{}))};
+    return take(sets::make_h(description,representation)).as_handle();
+}
+void set_quadratic_objective(Problem& problem,double hessian_value,double linear_value,double constant) {
+    problem.objective.emplace<QuadraticTerminal>();
+    auto& objective=std::get<QuadraticTerminal>(problem.objective);
+    objective.Q.rows=1;objective.Q.cols=1;objective.Q.values=Vector{hessian_value};
+    objective.linear=Vector{linear_value};objective.offset=constant;
 }
 Problem source() {
-    return {{"ts01"},std::make_shared<const SystemModel>(SystemModel{
-        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{1}},{1,1,{1}},
-            {1,0,{}},{0}}},{}}),{0,1,2},KnownInitial{{0}},
-        ContinuousDomain{{interval("u0",0,1),interval("u1",0,1)}},
-        {UniversalSet{1},UniversalSet{1},UniversalSet{1}},{},{},
-        InformationPattern::nominal_open_loop,QuadraticTerminal{{1,1,{2}},{-2},1}};
+    Matrix state_transition{};state_transition.rows=1;state_transition.cols=1;state_transition.values=Vector{1};
+    Matrix control_transition{};control_transition.rows=1;control_transition.cols=1;control_transition.values=Vector{1};
+    Matrix external_transition{};external_transition.rows=1;external_transition.cols=0;
+    LinearStage transition{std::move(state_transition),std::move(control_transition),std::move(external_transition),Vector{0}};
+    Dynamics dynamics{{1,1,0},TimeDomain::discrete,std::move(transition)};
+    auto model=std::make_shared<const SystemModel>(SystemModel{std::move(dynamics),{}});
+    Problem problem{};problem.id={"ts01"};problem.model=std::move(model);problem.times={0,1,2};
+    problem.initial=KnownInitial{Vector{0}};
+    problem.controls=ContinuousDomain{{interval("u0",0,1),interval("u1",0,1)}};
+    problem.states={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    problem.information=InformationPattern::nominal_open_loop;
+    set_quadratic_objective(problem,2,-2,1);
+    return problem;
 }
 problem::ResolvedProblem resolve(Problem p) {
     return take(problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
@@ -106,11 +121,13 @@ TEST_CASE("registered T-S01 exact profile publishes its canonical complete famil
 }
 
 TEST_CASE("T-S01 admission rejects objective, dynamics, controls, initial and temporal mutations") {
-    auto p=source();p.objective=ResidualNormTerminal{{1,1,{1}},{1}};
+    auto p=source();p.objective.emplace<ResidualNormTerminal>();
+    auto& residual=std::get<ResidualNormTerminal>(p.objective);
+    residual.map.rows=1;residual.map.cols=1;residual.map.values=Vector{1};residual.target=Vector{1};
     CHECK(rejected(p));
-    p=source();p.objective=QuadraticTerminal{{1,1,{1}},{-2},1};
+    p=source();set_quadratic_objective(p,1,-2,1);
     CHECK(rejected(p));
-    p=source();p.objective=QuadraticTerminal{{1,1,{2}},{-2},0};
+    p=source();set_quadratic_objective(p,2,-2,0);
     CHECK(rejected(p));
     p=source();auto altered=std::make_shared<SystemModel>(*p.model);
     std::get<LinearStage>(altered->dynamics.stages).A.values[0]=0;p.model=std::move(altered);
@@ -172,8 +189,10 @@ TEST_CASE("generic numerical and unchecked certificate strings cannot publish co
     auto fake=std::make_shared<const JointRelationPayload>();
     const auto arbitrary=SymbolicArgument{"looks like a proof","not a trusted analytic capability"};
     for(const auto& support:std::vector<std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>>{
-        NumericalCoverageEvidence{"always-pass",{0,0},{"verifier"},"residual below invented tolerance"},
-        ValidatedCoverageEvidence{"artifact:unverified","checker:unregistered","exact-looking"}}) {
+        std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>{
+            NumericalCoverageEvidence{"always-pass",{0,0},{"verifier"},"residual below invented tolerance"}},
+        std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>{
+            ValidatedCoverageEvidence{"artifact:unverified","checker:unregistered","exact-looking"}}}) {
         const auto completeness_support=std::holds_alternative<NumericalCoverageEvidence>(support)?
             std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence>{std::get<NumericalCoverageEvidence>(support)}:
             std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence>{std::get<ValidatedCoverageEvidence>(support)};
