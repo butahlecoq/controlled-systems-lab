@@ -85,6 +85,16 @@ public:
             const auto expected=original_.constraints().coordinates();
             if(identity.coordinates!=expected)
                 mismatch("family.coordinates","family identity coordinates differ from original problem");
+            if(const auto& binding=report_.input.expected_synthesis) {
+                if(identity.request!=binding->request)
+                    mismatch("family.expected_synthesis.request","reported family request differs from the independently supplied effective request");
+                if(identity.strategy!=binding->strategy)
+                    mismatch("family.expected_synthesis.strategy","reported strategy identity differs from the independently supplied strategy");
+                if(identity.strategy_version!=binding->strategy_version)
+                    mismatch("family.expected_synthesis.strategy_version","reported strategy version differs from the independently supplied version");
+                if(identity.lineage!=binding->lineage)
+                    mismatch("family.expected_synthesis.lineage","reported ordered transformation lineage differs from the independently supplied lineage");
+            } else mismatch("family.expected_synthesis","an independent expected synthesis binding is required to verify a reported family");
             const auto family_bound=[&](const std::optional<ObjectiveBound>& bound,const std::string& field) {
                 if(bound) {claim(bound->evidence,field);if(!std::isfinite(bound->value))mismatch(field,"bound must be finite");}
             };

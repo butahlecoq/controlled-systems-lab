@@ -202,6 +202,7 @@ TEST_CASE("published candidate and claimed optimum never establish family covera
         {1e-8,1e-8},Assurance::numerical,{"opaque-family"},{}};
     const FamilyIdentity identity{p.identity(),effective,coordinates,{"candidate-strategy"},"1",{}};
     const JointRelation relation{coordinates,effective.representation,{}};
+    q.expected_synthesis=ExpectedSynthesisBinding{effective,{"candidate-strategy"},"1",{}};
     q.family=accepted(FamilyPublisher::publish(identity,CandidateFamily{relation,
         HeuristicRelationEvidence{"literal candidate"},WitnessFeasibilityEvidence{q.witness,claim}}));
     auto r=verify_trajectory(p,q);
@@ -224,6 +225,72 @@ TEST_CASE("published candidate and claimed optimum never establish family covera
         HeuristicRelationEvidence{"literal candidate"},Unestablished{}}));
     CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
     q.family.reset();q.outcome->subject={"wrong"};CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+}
+TEST_CASE("published synthesis family bindings match only an independent expected synthesis identity") {
+    auto p=resolve(scalar());
+    auto q=request(p);
+    ClaimEvidence claim{p.identity(),NumericalCheck{0,0,0,{"backend"}}};
+    const auto coordinates=p.constraints().coordinates();
+    const FamilyRequest effective{"nominal",p.identity(),FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{"opaque-family"},{}};
+    const std::vector<TransformStepIdentity> lineage{
+        {{"transform/1"},{"source/set"},{"intermediate/set"},{"converter"},"2"},
+        {{"transform/2"},{"intermediate/set"},{"family/set"},{"projector"},"3"}};
+    const ModuleId strategy{"candidate-strategy"};
+    const std::string strategy_version="1";
+    const ExpectedSynthesisBinding expected{effective,strategy,strategy_version,lineage};
+    const auto family=[&](const FamilyRequest& family_request,const ModuleId& family_strategy,
+                          const std::string& family_version,
+                          const std::vector<TransformStepIdentity>& family_lineage) {
+        const FamilyIdentity identity{p.identity(),family_request,coordinates,family_strategy,family_version,family_lineage};
+        const JointRelation relation{coordinates,family_request.representation,{}};
+        return accepted(FamilyPublisher::publish(identity,CandidateFamily{relation,
+            HeuristicRelationEvidence{"literal candidate"},WitnessFeasibilityEvidence{q.witness,claim}}));
+    };
+    q.family=family(effective,strategy,strategy_version,lineage);
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+
+    q.expected_synthesis=expected;
+    auto report=verify_trajectory(p,q);
+    CHECK(report.bindings==CheckStatus::numerical_pass);
+    CHECK(report.feasibility==CheckStatus::numerical_pass);
+    CHECK(report.optimality==CheckStatus::unsupported);
+    CHECK(report.completeness==CheckStatus::unsupported);
+    CHECK(report.validated==CheckStatus::unsupported);
+
+    auto wrong_request=effective;
+    wrong_request.profile="different-effective-request";
+    q.family=family(wrong_request,strategy,strategy_version,lineage);
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+
+    auto wrong_strategy=strategy;
+    wrong_strategy.value="different-strategy";
+    q.family=family(effective,wrong_strategy,strategy_version,lineage);
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+
+    q.family=family(effective,strategy,"2",lineage);
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+
+    auto wrong_lineage=lineage;
+    std::reverse(wrong_lineage.begin(),wrong_lineage.end());
+    q.family=family(effective,strategy,strategy_version,wrong_lineage);
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+
+    q.family.reset();
+    q.expected_synthesis.reset();
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::numerical_pass);
+    CHECK(verify_trajectory(p,q).optimality==CheckStatus::unsupported);
+    CHECK(verify_trajectory(p,q).completeness==CheckStatus::unsupported);
+}
+TEST_CASE("legacy positional trajectory request aggregate remains source compatible") {
+    auto p=resolve(scalar());
+    const auto witness=request(p).witness;
+    TrajectoryRequest legacy{witness,Assurance::numerical,std::nullopt,std::nullopt,{}, {}, {}};
+    const auto report=verify_trajectory(p,legacy);
+    CHECK(report.bindings==CheckStatus::numerical_pass);
+    CHECK(report.feasibility==CheckStatus::numerical_pass);
+    CHECK(report.optimality==CheckStatus::unsupported);
+    CHECK(report.completeness==CheckStatus::unsupported);
 }
 TEST_CASE("V membership checks actual original rows and retains registered provenance") {
     auto input=scalar();input.states[1]=segment_v();auto p=resolve(input);auto q=request(p);

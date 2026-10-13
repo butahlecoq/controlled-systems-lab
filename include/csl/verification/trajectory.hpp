@@ -8,6 +8,14 @@ struct Limits {
     std::size_t residuals{1000000};
     std::size_t membership_queries{1000};
 };
+// Caller-owned expectations used to independently bind a reported family.
+// Problem identity and ordered joint coordinates are derived from ResolvedProblem.
+struct ExpectedSynthesisBinding {
+    FamilyRequest request;
+    ModuleId strategy;
+    std::string strategy_version;
+    std::vector<TransformStepIdentity> lineage;
+};
 struct TrajectoryRequest {
     Witness witness;
     Assurance assurance{Assurance::numerical};
@@ -17,6 +25,9 @@ struct TrajectoryRequest {
     // Retained program provenance only; no unprovided program-to-problem proof is inferred.
     std::vector<ProgramObjectiveEvidence> backend_bounds;
     Limits limits{};
+    // Appended to preserve positional aggregate initialization of prior fields.
+    // Required when family is supplied; omitted for witness-only verification.
+    std::optional<ExpectedSynthesisBinding> expected_synthesis;
 };
 struct NamedResidual {
     std::string field;
@@ -30,9 +41,9 @@ struct TrajectoryReport {
     Verifier verifier{{"csl.trajectory.original"},"1"};
     NumericalPolicy numerical{};
     Termination termination{Termination::completed};
-    // numerical_pass means only the identity/shape bindings expressible by the
-    // current public claims passed. It does not cover effective FamilyRequest,
-    // strategy/version or transformation-lineage bindings (SYN-07 #155).
+    // numerical_pass means all available caller-supplied identity bindings and
+    // the original-problem, witness, coordinate and evidence bindings passed.
+    // It does not establish optimality, completeness or validated evidence.
     CheckStatus bindings{CheckStatus::not_checked};
     CheckStatus feasibility{CheckStatus::not_checked};
     CheckStatus objective{CheckStatus::not_checked};
