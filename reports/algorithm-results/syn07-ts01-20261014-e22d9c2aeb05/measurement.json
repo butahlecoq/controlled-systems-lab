@@ -2,20 +2,20 @@
   "algorithm_source_checkout": {
     "clean_after_run": true,
     "clean_before_build": true,
-    "head": "28f305387f66caf8f72f057e16a39050cc5dbdba",
-    "strategy_header_sha256": "4c99a639949a0b2d3daca82845c269e8b9bfcfa2ed3b0243d0925d07972866df",
-    "strategy_source_sha256": "9f2c67de31bb2578ed41ebb1892a329916f10b11dfa1b803a47ef40d292e6634",
-    "tree_sha": "1dbfd4a4c4120194df7b4903c4f07409e2679bbc"
+    "head": "e22d9c2aeb05dc7567038801e6a21b8780184c9e",
+    "strategy_header_sha256": "d3ac738bed95a3bcf71fe922a43c947e1a1065bdbfa8d41f3e0d40cb8c893bbd",
+    "strategy_source_sha256": "5c29baf65a3243fc9b9fa41746553c8a23aca08e0ad2e23a7a826fa4ab7c75fa",
+    "tree_sha": "0884e4e856b18d0ec8f39ac20459310432b65476"
   },
-  "algorithm_source_commit": "28f305387f66caf8f72f057e16a39050cc5dbdba",
+  "algorithm_source_commit": "e22d9c2aeb05dc7567038801e6a21b8780184c9e",
   "binary": {
-    "bytes": 383488,
+    "bytes": 401920,
     "configuration": "Release",
     "cxx_standard": "c++20",
     "ndebug": true,
     "path": "release-build\\Release\\csl_syn07_ts01_report.exe",
     "release_properties": {
-      "AdditionalIncludeDirectories": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-p2\\solver-source\\include;%(AdditionalIncludeDirectories)",
+      "AdditionalIncludeDirectories": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-e22d9c2\\solver-source\\include;%(AdditionalIncludeDirectories)",
       "AssemblerListingLocation": "$(IntDir)",
       "BasicRuntimeChecks": "Default",
       "ConformanceMode": "true",
@@ -35,13 +35,13 @@
       "UseFullPaths": "false",
       "WarningLevel": "Level4"
     },
-    "sha256": "e7157ba6e934c90342b89973703f6515bffb6414ab239a54be205c1d7034b396"
+    "sha256": "9609d2d5a2a4d740e64de3f1a4bcf108a2c760b801decb940ff2e029345e8c0d"
   },
   "build_provenance": {
     "build_command": [
       "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
       "--build",
-      "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-p2\\release-build",
+      "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-e22d9c2\\release-build",
       "--config",
       "Release",
       "--target",
@@ -49,8 +49,8 @@
       "--parallel",
       "4"
     ],
-    "build_log_sha256": "87e27b9b9b1f62d323c71cad0fe16e80459aa3d12e29daef263133fa5c53351e",
-    "cmake_cache_sha256": "a946b1e093d4e62d8676100958a42099cefcfb53207fbd39d549e61a957ae6a2",
+    "build_log_sha256": "c82b46be06eac45a84b2fc1c476a13e97c431043f1fd56422ee01b7403dde240",
+    "cmake_cache_sha256": "699dccf4eca34a047713a58e93e84e2e4ddef381ced67e7c38f79944b1d84fe3",
     "cmake_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
     "cmake_sha256": "b540efece9172930877dff0c9fedda7a69b0dd82446e0e8bba13372aac6c8ac8",
     "cmake_version": "cmake version 3.31.6-msvc6",
@@ -64,20 +64,20 @@
       "-S",
       "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\reports\\algorithm-results\\tooling\\ts01\\runner",
       "-B",
-      "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-p2\\release-build",
+      "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-e22d9c2\\release-build",
       "-G",
       "Visual Studio 17 2022",
       "-A",
       "x64",
-      "-DCSL_SOURCE_ROOT=C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-p2\\solver-source",
+      "-DCSL_SOURCE_ROOT=C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-e22d9c2\\solver-source",
       "-DBUILD_TESTING=OFF",
       "-DFETCHCONTENT_BASE_DIR=C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-report\\_deps",
       "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"
     ],
-    "configure_log_sha256": "827de77f08830c99c8cbe8d7b564cd0e8a4ebeee9427cb957e0240980513f16f",
+    "configure_log_sha256": "855f207ac2bd8b4fefac699850cdb17c1a2d787d04b975bb22b4e2737c64a521",
     "dependency_cache": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-report\\_deps",
     "generator": "Visual Studio 17 2022 x64",
-    "target_project_sha256": "58485daed06e6def34529078ae16fcb093764edb5fc3ad2b80a35ec91367550d"
+    "target_project_sha256": "018749b6a99ebbc8a2e265e6a5c32c4f62179702d51626381186572cf9408761"
   },
   "counts": {
     "all_outputs_consumed_and_validated": true,
@@ -94,13 +94,13 @@
     "os": "Windows-11-10.0.22631-SP0",
     "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
     "python": "3.13.5",
-    "total_cpu_percent_1s_after": 5.3,
-    "total_cpu_percent_1s_before": 4.2
+    "total_cpu_percent_1s_after": 1.8,
+    "total_cpu_percent_1s_before": 2.6
   },
   "events": [
     {
       "consumed_result_marker": 1805158144890476961,
-      "elapsed_ns": 197200,
+      "elapsed_ns": 232300,
       "error": "",
       "objective_lower": 0,
       "objective_upper": 0,
@@ -114,7 +114,7 @@
     },
     {
       "consumed_result_marker": 1805158144890476961,
-      "elapsed_ns": 34500,
+      "elapsed_ns": 40400,
       "error": "",
       "objective_lower": 0,
       "objective_upper": 0,
@@ -128,7 +128,7 @@
     },
     {
       "consumed_result_marker": 1805158144890476961,
-      "elapsed_ns": 29400,
+      "elapsed_ns": 33400,
       "error": "",
       "objective_lower": 0,
       "objective_upper": 0,
@@ -142,7 +142,7 @@
     },
     {
       "consumed_result_marker": 1805158144890476961,
-      "elapsed_ns": 27200,
+      "elapsed_ns": 30400,
       "error": "",
       "objective_lower": 0,
       "objective_upper": 0,
@@ -156,7 +156,7 @@
     },
     {
       "consumed_result_marker": 1805158144890476961,
-      "elapsed_ns": 26500,
+      "elapsed_ns": 28900,
       "error": "",
       "objective_lower": 0,
       "objective_upper": 0,
@@ -170,7 +170,7 @@
     },
     {
       "consumed_result_marker": 1805158144890476961,
-      "elapsed_ns": 26500,
+      "elapsed_ns": 28700,
       "error": "",
       "objective_lower": 0,
       "objective_upper": 0,
@@ -184,7 +184,7 @@
     },
     {
       "consumed_result_marker": 1805158144890476961,
-      "elapsed_ns": 26000,
+      "elapsed_ns": 28600,
       "error": "",
       "objective_lower": 0,
       "objective_upper": 0,
@@ -198,7 +198,7 @@
     },
     {
       "consumed_result_marker": 1805158144890476961,
-      "elapsed_ns": 26900,
+      "elapsed_ns": 29000,
       "error": "",
       "objective_lower": 0,
       "objective_upper": 0,
@@ -211,19 +211,26 @@
       "warmup": false
     }
   ],
-  "harness_commit": "94cc44f2d94b45f190b852ee4e69bf18a4d11a1a",
+  "harness_commit": "be76ba326567d1bccda36934a19e78ba6cf25bcc",
   "harness_sources": {
     "driver_sha256": "1983dac4e12ae69cffd1a80e75a358effb28208e03fa944fcb244fd98e3f698b",
     "runner_cmake_sha256": "60c5f83bc3bacd682bd6c22c1240bfa02982817bfd673520248b5024a1ea3f27"
   },
   "limiter": {
     "available": false,
-    "reason": "No separate sampling/call-stack profile was collected; this record does not attribute the observed time or establish capacity."
+    "reason": "No usable process/call-stack profile was collected; the limiting function is unknown. A separate Windows Performance Recorder CPU-stack capture was attempted after the timed run but failed before recording: wpr.exe -start CPU -filemode returned HRESULT 0xc5585011 (Failed to enable the policy to profile system performance). No profile-mode solver run was made.",
+    "separate_profile_attempt": {
+      "command": "wpr.exe -start CPU -filemode",
+      "result": "failed before recording; no call-stack attribution available",
+      "stderr": "Failed to enable the policy to profile system performance. Error code: 0xc5585011",
+      "stdout": "Profile Id: CPU.Verbose.File; Failed to enable the policy to profile system performance.",
+      "timed_solver_run_after_start": "not run"
+    }
   },
   "order": "One excluded warmup, followed by seven measured repetitions in one process. Single strategy only; alternation is inapplicable and no comparator was measured.",
   "performance_conclusion": "inconclusive",
   "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "raw_stdout_sha256": "999a9a9a1d14d9882460dbbd3dec49bc118f7ff45512f2c48f4f98451d897c43",
+  "raw_stdout_sha256": "01940077d1e92c7f948bb98a12c6687adf0ef4168e2fd11276dd138b81c35e72",
   "schema": "csl.syn07-ts01-measurement-collection/1",
   "scope": "Fresh problem construction and resolution, strategy registration/selection/preparation, exclusive workspace creation, public bound-workspace run, and independent complete-H-relation plus exact-membership validation. Excludes process startup, JSON serialization, build, collection, and rendering.",
   "strategy_observation": {
@@ -237,18 +244,18 @@
     "termination": "completed"
   },
   "timing_ns": {
-    "max": 34500,
-    "median": 26900,
-    "min": 26000,
+    "max": 40400,
+    "median": 29000,
+    "min": 28600,
     "observations": [
-      34500,
-      29400,
-      27200,
-      26500,
-      26500,
-      26000,
-      26900
+      40400,
+      33400,
+      30400,
+      28900,
+      28700,
+      28600,
+      29000
     ],
-    "range": 8500
+    "range": 11800
   }
 }

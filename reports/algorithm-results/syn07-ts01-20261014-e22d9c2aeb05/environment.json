@@ -5,6 +5,6 @@
   "os": "Windows-11-10.0.22631-SP0",
   "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
   "python": "3.13.5",
-  "total_cpu_percent_1s_after": 5.3,
-  "total_cpu_percent_1s_before": 4.2
+  "total_cpu_percent_1s_after": 1.8,
+  "total_cpu_percent_1s_before": 2.6
 }

@@ -1,9 +1,0 @@
-repetition,warmup,status,elapsed_ns,consumed_result_marker,termination,outcome,objective_lower,objective_upper,residuals_available
-0,True,passed,197200,1805158144890476961,completed,optimal,0,0,False
-1,False,passed,34500,1805158144890476961,completed,optimal,0,0,False
-2,False,passed,29400,1805158144890476961,completed,optimal,0,0,False
-3,False,passed,27200,1805158144890476961,completed,optimal,0,0,False
-4,False,passed,26500,1805158144890476961,completed,optimal,0,0,False
-5,False,passed,26500,1805158144890476961,completed,optimal,0,0,False
-6,False,passed,26000,1805158144890476961,completed,optimal,0,0,False
-7,False,passed,26900,1805158144890476961,completed,optimal,0,0,False
