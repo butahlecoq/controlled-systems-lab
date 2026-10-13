@@ -201,6 +201,17 @@ class Geo05PublicationTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
                     geo05.adapt(bundle)
 
+    def test_surplus_trials_csv_field_is_rejected_after_bundle_reseal(self):
+        with tempfile.TemporaryDirectory() as temp:
+            bundle = create_bundle(Path(temp), record())
+            csv_path = bundle / "trials.csv"
+            lines = csv_path.read_text(encoding="utf-8").splitlines()
+            lines[1] += ",unregistered-extra-value"
+            csv_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            reseal_source_bundle(bundle)
+            with self.assertRaisesRegex(ValueError, "trials.csv"):
+                geo05.adapt(bundle)
+
     def test_measurement_adapter_preserves_attempts_and_identity(self):
         saved = record(failed=True)
         publication = geo05.adapt_payload(saved)

@@ -307,6 +307,8 @@ def _validate_saved_data(bundle, record):
     if reader.fieldnames != list(fields) or len(rows) != len(expected_rows):
         raise ValueError("GEO-05 trials.csv inventory differs from records")
     for actual, expected in zip(rows, expected_rows):
+        if None in actual or any(value is None for value in actual.values()):
+            raise ValueError("GEO-05 trials.csv row width differs from header")
         flat = {**expected, **expected.get("durations_ns", {})}
         if any(actual.get(field) != ("" if flat.get(field) is None else str(flat.get(field))) for field in fields):
             raise ValueError("GEO-05 trials.csv differs from saved records")
