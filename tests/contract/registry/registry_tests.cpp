@@ -974,6 +974,19 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
                         ModuleId{"synthetic"},std::string{"1"}}, {false,false,1,false}};
                 return result;
             }
+            if (request.profile=="resource-limit") {
+                result.termination=Termination::resource_limit;
+                result.objective={ObjectiveBound{4,support},ObjectiveBound{5,support}};
+                auto candidate=FamilyPublisher::publish(identity,CandidateFamily{relation,
+                    HeuristicRelationEvidence{"synthetic"},
+                    WitnessFeasibilityEvidence{result.incumbents[0].witness,support}});
+                result.family=std::get<OptimalFamily>(std::move(candidate));
+                result.spans.push_back({0,{},ModuleId{"synthetic"},0,1});
+                result.stop=ScopedOperationStopped{{StopReason::resource_limit,"synthetic resource budget exhausted"},
+                    RequestProvenance{{"generated/step/4"},"strategy",{"synthetic"},std::string{"1"},
+                        ModuleId{"synthetic"},std::string{"1"}}, {true,true,1,true}};
+                return result;
+            }
             if (request.target==FamilyTarget::candidate_relaxation) {
                 if (request.profile=="outcome-identity-mismatch") result.outcome.subject={"other-problem"};
                 auto candidate_identity=identity;
@@ -1163,6 +1176,46 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
         CHECK(value.incumbents[0].witness.original_objective==5);
         CHECK(value.spans.size()==1);
     }
+    request.family.target=FamilyTarget::candidate_relaxation;
+    request.family.profile="resource-limit";
+    auto limited_prepared=registry.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(limited_prepared));
+    const auto limited_answer=std::get<PreparedStrategy>(std::move(limited_prepared)).create()->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(limited_answer));
+    const auto& limited=std::get<SynthesisResult>(limited_answer);
+    CHECK(limited.termination==Termination::resource_limit);
+    CHECK(limited.outcome.subject==request.problem.identity());
+    CHECK(limited.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(limited.objective.lower.has_value());
+    CHECK(limited.objective.lower->value==4);
+    CHECK(limited.objective.lower->evidence.problem==request.problem.identity());
+    REQUIRE(limited.objective.upper.has_value());
+    CHECK(limited.objective.upper->value==5);
+    CHECK(limited.objective.upper->evidence.problem==request.problem.identity());
+    REQUIRE(limited.incumbents.size()==1);
+    CHECK(limited.incumbents[0].witness.original_objective==5);
+    CHECK(limited.incumbents[0].feasibility.problem==request.problem.identity());
+    REQUIRE(limited.family.has_value());
+    CHECK(limited.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(limited.family->identity().request==request.family);
+    CHECK(std::holds_alternative<WitnessFeasibilityEvidence>(
+        std::get<CandidateFamily>(limited.family->outcome()).feasibility));
+    REQUIRE(limited.spans.size()==1);
+    CHECK(limited.spans[0].module==ModuleId{"synthetic"});
+    CHECK(limited.spans[0].start_seconds==0);
+    CHECK(limited.spans[0].end_seconds==1);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(limited.stop));
+    const auto& scoped=std::get<ScopedOperationStopped>(limited.stop);
+    CHECK(scoped.stop.reason==StopReason::resource_limit);
+    CHECK(scoped.stop.diagnostics=="synthetic resource budget exhausted");
+    CHECK(scoped.request.request.value=="generated/step/4");
+    CHECK(scoped.request.port=="strategy");
+    CHECK(scoped.request.requested_module==ModuleId{"synthetic"});
+    CHECK(scoped.request.actual_module==std::optional<ModuleId>{ModuleId{"synthetic"}});
+    CHECK(scoped.retained.lower_bound);
+    CHECK(scoped.retained.upper_bound);
+    CHECK(scoped.retained.incumbents==1);
+    CHECK(scoped.retained.partial_or_candidate_family);
 }
 
 TEST_CASE("public strategy rejects unbounded outcomes that retain a finite lower bound") {
