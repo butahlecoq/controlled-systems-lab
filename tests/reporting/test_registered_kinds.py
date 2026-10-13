@@ -17,6 +17,7 @@ import geo04_registered_reports as geo04_publication
 import geo02_registered_reports as geo02_publication
 import geo05_registered_reports as geo05_publication
 import syn01_registered_reports as syn01_publication
+import syn02_registered_reports as syn02_publication
 SITE_PATH = Path(__file__).resolve().parents[2] / 'scripts' / 'reports' / 'site.py'
 SITE_SPEC = importlib.util.spec_from_file_location('csl_report_site', SITE_PATH)
 site = importlib.util.module_from_spec(SITE_SPEC)
@@ -391,7 +392,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt05-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt05-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward','syn02-terminal-minimizers'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))
@@ -400,15 +401,16 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertRegex(report['payload_sha256'],r'^[0-9a-f]{64}$')
             self.assertRegex(report['source_commit'],r'^[0-9a-f]{40}$')
             self.assertRegex(report['zip_sha256'],r'^[0-9a-f]{64}$')
-            if report['report_kind'] in ('opt05-hull','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward'):
+            if report['report_kind'] in ('opt05-hull','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward','syn02-terminal-minimizers'):
                 self.assertTrue({'measured_scope','evidence_limits'} <= set(report))
                 # Per-kind saved schemas/manifests are validated at the boundary,
                 # then projected into the same catalogue identity contract.
                 self.assertIn('source_report_id',report)
                 self.assertNotEqual(report['report_id'],report['source_report_id'])
-                publisher=(geo02_publication if report['report_kind']=='geo02-affine-sum' else
-                           geo05_publication if report['report_kind']=='geo05-projection-predecessor' else
-                           syn01_publication if report['report_kind']=='syn01-nominal-forward' else registered)
+                publisher=(syn02_publication if report['report_kind']=='syn02-terminal-minimizers' else
+                           syn01_publication if report['report_kind']=='syn01-nominal-forward' else
+                           geo02_publication if report['report_kind']=='geo02-affine-sum' else
+                           geo05_publication if report['report_kind']=='geo05-projection-predecessor' else registered)
                 adapted=publisher.adapt(root/report['source_report_id'])
                 self.assertEqual((report['report_id'],report['report_kind'],report['payload_sha256'],report['source_commit']),
                                  (adapted.report_id,adapted.kind,adapted.payload_sha256,adapted.source_commit))
