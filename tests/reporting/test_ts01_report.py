@@ -14,7 +14,7 @@ import ts01_registered_reports
 
 class Ts01SavedReportTests(unittest.TestCase):
     def setUp(self):
-        self.bundle = ROOT / "reports" / "algorithm-results" / "syn07-ts01-20261013-fe5095ce27ab"
+        self.bundle = ROOT / "reports" / "algorithm-results" / "syn07-ts01-20261013-28f305387f66"
         self.record = json.loads((self.bundle / "records.json").read_text(encoding="utf-8"))
 
     def test_exact_membership_matrix_matches_saved_outcomes(self):
