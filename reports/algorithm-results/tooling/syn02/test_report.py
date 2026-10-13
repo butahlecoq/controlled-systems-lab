@@ -1,5 +1,6 @@
 """Saved-record oracle and report-rendering tests for SYN-02."""
 import json
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -82,6 +83,19 @@ class SavedOracleTests(unittest.TestCase):
         self.assertEqual({"schema","report_id","report_kind","payload_schema","payload_sha256","source_commit","measured_scope","evidence_limits","payload","source_report_id"},set(mapping["envelope_fields"]))
         self.assertEqual("scripts/reports/syn02_registered_reports.py",mapping["publisher_registration"]["adapter_module"])
         self.assertFalse(mapping["publisher_registration"]["publishable_now"])
+        self.assertEqual("syn02- plus lowercase SHA-256 hex of the canonical identity record",mapping["immutable_public_id"]["public_report_id"])
+        inventory=set(mapping["manifest_fields"]["files"]["entries"])
+        self.assertEqual({"README.md","build-log.txt","build-provenance.json","collect.py","configure-log.txt","environment.json","etw-profile-attempt.txt","index.html","latency.svg","manifest.json","measurement-command.txt","profile-evidence.json","profile-note.txt","profile-raw.jsonl","publication-map.json","raw-events.jsonl","records.json","render_saved.py","report-envelope.json","terminal_driver.cpp","test_report.py","trials.csv"},inventory)
+        self.assertIn("index.html",inventory)
+        self.assertIn("latency.svg",inventory)
+        self.assertIn("report-envelope.json",inventory)
+        self.assertIn("profile-evidence.json",inventory)
+        self.assertNotIn("publication-manifest.json",inventory)
+        hashes={"manifest.json":"a"*64,"records.json":"b"*64}
+        identity={"schema":"csl.registered-publication-identity/1","source_report_id":"syn02-example",
+                  "source_files":hashes,"publisher_sha256":hashlib.sha256(b"adapter\n").hexdigest()}
+        expected="syn02-"+publication_map.digest(identity)
+        self.assertEqual(expected,publication_map.public_report_id("syn02-example",hashes,b"adapter\r\n"))
 
     def test_profile_summary_reports_incomplete_final_status(self):
         profile={"status":"process_counter_sampling_incomplete","incomplete_reason":"missing events"}

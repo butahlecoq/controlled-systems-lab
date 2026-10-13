@@ -302,11 +302,10 @@ def collect(a,state):
     try: profile_events=[json.loads(line) for line in profile_lines[1:]]
     except Exception: profile_events=[]
     profile_validation=[validate_trial(r) for r in profile_events]
-    profile.update({"status":"counter_profile_completed" if p.returncode==0 and not perr else "counter_profile_failed","wall_ns":profile_wall,"process_return_code":p.returncode,"stderr":perr.decode("utf-8","replace"),"samples":samples,"sample_interval_target_ms":10,"max_sampled_cpu_seconds":max((s["process_cpu_seconds"] for s in samples),default=0),"max_sampled_resident_bytes":max((s["resident_bytes"] for s in samples),default=0),"profile_trial_events":len(profile_events),"profile_non_success":sum(r.get("termination")!="completed" for r in profile_events if not r.get("warmup")),"profile_all_expected":bool(profile_events) and all(not errors for errors in profile_validation),"limiter":"unknown","limiter_reason":"sampling captured only process CPU and RSS counters, not call stacks; no source attribution is justified"})
+    profile.update({"status":"process_counter_sampling_completed" if p.returncode==0 and not perr else "process_counter_sampling_incomplete","wall_ns":profile_wall,"process_return_code":p.returncode,"stderr":perr.decode("utf-8","replace"),"samples":samples,"sample_interval_target_ms":10,"max_sampled_cpu_seconds":max((s["process_cpu_seconds"] for s in samples),default=0),"max_sampled_resident_bytes":max((s["resident_bytes"] for s in samples),default=0),"profile_trial_events":len(profile_events),"profile_non_success":sum(r.get("termination")!="completed" for r in profile_events if not r.get("warmup")),"profile_all_expected":bool(profile_events) and all(not errors for errors in profile_validation),"limiter":"unknown","limiter_reason":"sampling captured only process CPU and RSS counters, not call stacks; no source attribution is justified"})
     if p.returncode!=0 or len(profile_events)!=5*1001 or not profile["profile_all_expected"]:
         profile["status"]="process_counter_sampling_incomplete"
         profile["incomplete_reason"]="separate profile process returned incomplete output or an expected-result check failed"
-    if profile["status"]=="counter_profile_completed":profile["status"]="process_counter_sampling_completed"
     profile_summary=profile_summary_for(profile)
     source_tree=git("rev-parse",f"{SOURCE_COMMIT}^{{tree}}")
     compiler_file=next((build/"CMakeFiles").glob("*/CMakeCXXCompiler.cmake"));compiler_text=compiler_file.read_text(errors="replace")

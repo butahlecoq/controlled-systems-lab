@@ -23,8 +23,21 @@ which gives the exact projection to `csl.algorithm-report-envelope/1` and
 `csl.algorithm-report-catalog/3`: the native report ID becomes
 `source_report_id`; the publisher supplies the immutable public `report_id`;
 the payload schema/digest, source commit, measured scope, evidence limits and
-complete native payload populate the shared envelope. It lists every envelope
-and publication-manifest field and the required adapter checks.
+complete native payload populate the shared envelope. The map enumerates the
+exact staged file inventory hashed by `publication-manifest.json`: the
+validated bundle artifacts plus generated `index.html` and `report-envelope.json`;
+the publication manifest excludes itself. The generated offline ZIP contains
+that staged inventory and its digest is recorded in the catalogue.
+
+The immutable public ID is `syn02-` plus the full SHA-256 of canonical UTF-8
+JSON (`ensure_ascii=false`, sorted keys, compact separators) for
+`{schema: csl.registered-publication-identity/1, source_report_id, source_files,
+publisher_sha256}`. `source_files` maps sorted relative paths to SHA-256 for
+every validated native source file (the native manifest inventory plus the
+manifest itself; any separately validated source ZIP is included). The adapter
+module hash is SHA-256 of its UTF-8 source after CRLF-to-LF normalization. This
+matches the repository's registered-publication identity rule and binds both
+the saved measurement and its renderer/publisher implementation.
 
 This is a mapping specification, not a registered adapter. SYN-02 is not
 publishable until `scripts/reports/syn02_registered_reports.py` implements
