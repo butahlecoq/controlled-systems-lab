@@ -21,6 +21,7 @@ HARNESS_PATH_ALLOWLIST = {
     "reports/algorithm-results/tooling/geo05/collect.py",
     "reports/algorithm-results/tooling/geo05/render.py",
     "reports/algorithm-results/tooling/geo05/test_report_tools.py",
+    "reports/algorithm-results/tooling/geo05/test_fresh_build.py",
 }
 GEO04_CMAKE_OPTION = 'option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report driver" OFF)'
 GEO05_CMAKE_OPTION = 'option(CSL_BUILD_GEO05_REPORT "Build the GEO-05 projection/predecessor report driver" OFF)'
