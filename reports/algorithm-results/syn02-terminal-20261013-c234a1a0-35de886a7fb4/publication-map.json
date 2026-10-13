@@ -43,10 +43,12 @@
         "profile-note.txt",
         "profile-raw.jsonl",
         "publication-map.json",
+        "publication_map.py",
         "raw-events.jsonl",
         "records.json",
         "render_saved.py",
         "report-envelope.json",
+        "summary.csv",
         "terminal_driver.cpp",
         "test_report.py",
         "trials.csv"
@@ -58,6 +60,8 @@
         "generated index.html",
         "latency.svg",
         "raw evidence",
+        "trials.csv",
+        "summary.csv",
         "report-envelope.json"
       ],
       "meaning": "exact staged artifact inventory: relative path to SHA-256 of staged bytes"
@@ -84,7 +88,7 @@
   },
   "publisher_registration": {
     "adapter_module": "scripts/reports/syn02_registered_reports.py",
-    "blocking_reason": "No SYN-02 publisher adapter is currently registered in site.py.",
+    "blocking_reason": "The publisher adapter is registered; captured measurements must be regenerated under the reviewed harness, pass schema-3 staging, and complete independent report review before publication.",
     "publishable_now": false,
     "required_adapter_operations": [
       "adapt",

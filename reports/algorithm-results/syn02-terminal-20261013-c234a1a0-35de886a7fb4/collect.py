@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build, measure, validate, and bundle the SYN-02 terminal relation report."""
 from __future__ import annotations
-import argparse, csv, datetime as dt, hashlib, html, json, os, platform, statistics, subprocess, sys, zipfile
+import argparse, csv, datetime as dt, hashlib, html, io, json, os, platform, statistics, subprocess, sys, zipfile
 from pathlib import Path
 from publication_map import project as publication_map
 
@@ -207,15 +207,42 @@ def svg(summary):
     width,height=920,360; left,top=235,36; rowh=48
     maximum=max((s["timings"][k]["max_ns"] for s in good for k in keys),default=1)
     scale=560/maximum
-    bits=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc"><title id="title">SYN-02 measured latency ranges</title><desc id="desc">Median and min-to-max range for solve and input-to-verified-result intervals, in milliseconds.</desc><style>text{{font:13px system-ui,sans-serif}}.axis{{stroke:#64748b;stroke-width:1}}.range{{stroke-width:3}}.median{{stroke:#111827;stroke-width:2}}</style>']
+    bits=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc"><title id="title">SYN-02 measured latency ranges</title><desc id="desc">Median and min-to-max range for solve and input-to-verified-result intervals, in milliseconds.</desc><style>text{{font:13px system-ui,sans-serif}}</style>']
     for i,s in enumerate(good):
         y=top+i*rowh; bits.append(f'<text x="12" y="{y+17}">{html.escape(s["scenario"])}</text>')
         for j,key in enumerate(keys):
             st=s["timings"][key]; yy=y+j*16
             x0=left+st["min_ns"]*scale;x1=left+st["max_ns"]*scale;xm=left+st["median_ns"]*scale
-            bits.append(f'<line class="range" x1="{x0:.1f}" y1="{yy}" x2="{x1:.1f}" y2="{yy}" stroke="{colors[key]}"/><line class="median" x1="{xm:.1f}" y1="{yy-5}" x2="{xm:.1f}" y2="{yy+5}"/><text x="{left+565}" y="{yy+5}">{key.replace("_ns", "")} · {st["median_ns"]/1e6:.3f} ms</text>')
-    bits.append(f'<line class="axis" x1="{left}" y1="{top-12}" x2="{left+560}" y2="{top-12}"/><text x="{left}" y="{height-12}">0 ms</text><text x="{left+430}" y="{height-12}">{maximum/1e6:.3f} ms maximum range</text></svg>')
+            bits.append(f'<line x1="{x0:.1f}" y1="{yy}" x2="{x1:.1f}" y2="{yy}" stroke="{colors[key]}" stroke-width="3"/><line x1="{xm:.1f}" y1="{yy-5}" x2="{xm:.1f}" y2="{yy+5}" stroke="#111827" stroke-width="2"/><text x="{left+565}" y="{yy+5}">{key.replace("_ns", "")} · {st["median_ns"]/1e6:.3f} ms</text>')
+    bits.append(f'<line x1="{left}" y1="{top-12}" x2="{left+560}" y2="{top-12}" stroke="#64748b" stroke-width="1"/><text x="{left}" y="{height-12}">0 ms</text><text x="{left+430}" y="{height-12}">{maximum/1e6:.3f} ms maximum range</text></svg>')
     return "".join(bits)
+
+SUMMARY_FIELDS=("scenario","requested","matched_expected","completed","failed","non_success","expected_outcome","expected_termination",
+                "observed_outcomes","observed_terminations","observed_providers","relation_count","objective_bounds",
+                "primal_objective_value","residual_observations","timings")
+
+def summary_csv_bytes(summary):
+    stream=io.StringIO(newline="")
+    writer=csv.DictWriter(stream,fieldnames=SUMMARY_FIELDS,lineterminator="\n")
+    writer.writeheader()
+    for row in summary:
+        writer.writerow({key:(json.dumps(row[key],ensure_ascii=False,sort_keys=True,separators=(",",":"))
+                          if isinstance(row[key],(dict,list)) else row[key]) for key in SUMMARY_FIELDS})
+    return stream.getvalue().encode("utf-8")
+
+TRIAL_FIELDS=("scenario","repetition","status","validation_errors","outcome","termination","relation",
+              "optimization_present","optimum_present","provider","primal_value","lower_bound","upper_bound",
+              "prepare_ns","solve_ns","oracle_ns","execute_ns","solver_observations")
+
+def trials_csv_bytes(rows):
+    stream=io.StringIO(newline="")
+    writer=csv.DictWriter(stream,fieldnames=TRIAL_FIELDS,lineterminator="\n")
+    writer.writeheader()
+    for row in rows:
+        if not row["warmup"]:
+            writer.writerow({key:(json.dumps(row.get(key),ensure_ascii=False,sort_keys=True,separators=(",",":"))
+                              if isinstance(row.get(key),(dict,list)) else row.get(key)) for key in TRIAL_FIELDS})
+    return stream.getvalue().encode("utf-8")
 
 def write_bundle(bundle, payload, raw, environment, provenance, profile, profile_raw, build_log, configure_log, command, profile_note):
     bundle.mkdir(parents=True,exist_ok=False)
@@ -223,10 +250,8 @@ def write_bundle(bundle, payload, raw, environment, provenance, profile, profile
         row["solver_observations"]=parse_solver_observations(row.get("raw_diagnostics",""))
     raw_bytes="".join(json.dumps(row,sort_keys=True,separators=(",",":"),allow_nan=False)+"\n" for row in raw).encode()
     rows=[r for r in raw if not r["warmup"]]
-    with (bundle/"trials.csv").open("w",newline="",encoding="utf-8") as f:
-        fields=["scenario","repetition","status","validation_errors","outcome","termination","relation","optimization_present","optimum_present","provider","primal_value","lower_bound","upper_bound","prepare_ns","solve_ns","oracle_ns","execute_ns","solver_observations"]
-        writer=csv.DictWriter(f,fieldnames=fields);writer.writeheader()
-        for r in rows: writer.writerow({k:(json.dumps(r.get(k),separators=(",",":")) if isinstance(r.get(k),list) else r.get(k)) for k in fields})
+    (bundle/"trials.csv").write_bytes(trials_csv_bytes(raw))
+    (bundle/"summary.csv").write_bytes(summary_csv_bytes(payload["summary"]))
     (bundle/"raw-events.jsonl").write_bytes(raw_bytes)
     (bundle/"records.json").write_text(json.dumps(payload,indent=2,sort_keys=True,allow_nan=False)+"\n",encoding="utf-8")
     (bundle/"publication-map.json").write_text(json.dumps(publication_map(payload),indent=2,sort_keys=True)+"\n",encoding="utf-8")
@@ -268,7 +293,7 @@ def render_html(p):
         detail=SCENARIOS[s["scenario"]].get("backend_observation","")
         detail_html=f"<br><small>{html.escape(detail)}</small>" if detail else ""
         table.append(f"<tr><th>{html.escape(s['scenario'])}</th><td>{html.escape(s['expected_outcome'])} / {html.escape(s['expected_termination'])}<br>{actual}; {s['matched_expected']}/{s['requested']} matched; {s['non_success']} non-success{detail_html}</td><td>{providers}<br>{s['relation_count']} relations; {bounds}</td><td>{obj}</td><td>{residual}</td><td>{stat}</td></tr>")
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SYN-02 terminal minimizer report {html.escape(p['report_id'])}</title><style>body{{font:16px/1.55 system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#172033}}table{{border-collapse:collapse;width:100%}}th,td{{border:1px solid #ccd3dd;padding:.55rem;text-align:left}}code{{overflow-wrap:anywhere}}figure{{margin:2rem 0}}.notice{{background:#f3f6fa;padding:1rem;border-left:4px solid #146c94}}</style></head><body><h1>Terminal minimizer relation construction (SYN-02)</h1><p><strong>Descriptive single-adapter latency report.</strong> Five analytic H-polyhedral fixtures exercise the public <code>TerminalOptimizer</code> with the real HiGHS LP and convex providers. No competitor, speedup, throughput, or scale claim is made.</p><div class="notice"><strong>Evidence limit:</strong> returned objective and relation checks use binary64 and finite literal sample points. Relation support and optimum support remain <em>Unestablished</em>; these checks do not certify exact equality, global optimality, or the complete optimizer relation. The shifted residual fixture retains its actual <code>undetermined</code> outcome, <code>numerical_failure</code> termination and missing relation. Its native QP phase reports model status 7, while the adapter withholds optimality; the retained stationarity violation is 1.0.</div><h2>Measured outcomes and latency</h2><table><thead><tr><th>Fixture</th><th>Expected and observed outcomes</th><th>Backend and evidence counts</th><th>Actual primal objective or witness</th><th>Backend residual observations</th><th>TerminalOptimizer::solve</th></tr></thead><tbody>{''.join(table)}</tbody></table><figure>{svg(p['summary'])}<figcaption>Median markers and observed minimum-to-maximum ranges. <code>solve_ns</code> is the <code>TerminalOptimizer::solve</code> call. <code>execute_ns</code> covers setup through immediate C++ result-field consumption; it excludes collector-side independent literal validation. No timing includes process startup, compilation, or rendering. HiGHS native logging and callback work are within the solve interval.</figcaption></figure><h2>Method</h2><p>Each measured attempt constructs a fresh resolved problem, unit-box terminal slice, provider registries and prepared providers, then calls <code>solve</code> using one configured worker/thread. One warmup is excluded per fixture. Seven measured rounds alternate forward and reverse fixture order. All attempts and non-success outcomes remain in the raw records. Independent literal validation runs after the executable exits and is not timed as an algorithm interval. The shifted residual provides an unestablished primal witness value only; it is not reported as an optimum.</p><p><strong>Source:</strong> <code>{SOURCE_COMMIT}</code><br><strong>Harness/artifact commit:</strong> <code>{html.escape(p['harness_commit'])}</code><br><strong>Build:</strong> {html.escape(p['provenance']['compiler'])}; Release; {html.escape(p['environment']['os'])}; {html.escape(p['environment']['processor'])}</p><p>Profile result: {html.escape(p['profile_summary'])}</p><p>Files: <a href="records.json">records.json</a> · <a href="raw-events.jsonl">raw events</a> · <a href="trials.csv">trials.csv</a> · <a href="profile-evidence.json">profile evidence</a> · <a href="manifest.json">manifest</a> · <a href="publication-map.json">publication mapping</a>. Publication URL is pending independent report review and Pages deployment.</p></body></html>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SYN-02 terminal minimizer report {html.escape(p['report_id'])}</title><style>body{{font:16px/1.55 system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#172033}}table{{border-collapse:collapse;width:100%}}th,td{{border:1px solid #ccd3dd;padding:.55rem;text-align:left}}code{{overflow-wrap:anywhere}}figure{{margin:2rem 0}}.notice{{background:#f3f6fa;padding:1rem;border-left:4px solid #146c94}}</style></head><body><h1>Terminal minimizer relation construction (SYN-02)</h1><p><strong>Descriptive single-adapter latency report.</strong> Five analytic H-polyhedral fixtures exercise the public <code>TerminalOptimizer</code> with the real HiGHS LP and convex providers. No competitor, speedup, throughput, or scale claim is made.</p><div class="notice"><strong>Evidence limit:</strong> returned objective and relation checks use binary64 and finite literal sample points. Relation support and optimum support remain <em>Unestablished</em>; these checks do not certify exact equality, global optimality, or the complete optimizer relation. The shifted residual fixture retains its actual <code>undetermined</code> outcome, <code>numerical_failure</code> termination and missing relation. Its native QP phase reports model status 7, while the adapter withholds optimality; the retained stationarity violation is 1.0.</div><h2>Measured outcomes and latency</h2><table><thead><tr><th>Fixture</th><th>Expected and observed outcomes</th><th>Backend and evidence counts</th><th>Actual primal objective or witness</th><th>Backend residual observations</th><th>TerminalOptimizer::solve</th></tr></thead><tbody>{''.join(table)}</tbody></table><figure>{svg(p['summary'])}<figcaption>Median markers and observed minimum-to-maximum ranges. <code>solve_ns</code> is the <code>TerminalOptimizer::solve</code> call. <code>execute_ns</code> covers setup through immediate C++ result-field consumption; it excludes collector-side independent literal validation. No timing includes process startup, compilation, or rendering. HiGHS native logging and callback work are within the solve interval.</figcaption></figure><h2>Method</h2><p>Each measured attempt constructs a fresh resolved problem, unit-box terminal slice, provider registries and prepared providers, then calls <code>solve</code> using one configured worker/thread. One warmup is excluded per fixture. Seven measured rounds alternate forward and reverse fixture order. All attempts and non-success outcomes remain in the raw records. Independent literal validation runs after the executable exits and is not timed as an algorithm interval. The shifted residual provides an unestablished primal witness value only; it is not reported as an optimum.</p><p><strong>Source:</strong> <code>{SOURCE_COMMIT}</code><br><strong>Measurement harness commit:</strong> <code>{html.escape(p['harness_commit'])}</code><br><strong>Build:</strong> {html.escape(p['provenance']['compiler'])}; Release; {html.escape(p['environment']['os'])}; {html.escape(p['environment']['processor'])}</p><p>Profile result: {html.escape(p['profile_summary'])}</p><p>Artifact note: this report presentation and package were regenerated from the saved accepted records and raw trial evidence; no measurement trials were rerun.</p><p>Files: <a href="records.json">records.json</a> · <a href="raw-events.jsonl">raw events</a> · <a href="trials.csv">trials.csv</a> · <a href="profile-evidence.json">profile evidence</a> · <a href="manifest.json">manifest</a> · <a href="publication-map.json">publication mapping</a>. Publication URL is pending independent report review and Pages deployment.</p></body></html>'''
 
 def collect(a,state):
     require(a.repetitions>=7 and a.warmups>=1,"accepted profile requires >=7 repetitions and >=1 warmup")

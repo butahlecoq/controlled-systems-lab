@@ -87,7 +87,7 @@ class SavedOracleTests(unittest.TestCase):
         self.assertFalse(mapping["publisher_registration"]["publishable_now"])
         self.assertEqual("syn02- plus lowercase SHA-256 hex of the canonical identity record",mapping["immutable_public_id"]["public_report_id"])
         inventory=set(mapping["manifest_fields"]["files"]["entries"])
-        self.assertEqual({"README.md","build-log.txt","build-provenance.json","collect.py","configure-log.txt","environment.json","etw-profile-attempt.txt","index.html","latency.svg","manifest.json","measurement-command.txt","profile-evidence.json","profile-note.txt","profile-raw.jsonl","publication-map.json","raw-events.jsonl","records.json","render_saved.py","report-envelope.json","terminal_driver.cpp","test_report.py","trials.csv"},inventory)
+        self.assertEqual({"README.md","build-log.txt","build-provenance.json","collect.py","configure-log.txt","environment.json","etw-profile-attempt.txt","index.html","latency.svg","manifest.json","measurement-command.txt","profile-evidence.json","profile-note.txt","profile-raw.jsonl","publication-map.json","publication_map.py","raw-events.jsonl","records.json","render_saved.py","report-envelope.json","summary.csv","terminal_driver.cpp","test_report.py","trials.csv"},inventory)
         self.assertIn("index.html",inventory)
         self.assertIn("latency.svg",inventory)
         self.assertIn("report-envelope.json",inventory)
