@@ -83,7 +83,8 @@ def main():
         raise SystemExit("pinned solver worktree changed during configure/build")
     cache = build_dir / "CMakeCache.txt"
     cache_text = cache.read_text(encoding="utf-8", errors="replace")
-    if "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" not in cache_text:
+    if ("CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" not in cache_text or
+            "CMAKE_GENERATOR_PLATFORM:INTERNAL=x64" not in cache_text):
         raise SystemExit("unexpected generator in pinned Release build")
     target_project = build_dir / "csl_syn07_ts01_report.vcxproj"
     target_root = ET.parse(target_project).getroot()
@@ -121,8 +122,19 @@ def main():
         raise SystemExit("one or more T-S01 attempts failed validation or returned invalid timing")
     measured = [event for event in events if not event["warmup"]]
     values = [event["elapsed_ns"] for event in measured]
-    cxx_compiler = next((line.split("=", 1)[1] for line in cache_text.splitlines() if line.startswith("CMAKE_CXX_COMPILER:FILEPATH=")), "unavailable")
-    cxx_version = next((line.split("=", 1)[1] for line in cache_text.splitlines() if line.startswith("CMAKE_CXX_COMPILER_VERSION:INTERNAL=")), "unavailable")
+    compiler_configs = list((build_dir / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
+    if len(compiler_configs) != 1:
+        raise SystemExit("unable to identify generated C++ compiler configuration")
+    compiler_config = compiler_configs[0]
+    compiler_text = compiler_config.read_text(encoding="utf-8", errors="replace")
+    def cmake_set(name):
+        prefix = f'set({name} "'
+        line = next((line for line in compiler_text.splitlines() if line.startswith(prefix)), None)
+        return line[len(prefix):-2] if line else "unavailable"
+    cxx_compiler = cmake_set("CMAKE_CXX_COMPILER")
+    cxx_version = cmake_set("CMAKE_CXX_COMPILER_VERSION")
+    if cxx_compiler == "unavailable" or cxx_version == "unavailable":
+        raise SystemExit("generated CMake compiler identity is incomplete")
     measurement = {
         "schema": "csl.syn07-ts01-measurement-collection/1",
         "algorithm_source_commit": report.SOURCE_COMMIT,
@@ -140,7 +152,7 @@ def main():
         "limiter": {"available": False, "reason": "No separate sampling/call-stack profile was collected; this record does not attribute the observed time or establish capacity."},
         "binary": {"path": str(executable.relative_to(build_root)), "sha256": sha(binary), "bytes": len(binary), "configuration": "Release", "ndebug": True, "cxx_standard": "c++20", "release_properties": props},
         "build_provenance": {"cmake_path": str(cmake), "cmake_sha256": sha(cmake.read_bytes()), "cmake_version": (run([cmake, "--version"]).stdout.decode("utf-8", errors="replace").splitlines()[0]),
-            "cmake_cache_sha256": sha(cache.read_bytes()), "target_project_sha256": sha(target_project.read_bytes()), "configure_log_sha256": sha((build_root / "configure.log").read_bytes()), "build_log_sha256": sha(build_log),
+            "cmake_cache_sha256": sha(cache.read_bytes()), "compiler_config_sha256": sha(compiler_config.read_bytes()), "target_project_sha256": sha(target_project.read_bytes()), "configure_log_sha256": sha((build_root / "configure.log").read_bytes()), "build_log_sha256": sha(build_log),
             "generator": "Visual Studio 17 2022 x64", "compiler": "MSVC", "compiler_path": cxx_compiler, "compiler_version": cxx_version, "configuration": "Release",
             "dependency_cache": str(args.dependency_cache.resolve()) if args.dependency_cache else "CMake source-defined fetches",
             "configure_command": [str(part) for part in configure_command], "build_command": [str(part) for part in build_command]},
