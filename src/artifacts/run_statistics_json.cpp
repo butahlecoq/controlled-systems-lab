@@ -506,7 +506,7 @@ ArtifactResult<std::string> encode_run(const RunStatistics& owner,EncodeLimits l
         const auto* complete=std::get_if<CompleteOptimalFamily>(&synthesis->family->family.outcome());
         if(complete&&std::holds_alternative<RegisteredCompletenessEvidence>(complete->completeness.support))
             return ArtifactError{ArtifactErrorCode::unsupported,"run.final.family.completeness.support",
-                "run-statistics-v3 cannot encode the live T-S01 analytic proof capability"};
+                "run-statistics-v3 does not persist registry-verified completeness payloads"};
     }
     const auto wire=recorded_json(owner);
     if(wire.size()>limits.bytes)return ArtifactError{ArtifactErrorCode::limit,{},{}};

@@ -30,6 +30,8 @@ SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::Resolved
         registered->verifier_version!=request_->strategy_version||registered->proof.empty())
         return reject({{DiagnosticCode::evidence_mismatch,"family.proposal.verifier",
             "Proposal proof payload does not match the frozen strategy registration"}});
+    // The registry owns identity/context binding; strategy-specific callbacks
+    // validate theorem content against that already-frozen authoritative input.
     auto diagnostics=verifier_(*request_,proposal);
     if(!diagnostics.empty())return reject(std::move(diagnostics));
     auto published=FamilyPublisher::publish_verified(identity,OptimalFamilyOutcome{proposal.family},authority_);
