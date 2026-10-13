@@ -198,10 +198,11 @@ TEST_CASE("registered Strategy B candidate identity mismatches are rejected by t
     const auto result=accepted(workspace->run(context));
     REQUIRE(result.family);
     const auto& family=*result.family;
-    const auto actual=family.identity();
+    const FamilyIdentity expected{p.identity(),request(p),p.constraints().coordinates(),
+        {"csl.synthesis.strategy-b"},"1",{}};
     REQUIRE(family.target()==FamilyTarget::candidate_relaxation);
     REQUIRE(std::holds_alternative<CandidateFamily>(family.outcome()));
-    CHECK(check_synthesis_result(result,actual).empty());
+    CHECK(check_synthesis_result(result,expected).empty());
 
     auto expect_identity_rejection=[&](FamilyIdentity expected) {
         const auto diagnostics=check_synthesis_result(result,expected);
@@ -212,11 +213,11 @@ TEST_CASE("registered Strategy B candidate identity mismatches are rejected by t
         CHECK(std::holds_alternative<CandidateFamily>(family.outcome()));
     };
 
-    auto wrong_problem=actual;wrong_problem.problem.value+="-foreign";expect_identity_rejection(wrong_problem);
-    auto wrong_request=actual;wrong_request.request.profile+="-foreign";expect_identity_rejection(wrong_request);
-    auto wrong_coordinates=actual;++wrong_coordinates.coordinates.horizon;expect_identity_rejection(wrong_coordinates);
-    auto wrong_strategy=actual;wrong_strategy.strategy={"csl.synthesis.foreign"};expect_identity_rejection(wrong_strategy);
-    auto wrong_version=actual;wrong_version.strategy_version+="-foreign";expect_identity_rejection(wrong_version);
+    auto wrong_problem=expected;wrong_problem.problem.value+="-foreign";expect_identity_rejection(wrong_problem);
+    auto wrong_request=expected;wrong_request.request.profile+="-foreign";expect_identity_rejection(wrong_request);
+    auto wrong_coordinates=expected;++wrong_coordinates.coordinates.horizon;expect_identity_rejection(wrong_coordinates);
+    auto wrong_strategy=expected;wrong_strategy.strategy={"csl.synthesis.foreign"};expect_identity_rejection(wrong_strategy);
+    auto wrong_version=expected;wrong_version.strategy_version+="-foreign";expect_identity_rejection(wrong_version);
 }
 TEST_CASE("late extraction materialization stop retains program evidence incumbent and feasible candidate") {
     const auto p=resolve(integrator());auto q=request(p);q.materialization_limit=7;
