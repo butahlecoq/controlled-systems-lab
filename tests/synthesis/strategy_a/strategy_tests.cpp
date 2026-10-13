@@ -246,6 +246,7 @@ TEST_CASE("registered Strategy A candidate identity mismatches fail at the calle
 
     auto wrong_problem=expected;wrong_problem.problem.value+="-foreign";expect_identity_rejection(wrong_problem);
     auto wrong_request=expected;wrong_request.request.profile+="-foreign";expect_identity_rejection(wrong_request);
+    auto wrong_objective=expected;wrong_objective.request.objective=integrator(true).identity();expect_identity_rejection(wrong_objective);
     auto wrong_coordinates=expected;++wrong_coordinates.coordinates.horizon;expect_identity_rejection(wrong_coordinates);
     auto wrong_strategy=expected;wrong_strategy.strategy={"csl.synthesis.foreign"};expect_identity_rejection(wrong_strategy);
     auto wrong_version=expected;wrong_version.strategy_version+="-foreign";expect_identity_rejection(wrong_version);
