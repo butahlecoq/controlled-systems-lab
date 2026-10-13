@@ -283,7 +283,13 @@ bool supported_feasible_incumbent(const FeasibleIncumbent& incumbent,const Famil
             return finite_dimension(control,coordinates.dimensions.control);});
 }
 Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIdentity& expected) {
+    return check_synthesis_result(result,SynthesisIdentityExpectation{expected.problem,expected.request,
+        expected.coordinates,expected.strategy,expected.strategy_version,expected.lineage});
+}
+Diagnostics check_synthesis_result(const SynthesisResult& result,const SynthesisIdentityExpectation& expected) {
     Diagnostics diagnostics=check_outcome_evidence(result.outcome,expected.problem,expected.request.assurance);
+    const FamilyIdentity expected_identity{expected.problem,expected.request,expected.coordinates,
+        expected.strategy,expected.strategy_version,expected.lineage.value_or(std::vector<TransformStepIdentity>{})};
     auto add=[&](DiagnosticCode code,std::string field,std::string explanation) {
         diagnostics.push_back({code,std::move(field),std::move(explanation)});
     };
@@ -293,18 +299,18 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
     if (result.objective.lower && result.objective.upper && result.objective.lower->value>result.objective.upper->value)
         add(DiagnosticCode::invalid_claim,"result.objective","Lower bound exceeds upper bound");
     for (const auto& incumbent:result.incumbents)
-        if (!supported_feasible_incumbent(incumbent,expected))
+        if (!supported_feasible_incumbent(incumbent,expected_identity))
             add(DiagnosticCode::evidence_mismatch,"result.incumbents",
                 "An incumbent needs matching problem, supported feasibility and a finite full history in canonical dimensions");
     if (result.outcome.value==MathematicalOutcome::infeasible &&
         std::any_of(result.incumbents.begin(),result.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
-            return supported_feasible_incumbent(incumbent,expected);
+            return supported_feasible_incumbent(incumbent,expected_identity);
         }))
         add(DiagnosticCode::invalid_claim,"result.outcome.infeasible",
             "A supported feasible incumbent contradicts an infeasibility claim");
     if (result.objective.lower && supported_synthesis_bound(*result.objective.lower,expected.problem) &&
         std::any_of(result.incumbents.begin(),result.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
-            return supported_feasible_incumbent(incumbent,expected) &&
+            return supported_feasible_incumbent(incumbent,expected_identity) &&
                 incumbent.witness.original_objective<result.objective.lower->value;
         }))
         add(DiagnosticCode::invalid_claim,"result.objective.lower",
@@ -313,8 +319,9 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
         const auto& identity=result.family->identity();
         if (identity.problem!=expected.problem || identity.request!=expected.request ||
             identity.coordinates!=expected.coordinates || identity.strategy!=expected.strategy ||
-            identity.strategy_version!=expected.strategy_version)
-            add(DiagnosticCode::evidence_mismatch,"family.identity","Family identity differs from the prepared problem, request, coordinates or strategy");
+            identity.strategy_version!=expected.strategy_version ||
+            (expected.lineage && identity.lineage!=*expected.lineage))
+            add(DiagnosticCode::evidence_mismatch,"family.identity","Family identity differs from the prepared problem, request, coordinates, strategy or ordered transformation lineage");
         auto family_diagnostics=check_family_evidence(*result.family,expected.problem,expected.request.assurance);
         diagnostics.insert(diagnostics.end(),family_diagnostics.begin(),family_diagnostics.end());
         if (result.family->target()==FamilyTarget::exact_optimal_relation &&
