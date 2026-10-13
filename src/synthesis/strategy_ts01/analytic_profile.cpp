@@ -119,7 +119,7 @@ public:
             !std::holds_alternative<numeric::MatrixView>(equalities)||
             !std::holds_alternative<numeric::VectorView>(equality_values))
             return Diagnostics{{DiagnosticCode::invalid_input,"ts01.relation","Could not construct exact H-representation buffers"}};
-        auto data=sets::make_h({"ts01-optimal-histories",5,{"x0","x1","x2","u0","u1"}},
+        auto data=sets::make_h({{"ts01-optimal-histories"},5,{"x0","x1","x2","u0","u1"}},
             {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
              std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(equality_values)});
         if(!std::holds_alternative<sets::SetData>(data))
