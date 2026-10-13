@@ -15,6 +15,36 @@ executable whose embedded source/harness identities do not match the selected
 commits. The report option is private and off by default; the target is not
 installed and does not change the library API.
 
+## Saved records and publication contract
+
+`records.json` retains the private native payload schema
+`csl.syn02-terminal-report/1`. Each bundle also contains `publication-map.json`,
+which gives the exact projection to `csl.algorithm-report-envelope/1` and
+`csl.algorithm-report-catalog/3`: the native report ID becomes
+`source_report_id`; the publisher supplies the immutable public `report_id`;
+the payload schema/digest, source commit, measured scope, evidence limits and
+complete native payload populate the shared envelope. It lists every envelope
+and publication-manifest field and the required adapter checks.
+
+This is a mapping specification, not a registered adapter. SYN-02 is not
+publishable until `scripts/reports/syn02_registered_reports.py` implements
+`adapt`, `render_page`, `publication_artifacts` and `offline_zip`, and
+`scripts/reports/site.py` imports it, admits the schema-3 kind, and dispatches
+to it from `site.stage`. The adapter must validate safe identity/paths, native
+record and source identity, complete trial/summary consistency including
+failures, inventory/hash manifest, SVG, common envelope projection and
+deterministic ZIP. Then the schema-3 catalogue and main-only Pages workflow
+must stage the report and verify the live page and ZIP URLs. Until those steps
+land, neither this mapping nor its producer HTML makes the bundle publishable.
+
+On any collector exception, `collection-failures/<attempt-id>/failure.json`
+preserves the stage, error, source/harness identities, attempted command and
+hashes of available configure/build/driver/profile streams. Partial timeout
+stdout/stderr and incomplete trial streams are saved alongside it. These use
+the distinct `csl.syn02-collection-failure/1` schema under
+`collection-failures/`, carry `accepted_measurement: false`, and are not valid
+report bundles, catalogue entries, or accepted measurements.
+
 ## Fixtures and limits
 
 * `linear-face`: minimize `x + 7` on `[0,1]^2`; expected value 7 and sampled
@@ -43,9 +73,10 @@ Every trial builds a fresh resolved problem, set, provider registrations and
 prepared providers. `prepare_ns` records that setup. `solve_ns` covers the
 `TerminalOptimizer::solve` call, including internal program construction,
 workspace execution, anchor handling, and relation construction. `oracle_ns`
-records immediate result consumption; saved-data literal checks are rerun in
-Python outside the C++ solve timer. `total_ns` spans the in-process call and
-literal checks. Process startup, compilation, destruction, JSON writing, and
+records immediate C++ result consumption; saved-data literal checks are rerun in
+Python after the executable exits, outside every reported algorithm interval.
+`execute_ns` spans fixture resolution through immediate C++ result
+consumption. Process startup, compilation, destruction, JSON writing, collector validation, and
 rendering are excluded. One process is used, with one excluded warmup per
 fixture and seven alternating forward/reverse measured rounds. The output
 retains every event and failure; a failed oracle invalidates its fixture
@@ -91,6 +122,7 @@ Run harness tests before collection:
 python reports/algorithm-results/tooling/syn02/test_report.py
 python -m py_compile reports/algorithm-results/tooling/syn02/collect.py
 python -m py_compile reports/algorithm-results/tooling/syn02/render_saved.py
+python -m py_compile reports/algorithm-results/tooling/syn02/publication_map.py
 ```
 
 Regenerate the page and figure from an existing bundle:

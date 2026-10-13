@@ -3,6 +3,7 @@
 from __future__ import annotations
 import argparse, csv, datetime as dt, hashlib, html, json, os, platform, statistics, subprocess, sys, zipfile
 from pathlib import Path
+from publication_map import project as publication_map
 
 ROOT = Path(__file__).resolve().parents[4]
 TOOLING = Path(__file__).resolve().parent
@@ -22,6 +23,7 @@ ALLOWLIST = {
  "reports/algorithm-results/tooling/syn02/README.md",
  "reports/algorithm-results/tooling/syn02/test_report.py",
  "reports/algorithm-results/tooling/syn02/render_saved.py",
+ "reports/algorithm-results/tooling/syn02/publication_map.py",
 }
 
 def run(command, *, cwd=ROOT, check=True, timeout=None):
@@ -32,6 +34,49 @@ def canonical(value) -> bytes: return json.dumps(value, sort_keys=True, separato
 def git(*args): return out(["git", *args])
 def require(ok, message):
     if not ok: raise ValueError(message)
+
+def profile_summary_for(profile):
+    common="WPR CPU stack capture is unavailable (0xc5585011); the limiting source function remains unknown."
+    if profile.get("status")=="process_counter_sampling_completed":
+        return "Separate process CPU/RSS counter sampling completed; no call-stack attribution. "+common
+    reason=profile.get("incomplete_reason") or profile.get("reason") or "profile completion was not verified"
+    return "Separate process CPU/RSS counter sampling is incomplete: "+str(reason)+". Limiter unknown. "+common
+
+def _write_evidence_file(directory, name, data):
+    if data:
+        (directory/name).write_bytes(data if isinstance(data,bytes) else str(data).encode("utf-8","replace"))
+
+def persist_failure(args, state, error):
+    """Persist every reached stage and partial subprocess stream after collector failure."""
+    root=args.out_root.resolve()/"collection-failures"
+    root.mkdir(parents=True,exist_ok=True)
+    stamp=dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    base=f"syn02-attempt-{stamp}-{os.getpid()}"
+    directory=root/base
+    suffix=0
+    while directory.exists():
+        suffix+=1;directory=root/f"{base}-{suffix}"
+    directory.mkdir()
+    exception_stdout=getattr(error,"stdout",None) or getattr(error,"output",None) or b""
+    exception_stderr=getattr(error,"stderr",None) or b""
+    if isinstance(exception_stdout,str): exception_stdout=exception_stdout.encode("utf-8","replace")
+    if isinstance(exception_stderr,str): exception_stderr=exception_stderr.encode("utf-8","replace")
+    for key,name in (("configure_log","configure-log.txt"),("build_log","build-log.txt"),
+                     ("driver_stdout","driver-stdout.jsonl"),("driver_stderr","driver-stderr.txt"),
+                     ("profile_stdout","profile-stdout.jsonl"),("profile_stderr","profile-stderr.txt")):
+        _write_evidence_file(directory,name,state.get(key,b""))
+    _write_evidence_file(directory,"exception-stdout.txt",exception_stdout)
+    _write_evidence_file(directory,"exception-stderr.txt",exception_stderr)
+    data={"schema":"csl.syn02-collection-failure/1","attempt_id":directory.name,
+          "stage":state.get("stage","preflight"),"source_commit":SOURCE_COMMIT,
+          "harness_commit":getattr(args,"harness_commit",None),
+          "error_type":type(error).__name__,"error":str(error),
+          "command":state.get("command",getattr(args,"command",[])),
+          "evidence_files":{p.name:sha(p.read_bytes()) for p in sorted(directory.iterdir()) if p.is_file()},
+          "measurement_trials_started":bool(state.get("measurement_trials_started",False)),
+          "accepted_measurement":False}
+    (directory/"failure.json").write_text(json.dumps(data,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    return directory
 def tracked_changes(): return set(git("diff", "--name-only", SOURCE_COMMIT, "HEAD").splitlines())
 def verify_checkout(harness_commit):
     require(git("rev-parse","HEAD")==harness_commit,"harness commit mismatch")
@@ -110,14 +155,14 @@ def summarize(rows):
         item["primal_objective_value"]={"min":min(objective_values),"max":max(objective_values),"count":len(objective_values)} if objective_values else None
         residual_fields=("native.primal_infeasibility","native.dual_infeasibility","check.rows.violation","check.variables.violation","check.stationarity.violation","check.signs.violation","check.complementarity.violation")
         item["residual_observations"]={field:{"max":max(float(r["solver_observations"][field]) for r in trials if field in r.get("solver_observations",{})),"count":sum(field in r.get("solver_observations",{}) for r in trials)} for field in residual_fields if any(field in r.get("solver_observations",{}) for r in trials)}
-        for key in ("prepare_ns","solve_ns","oracle_ns","total_ns"):
+        for key in ("prepare_ns","solve_ns","oracle_ns","execute_ns"):
             vals=[int(r[key]) for r in successful]
             item["timings"][key]={"median_ns":statistics.median(vals),"min_ns":min(vals),"max_ns":max(vals)} if len(vals)>=5 and len(successful)==len(trials) else None
         result.append(item)
     return result
 
 def svg(summary):
-    keys=["solve_ns","total_ns"]; colors={"solve_ns":"#146c94","total_ns":"#8b5cf6"}
+    keys=["solve_ns","execute_ns"]; colors={"solve_ns":"#146c94","execute_ns":"#8b5cf6"}
     good=[s for s in summary if s["timings"]["solve_ns"]]
     width,height=920,360; left,top=235,36; rowh=48
     maximum=max((s["timings"][k]["max_ns"] for s in good for k in keys),default=1)
@@ -139,11 +184,12 @@ def write_bundle(bundle, payload, raw, environment, provenance, profile, profile
     raw_bytes="".join(json.dumps(row,sort_keys=True,separators=(",",":"),allow_nan=False)+"\n" for row in raw).encode()
     rows=[r for r in raw if not r["warmup"]]
     with (bundle/"trials.csv").open("w",newline="",encoding="utf-8") as f:
-        fields=["scenario","repetition","status","validation_errors","outcome","termination","relation","optimization_present","optimum_present","provider","primal_value","lower_bound","upper_bound","prepare_ns","solve_ns","oracle_ns","total_ns","solver_observations"]
+        fields=["scenario","repetition","status","validation_errors","outcome","termination","relation","optimization_present","optimum_present","provider","primal_value","lower_bound","upper_bound","prepare_ns","solve_ns","oracle_ns","execute_ns","solver_observations"]
         writer=csv.DictWriter(f,fieldnames=fields);writer.writeheader()
         for r in rows: writer.writerow({k:(json.dumps(r.get(k),separators=(",",":")) if isinstance(r.get(k),list) else r.get(k)) for k in fields})
     (bundle/"raw-events.jsonl").write_bytes(raw_bytes)
     (bundle/"records.json").write_text(json.dumps(payload,indent=2,sort_keys=True,allow_nan=False)+"\n",encoding="utf-8")
+    (bundle/"publication-map.json").write_text(json.dumps(publication_map(payload),indent=2,sort_keys=True)+"\n",encoding="utf-8")
     (bundle/"environment.json").write_text(json.dumps(environment,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     (bundle/"build-provenance.json").write_text(json.dumps(provenance,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     (bundle/"profile-evidence.json").write_text(json.dumps(profile,indent=2,sort_keys=True)+"\n",encoding="utf-8")
@@ -154,7 +200,7 @@ def write_bundle(bundle, payload, raw, environment, provenance, profile, profile
     (bundle/"measurement-command.txt").write_text(command+"\n",encoding="utf-8")
     (bundle/"profile-note.txt").write_text(profile_note+"\n",encoding="utf-8")
     (bundle/"terminal_driver.cpp").write_bytes((TOOLING/"terminal_driver.cpp").read_bytes())
-    for tool_name in ("collect.py", "render_saved.py", "test_report.py", "README.md"):
+    for tool_name in ("collect.py", "render_saved.py", "publication_map.py", "test_report.py", "README.md"):
         (bundle/tool_name).write_bytes((TOOLING/tool_name).read_bytes())
     # Renderer consumes the just-written records file, keeping report generation
     # reproducible without invoking the measured executable again.
@@ -182,10 +228,9 @@ def render_html(p):
         detail=SCENARIOS[s["scenario"]].get("backend_observation","")
         detail_html=f"<br><small>{html.escape(detail)}</small>" if detail else ""
         table.append(f"<tr><th>{html.escape(s['scenario'])}</th><td>{html.escape(s['expected_outcome'])} / {html.escape(s['expected_termination'])}<br>{actual}; {s['matched_expected']}/{s['requested']} matched; {s['non_success']} non-success{detail_html}</td><td>{providers}<br>{s['relation_count']} relations; {bounds}</td><td>{obj}</td><td>{residual}</td><td>{stat}</td></tr>")
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SYN-02 terminal minimizer report {html.escape(p['report_id'])}</title><style>body{{font:16px/1.55 system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#172033}}table{{border-collapse:collapse;width:100%}}th,td{{border:1px solid #ccd3dd;padding:.55rem;text-align:left}}code{{overflow-wrap:anywhere}}figure{{margin:2rem 0}}.notice{{background:#f3f6fa;padding:1rem;border-left:4px solid #146c94}}</style></head><body><h1>Terminal minimizer relation construction (SYN-02)</h1><p><strong>Descriptive single-adapter latency report.</strong> Five analytic H-polyhedral fixtures exercise the public <code>TerminalOptimizer</code> with the real HiGHS LP and convex providers. No competitor, speedup, throughput, or scale claim is made.</p><div class="notice"><strong>Evidence limit:</strong> returned objective and relation checks use binary64 and finite literal sample points. Relation support and optimum support remain <em>Unestablished</em>; these checks do not certify exact equality, global optimality, or the complete optimizer relation. The shifted residual fixture retains its actual <code>undetermined</code> outcome, <code>numerical_failure</code> termination and missing relation. Its native QP phase reports model status 7, while the adapter withholds optimality; the retained stationarity violation is 1.0.</div><h2>Measured outcomes and latency</h2><table><thead><tr><th>Fixture</th><th>Expected and observed outcomes</th><th>Backend and evidence counts</th><th>Actual primal objective or witness</th><th>Backend residual observations</th><th>TerminalOptimizer::solve</th></tr></thead><tbody>{''.join(table)}</tbody></table><figure>{svg(p['summary'])}<figcaption>Median markers and observed minimum-to-maximum ranges. The measured interval covers the call to <code>TerminalOptimizer::solve</code>; provider selection/setup and output checks are recorded separately. No timing includes process startup, compilation, or rendering. HiGHS native logging and callback work are within the solve interval.</figcaption></figure><h2>Method</h2><p>Each measured attempt constructs a fresh resolved problem, unit-box terminal slice, provider registries and prepared providers, then calls <code>solve</code> using one configured worker/thread. One warmup is excluded per fixture. Seven measured rounds alternate forward and reverse fixture order. All attempts and non-success outcomes remain in the raw records. The shifted residual provides an unestablished primal witness value only; it is not reported as an optimum.</p><p><strong>Source:</strong> <code>{SOURCE_COMMIT}</code><br><strong>Harness/artifact commit:</strong> <code>{html.escape(p['harness_commit'])}</code><br><strong>Build:</strong> {html.escape(p['provenance']['compiler'])}; Release; {html.escape(p['environment']['os'])}; {html.escape(p['environment']['processor'])}</p><p>Profile result: {html.escape(p['profile_summary'])}</p><p>Files: <a href="records.json">records.json</a> · <a href="raw-events.jsonl">raw events</a> · <a href="trials.csv">trials.csv</a> · <a href="profile-evidence.json">profile evidence</a> · <a href="manifest.json">manifest</a>. Publication URL is pending independent report review and Pages deployment.</p></body></html>'''
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SYN-02 terminal minimizer report {html.escape(p['report_id'])}</title><style>body{{font:16px/1.55 system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#172033}}table{{border-collapse:collapse;width:100%}}th,td{{border:1px solid #ccd3dd;padding:.55rem;text-align:left}}code{{overflow-wrap:anywhere}}figure{{margin:2rem 0}}.notice{{background:#f3f6fa;padding:1rem;border-left:4px solid #146c94}}</style></head><body><h1>Terminal minimizer relation construction (SYN-02)</h1><p><strong>Descriptive single-adapter latency report.</strong> Five analytic H-polyhedral fixtures exercise the public <code>TerminalOptimizer</code> with the real HiGHS LP and convex providers. No competitor, speedup, throughput, or scale claim is made.</p><div class="notice"><strong>Evidence limit:</strong> returned objective and relation checks use binary64 and finite literal sample points. Relation support and optimum support remain <em>Unestablished</em>; these checks do not certify exact equality, global optimality, or the complete optimizer relation. The shifted residual fixture retains its actual <code>undetermined</code> outcome, <code>numerical_failure</code> termination and missing relation. Its native QP phase reports model status 7, while the adapter withholds optimality; the retained stationarity violation is 1.0.</div><h2>Measured outcomes and latency</h2><table><thead><tr><th>Fixture</th><th>Expected and observed outcomes</th><th>Backend and evidence counts</th><th>Actual primal objective or witness</th><th>Backend residual observations</th><th>TerminalOptimizer::solve</th></tr></thead><tbody>{''.join(table)}</tbody></table><figure>{svg(p['summary'])}<figcaption>Median markers and observed minimum-to-maximum ranges. <code>solve_ns</code> is the <code>TerminalOptimizer::solve</code> call. <code>execute_ns</code> covers setup through immediate C++ result-field consumption; it excludes collector-side independent literal validation. No timing includes process startup, compilation, or rendering. HiGHS native logging and callback work are within the solve interval.</figcaption></figure><h2>Method</h2><p>Each measured attempt constructs a fresh resolved problem, unit-box terminal slice, provider registries and prepared providers, then calls <code>solve</code> using one configured worker/thread. One warmup is excluded per fixture. Seven measured rounds alternate forward and reverse fixture order. All attempts and non-success outcomes remain in the raw records. Independent literal validation runs after the executable exits and is not timed as an algorithm interval. The shifted residual provides an unestablished primal witness value only; it is not reported as an optimum.</p><p><strong>Source:</strong> <code>{SOURCE_COMMIT}</code><br><strong>Harness/artifact commit:</strong> <code>{html.escape(p['harness_commit'])}</code><br><strong>Build:</strong> {html.escape(p['provenance']['compiler'])}; Release; {html.escape(p['environment']['os'])}; {html.escape(p['environment']['processor'])}</p><p>Profile result: {html.escape(p['profile_summary'])}</p><p>Files: <a href="records.json">records.json</a> · <a href="raw-events.jsonl">raw events</a> · <a href="trials.csv">trials.csv</a> · <a href="profile-evidence.json">profile evidence</a> · <a href="manifest.json">manifest</a> · <a href="publication-map.json">publication mapping</a>. Publication URL is pending independent report review and Pages deployment.</p></body></html>'''
 
-def main():
-    ap=argparse.ArgumentParser();ap.add_argument("--cmake",type=Path,required=True);ap.add_argument("--build-dir",type=Path,required=True);ap.add_argument("--out-root",type=Path,required=True);ap.add_argument("--harness-commit",required=True);ap.add_argument("--generator",default="Visual Studio 17 2022");ap.add_argument("--architecture",default="x64");ap.add_argument("--repetitions",type=int,default=7);ap.add_argument("--warmups",type=int,default=1);ap.add_argument("--timeout",type=int,default=120);a=ap.parse_args()
+def collect(a,state):
     require(a.repetitions>=7 and a.warmups>=1,"accepted profile requires >=7 repetitions and >=1 warmup")
     verify_checkout(a.harness_commit);require(a.cmake.is_file(),"CMake executable not found");require(not a.build_dir.exists(),"build directory must be fresh")
     try: import psutil
@@ -193,9 +238,11 @@ def main():
     build=a.build_dir.resolve(); out_root=a.out_root.resolve(); build.mkdir(parents=True)
     (build/".cmake/api/v1/query").mkdir(parents=True);(build/".cmake/api/v1/query/codemodel-v2").touch();(build/".cmake/api/v1/query/toolchains-v1").touch()
     config=[str(a.cmake),"-S",str(ROOT),"-B",str(build),"-G",a.generator,"-A",a.architecture,"-DCSL_BUILD_SYN02_REPORT=ON","-DBUILD_TESTING=OFF","-DCMAKE_BUILD_TYPE=Release"]
-    configured=run(config,check=False);configure_log=configured.stdout+configured.stderr;require(configured.returncode==0,"CMake configure failed; logs retained only in terminal output")
+    state["stage"]="configure";state["command"]=config
+    configured=run(config,check=False);configure_log=configured.stdout+configured.stderr;state["configure_log"]=configure_log;require(configured.returncode==0,"CMake configure failed")
+    state["stage"]="build"
     built=run([str(a.cmake),"--build",str(build),"--config","Release","--target","csl_syn02_terminal_report","--parallel","4","--verbose"],check=False)
-    build_log=built.stdout+built.stderr;require(built.returncode==0,"Release build failed; logs retained only in terminal output")
+    build_log=built.stdout+built.stderr;state["build_log"]=build_log;require(built.returncode==0,"Release build failed")
     require(git("rev-parse","HEAD")==a.harness_commit and not git("status","--porcelain=v1","--untracked-files=no"),"checkout changed during build")
     cache=(build/"CMakeCache.txt").read_text(errors="replace")
     require(f"CMAKE_HOME_DIRECTORY:INTERNAL={ROOT.as_posix()}" in cache or f"CMAKE_HOME_DIRECTORY:INTERNAL={ROOT}" in cache,"build is not sourced from pinned worktree")
@@ -208,7 +255,9 @@ def main():
     flags=" ".join(f.get("fragment","") for f in groups[0].get("compileCommandFragments",[]));require(("/DNDEBUG" in flags or "-DNDEBUG" in flags) and ("/O2" in flags or "-O2" in flags),"Release/NDEBUG optimization flags missing")
     artifacts=[build/p["path"] for p in target_doc.get("artifacts",[]) if Path(p["path"]).suffix.lower()==".exe"];require(len(artifacts)==1 and artifacts[0].is_file(),"one built report executable required");exe=artifacts[0]
     host_cpu_before=psutil.cpu_percent(interval=1)
-    args=[str(exe),str(a.repetitions),str(a.warmups)];start=__import__("time").perf_counter_ns();measured=run(args,check=False,timeout=a.timeout);elapsed=__import__("time").perf_counter_ns()-start
+    args=[str(exe),str(a.repetitions),str(a.warmups)];state["stage"]="measurement";state["measurement_trials_started"]=True;state["command"]=args
+    start=__import__("time").perf_counter_ns();measured=run(args,check=False,timeout=a.timeout);elapsed=__import__("time").perf_counter_ns()-start
+    state["driver_stdout"]=measured.stdout;state["driver_stderr"]=measured.stderr
     host_cpu_after=psutil.cpu_percent(interval=1)
     output_lines=measured.stdout.splitlines();require(output_lines,"report executable emitted no identity/trials")
     run_identity=json.loads(output_lines[0].decode("utf-8"));require(run_identity=={"schema":"csl.syn02-terminal-run/1","source_commit":SOURCE_COMMIT,"harness_commit":a.harness_commit},"embedded executable source/harness identity mismatch")
@@ -229,14 +278,13 @@ def main():
         measured_rows=[r for r in raw if r.get("scenario")==name and not r.get("warmup")]
         require(len(warm)==a.warmups and len(measured_rows)==a.repetitions,"per-fixture warmup/trial matrix incomplete: "+name)
         require(len({r["repetition"] for r in measured_rows})==a.repetitions,"duplicate measured repetition: "+name)
-    summary=summarize(raw);results_ok=all(s["failed"]==0 and s["matched_expected"]==s["requested"] for s in summary)
+    summary=summarize(raw);results_ok=measured.returncode==0 and all(s["failed"]==0 and s["matched_expected"]==s["requested"] for s in summary)
     # Separate profiling run: time-sampled process counters, excluded from measured trials.
-    profile_summary="No CPU stack profile: WPR could not enable the performance profiling policy (0xc5585011). Separate 1,000-round process CPU/RSS sampling completed; limiter unknown."
     profile={"schema":"csl.syn02-process-counters/1","separate_from_reported_trials":True,"source_commit":SOURCE_COMMIT,"command":"Separate 1000-repetition process CPU/RSS observation.","etw_stack_profile":"unavailable","etw_failure":"WPR -start CPU -filemode returned 0xc5585011: Failed to enable the policy to profile system performance.","status":"pending","limiter":"unknown","reason":"process counters do not attribute work to a source function"}
     # Capture process CPU/RSS during an independent long batch. It is a limiter observation only,
     # not source-level attribution or a reported latency sample.
     import time
-    profile_args=[str(exe),"1000","1"];samples=[]
+    profile_args=[str(exe),"1000","1"];state["stage"]="profile";state["command"]=profile_args;samples=[]
     profile_stdout_path=build/"profile-raw.jsonl";profile_stderr_path=build/"profile-stderr.txt"
     with profile_stdout_path.open("wb") as profile_stdout, profile_stderr_path.open("wb") as profile_stderr:
       p=subprocess.Popen(profile_args,cwd=ROOT,stdout=profile_stdout,stderr=profile_stderr)
@@ -247,7 +295,7 @@ def main():
           except psutil.NoSuchProcess: break
           time.sleep(.01)
       p.wait()
-    pout=profile_stdout_path.read_bytes();perr=profile_stderr_path.read_bytes();profile_raw=pout
+    pout=profile_stdout_path.read_bytes();perr=profile_stderr_path.read_bytes();profile_raw=pout;state["profile_stdout"]=pout;state["profile_stderr"]=perr
     profile_wall=time.perf_counter_ns()-startp
     profile_lines=pout.splitlines();profile_identity=json.loads(profile_lines[0]) if profile_lines else {}
     require(profile_identity=={"schema":"csl.syn02-terminal-run/1","source_commit":SOURCE_COMMIT,"harness_commit":a.harness_commit},"profile executable identity mismatch")
@@ -258,7 +306,8 @@ def main():
     if p.returncode!=0 or len(profile_events)!=5*1001 or not profile["profile_all_expected"]:
         profile["status"]="process_counter_sampling_incomplete"
         profile["incomplete_reason"]="separate profile process returned incomplete output or an expected-result check failed"
-    profile_summary="No CPU stack profile: WPR could not enable the performance profiling policy (0xc5585011). Separate 1,000-round process CPU/RSS sampling completed; limiter unknown."
+    if profile["status"]=="counter_profile_completed":profile["status"]="process_counter_sampling_completed"
+    profile_summary=profile_summary_for(profile)
     source_tree=git("rev-parse",f"{SOURCE_COMMIT}^{{tree}}")
     compiler_file=next((build/"CMakeFiles").glob("*/CMakeCXXCompiler.cmake"));compiler_text=compiler_file.read_text(errors="replace")
     import re
@@ -275,10 +324,9 @@ def main():
     visit_target(target["id"])
     provenance={"schema":"csl.syn02-build-provenance/1","source_commit":SOURCE_COMMIT,"source_tree":source_tree,"harness_commit":a.harness_commit,"configuration":"Release","cxx_standard":"20","release_flags":flags,"binary_sha256":sha(exe.read_bytes()),"driver_sha256":sha((TOOLING/"terminal_driver.cpp").read_bytes()),"compiler":(compiler_id.group(1)+" "+compiler_version.group(1)) if compiler_id and compiler_version else "unavailable","cmake_generator":a.generator,"target":"csl_syn02_terminal_report","configure_command":["cmake","-S","SOURCE_ROOT","-B","BUILD_ROOT","-G",a.generator,"-A",a.architecture,"-DCSL_BUILD_SYN02_REPORT=ON","-DBUILD_TESTING=OFF","-DCMAKE_BUILD_TYPE=Release"],"build_command":["cmake","--build","BUILD_ROOT","--config","Release","--target","csl_syn02_terminal_report","--parallel","4","--verbose"],"target_closure":closure,"checkout_clean_before":True,"checkout_clean_after":True}
     environment={"captured_utc":dt.datetime.now(dt.timezone.utc).isoformat(),"os":platform.platform(),"machine":platform.machine(),"processor":proc_name(),"logical_cpus":psutil.cpu_count(logical=True),"physical_cpus":psutil.cpu_count(logical=False),"memory_bytes":psutil.virtual_memory().total,"cpu_percent_before":host_cpu_before,"cpu_percent_after":host_cpu_after,"simultaneous_work":"No intentional concurrent benchmark; background processes may affect host load.","requested_workers":1,"configured_native_threads":1,"observed_native_threads":"Unavailable; not inferred from the configured policy","cache_policy":"One excluded warmup per scenario; one process; fresh fixture, registries and prepared providers on every trial.","seed":None}
-    payload={"schema":"csl.syn02-terminal-report/1","report_id":"pending","source_commit":SOURCE_COMMIT,"harness_commit":a.harness_commit,"scenario_catalog":SCENARIOS,"terminal_slice":UNIT_BOX,"scenario_hashes":{name:sha(canonical({"scenario":spec,"terminal_slice":UNIT_BOX})) for name,spec in SCENARIOS.items()},"environment":environment,"provenance":provenance,"profile_summary":profile_summary,"measurement":{"kind":"descriptive_single_adapter","scope":"Terminal optimizer on resolved objectives and a supplied terminal H-slice; not system simulation or complete control synthesis","adapter":"HiGHS LP and convex adapters selected through PreparedProvider","backend":{"name":"HiGHS","version":"1.11.0","source_archive_sha256":"2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275","lp_solver":"simplex","presolve":"off","parallel":"off","configured_native_threads":1,"random_seed":0,"absolute_and_relative_tolerance":1e-8,"small_matrix_value":1e-12,"iteration_limit":2147483647,"time_limit":"infinity"},"resource_policy":{"total_threads":1,"outer_workers":1,"threads_per_worker":1,"memory_bytes":None},"repetitions":a.repetitions,"warmups_per_scenario":a.warmups,"fixture_order":"alternating forward/reverse per round","timing_scopes":{"prepare_ns":"resolved problem, slice construction, LP/convex registration, provider selection/preparation","solve_ns":"TerminalOptimizer::solve call only, including internal program setup/workspace/run/anchor and relation construction","oracle_ns":"consumption of returned status/evidence and captured result fields; literal independent verification performed from saved rows after timing","total_ns":"fixture resolution through call and in-process output checks, excluding process startup, output serialization, destruction and rendering"},"interval_unit":"nanoseconds","number_of_process_trials":1,"process_startup_included":False,"driver_exit_code":measured.returncode,"process_elapsed_ns_outside_per_trial":elapsed},"summary":summary,"attempt_counts":{"measured":len([r for r in raw if not r["warmup"]]),"matched_expected":sum(s["matched_expected"] for s in summary),"failed":sum(s["failed"] for s in summary),"non_success":sum(s["non_success"] for s in summary),"missing":5*a.repetitions-len([r for r in raw if not r["warmup"]])},"evidence_limits":["binary64 literal fixture checks, not exact or validated arithmetic","relation samples and H representation checks do not certify full set equality or full minimizer-family completeness","global optimum and relation support remain Unestablished","the shifted residual case returns undetermined with numerical_failure and no constructed relation","tiny analytic fixtures only; no comparator, speedup, application-scale, throughput, or scalability claim","limiter unknown because no call-stack profile evidence was collected"]}
+    payload={"schema":"csl.syn02-terminal-report/1","report_id":"pending","source_commit":SOURCE_COMMIT,"harness_commit":a.harness_commit,"scenario_catalog":SCENARIOS,"terminal_slice":UNIT_BOX,"scenario_hashes":{name:sha(canonical({"scenario":spec,"terminal_slice":UNIT_BOX})) for name,spec in SCENARIOS.items()},"environment":environment,"provenance":provenance,"profile_summary":profile_summary,"measurement":{"kind":"descriptive_single_adapter","scope":"Terminal optimizer on resolved objectives and a supplied terminal H-slice; not system simulation or complete control synthesis","adapter":"HiGHS LP and convex adapters selected through PreparedProvider","backend":{"name":"HiGHS","version":"1.11.0","source_archive_sha256":"2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275","lp_solver":"simplex","presolve":"off","parallel":"off","configured_native_threads":1,"random_seed":0,"absolute_and_relative_tolerance":1e-8,"small_matrix_value":1e-12,"iteration_limit":2147483647,"time_limit":"infinity"},"resource_policy":{"total_threads":1,"outer_workers":1,"threads_per_worker":1,"memory_bytes":None},"repetitions":a.repetitions,"warmups_per_scenario":a.warmups,"fixture_order":"alternating forward/reverse per round","timing_scopes":{"prepare_ns":"resolved problem, slice construction, LP/convex registration, provider selection/preparation","solve_ns":"TerminalOptimizer::solve call only, including internal program setup/workspace/run/anchor and relation construction","oracle_ns":"consumption of returned status/evidence and captured result fields; literal independent verification performed from saved rows after timing","execute_ns":"fixture resolution through solve and immediate C++ result-field consumption; excludes collector-side literal validation, process startup, output serialization, destruction and rendering"},"interval_unit":"nanoseconds","number_of_process_trials":1,"process_startup_included":False,"driver_exit_code":measured.returncode,"process_elapsed_ns_outside_per_trial":elapsed},"summary":summary,"attempt_counts":{"measured":len([r for r in raw if not r["warmup"]]),"matched_expected":sum(s["matched_expected"] for s in summary),"failed":sum(s["failed"] for s in summary),"non_success":sum(s["non_success"] for s in summary),"missing":5*a.repetitions-len([r for r in raw if not r["warmup"]])},"evidence_limits":["binary64 literal fixture checks, not exact or validated arithmetic","relation samples and H representation checks do not certify full set equality or full minimizer-family completeness","global optimum and relation support remain Unestablished","the shifted residual case returns undetermined with numerical_failure and no constructed relation","tiny analytic fixtures only; no comparator, speedup, application-scale, throughput, or scalability claim","limiter unknown because no call-stack profile evidence was collected"]}
     payload["report_id"]="syn02-terminal-"+dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d")+"-"+SOURCE_COMMIT[:8]+"-"+sha(canonical({"summary":summary,"raw_sha":sha(measured.stdout),"binary_sha":provenance["binary_sha256"],"harness":a.harness_commit}))[:12]
     profile_note="Separate process-counter-only invocation (1000 rounds, excluded from reported trials). Process CPU and resident-memory snapshots were sampled every ~10 ms. WPR CPU stack capture could not be enabled: command returned 0xc5585011 and reported 'Failed to enable the policy to profile system performance'. The limiting function/path remains unknown; no performance cause is inferred."
-    if profile["status"]=="counter_profile_completed":profile["status"]="process_counter_sampling_completed"
     out_dir=out_root/payload["report_id"]
     require(not out_dir.exists() and not out_dir.with_suffix(".zip").exists(),"versioned report destination already exists")
     out_dir.parent.mkdir(parents=True,exist_ok=True)
@@ -288,7 +336,24 @@ def main():
                  redact_bytes(build_log,[(ROOT,"SOURCE_ROOT"),(build,"BUILD_ROOT")]),
                  redact_bytes(configure_log,[(ROOT,"SOURCE_ROOT"),(build,"BUILD_ROOT")]),
                  " ".join([str(exe).replace(str(build),"BUILD_ROOT"),str(a.repetitions),str(a.warmups)]),profile_note)
-    require(results_ok,"one or more measured trials failed the literal oracle; complete report bundle retained at "+str(out_dir))
+    if not results_ok:
+        reasons=[]
+        if measured.returncode!=0: reasons.append(f"driver exit code {measured.returncode}")
+        failed_trials=sum(s["failed"] for s in summary)
+        if failed_trials: reasons.append(f"{failed_trials} measured trials failed the literal oracle")
+        raise ValueError("collection invalid ("+"; ".join(reasons)+"); report evidence retained at "+str(out_dir))
     print(json.dumps({"report_id":payload["report_id"],"bundle":str(out_dir),"source_commit":SOURCE_COMMIT,"harness_commit":a.harness_commit,"summary":summary,"profile_status":profile["status"]},indent=2))
+
+def main():
+    ap=argparse.ArgumentParser();ap.add_argument("--cmake",type=Path,required=True);ap.add_argument("--build-dir",type=Path,required=True);ap.add_argument("--out-root",type=Path,required=True);ap.add_argument("--harness-commit",required=True);ap.add_argument("--generator",default="Visual Studio 17 2022");ap.add_argument("--architecture",default="x64");ap.add_argument("--repetitions",type=int,default=7);ap.add_argument("--warmups",type=int,default=1);ap.add_argument("--timeout",type=int,default=120);a=ap.parse_args()
+    state={"stage":"preflight","measurement_trials_started":False,"command":sys.argv[1:]}
+    try: collect(a,state)
+    except Exception as error:
+        try: failure_dir=persist_failure(a,state,error)
+        except Exception as persist_error:
+            print(f"Failed to persist collection evidence: {persist_error}",file=sys.stderr)
+            raise error
+        print(f"Collection failed at {state['stage']}; durable evidence: {failure_dir}",file=sys.stderr)
+        raise
 
 if __name__=="__main__": main()

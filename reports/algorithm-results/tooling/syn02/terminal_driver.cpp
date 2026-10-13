@@ -76,7 +76,7 @@ const char* support(const EvidenceSupport& v) {
 }
 void vector_json(std::ostream& o, numeric::VectorView v) { o<<'[';for(std::size_t i=0;i<v.size();++i){if(i)o<<',';o<<std::setprecision(17)<<v[i];}o<<']'; }
 void matrix_json(std::ostream& o, numeric::MatrixView m) { o<<'[';for(std::size_t i=0;i<m.rows();++i){if(i)o<<',';o<<'[';for(std::size_t j=0;j<m.cols();++j){if(j)o<<',';o<<std::setprecision(17)<<m(i,j);}o<<']';}o<<']'; }
-struct Trial { std::string status{"failed"}, outcome{"undetermined"}, termination{"unknown"}, provider, diagnostic, raw_diagnostics, relation_support{"unestablished"}, optimum_support{"unestablished"}, lower_support{"unavailable"}, upper_support{"unavailable"}, program_outcome_support{"unavailable"}, program_lower_support{"unavailable"}, program_upper_support{"unavailable"}, characterization; std::vector<std::string> assumptions; bool relation{}, optimization{}, optimum{}, oracle{}; std::optional<double> primal_value, lower, upper; std::uint64_t prepare_ns{}, solve_ns{}, oracle_ns{}, total_ns{}; std::optional<sets::SetData> result; };
+struct Trial { std::string status{"failed"}, outcome{"undetermined"}, termination{"unknown"}, provider, diagnostic, raw_diagnostics, relation_support{"unestablished"}, optimum_support{"unestablished"}, lower_support{"unavailable"}, upper_support{"unavailable"}, program_outcome_support{"unavailable"}, program_lower_support{"unavailable"}, program_upper_support{"unavailable"}, characterization; std::vector<std::string> assumptions; bool relation{}, optimization{}, optimum{}, oracle{}; std::optional<double> primal_value, lower, upper; std::uint64_t prepare_ns{}, solve_ns{}, oracle_ns{}, execute_ns{}; std::optional<sets::SetData> result; };
 Trial execute(const Fixture& fixture) {
     Trial t; const auto begin=Clock::now();
     try {
@@ -108,14 +108,14 @@ Trial execute(const Fixture& fixture) {
       t.oracle_ns=std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-oracle_begin).count();
       t.status=t.oracle?"passed":"oracle_failed";
     } catch(const std::exception& e) {t.diagnostic=e.what();t.status="failed";}
-    t.total_ns=std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-begin).count();return t;
+    t.execute_ns=std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-begin).count();return t;
 }
 void emit(const Fixture& f,std::size_t repetition,bool warmup,const Trial& t) {
     std::cout<<"{\"schema\":\"csl.syn02-terminal-trial/1\",\"scenario\":"<<quoted(f.id)<<",\"repetition\":"<<repetition<<",\"warmup\":"<<(warmup?"true":"false")<<",\"status\":"<<quoted(t.status)<<",\"expected_outcome\":"<<quoted(outcome(f.expected))<<",\"outcome\":"<<quoted(t.outcome)<<",\"termination\":"<<quoted(t.termination)<<",\"relation\":"<<(t.relation?"true":"false")<<",\"optimization_present\":"<<(t.optimization?"true":"false")<<",\"optimum_present\":"<<(t.optimum?"true":"false")<<",\"provider\":"<<quoted(t.provider)<<",\"diagnostic\":"<<quoted(t.diagnostic)<<",\"primal_value\":";
     if(t.primal_value)std::cout<<std::setprecision(17)<<*t.primal_value;else std::cout<<"null";
     std::cout<<",\"expected_termination\":"<<quoted(f.expected_termination)<<",\"expected_provider\":"<<quoted(f.provider)<<",\"relation_support\":"<<quoted(t.relation_support)<<",\"optimum_support\":"<<quoted(t.optimum_support)<<",\"program_outcome_support\":"<<quoted(t.program_outcome_support)<<",\"program_lower_bound_support\":"<<quoted(t.program_lower_support)<<",\"program_upper_bound_support\":"<<quoted(t.program_upper_support)<<",\"lower_bound_support\":"<<quoted(t.lower_support)<<",\"upper_bound_support\":"<<quoted(t.upper_support)<<",\"characterization\":"<<quoted(t.characterization)<<",\"assumptions\":[";for(std::size_t i=0;i<t.assumptions.size();++i){if(i)std::cout<<',';std::cout<<quoted(t.assumptions[i]);}std::cout<<"],\"raw_diagnostics\":"<<quoted(t.raw_diagnostics)<<",\"lower_bound\":";if(t.lower)std::cout<<std::setprecision(17)<<*t.lower;else std::cout<<"null";
     std::cout<<",\"upper_bound\":";if(t.upper)std::cout<<std::setprecision(17)<<*t.upper;else std::cout<<"null";
-    std::cout<<",\"prepare_ns\":"<<t.prepare_ns<<",\"solve_ns\":"<<t.solve_ns<<",\"oracle_ns\":"<<t.oracle_ns<<",\"total_ns\":"<<t.total_ns<<",\"inequalities\":";
+    std::cout<<",\"prepare_ns\":"<<t.prepare_ns<<",\"solve_ns\":"<<t.solve_ns<<",\"oracle_ns\":"<<t.oracle_ns<<",\"execute_ns\":"<<t.execute_ns<<",\"inequalities\":";
     if(t.relation){auto rep=std::get<sets::HRepresentation>(t.result->representation());matrix_json(std::cout,rep.inequalities);std::cout<<",\"upper_bounds\":";vector_json(std::cout,rep.upper_bounds);std::cout<<",\"equalities\":";matrix_json(std::cout,rep.equalities);std::cout<<",\"equality_values\":";vector_json(std::cout,rep.equality_values);}else std::cout<<"[],\"upper_bounds\":[],\"equalities\":[],\"equality_values\":[]";
     std::cout<<"}\n";
 }
