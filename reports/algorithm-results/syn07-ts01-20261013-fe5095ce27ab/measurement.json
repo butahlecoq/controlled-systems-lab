@@ -1,0 +1,158 @@
+{
+  "algorithm_source_commit": "fe5095ce27ab4872cb31df32fab6f3b1b073f4f6",
+  "binary": {
+    "bytes": 379392,
+    "configuration": "Release",
+    "cxx_standard": "c++20",
+    "ndebug": true,
+    "path": "build/ts01-report/Release/csl_syn07_ts01_report.exe",
+    "release_properties": {
+      "AdditionalIncludeDirectories": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\include;%(AdditionalIncludeDirectories)",
+      "AssemblerListingLocation": "$(IntDir)",
+      "BasicRuntimeChecks": "Default",
+      "ConformanceMode": "true",
+      "DebugInformationFormat": "\n      ",
+      "ExceptionHandling": "Sync",
+      "InlineFunctionExpansion": "AnySuitable",
+      "LanguageStandard": "stdcpp20",
+      "MinimalRebuild": "",
+      "ObjectFileName": "$(IntDir)",
+      "Optimization": "MaxSpeed",
+      "PrecompiledHeader": "NotUsing",
+      "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+      "RuntimeLibrary": "MultiThreadedDLL",
+      "ScanSourceForModuleDependencies": "true",
+      "SupportJustMyCode": "",
+      "TreatWarningAsError": "true",
+      "UseFullPaths": "false",
+      "WarningLevel": "Level4"
+    },
+    "sha256": "f4df8c27e86afdbe0de7326183c1672fa662e4e41051540c2318e39f70197a84"
+  },
+  "build_provenance": {
+    "build_log_sha256": "da5767a4b8e00474341dfe7abe498131db72746f4ae8577ca9be60a5ac10e204",
+    "cmake_cache_sha256": "1e9529c0b85ed0f79cd1a02c3abab64792667b66c08a4ff316ccf21e31200be2",
+    "compiler": "MSVC",
+    "configuration": "Release",
+    "generator": "Visual Studio 17 2022 x64",
+    "target_project_sha256": "f317ffa9c534ba9d05dd2ee58226044c5cf321f070b3307708c5714ebf2c65aa"
+  },
+  "counts": {
+    "all_outputs_consumed_and_validated": true,
+    "failed": 0,
+    "measured": 7,
+    "passed": 7,
+    "unique_observation_tokens": 1,
+    "warmup": 1
+  },
+  "environment": {
+    "clock": "std::chrono::steady_clock; elapsed duration in nanoseconds",
+    "load_policy": "Unrelated processes were left running; the two CPU samples are outside the measured process. This is a single-side observation, so no interleaving or noise cancellation is claimed.",
+    "logical_cpu_count": 12,
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "total_cpu_percent_1s_after": 99.6,
+    "total_cpu_percent_1s_before": 99.6
+  },
+  "events": [
+    {
+      "elapsed_ns": 309400,
+      "error": "",
+      "observation_token": 1805158144890476961,
+      "repetition": 0,
+      "schema": "csl.syn07-ts01-measurement-event/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "elapsed_ns": 71300,
+      "error": "",
+      "observation_token": 1805158144890476961,
+      "repetition": 1,
+      "schema": "csl.syn07-ts01-measurement-event/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "elapsed_ns": 66200,
+      "error": "",
+      "observation_token": 1805158144890476961,
+      "repetition": 2,
+      "schema": "csl.syn07-ts01-measurement-event/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "elapsed_ns": 54200,
+      "error": "",
+      "observation_token": 1805158144890476961,
+      "repetition": 3,
+      "schema": "csl.syn07-ts01-measurement-event/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "elapsed_ns": 51400,
+      "error": "",
+      "observation_token": 1805158144890476961,
+      "repetition": 4,
+      "schema": "csl.syn07-ts01-measurement-event/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "elapsed_ns": 50900,
+      "error": "",
+      "observation_token": 1805158144890476961,
+      "repetition": 5,
+      "schema": "csl.syn07-ts01-measurement-event/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "elapsed_ns": 54100,
+      "error": "",
+      "observation_token": 1805158144890476961,
+      "repetition": 6,
+      "schema": "csl.syn07-ts01-measurement-event/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "elapsed_ns": 53500,
+      "error": "",
+      "observation_token": 1805158144890476961,
+      "repetition": 7,
+      "schema": "csl.syn07-ts01-measurement-event/1",
+      "status": "passed",
+      "warmup": false
+    }
+  ],
+  "harness_commit": "0d71a8a24bf6eacd82ab87cf9fb114d4a3223998",
+  "limiter": {
+    "available": false,
+    "reason": "No separate sampling/call-stack profile was collected; this record does not attribute the observed time or establish capacity."
+  },
+  "order": "One excluded warmup, followed by seven measured repetitions in one process. Single strategy only; alternation is inapplicable and no comparator was measured.",
+  "performance_conclusion": "inconclusive",
+  "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "raw_stdout_sha256": "217e1d0215ab0c9117225592b0874fe99825d848312fbac3d01a922cedb90c54",
+  "schema": "csl.syn07-ts01-measurement-collection/1",
+  "scope": "Fresh problem construction and resolution, strategy registration/selection/preparation, exclusive workspace creation, public bound-workspace run, and independent complete-H-relation plus exact-membership validation. Excludes process startup, JSON serialization, build, collection, and rendering.",
+  "timing_ns": {
+    "max": 71300,
+    "median": 54100,
+    "min": 50900,
+    "observations": [
+      71300,
+      66200,
+      54200,
+      51400,
+      50900,
+      54100,
+      53500
+    ],
+    "range": 20400
+  }
+}

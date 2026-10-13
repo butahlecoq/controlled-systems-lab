@@ -1,12 +1,15 @@
 {
   "files": {
-    "README.md": "df33e1f6722a32ba1662e1fb48c697ffc0b1bb4946a1ff899055da9018d11125",
-    "environment.json": "99ace0ec7320959762663c21d80cbe53480983629762d43515918750de984baf",
-    "index.html": "b114784e9b00bca205e006c5f7acfbcdca8bd8857782eccbe552b3c7a50d8242",
-    "publication-map.json": "07507947d8050595f05c97e670ef590bcbf714de4bb5a44e8e6541a30258af57",
+    "README.md": "c9797f4d618d114e261b602d7a358a0a5692573d2faa1f53fac4d95b68f206ed",
+    "environment.json": "c321a11220e4b5ac8155780ff6de1c1a40e0569a75bc785bf54ba45c05d92aa4",
+    "index.html": "74faaf96d32e31cd6d0ded99777d850710655ec0bf87a0b78ca19bc46edab386",
+    "measurement-events.jsonl": "217e1d0215ab0c9117225592b0874fe99825d848312fbac3d01a922cedb90c54",
+    "measurement.json": "f9149cb115bfae00a1e873b8d74b71bf7e2716213a29ebbf11549f1f6c07bffd",
+    "publication-map.json": "f4ff8a085ce5a6ce0433f879118fc44baa5467ab2f76ce7aed4d6a5df6070ff0",
     "raw-events.jsonl": "4ef9ea25170803adfde7e920a8fa15963b0fbbe1abfd3bc1f3f9af86b4ece56c",
-    "records.json": "af05df8a6316f8c3865ff97bee6b84d1b3e1c22cd8ae716b1e8c001e56b92a7c",
+    "records.json": "7e805824f8b8fc40fedcaba2cb9bde6fc31ac184f591fa787e166fc6a84b7788",
     "scenarios.json": "5cc4466b5aedbe4ab0efbd30f0b2a5a679aa43e912299d8c576e4a891a7c2691",
+    "timings.csv": "7a7079caecf377c94c0a8cfb0a5aac7800d517cdfbe608b3a3047bd3d0db4736",
     "trials.csv": "f68b9bfcc840c9cc82ec27933287711971240a20475902e8ced25c7ea889682d"
   },
   "report_id": "syn07-ts01-20261013-fe5095ce27ab",
