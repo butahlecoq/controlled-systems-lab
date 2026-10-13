@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_a/strategy.hpp>
+#include <csl/contracts.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
@@ -200,6 +201,24 @@ TEST_CASE("T-S01 registered candidate retains u0+u1=1 and rejects the marginal p
     CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
     CHECK(result.family->identity().request==query.family);
     CHECK(result.family->identity().lineage.size()==6);
+}
+TEST_CASE("T-S01 result validation rejects a mismatched ordered transformation lineage") {
+    const auto query=request(integrator());
+    const auto result=run(query);
+    REQUIRE(result.family);
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+
+    const auto& actual=result.family->identity();
+    CHECK(check_synthesis_result(result,actual).empty());
+
+    auto expected=actual;
+    REQUIRE(expected.lineage.size()==6);
+    expected.lineage.pop_back();
+    const auto diagnostics=check_synthesis_result(result,expected);
+    CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
+        return diagnostic.field=="family.identity";
+    }));
+    CHECK(std::holds_alternative<CandidateFamily>(result.family->outcome()));
 }
 TEST_CASE("T-S02 constant objective preserves histories at different terminal points") {
     const auto query=request(integrator(true));auto result=run(query);const auto& history=payload(result);

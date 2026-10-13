@@ -31,7 +31,9 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     if (request.family.assurance==Assurance::validated)
         return Unsupported{{{DiagnosticCode::unsupported,"family.assurance","No validated family verifier is implemented"}}};
     const auto id=request.problem.identity();
-    const FamilyIdentity expected{id,request.family,request.problem.constraints().coordinates(),
+    const SynthesisIdentityExpectation expected{id,request.family,request.problem.constraints().coordinates(),
+        request.configuration.strategy,request.strategy_version,std::nullopt};
+    const FamilyIdentity validation_identity{id,request.family,request.problem.constraints().coordinates(),
         request.configuration.strategy,request.strategy_version,{}};
     auto answer=workspace.solve(request.problem,request.family,context);
     auto diagnostics=check_synthesis_result(answer,expected);
@@ -48,7 +50,7 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
     const bool lower_exceeds_incumbent=answer.objective.lower.has_value() &&
         supported_synthesis_bound(*answer.objective.lower,id) &&
         std::any_of(answer.incumbents.begin(),answer.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
-            return supported_feasible_incumbent(incumbent,expected) &&
+            return supported_feasible_incumbent(incumbent,validation_identity) &&
                 incumbent.witness.original_objective<answer.objective.lower->value;
         });
     auto retained=std::move(answer);
@@ -62,7 +64,7 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
         retained.objective.lower.reset(); retained.objective.upper.reset();
     } else if (lower_exceeds_incumbent) retained.objective.lower.reset();
     std::erase_if(retained.incumbents,[&](const FeasibleIncumbent& incumbent) {
-        return !supported_feasible_incumbent(incumbent,expected);
+        return !supported_feasible_incumbent(incumbent,validation_identity);
     });
     if (retained.family && !check_family_evidence(*retained.family,id,request.family.assurance).empty())
         retained.family.reset();

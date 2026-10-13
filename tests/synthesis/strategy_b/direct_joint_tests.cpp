@@ -281,7 +281,8 @@ TEST_CASE("validation failure uses the contract product without a sanitizer repl
     const auto p=resolve(integrator());const auto q=request(p);ExecutionContext context;context.numerical={1e-3,1e-3};
     const auto direct=oracle({0,0.25,1,0.25,0.75},0).solve(p,q,context);
     CHECK(direct.termination==Termination::contract_rejected);REQUIRE(std::holds_alternative<ContractValidationFailure>(direct.stop));
-    const FamilyIdentity expected{p.identity(),q,p.constraints().coordinates(),{"csl.synthesis.strategy-b"},"1",{}};
+    const SynthesisIdentityExpectation expected{p.identity(),q,p.constraints().coordinates(),
+        {"csl.synthesis.strategy-b"},"1",std::nullopt};
     CHECK(check_synthesis_result(direct,expected).empty());
     const auto prepared=registered_prepared(p,q,true);auto workspace=prepared.create();const auto r=accepted(workspace->run({}));
     CHECK(r.termination==Termination::contract_rejected);REQUIRE(std::holds_alternative<ContractValidationFailure>(r.stop));

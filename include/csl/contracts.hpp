@@ -426,6 +426,14 @@ struct FamilyIdentity {
     std::vector<TransformStepIdentity> lineage;
     bool operator==(const FamilyIdentity&) const = default;
 };
+struct SynthesisIdentityExpectation {
+    ProblemId problem;
+    FamilyRequest request;
+    JointCoordinates coordinates;
+    ModuleId strategy;
+    std::string strategy_version;
+    std::optional<std::vector<TransformStepIdentity>> lineage;
+};
 struct OptimumEvidence { ClaimEvidence optimum; ObjectiveEvidence bounds; };
 struct NumericalCoverageEvidence {
     std::string procedure;
@@ -560,6 +568,7 @@ Diagnostics check_family_evidence(const OptimalFamily&, const ProblemId&, Assura
 bool supported_synthesis_bound(const ObjectiveBound&, const ProblemId&);
 bool supported_feasible_incumbent(const FeasibleIncumbent&, const FamilyIdentity&);
 Diagnostics check_synthesis_result(const SynthesisResult&, const FamilyIdentity&);
+Diagnostics check_synthesis_result(const SynthesisResult&, const SynthesisIdentityExpectation&);
 Diagnostics check_resources(const ResourcePolicy&);
 Diagnostics check_outcome_evidence(const ProgramOutcomeClaim&, const ProgramIdentity&, Assurance);
 Diagnostics check_outcome_evidence(const SynthesisOutcomeClaim&, const ProblemId&, Assurance);
