@@ -101,12 +101,7 @@ class Syn02PublicationTests(unittest.TestCase):
         payload_bytes = (json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode()
         (bundle / "records.json").write_bytes(payload_bytes)
         (bundle / "raw-events.jsonl").write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
-        with (bundle / "trials.csv").open("w", newline="", encoding="utf-8") as stream:
-            writer = csv.DictWriter(stream, fieldnames=TRIAL_FIELDS)
-            writer.writeheader()
-            for row in rows:
-                if not row["warmup"]:
-                    writer.writerow({key: _csv_value(row.get(key)) for key in TRIAL_FIELDS})
+        (bundle / "trials.csv").write_bytes(collect.trials_csv_bytes(rows))
         (bundle / "summary.csv").write_bytes(collect.summary_csv_bytes(summary))
         (bundle / "latency.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><title>Latency</title><path d="M0 0L10 10"/></svg>', encoding="utf-8")
         (bundle / "index.html").write_text("<!doctype html><html><body>SYN-02 saved report</body></html>", encoding="utf-8")
@@ -210,6 +205,18 @@ class Syn02PublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "CSV"):
                 syn02.adapt(bundle)
 
+    def test_rejects_semantically_equivalent_noncanonical_trial_csv(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self.make_bundle(Path(directory))
+            path = bundle / "trials.csv"
+            original = path.read_bytes()
+            noncanonical = original.replace(b"\n", b"\r\n")
+            self.assertNotEqual(original, noncanonical)
+            path.write_bytes(noncanonical)
+            self._rehash_native_manifest(bundle)
+            with self.assertRaisesRegex(ValueError, "CSV"):
+                syn02.adapt(bundle)
+
     def test_rejects_missing_summary_csv(self):
         with tempfile.TemporaryDirectory() as directory:
             bundle = self.make_bundle(Path(directory))
@@ -226,6 +233,17 @@ class Syn02PublicationTests(unittest.TestCase):
             self._rehash_native_manifest(bundle)
             with self.assertRaisesRegex(ValueError, "summary.csv"):
                 syn02.adapt(bundle)
+
+    def test_accepts_completed_profile_with_explicit_unknown_limiter(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self.make_bundle(Path(directory))
+            record_path = bundle / "records.json"
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+            record["profile_summary"] = "Separate process CPU/RSS counter sampling completed; no call-stack attribution. WPR CPU stack capture unavailable; limiting source function remains unknown."
+            record_path.write_text(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            (bundle / "publication-map.json").write_text(json.dumps(publication_map.project(record), ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            self._rehash_native_manifest(bundle)
+            self.assertEqual(bundle.name, syn02.adapt(bundle).source_report_id)
         with tempfile.TemporaryDirectory() as directory:
             bundle = self.make_bundle(Path(directory))
             record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))

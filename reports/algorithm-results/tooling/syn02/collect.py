@@ -230,16 +230,27 @@ def summary_csv_bytes(summary):
                           if isinstance(row[key],(dict,list)) else row[key]) for key in SUMMARY_FIELDS})
     return stream.getvalue().encode("utf-8")
 
+TRIAL_FIELDS=("scenario","repetition","status","validation_errors","outcome","termination","relation",
+              "optimization_present","optimum_present","provider","primal_value","lower_bound","upper_bound",
+              "prepare_ns","solve_ns","oracle_ns","execute_ns","solver_observations")
+
+def trials_csv_bytes(rows):
+    stream=io.StringIO(newline="")
+    writer=csv.DictWriter(stream,fieldnames=TRIAL_FIELDS,lineterminator="\n")
+    writer.writeheader()
+    for row in rows:
+        if not row["warmup"]:
+            writer.writerow({key:(json.dumps(row.get(key),ensure_ascii=False,sort_keys=True,separators=(",",":"))
+                              if isinstance(row.get(key),(dict,list)) else row.get(key)) for key in TRIAL_FIELDS})
+    return stream.getvalue().encode("utf-8")
+
 def write_bundle(bundle, payload, raw, environment, provenance, profile, profile_raw, build_log, configure_log, command, profile_note):
     bundle.mkdir(parents=True,exist_ok=False)
     for row in raw:
         row["solver_observations"]=parse_solver_observations(row.get("raw_diagnostics",""))
     raw_bytes="".join(json.dumps(row,sort_keys=True,separators=(",",":"),allow_nan=False)+"\n" for row in raw).encode()
     rows=[r for r in raw if not r["warmup"]]
-    with (bundle/"trials.csv").open("w",newline="",encoding="utf-8") as f:
-        fields=["scenario","repetition","status","validation_errors","outcome","termination","relation","optimization_present","optimum_present","provider","primal_value","lower_bound","upper_bound","prepare_ns","solve_ns","oracle_ns","execute_ns","solver_observations"]
-        writer=csv.DictWriter(f,fieldnames=fields);writer.writeheader()
-        for r in rows: writer.writerow({k:(json.dumps(r.get(k),separators=(",",":")) if isinstance(r.get(k),list) else r.get(k)) for k in fields})
+    (bundle/"trials.csv").write_bytes(trials_csv_bytes(raw))
     (bundle/"summary.csv").write_bytes(summary_csv_bytes(payload["summary"]))
     (bundle/"raw-events.jsonl").write_bytes(raw_bytes)
     (bundle/"records.json").write_text(json.dumps(payload,indent=2,sort_keys=True,allow_nan=False)+"\n",encoding="utf-8")

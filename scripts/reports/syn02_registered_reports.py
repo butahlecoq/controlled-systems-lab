@@ -1,6 +1,5 @@
 """Registered publication adapter for SYN-02 terminal minimizer reports."""
 import csv
-import ast
 import hashlib
 import importlib.util
 import io
@@ -166,7 +165,8 @@ def _validate_record(record, rows):
     expected_counts = {"measured": 35, "matched_expected": 35, "failed": 0, "non_success": 7, "missing": 0}
     if counts != expected_counts:
         raise ValueError("SYN-02 attempt counts differ from raw events")
-    if "limiter unknown" not in record.get("profile_summary", "").lower():
+    profile_summary = record.get("profile_summary")
+    if not isinstance(profile_summary, str) or "unknown" not in profile_summary.lower() or not any(token in profile_summary.lower() for token in ("call-stack", "limiter")):
         raise ValueError("SYN-02 profile limiter must remain unknown")
 
 
@@ -202,29 +202,23 @@ def _summarize(rows):
 
 
 def _validate_csv(bundle, rows):
-    expected = [row for row in rows if not row["warmup"]]
     try:
-        with (bundle / "trials.csv").open(newline="", encoding="utf-8-sig") as stream:
-            reader = csv.DictReader(stream)
-            if reader.fieldnames != list(TRIAL_FIELDS):
-                raise ValueError("SYN-02 trials.csv headers differ from registered projection")
-            actual = list(reader)
-    except (OSError, UnicodeError, csv.Error) as exc:
+        actual = (bundle / "trials.csv").read_bytes()
+    except OSError as exc:
         raise ValueError("invalid SYN-02 trials.csv") from exc
-    if len(actual) != len(expected):
-        raise ValueError("SYN-02 CSV row count differs from raw events")
-    for actual_row, raw in zip(actual, expected):
-        projected = {key: _csv_value(raw.get(key)) for key in TRIAL_FIELDS}
-        for key, value in projected.items():
-            if key == "solver_observations":
-                try:
-                    parsed = ast.literal_eval(actual_row.get(key, ""))
-                except (ValueError, SyntaxError):
-                    raise ValueError("SYN-02 CSV solver observations are malformed") from None
-                if parsed != value:
-                    raise ValueError("SYN-02 CSV solver observations differ from raw measured events")
-            elif actual_row.get(key, "") != ("" if value is None else str(value)):
-                raise ValueError("SYN-02 CSV differs from raw measured events")
+    if actual != _trials_csv_bytes(rows):
+        raise ValueError("SYN-02 CSV trials.csv differs from canonical raw measured event projection")
+
+
+def _trials_csv_bytes(rows):
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=TRIAL_FIELDS, lineterminator="\n")
+    writer.writeheader()
+    for row in rows:
+        if not row["warmup"]:
+            writer.writerow({key: (json.dumps(row.get(key), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+                             if isinstance(row.get(key), (dict, list)) else row.get(key)) for key in TRIAL_FIELDS})
+    return stream.getvalue().encode("utf-8")
 
 
 def _summary_csv_bytes(summary):
@@ -244,10 +238,6 @@ def _validate_summary_csv(bundle, summary):
         raise ValueError("invalid SYN-02 summary.csv") from exc
     if actual != _summary_csv_bytes(summary):
         raise ValueError("SYN-02 summary.csv differs from recomputed records summary")
-
-
-def _csv_value(value):
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":")) if isinstance(value, list) else value
 
 
 def adapt(bundle):
