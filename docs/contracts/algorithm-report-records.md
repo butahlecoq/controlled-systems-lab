@@ -347,11 +347,12 @@ publication gate exemption.
 ## Registered non-LP publication adapters
 
 The shared Pages publisher accepts catalogue schema `csl.algorithm-report-catalog/3`
-for mixed LP, convex, OPT-05, GEO-02, GEO-03, GEO-04 and GEO-05 catalogues.
+for mixed LP, convex, OPT-05, GEO-02, GEO-03, GEO-04, GEO-05 and SYN-02 catalogues.
 LP/convex retain their validated view schemas and bundle projections. Other report
 kinds use the corresponding registered adapters: OPT-05 and GEO-03 in
 `registered_reports.py`, GEO-02 in `geo02_registered_reports.py`, GEO-04 in
-`geo04_registered_reports.py`, and GEO-05 in `geo05_registered_reports.py`.
+`geo04_registered_reports.py`, GEO-05 in `geo05_registered_reports.py`, and
+SYN-02 in `syn02_registered_reports.py`.
 Each adapter validates its native source identity, typed trial/summary coherence,
 explicit file inventory, manifest hashes and safe paths before staging. The shared
 renderer projects measured tables, evidence limits and links from validated
@@ -402,3 +403,18 @@ editing the pinset; every pinned historical source must still be present and
 staged byte-for-byte.
 
 The manifest records the exact staged file inventory and SHA-256 values, including the staged page, figures, evidence files and serialized envelope. The manifest itself is excluded from its own file list. The offline ZIP contains the same envelope and manifest bytes as the staged directory and uses deterministic, uncompressed entries. Schema-1/2 catalogues remain readable under their existing publication path; schema-3 rows require the common envelope metadata. An unknown native payload schema is rejected before output is created.
+
+SYN-02 keeps `csl.syn02-terminal-report/1` and its native `report_id` in
+`records.json`; the schema-3 public ID is derived from the complete validated
+native bundle inventory (manifest-listed files plus `manifest.json`) and the
+LF-normalized adapter source hash. Its adapter checks the raw 40-event matrix
+against each fixture's literal expected outcome, termination, provider,
+objective and retained residual diagnostics, then recomputes the five summary
+rows and compares the measured CSV projection. The shifted-residual fixture's
+seven `undetermined` / `numerical_failure` outcomes remain expected visible
+results with no constructed relation; they count as non-success outcomes and
+are never filtered into a successful solve-time distribution. The publisher
+validates the SVG with the shared safe-SVG policy and renders the public page
+from validated records rather than copying producer HTML. Staging does not
+publish the report; reviewed measurements, catalogue integration and the
+main-only Pages workflow remain required.

@@ -207,14 +207,14 @@ def svg(summary):
     width,height=920,360; left,top=235,36; rowh=48
     maximum=max((s["timings"][k]["max_ns"] for s in good for k in keys),default=1)
     scale=560/maximum
-    bits=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc"><title id="title">SYN-02 measured latency ranges</title><desc id="desc">Median and min-to-max range for solve and input-to-verified-result intervals, in milliseconds.</desc><style>text{{font:13px system-ui,sans-serif}}.axis{{stroke:#64748b;stroke-width:1}}.range{{stroke-width:3}}.median{{stroke:#111827;stroke-width:2}}</style>']
+    bits=[f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc"><title id="title">SYN-02 measured latency ranges</title><desc id="desc">Median and min-to-max range for solve and input-to-verified-result intervals, in milliseconds.</desc><style>text{{font:13px system-ui,sans-serif}}</style>']
     for i,s in enumerate(good):
         y=top+i*rowh; bits.append(f'<text x="12" y="{y+17}">{html.escape(s["scenario"])}</text>')
         for j,key in enumerate(keys):
             st=s["timings"][key]; yy=y+j*16
             x0=left+st["min_ns"]*scale;x1=left+st["max_ns"]*scale;xm=left+st["median_ns"]*scale
-            bits.append(f'<line class="range" x1="{x0:.1f}" y1="{yy}" x2="{x1:.1f}" y2="{yy}" stroke="{colors[key]}"/><line class="median" x1="{xm:.1f}" y1="{yy-5}" x2="{xm:.1f}" y2="{yy+5}"/><text x="{left+565}" y="{yy+5}">{key.replace("_ns", "")} · {st["median_ns"]/1e6:.3f} ms</text>')
-    bits.append(f'<line class="axis" x1="{left}" y1="{top-12}" x2="{left+560}" y2="{top-12}"/><text x="{left}" y="{height-12}">0 ms</text><text x="{left+430}" y="{height-12}">{maximum/1e6:.3f} ms maximum range</text></svg>')
+            bits.append(f'<line x1="{x0:.1f}" y1="{yy}" x2="{x1:.1f}" y2="{yy}" stroke="{colors[key]}" stroke-width="3"/><line x1="{xm:.1f}" y1="{yy-5}" x2="{xm:.1f}" y2="{yy+5}" stroke="#111827" stroke-width="2"/><text x="{left+565}" y="{yy+5}">{key.replace("_ns", "")} · {st["median_ns"]/1e6:.3f} ms</text>')
+    bits.append(f'<line x1="{left}" y1="{top-12}" x2="{left+560}" y2="{top-12}" stroke="#64748b" stroke-width="1"/><text x="{left}" y="{height-12}">0 ms</text><text x="{left+430}" y="{height-12}">{maximum/1e6:.3f} ms maximum range</text></svg>')
     return "".join(bits)
 
 def write_bundle(bundle, payload, raw, environment, provenance, profile, profile_raw, build_log, configure_log, command, profile_note):

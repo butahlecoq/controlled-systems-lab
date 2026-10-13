@@ -12,7 +12,7 @@ STAGED_SOURCE_FILES = [
     "configure-log.txt", "environment.json", "etw-profile-attempt.txt",
     "latency.svg", "manifest.json", "measurement-command.txt",
     "profile-evidence.json", "profile-note.txt", "profile-raw.jsonl",
-    "publication-map.json", "raw-events.jsonl", "records.json",
+    "publication-map.json", "publication_map.py", "raw-events.jsonl", "records.json",
     "render_saved.py", "terminal_driver.cpp", "test_report.py", "trials.csv",
 ]
 STAGED_FILES = sorted([*STAGED_SOURCE_FILES, "index.html", "report-envelope.json"])
@@ -108,7 +108,7 @@ def project(record):
             "required_validation": ["safe source ID/path", "native schema and source identity", "trial-to-summary consistency including failures", "raw/evidence file inventory and SHA256 manifest", "SVG safety", "envelope field projection", "deterministic offline ZIP"],
             "required_staging": ["schema-3 catalogue projection", "site.stage validation", "main-only Pages deployment", "verify immutable live page and ZIP URLs"],
             "publishable_now": False,
-            "blocking_reason": "No SYN-02 publisher adapter is currently registered in site.py.",
+            "blocking_reason": "The publisher adapter is registered; captured measurements must be regenerated under the reviewed harness, pass schema-3 staging, and complete independent report review before publication.",
         },
     }
 

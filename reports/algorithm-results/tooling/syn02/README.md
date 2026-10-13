@@ -40,16 +40,17 @@ module hash is SHA-256 of its UTF-8 source after CRLF-to-LF normalization. This
 matches the repository's registered-publication identity rule and binds both
 the saved measurement and its renderer/publisher implementation.
 
-This is a mapping specification, not a registered adapter. SYN-02 is not
-publishable until `scripts/reports/syn02_registered_reports.py` implements
-`adapt`, `render_page`, `publication_artifacts` and `offline_zip`, and
-`scripts/reports/site.py` imports it, admits the schema-3 kind, and dispatches
-to it from `site.stage`. The adapter must validate safe identity/paths, native
-record and source identity, complete trial/summary consistency including
-failures, inventory/hash manifest, SVG, common envelope projection and
-deterministic ZIP. Then the schema-3 catalogue and main-only Pages workflow
-must stage the report and verify the live page and ZIP URLs. Until those steps
-land, neither this mapping nor its producer HTML makes the bundle publishable.
+This mapping is implemented by the registered
+`scripts/reports/syn02_registered_reports.py` adapter and dispatched by
+`scripts/reports/site.py` for schema-3 staging. The adapter validates safe
+identity/paths, native record and source identity, complete trial/summary
+consistency including failures, inventory/hash manifest, SVG, common envelope
+projection and deterministic ZIP. The shifted-residual result remains
+`undetermined` with `numerical_failure` and no constructed relation; these
+expected numerical failures stay visible and are never removed from timing
+summaries. The captured report still requires regeneration under the
+independently reviewed harness, schema-3 staging, and scientific review before
+a catalogue or Pages deployment is authorized.
 
 On any collector exception, `collection-failures/<attempt-id>/failure.json`
 preserves the stage, error, source/harness identities, attempted command and
