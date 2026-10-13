@@ -1,0 +1,116 @@
+{
+  "envelope_fields": {
+    "evidence_limits": "payload.evidence_limits joined in stored order",
+    "measured_scope": "payload.measurement.scope",
+    "native_payload_sha256": "canonical digest of the complete native records.json payload",
+    "payload": "complete native records.json object",
+    "payload_schema": "csl.syn02-terminal-report/1",
+    "payload_sha256": "canonical digest of the complete native records.json payload",
+    "report_id": "publisher-derived immutable public ID",
+    "report_kind": "syn02-terminal-minimizers",
+    "schema": "csl.algorithm-report-envelope/1",
+    "source_commit": "payload.source_commit",
+    "source_report_id": "native records.json report_id"
+  },
+  "immutable_public_id": {
+    "canonicalization": "UTF-8 JSON, ensure_ascii=false, sort_keys=true, separators=(',', ':')",
+    "identity_fields": {
+      "publisher_sha256": "SHA-256 of scripts/reports/syn02_registered_reports.py UTF-8 bytes after CRLF-to-LF normalization",
+      "schema": "csl.registered-publication-identity/1",
+      "source_files": "SHA-256 of every validated native bundle file, using sorted relative paths; inventory is manifest.json.files plus manifest.json itself",
+      "source_report_id": "native records.json report_id"
+    },
+    "identity_schema": "csl.registered-publication-identity/1",
+    "offline_zip": "Generated from the exact staged file mapping; its SHA-256 is stored in the schema-3 catalogue zip_sha256, avoiding a digest cycle.",
+    "public_report_id": "syn02- plus lowercase SHA-256 hex of the canonical identity record",
+    "source_zip": "If the adapter validates a separate native source ZIP, include its SHA-256 in source_files under its validated relative name."
+  },
+  "manifest_fields": {
+    "files": {
+      "entries": [
+        "README.md",
+        "build-log.txt",
+        "build-provenance.json",
+        "collect.py",
+        "configure-log.txt",
+        "environment.json",
+        "etw-profile-attempt.txt",
+        "index.html",
+        "latency.svg",
+        "manifest.json",
+        "measurement-command.txt",
+        "profile-evidence.json",
+        "profile-note.txt",
+        "profile-raw.jsonl",
+        "publication-map.json",
+        "raw-events.jsonl",
+        "records.json",
+        "render_saved.py",
+        "report-envelope.json",
+        "terminal_driver.cpp",
+        "test_report.py",
+        "trials.csv"
+      ],
+      "excludes": [
+        "publication-manifest.json"
+      ],
+      "includes": [
+        "generated index.html",
+        "latency.svg",
+        "raw evidence",
+        "report-envelope.json"
+      ],
+      "meaning": "exact staged artifact inventory: relative path to SHA-256 of staged bytes"
+    },
+    "report_id": "same publisher-derived public ID as envelope",
+    "report_kind": "syn02-terminal-minimizers",
+    "schema": "csl.algorithm-report-publication-manifest/1"
+  },
+  "native_payload_schema": "csl.syn02-terminal-report/1",
+  "native_payload_sha256": "80fac083f4f0580acea81f2a2f0e681693520b7ecb3872287160d1a759cde223",
+  "publication_contract": {
+    "catalogue_schema": "csl.algorithm-report-catalog/3",
+    "envelope_schema": "csl.algorithm-report-envelope/1",
+    "evidence_limits": "payload.evidence_limits joined in stored order",
+    "measured_scope": "payload.measurement.scope",
+    "native_payload_sha256": "canonical digest of the complete native records.json payload",
+    "payload": "complete native records.json object",
+    "payload_schema": "csl.syn02-terminal-report/1",
+    "payload_sha256": "canonical digest of the complete native records.json payload",
+    "report_id": "publisher-derived immutable public ID",
+    "report_kind": "syn02-terminal-minimizers",
+    "source_commit": "payload.source_commit",
+    "source_report_id": "native records.json report_id"
+  },
+  "publisher_registration": {
+    "adapter_module": "scripts/reports/syn02_registered_reports.py",
+    "blocking_reason": "No SYN-02 publisher adapter is currently registered in site.py.",
+    "publishable_now": false,
+    "required_adapter_operations": [
+      "adapt",
+      "render_page",
+      "publication_artifacts",
+      "offline_zip"
+    ],
+    "required_staging": [
+      "schema-3 catalogue projection",
+      "site.stage validation",
+      "main-only Pages deployment",
+      "verify immutable live page and ZIP URLs"
+    ],
+    "required_validation": [
+      "safe source ID/path",
+      "native schema and source identity",
+      "trial-to-summary consistency including failures",
+      "raw/evidence file inventory and SHA256 manifest",
+      "SVG safety",
+      "envelope field projection",
+      "deterministic offline ZIP"
+    ],
+    "site_dispatch_point": "site.stage publisher selection expression",
+    "site_import_point": "scripts/reports/site.py adapter imports",
+    "site_kind_allowlist_point": "site.stage schema-3 registered report_kind dispatch tuple"
+  },
+  "schema": "csl.algorithm-report-publication-map/1",
+  "source_report_id": "syn02-terminal-20261013-c234a1a0-35de886a7fb4"
+}

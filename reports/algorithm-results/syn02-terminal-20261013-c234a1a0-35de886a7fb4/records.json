@@ -1,0 +1,2772 @@
+{
+  "attempt_counts": {
+    "failed": 0,
+    "matched_expected": 35,
+    "measured": 35,
+    "missing": 0,
+    "non_success": 7
+  },
+  "environment": {
+    "cache_policy": "One excluded warmup per scenario; one process; fresh fixture, registries and prepared providers on every trial.",
+    "captured_utc": "2026-10-13T08:15:49.062551+00:00",
+    "configured_native_threads": 1,
+    "cpu_percent_after": 3.8,
+    "cpu_percent_before": 0.1,
+    "logical_cpus": 12,
+    "machine": "AMD64",
+    "memory_bytes": 34189107200,
+    "observed_native_threads": "Unavailable; not inferred from the configured policy",
+    "os": "Windows-11-10.0.22631-SP0",
+    "physical_cpus": 6,
+    "processor": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "requested_workers": 1,
+    "seed": null,
+    "simultaneous_work": "No intentional concurrent benchmark; background processes may affect host load."
+  },
+  "evidence_limits": [
+    "binary64 literal fixture checks, not exact or validated arithmetic",
+    "relation samples and H representation checks do not certify full set equality or full minimizer-family completeness",
+    "global optimum and relation support remain Unestablished",
+    "the shifted residual case returns undetermined with numerical_failure and no constructed relation",
+    "tiny analytic fixtures only; no comparator, speedup, application-scale, throughput, or scalability claim",
+    "limiter unknown because no call-stack profile evidence was collected"
+  ],
+  "harness_commit": "ad08e2c3e5d4abc5fa5ee93876c6cbb7510ec0aa",
+  "measurement": {
+    "adapter": "HiGHS LP and convex adapters selected through PreparedProvider",
+    "backend": {
+      "absolute_and_relative_tolerance": 1e-08,
+      "configured_native_threads": 1,
+      "iteration_limit": 2147483647,
+      "lp_solver": "simplex",
+      "name": "HiGHS",
+      "parallel": "off",
+      "presolve": "off",
+      "random_seed": 0,
+      "small_matrix_value": 1e-12,
+      "source_archive_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275",
+      "time_limit": "infinity",
+      "version": "1.11.0"
+    },
+    "driver_exit_code": 0,
+    "fixture_order": "alternating forward/reverse per round",
+    "interval_unit": "nanoseconds",
+    "kind": "descriptive_single_adapter",
+    "number_of_process_trials": 1,
+    "process_elapsed_ns_outside_per_trial": 36338100,
+    "process_startup_included": false,
+    "repetitions": 7,
+    "resource_policy": {
+      "memory_bytes": null,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "total_threads": 1
+    },
+    "scope": "Terminal optimizer on resolved objectives and a supplied terminal H-slice; not system simulation or complete control synthesis",
+    "timing_scopes": {
+      "execute_ns": "fixture resolution through solve and immediate C++ result-field consumption; excludes collector-side literal validation, process startup, output serialization, destruction and rendering",
+      "oracle_ns": "consumption of returned status/evidence and captured result fields; literal independent verification performed from saved rows after timing",
+      "prepare_ns": "resolved problem, slice construction, LP/convex registration, provider selection/preparation",
+      "solve_ns": "TerminalOptimizer::solve call only, including internal program setup/workspace/run/anchor and relation construction"
+    },
+    "warmups_per_scenario": 1
+  },
+  "profile_summary": "Separate process CPU/RSS counter sampling completed; no call-stack attribution. WPR CPU stack capture is unavailable (0xc5585011); the limiting source function remains unknown.",
+  "provenance": {
+    "binary_sha256": "11761607b4c810702ea304b41afefaeb582b8c54c20ce387c1ec14f6c069467f",
+    "build_command": [
+      "cmake",
+      "--build",
+      "BUILD_ROOT",
+      "--config",
+      "Release",
+      "--target",
+      "csl_syn02_terminal_report",
+      "--parallel",
+      "4",
+      "--verbose"
+    ],
+    "checkout_clean_after": true,
+    "checkout_clean_before": true,
+    "cmake_generator": "Visual Studio 17 2022",
+    "compiler": "MSVC 19.44.35215.0",
+    "configuration": "Release",
+    "configure_command": [
+      "cmake",
+      "-S",
+      "SOURCE_ROOT",
+      "-B",
+      "BUILD_ROOT",
+      "-G",
+      "Visual Studio 17 2022",
+      "-A",
+      "x64",
+      "-DCSL_BUILD_SYN02_REPORT=ON",
+      "-DBUILD_TESTING=OFF",
+      "-DCMAKE_BUILD_TYPE=Release"
+    ],
+    "cxx_standard": "20",
+    "driver_sha256": "33aac442d06c57b081f8f33a7e2e50485ac6d9b523c702336cfeaeb705e8cf41",
+    "harness_commit": "ad08e2c3e5d4abc5fa5ee93876c6cbb7510ec0aa",
+    "release_flags": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+    "schema": "csl.syn02-build-provenance/1",
+    "source_commit": "c234a1a04b2f90e34776a2bfa349a91a1d30257d",
+    "source_tree": "b40e8c7910f86966be516697afc5efedaa80717e",
+    "target": "csl_syn02_terminal_report",
+    "target_closure": {
+      "ZERO_CHECK::@6890427a1f51a3e7e1df": {
+        "artifacts": [],
+        "compile_groups": [],
+        "dependencies": [],
+        "name": "ZERO_CHECK",
+        "sources": [
+          "build\\syn02-report-release-ad08e2c\\CMakeFiles\\aa9c9e045ed9207b2ad6cdbb2f883899\\generate.stamp.rule"
+        ],
+        "type": "UTILITY"
+      },
+      "csl_contracts::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_contracts.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 3,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 3,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 3,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 4,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                5
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_contracts",
+        "sources": [
+          "src\\contracts.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_convex::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_convex.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_optimization::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "csl_objectives::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_convex",
+        "sources": [
+          "src\\optimization\\convex_backend.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_highs_convex::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_highs_convex.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              },
+              {
+                "backtrace": 3,
+                "isSystem": true,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src"
+              },
+              {
+                "backtrace": 3,
+                "isSystem": true,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs"
+              },
+              {
+                "backtrace": 3,
+                "isSystem": true,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-build"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_problem::@6890427a1f51a3e7e1df",
+          "csl_convex::@6890427a1f51a3e7e1df",
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_optimization::@6890427a1f51a3e7e1df",
+          "csl_sets::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "csl_registry::@6890427a1f51a3e7e1df",
+          "csl_model::@6890427a1f51a3e7e1df",
+          "csl_objectives::@6890427a1f51a3e7e1df",
+          "highs::@146385e96b625ec5a656",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df",
+          "csl_resolved_core::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_highs_convex",
+        "sources": [
+          "src\\adapters\\convex\\highs.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_highs_lp::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_highs_lp.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 8,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 8,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 8,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 9,
+                "path": "SOURCE_ROOT/include"
+              },
+              {
+                "backtrace": 10,
+                "isSystem": true,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src"
+              },
+              {
+                "backtrace": 10,
+                "isSystem": true,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs"
+              },
+              {
+                "backtrace": 10,
+                "isSystem": true,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-build"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                11
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_problem::@6890427a1f51a3e7e1df",
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_optimization::@6890427a1f51a3e7e1df",
+          "csl_sets::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "csl_registry::@6890427a1f51a3e7e1df",
+          "csl_model::@6890427a1f51a3e7e1df",
+          "csl_objectives::@6890427a1f51a3e7e1df",
+          "highs::@146385e96b625ec5a656",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df",
+          "csl_resolved_core::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_highs_lp",
+        "sources": [
+          "src\\adapters\\lp\\highs.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_model::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_model.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_model",
+        "sources": [
+          "src\\model\\linear_system.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_numeric::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_numeric.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_numeric",
+        "sources": [
+          "src\\numeric\\data.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_objectives::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_objectives.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "defines": [
+              {
+                "backtrace": 7,
+                "define": "EIGEN_MPL2_ONLY"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 8,
+                "path": "SOURCE_ROOT/include"
+              },
+              {
+                "backtrace": 9,
+                "isSystem": true,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_objectives_eigen-src"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                10
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_objectives",
+        "sources": [
+          "src\\optimization\\objective_reformulation.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_optimization::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_optimization.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0,
+              1
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_optimization",
+        "sources": [
+          "src\\optimization\\linear_program.cpp",
+          "src\\optimization\\lp_backend.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_problem::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_problem.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0,
+              1,
+              2
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_sets::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "csl_model::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_problem",
+        "sources": [
+          "src\\problem\\domains.cpp",
+          "src\\problem\\constraints.cpp",
+          "src\\problem\\initial_information.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_registry::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_registry.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 5,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 5,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 5,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 6,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                7
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_problem::@6890427a1f51a3e7e1df",
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_sets::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "csl_model::@6890427a1f51a3e7e1df",
+          "csl_objectives::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df",
+          "csl_resolved_core::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_registry",
+        "sources": [
+          "src\\registry\\registry.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_resolved_core::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_resolved_core.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0,
+              1
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_problem::@6890427a1f51a3e7e1df",
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_sets::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "csl_model::@6890427a1f51a3e7e1df",
+          "csl_objectives::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_resolved_core",
+        "sources": [
+          "src\\problem\\identity.cpp",
+          "src\\problem\\resolved.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_sets::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_sets.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_sets",
+        "sources": [
+          "src\\sets\\data.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "csl_syn02_terminal_report::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_syn02_terminal_report.exe"
+          },
+          {
+            "path": "Release/csl_syn02_terminal_report.pdb"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              }
+            ],
+            "defines": [
+              {
+                "backtrace": 14,
+                "define": "CSL_SYN02_HARNESS_COMMIT=\"ad08e2c3e5d4abc5fa5ee93876c6cbb7510ec0aa\""
+              },
+              {
+                "backtrace": 14,
+                "define": "CSL_SYN02_SOURCE_COMMIT=\"c234a1a04b2f90e34776a2bfa349a91a1d30257d\""
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 2,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                15
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_highs_lp::@6890427a1f51a3e7e1df",
+          "csl_highs_convex::@6890427a1f51a3e7e1df",
+          "csl_problem::@6890427a1f51a3e7e1df",
+          "csl_terminal_minimizers::@6890427a1f51a3e7e1df",
+          "csl_convex::@6890427a1f51a3e7e1df",
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_optimization::@6890427a1f51a3e7e1df",
+          "csl_sets::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "csl_registry::@6890427a1f51a3e7e1df",
+          "csl_model::@6890427a1f51a3e7e1df",
+          "csl_objectives::@6890427a1f51a3e7e1df",
+          "highs::@146385e96b625ec5a656",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df",
+          "csl_resolved_core::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_syn02_terminal_report",
+        "sources": [
+          "reports\\algorithm-results\\tooling\\syn02\\terminal_driver.cpp"
+        ],
+        "type": "EXECUTABLE"
+      },
+      "csl_terminal_minimizers::@6890427a1f51a3e7e1df": {
+        "artifacts": [
+          {
+            "path": "Release/csl_terminal_minimizers.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "dependencies": [
+          "csl_problem::@6890427a1f51a3e7e1df",
+          "csl_convex::@6890427a1f51a3e7e1df",
+          "csl_contracts::@6890427a1f51a3e7e1df",
+          "csl_optimization::@6890427a1f51a3e7e1df",
+          "csl_sets::@6890427a1f51a3e7e1df",
+          "csl_numeric::@6890427a1f51a3e7e1df",
+          "csl_registry::@6890427a1f51a3e7e1df",
+          "csl_model::@6890427a1f51a3e7e1df",
+          "csl_objectives::@6890427a1f51a3e7e1df",
+          "ZERO_CHECK::@6890427a1f51a3e7e1df",
+          "csl_resolved_core::@6890427a1f51a3e7e1df"
+        ],
+        "name": "csl_terminal_minimizers",
+        "sources": [
+          "src\\synthesis\\terminal_minimizers.cpp"
+        ],
+        "type": "STATIC_LIBRARY"
+      },
+      "highs::@146385e96b625ec5a656": {
+        "artifacts": [
+          {
+            "path": "Release/bin/highs.lib"
+          }
+        ],
+        "compile_groups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD"
+              },
+              {
+                "backtrace": 11,
+                "fragment": "-D_CRT_SECURE_NO_WARNINGS"
+              },
+              {
+                "backtrace": 12,
+                "fragment": "/MP"
+              },
+              {
+                "backtrace": 13,
+                "fragment": "/Z7"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/bigobj"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DNOMINMAX"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/Zc:preprocessor"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/fp:precise"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DNDEBUG"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4005"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4018"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4065"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4068"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4101"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4146"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4200"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4244"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4251"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4267"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4305"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4307"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4309"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4334"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4355"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4477"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4506"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4715"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4800"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4996"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/filereader"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/pdqsort"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/zstr"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/interfaces"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/io"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm/ipx"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm/basiclu"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/lp_data"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/mip"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/model"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/parallel"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/pdlp"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/pdlp/cupdlp"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/presolve"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/qpsolver"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/simplex"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/test_kkt"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/util"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-build"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                1
+              ],
+              "standard": "11"
+            },
+            "sourceIndexes": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31,
+              32,
+              33,
+              34,
+              35,
+              36,
+              37,
+              38,
+              39,
+              40,
+              41,
+              42,
+              43,
+              44,
+              45,
+              46,
+              47,
+              48,
+              49,
+              50,
+              51,
+              52,
+              53,
+              54,
+              55,
+              56,
+              57,
+              58,
+              59,
+              60,
+              61,
+              62,
+              63,
+              64,
+              65,
+              66,
+              67,
+              68,
+              69,
+              70,
+              71,
+              72,
+              73,
+              74,
+              75,
+              76,
+              77,
+              78,
+              79,
+              80,
+              81,
+              82,
+              83,
+              84,
+              85,
+              86,
+              87,
+              88,
+              89,
+              90,
+              91,
+              92,
+              93,
+              94,
+              95,
+              96,
+              97,
+              98,
+              99,
+              100,
+              101,
+              102,
+              103,
+              104,
+              105,
+              106,
+              107,
+              108,
+              117,
+              118,
+              119,
+              120,
+              121,
+              122,
+              123,
+              124,
+              125,
+              126,
+              127,
+              128,
+              129,
+              130,
+              131,
+              132,
+              133,
+              134,
+              135,
+              136,
+              137,
+              138,
+              139,
+              140,
+              141,
+              142,
+              143,
+              144,
+              145,
+              146,
+              147
+            ]
+          },
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG -MD"
+              },
+              {
+                "backtrace": 11,
+                "fragment": "-D_CRT_SECURE_NO_WARNINGS"
+              },
+              {
+                "backtrace": 12,
+                "fragment": "/MP"
+              },
+              {
+                "backtrace": 13,
+                "fragment": "/Z7"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/bigobj"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DNOMINMAX"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/Zc:preprocessor"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/fp:precise"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DNDEBUG"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4005"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4018"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4065"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4068"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4101"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4146"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4200"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4244"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4251"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4267"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4305"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4307"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4309"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4334"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4355"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4477"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4506"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4715"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4800"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/wd4996"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/filereader"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/pdqsort"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/zstr"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/interfaces"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/io"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm/ipx"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm/basiclu"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/lp_data"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/mip"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/model"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/parallel"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/pdlp"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/pdlp/cupdlp"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/presolve"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/qpsolver"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/simplex"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/test_kkt"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/util"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-build"
+              }
+            ],
+            "language": "C",
+            "sourceIndexes": [
+              109,
+              110,
+              111,
+              112,
+              113,
+              114,
+              115,
+              116,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157,
+              158,
+              159,
+              160,
+              161,
+              162,
+              163,
+              164,
+              165,
+              166,
+              167,
+              168,
+              169,
+              170,
+              171,
+              172,
+              173,
+              174,
+              175
+            ]
+          },
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "-DWIN32"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DNOMINMAX"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+              },
+              {
+                "backtrace": 14,
+                "fragment": "/DNDEBUG"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/filereader"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/pdqsort"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/extern/zstr"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/interfaces"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/io"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm/ipx"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/ipm/basiclu"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/lp_data"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/mip"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/model"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/parallel"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/pdlp"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/pdlp/cupdlp"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/presolve"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/qpsolver"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/simplex"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/test_kkt"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-src/highs/util"
+              },
+              {
+                "backtrace": 15,
+                "path": "SOURCE_ROOT/build/syn02-report-release-ad08e2c/_deps/csl_highs-build"
+              }
+            ],
+            "language": "RC",
+            "sourceIndexes": [
+              403
+            ]
+          }
+        ],
+        "dependencies": [
+          "ZERO_CHECK::@6890427a1f51a3e7e1df"
+        ],
+        "name": "highs",
+        "sources": [
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\extern\\filereaderlp\\reader.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\interfaces\\highs_c_api.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\Filereader.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\FilereaderEms.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\FilereaderLp.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\FilereaderMps.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\HighsIO.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\HMpsFF.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\HMPSIO.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\LoadOptions.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\IpxWrapper.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\Highs.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsCallback.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsDebug.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsIis.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsInfo.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsInfoDebug.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsDeprecated.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsInterface.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsLp.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsLpUtils.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsModelUtils.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsOptions.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsRanging.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsSolution.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsSolutionDebug.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsSolve.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsStatus.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsCliqueTable.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsConflictPool.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsCutGeneration.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsCutPool.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsDebugSol.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsDomain.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsDynamicRowMatrix.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsFeasibilityJump.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsGFkSolve.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsImplications.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsLpAggregator.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsLpRelaxation.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsMipAnalysis.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsMipSolver.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsMipSolverData.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsModkSeparator.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsNodeQueue.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsObjectiveFunction.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsPathSeparator.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsPrimalHeuristics.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsPseudocost.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsRedcostFixing.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsSearch.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsSeparation.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsSeparator.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsTableauSeparator.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsTransformedLp.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\model\\HighsHessian.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\model\\HighsHessianUtils.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\model\\HighsModel.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsTaskExecutor.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\CupdlpWrapper.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\HighsPostsolveStack.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\HighsSymmetry.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\HPresolve.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\HPresolveAnalysis.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\ICrash.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\ICrashUtil.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\ICrashX.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\PresolveComponent.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\a_asm.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\a_quass.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\basis.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\perturbation.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\quass.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\ratiotest.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\scaling.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkk.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkControl.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkDebug.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkDual.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkDualMulti.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkDualRHS.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkDualRow.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkInterface.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkPrimal.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HighsSimplexAnalysis.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplex.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexDebug.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexNla.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexNlaDebug.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexNlaFreeze.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexNlaProductForm.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexReport.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\test_kkt\\KktCh2.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\test_kkt\\DevKkt.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HFactor.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HFactorDebug.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HFactorExtend.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HFactorRefactor.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HFactorUtils.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsHash.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsLinearSumBounds.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsMatrixPic.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsMatrixUtils.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsSort.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsSparseMatrix.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsUtils.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HSet.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HVectorBase.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\stringutil.cpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_cs.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_linalg.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_proj.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_restart.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_scaling.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_solver.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_step.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_utils.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\basiclu_kernel.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\basiclu_wrapper.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\basis.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\conjugate_residuals.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\control.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\crossover.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\diagonal_precond.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\forrest_tomlin.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\guess_basis.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\indexed_vector.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\info.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipm.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipx_c.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\iterate.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\kkt_solver_basis.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\kkt_solver_diag.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\kkt_solver.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\linear_operator.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\lp_solver.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\lu_factorization.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\lu_update.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\maxvolume.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\model.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\normal_matrix.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\sparse_matrix.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\sparse_utils.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\splitted_normal_matrix.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\starting_basis.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\symbolic_invert.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\timer.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\utils.cc",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_factorize.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_get_factors.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_initialize.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_object.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_solve_dense.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_solve_for_update.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_solve_sparse.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_update.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_build_factors.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_condest.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_dfs.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_factorize_bump.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_file.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_garbage_perm.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_initialize.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_internal.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_markowitz.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_matrix_norm.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_pivot.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_residual_test.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_setup_bump.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_singletons.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_solve_dense.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_solve_for_update.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_solve_sparse.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_solve_symbolic.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_solve_triangular.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_update.c",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\extern\\filereaderlp\\builder.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\extern\\filereaderlp\\def.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\extern\\filereaderlp\\model.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\extern\\filereaderlp\\reader.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\extern\\pdqsort\\pdqsort.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\extern\\zstr\\strict_fstream.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\extern\\zstr\\zstr.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\interfaces\\highs_c_api.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\Filereader.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\FilereaderEms.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\FilereaderLp.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\FilereaderMps.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\HighsIO.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\HMpsFF.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\HMPSIO.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\io\\LoadOptions.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\IpxSolution.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\IpxWrapper.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HConst.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsAnalysis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsCallback.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsCallbackStruct.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsDebug.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsIis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsInfo.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsInfoDebug.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsLp.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsLpSolverObject.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsLpUtils.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsModelUtils.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsOptions.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsRanging.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsSolution.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsSolutionDebug.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsSolve.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HighsStatus.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\lp_data\\HStruct.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\feasibilityjump.hh",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsCliqueTable.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsConflictPool.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsCutGeneration.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsCutPool.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsDebugSol.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsDomain.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsDomainChange.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsDynamicRowMatrix.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsGFkSolve.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsImplications.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsLpAggregator.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsLpRelaxation.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsMipAnalysis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsMipSolver.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsMipSolverData.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsModkSeparator.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsNodeQueue.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsObjectiveFunction.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsPathSeparator.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsPrimalHeuristics.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsPseudocost.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsRedcostFixing.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsSearch.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsSeparation.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsSeparator.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsTableauSeparator.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\HighsTransformedLp.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\mip\\MipTimer.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\model\\HighsHessian.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\model\\HighsHessianUtils.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\model\\HighsModel.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsBinarySemaphore.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsCacheAlign.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsCombinable.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsMutex.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsParallel.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsRaceTimer.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsSchedulerConstants.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsSpinMutex.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsSplitDeque.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsTask.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\parallel\\HighsTaskExecutor.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\CupdlpWrapper.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\HighsPostsolveStack.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\HighsSymmetry.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\HPresolve.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\HPresolveAnalysis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\ICrash.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\ICrashUtil.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\ICrashX.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\presolve\\PresolveComponent.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\a_asm.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\a_quass.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\basis.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\crashsolution.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\dantzigpricing.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\devexpricing.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\eventhandler.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\factor.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\feasibility_bounded.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\feasibility_highs.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\gradient.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\instance.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\matrix.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\perturbation.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\pricing.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\qpconst.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\qpvector.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\quass.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\ratiotest.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\runtime.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\scaling.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\settings.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\snippets.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\statistics.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\qpsolver\\steepestedgepricing.hpp",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HApp.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkk.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkDual.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkDualRHS.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkDualRow.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HEkkPrimal.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HighsSimplexAnalysis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplex.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexDebug.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexNla.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\HSimplexReport.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\SimplexConst.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\SimplexStruct.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\simplex\\SimplexTimer.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\test_kkt\\DevKkt.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\test_kkt\\KktCh2.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\FactorTimer.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HFactor.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HFactorConst.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HFactorDebug.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsCDouble.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsComponent.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsDataStack.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsDisjointSets.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsHash.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsHashTree.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsInt.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsIntegers.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsLinearSumBounds.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsMatrixPic.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsMatrixSlice.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsMatrixUtils.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsMemoryAllocation.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsRandom.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsRbTree.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsSort.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsSparseMatrix.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsSparseVectorSum.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsSplay.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsTimer.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HighsUtils.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HSet.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HVector.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\HVectorBase.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\util\\stringutil.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\Highs.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_cs.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_defs.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_linalg.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_proj.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_restart.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_scaling.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_solver.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\pdlp\\cupdlp\\cupdlp_step.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\basiclu_kernel.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\basiclu_wrapper.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\basis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\conjugate_residuals.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\control.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\crossover.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\diagonal_precond.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\forrest_tomlin.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\guess_basis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\indexed_vector.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\info.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipm.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipx_c.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipx_config.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipx_info.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipx_internal.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipx_parameters.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\ipx_status.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\iterate.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\kkt_solver_basis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\kkt_solver_diag.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\kkt_solver.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\linear_operator.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\lp_solver.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\lu_factorization.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\lu_update.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\maxvolume.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\model.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\multistream.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\normal_matrix.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\power_method.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\sparse_matrix.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\sparse_utils.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\splitted_normal_matrix.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\starting_basis.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\symbolic_invert.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\timer.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\ipx\\utils.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_factorize.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_get_factors.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_initialize.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_obj_factorize.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_obj_free.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_obj_get_factors.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_obj_initialize.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_obj_solve_dense.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_obj_solve_for_update.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_obj_solve_sparse.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_obj_update.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_object.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_solve_dense.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_solve_for_update.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_solve_sparse.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu_update.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\basiclu.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_def.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_file.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_internal.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-src\\highs\\ipm\\basiclu\\lu_list.h",
+          "build\\syn02-report-release-ad08e2c\\_deps\\csl_highs-build\\version.rc"
+        ],
+        "type": "STATIC_LIBRARY"
+      }
+    }
+  },
+  "report_id": "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
+  "scenario_catalog": {
+    "constant-linear": {
+      "input": {
+        "coefficients": [
+          0,
+          0
+        ],
+        "offset": 3,
+        "type": "linear"
+      },
+      "outcome": "optimal",
+      "provider": "csl.lp.highs",
+      "relation": "whole unit box",
+      "samples": [
+        [
+          [
+            0,
+            0
+          ],
+          true
+        ],
+        [
+          [
+            0,
+            1
+          ],
+          true
+        ],
+        [
+          [
+            1,
+            0
+          ],
+          true
+        ],
+        [
+          [
+            1,
+            1
+          ],
+          true
+        ],
+        [
+          [
+            0.4,
+            0.6
+          ],
+          true
+        ],
+        [
+          [
+            1.01,
+            0.5
+          ],
+          false
+        ]
+      ],
+      "termination": "completed",
+      "value": 3.0
+    },
+    "linear-face": {
+      "input": {
+        "coefficients": [
+          1,
+          0
+        ],
+        "offset": 7,
+        "type": "linear"
+      },
+      "outcome": "optimal",
+      "provider": "csl.lp.highs",
+      "relation": "x=0 in [0,1]^2",
+      "samples": [
+        [
+          [
+            0,
+            0
+          ],
+          true
+        ],
+        [
+          [
+            0,
+            0.5
+          ],
+          true
+        ],
+        [
+          [
+            0,
+            1
+          ],
+          true
+        ],
+        [
+          [
+            1,
+            0
+          ],
+          false
+        ],
+        [
+          [
+            0.2,
+            0.8
+          ],
+          false
+        ]
+      ],
+      "termination": "completed",
+      "value": 7.0
+    },
+    "psd-null-direction": {
+      "input": {
+        "Q": [
+          [
+            2,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "constant": 0,
+        "convention": "0.5*x'Q*x + q'x + c",
+        "linear": [
+          0,
+          0
+        ],
+        "type": "quadratic"
+      },
+      "outcome": "optimal",
+      "provider": "csl.convex.highs",
+      "relation": "x=0 in [0,1]^2",
+      "samples": [
+        [
+          [
+            0,
+            0
+          ],
+          true
+        ],
+        [
+          [
+            0,
+            0.5
+          ],
+          true
+        ],
+        [
+          [
+            0,
+            1
+          ],
+          true
+        ],
+        [
+          [
+            1,
+            0
+          ],
+          false
+        ],
+        [
+          [
+            0.2,
+            0.8
+          ],
+          false
+        ]
+      ],
+      "termination": "completed",
+      "value": 0.0
+    },
+    "rectangular-residual": {
+      "input": {
+        "map": [
+          [
+            1,
+            0
+          ]
+        ],
+        "target": [
+          0
+        ],
+        "type": "residual_norm"
+      },
+      "outcome": "optimal",
+      "provider": "csl.convex.highs",
+      "relation": "x=0 in [0,1]^2",
+      "samples": [
+        [
+          [
+            0,
+            0
+          ],
+          true
+        ],
+        [
+          [
+            0,
+            0.5
+          ],
+          true
+        ],
+        [
+          [
+            0,
+            1
+          ],
+          true
+        ],
+        [
+          [
+            1,
+            0
+          ],
+          false
+        ],
+        [
+          [
+            0.2,
+            0.8
+          ],
+          false
+        ]
+      ],
+      "termination": "completed",
+      "value": 0.0
+    },
+    "shifted-residual-degenerate": {
+      "backend_observation": "Native QP phase reports model status 7; adapter withholds optimality, reporting stationarity violation 1.0 and the diagnostic 'original-space checks unavailable or failing'.",
+      "input": {
+        "map": [
+          [
+            1,
+            0
+          ]
+        ],
+        "target": [
+          0.5
+        ],
+        "type": "residual_norm"
+      },
+      "outcome": "undetermined",
+      "provider": "csl.convex.highs",
+      "relation": "not constructed",
+      "samples": [],
+      "termination": "numerical_failure",
+      "value": null
+    }
+  },
+  "scenario_hashes": {
+    "constant-linear": "c345585d90483c9d9c8c3e15337831563a01b9a8712dd89056be7e460ffb6e31",
+    "linear-face": "bd6d678f42b44a186e7b82ab8bfb6d4c06220c16990faa1770b1f5ccec0e48cf",
+    "psd-null-direction": "198dbb15e03c318b93a94ed28059d1d14ab200bb493026c9bcd7ef3d7a29fae9",
+    "rectangular-residual": "c4cddce6474bf9bef2eda23da2064c1ec737b6dc4cb8d8c7ce061ccad21b10ef",
+    "shifted-residual-degenerate": "2c1a410ce0b66e2b0eb3e5471e1d614b7f5807c92b243237f4b0ee9248dabf6d"
+  },
+  "schema": "csl.syn02-terminal-report/1",
+  "source_commit": "c234a1a04b2f90e34776a2bfa349a91a1d30257d",
+  "summary": [
+    {
+      "completed": 7,
+      "expected_outcome": "optimal",
+      "expected_termination": "completed",
+      "failed": 0,
+      "matched_expected": 7,
+      "non_success": 0,
+      "objective_bounds": {
+        "lower_available": 0,
+        "upper_available": 0
+      },
+      "observed_outcomes": {
+        "optimal": 7
+      },
+      "observed_providers": {
+        "csl.lp.highs": 7
+      },
+      "observed_terminations": {
+        "completed": 7
+      },
+      "primal_objective_value": {
+        "count": 7,
+        "max": 7.0,
+        "min": 7.0
+      },
+      "relation_count": 7,
+      "requested": 7,
+      "residual_observations": {
+        "native.dual_infeasibility": {
+          "count": 7,
+          "max": 0.0
+        },
+        "native.primal_infeasibility": {
+          "count": 7,
+          "max": 0.0
+        }
+      },
+      "scenario": "linear-face",
+      "timings": {
+        "execute_ns": {
+          "max_ns": 260600,
+          "median_ns": 253300,
+          "min_ns": 233400
+        },
+        "oracle_ns": {
+          "max_ns": 1200,
+          "median_ns": 900,
+          "min_ns": 800
+        },
+        "prepare_ns": {
+          "max_ns": 23800,
+          "median_ns": 13400,
+          "min_ns": 12100
+        },
+        "solve_ns": {
+          "max_ns": 242600,
+          "median_ns": 225500,
+          "min_ns": 214000
+        }
+      }
+    },
+    {
+      "completed": 7,
+      "expected_outcome": "optimal",
+      "expected_termination": "completed",
+      "failed": 0,
+      "matched_expected": 7,
+      "non_success": 0,
+      "objective_bounds": {
+        "lower_available": 0,
+        "upper_available": 0
+      },
+      "observed_outcomes": {
+        "optimal": 7
+      },
+      "observed_providers": {
+        "csl.lp.highs": 7
+      },
+      "observed_terminations": {
+        "completed": 7
+      },
+      "primal_objective_value": {
+        "count": 7,
+        "max": 3.0,
+        "min": 3.0
+      },
+      "relation_count": 7,
+      "requested": 7,
+      "residual_observations": {
+        "native.dual_infeasibility": {
+          "count": 7,
+          "max": 0.0
+        },
+        "native.primal_infeasibility": {
+          "count": 7,
+          "max": 0.0
+        }
+      },
+      "scenario": "constant-linear",
+      "timings": {
+        "execute_ns": {
+          "max_ns": 208400,
+          "median_ns": 191500,
+          "min_ns": 178900
+        },
+        "oracle_ns": {
+          "max_ns": 1000,
+          "median_ns": 900,
+          "min_ns": 700
+        },
+        "prepare_ns": {
+          "max_ns": 20000,
+          "median_ns": 14600,
+          "min_ns": 12500
+        },
+        "solve_ns": {
+          "max_ns": 184300,
+          "median_ns": 171500,
+          "min_ns": 162000
+        }
+      }
+    },
+    {
+      "completed": 7,
+      "expected_outcome": "optimal",
+      "expected_termination": "completed",
+      "failed": 0,
+      "matched_expected": 7,
+      "non_success": 0,
+      "objective_bounds": {
+        "lower_available": 0,
+        "upper_available": 0
+      },
+      "observed_outcomes": {
+        "optimal": 7
+      },
+      "observed_providers": {
+        "csl.convex.highs": 7
+      },
+      "observed_terminations": {
+        "completed": 7
+      },
+      "primal_objective_value": {
+        "count": 7,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "relation_count": 7,
+      "requested": 7,
+      "residual_observations": {
+        "check.complementarity.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.rows.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.signs.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.stationarity.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.variables.violation": {
+          "count": 7,
+          "max": 0.0
+        }
+      },
+      "scenario": "psd-null-direction",
+      "timings": {
+        "execute_ns": {
+          "max_ns": 397600,
+          "median_ns": 385300,
+          "min_ns": 363400
+        },
+        "oracle_ns": {
+          "max_ns": 1000,
+          "median_ns": 900,
+          "min_ns": 800
+        },
+        "prepare_ns": {
+          "max_ns": 19300,
+          "median_ns": 17100,
+          "min_ns": 15100
+        },
+        "solve_ns": {
+          "max_ns": 373700,
+          "median_ns": 362100,
+          "min_ns": 335200
+        }
+      }
+    },
+    {
+      "completed": 7,
+      "expected_outcome": "optimal",
+      "expected_termination": "completed",
+      "failed": 0,
+      "matched_expected": 7,
+      "non_success": 0,
+      "objective_bounds": {
+        "lower_available": 0,
+        "upper_available": 0
+      },
+      "observed_outcomes": {
+        "optimal": 7
+      },
+      "observed_providers": {
+        "csl.convex.highs": 7
+      },
+      "observed_terminations": {
+        "completed": 7
+      },
+      "primal_objective_value": {
+        "count": 7,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "relation_count": 7,
+      "requested": 7,
+      "residual_observations": {
+        "check.complementarity.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.rows.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.signs.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.stationarity.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.variables.violation": {
+          "count": 7,
+          "max": 0.0
+        }
+      },
+      "scenario": "rectangular-residual",
+      "timings": {
+        "execute_ns": {
+          "max_ns": 403400,
+          "median_ns": 367400,
+          "min_ns": 361200
+        },
+        "oracle_ns": {
+          "max_ns": 1000,
+          "median_ns": 1000,
+          "min_ns": 900
+        },
+        "prepare_ns": {
+          "max_ns": 18600,
+          "median_ns": 17600,
+          "min_ns": 15400
+        },
+        "solve_ns": {
+          "max_ns": 379700,
+          "median_ns": 345100,
+          "min_ns": 337100
+        }
+      }
+    },
+    {
+      "completed": 0,
+      "expected_outcome": "undetermined",
+      "expected_termination": "numerical_failure",
+      "failed": 0,
+      "matched_expected": 7,
+      "non_success": 7,
+      "objective_bounds": {
+        "lower_available": 0,
+        "upper_available": 0
+      },
+      "observed_outcomes": {
+        "undetermined": 7
+      },
+      "observed_providers": {
+        "csl.convex.highs": 7
+      },
+      "observed_terminations": {
+        "numerical_failure": 7
+      },
+      "primal_objective_value": {
+        "count": 7,
+        "max": 0.5,
+        "min": 0.5
+      },
+      "relation_count": 0,
+      "requested": 7,
+      "residual_observations": {
+        "check.complementarity.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.rows.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.signs.violation": {
+          "count": 7,
+          "max": 0.0
+        },
+        "check.stationarity.violation": {
+          "count": 7,
+          "max": 1.0
+        },
+        "check.variables.violation": {
+          "count": 7,
+          "max": 0.0
+        }
+      },
+      "scenario": "shifted-residual-degenerate",
+      "timings": {
+        "execute_ns": null,
+        "oracle_ns": null,
+        "prepare_ns": null,
+        "solve_ns": null
+      }
+    }
+  ],
+  "terminal_slice": {
+    "dimension": 2,
+    "equalities": [],
+    "equality_values": [],
+    "inequalities": [
+      [
+        1,
+        0
+      ],
+      [
+        -1,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        -1
+      ]
+    ],
+    "upper_bounds": [
+      1,
+      0,
+      1,
+      0
+    ]
+  }
+}
