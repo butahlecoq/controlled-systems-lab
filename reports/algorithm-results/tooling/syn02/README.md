@@ -22,8 +22,9 @@ installed and does not change the library API.
 which gives the exact projection to `csl.algorithm-report-envelope/1` and
 `csl.algorithm-report-catalog/3`: the native report ID becomes
 `source_report_id`; the publisher supplies the immutable public `report_id`;
-the payload schema/digest, source commit, measured scope, evidence limits and
-complete native payload populate the shared envelope. The map enumerates the
+the payload schema/digest, `native_payload_sha256` (the canonical digest of the
+complete native `records.json` payload), source commit, measured scope, evidence
+limits and complete native payload populate the shared envelope. The map enumerates the
 exact staged file inventory hashed by `publication-manifest.json`: the
 validated bundle artifacts plus generated `index.html` and `report-envelope.json`;
 the publication manifest excludes itself. The generated offline ZIP contains
