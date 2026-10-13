@@ -40,6 +40,7 @@ def git(root, *args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cmake", type=Path, required=True, help="CMake executable used to configure and build the pinned source")
+    parser.add_argument("--dependency-cache", type=Path, help="optional populated FetchContent cache, for disconnected rebuilds")
     parser.add_argument("--build-root", type=Path, required=True, help="new directory for the clean source worktree and Release build")
     parser.add_argument("--out", type=Path, required=True, help="new directory for raw events and the collection record")
     parser.add_argument("--algorithm-source-commit", default=report.SOURCE_COMMIT)
@@ -68,6 +69,9 @@ def main():
     runner_cmake = runner / "CMakeLists.txt"
     configure_command = [cmake, "-S", runner, "-B", build_dir, "-G", "Visual Studio 17 2022", "-A", "x64",
                          f"-DCSL_SOURCE_ROOT={source_checkout}", "-DBUILD_TESTING=OFF"]
+    if args.dependency_cache is not None:
+        dependency_cache = args.dependency_cache.resolve(strict=True)
+        configure_command.extend([f"-DFETCHCONTENT_BASE_DIR={dependency_cache}", "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"])
     configure = run(configure_command)
     (build_root / "configure.log").write_bytes(configure.stdout + configure.stderr)
     build_command = [cmake, "--build", build_dir, "--config", "Release", "--target", "csl_syn07_ts01_report", "--parallel", "4"]
@@ -138,6 +142,7 @@ def main():
         "build_provenance": {"cmake_path": str(cmake), "cmake_sha256": sha(cmake.read_bytes()), "cmake_version": (run([cmake, "--version"]).stdout.decode("utf-8", errors="replace").splitlines()[0]),
             "cmake_cache_sha256": sha(cache.read_bytes()), "target_project_sha256": sha(target_project.read_bytes()), "configure_log_sha256": sha((build_root / "configure.log").read_bytes()), "build_log_sha256": sha(build_log),
             "generator": "Visual Studio 17 2022 x64", "compiler": "MSVC", "compiler_path": cxx_compiler, "compiler_version": cxx_version, "configuration": "Release",
+            "dependency_cache": str(args.dependency_cache.resolve()) if args.dependency_cache else "CMake source-defined fetches",
             "configure_command": [str(part) for part in configure_command], "build_command": [str(part) for part in build_command]},
         "environment": {"os": platform.platform(), "processor": platform.processor() or "unavailable", "logical_cpu_count": os.cpu_count(), "python": sys.version.split()[0], "clock": "std::chrono::steady_clock; elapsed duration in nanoseconds", "total_cpu_percent_1s_before": cpu_before, "total_cpu_percent_1s_after": cpu_after, "load_policy": "Unrelated processes were left running; the two CPU samples are outside the measured process. This is a single-side observation, so no interleaving or noise cancellation is claimed."},
         "raw_stdout_sha256": sha(result.stdout), "raw_stderr_sha256": sha(result.stderr),
