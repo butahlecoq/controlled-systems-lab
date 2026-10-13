@@ -72,12 +72,16 @@ template<class Port> const Identity& selected_identity(const PreparedProvider<Po
     return *actual;
 }
 DependencyBundle dependencies() {
-    auto lp=take(adapters::lp::make_highs_registration());
-    auto converter=take(adapters::polyhedral::make_qhull_registration(lp));
+    const adapters::lp::HighsLPOptions lp_options{std::nullopt};
+    const adapters::polyhedral::QhullOptions qhull_options{std::nullopt,std::nullopt,{}};
+    const geometry::polyhedral::ProjectionOptions projection_options{geometry::polyhedral::ProjectionOutput::h,std::nullopt};
+    const geometry::AffineSumOptions affine_options{std::nullopt,{}};
+    auto lp=take(adapters::lp::make_highs_registration(lp_options));
+    auto converter=take(adapters::polyhedral::make_qhull_registration(lp,qhull_options));
     auto hull=geometry::make_lp_hull_reducer_registration();
-    auto projection=geometry::polyhedral::make_projection_registration({geometry::polyhedral::ProjectionOutput::h,{}});
+    auto projection=geometry::polyhedral::make_projection_registration(projection_options);
     auto affine=geometry::make_affine_sum_registration({
-        selected(hull,""), selected(lp,"csl.program-result.v1"), selected(converter,"csl.polyhedron.v")},{ {},{}});
+        selected(hull,""), selected(lp,"csl.program-result.v1"), selected(converter,"csl.polyhedron.v")},affine_options);
     auto projection_provider=selected(std::move(projection),"csl.polyhedron.h");
     auto affine_provider=selected(std::move(affine),"csl.polyhedron.v");
     auto conversion_provider=selected(converter,"csl.polyhedron.h");
@@ -87,6 +91,21 @@ DependencyBundle dependencies() {
                     {"lp_backend",identity(lp.identity)},
                     {"hull_reducer",identity(hull.identity)}};
     return {{std::move(projection_provider),std::move(affine_provider),std::move(conversion_provider)},std::move(providers)};
+}
+Json effective_settings(const NumericalPolicy& numerical) {
+    return {{"numerical_policy",{{"absolute_tolerance",numerical.absolute_tolerance},
+                                  {"relative_tolerance",numerical.relative_tolerance}}},
+        {"highs",{{"solver","simplex"},{"presolve","off"},{"parallel","off"},{"threads",1},
+                   {"random_seed",0},{"allow_unbounded_or_infeasible",false},{"log_to_console",true},
+                   {"output_flag",true},{"small_matrix_value",1e-12},{"large_matrix_value","kHighsInf"},
+                   {"infinite_bound","kHighsInf"},{"infinite_cost","kHighsInf"},
+                   {"primal_feasibility_tolerance",numerical.absolute_tolerance},
+                   {"dual_feasibility_tolerance",numerical.absolute_tolerance},
+                   {"simplex_iteration_limit",nullptr},{"time_limit","kHighsInf (no deadline)"}}},
+        {"qhull",{{"options","qhull Qx"},{"max_ambient_dimension",nullptr},{"max_input_rows",nullptr}}},
+        {"projection",{{"output","h"},{"max_rows",nullptr}}},
+        {"affine_sum",{{"max_candidates",nullptr}}},
+        {"hull_reducer",{{"default_registration",true}}}};
 }
 struct Bounds { double lower,upper; bool feasible; };
 Bounds h_bounds(const SetHandle& set) {
@@ -109,12 +128,16 @@ struct Result {
     std::vector<std::array<double,2>> marginals;
     std::map<std::string,std::size_t> operation_counts;
     Json provider_identities=Json::object();
+    Json execution_settings=Json::object();
     std::optional<std::uint64_t> setup_ns,solve_ns,oracle_ns,execute_ns;
     std::string setup_state{"not_reached"},solve_state{"not_reached"},oracle_state{"not_reached"},execute_state{"not_reached"};
     bool oracle_passed{};
 };
 Result run(const std::string& scenario,std::size_t repetition) {
     Result result;const auto total_start=Clock::now();
+    const NumericalPolicy numerical{1e-8,1e-8};
+    ExecutionContext context;context.numerical=numerical;
+    result.execution_settings=effective_settings(numerical);
     const auto setup_start=Clock::now();
     auto solve_start=setup_start,oracle_start=setup_start;
     std::string active_phase="setup";
@@ -124,7 +147,7 @@ Result run(const std::string& scenario,std::size_t repetition) {
         result.setup_ns=elapsed(setup_start);result.setup_state="available";
         active_phase="solve";
         solve_start=Clock::now();
-        auto outcome=nominal_forward(p,{"syn01-tube"},deps.providers,{});
+        auto outcome=nominal_forward(p,{"syn01-tube"},deps.providers,context);
         result.solve_ns=elapsed(solve_start);result.solve_state="available";
         active_phase="oracle";
         oracle_start=Clock::now();
@@ -174,7 +197,8 @@ Json event_json(const std::string& scenario,std::size_t repetition,const Result&
         {"solve_ns",result.solve_ns?Json(*result.solve_ns):Json(nullptr)},{"solve_state",result.solve_state},
         {"oracle_ns",result.oracle_ns?Json(*result.oracle_ns):Json(nullptr)},{"oracle_state",result.oracle_state},
         {"execute_ns",result.execute_ns?Json(*result.execute_ns):Json(nullptr)},{"execute_state",result.execute_state},
-        {"provider_identities",result.provider_identities},{"provider_operation_counts",result.operation_counts},
+        {"provider_identities",result.provider_identities},{"execution_settings",result.execution_settings},
+        {"provider_operation_counts",result.operation_counts},
         {"provider_operation_timing_ns",nullptr},{"detail",result.detail}};
 }
 }

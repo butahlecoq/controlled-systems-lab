@@ -29,6 +29,7 @@ def event(scenario, repetition, bounds):
         "execute_ns": 330,
         "execute_state": "available",
         "provider_identities": provider_ids(),
+        "execution_settings": syn01.RUNTIME_SETTINGS,
         "provider_operation_counts": {"csl.geometry.polyhedral-projection": 3,
                                        "csl.geometry.affine-sum": 6},
         "provider_operation_timing_ns": None,
@@ -36,12 +37,21 @@ def event(scenario, repetition, bounds):
     }
 
 
-def valid_provenance(source="a" * 40):
+def valid_provenance():
     return {"algorithm_module": {"id": "csl.reachability.nominal-forward", "version": "0.1.0"},
             "providers": {name: {"id": name, "version": "1.0.0"} for name in (
                 "projection", "affine_sum", "conversion", "lp_backend", "hull_reducer")},
             "dependency_edges": {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
-                                 "conversion": ["lp_backend"]}}
+                                 "conversion": ["lp_backend"]},
+            "runtime_settings": syn01.RUNTIME_SETTINGS,
+            "build_configuration": {"configuration": "Release", "cxx_standard": "c++20",
+                "generator": "Visual Studio 17 2022", "generator_platform": "x64",
+                "compiler_id": "MSVC", "compiler_version": "19.44.35215.0", "compiler_executable": "cl.exe",
+                "cmake_version": "3.31.6", "cmake_release_flags": "/O2 /Ob2 /DNDEBUG",
+                "target_release_properties": {"LanguageStandard": "stdcpp20", "Optimization": "MaxSpeed"},
+                "effective_release_flags": ["/std:c++20", "/O2", "/Ob2", "/DNDEBUG", "/W4", "/WX", "/permissive-"],
+                "evidence_sha256": {"CMakeCache.txt": "a" * 64, "build_configuration_file": "b" * 64,
+                                     "release_build_log": "c" * 64}}}
 
 
 def provider_ids():
@@ -143,6 +153,17 @@ class Syn01ReportTests(unittest.TestCase):
         self.assertIn("1.0.0", syn01.render_html(record))
         record["provenance"]["providers"]["lp_backend"].pop("version")
         self.assertIn("provider_provenance_incomplete", syn01.validate_record(record))
+
+    def test_effective_numerical_backend_and_release_configuration_are_required_and_rendered(self):
+        record = syn01.make_record(complete_events(), source_commit="a" * 40,
+                                   harness_commit="b" * 40, environment={}, provenance=valid_provenance())
+        page = syn01.render_html(record)
+        self.assertIn("absolute_tolerance", page)
+        self.assertIn("1e-08", page)
+        self.assertIn("c++20", page)
+        self.assertIn("/O2 /Ob2 /DNDEBUG", page)
+        del record["provenance"]["runtime_settings"]["highs"]["threads"]
+        self.assertIn("effective_settings_incomplete", syn01.validate_record(record))
 
     def test_saved_html_discloses_scope_and_support_limit(self):
         record = syn01.make_record(complete_events(), source_commit="a" * 40,

@@ -12,7 +12,9 @@ import platform
 import shutil
 import subprocess
 import sys
+import shlex
 import zipfile
+import xml.etree.ElementTree as ET
 
 import report
 import publication_map
@@ -22,7 +24,7 @@ TOOLING = Path(__file__).resolve().parent
 TRIAL_FIELDS = ("scenario", "repetition", "warmup", "status", "outcome", "oracle_passed",
                 "expected_marginals", "observed_marginals", "setup_ns", "setup_state", "solve_ns", "solve_state",
                 "oracle_ns", "oracle_state", "execute_ns", "execute_state", "provider_identities",
-                "provider_operation_counts", "provider_operation_timing_ns", "detail")
+                "execution_settings", "provider_operation_counts", "provider_operation_timing_ns", "detail")
 
 
 def canonical(value):
@@ -40,6 +42,70 @@ def project_version():
     if match is None:
         raise ValueError("CMake project version could not be identified")
     return match.group(1)
+
+
+def _cache_values(path):
+    values = {}
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if line and not line.startswith(("//", "#")) and "=" in line and ":" in line.split("=", 1)[0]:
+            key = line.split("=", 1)[0].split(":", 1)[0]
+            values[key] = line.split("=", 1)[1]
+    return values
+
+
+def build_configuration(build, compiler_id, compiler_version, compiler_executable, cmake_version, build_log):
+    cache_path = build / "CMakeCache.txt"
+    cache = _cache_values(cache_path)
+    generator = cache.get("CMAKE_GENERATOR", "")
+    platform_name = cache.get("CMAKE_GENERATOR_PLATFORM", "") or "default"
+    global_flags = cache.get("CMAKE_CXX_FLAGS_RELEASE", "")
+    evidence = {"CMakeCache.txt": sha(cache_path.read_bytes()), "release_build_log": sha(build_log)}
+    if "Visual Studio" in generator:
+        config_path = build / "csl_syn01_nominal_forward_report.vcxproj"
+        root = ET.parse(config_path).getroot()
+        group = next((item for item in root.findall("ItemDefinitionGroup")
+                      if "Release|" in item.attrib.get("Condition", "")), None)
+        compile = group.find("ClCompile") if group is not None else None
+        if compile is None:
+            raise ValueError("Release ClCompile properties missing from generated Visual Studio project")
+        properties = {item.tag: (item.text or "").strip() for item in compile}
+        if properties.get("LanguageStandard") != "stdcpp20":
+            raise ValueError("generated report target is not configured for C++20")
+        flags = ["/std:c++20"] + shlex.split(global_flags)
+        for property_name, value_to_flag in (("Optimization", {"MaxSpeed": "/O2"}),
+                                              ("WarningLevel", {"Level4": "/W4"})):
+            value = properties.get(property_name)
+            if value not in value_to_flag:
+                raise ValueError("unexpected generated Release property: " + property_name)
+            flags.append(value_to_flag[value])
+        if properties.get("TreatWarningAsError") == "true":
+            flags.append("/WX")
+        if properties.get("ConformanceMode") == "true":
+            flags.append("/permissive-")
+        evidence["build_configuration_file"] = sha(config_path.read_bytes())
+        cxx_standard = "c++20"
+        target_properties = properties
+    else:
+        config_path = build / "compile_commands.json"
+        commands = json.loads(config_path.read_text(encoding="utf-8"))
+        entry = next((item for item in commands if item.get("file", "").endswith("nominal_forward_driver.cpp")), None)
+        if entry is None:
+            raise ValueError("compile command for nominal-forward driver is missing")
+        command_args = entry.get("arguments") or shlex.split(entry["command"])
+        flags = command_args[1:]
+        standard = next((flag.split("=", 1)[1] for flag in flags if flag.startswith("-std=")), "")
+        if standard not in ("c++20", "gnu++20"):
+            raise ValueError("effective compiler command does not select C++20")
+        cxx_standard = "c++20"
+        target_properties = {"compile_command": entry.get("command", " ".join(command_args))}
+        evidence["build_configuration_file"] = sha(config_path.read_bytes())
+    if not flags or not global_flags:
+        raise ValueError("effective Release flag evidence is incomplete")
+    return {"configuration": "Release", "generator": generator, "generator_platform": platform_name,
+            "cxx_standard": cxx_standard, "compiler_id": compiler_id, "compiler_version": compiler_version,
+            "compiler_executable": compiler_executable, "cmake_version": cmake_version,
+            "cmake_release_flags": global_flags, "target_release_properties": target_properties,
+            "effective_release_flags": list(dict.fromkeys(flags)), "evidence_sha256": evidence}
 
 
 def run(command, **kwargs):
@@ -165,7 +231,8 @@ def collect(args):
         if build.exists():
             raise ValueError("build directory must be new/empty")
         configure = [str(args.cmake), "-S", str(ROOT), "-B", str(build), "-G", args.generator,
-                     "-DCSL_BUILD_SYN01_REPORT=ON", "-DBUILD_TESTING=OFF", "-DCMAKE_BUILD_TYPE=Release"]
+                     "-DCSL_BUILD_SYN01_REPORT=ON", "-DBUILD_TESTING=OFF", "-DCMAKE_BUILD_TYPE=Release",
+                     "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"]
         if args.architecture:
             configure.extend(["-A", args.architecture])
         command = configure
@@ -195,6 +262,14 @@ def collect(args):
         compiler_version = re.search(r'set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)', compiler_text)
         cache_text = (build / "CMakeCache.txt").read_text(encoding="utf-8", errors="replace")
         compiler_path = re.search(r"CMAKE_CXX_COMPILER:FILEPATH=(.+)", cache_text)
+        compiler_source = re.search(r'set\(CMAKE_CXX_COMPILER "([^"]+)"\)', compiler_text)
+        cmake_version = run([str(args.cmake), "--version"]).stdout.splitlines()[0]
+        compiler_executable = Path(compiler_path.group(1) if compiler_path else
+                                   compiler_source.group(1) if compiler_source else "unavailable").name
+        build_log = streams["build-stdout.txt"] + streams["build-stderr.txt"]
+        build_evidence = build_configuration(build, compiler_id.group(1) if compiler_id else "unavailable",
+            compiler_version.group(1) if compiler_version else "unavailable", compiler_executable,
+            cmake_version, build_log)
         stage = "driver"
         command = [str(executable)]
         load_before = host_observation()
@@ -221,11 +296,13 @@ def collect(args):
                                                 "providers": providers,
                                                 "dependency_edges": {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
                                                                      "conversion": ["lp_backend"]},
+                                                "runtime_settings": trials[0].get("execution_settings"),
+                                                "build_configuration": build_evidence,
                                                 "configuration": "Release", "generator": args.generator,
-                                                "cmake_version": run([str(args.cmake), "--version"]).stdout.splitlines()[0],
+                                                "cmake_version": cmake_version,
                                                 "compiler_id": compiler_id.group(1) if compiler_id else "unavailable",
                                                 "compiler_version": compiler_version.group(1) if compiler_version else "unavailable",
-                                                "compiler_executable": Path(compiler_path.group(1)).name if compiler_path else "unavailable",
+                                                "compiler_executable": compiler_executable,
                                                 "driver_sha256": sha(executable.read_bytes()),
                                                 "driver_source_sha256": sha((TOOLING / "nominal_forward_driver.cpp").read_bytes()),
                                                 "configure_command": [str(args.cmake), "-S", "SOURCE_ROOT", "-B", "BUILD_ROOT", "-G", args.generator,

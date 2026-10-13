@@ -34,6 +34,18 @@ forward module at the CMake project version and the fixed measured source
 commit. It lists selected provider IDs and actual versions, including the
 transitive HiGHS, Qhull, and hull-reducer registrations used by affine sum.
 
+The saved runtime configuration explicitly records both numerical tolerances
+(`1e-8` absolute and relative) and the selected backend settings: HiGHS simplex
+with presolve and parallel mode off, one thread, seed zero, default feasibility
+tolerances, and no iteration/time limit; Qhull `qhull Qx` with no caller row or
+dimension cap; H-representation projection without a row cap; affine-sum
+candidate limit unset; and the default hull reducer. The Release provenance
+records the C++20 standard, compiler identity/version, CMake version, global
+Release flags, generated target properties/effective flags, and SHA-256 hashes
+of the actual `CMakeCache.txt`, generated build-configuration file, and build
+log. These settings describe this measured configuration and are validated
+against each event before a result record is accepted.
+
 Per-fixture phase summaries use completed (`available`) phase observations
 even if another trial failed. They report median/range, available/partial/not
 reached counts, and mark coverage incomplete whenever fewer than seven full

@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import statistics
+import copy
 
 SCHEMA = "csl.syn01-nominal-forward-report/2"
 EVENT_SCHEMA = "csl.syn01-nominal-forward-trial/2"
@@ -23,6 +24,19 @@ SCENARIO_SPECS = {
 }
 PHASES = ("setup_ns", "solve_ns", "oracle_ns", "execute_ns")
 PHASE_STATES = ("available", "partial", "not_reached")
+RUNTIME_SETTINGS = {
+    "numerical_policy": {"absolute_tolerance": 1e-8, "relative_tolerance": 1e-8},
+    "highs": {"solver": "simplex", "presolve": "off", "parallel": "off", "threads": 1,
+              "random_seed": 0, "allow_unbounded_or_infeasible": False, "log_to_console": True,
+              "output_flag": True, "small_matrix_value": 1e-12, "large_matrix_value": "kHighsInf",
+              "infinite_bound": "kHighsInf", "infinite_cost": "kHighsInf",
+              "primal_feasibility_tolerance": 1e-8, "dual_feasibility_tolerance": 1e-8,
+              "simplex_iteration_limit": None, "time_limit": "kHighsInf (no deadline)"},
+    "qhull": {"options": "qhull Qx", "max_ambient_dimension": None, "max_input_rows": None},
+    "projection": {"output": "h", "max_rows": None},
+    "affine_sum": {"max_candidates": None},
+    "hull_reducer": {"default_registration": True},
+}
 LIMITS = [
     "Complete 1-D H-row bounds over returned binary64 data; not an exact real-arithmetic certificate.",
     "Reachability relation assurance remains Unestablished; provider outputs are numerical.",
@@ -64,7 +78,7 @@ def summarize(trials):
 
 
 def make_record(trials, *, source_commit, harness_commit, environment, provenance):
-    rows = [dict(row) for row in trials]
+    rows = [copy.deepcopy(row) for row in trials]
     scenario_hashes = {name: hashlib.sha256(json.dumps(SCENARIO_SPECS[name], sort_keys=True,
         separators=(",", ":"), allow_nan=False).encode()).hexdigest() for name in SCENARIOS}
     expected_matrix = {(scenario, repetition) for scenario in SCENARIOS for repetition in range(8)}
@@ -80,7 +94,7 @@ def make_record(trials, *, source_commit, harness_commit, environment, provenanc
                             for name in SCENARIOS},
         "scenario_hashes": scenario_hashes,
         "environment": environment,
-        "provenance": provenance,
+        "provenance": copy.deepcopy(provenance),
         "measurement": {
             "kind": "descriptive_single_adapter",
             "scope": "Two-step discrete nominal-forward reachability on two authored scalar analytic fixtures",
@@ -134,6 +148,33 @@ def validate_record(record):
             provenance.get("dependency_edges") != {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
                                                      "conversion": ["lp_backend"]}):
         errors.append("provider_provenance_incomplete")
+    if not isinstance(provenance, dict) or provenance.get("runtime_settings") != RUNTIME_SETTINGS:
+        errors.append("effective_settings_incomplete")
+    build = provenance.get("build_configuration") if isinstance(provenance, dict) else None
+    required_build_fields = {"configuration", "generator", "generator_platform", "cxx_standard",
+        "compiler_id", "compiler_version", "compiler_executable", "cmake_version",
+        "cmake_release_flags", "target_release_properties", "effective_release_flags", "evidence_sha256"}
+    if (not isinstance(build, dict) or not required_build_fields <= set(build) or
+            build.get("configuration") != "Release" or build.get("cxx_standard") != "c++20" or
+            not all(isinstance(build.get(field), str) and build[field] for field in
+                    ("generator", "compiler_id", "compiler_version", "compiler_executable", "cmake_version", "cmake_release_flags")) or
+            not isinstance(build.get("target_release_properties"), dict) or
+            not isinstance(build.get("effective_release_flags"), list) or
+            not all(isinstance(flag, str) and flag for flag in build["effective_release_flags"]) or
+            not isinstance(build.get("evidence_sha256"), dict) or
+            set(build["evidence_sha256"]) != {"CMakeCache.txt", "build_configuration_file", "release_build_log"} or
+            not all(isinstance(digest, str) and len(digest) == 64 and
+                    all(char in "0123456789abcdef" for char in digest)
+                    for digest in build["evidence_sha256"].values())):
+        errors.append("release_build_provenance_incomplete")
+    elif build["compiler_id"] == "MSVC":
+        if not {"/std:c++20", "/O2", "/DNDEBUG", "/W4", "/WX", "/permissive-"} <= set(build["effective_release_flags"]):
+            errors.append("effective_msvc_release_flags_incomplete")
+        if (build["target_release_properties"].get("LanguageStandard") != "stdcpp20" or
+                build["target_release_properties"].get("Optimization") != "MaxSpeed"):
+            errors.append("effective_msvc_release_properties_incomplete")
+    elif not any(flag in ("-std=c++20", "-std=gnu++20") for flag in build["effective_release_flags"]):
+        errors.append("effective_cxx20_release_flag_missing")
     for field in ("source_commit", "harness_commit"):
         value = record.get(field)
         if not isinstance(value, str) or len(value) != 40 or any(c not in "0123456789abcdef" for c in value):
@@ -200,6 +241,8 @@ def validate_record(record):
             errors.append("trial_provider_identity_mismatch")
         if passed and (not provider_ids or provider_ids != (provenance.get("providers") if isinstance(provenance, dict) else None)):
             errors.append("passed_trial_provider_stack_missing")
+        if row.get("execution_settings") != RUNTIME_SETTINGS:
+            errors.append("trial_effective_settings_mismatch")
     if len(trials) != 16 or seen != {(scenario, repetition) for scenario in SCENARIOS for repetition in range(8)}:
         errors.append("incomplete_trial_matrix")
     if record.get("summary") != summarize(trials):
@@ -265,6 +308,8 @@ def render_html(record):
 <h2>Implementation and selected provider stack</h2><p>Algorithm module: <code>{html.escape(record['provenance']['algorithm_module']['id'])}</code> version <code>{html.escape(record['provenance']['algorithm_module']['version'])}</code>.</p>
 <ul>{''.join('<li>'+html.escape(name)+': <code>'+html.escape(item['id'])+'</code> version <code>'+html.escape(item['version'])+'</code></li>' for name,item in sorted(record['provenance']['providers'].items()))}</ul>
 <p>Nested dependencies: {html.escape(json.dumps(record['provenance']['dependency_edges'], sort_keys=True))}</p>
+<h2>Effective runtime settings</h2><pre>{html.escape(json.dumps(record['provenance']['runtime_settings'], sort_keys=True, indent=2))}</pre>
+<h2>Compiler and Release build evidence</h2><pre>{html.escape(json.dumps(record['provenance']['build_configuration'], sort_keys=True, indent=2))}</pre>
 <p>One registered provider stack; descriptive timings only, no speedup or comparison claim. Reachability support: <strong>Unestablished</strong>.</p>
 <h2>Evidence limits</h2><ul>{limits}</ul><h2>Median end-to-end timing by fixture</h2>{render_svg(record)}
 <div class="scroll"><table><thead><tr><th>Fixture</th><th>Measured trials</th><th>Passed</th><th>Failed</th>{phase_headers}</tr></thead><tbody>{''.join(summary)}</tbody></table></div>

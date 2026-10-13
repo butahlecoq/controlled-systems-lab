@@ -41,7 +41,7 @@ def _trial_csv(record):
     fields = ("scenario", "repetition", "warmup", "status", "outcome", "oracle_passed",
               "expected_marginals", "observed_marginals", "setup_ns", "setup_state", "solve_ns", "solve_state",
               "oracle_ns", "oracle_state", "execute_ns", "execute_state", "provider_identities",
-              "provider_operation_counts", "provider_operation_timing_ns", "detail")
+              "execution_settings", "provider_operation_counts", "provider_operation_timing_ns", "detail")
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
     writer.writeheader()
