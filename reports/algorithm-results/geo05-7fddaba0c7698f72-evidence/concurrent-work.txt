@@ -1,0 +1,5 @@
+Pre-collection host snapshot UTC: 2026-10-13T01:53:29.8856743Z
+Host: Windows 11, 6 physical cores, 12 logical processors.
+Windows PerfOS total processor utilization at the pre-run snapshot: 1%.
+No deliberate concurrent benchmark workload was started. Background desktop processes remained open; this is a single-process measurement with one requested total thread.
+A separate discarded CPU profiling attempt using Windows Performance Recorder failed to enable system performance profiling (error 0xc5585011). No profiler trace was produced; CPU-vs-overhead limiter attribution is unavailable.

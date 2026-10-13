@@ -1,0 +1,83 @@
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  contracts.cpp
+  Компиляция…
+  contracts.cpp
+  csl_contracts.vcxproj -> BUILD_ROOT\Release\csl_contracts.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  data.cpp
+  Компиляция…
+  data.cpp
+  csl_numeric.vcxproj -> BUILD_ROOT\Release\csl_numeric.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  objective_reformulation.cpp
+  linear_system.cpp
+  linear_program.cpp
+  data.cpp
+  lp_backend.cpp
+  Компиляция…
+  Компиляция…
+  Компиляция…
+  data.cpp
+  linear_system.cpp
+  linear_program.cpp
+  lp_backend.cpp
+  Компиляция…
+  objective_reformulation.cpp
+  csl_sets.vcxproj -> BUILD_ROOT\Release\csl_sets.lib
+  csl_optimization.vcxproj -> BUILD_ROOT\Release\csl_optimization.lib
+  csl_model.vcxproj -> BUILD_ROOT\Release\csl_model.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  initial_information.cpp
+  constraints.cpp
+  domains.cpp
+  Компиляция…
+  constraints.cpp
+  domains.cpp
+  initial_information.cpp
+  csl_problem.vcxproj -> BUILD_ROOT\Release\csl_problem.lib
+  csl_objectives.vcxproj -> BUILD_ROOT\Release\csl_objectives.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  resolved.cpp
+  identity.cpp
+  Компиляция…
+  resolved.cpp
+  identity.cpp
+  csl_resolved_core.vcxproj -> BUILD_ROOT\Release\csl_resolved_core.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  registry.cpp
+  Компиляция…
+  registry.cpp
+  csl_registry.vcxproj -> BUILD_ROOT\Release\csl_registry.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  nominal_predecessor.cpp
+  intersection.cpp
+  halfspace_reducer.cpp
+  projection.cpp
+  Компиляция…
+  halfspace_reducer.cpp
+  nominal_predecessor.cpp
+  projection.cpp
+  intersection.cpp
+  csl_polyhedral.vcxproj -> BUILD_ROOT\Release\csl_polyhedral.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  projection_predecessor_driver.cpp
+  Компиляция…
+  projection_predecessor_driver.cpp
+  csl_geo05_projection_predecessor_report.vcxproj -> BUILD_ROOT\Release\csl_geo05_projection_predecessor_report.exe

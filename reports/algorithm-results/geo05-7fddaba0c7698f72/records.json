@@ -1,0 +1,2173 @@
+{
+  "schema": "csl.geo05-numerical-report/1",
+  "purpose": "measurement",
+  "algorithm": {
+    "id": "GEO-05",
+    "source_commit": "2a7738f0ef9652501c68021a91c648723458569a",
+    "harness_commit": "cc972291b99665e8b3b16a620bcc08d4d1d99f82",
+    "tracked_clean": true,
+    "tracked_tree_binding": {
+      "scope": "complete tracked repository tree",
+      "source_tree_oid": "afbd7c391627faadd539c04751a7f709806c7748",
+      "harness_tree_oid": "cd4cba3f0adf71f033bb7451c06095f06fe0d9fd",
+      "allowed_harness_delta": [
+        "reports/algorithm-results/tooling/geo05/README.md",
+        "reports/algorithm-results/tooling/geo05/collect.py",
+        "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
+        "reports/algorithm-results/tooling/geo05/render.py",
+        "reports/algorithm-results/tooling/geo05/report.py",
+        "reports/algorithm-results/tooling/geo05/schema-v1.json",
+        "reports/algorithm-results/tooling/geo05/smoke.py",
+        "reports/algorithm-results/tooling/geo05/test_report_tools.py"
+      ],
+      "actual_changed_paths": [
+        "CMakeLists.txt",
+        "reports/algorithm-results/tooling/geo05/README.md",
+        "reports/algorithm-results/tooling/geo05/collect.py",
+        "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
+        "reports/algorithm-results/tooling/geo05/render.py",
+        "reports/algorithm-results/tooling/geo05/report.py",
+        "reports/algorithm-results/tooling/geo05/schema-v1.json",
+        "reports/algorithm-results/tooling/geo05/smoke.py",
+        "reports/algorithm-results/tooling/geo05/test_report_tools.py"
+      ]
+    },
+    "executable": {
+      "name": "csl_geo05_projection_predecessor_report.exe",
+      "sha256": "cc56bc7369f0fedf9a3cdb4458d5bec16a95265b8e2c57324dc96856d6a14be5"
+    },
+    "build_log_sha256": "9abeebe2f772f454f70487a11f9cb425b189b39a952e9b763d0908f51e5db811",
+    "configuration": "Release",
+    "cxx_standard": "20",
+    "cmake": {
+      "version": {
+        "isDirty": false,
+        "major": 3,
+        "minor": 31,
+        "patch": 6,
+        "string": "3.31.6-msvc6",
+        "suffix": "msvc6"
+      },
+      "generator": "Visual Studio 17 2022"
+    },
+    "compiler": {
+      "compiler": {
+        "id": "MSVC",
+        "implicit": {
+          "includeDirectories": [],
+          "linkDirectories": [],
+          "linkFrameworkDirectories": [],
+          "linkLibraries": []
+        },
+        "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+        "version": "19.44.35215.0"
+      },
+      "language": "CXX",
+      "sourceFileExtensions": [
+        "C",
+        "M",
+        "c++",
+        "cc",
+        "cpp",
+        "cxx",
+        "mm",
+        "mpp",
+        "CPP",
+        "ixx",
+        "cppm",
+        "ccm",
+        "cxxm",
+        "c++m"
+      ]
+    },
+    "dependency_targets": [
+      "ZERO_CHECK",
+      "csl_contracts",
+      "csl_geo05_projection_predecessor_report",
+      "csl_model",
+      "csl_numeric",
+      "csl_objectives",
+      "csl_optimization",
+      "csl_polyhedral",
+      "csl_problem",
+      "csl_registry",
+      "csl_resolved_core",
+      "csl_sets"
+    ],
+    "file_api_paths": {
+      "build": "SOURCE_ROOT/build/geo05-measure",
+      "source": "SOURCE_ROOT"
+    },
+    "targets": [
+      {
+        "name": "csl_geo05_projection_predecessor_report",
+        "type": "EXECUTABLE",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 2,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                2
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "link": {
+          "commandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD",
+              "role": "flags"
+            },
+            {
+              "fragment": "/machine:x64 /INCREMENTAL:NO /subsystem:console",
+              "role": "flags"
+            },
+            {
+              "backtrace": 2,
+              "fragment": "Release\\csl_polyhedral.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "Release\\csl_optimization.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "Release\\csl_registry.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "Release\\csl_resolved_core.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "Release\\csl_problem.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "Release\\csl_sets.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 6,
+              "fragment": "Release\\csl_model.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "Release\\csl_objectives.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 7,
+              "fragment": "Release\\csl_numeric.lib",
+              "role": "libraries"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "Release\\csl_contracts.lib",
+              "role": "libraries"
+            },
+            {
+              "fragment": "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+              "role": "libraries"
+            }
+          ],
+          "language": "CXX"
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_geo05_projection_predecessor_report.exe"
+          },
+          {
+            "path": "Release/csl_geo05_projection_predecessor_report.pdb"
+          }
+        ]
+      },
+      {
+        "name": "csl_polyhedral",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0,
+              1,
+              2,
+              3
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_polyhedral.lib"
+          }
+        ]
+      },
+      {
+        "name": "csl_model",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_model.lib"
+          }
+        ]
+      },
+      {
+        "name": "csl_contracts",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 3,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 3,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 3,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 4,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                5
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_contracts.lib"
+          }
+        ]
+      },
+      {
+        "name": "ZERO_CHECK",
+        "type": "UTILITY"
+      },
+      {
+        "name": "csl_numeric",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_numeric.lib"
+          }
+        ]
+      },
+      {
+        "name": "csl_optimization",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0,
+              1
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_optimization.lib"
+          }
+        ]
+      },
+      {
+        "name": "csl_objectives",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "defines": [
+              {
+                "backtrace": 7,
+                "define": "EIGEN_MPL2_ONLY"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 8,
+                "path": "SOURCE_ROOT/include"
+              },
+              {
+                "backtrace": 9,
+                "isSystem": true,
+                "path": "SOURCE_ROOT/build/geo05-measure/_deps/csl_objectives_eigen-src"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                10
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_objectives.lib"
+          }
+        ]
+      },
+      {
+        "name": "csl_registry",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 5,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 5,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 5,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 6,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                7
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_registry.lib"
+          }
+        ]
+      },
+      {
+        "name": "csl_sets",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_sets.lib"
+          }
+        ]
+      },
+      {
+        "name": "csl_resolved_core",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0,
+              1
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_resolved_core.lib"
+          }
+        ]
+      },
+      {
+        "name": "csl_problem",
+        "type": "STATIC_LIBRARY",
+        "compileGroups": [
+          {
+            "compileCommandFragments": [
+              {
+                "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/W4"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/WX"
+              },
+              {
+                "backtrace": 4,
+                "fragment": "/permissive-"
+              }
+            ],
+            "includes": [
+              {
+                "backtrace": 5,
+                "path": "SOURCE_ROOT/include"
+              }
+            ],
+            "language": "CXX",
+            "languageStandard": {
+              "backtraces": [
+                6
+              ],
+              "standard": "20"
+            },
+            "sourceIndexes": [
+              0,
+              1,
+              2
+            ]
+          }
+        ],
+        "archive": {
+          "commandFragments": [
+            {
+              "fragment": "/machine:x64",
+              "role": "flags"
+            }
+          ]
+        },
+        "artifacts": [
+          {
+            "path": "Release/csl_problem.lib"
+          }
+        ]
+      }
+    ],
+    "environment": {
+      "os": "Windows-11-10.0.22631-SP0",
+      "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+      "cpu_count": 12,
+      "python": "3.13.5",
+      "arithmetic": "IEEE-754 binary64",
+      "native_backend": "none selected",
+      "native_threads": {
+        "configured": 0,
+        "observed": {
+          "available": false,
+          "reason": "this geometry provider exposes no native thread counter"
+        }
+      },
+      "resources": {
+        "requested_total_threads": 1,
+        "actual_outer_workers": 1,
+        "threads_per_worker": 1,
+        "memory_bytes": null
+      },
+      "numeric_context_tolerance": {
+        "absolute": 1e-08,
+        "relative": 1e-08
+      },
+      "independent_sample_tolerance": 1e-09,
+      "random_seed": null,
+      "concurrent_work_note": "Pre-collection host snapshot UTC: 2026-10-13T01:53:29.8856743Z\nHost: Windows 11, 6 physical cores, 12 logical processors.\nWindows PerfOS total processor utilization at the pre-run snapshot: 1%.\nNo deliberate concurrent benchmark workload was started. Background desktop processes remained open; this is a single-process measurement with one requested total thread.\nA separate discarded CPU profiling attempt using Windows Performance Recorder failed to enable system performance profiling (error 0xc5585011). No profiler trace was produced; CPU-vs-overhead limiter attribution is unavailable.",
+      "collection_utc": "2026-10-13T01:53:33.775287+00:00"
+    },
+    "raw_stdout_sha256": "c3f2c2932009fd68c92e5dad9f723c935629feca67cd4addb5536cf9149f6445",
+    "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "catalog": {
+    "version": "geo05-analytic-v1",
+    "scenarios": [
+      "singular_a",
+      "unreachable_equality_target",
+      "integrator_predecessor",
+      "v_projection_preserves_ray"
+    ],
+    "oracles": {
+      "singular_a": {
+        "inputs": {
+          "X": {
+            "kind": "universal",
+            "dimension": 2
+          },
+          "U": {
+            "kind": "interval",
+            "bounds": [
+              -1,
+              1
+            ]
+          },
+          "S": {
+            "kind": "singleton",
+            "point": [
+              2,
+              0
+            ]
+          },
+          "A": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "B": [
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ],
+          "offset": [
+            0,
+            0
+          ],
+          "projected_coordinates": [
+            0,
+            1
+          ]
+        },
+        "input_rows": 4,
+        "output_rows": 2,
+        "result_kind": "h",
+        "sample_points": [
+          [
+            1,
+            -1000
+          ],
+          [
+            3,
+            1000
+          ]
+        ],
+        "rejected_points": [
+          [
+            0.5,
+            0
+          ]
+        ],
+        "meaning": "singular A retains the free state direction"
+      },
+      "unreachable_equality_target": {
+        "inputs": {
+          "X": {
+            "kind": "universal",
+            "dimension": 2
+          },
+          "U": {
+            "kind": "interval",
+            "bounds": [
+              -1,
+              1
+            ]
+          },
+          "S": {
+            "kind": "H",
+            "equalities": [
+              [
+                0,
+                1
+              ]
+            ],
+            "values": [
+              1
+            ]
+          },
+          "A": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "B": [
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ],
+          "offset": [
+            0,
+            0
+          ],
+          "projected_coordinates": [
+            0,
+            1
+          ]
+        },
+        "input_rows": 3,
+        "output_rows": 1,
+        "result_kind": "h",
+        "sample_points": [],
+        "rejected_points": [
+          [
+            0,
+            0
+          ],
+          [
+            100,
+            -100
+          ]
+        ],
+        "meaning": "target equality is unreachable under singular dynamics"
+      },
+      "integrator_predecessor": {
+        "inputs": {
+          "X": {
+            "kind": "interval",
+            "bounds": [
+              -2,
+              2
+            ]
+          },
+          "U": {
+            "kind": "interval",
+            "bounds": [
+              -1,
+              1
+            ]
+          },
+          "S": {
+            "kind": "interval",
+            "bounds": [
+              1,
+              3
+            ]
+          },
+          "A": [
+            [
+              1
+            ]
+          ],
+          "B": [
+            [
+              1
+            ]
+          ],
+          "offset": [
+            0
+          ],
+          "projected_coordinates": [
+            0
+          ]
+        },
+        "input_rows": 6,
+        "output_rows": 4,
+        "result_kind": "h",
+        "sample_points": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "rejected_points": [
+          [
+            -0.125
+          ],
+          [
+            2.125
+          ]
+        ],
+        "meaning": "x'=x+u, X=[-2,2], U=[-1,1], S=[1,3] gives literal predecessor samples",
+        "expected_fm_peak_rows": 6,
+        "expected_fm_peak_basis": "2X+2U+2S rows; eliminating u generates 2x2+2=6 before tautology removal"
+      },
+      "v_projection_preserves_ray": {
+        "inputs": {
+          "V": {
+            "vertices": [
+              [
+                2,
+                3
+              ]
+            ],
+            "rays": [
+              [
+                1,
+                0
+              ],
+              [
+                0,
+                -1
+              ]
+            ]
+          },
+          "projected_coordinates": [
+            1
+          ]
+        },
+        "input_rows": 3,
+        "output_rows": 3,
+        "result_kind": "v",
+        "vertices": [
+          [
+            3
+          ]
+        ],
+        "rays": [
+          [
+            0
+          ],
+          [
+            -1
+          ]
+        ],
+        "meaning": "selected ray images, including zero, are retained"
+      }
+    }
+  },
+  "collection": {
+    "measured_repetitions": 7,
+    "warmups_per_scenario": 1,
+    "expected_trials": 28,
+    "counts": {
+      "passed": 32,
+      "failed": 0,
+      "unsupported": 0,
+      "cancelled": 0,
+      "missing": 0
+    },
+    "valid_success_summary": true,
+    "expected_warmup_trials": 4,
+    "actual_warmup_trials": 4,
+    "process_return_code": 0,
+    "parse_errors": 0,
+    "timed_out": false,
+    "phases": {
+      "preparation_ns": {
+        "median_ns": 10200.0,
+        "min_ns": 3700,
+        "max_ns": 15800,
+        "successful_trials": 28,
+        "unavailable_trials": 0,
+        "trials_excluded": 0
+      },
+      "workspace_ns": {
+        "median_ns": 100,
+        "min_ns": 0,
+        "max_ns": 100,
+        "successful_trials": 7,
+        "unavailable_trials": 21,
+        "trials_excluded": 0
+      },
+      "run_ns": {
+        "median_ns": 5750.0,
+        "min_ns": 1900,
+        "max_ns": 11300,
+        "successful_trials": 28,
+        "unavailable_trials": 0,
+        "trials_excluded": 0
+      },
+      "verification_ns": {
+        "median_ns": 400.0,
+        "min_ns": 0,
+        "max_ns": 900,
+        "successful_trials": 28,
+        "unavailable_trials": 0,
+        "trials_excluded": 0
+      },
+      "end_to_end_ns": {
+        "median_ns": 18950.0,
+        "min_ns": 6700,
+        "max_ns": 26400,
+        "successful_trials": 28,
+        "unavailable_trials": 0,
+        "trials_excluded": 0
+      }
+    },
+    "by_scenario": {
+      "singular_a": {
+        "attempts": 7,
+        "phases": {
+          "preparation_ns": {
+            "median_ns": 11200,
+            "min_ns": 10400,
+            "max_ns": 15800,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "workspace_ns": {
+            "median_ns": null,
+            "min_ns": null,
+            "max_ns": null,
+            "successful_trials": 0,
+            "unavailable_trials": 7,
+            "trials_excluded": 0
+          },
+          "run_ns": {
+            "median_ns": 5700,
+            "min_ns": 5400,
+            "max_ns": 7000,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "verification_ns": {
+            "median_ns": 400,
+            "min_ns": 300,
+            "max_ns": 400,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "end_to_end_ns": {
+            "median_ns": 19400,
+            "min_ns": 18600,
+            "max_ns": 26400,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          }
+        }
+      },
+      "unreachable_equality_target": {
+        "attempts": 7,
+        "phases": {
+          "preparation_ns": {
+            "median_ns": 9100,
+            "min_ns": 8800,
+            "max_ns": 10000,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "workspace_ns": {
+            "median_ns": null,
+            "min_ns": null,
+            "max_ns": null,
+            "successful_trials": 0,
+            "unavailable_trials": 7,
+            "trials_excluded": 0
+          },
+          "run_ns": {
+            "median_ns": 5800,
+            "min_ns": 5400,
+            "max_ns": 6400,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "verification_ns": {
+            "median_ns": 400,
+            "min_ns": 300,
+            "max_ns": 400,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "end_to_end_ns": {
+            "median_ns": 17100,
+            "min_ns": 16600,
+            "max_ns": 19100,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          }
+        }
+      },
+      "integrator_predecessor": {
+        "attempts": 7,
+        "phases": {
+          "preparation_ns": {
+            "median_ns": 10800,
+            "min_ns": 10600,
+            "max_ns": 11400,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "workspace_ns": {
+            "median_ns": null,
+            "min_ns": null,
+            "max_ns": null,
+            "successful_trials": 0,
+            "unavailable_trials": 7,
+            "trials_excluded": 0
+          },
+          "run_ns": {
+            "median_ns": 8300,
+            "min_ns": 7500,
+            "max_ns": 11300,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "verification_ns": {
+            "median_ns": 900,
+            "min_ns": 800,
+            "max_ns": 900,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "end_to_end_ns": {
+            "median_ns": 22600,
+            "min_ns": 21600,
+            "max_ns": 25900,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          }
+        }
+      },
+      "v_projection_preserves_ray": {
+        "attempts": 7,
+        "phases": {
+          "preparation_ns": {
+            "median_ns": 4200,
+            "min_ns": 3700,
+            "max_ns": 5100,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "workspace_ns": {
+            "median_ns": 100,
+            "min_ns": 0,
+            "max_ns": 100,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "run_ns": {
+            "median_ns": 1900,
+            "min_ns": 1900,
+            "max_ns": 2600,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "verification_ns": {
+            "median_ns": 0,
+            "min_ns": 0,
+            "max_ns": 100,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          },
+          "end_to_end_ns": {
+            "median_ns": 7600,
+            "min_ns": 6700,
+            "max_ns": 8800,
+            "successful_trials": 7,
+            "unavailable_trials": 0,
+            "trials_excluded": 0
+          }
+        }
+      }
+    }
+  },
+  "trials": [
+    {
+      "purpose": "measurement",
+      "scenario": "singular_a",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 4,
+      "output_rows": 2,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 15800,
+        "workspace_ns": null,
+        "run_ns": 7000,
+        "verification_ns": 400,
+        "end_to_end_ns": 26400
+      },
+      "input_sha256": "fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513",
+      "scenario_sha256": "511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "unreachable_equality_target",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 3,
+      "output_rows": 1,
+      "result_kind": "h",
+      "result_encoding": "h_contradiction_row",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10000,
+        "workspace_ns": null,
+        "run_ns": 6000,
+        "verification_ns": 400,
+        "end_to_end_ns": 19100
+      },
+      "input_sha256": "7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d",
+      "scenario_sha256": "fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "integrator_predecessor",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 6,
+      "output_rows": 4,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": 6,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 11400,
+        "workspace_ns": null,
+        "run_ns": 8800,
+        "verification_ns": 900,
+        "end_to_end_ns": 24100
+      },
+      "input_sha256": "2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94",
+      "scenario_sha256": "2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "v_projection_preserves_ray",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": null,
+      "input_rows": 3,
+      "output_rows": 3,
+      "result_kind": "v",
+      "result_encoding": "v_generators",
+      "expected_fm_peak_rows": null,
+      "vertices": 1,
+      "rays": 2,
+      "durations_ns": {
+        "preparation_ns": 4700,
+        "workspace_ns": 100,
+        "run_ns": 2600,
+        "verification_ns": 0,
+        "end_to_end_ns": 8800
+      },
+      "input_sha256": "243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3",
+      "scenario_sha256": "1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "v_projection_preserves_ray",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": null,
+      "input_rows": 3,
+      "output_rows": 3,
+      "result_kind": "v",
+      "result_encoding": "v_generators",
+      "expected_fm_peak_rows": null,
+      "vertices": 1,
+      "rays": 2,
+      "durations_ns": {
+        "preparation_ns": 4700,
+        "workspace_ns": 100,
+        "run_ns": 1900,
+        "verification_ns": 100,
+        "end_to_end_ns": 7900
+      },
+      "input_sha256": "243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3",
+      "scenario_sha256": "1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "integrator_predecessor",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 6,
+      "output_rows": 4,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": 6,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10900,
+        "workspace_ns": null,
+        "run_ns": 8400,
+        "verification_ns": 900,
+        "end_to_end_ns": 22800
+      },
+      "input_sha256": "2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94",
+      "scenario_sha256": "2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "unreachable_equality_target",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 3,
+      "output_rows": 1,
+      "result_kind": "h",
+      "result_encoding": "h_contradiction_row",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 9700,
+        "workspace_ns": null,
+        "run_ns": 6400,
+        "verification_ns": 400,
+        "end_to_end_ns": 19000
+      },
+      "input_sha256": "7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d",
+      "scenario_sha256": "fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "singular_a",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 4,
+      "output_rows": 2,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 11200,
+        "workspace_ns": null,
+        "run_ns": 6100,
+        "verification_ns": 300,
+        "end_to_end_ns": 20100
+      },
+      "input_sha256": "fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513",
+      "scenario_sha256": "511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "singular_a",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 4,
+      "output_rows": 2,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10400,
+        "workspace_ns": null,
+        "run_ns": 5700,
+        "verification_ns": 300,
+        "end_to_end_ns": 18600
+      },
+      "input_sha256": "fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513",
+      "scenario_sha256": "511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "unreachable_equality_target",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 3,
+      "output_rows": 1,
+      "result_kind": "h",
+      "result_encoding": "h_contradiction_row",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 8800,
+        "workspace_ns": null,
+        "run_ns": 5900,
+        "verification_ns": 300,
+        "end_to_end_ns": 17100
+      },
+      "input_sha256": "7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d",
+      "scenario_sha256": "fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "integrator_predecessor",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 6,
+      "output_rows": 4,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": 6,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10600,
+        "workspace_ns": null,
+        "run_ns": 8300,
+        "verification_ns": 900,
+        "end_to_end_ns": 22600
+      },
+      "input_sha256": "2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94",
+      "scenario_sha256": "2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "v_projection_preserves_ray",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": null,
+      "input_rows": 3,
+      "output_rows": 3,
+      "result_kind": "v",
+      "result_encoding": "v_generators",
+      "expected_fm_peak_rows": null,
+      "vertices": 1,
+      "rays": 2,
+      "durations_ns": {
+        "preparation_ns": 4200,
+        "workspace_ns": 100,
+        "run_ns": 2100,
+        "verification_ns": 0,
+        "end_to_end_ns": 7600
+      },
+      "input_sha256": "243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3",
+      "scenario_sha256": "1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "v_projection_preserves_ray",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": null,
+      "input_rows": 3,
+      "output_rows": 3,
+      "result_kind": "v",
+      "result_encoding": "v_generators",
+      "expected_fm_peak_rows": null,
+      "vertices": 1,
+      "rays": 2,
+      "durations_ns": {
+        "preparation_ns": 3700,
+        "workspace_ns": 0,
+        "run_ns": 1900,
+        "verification_ns": 0,
+        "end_to_end_ns": 6900
+      },
+      "input_sha256": "243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3",
+      "scenario_sha256": "1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "integrator_predecessor",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 6,
+      "output_rows": 4,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": 6,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10800,
+        "workspace_ns": null,
+        "run_ns": 11300,
+        "verification_ns": 900,
+        "end_to_end_ns": 25900
+      },
+      "input_sha256": "2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94",
+      "scenario_sha256": "2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "unreachable_equality_target",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 3,
+      "output_rows": 1,
+      "result_kind": "h",
+      "result_encoding": "h_contradiction_row",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10000,
+        "workspace_ns": null,
+        "run_ns": 5800,
+        "verification_ns": 400,
+        "end_to_end_ns": 18800
+      },
+      "input_sha256": "7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d",
+      "scenario_sha256": "fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "singular_a",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 4,
+      "output_rows": 2,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 13600,
+        "workspace_ns": null,
+        "run_ns": 5800,
+        "verification_ns": 400,
+        "end_to_end_ns": 22400
+      },
+      "input_sha256": "fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513",
+      "scenario_sha256": "511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "singular_a",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 4,
+      "output_rows": 2,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10900,
+        "workspace_ns": null,
+        "run_ns": 5400,
+        "verification_ns": 400,
+        "end_to_end_ns": 18900
+      },
+      "input_sha256": "fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513",
+      "scenario_sha256": "511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "unreachable_equality_target",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 3,
+      "output_rows": 1,
+      "result_kind": "h",
+      "result_encoding": "h_contradiction_row",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 9100,
+        "workspace_ns": null,
+        "run_ns": 5400,
+        "verification_ns": 400,
+        "end_to_end_ns": 16800
+      },
+      "input_sha256": "7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d",
+      "scenario_sha256": "fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "integrator_predecessor",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 6,
+      "output_rows": 4,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": 6,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 11000,
+        "workspace_ns": null,
+        "run_ns": 7800,
+        "verification_ns": 800,
+        "end_to_end_ns": 22000
+      },
+      "input_sha256": "2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94",
+      "scenario_sha256": "2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "v_projection_preserves_ray",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": null,
+      "input_rows": 3,
+      "output_rows": 3,
+      "result_kind": "v",
+      "result_encoding": "v_generators",
+      "expected_fm_peak_rows": null,
+      "vertices": 1,
+      "rays": 2,
+      "durations_ns": {
+        "preparation_ns": 5100,
+        "workspace_ns": 0,
+        "run_ns": 1900,
+        "verification_ns": 0,
+        "end_to_end_ns": 8500
+      },
+      "input_sha256": "243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3",
+      "scenario_sha256": "1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "v_projection_preserves_ray",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": null,
+      "input_rows": 3,
+      "output_rows": 3,
+      "result_kind": "v",
+      "result_encoding": "v_generators",
+      "expected_fm_peak_rows": null,
+      "vertices": 1,
+      "rays": 2,
+      "durations_ns": {
+        "preparation_ns": 3800,
+        "workspace_ns": 100,
+        "run_ns": 1900,
+        "verification_ns": 0,
+        "end_to_end_ns": 6700
+      },
+      "input_sha256": "243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3",
+      "scenario_sha256": "1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "integrator_predecessor",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 6,
+      "output_rows": 4,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": 6,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10700,
+        "workspace_ns": null,
+        "run_ns": 7700,
+        "verification_ns": 800,
+        "end_to_end_ns": 21600
+      },
+      "input_sha256": "2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94",
+      "scenario_sha256": "2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "unreachable_equality_target",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 3,
+      "output_rows": 1,
+      "result_kind": "h",
+      "result_encoding": "h_contradiction_row",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 8900,
+        "workspace_ns": null,
+        "run_ns": 5500,
+        "verification_ns": 300,
+        "end_to_end_ns": 16700
+      },
+      "input_sha256": "7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d",
+      "scenario_sha256": "fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "singular_a",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 4,
+      "output_rows": 2,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10900,
+        "workspace_ns": null,
+        "run_ns": 5400,
+        "verification_ns": 400,
+        "end_to_end_ns": 19000
+      },
+      "input_sha256": "fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513",
+      "scenario_sha256": "511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "singular_a",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 4,
+      "output_rows": 2,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 11300,
+        "workspace_ns": null,
+        "run_ns": 5400,
+        "verification_ns": 300,
+        "end_to_end_ns": 19400
+      },
+      "input_sha256": "fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513",
+      "scenario_sha256": "511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "unreachable_equality_target",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 3,
+      "output_rows": 1,
+      "result_kind": "h",
+      "result_encoding": "h_contradiction_row",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 8800,
+        "workspace_ns": null,
+        "run_ns": 5400,
+        "verification_ns": 400,
+        "end_to_end_ns": 16600
+      },
+      "input_sha256": "7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d",
+      "scenario_sha256": "fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "integrator_predecessor",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 6,
+      "output_rows": 4,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": 6,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 10600,
+        "workspace_ns": null,
+        "run_ns": 7500,
+        "verification_ns": 900,
+        "end_to_end_ns": 21600
+      },
+      "input_sha256": "2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94",
+      "scenario_sha256": "2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513"
+    },
+    {
+      "purpose": "measurement",
+      "scenario": "v_projection_preserves_ray",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": null,
+      "input_rows": 3,
+      "output_rows": 3,
+      "result_kind": "v",
+      "result_encoding": "v_generators",
+      "expected_fm_peak_rows": null,
+      "vertices": 1,
+      "rays": 2,
+      "durations_ns": {
+        "preparation_ns": 3900,
+        "workspace_ns": 100,
+        "run_ns": 1900,
+        "verification_ns": 0,
+        "end_to_end_ns": 7200
+      },
+      "input_sha256": "243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3",
+      "scenario_sha256": "1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d"
+    }
+  ],
+  "warmup_trials": [
+    {
+      "purpose": "warmup",
+      "scenario": "singular_a",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 4,
+      "output_rows": 2,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 62400,
+        "workspace_ns": null,
+        "run_ns": 17800,
+        "verification_ns": 500,
+        "end_to_end_ns": 88000
+      },
+      "input_sha256": "fb829ef90ae74b9d57fa66fb6c1a17a2ffbc70c013deae3ce3e7e0cae81b4513",
+      "scenario_sha256": "511ee35cc320e582b1fdab603aedc71e3ac1077ed45fff2d483048b9b43e5053"
+    },
+    {
+      "purpose": "warmup",
+      "scenario": "unreachable_equality_target",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 3,
+      "output_rows": 1,
+      "result_kind": "h",
+      "result_encoding": "h_contradiction_row",
+      "expected_fm_peak_rows": null,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 14200,
+        "workspace_ns": null,
+        "run_ns": 9200,
+        "verification_ns": 600,
+        "end_to_end_ns": 27700
+      },
+      "input_sha256": "7b54510217980b1f856d03a94e0b313c9bb169d1bdf9183e91208a03caaa3b8d",
+      "scenario_sha256": "fbe971bd9cd9c7920db0cd4648be6bfae64c435d5f87d8c60b39ba0f1057b6ba"
+    },
+    {
+      "purpose": "warmup",
+      "scenario": "integrator_predecessor",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": 128,
+      "input_rows": 6,
+      "output_rows": 4,
+      "result_kind": "h",
+      "result_encoding": "h_rows",
+      "expected_fm_peak_rows": 6,
+      "vertices": 0,
+      "rays": 0,
+      "durations_ns": {
+        "preparation_ns": 13900,
+        "workspace_ns": null,
+        "run_ns": 15100,
+        "verification_ns": 1100,
+        "end_to_end_ns": 34000
+      },
+      "input_sha256": "2c0de69c37e92553c64954467ec7a1ffccae1b1aaaf73b3a74c8ac4076786e94",
+      "scenario_sha256": "2727a7846bfd2a9531536adc99f1011a4d5b147a4a37d1bfbf63778b93e2a513"
+    },
+    {
+      "purpose": "warmup",
+      "scenario": "v_projection_preserves_ray",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "oracle_scope": "numeric_literal_samples",
+      "oracle_passed": true,
+      "work_observed": true,
+      "max_rows": null,
+      "input_rows": 3,
+      "output_rows": 3,
+      "result_kind": "v",
+      "result_encoding": "v_generators",
+      "expected_fm_peak_rows": null,
+      "vertices": 1,
+      "rays": 2,
+      "durations_ns": {
+        "preparation_ns": 6100,
+        "workspace_ns": 100,
+        "run_ns": 3000,
+        "verification_ns": 100,
+        "end_to_end_ns": 11200
+      },
+      "input_sha256": "243a5e04023bf4742376c42d2c3b9909025e478ef3197d04fdb265d8e8e8caf3",
+      "scenario_sha256": "1e63579338e294c5b1fd0e258153e345aec0afb372c51ee449484a56635c0a0d"
+    }
+  ],
+  "evidence_limits": [
+    "numeric sample checks only",
+    "H relation support Unestablished",
+    "no exact set equality or validated arithmetic claim"
+  ],
+  "payload_sha256": "7fddaba0c7698f721b56b5d9b97310cd45f12f44d75676617fa84d554f5a38d5",
+  "report_id": "geo05-7fddaba0c7698f72"
+}
