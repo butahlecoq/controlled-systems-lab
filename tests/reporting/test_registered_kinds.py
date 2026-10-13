@@ -50,7 +50,11 @@ class RegisteredKindTests(unittest.TestCase):
         self.assertEqual(publication.native_payload_sha256, row['native_payload_sha256'])
         self.assertEqual(publication.measured_scope, row['measured_scope'])
         self.assertEqual(publication.evidence_limits, row['evidence_limits'])
-        self.assertEqual(hashlib.sha256(site.opt04.offline_zip(source, publication)).hexdigest(), row['zip_sha256'])
+        public_zip_bytes = site.opt04.offline_zip(source, publication)
+        self.assertEqual(hashlib.sha256(public_zip_bytes).hexdigest(), row['zip_sha256'])
+        public_zip = FIXTURES / (row['report_id'] + '.zip')
+        self.assertTrue(public_zip.is_file())
+        self.assertEqual(public_zip_bytes, public_zip.read_bytes())
 
         with tempfile.TemporaryDirectory() as directory:
             staged = site.stage(catalog_path, Path(directory) / 'site', check=True)
