@@ -43,6 +43,21 @@ public:
         return geometry::HullReduction{geometry::ReductionStatus::complete,std::move(retained),{},0,{}};
     }
 };
+class FixedReductionHullWorkspace final : public geometry::HullReducerWorkspace {
+    geometry::HullReduction reduction_;
+public:
+    explicit FixedReductionHullWorkspace(geometry::HullReduction reduction)
+        : reduction_(std::move(reduction)) {}
+    geometry::HullReductionResult reduce(const geometry::PointCloud&, LPWorkspace&,
+            const ExecutionContext&) override { return reduction_; }
+};
+Registration<HullReducerPort> make_fixed_reduction_hull_registration(geometry::HullReduction reduction) {
+    return {{{"test.hull.fixed-reduction"},"1"},
+        [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
+        [reduction=std::move(reduction)](const geometry::PointCloud&) {
+            return std::make_unique<FixedReductionHullWorkspace>(reduction);
+        }};
+}
 class NearEndpointDroppingHullWorkspace final : public geometry::HullReducerWorkspace {
 public:
     geometry::HullReductionResult reduce(const geometry::PointCloud& cloud, LPWorkspace&,
@@ -219,6 +234,72 @@ TEST_CASE("affine and sum operations use the selected hull reducer") {
         [](const std::string& value){return value.find("test.hull.keep-all@1")!=std::string::npos;}));
 }
 
+TEST_CASE("public affine operation removes exact duplicate and interior candidates") {
+    auto selected=dependencies();
+    selected.hull=provider(make_fixed_reduction_hull_registration({
+        geometry::ReductionStatus::complete,{0,1},
+        {{2,{{1,1.0}},{{"exact-duplicate"},{"test-program"}},
+            {0.0,0.0,0.0,{"test.exact"}}}},0,{}}));
+    const auto duplicate=vertices("exact-duplicate-candidates",1,{0,1,1},3);
+    const auto duplicate_result=take(run(request(AffineImage{duplicate,{1,1,{1}},{0}},"exact-duplicate"),
+        std::move(selected)));
+    const auto duplicate_rep=take(sets::from_handle(duplicate_result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(duplicate_rep));
+    CHECK(std::get<sets::VRepresentation>(duplicate_rep).vertices.rows()==2);
+    CHECK(support(duplicate_result.output,{1})==1.0);
+    CHECK(support(duplicate_result.output,{-1})==0.0);
+    CHECK(std::any_of(duplicate_result.evidence.assumptions.begin(),duplicate_result.evidence.assumptions.end(),
+        [](const std::string& value){return value.find("exact binary64")!=std::string::npos;}));
+
+    selected=dependencies();
+    selected.hull=provider(make_fixed_reduction_hull_registration({
+        geometry::ReductionStatus::complete,{0,1},
+        {{2,{{0,0.5},{1,0.5}},{{"exact-interior"},{"test-program"}},
+            {0.0,0.0,0.0,{"test.exact"}}}},0,{}}));
+    const auto interior=vertices("exact-interior-candidate",1,{0,1,0.5},3);
+    const auto interior_result=take(run(request(AffineImage{interior,{1,1,{1}},{0}},"exact-interior"),
+        std::move(selected)));
+    const auto interior_rep=take(sets::from_handle(interior_result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(interior_rep));
+    CHECK(std::get<sets::VRepresentation>(interior_rep).vertices.rows()==2);
+    CHECK(support(interior_result.output,{1})==1.0);
+    CHECK(support(interior_result.output,{-1})==0.0);
+}
+
+TEST_CASE("public Minkowski sum removes exact duplicate candidates and preserves support") {
+    auto selected=dependencies();
+    selected.hull=provider(make_fixed_reduction_hull_registration({
+        geometry::ReductionStatus::complete,{0,1,3},
+        {{2,{{1,1.0}},{{"minkowski-duplicate"},{"test-program"}},
+            {0.0,0.0,0.0,{"test.exact"}}}},0,{}}));
+    const auto interval=vertices("minkowski-duplicate-input",1,{0,1},2);
+    const auto result=take(run(request(MinkowskiSum{interval,interval},"minkowski-duplicate"),
+        std::move(selected)));
+    const auto rep=take(sets::from_handle(result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==3);
+    CHECK(support(result.output,{1})==2.0);
+    CHECK(support(result.output,{-1})==0.0);
+    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& value){return value.find("exact binary64")!=std::string::npos;}));
+}
+
+TEST_CASE("public geometry operation falls back to the complete cloud for malformed reductions") {
+    auto selected=dependencies();
+    selected.hull=provider(make_fixed_reduction_hull_registration({
+        geometry::ReductionStatus::complete,{0,1},{},0,{}}));
+    const auto cloud=vertices("malformed-reduction-candidates",1,{0,1,0.5},3);
+    const auto result=take(run(request(AffineImage{cloud,{1,1,{1}},{0}},"malformed-reduction"),
+        std::move(selected)));
+    const auto rep=take(sets::from_handle(result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==3);
+    CHECK(support(result.output,{1})==1.0);
+    CHECK(support(result.output,{-1})==0.0);
+    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& value){return value.find("all generated candidates retained")!=std::string::npos;}));
+}
+
 TEST_CASE("rectangular and singular affine maps retain their actual ambient spaces") {
     const auto interval=vertices("control",1,{-1,2},2);
     auto rectangular=request(AffineImage{interval,{2,1,{2,-1}},{1,3}});
@@ -238,7 +319,7 @@ TEST_CASE("rectangular and singular affine maps retain their actual ambient spac
     CHECK(support(result.output,{1})==doctest::Approx(7));
     const auto rep=take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::VRepresentation>(rep));
-    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==4);
+    CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==1);
 }
 
 TEST_CASE("selected H conversion preserves explicit equalities and infeasible empty sets") {
