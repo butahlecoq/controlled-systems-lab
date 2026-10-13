@@ -165,7 +165,7 @@ def _write_collection(out: Path, stdout: str, stderr: str, rows: list[dict],
     with (out / "trials.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
         for row in rows:
             stream.write(json.dumps(row, sort_keys=True, allow_nan=False)+"\n")
-    fields = ["purpose", "scenario", "repetition", "status", "detail", "oracle_passed", "work_observed",
+    fields = ["purpose", "scenario", "repetition", "status", "detail", "oracle_passed", "work_observed", "end_to_end_scope",
               "max_rows", "input_rows", "output_rows", "result_kind", "result_encoding", "input_sha256", "scenario_sha256", "expected_fm_peak_rows", *PHASES]
     with (out / "trials.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")

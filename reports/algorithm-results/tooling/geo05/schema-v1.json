@@ -26,6 +26,7 @@
         "scenario": {"enum": ["singular_a", "unreachable_equality_target", "integrator_predecessor", "v_projection_preserves_ray"]},
         "repetition": {"type": "integer", "minimum": 0},
         "status": {"enum": ["passed", "failed", "unsupported", "cancelled", "oracle_failed"]},
+        "end_to_end_scope": {"enum": ["through_verification_and_fixture_teardown", "through_failure_unwind"]},
         "oracle_scope": {"const": "numeric_literal_samples"}, "oracle_passed": {"type": "boolean"},
         "work_observed": {"type": "boolean"}, "max_rows": {"type": ["integer", "null"]},
         "input_rows": {"type": "integer", "minimum": 0}, "output_rows": {"type": ["integer", "null"], "minimum": 0},

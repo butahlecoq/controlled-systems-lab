@@ -34,6 +34,7 @@ class Geo05ReportTests(unittest.TestCase):
             "CMakeLists.txt",
             "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
             "reports/algorithm-results/tooling/geo05/report.py",
+            "reports/algorithm-results/tooling/geo05/test_driver_outcomes.cpp",
         ])
         with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
             report.validate_source_tree_delta(["src/geometry/polyhedral/projection.cpp"])
@@ -139,6 +140,54 @@ class Geo05ReportTests(unittest.TestCase):
         record["trials"][0]["max_rows"] = 129
         with self.assertRaisesRegex(ValueError, "payload digest mismatch"):
             report.validate_record(record)
+
+    def test_oracle_failure_retains_observed_output_and_suppresses_every_summary(self):
+        for scenario in report.SCENARIOS:
+            with self.subTest(scenario=scenario):
+                rows = [report.synthetic_trial(name, 0) for name in report.SCENARIOS]
+                failed = next(row for row in rows if row["scenario"] == scenario)
+                failed.update(status="oracle_failed", oracle_passed=False, output_rows=17)
+                record = report.make_record(rows, purpose="test", provenance={
+                    "source_commit": "fixture", "harness_commit": "fixture"})
+                report.validate_record(record)
+                self.assertEqual(record["trials"][rows.index(failed)]["output_rows"], 17)
+                self.assertEqual(record["collection"]["counts"], {
+                    "passed": 3, "failed": 1, "unsupported": 0, "cancelled": 0, "missing": 0})
+                self.assertFalse(record["collection"]["valid_success_summary"])
+                groups = [record["collection"], *record["collection"]["by_scenario"].values()]
+                for group in groups:
+                    for phase in group["phases"].values():
+                        for statistic in ("median_ns", "min_ns", "max_ns"):
+                            self.assertIsNone(phase[statistic])
+
+    def test_typed_non_success_records_retain_status_and_diagnostic_detail(self):
+        for status in ("unsupported", "cancelled"):
+            with self.subTest(status=status):
+                rows = [report.synthetic_trial(name, 0) for name in report.SCENARIOS]
+                rows[0].update(status=status, oracle_passed=False, work_observed=False,
+                    output_rows=None, result_kind=None, result_encoding=None,
+                    detail="unsupported: projection.rows: configured row limit exceeded" if status == "unsupported"
+                           else "cancelled: operation stopped before projection")
+                record = report.make_record(rows, purpose="test", provenance={
+                    "source_commit": "fixture", "harness_commit": "fixture"})
+                self.assertEqual(record["trials"][0]["status"], status)
+                self.assertIn("projection", record["trials"][0]["detail"])
+                self.assertEqual(record["collection"]["counts"][status], 1)
+                self.assertEqual(record["collection"]["counts"]["failed"], 0)
+                self.assertFalse(record["collection"]["valid_success_summary"])
+
+    def test_optional_end_to_end_scope_rejects_unknown_values_and_renders_observed_scope(self):
+        rows = [report.synthetic_trial(name, 0) for name in report.SCENARIOS]
+        record = report.make_record(rows, purpose="test", provenance={
+            "source_commit": "fixture", "harness_commit": "fixture"})
+        rows[0]["end_to_end_scope"] = "invented_scope"
+        report.resign_record(record)
+        with self.assertRaisesRegex(ValueError, "end-to-end scope"):
+            report.validate_record(record)
+        rows[0]["end_to_end_scope"] = "through_verification_and_fixture_teardown"
+        report.resign_record(record)
+        report.validate_record(record)
+        self.assertIn("through_verification_and_fixture_teardown", render.render_html(record))
 
     def test_resigned_record_cannot_omit_or_invent_scenario_row_limit(self):
         for scenario, bad_value in (("singular_a", None), ("v_projection_preserves_ray", 128)):

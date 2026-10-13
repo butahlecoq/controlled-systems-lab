@@ -10,6 +10,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <variant>
 #include <vector>
 #include <utility>
@@ -24,8 +25,57 @@ std::shared_ptr<const ResourcePolicy> report_resources() {
 ExecutionContext report_context() {
     return {report_resources(),{}, {},{1e-8,1e-8},"geo05-report"};
 }
+struct TrialFailure : std::runtime_error {
+    std::string status;
+    TrialFailure(std::string status_value, std::string detail)
+        : std::runtime_error(status_value + ": " + detail), status(std::move(status_value)) {}
+};
+const char* diagnostic_code(DiagnosticCode code) {
+    switch (code) {
+    case DiagnosticCode::invalid_input: return "invalid_input";
+    case DiagnosticCode::unsupported: return "unsupported";
+    case DiagnosticCode::evidence_mismatch: return "evidence_mismatch";
+    case DiagnosticCode::invalid_claim: return "invalid_claim";
+    }
+    throw std::logic_error("unknown diagnostic code");
+}
+[[noreturn]] void reject(const Diagnostics& diagnostics, bool unsupported = false) {
+    std::string detail;
+    for (const auto& diagnostic : diagnostics) {
+        unsupported = unsupported || diagnostic.code == DiagnosticCode::unsupported;
+        if (!detail.empty()) detail += "; ";
+        detail += std::string(diagnostic_code(diagnostic.code)) + ": " + diagnostic.field + ": " + diagnostic.explanation;
+    }
+    throw TrialFailure(unsupported ? "unsupported" : "failed", detail);
+}
+[[noreturn]] void reject(const Diagnostic& diagnostic) { reject(Diagnostics{diagnostic}); }
+[[noreturn]] void reject(const registry::Rejection& rejection) { reject(rejection.diagnostics); }
+[[noreturn]] void reject(const Unsupported& unsupported) { reject(unsupported.diagnostics, true); }
+[[noreturn]] void reject(const OperationStopped& stopped) {
+    switch (stopped.reason) {
+    case StopReason::cancelled: throw TrialFailure("cancelled", "cancelled: " + stopped.diagnostics);
+    case StopReason::deadline_expired: throw TrialFailure("cancelled", "deadline_expired: " + stopped.diagnostics);
+    case StopReason::resource_limit: throw TrialFailure("failed", "resource_limit: " + stopped.diagnostics);
+    case StopReason::numerical_failure: throw TrialFailure("failed", "numerical_failure: " + stopped.diagnostics);
+    }
+    throw std::logic_error("unknown stop reason");
+}
+[[noreturn]] void reject(const reachability::NominalPredecessorFailure& failure) {
+    std::visit([](const auto& cause) { reject(cause); }, failure.cause);
+    throw std::logic_error("predecessor failure has no cause");
+}
+[[noreturn]] void reject(const SupportResult&) {
+    throw TrialFailure("failed", "public geometry API returned an unexpected support-query result");
+}
+[[noreturn]] void reject(const ContainmentResult&) {
+    throw TrialFailure("failed", "public geometry API returned an unexpected containment-query result");
+}
 template<class T, class... E> T take(std::variant<T,E...> value) {
-    if (!std::holds_alternative<T>(value)) throw std::runtime_error("public geometry API returned diagnostics or rejection");
+    if (!std::holds_alternative<T>(value)) {
+        std::visit([](const auto& outcome) {
+            if constexpr (!std::is_same_v<std::decay_t<decltype(outcome)>, T>) reject(outcome);
+        }, value);
+    }
     return std::get<T>(std::move(value));
 }
 struct Trial {
@@ -33,6 +83,7 @@ struct Trial {
     std::size_t repetition{}, input_rows{}, rows{}, vertices{}, rays{};
     std::string result_kind;
     std::string result_encoding;
+    std::string end_to_end_scope{"through_verification_and_fixture_teardown"};
     std::optional<std::size_t> expected_fm_peak_rows;
     bool oracle_passed{}, work_observed{};
     bool output_observed{};
@@ -187,23 +238,32 @@ void run_v(Trial& t) {
     t.verification_ns=verify.elapsed(); t.work_observed=t.vertices+t.rays>0;
     t.max_rows.reset(); t.status=t.oracle_passed?"passed":"oracle_failed";
 }
-Trial execute(const std::string& name,std::size_t repetition,std::string purpose="measurement") {
+template<class Run> Trial execute_attempt(const std::string& name,std::size_t repetition,std::string purpose,Run run) {
     Trial t; t.purpose=std::move(purpose); t.scenario=name; t.repetition=repetition; Timer total;
+    if (name=="v_projection_preserves_ray") t.max_rows.reset();
+    if (name=="integrator_predecessor") t.expected_fm_peak_rows=6;
     try {
+        run(t);
+    } catch (const TrialFailure& e) { t.detail=e.what(); t.status=e.status; t.end_to_end_scope="through_failure_unwind"; }
+    catch (const std::exception& e) { t.detail=e.what(); t.status="failed"; t.end_to_end_scope="through_failure_unwind"; }
+    t.end_to_end_ns=total.elapsed(); return t;
+}
+Trial execute(const std::string& name,std::size_t repetition,std::string purpose="measurement") {
+    return execute_attempt(name,repetition,std::move(purpose),[&](Trial& t) {
         if (name=="singular_a") run_predecessor(t);
         else if (name=="unreachable_equality_target") run_unreachable(t);
         else if (name=="integrator_predecessor") run_integrator(t);
         else if (name=="v_projection_preserves_ray") run_v(t);
         else throw std::runtime_error("unknown scenario");
-    } catch (const std::exception& e) { t.detail=e.what(); t.status="failed"; }
-    t.end_to_end_ns=total.elapsed(); return t;
+    });
 }
 std::vector<std::string> scenarios{"singular_a","unreachable_equality_target","integrator_predecessor","v_projection_preserves_ray"};
 std::uint64_t count(const char* value) { auto n=std::stoull(value); if (!n||n>1000) throw std::runtime_error("count must be in [1,1000]"); return n; }
 void emit(const Trial& t) {
     std::cout << "{\"purpose\":\""<<json_escape(t.purpose)<<"\",\"scenario\":\""<<json_escape(t.scenario)<<"\",\"repetition\":"<<t.repetition
       <<",\"status\":\""<<json_escape(t.status)<<"\",\"detail\":\""<<json_escape(t.detail)<<"\",\"oracle_scope\":\"numeric_literal_samples\",\"oracle_passed\":"<<(t.oracle_passed?"true":"false")
-      <<",\"work_observed\":"<<(t.work_observed?"true":"false")<<",\"max_rows\":";
+      <<",\"work_observed\":"<<(t.work_observed?"true":"false")
+      <<",\"end_to_end_scope\":\""<<json_escape(t.end_to_end_scope)<<"\",\"max_rows\":";
     if (t.max_rows) std::cout<<*t.max_rows; else std::cout<<"null";
     std::cout<<",\"input_rows\":"<<t.input_rows<<",\"output_rows\":";
     if(t.output_observed) std::cout<<t.rows; else std::cout<<"null";

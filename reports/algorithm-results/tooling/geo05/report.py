@@ -21,6 +21,7 @@ HARNESS_PATH_ALLOWLIST = {
     "reports/algorithm-results/tooling/geo05/collect.py",
     "reports/algorithm-results/tooling/geo05/render.py",
     "reports/algorithm-results/tooling/geo05/test_report_tools.py",
+    "reports/algorithm-results/tooling/geo05/test_driver_outcomes.cpp",
 }
 GEO04_CMAKE_OPTION = 'option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report driver" OFF)'
 GEO05_CMAKE_OPTION = 'option(CSL_BUILD_GEO05_REPORT "Build the GEO-05 projection/predecessor report driver" OFF)'
@@ -31,6 +32,11 @@ endif()'''
 GEO05_CMAKE_TARGET = '''if(CSL_BUILD_GEO05_REPORT)
   add_executable(csl_geo05_projection_predecessor_report reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp)
   target_link_libraries(csl_geo05_projection_predecessor_report PRIVATE CSL::polyhedral)
+  if(BUILD_TESTING)
+    add_executable(geo05_driver_outcome_tests reports/algorithm-results/tooling/geo05/test_driver_outcomes.cpp)
+    target_link_libraries(geo05_driver_outcome_tests PRIVATE CSL::polyhedral)
+    add_test(NAME geo05_driver_outcome_tests COMMAND geo05_driver_outcome_tests)
+  endif()
 endif()'''
 # These independent literal checks are sample/fixture checks only. They do not
 # establish exact set equality or validated arithmetic.
@@ -250,8 +256,20 @@ def validate_record(record: dict) -> None:
                 raise ValueError("observed result encoding differs from pinned fixture")
             if row.get("input_rows") != expected_case["input_rows"] or row.get("output_rows") != expected_case["output_rows"]:
                 raise ValueError("observed input/output row counts differ from the pinned fixture")
-        elif row.get("result_kind") not in (None, "") or row.get("result_encoding") not in (None, ""):
-            raise ValueError("failed attempt must mark unobserved result representation as null")
+        else:
+            output_rows = row.get("output_rows")
+            if output_rows is None:
+                if row.get("result_kind") not in (None, "") or row.get("result_encoding") not in (None, ""):
+                    raise ValueError("unobserved output must mark result representation as null")
+            else:
+                if not isinstance(output_rows, int) or isinstance(output_rows, bool) or output_rows < 0:
+                    raise ValueError("observed output row count must be a nonnegative integer")
+                encodings = {"empty": {"empty"}, "h": {"h_rows", "h_contradiction_row"}, "v": {"v_generators"}}
+                if row.get("result_encoding") not in encodings.get(row.get("result_kind"), set()):
+                    raise ValueError("observed output representation and encoding are inconsistent")
+        if "end_to_end_scope" in row and row["end_to_end_scope"] not in (
+                "through_verification_and_fixture_teardown", "through_failure_unwind"):
+            raise ValueError("invalid end-to-end scope")
         expected_peak = expected_case.get("expected_fm_peak_rows")
         if row.get("expected_fm_peak_rows") != expected_peak:
             raise ValueError("expected Fourier-Motzkin row peak differs from the pinned derivation")
