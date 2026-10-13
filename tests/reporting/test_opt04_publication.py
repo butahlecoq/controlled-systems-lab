@@ -57,6 +57,10 @@ def make_records():
     def event(name, side, repetition, warmup):
         fixture = collector.FIXTURES[name]
         row = copy.deepcopy(base)
+        primal = fixture["expected_phase_one_primal"]
+        original_rows_max_violation = max(
+            abs(sum(coefficient * value for coefficient, value in zip(matrix_row, primal)) - target)
+            for matrix_row, target in zip(fixture["matrix"], fixture["rhs"]))
         row.update({"fixture": name, "side": side, "repetition": repetition, "warmup": warmup,
             "pair_id": f"{name}-warmup-0" if warmup else f"{name}-{repetition}", "sequence": len(raw),
             "expected_status": fixture["expected_status"], "observed_status": fixture["expected_status"],
@@ -64,7 +68,8 @@ def make_records():
                 "variable_lower_bound": 0.0, "variable_upper_bound": None,
                 "objective_coefficients": [0.0] * fixture["columns"], "objective_constant": 0.0}})
         row["result"].update({"outcome": fixture["expected_status"],
-            "primal": fixture["expected_phase_one_primal"], "auxiliary": fixture["expected_auxiliary"]})
+            "primal": primal, "auxiliary": fixture["expected_auxiliary"]})
+        row["original_rows_max_violation"] = original_rows_max_violation
         row["auxiliary_value"] = fixture["expected_auxiliary"]
         if side == "highs-reference":
             for key in ("original_rows_max_violation", "nonnegative_max_violation", "objective_value", "auxiliary_residual", "auxiliary_value"):
@@ -120,6 +125,18 @@ class Opt04PublicationTests(unittest.TestCase):
         except ImportError:
             self.fail("OPT-04 registered adapter is missing")
         return opt04_registered_reports
+
+    def test_synthetic_infeasible_phase_one_warmup_records_recomputed_row_violation(self):
+        record, _ = make_records()
+        row = next(row for row in record["warmup_trials"]
+                   if row["fixture"] == "contradictory_rows" and row["side"] == "phase-one-bland")
+        fixture = next(fixture for fixture in record["catalog"]["fixtures"]
+                       if fixture["id"] == "contradictory_rows")
+        primal = row["result"]["primal"]
+        expected = max(abs(sum(a * x for a, x in zip(matrix_row, primal)) - target)
+                       for matrix_row, target in zip(fixture["matrix"], fixture["rhs"]))
+        self.assertEqual(expected, row["original_rows_max_violation"])
+        self.assertGreater(expected, fixture["absolute_tolerance"])
 
     def test_saved_bundle_stages_typed_page_and_complete_native_evidence(self):
         adapter = self.adapter()
