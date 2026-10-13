@@ -191,7 +191,9 @@ def catalogue_index(catalogue):
                 label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
         csv_name = "stdout.jsonl" if report.get("report_kind") == opt04.KIND else "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
         trial_label = "trial JSONL" if report.get("report_kind") == opt04.KIND else "CSV"
-        parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/'+csv_name+'">'+trial_label+'</a> · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
+        figure_link = (' · <a href="'+escape(rid,quote=True)+'/performance.svg">performance SVG</a>'
+                       if report.get("report_kind") == opt04.KIND else "")
+        parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/'+csv_name+'">'+trial_label+'</a>'+figure_link+' · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
     return ''.join(parts)+"</ul></body></html>"
 
 

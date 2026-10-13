@@ -27,6 +27,16 @@ FIXTURES = Path(__file__).resolve().parents[2] / 'reports' / 'algorithm-results'
 
 
 class RegisteredKindTests(unittest.TestCase):
+    def test_opt04_catalogue_row_links_the_published_performance_figure(self):
+        catalogue = {'schema': 'csl.algorithm-report-catalog/3', 'artifact_ref': 'main', 'reports': [{
+            'report_id': 'opt04-20261013T000000Z-' + 'a' * 64,
+            'source_report_id': 'opt04-20261013T000000Z-123456789abc',
+            'report_kind': 'opt04-phase-one', 'source_commit': '1' * 40,
+            'measured_scope': 'Five analytic feasibility fixtures',
+            'evidence_limits': 'Descriptive only'}]}
+        html = site.catalogue_index(catalogue)
+        self.assertIn('href="' + catalogue['reports'][0]['report_id'] + '/performance.svg"', html)
+
     def rehash_native(self, bundle, kind):
         if kind=='geo03-hv':
             manifest_path=bundle/'manifest.json'

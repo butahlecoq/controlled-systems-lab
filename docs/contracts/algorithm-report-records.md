@@ -347,20 +347,15 @@ publication gate exemption.
 ## Registered non-LP publication adapters
 
 OPT-04's native `csl.opt04-phase-one-report/2` records have a registered saved-data
-adapter in `opt04_registered_reports.py`; the local renderer and native bundle
-remain private source evidence. No OPT-04 measurement bundle or production
-catalogue row is committed, and no OPT-04 public page or URL is established.
-The exact tracked
-migration into this contract's schema-3 catalogue and envelope is [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185).
-It assigns native bundle/schema and semantic validation, content-bound identity
-from the native report ID, complete source-file hashes and adapter hash,
-projection into the common envelope and catalogue payload, allowlisting and
-staging, and preservation of the native records, trial output, diagnostics,
-build log, figure and manifest as source evidence. The public renderer must
-consume validated records under the shared safe HTML policy rather than copy
-the local producer page. Integration into the authoritative catalogue and
-main-only Pages workflow, followed by live URL verification, is required before
-any public page or URL can be claimed.
+adapter in `opt04_registered_reports.py`; schema-3 catalogue dispatch and
+staging use the typed renderer and preserve the local renderer and native bundle
+as source evidence. Test-mode integration exercises the generated page, common
+envelope, catalogue links and deterministic ZIP. No independently reviewed
+production inventory digest or production catalogue row is committed, and no
+live OPT-04 public page or URL is established. The remaining tracked migration
+and publication gates are in [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185):
+reviewed production admission, authoritative catalogue integration, main-only
+Pages publication and live URL verification.
 
 The OPT-04 adapter requires the exact ten-file native inventory documented in its
 [tooling README](../../reports/algorithm-results/tooling/opt04/README.md), schema-v2
