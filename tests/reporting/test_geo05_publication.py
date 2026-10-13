@@ -143,7 +143,64 @@ def create_bundle(root, saved):
     return bundle
 
 
+def reseal_source_bundle(bundle):
+    manifest_path = bundle / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["files"] = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                         for path in bundle.iterdir() if path.is_file() and path.name != "manifest.json"}
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    rewrite_source_zip(bundle)
+
+
+def rewrite_source_zip(bundle):
+    with zipfile.ZipFile(bundle.parent / (bundle.name + ".zip"), "w", compression=zipfile.ZIP_STORED) as archive:
+        for path in sorted(bundle.iterdir()):
+            archive.write(path, arcname=path.name)
+
+
 class Geo05PublicationTests(unittest.TestCase):
+    def test_duplicate_keys_in_native_record_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            bundle = create_bundle(Path(temp), record())
+            source = (bundle / "records.json").read_text(encoding="utf-8")
+            source = source.replace('"schema":', '"schema":"shadow", "schema":', 1)
+            (bundle / "records.json").write_text(source, encoding="utf-8")
+            reseal_source_bundle(bundle)
+            with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
+                geo05.adapt(bundle)
+
+    def test_duplicate_keys_in_each_trial_jsonl_object_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            bundle = create_bundle(Path(temp), record())
+            lines = (bundle / "trials.jsonl").read_text(encoding="utf-8").splitlines()
+            lines = [line.replace('"scenario":', '"scenario":"shadow", "scenario":', 1) for line in lines]
+            (bundle / "trials.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+            reseal_source_bundle(bundle)
+            with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
+                geo05.adapt(bundle)
+
+    def test_duplicate_keys_are_rejected_in_every_json_sidecar(self):
+        duplicate_payloads = {
+            "records.json": lambda text: text.replace('"schema":', '"schema":"shadow", "schema":', 1),
+            "manifest.json": lambda text: text.replace('"schema":', '"schema":"shadow", "schema":', 1),
+            "provenance.json": lambda text: text.replace('"source_commit":', '"source_commit":"shadow", "source_commit":', 1),
+            "command.json": lambda _text: '{"duplicate": 1, "duplicate": 2}',
+            "parse-errors.json": lambda _text: '[{"duplicate": 1, "duplicate": 2}]',
+        }
+        for filename, mutate in duplicate_payloads.items():
+            with self.subTest(filename=filename), tempfile.TemporaryDirectory() as temp:
+                bundle = create_bundle(Path(temp), record())
+                path = bundle / filename
+                if filename == "manifest.json":
+                    reseal_source_bundle(bundle)
+                path.write_text(mutate(path.read_text(encoding="utf-8")), encoding="utf-8")
+                if filename == "manifest.json":
+                    rewrite_source_zip(bundle)
+                else:
+                    reseal_source_bundle(bundle)
+                with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
+                    geo05.adapt(bundle)
+
     def test_measurement_adapter_preserves_attempts_and_identity(self):
         saved = record(failed=True)
         publication = geo05.adapt_payload(saved)

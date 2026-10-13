@@ -38,8 +38,23 @@ ORACLES = {
 }
 
 
+class _DuplicateJsonKeyError(ValueError):
+    pass
+
+
 def _json(path: Path):
-    return json.loads(path.read_text(encoding="utf-8"))
+    return _strict_json_loads(path.read_text(encoding="utf-8"))
+
+
+def _strict_json_loads(source):
+    def object_pairs(pairs):
+        value = {}
+        for key, item in pairs:
+            if key in value:
+                raise _DuplicateJsonKeyError(f"duplicate JSON key: {key}")
+            value[key] = item
+        return value
+    return json.loads(source, object_pairs_hook=object_pairs)
 
 
 def _canonical(value):
@@ -272,8 +287,10 @@ def adapt(bundle):
 def _validate_saved_data(bundle, record):
     with (bundle / "trials.jsonl").open(encoding="utf-8") as stream:
         try:
-            raw_rows = [json.loads(line) for line in stream if line.strip()]
-        except (UnicodeError, json.JSONDecodeError) as error:
+            raw_rows = [_strict_json_loads(line) for line in stream if line.strip()]
+        except _DuplicateJsonKeyError:
+            raise
+        except (UnicodeError, json.JSONDecodeError, ValueError) as error:
             raise ValueError("invalid GEO-05 raw trial stream") from error
     expected_rows = [*record["warmup_trials"], *record["trials"]]
     if raw_rows != expected_rows:
