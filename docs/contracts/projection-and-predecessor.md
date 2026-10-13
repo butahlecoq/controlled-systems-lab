@@ -190,7 +190,7 @@ fixtures; all 32 passed their literal sample checks and reported work. The
 record supports descriptive timings only, without a comparator, speedup,
 application-scale or scalability claim, or profiler-based bottleneck
 attribution. The registered Pages route is
-`https://butahlecoq.github.io/controlled-systems-lab/geo05-fbd71773cb6f92045f07378fc30ffb480605bda804ead24a1b1a0fdf696d6226/index.html`;
+`https://butahlecoq.github.io/controlled-systems-lab/geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795/index.html`;
 it remains pending until the main-branch deployment and direct page/download
 checks succeed.
 

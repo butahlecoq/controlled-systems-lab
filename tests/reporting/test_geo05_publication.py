@@ -350,6 +350,9 @@ class Geo05PublicationTests(unittest.TestCase):
             page = (staged / publication.report_id / "index.html").read_text(encoding="utf-8")
             envelope = json.loads((staged / publication.report_id / "report-envelope.json").read_text(encoding="utf-8"))
             self.assertIn("GEO-05 measurement report", page)
+            self.assertIn(".table-scroll{overflow-x:auto", page)
+            self.assertIn('aria-label="Attempts, including warmups and failures"', page)
+            self.assertIn('aria-label="Phase summaries in nanoseconds"', page)
             self.assertEqual(envelope["payload_schema"], "csl.geo05-numerical-report/1")
             self.assertIn("trials.csv", page)
 

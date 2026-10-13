@@ -404,18 +404,18 @@ def render_page(bundle, publication):
                   "INCOMPLETE / INCONCLUSIVE measurement: one or more attempts failed, were unsupported/cancelled, are missing, or the process timed out; all timing summaries are suppressed.")
     counts = html.escape(json.dumps(record["collection"]["counts"], sort_keys=True))
     return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>GEO-05 report "
-            + html.escape(publication.report_id) + "</title></head><body><h1>GEO-05 measurement report</h1>"
+            + html.escape(publication.report_id) + "</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:1200px;margin:2rem auto;padding:0 1rem;color:#17212b}h1,h2{line-height:1.2}p{overflow-wrap:anywhere}.table-scroll{overflow-x:auto;max-width:100%;margin:1rem 0;border:1px solid #b8c3cc;border-radius:.35rem}table{border-collapse:collapse;width:100%;min-width:900px;font-size:.92rem}th,td{border:1px solid #b8c3cc;padding:.45rem;text-align:left;vertical-align:top}th{background:#edf2f6;position:sticky;top:0}tbody tr:nth-child(even){background:#f7f9fb}a{color:#075a9c}code{overflow-wrap:anywhere}</style></head><body><h1>GEO-05 measurement report</h1>"
             + "<p><strong>Assessment: " + html.escape(assessment) + "</strong></p><p>Attempt counts: <code>"
             + counts + "</code></p><p>Report <code>" + html.escape(publication.report_id) + "</code>; source <code>"
             + html.escape(publication.source_report_id) + "</code>.</p><p>Measured scope: "
             + html.escape(publication.measured_scope) + "</p><p>Evidence limits: "
             + html.escape(publication.evidence_limits) + "</p><h2>Saved source files</h2><p>" + links
-            + "</p><h2>Attempts, including warmups and failures</h2><table><thead><tr>"
+            + "</p><h2>Attempts, including warmups and failures</h2><div class=\"table-scroll\" role=\"region\" aria-label=\"Attempts, including warmups and failures\" tabindex=\"0\"><table><thead><tr>"
             + "".join("<th>" + html.escape(name) + "</th>" for name in headings)
-            + "</tr></thead><tbody>" + "".join(rows) + "</tbody></table><h2>Phase summaries (ns)</h2><table><thead><tr>"
+            + "</tr></thead><tbody>" + "".join(rows) + "</tbody></table></div><h2>Phase summaries (ns)</h2><div class=\"table-scroll\" role=\"region\" aria-label=\"Phase summaries in nanoseconds\" tabindex=\"0\"><table><thead><tr>"
             + "".join("<th>" + html.escape(name) + "</th>" for name in
                      ("Scope", "Phase", "Median", "Min", "Max", "Successful trials", "Unavailable trials", "Excluded trials"))
-            + "</tr></thead><tbody>" + "".join(summary_rows) + "</tbody></table><h2>Native evidence limits</h2><ul>"
+            + "</tr></thead><tbody>" + "".join(summary_rows) + "</tbody></table></div><h2>Native evidence limits</h2><ul>"
             + limits + "</ul><p><a href=\"report-envelope.json\">Report envelope</a> · "
             + "<a href=\"publication-manifest.json\">Publication manifest</a></p></body></html>")
 
