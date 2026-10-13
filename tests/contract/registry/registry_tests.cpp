@@ -75,6 +75,58 @@ TEST_CASE("direct strategy admission rejects malformed effective requests before
     CHECK(workspace.attempts==1);
 }
 
+TEST_CASE("prepared strategy rejects a mismatched execution policy and preserves matching solve evidence") {
+    class PolicyObservingWorkspace final : public SynthesisWorkspace {
+    public:
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+            const ExecutionContext& context) override {
+            const auto id=problem.identity();
+            SynthesisResult result{Termination::completed,
+                {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{}};
+            result.objective.upper=ObjectiveBound{5,
+                {id,NumericalCheck{context.numerical.absolute_tolerance,
+                    context.numerical.relative_tolerance,0,ModuleId{"policy-observer"}}}};
+            return result;
+        }
+    };
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add({{{"policy-observer"},"1"},
+        [](const StrategyRequest&,const Requirements&) -> Capability { return Offer{}; },
+        [](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+            return compose_strategy(std::get<0>(check_pipeline()),
+                [](auto,const StrategyRequest&,const Requirements&) {
+                    return std::make_unique<PolicyObservingWorkspace>();
+                });
+        }}));
+    auto request=strategy_request();
+    request.configuration.strategy={"policy-observer"};
+    request.family.numerical={0.125,0.25};
+    auto prepared=strategies.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+    auto workspace=std::get<PreparedStrategy>(std::move(prepared)).create();
+
+    auto mismatched=context();
+    mismatched.numerical={0.5,0.25};
+    const auto rejected=workspace->run(mismatched);
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    REQUIRE(std::get<Unsupported>(rejected).diagnostics.size()==1);
+    CHECK(std::get<Unsupported>(rejected).diagnostics[0].code==DiagnosticCode::invalid_input);
+    CHECK(std::get<Unsupported>(rejected).diagnostics[0].field=="family.numerical");
+
+    auto matching=context();
+    matching.numerical={0.125,0.25};
+    const auto accepted=workspace->run(matching);
+    REQUIRE(std::holds_alternative<SynthesisResult>(accepted));
+    const auto& result=std::get<SynthesisResult>(accepted);
+    REQUIRE(result.objective.upper.has_value());
+    const auto* observed=std::get_if<NumericalCheck>(&result.objective.upper->evidence.support);
+    REQUIRE(observed!=nullptr);
+    CHECK(observed->absolute_tolerance==0.125);
+    CHECK(observed->relative_tolerance==0.25);
+    CHECK(observed->max_residual==0);
+    CHECK(observed->verifier.value=="policy-observer");
+}
+
 TEST_CASE("scoped provider provenance is checked without erasing retained evidence") {
     class RetainedWorkspace final : public SynthesisWorkspace {
     public:
