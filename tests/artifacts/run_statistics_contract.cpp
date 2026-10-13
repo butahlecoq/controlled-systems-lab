@@ -582,7 +582,7 @@ TEST_CASE("strategy boundary preserves a candidate through contradictory-status 
         {record.problem,MathematicalOutcome::infeasible,SymbolicArgument{"synthetic contradiction","fixture"},{}},
         source.objective,source.family->family,source.incumbents,{}}};
     const auto problem=integrator_problem();
-    registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version};
+    registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version,{}};
     const ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{}, {},
         identity.request.numerical,"synthetic-v3"};
     auto observed=registry::StrategyPort::run(workspace,request,context);
@@ -619,7 +619,7 @@ TEST_CASE("strategy boundary retains a feasible incumbent against a no-family in
         {record.problem,MathematicalOutcome::infeasible,SymbolicArgument{"synthetic contradiction","fixture"},{}},
         source.objective,{},source.incumbents,{}}};
     const auto problem=integrator_problem();
-    registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version};
+    registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version,{}};
     const ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{}, {},
         identity.request.numerical,"synthetic-v3-no-family"};
     auto observed=registry::StrategyPort::run(workspace,request,context);
@@ -677,7 +677,7 @@ TEST_CASE("strategy boundary sanitizes contradictory bounds and malformed incumb
             explicit Fixture(SynthesisResult result):value(std::move(result)){}
             SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override{return value;}
         } workspace{std::move(raw)};
-        registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version};
+        registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version,{}};
         const ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{}, {},
             identity.request.numerical,"synthetic-v3-evidence"};
         auto observed=registry::StrategyPort::run(workspace,request,context);

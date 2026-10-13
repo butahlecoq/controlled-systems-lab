@@ -380,7 +380,7 @@ ex::Task<reg::StrategyPort> strategy_task(std::shared_ptr<StrategyAudit> audit,s
         {csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     reg::StrategyRequest request{resolved,{{"two-calls"},{"analytic"},{},{},{},{},{},{},{}},
         {"nominal_open_loop",resolved.identity(),FamilyTarget::candidate_relaxation,{1e-12,1e-12},
-            Assurance::numerical,{},{}}};
+            Assurance::numerical,{},{}},{},{}};
     auto prepared=std::get<reg::PreparedStrategy>(strategies.prepare(request));
     return std::get<ex::Task<reg::StrategyPort>>(ex::make_task({std::move(id)},prepared,use()));
 }

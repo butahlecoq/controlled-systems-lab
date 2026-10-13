@@ -7,7 +7,11 @@ using namespace csl;
 using namespace csl::registry;
 namespace {
 problem::ResolvedProblem resolved_problem() {
-    const LinearStage transition{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}};
+    const Matrix a{1,1,Vector{1}};
+    const Matrix b{1,1,Vector{1}};
+    const Matrix e{1,0,Vector{}};
+    const Vector offset{0};
+    const LinearStage transition{a,b,e,offset};
     const auto model=std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,transition},{}});
     Problem source;source.id={"compiled-verifier-test"};source.model=model;source.times={0,1,2};
     source.initial=KnownInitial{{0}};source.controls=ContinuousDomain{{UniversalSet{1},UniversalSet{1}}};

@@ -21,7 +21,7 @@ public:
         SynthesisResult result{Termination::completed,
             {problem.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{},{}};
         const registry::StrategyRequest frozen{problem,StrategyConfiguration{ModuleId{strategy_id},{},{},{},{},{},{},{},h_polyhedron},
-            request,strategy_version};
+            request,strategy_version,{}};
         if(!registry::detail::ts01_profile_valid(problem,frozen)) {
             result.termination=Termination::operation_rejected;
             result.stop=ScopedRequestRejection{{{"ts01/profile"},"strategy",ModuleId{strategy_id},std::string(strategy_version),

@@ -39,7 +39,7 @@ registry::StrategyRequest strategy_request(const problem::ResolvedProblem& probl
     FamilyRequest family;family.profile="ts01_exact_integrator";family.objective=problem.identity();
     family.target=FamilyTarget::exact_optimal_relation;family.assurance=Assurance::numerical;family.representation=representation;
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.ts01-analytic"};configuration.representation=representation;
-    return {problem,configuration,family,"1"};
+    return {problem,configuration,family,"1",{}};
 }
 artifacts::ResolvedConfiguration artifact_configuration(const RepresentationId& representation) {
     namespace ar=artifacts;

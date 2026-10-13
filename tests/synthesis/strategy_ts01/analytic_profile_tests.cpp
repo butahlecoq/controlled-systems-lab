@@ -56,7 +56,7 @@ StrategyRequest request(problem::ResolvedProblem p) {
     family.representation={"csl.polyhedron.h"};
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.ts01-analytic"};
     configuration.representation=family.representation;
-    return {std::move(p),configuration,std::move(family),{}};
+    return {std::move(p),configuration,std::move(family),{},{}};
 }
 ExecutionContext make_execution_context() {
     ExecutionContext result;result.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
