@@ -1,4 +1,14 @@
-# Native interfaces, revision 1.5
+# Native interfaces, revision 1.6
+
+Revision 1.6 (OBS-02, 2026-10-13) adds a trailing, default-empty
+`ExecutionContext::timing` handle to the independent timing collector. Existing
+aggregate initializers remain source compatible; struct layout changes, and this
+is not a stable binary ABI. The [timing contract](timing-collector.md) specifies
+planned IDs/parentage, scoped completion, wall interval unions, CPU scope,
+unavailable metrics and disabled collection. Solver workspaces, mathematical
+claims, problem/configuration identity encodings and artifact schemas do not
+change. Independent integration review is required before downstream
+instrumentation relies on this extension.
 
 MODEL-03 adds the [resolved problem module](resolved-problems.md) without changing
 the canonical `Problem` DTO introduced in source 1.4 and retained in source 1.5.

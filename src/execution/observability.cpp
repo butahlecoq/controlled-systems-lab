@@ -28,6 +28,17 @@ bool utf8(std::string_view s) noexcept {
         if(cp<min||cp>0x10ffff||(cp>=0xd800&&cp<=0xdfff))return false;
     }return true;
 }
+bool valid_termination(Termination value) noexcept {
+    switch(value){
+    case Termination::completed:
+    case Termination::cancelled:
+    case Termination::resource_limit:
+    case Termination::numerical_failure:
+    case Termination::operation_rejected:
+    case Termination::contract_rejected:return true;
+    }
+    return false;
+}
 bool missing(ar::MissingReason reason)noexcept {return reason>=ar::MissingReason::not_requested&&reason<=ar::MissingReason::not_applicable;}
 ar::Metric<std::int64_t> tick(TickValue value) {if(value.available)return ar::Available<std::int64_t>{value.value};return ar::Unavailable{value.missing,{}};}
 struct Slot {
@@ -94,7 +105,7 @@ RecordDisposition ObservationShard::record(SpanCompletionView value)noexcept {
         (!value.start.available||!value.end.available||value.end.value>=value.start.value)&&
         (value.start.available||missing(value.start.missing))&&(value.end.available||missing(value.end.missing))&&
         (value.iterations.available||missing(value.iterations.missing))&&
-        (!value.has_termination||(value.termination>=Termination::completed&&value.termination<=Termination::numerical_failure))&&
+        (!value.has_termination||valid_termination(value.termination))&&
         (value.execution!=ObservationState::not_called||(value.not_called_reason>=ar::NotCalledReason::capability_rejected&&value.not_called_reason<=ar::NotCalledReason::route_not_selected))&&
         (value.status>=CompletionStatus::returned&&value.status<=CompletionStatus::incomplete)&&
         (value.status!=CompletionStatus::returned||value.has_termination)&&
