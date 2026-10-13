@@ -1,4 +1,5 @@
 #include <csl/registry/registry.hpp>
+#include "compiled_verifiers.hpp"
 #include <algorithm>
 
 namespace csl::registry {
@@ -26,13 +27,13 @@ SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::Resolved
         return reject({{DiagnosticCode::evidence_mismatch,"family.proposal.binding",
             "Complete-family proposal differs from the prepared problem, effective request or selected registration"}});
     const auto* registered=std::get_if<RegisteredCompletenessEvidence>(&proposal.family.completeness.support);
-    if(!registered||registered->verifier!=request_->configuration.strategy||
-        registered->verifier_version!=request_->strategy_version||registered->proof.empty())
+    if(!registered||registered->verifier!=verifier_->id()||
+        registered->verifier_version!=verifier_->version()||registered->proof.empty())
         return reject({{DiagnosticCode::evidence_mismatch,"family.proposal.verifier",
             "Proposal proof payload does not match the frozen strategy registration"}});
-    // The registry owns identity/context binding; strategy-specific callbacks
+    // The registry owns identity/context binding; the compiled verifier
     // validate theorem content against that already-frozen authoritative input.
-    auto diagnostics=verifier_(*request_,proposal);
+    auto diagnostics=verifier_->verify(*request_,proposal);
     if(!diagnostics.empty())return reject(std::move(diagnostics));
     auto published=FamilyPublisher::publish_verified(identity,OptimalFamilyOutcome{proposal.family},authority_);
     if(const auto* errors=std::get_if<Diagnostics>(&published))return reject(*errors);
@@ -159,8 +160,10 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     if (const auto* diagnostics = std::get_if<Diagnostics>(&capability)) return detail::capability_rejection(provenance,*diagnostics);
     auto diagnostics = detail::check_offer(std::get<Offer>(capability),requirements,false);
     if (!diagnostics.empty()) return Rejection{provenance,std::move(diagnostics)};
-    if(requirements.output.completeness==Completeness::established&&!entry.complete_family_verifier)
-        return detail::reject(provenance,"family.verifier","Complete-family output requires a verifier bound to the selected registration");
+    auto verifier=entry.complete_family_verifier.id.value.empty()?nullptr:
+        detail::find_compiled_verifier(entry.complete_family_verifier.id,entry.complete_family_verifier.version);
+    if(requirements.output.completeness==Completeness::established&&!verifier)
+        return detail::reject(provenance,"family.verifier","Complete-family output requires a verifier in the compiled library catalog");
     auto planned = entry.planner(request,requirements);
     if (const auto* rejection = std::get_if<Rejection>(&planned)) return *rejection;
     auto& plan = std::get<StrategyPlan>(planned);
@@ -172,9 +175,9 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     auto snapshot = std::make_shared<const StrategyRequest>(std::move(frozen));
     auto factory = plan.snapshot_();
     std::optional<detail::VerifiedFamilyAuthority> authority;
-    if(entry.complete_family_verifier)
+    if(verifier)
         authority=detail::VerifiedFamilyAuthority(entry.identity.id,entry.identity.version);
-    return PreparedStrategy{std::move(snapshot),requirements,std::move(factory),entry.complete_family_verifier,
+    return PreparedStrategy{std::move(snapshot),requirements,std::move(factory),std::move(verifier),
         std::move(authority),std::move(records)};
 }
 namespace detail {

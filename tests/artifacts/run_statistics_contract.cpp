@@ -3,6 +3,7 @@
 #include <csl/artifacts/run_statistics.hpp>
 #include <csl/registry/registry.hpp>
 #include <csl/execution/observability.hpp>
+#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -213,6 +214,25 @@ std::string fixture_text(){std::ifstream source(CSL_STATISTICS_FIXTURE);return {
 std::string fixture_v2_text(){std::ifstream source(CSL_STATISTICS_V2_FIXTURE);return {std::istreambuf_iterator<char>{source},std::istreambuf_iterator<char>{}};}
 problem::ResolvedProblem integrator_problem();
 std::string changed(std::string source,std::string_view from,std::string_view to){const auto position=source.find(from);REQUIRE(position!=std::string::npos);source.replace(position,from.size(),to);return source;}
+}
+TEST_CASE("serialized registered verifier evidence decodes as untrusted and cannot publish complete family") {
+    auto document=nlohmann::json::parse(fixture_text());
+    auto& family=document["final"]["value"]["family"]["family"];
+    const auto identity=family["identity"];
+    const auto problem=identity["problem"];
+    const nlohmann::json claim{{"problem",problem},{"support",{{"kind","symbolic_argument"},
+        {"value",{{"reference","serialized claim"},{"assumptions","untrusted text"}}}}}};
+    const nlohmann::json complete{{"relation",{{"coordinates",identity["coordinates"]},
+            {"representation",identity["request"]["representation"]}}},
+        {"optimum",{{"optimum",claim},{"bounds",{{"lower",{{"value",0.0},{"evidence",claim}}},
+            {"upper",{{"value",0.0},{"evidence",claim}}}}}}},
+        {"completeness",{{"binding",identity},{"support",{{"kind","registered_verifier"},
+            {"value",{{"verifier","csl.verifier.ts01-analytic"},{"verifier_version","1"},{"proof","TS01-analytic-v1"}}}}}}},
+        {"assurance","numerical"}};
+    family["outcome"]={{"kind","complete"},{"value",complete}};
+    const auto decoded=ar::decode_run(document.dump());
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(decoded));
+    CHECK(std::get<ar::ArtifactError>(decoded).path=="family.family.publisher");
 }
 TEST_CASE("historical v1 synthesis record is retained but requires explicit migration") {
     std::ifstream source(CSL_STATISTICS_V1_FIXTURE);

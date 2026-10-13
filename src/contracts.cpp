@@ -210,9 +210,9 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
             if (std::holds_alternative<Unestablished>(complete.optimum.optimum.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.optimum","Complete-family optimum needs supporting evidence"});
             if(const auto* registered=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
-                registered&&(registered->verifier!=identity.strategy||registered->verifier_version!=identity.strategy_version||registered->proof.empty()))
+                registered&&(registered->verifier.value.empty()||registered->verifier_version.empty()||registered->proof.empty()))
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.verifier",
-                    "Opaque completeness payload must identify the strategy registration and contain proof bytes"});
+                    "Opaque completeness payload must identify a verifier and contain its proof payload"});
         },
         [&](const PartialOptimalFamily& partial) {
             if (partial.relation.coordinates != identity.coordinates ||
