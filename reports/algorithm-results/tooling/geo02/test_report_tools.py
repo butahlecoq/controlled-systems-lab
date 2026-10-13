@@ -52,6 +52,10 @@ class ContractTests(unittest.TestCase):
   expected=provenance.expected_harness_cmake(source)
   provenance.validate_harness_cmake(source,expected)
   with self.assertRaisesRegex(ValueError,'CMakeLists.txt'):provenance.validate_harness_cmake(source,expected+'\nadd_library(unreviewed x.cpp)')
+ def test_provenance_accepts_unchanged_cmake_when_target_is_in_baseline(self):
+  source='\n'.join((provenance.GEO02_OPTION,provenance.GEO02_TARGET,''))
+  provenance.validate_harness_cmake(source,source)
+  with self.assertRaisesRegex(ValueError,'CMakeLists.txt'):provenance.validate_harness_cmake(source,source+'\nadd_library(unreviewed x.cpp)')
  def test_collector_rejects_unknown_commit_before_build_validation(self):
   with tempfile.TemporaryDirectory() as temporary:
    root=Path(temporary);concurrent=root/'concurrent.txt';profile=root/'profile.txt';concurrent.write_text('none\n',encoding='utf8');profile.write_text('none\n',encoding='utf8')

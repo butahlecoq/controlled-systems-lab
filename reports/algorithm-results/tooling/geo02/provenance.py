@@ -82,6 +82,14 @@ def expected_harness_cmake(source_text: str) -> str:
 
 
 def validate_harness_cmake(source_text: str, harness_text: str) -> None:
+    # Once GEO-02 is already present in the reviewed algorithm baseline, the
+    # report harness must leave CMake untouched. Older source snapshots still
+    # use the pinned merge-resolution path below.
+    if CMAKE_CONFLICT not in source_text:
+        if (source_text.count(GEO02_OPTION) == 1 and source_text.count(GEO02_TARGET) == 1
+                and harness_text == source_text):
+            return
+        raise ValueError("CMakeLists.txt must remain unchanged when GEO-02 report target is already present")
     if harness_text != expected_harness_cmake(source_text):
         raise ValueError("CMakeLists.txt differs beyond exact merge resolution and GEO-02 report target insertion")
 
