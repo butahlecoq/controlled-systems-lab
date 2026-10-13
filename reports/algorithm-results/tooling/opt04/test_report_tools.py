@@ -101,8 +101,11 @@ def fixture_records() -> dict:
             "expected_status": "optimal", "observed_status": "optimal", "reference_status": "optimal",
             "oracle_match": True,
             "oracle_checks": [{"name": name, "passed": True} for name in (
-                "expected_status", "literal_expected_candidate", "original_equalities",
-                "nonnegative_variables", "zero_original_objective", "literal_auxiliary_value")],
+                ("expected_status", "literal_expected_candidate", "original_equalities",
+                 "nonnegative_variables", "zero_original_objective", "literal_auxiliary_value")
+                if side == "phase-one-bland" else
+                ("expected_status", "independent_feasible_witness", "original_equalities",
+                 "nonnegative_variables", "zero_original_objective"))],
             "work_observed": True, "input": driver_input,
             "input_sha256": input_sha256, "scenario_sha256": scenario_sha256,
             "tolerances": {"absolute": 1e-8, "relative": 0.0},
@@ -179,6 +182,17 @@ class ReportToolsTests(unittest.TestCase):
         records = fixture_records()
         records["summary"]["rows"][0]["count"] = 6
         with self.assertRaises(ValueError):
+            validate.validate_records(records)
+
+    def test_recomputes_highs_witness_residuals_from_saved_input(self) -> None:
+        records = fixture_records()
+        row = next(row for row in records["trials"] if row["side"] == "highs-reference")
+        row["result"]["primal"] = [2.0, 1.0]
+        row["paired_outcomes"]["highs_reference"]["primal"] = [2.0, 1.0]
+        paired_phase = next(candidate for candidate in records["trials"]
+                            if candidate["side"] == "phase-one-bland" and candidate["pair_id"] == row["pair_id"])
+        paired_phase["paired_outcomes"]["highs_reference"]["primal"] = [2.0, 1.0]
+        with self.assertRaisesRegex(ValueError, "reference.*residual|HiGHS.*residual|witness"):
             validate.validate_records(records)
 
     def test_rejects_fixture_hash_mismatch_and_missing_execution_policy(self) -> None:

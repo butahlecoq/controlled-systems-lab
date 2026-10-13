@@ -30,6 +30,26 @@ def finite_number(value: object, label: str) -> float:
     return float(value)
 
 
+def _primal_residuals(problem: dict, primal: list, label: str) -> dict[str, float]:
+    values = [finite_number(value, f"{label}.primal") for value in primal]
+    matrix, rhs = problem["matrix"], problem["rhs"]
+    row_violation = max(abs(sum(coefficient * value for coefficient, value in zip(row, values)) - target)
+                        for row, target in zip(matrix, rhs))
+    lower = problem["variable_lower_bound"]
+    upper = problem["variable_upper_bound"]
+    bound_violations = []
+    if lower is not None:
+        bound_violations.extend(max(0.0, lower - value) for value in values)
+    if upper is not None:
+        bound_violations.extend(max(0.0, value - upper) for value in values)
+    bound_violation = max(bound_violations, default=0.0)
+    objective = sum(coefficient * value for coefficient, value
+                    in zip(problem["objective_coefficients"], values)) + problem["objective_constant"]
+    return {"original_equalities": row_violation,
+            "nonnegative_variables": bound_violation,
+            "zero_original_objective": abs(objective)}
+
+
 def nonnegative_ns(value: object, label: str) -> int:
     require(isinstance(value, int) and not isinstance(value, bool) and value >= 0,
             f"{label} must be a nonnegative integer nanosecond count")
@@ -270,6 +290,22 @@ def validate_records(records: dict) -> dict:
             else:
                 for field in ("original_rows_max_violation", "nonnegative_max_violation", "objective_value", "auxiliary_residual", "auxiliary_value"):
                     require(trial.get(field) is None, f"{label}: reference row contains phase-I-only {field}")
+                if trial["status"] == "passed" and fixture["expected_reference_status"] == "optimal":
+                    primal = result.get("primal")
+                    require(isinstance(primal, list) and len(primal) == fixture["columns"],
+                            f"{label}: successful HiGHS result has no primal witness")
+                    require(actual_input is not None and actual_input.get("row_relation") == "equality",
+                            f"{label}: successful HiGHS result has no supported input semantics")
+                    residuals = _primal_residuals(actual_input, primal, label)
+                    limit = absolute + relative
+                    recomputed = {name: value <= limit for name, value in residuals.items()}
+                    recorded = {check["name"]: check["passed"] for check in checks}
+                    for name, passed in recomputed.items():
+                        require(recorded.get(name) is passed,
+                                f"{label}: HiGHS witness {name} check contradicts recomputed residual")
+                    witness_passed = all(recomputed.values())
+                    require(recorded.get("independent_feasible_witness") is witness_passed,
+                            f"{label}: HiGHS witness check contradicts recomputed residuals")
             paired = trial.get("paired_outcomes")
             require(paired is None or (isinstance(paired, dict) and set(paired) == {"phase_one", "highs_reference"}),
                     f"{label}: malformed paired_outcomes")

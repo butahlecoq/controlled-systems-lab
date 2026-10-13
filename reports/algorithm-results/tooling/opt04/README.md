@@ -62,6 +62,9 @@ literal infeasible status and phase-I auxiliary value. Residuals use binary64
 absolute tolerance `1e-8`, relative tolerance `0`. These checks are numerical,
 not exact proofs. Reference agreement is supplementary evidence and not a
 certificate.
+The saved-data validator independently recomputes the successful HiGHS
+witness residual checks from each trial's hashed input and saved primal; it
+rejects recorded check flags that disagree with the recomputed residuals.
 
 ## Timing fields
 
