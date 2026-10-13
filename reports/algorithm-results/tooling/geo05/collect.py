@@ -38,7 +38,7 @@ def _run_capture(command: list[str], timeout_seconds: int = 600) -> tuple[str, s
 
 def _redact_paths(value, source_root: Path, build_root: Path):
     if isinstance(value, str):
-        for path, token in ((source_root, "SOURCE_ROOT"), (build_root, "BUILD_ROOT"),
+        for path, token in ((build_root, "BUILD_ROOT"), (source_root, "SOURCE_ROOT"),
                             (Path.home(), "USER_HOME")):
             value = value.replace(str(path), token).replace(str(path).replace("\\", "/"), token)
         return value
@@ -49,18 +49,7 @@ def _redact_paths(value, source_root: Path, build_root: Path):
     return value
 
 
-def build_provenance(build: Path, exe: Path, source_commit: str,
-                     harness_commit: str, build_log: Path) -> dict:
-    source_root = Path(_git("rev-parse", "--show-toplevel")).resolve()
-    if _git("rev-parse", "HEAD") != harness_commit:
-        raise ValueError("harness commit does not match checked-out HEAD")
-    if _git("status", "--porcelain=v1"):
-        raise ValueError("source and harness worktree must be clean before collection")
-    changed = _git("diff", "--name-only", source_commit, harness_commit).splitlines()
-    validate_source_tree_delta(changed)
-    source_cmake = subprocess.check_output(["git", "show", f"{source_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
-    harness_cmake = subprocess.check_output(["git", "show", f"{harness_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
-    validate_cmake_delta(source_cmake, harness_cmake)
+def _release_graph(build: Path, exe: Path, source_root: Path) -> dict:
     reply = build / ".cmake" / "api" / "v1" / "reply"
     indices = sorted(reply.glob("index-*.json"))
     if not indices:
@@ -88,7 +77,7 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
     root = targets[roots[0]]
     artifacts = [build / item["path"] for item in root.get("artifacts", [])
                  if Path(item["path"]).name == exe.name]
-    if len(artifacts) != 1 or not artifacts[0].is_file() or not artifacts[0].samefile(exe):
+    if len(artifacts) != 1 or artifacts[0].resolve() != exe.resolve():
         raise ValueError("provided executable is not the configured Release target artifact")
     groups = [group for group in root.get("compileGroups", []) if group.get("language") == "CXX"]
     if len(groups) != 1 or groups[0].get("languageStandard", {}).get("standard") != "20":
@@ -108,8 +97,49 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
     paths = codemodel["paths"]
     if not Path(paths["source"]).samefile(source_root) or not Path(paths["build"]).samefile(build):
         raise ValueError("CMake source/build path ownership differs from this collection")
-    if not build_log.is_file():
-        raise ValueError("the completed Release build log is required")
+    return {"cmake": {"version": index.get("cmake", {}).get("version"),
+                      "generator": index.get("cmake", {}).get("generator", {}).get("name")},
+            "compiler": _redact_paths(compilers[0], source_root, build), "dependency_targets": sorted(names),
+            "file_api_paths": _redact_paths(paths, source_root, build),
+            "targets": _redact_paths(list(selected.values()), source_root, build)}
+
+
+def build_provenance(build: Path, exe: Path, source_commit: str,
+                     harness_commit: str, build_log: Path) -> dict:
+    source_root = Path(_git("rev-parse", "--show-toplevel")).resolve()
+    if _git("rev-parse", "HEAD") != harness_commit:
+        raise ValueError("harness commit does not match checked-out HEAD")
+    if _git("status", "--porcelain=v1"):
+        raise ValueError("source and harness worktree must be clean before collection")
+    changed = _git("diff", "--name-only", source_commit, harness_commit).splitlines()
+    validate_source_tree_delta(changed)
+    source_cmake = subprocess.check_output(["git", "show", f"{source_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
+    harness_cmake = subprocess.check_output(["git", "show", f"{harness_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
+    validate_cmake_delta(source_cmake, harness_cmake)
+    _release_graph(build, exe, source_root)
+    command = ["cmake", "--build", str(build), "--config", "Release", "--target",
+               "csl_geo05_projection_predecessor_report", "--clean-first", "--verbose"]
+    try:
+        stdout, stderr, return_code, timed_out = _run_capture(command)
+    except OSError as error:
+        stdout, stderr, return_code, timed_out = "", str(error), 127, False
+    fresh_build = _redact_paths({"command": command, "source_commit": source_commit,
+                                "harness_commit": harness_commit, "stdout": stdout,
+                                "stderr": stderr, "return_code": return_code,
+                                "timed_out": timed_out}, source_root, build)
+    build_log.parent.mkdir(parents=True, exist_ok=True)
+    build_log.write_text(json.dumps(fresh_build, indent=2, allow_nan=False)+"\n", encoding="utf-8")
+    if return_code or timed_out:
+        reason = "timed out" if timed_out else "failed"
+        raise ValueError(f"fresh Release rebuild {reason} (exit {return_code}); diagnostics saved to "
+                         f"{_redact_paths(str(build_log), source_root, build)}")
+    if _git("rev-parse", "HEAD") != harness_commit:
+        raise ValueError("harness HEAD changed during the fresh Release rebuild")
+    if _git("status", "--porcelain=v1"):
+        raise ValueError("source and harness worktree must remain clean during the fresh Release rebuild")
+    graph = _release_graph(build, exe, source_root)
+    if not exe.is_file():
+        raise ValueError("fresh Release rebuild did not produce the configured executable")
     return {"source_commit": source_commit, "harness_commit": harness_commit,
             "tracked_clean": True, "tracked_tree_binding": {
                 "scope": "complete tracked repository tree",
@@ -117,12 +147,9 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
                 "harness_tree_oid": _git("rev-parse", f"{harness_commit}^{{tree}}"),
                 "allowed_harness_delta": sorted(HARNESS_PATH_ALLOWLIST), "actual_changed_paths": changed},
             "executable": {"name": exe.name, "sha256": _sha(exe)},
-            "build_log_sha256": _sha(build_log), "configuration": "Release", "cxx_standard": "20",
-            "cmake": {"version": index.get("cmake", {}).get("version"),
-                      "generator": index.get("cmake", {}).get("generator", {}).get("name")},
-            "compiler": _redact_paths(compilers[0], source_root, build), "dependency_targets": sorted(names),
-            "file_api_paths": _redact_paths(paths, source_root, build),
-            "targets": _redact_paths(list(selected.values()), source_root, build)}
+            "build_log_sha256": _sha(build_log), "fresh_build": fresh_build,
+            "configuration": "Release", "cxx_standard": "20",
+            **graph}
 
 
 def _matrix_error(rows: list[dict], repetitions: int) -> None:
@@ -215,6 +242,8 @@ def main() -> int:
                                   args.source_commit, args.harness_commit, args.build_log.resolve())
     command = [str(args.exe), "--measure", "--repetitions", str(args.repetitions), "--warmups", "1"]
     before = _sha(args.exe)
+    if before != provenance["executable"]["sha256"]:
+        raise SystemExit("measurement executable changed after the fresh Release rebuild")
     raw_stdout, raw_stderr, return_code, timed_out = _run_capture(command)
     after = _sha(args.exe)
     if before != after:
