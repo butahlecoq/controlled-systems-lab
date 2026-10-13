@@ -54,7 +54,7 @@ StrategyRequest request(problem::ResolvedProblem problem) {
     FamilyRequest family;family.objective=problem.identity();family.profile="nominal_open_loop";
     family.representation={"csl.polyhedron.h"};
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.reach-back"};
-    return {std::move(problem),configuration,family,"1"};
+    return {std::move(problem),configuration,family,"1",{}};
 }
 class CancelAfterTerminal final : public ConvexWorkspace {
     std::unique_ptr<ConvexWorkspace> inner_;

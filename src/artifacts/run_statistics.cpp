@@ -296,9 +296,13 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
             if(s->family){const auto& f=*s->family;
                 const auto& identity=f.family.identity();
                 const auto* relation=std::visit([](const auto& product)->const JointRelation*{return &product.relation;},f.family.outcome());
+                const auto* complete=std::get_if<CompleteOptimalFamily>(&f.family.outcome());
+                const bool retains_registered_verifier_proof=complete&&
+                    std::holds_alternative<RegisteredCompletenessEvidence>(complete->completeness.support);
                 const auto strategy_version=std::find_if(input.configuration.description().modules.begin(),input.configuration.description().modules.end(),[&](const auto& module){return module.role=="strategy"&&module.implementation.id==identity.strategy&&module.implementation.version==identity.strategy_version;});
                 if(identity.problem!=input.problem||identity.coordinates.horizon!=input.horizon||identity.coordinates.dimensions.state!=input.dimensions.state||identity.coordinates.dimensions.control!=input.dimensions.control||identity.coordinates.dimensions.external!=input.dimensions.external||
-                    relation->coordinates!=identity.coordinates||relation->representation!=identity.request.representation||relation->payload||
+                    relation->coordinates!=identity.coordinates||relation->representation!=identity.request.representation||
+                    (relation->payload&&!retains_registered_verifier_proof)||
                     identity.request.objective!=input.problem||identity.request.numerical!=input.configuration.description().numerical||
                     identity.request.assurance!=input.configuration.description().output.assurance||identity.request.representation!=input.configuration.description().output.representation||
                     identity.request.target!=input.configuration.description().output.family||identity.request.profile.empty()||
@@ -358,11 +362,17 @@ SynthesisFinal project_final(const SynthesisResult& result,std::optional<Attachm
     std::optional<FamilyRecord> family;
     if(result.family){const auto& f=*result.family;FamilyPayload payload=FamilyWithoutExporter{};
         if(attachment)payload=ExternalFamilyPayload{std::move(*attachment)};
-        auto outcome=f.outcome();
-        std::visit([](auto& product){product.relation.payload.reset();},outcome);
-        auto metadata=FamilyPublisher::publish(f.identity(),std::move(outcome));
-        if(!std::holds_alternative<OptimalFamily>(metadata))throw std::logic_error("A published family lost its evidence when projected");
-        family=FamilyRecord{std::get<OptimalFamily>(std::move(metadata)),std::move(payload)};
+        if(std::holds_alternative<CompleteOptimalFamily>(f.outcome())) {
+            // Only registry-published complete families can reach this object;
+            // retain their private verified state without re-entering the untrusted publisher.
+            family=FamilyRecord{f,std::move(payload)};
+        } else {
+            auto outcome=f.outcome();
+            std::visit([](auto& product){product.relation.payload.reset();},outcome);
+            auto metadata=FamilyPublisher::publish(f.identity(),std::move(outcome));
+            if(!std::holds_alternative<OptimalFamily>(metadata))throw std::logic_error("A published family lost its evidence when projected");
+            family=FamilyRecord{std::get<OptimalFamily>(std::move(metadata)),std::move(payload)};
+        }
     }
     return {result.termination,result.outcome,result.objective,std::move(family),result.incumbents,result.stop};
 }

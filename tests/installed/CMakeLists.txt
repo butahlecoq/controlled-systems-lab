@@ -166,3 +166,53 @@ set_target_properties(installed_nominal_forward_client PROPERTIES CXX_EXTENSIONS
 add_test(NAME installed_nominal_forward_client COMMAND installed_nominal_forward_client)
 set_tests_properties(installed_nominal_forward_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed nominal-forward client: provider-backed integrator tube and authored labels passed")
+
+add_executable(installed_ts01_evidence_client ts01_evidence_client.cpp)
+target_link_libraries(installed_ts01_evidence_client PRIVATE CSL::strategy_ts01)
+set_target_properties(installed_ts01_evidence_client PROPERTIES CXX_EXTENSIONS OFF)
+if(MSVC)
+  target_compile_options(installed_ts01_evidence_client PRIVATE /W4 /WX /permissive-)
+else()
+  target_compile_options(installed_ts01_evidence_client PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+add_test(NAME installed_ts01_evidence_client COMMAND installed_ts01_evidence_client)
+set(CMAKE_TRY_COMPILE_CONFIGURATION "${CMAKE_BUILD_TYPE}")
+unset(ts01_issuer_forge_compiled CACHE)
+try_compile(ts01_issuer_forge_compiled
+  "${CMAKE_CURRENT_BINARY_DIR}/ts01-issuer-forge-compile"
+  SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ts01_issuer_forge_client.cpp"
+  LINK_LIBRARIES CSL::contracts
+  OUTPUT_VARIABLE ts01_issuer_forge_output)
+if(ts01_issuer_forge_compiled)
+  message(FATAL_ERROR "Installed contracts API accepted downstream replacement of the complete-family publisher:\n${ts01_issuer_forge_output}")
+endif()
+if(NOT ts01_issuer_forge_output MATCHES "(error C[0-9]+|error:|fatal error:)")
+  message(FATAL_ERROR "Installed contracts API compile probe failed for an unrelated reason:\n${ts01_issuer_forge_output}")
+endif()
+message(STATUS "Installed complete-family publisher replacement was rejected by the compiler")
+unset(ts01_callback_forge_compiled CACHE)
+try_compile(ts01_callback_forge_compiled
+  "${CMAKE_CURRENT_BINARY_DIR}/ts01-callback-forge-compile"
+  SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ts01_callback_forge_client.cpp"
+  LINK_LIBRARIES CSL::registry
+  OUTPUT_VARIABLE ts01_callback_forge_output)
+if(ts01_callback_forge_compiled)
+  message(FATAL_ERROR "Installed registry API accepted a caller-supplied verifier callback:\n${ts01_callback_forge_output}")
+endif()
+if(NOT ts01_callback_forge_output MATCHES "(error C[0-9]+|error:|fatal error:)")
+  message(FATAL_ERROR "Installed registry API compile probe failed for an unrelated reason:\n${ts01_callback_forge_output}")
+endif()
+message(STATUS "Installed caller-supplied verifier callback was rejected by the compiler")
+unset(ts01_relation_factory_forge_compiled CACHE)
+try_compile(ts01_relation_factory_forge_compiled
+  "${CMAKE_CURRENT_BINARY_DIR}/ts01-relation-factory-forge-compile"
+  SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ts01_relation_factory_forge_client.cpp"
+  LINK_LIBRARIES CSL::strategy_ts01
+  OUTPUT_VARIABLE ts01_relation_factory_forge_output)
+if(ts01_relation_factory_forge_compiled)
+  message(FATAL_ERROR "Installed T-S01 API accepted a downstream relation factory definition:\n${ts01_relation_factory_forge_output}")
+endif()
+if(NOT ts01_relation_factory_forge_output MATCHES "(error C[0-9]+|error:|fatal error:)")
+  message(FATAL_ERROR "Installed T-S01 API relation-factory probe failed for an unrelated reason:\n${ts01_relation_factory_forge_output}")
+endif()
+message(STATUS "Installed downstream relation factory definition was rejected by the compiler")
