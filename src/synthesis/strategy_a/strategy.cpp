@@ -1,0 +1,213 @@
+#include <csl/synthesis/strategy_a/strategy.hpp>
+#include <algorithm>
+#include <new>
+
+namespace csl::synthesis::strategy_a {
+CandidateHistory::CandidateHistory(PreimageTarget scope,JointHistoryRelation h,reachability::ForwardTube f,
+    std::optional<TerminalMinimizers> t):target(scope),history(std::move(h)),forward(std::move(f)),terminal(std::move(t)){}
+namespace {
+const ModuleId strategy{"csl.synthesis.reach-back"};
+const std::string version="1";
+Diagnostics unsupported(std::string field,std::string reason) {
+    return {{DiagnosticCode::unsupported,std::move(field),std::move(reason)}};
+}
+Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyRequest& family) {
+    if(auto errors=check_family_request(family,problem.identity());!errors.empty())return errors;
+    if(family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop is supported.");
+    if(family.target!=FamilyTarget::candidate_relaxation)
+        return unsupported("strategy_a.coverage","No reviewed coverage procedure or optimal-subset verifier; request a candidate relation.");
+    if(family.assurance!=Assurance::numerical)
+        return unsupported("strategy_a.assurance","Only unestablished binary64 candidate construction is supported.");
+    if(family.representation.value!="csl.polyhedron.h")
+        return unsupported("strategy_a.representation","Canonical joint native H output required.");
+    if(family.materialization_limit)
+        return unsupported("strategy_a.capacity","Family materialization-limit semantics have not been reviewed; no limit is silently ignored.");
+    const auto source=problem.description();
+    if(auto errors=check_nominal_profile(*source,false,family.assurance);!errors.empty())return errors;
+    if(source->temporal)return unsupported("strategy_a.temporal","Declared temporal constraints require a coupled-history implementation.");
+    const auto native=[](const AdmissibleSet& set) {
+        const auto* handle=std::get_if<SetHandle>(&set);
+        if(!handle)return true;
+        auto data=sets::from_handle(*handle);const auto* value=std::get_if<sets::SetData>(&data);
+        return value && !std::holds_alternative<sets::VRepresentation>(value->representation());
+    };
+    for(const auto& set:source->states)if(!native(set))
+        return unsupported("strategy_a.states","Native H, singleton, empty or universal state factors required.");
+    for(const auto& set:std::get<ContinuousDomain>(source->controls).stages)if(!native(set))
+        return unsupported("strategy_a.controls","Native H, singleton, empty or universal control factors required.");
+    return {};
+}
+RetainedEvidenceScope retained(const SynthesisResult& result) {
+    return {result.objective.lower.has_value(),result.objective.upper.has_value(),
+        result.incumbents.size(),result.family.has_value()};
+}
+RequestProvenance provenance(RequestId request,const registry::Provenance& provider) {
+    return {std::move(request),provider.port,provider.requested.id,provider.requested.version,
+        provider.actual?std::optional<ModuleId>{provider.actual->id}:std::nullopt,
+        provider.actual?std::optional<std::string>{provider.actual->version}:std::nullopt};
+}
+RequestProvenance local(RequestId request) {
+    return {std::move(request),"strategy",strategy,version,strategy,version};
+}
+std::vector<TransformStepIdentity> forward_lineage(const reachability::ForwardTube& tube) {
+    std::vector<TransformStepIdentity> result;
+    for(const auto& stage:tube.stages) {
+        const auto& reference=stage.marginal.evidence.reference;
+        result.push_back({reference.identity.request,stage.source_factors.front(),
+            stage.marginal.output.id,strategy,version});
+    }
+    return result;
+}
+void reject(SynthesisResult& result,RequestProvenance request,Diagnostics diagnostics,
+    const std::vector<TransformStepIdentity>& lineage) {
+    result.termination=Termination::operation_rejected;
+    result.stop=ScopedRequestRejection{std::move(request),std::move(diagnostics),lineage,retained(result)};
+}
+void contract_failure(SynthesisResult& result,Diagnostics diagnostics) {
+    result.termination=Termination::contract_rejected;
+    result.stop=ContractValidationFailure{std::move(diagnostics),retained(result),{}};
+}
+void stop(SynthesisResult& result,RequestProvenance request,OperationStopped cause) {
+    switch(cause.reason) {
+    case StopReason::cancelled:result.termination=Termination::cancelled;break;
+    case StopReason::deadline_expired:
+        // Existing shared guard accepts deadline_expired with cancelled. Keep
+        // the distinct source reason rather than rewriting a deadline as a cap.
+        result.termination=Termination::cancelled;break;
+    case StopReason::resource_limit:result.termination=Termination::resource_limit;break;
+    case StopReason::numerical_failure:result.termination=Termination::numerical_failure;break;
+    }
+    result.stop=ScopedOperationStopped{std::move(cause),std::move(request),retained(result)};
+}
+std::optional<OperationStopped> interruption(const ExecutionContext& context) {
+    if(context.cancellation.stop_requested())return OperationStopped{StopReason::cancelled,"Cancelled between Strategy A phases."};
+    if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)
+        return OperationStopped{StopReason::deadline_expired,"Deadline expired between Strategy A phases."};
+    return {};
+}
+bool publish(SynthesisResult& result,const problem::ResolvedProblem& problem,const FamilyRequest& request,
+    JointHistoryRelation history,const reachability::ForwardTube& tube,std::optional<TerminalMinimizers> terminal,
+    std::vector<TransformStepIdentity> lineage,PreimageTarget target=PreimageTarget::forward_terminal_slice) {
+    const auto coordinates=history.coordinates;
+    auto data=std::make_shared<const CandidateHistory>(target,std::move(history),tube,std::move(terminal));
+    const std::string method=target==PreimageTarget::terminal_candidate?
+        "binary64 feasible preimage of entire terminal candidate; terminal optimizer anchor and forward coverage unestablished":
+        "binary64 feasible-history preimage of forward terminal slice; objective has not restricted this candidate";
+    auto outcome=FamilyPublisher::publish({problem.identity(),request,coordinates,strategy,version,std::move(lineage)},
+        CandidateFamily{{coordinates,request.representation,std::move(data)},HeuristicRelationEvidence{method},Unestablished{}});
+    if(auto* errors=std::get_if<Diagnostics>(&outcome)){contract_failure(result,*errors);return false;}
+    result.family=std::get<OptimalFamily>(std::move(outcome));return true;
+}
+class Workspace final : public SynthesisWorkspace {
+    reachability::ForwardDependencies forward_;
+    TerminalOptimizer terminal_;
+public:
+    Workspace(reachability::ForwardDependencies forward,registry::PreparedProvider<registry::LPPort> lp,
+        registry::PreparedProvider<registry::ConvexPort> convex)
+        :forward_(std::move(forward)),terminal_(std::move(lp),std::move(convex)){}
+    SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& request,
+        const ExecutionContext& context) override {
+        SynthesisResult result{Termination::completed,{problem.identity(),MathematicalOutcome::undetermined,
+            Unestablished{},{"forward recurrence, terminal construction and joint-history coverage remain unestablished"}},
+            {},{},{},{},{}};
+        std::vector<TransformStepIdentity> lineage;
+        try {
+            if(auto errors=capabilities(problem,request);!errors.empty()) {
+                reject(result,local({"strategy-a/admission"}),std::move(errors),lineage);return result;
+            }
+            auto forwarded=reachability::nominal_forward(problem,{"strategy-a/forward"},forward_,context);
+            if(const auto* failure=std::get_if<reachability::ForwardFailure>(&forwarded)) {
+                lineage=forward_lineage(failure->prefix);
+                const auto selected=failure->providers.empty()?local({"strategy-a/forward"}):failure->providers.back();
+                if(const auto* cause=std::get_if<Unsupported>(&failure->cause))reject(result,selected,cause->diagnostics,lineage);
+                else stop(result,selected,std::get<OperationStopped>(failure->cause));
+                return result;
+            }
+            if(const auto* empty=std::get_if<reachability::EmptyForwardStage>(&forwarded)) {
+                result.outcome.assumptions.push_back("forward stage "+std::to_string(empty->stage.value)+
+                    " compiled empty; authored infeasibility is not independently established");return result;
+            }
+            const auto tube=std::get<reachability::ForwardTube>(std::move(forwarded));
+            lineage=forward_lineage(tube);
+            auto feasible=sets::from_handle(tube.stages.back().marginal.output);
+            if(const auto* error=std::get_if<Diagnostic>(&feasible)){contract_failure(result,{*error});return result;}
+            const TerminalSlice slice{problem.identity(),std::get<sets::SetData>(std::move(feasible))};
+            auto recovery=recover_joint_history(problem,slice.feasible);
+            if(const auto* errors=std::get_if<Diagnostics>(&recovery)) {
+                reject(result,local({"strategy-a/feasible-preimage"}),*errors,lineage);return result;
+            }
+            const auto feasible_history=std::get<JointHistoryRelation>(std::move(recovery));
+            auto feasible_lineage=lineage;
+            feasible_lineage.push_back({{"strategy-a/feasible-preimage"},slice.feasible.metadata()->id,
+                feasible_history.relation.metadata()->id,{"csl.synthesis.control-recovery"},"1"});
+            if(!publish(result,problem,request,feasible_history,tube,{},feasible_lineage))return result;
+            if(auto interrupted=interruption(context)) {
+                stop(result,local({"strategy-a/terminal"}),*interrupted);return result;
+            }
+            auto minimized=terminal_.solve(problem,request,slice,context);
+            const auto terminal_request=minimized.optimization?
+                RequestId{minimized.optimization->outcome.subject.program.value}:
+                RequestId{"syn02-terminal:"+slice.feasible.metadata()->id.value};
+            const auto selected=minimized.provider?provenance(terminal_request,*minimized.provider):local(terminal_request);
+            lineage=feasible_lineage;
+            if(minimized.relation)lineage.push_back({terminal_request,slice.feasible.metadata()->id,
+                minimized.relation->metadata()->id,{"csl.synthesis.terminal-minimizers"},"1"});
+            // Preserve every completed transformation and scoped solver evidence,
+            // even if cancellation stops before the terminal preimage is joined.
+            // These program bounds cannot become original-problem bounds.
+            if(!publish(result,problem,request,feasible_history,tube,minimized,lineage))return result;
+            if(minimized.termination==Termination::operation_rejected) {
+                reject(result,selected,minimized.diagnostics,lineage);return result;
+            }
+            if(minimized.termination==Termination::contract_rejected) {
+                contract_failure(result,minimized.diagnostics);return result;
+            }
+            if(minimized.termination!=Termination::completed) {
+                const auto reason=minimized.termination==Termination::cancelled?StopReason::cancelled:
+                    minimized.termination==Termination::resource_limit?StopReason::resource_limit:StopReason::numerical_failure;
+                stop(result,selected,{reason,"Terminal optimization stopped; slice-scoped evidence retained."});return result;
+            }
+            if(!minimized.relation) {
+                if(!minimized.diagnostics.empty())contract_failure(result,minimized.diagnostics);
+                return result;
+            }
+            if(auto interrupted=interruption(context)) {stop(result,local({"strategy-a/terminal-preimage"}),*interrupted);return result;}
+            auto recovered=recover_joint_history(problem,*minimized.relation);
+            if(const auto* errors=std::get_if<Diagnostics>(&recovered)) {
+                reject(result,local({"strategy-a/terminal-preimage"}),*errors,lineage);return result;
+            }
+            auto history=std::get<JointHistoryRelation>(std::move(recovered));
+            lineage.push_back({{"strategy-a/terminal-preimage"},minimized.relation->metadata()->id,
+                history.relation.metadata()->id,{"csl.synthesis.control-recovery"},"1"});
+            publish(result,problem,request,std::move(history),tube,std::move(minimized),std::move(lineage),
+                PreimageTarget::terminal_candidate);
+            return result;
+        } catch(const std::bad_alloc&) {
+            stop(result,local({"strategy-a/storage"}),{StopReason::resource_limit,"Strategy A allocation failed; previously published evidence retained."});
+        } catch(const std::length_error&) {
+            stop(result,local({"strategy-a/storage"}),{StopReason::resource_limit,"Strategy A container capacity exceeded; previously published evidence retained."});
+        }
+        return result;
+    }
+};
+}
+registry::StrategyRegistration make_registration(Providers providers) {
+    return {{strategy,version},
+        [](const registry::StrategyRequest& request,const registry::Requirements&)->registry::Capability {
+            if(auto errors=capabilities(request.problem,request.family);!errors.empty())return errors;
+            registry::Output output;output.representation=request.family.representation;
+            output.family=FamilyTarget::candidate_relaxation;output.completeness=registry::Completeness::unestablished;
+            return registry::Offer{std::move(output)};
+        },[providers=std::move(providers)](const registry::StrategyRequest&,const registry::Requirements&)
+            ->std::variant<registry::StrategyPlan,registry::Rejection> {
+            auto fixed=std::get<registry::CheckedPipeline<>>(registry::check_pipeline());
+            return registry::compose_strategy(std::move(fixed),providers,
+                [](auto,const auto& generated,const registry::StrategyRequest&,const registry::Requirements&)
+                    ->std::unique_ptr<SynthesisWorkspace> {
+                    return std::make_unique<Workspace>(reachability::ForwardDependencies{
+                        std::get<0>(generated),std::get<1>(generated),std::get<2>(generated)},
+                        std::get<3>(generated),std::get<4>(generated));
+                });
+        }};
+}
+}

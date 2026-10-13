@@ -267,35 +267,41 @@ struct PipelineAccess {
         return CheckedEntry<Port>{&entry,&s.request,s.requirements,provenance,offer};
     }
     template<class... Ports> static std::variant<CheckedPipeline<Ports...>,Rejection> check(const Selection<Ports>&... s) {
-        auto entries = std::tuple{check_entry(s)...};
-        std::optional<Rejection> rejection;
-        std::apply([&](const auto&... e) {
-            ([&] { if (!rejection) if (const auto* r = std::get_if<Rejection>(&e)) rejection = *r; }(),...);
-        },entries);
-        if (rejection) return *rejection;
-        const auto offers = std::apply([](const auto&... e) {
-            return std::array<Offer,sizeof...(Ports)>{std::get<CheckedEntry<Ports>>(e).offer...};
-        },entries);
-        const auto provenances = std::apply([](const auto&... e) {
-            return std::array<Provenance,sizeof...(Ports)>{std::get<CheckedEntry<Ports>>(e).provenance...};
-        },entries);
-        std::size_t index = 0;
-        ([&] {
-            for (const auto& transition : s.inputs) {
-                if (rejection) break;
-                if (transition.producer >= index) {
-                    rejection = reject(provenances[index],"transition.producer","producer must precede its consumer");
-                    break;
+        if constexpr (sizeof...(Ports)==0) {
+            // A provider-only strategy has no fixed requests or transitions.
+            // Do not instantiate unused transition bookkeeping for this case.
+            return CheckedPipeline<>{std::tuple<>{}};
+        } else {
+            auto entries = std::tuple{check_entry(s)...};
+            std::optional<Rejection> rejection;
+            std::apply([&](const auto&... e) {
+                ([&] { if (!rejection) if (const auto* r = std::get_if<Rejection>(&e)) rejection = *r; }(),...);
+            },entries);
+            if (rejection) return *rejection;
+            const auto offers = std::apply([](const auto&... e) {
+                return std::array<Offer,sizeof...(Ports)>{std::get<CheckedEntry<Ports>>(e).offer...};
+            },entries);
+            const auto provenances = std::apply([](const auto&... e) {
+                return std::array<Provenance,sizeof...(Ports)>{std::get<CheckedEntry<Ports>>(e).provenance...};
+            },entries);
+            std::size_t index = 0;
+            ([&] {
+                for (const auto& transition : s.inputs) {
+                    if (rejection) break;
+                    if (transition.producer >= index) {
+                        rejection = reject(provenances[index],"transition.producer","producer must precede its consumer");
+                        break;
+                    }
+                    auto diagnostics = check_transition(offers[transition.producer].output,transition.required);
+                    if (!diagnostics.empty()) rejection = Rejection{provenances[index],std::move(diagnostics)};
                 }
-                auto diagnostics = check_transition(offers[transition.producer].output,transition.required);
-                if (!diagnostics.empty()) rejection = Rejection{provenances[index],std::move(diagnostics)};
-            }
-            ++index;
-        }(),...);
-        if (rejection) return *rejection;
-        return std::apply([](auto&... e) {
-            return CheckedPipeline<Ports...>{std::tuple<CheckedEntry<Ports>...>{std::get<CheckedEntry<Ports>>(std::move(e))...}};
-        },entries);
+                ++index;
+            }(),...);
+            if (rejection) return *rejection;
+            return std::apply([](auto&... e) {
+                return CheckedPipeline<Ports...>{std::tuple<CheckedEntry<Ports>...>{std::get<CheckedEntry<Ports>>(std::move(e))...}};
+            },entries);
+        }
     }
 };
 }
