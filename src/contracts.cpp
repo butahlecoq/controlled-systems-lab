@@ -5,6 +5,13 @@
 #include <set>
 #include <algorithm>
 namespace csl {
+Ts01AnalyticCoverageEvidence::Ts01AnalyticCoverageEvidence(FamilyIdentity binding,
+    std::shared_ptr<const JointRelationPayload> relation)
+    :binding_(std::move(binding)),relation_(std::move(relation)),trusted_(true) {}
+bool Ts01AnalyticCoverageEvidence::binds(const FamilyIdentity& identity,
+    const std::shared_ptr<const JointRelationPayload>& relation) const noexcept {
+    return trusted_ && binding_==identity && relation_ && relation_.get()==relation.get();
+}
 namespace {
 template<class... Visitors> struct Overloaded : Visitors... { using Visitors::operator()...; };
 bool matrix_matches(const Matrix& m, std::size_t rows, std::size_t cols) {
@@ -186,9 +193,20 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.assurance","Claimed assurance differs from the request"});
             if (std::holds_alternative<Unestablished>(complete.optimum.optimum.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.optimum","Complete-family optimum needs supporting evidence"});
-            // The numerical coverage procedure and its acceptance thresholds have not
-            // been reviewed. Neither a symbolic note nor a residual is a substitute.
-            result.push_back({DiagnosticCode::unsupported,"family.completeness","Complete-family publication is disabled until reviewed coverage evidence is implemented"});
+            if (const auto* exact=std::get_if<Ts01AnalyticCoverageEvidence>(&complete.completeness.support)) {
+                if (!exact->binds(identity,complete.relation.payload) ||
+                    identity.request.profile!="ts01_exact_integrator" ||
+                    identity.request.target!=FamilyTarget::exact_optimal_relation ||
+                    identity.strategy.value!="csl.synthesis.ts01-analytic" ||
+                    identity.strategy_version!="1" || !identity.lineage.empty() ||
+                    assurance!=Assurance::numerical || complete.assurance!=Assurance::numerical)
+                    result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.ts01",
+                        "T-S01 exact proof must bind its original immutable relation, strict profile, request and registered strategy identity"});
+            } else {
+                // Numerical coverage thresholds and generic certificate checking have
+                // not been reviewed. Neither a symbolic note nor a residual is a substitute.
+                result.push_back({DiagnosticCode::unsupported,"family.completeness","Complete-family publication is disabled except for the registered exact T-S01 analytic profile"});
+            }
         },
         [&](const PartialOptimalFamily& partial) {
             if (partial.relation.coordinates != identity.coordinates ||

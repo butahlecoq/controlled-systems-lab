@@ -14,6 +14,7 @@
 
 namespace csl {
 namespace problem { class ResolvedProblem; }
+namespace synthesis::strategy_ts01 { class ProofFactory; }
 // Revision 1.6. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
@@ -442,9 +443,24 @@ struct NumericalCoverageEvidence {
     std::string diagnostics;
 };
 struct ValidatedCoverageEvidence { std::string certificate; ModuleId verifier; std::string arithmetic_profile; };
+// A non-serializable in-memory proof capability created only by the dedicated
+// T-S01 analytic profile after it has checked the immutable resolved problem.
+// Default construction is intentionally untrusted (artifact decoding cannot
+// recreate the capability).
+class Ts01AnalyticCoverageEvidence {
+    FamilyIdentity binding_;
+    std::shared_ptr<const JointRelationPayload> relation_;
+    bool trusted_{};
+    Ts01AnalyticCoverageEvidence(FamilyIdentity, std::shared_ptr<const JointRelationPayload>);
+    friend class synthesis::strategy_ts01::ProofFactory;
+public:
+    Ts01AnalyticCoverageEvidence() = default;
+    const FamilyIdentity& binding() const noexcept { return binding_; }
+    bool binds(const FamilyIdentity& identity, const std::shared_ptr<const JointRelationPayload>& relation) const noexcept;
+};
 struct CompletenessEvidence {
     FamilyIdentity binding;
-    std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence> support;
+    std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence> support;
 };
 struct CompleteOptimalFamily {
     JointRelation relation;
