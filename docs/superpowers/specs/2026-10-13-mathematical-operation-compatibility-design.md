@@ -114,6 +114,8 @@ A complete family requires a checked coverage argument bound to the resolved pro
 
 Until a verifier contract and procedure are scientifically reviewed and implemented, the shared `StrategyPort` interface continues to reject complete-family publication. The first-profile contract tests must verify this rejection and retention of other supported evidence. This document does not set an arithmetic mode, tolerance, or acceptance threshold.
 
+This focused contract slice does not satisfy issue #8's central acceptance requirement for a complete optimal state/control family with explicit coverage and optimality evidence. `StrategyPort` deliberately continues to reject complete-family publication until that verifier contract and procedure have been reviewed and implemented. Follow-on work remains tracked in SYN-07 #155 for the shared boundary and evidence contract, SYN-06 #43 for independent verification, and TEST-24 #157 for caller-visible strategy tests and mathematical oracles. This PR therefore cannot close issue #8.
+
 ## 6. Test and review requirements
 
 Tests exercise the public seam used by the strategy, not private workspace counters or solver internals. Each operation contract has:
