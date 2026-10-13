@@ -11,7 +11,9 @@ import zipfile
 import registered_reports as common
 import report_data as data
 
-SCHEMA = "csl.geo02-affine-sum-report/1"
+SCHEMA = "csl.geo02-affine-sum-report/2"
+LEGACY_SCHEMA = "csl.geo02-affine-sum-report/1"
+SCHEMAS = {LEGACY_SCHEMA, SCHEMA}
 FILES = {
     "build-provenance.txt", "collection-status.json", "concurrent-work.txt", "environment.json",
     "index.html", "measurement-command.txt", "profile-evidence.txt", "process-stderr.txt", "timings.svg",
@@ -20,6 +22,11 @@ FILES = {
 HASH_SCOPE = "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope"
 TRIAL_FIELDS = ("scenario", "repetition", "status", "detail", "setup_ns", "operation_ns", "oracle_ns",
                 "total_ns", "input_sha256", "output_points", "support_checks", "support_values", "oracle_passed")
+REDUCTION_FIELDS = ("generated_candidate_count", "materialized_output_point_count", "reduction_status")
+LEGACY_PUBLICATION_IDS = {
+    "geo02-20261012T235755Z-6b1f504ad3db":
+        "geo02-20261012T235755Z-7275580339899c6ac27496fc2b05cb040d9fec14f8ec7f8bf219cc299c55eefc",
+}
 
 
 def _digest(value):
@@ -48,14 +55,16 @@ def _payload(record):
 
 
 def adapt_payload(record):
-    if not isinstance(record, dict) or record.get("schema") != SCHEMA:
+    if not isinstance(record, dict) or record.get("schema") not in SCHEMAS:
         raise ValueError("unregistered GEO-02 report schema")
     if record.get("payload_hash_scope") != HASH_SCOPE:
         raise ValueError("GEO-02 payload hash scope mismatch")
-    try:
-        _renderer().validate(record)
-    except (KeyError, TypeError, ValueError) as error:
-        raise ValueError("invalid GEO-02 report payload") from error
+    schema = record.get("schema")
+    if schema == SCHEMA:
+        try:
+            _renderer().validate(record)
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError("invalid GEO-02 report payload") from error
     rid = record.get("report_id", "")
     if not isinstance(rid, str) or re.fullmatch(r"geo02-\d{8}T\d{6}Z-[0-9a-f]{12}", rid) is None:
         raise ValueError("unsafe GEO-02 report ID")
@@ -70,7 +79,11 @@ def adapt_payload(record):
     limitations = evidence.get("limitations")
     limiter = evidence.get("limiter_profile", "")
     unavailable = evidence.get("unavailable_counters", [])
-    if (not isinstance(limitations, list) or not any("candidate reducer" in x and "retains full candidate cloud" in x for x in limitations)
+    legacy = schema == LEGACY_SCHEMA
+    reduction_scope_ok = (any("candidate reducer" in x and "retains full candidate cloud" in x for x in limitations)
+                          if legacy and isinstance(limitations, list) else
+                          any("exact" in x and "candidate hull" in x for x in limitations) if isinstance(limitations, list) else False)
+    if (not isinstance(limitations, list) or not reduction_scope_ok
             or not any("tiny" in x and "fixture" in x for x in limitations)
             or not any(all(word in x for word in ("no competitor", "speedup", "application-scale", "scalability")) for x in limitations)
             or not any("exact" in x and "validated" in x for x in limitations)):
@@ -83,7 +96,8 @@ def adapt_payload(record):
     if not isinstance(trials, list) or not trials:
         raise ValueError("GEO-02 trial records are required")
     for trial in trials:
-        if not isinstance(trial, dict) or not set(TRIAL_FIELDS).issubset(trial):
+        required_trial_fields = set(TRIAL_FIELDS) | (set() if legacy else set(REDUCTION_FIELDS))
+        if not isinstance(trial, dict) or not required_trial_fields.issubset(trial):
             raise ValueError("GEO-02 trial fields are incomplete")
         if type(trial["repetition"]) is not int or trial["repetition"] < 0:
             raise ValueError("GEO-02 trial repetition is invalid")
@@ -102,9 +116,10 @@ def adapt_payload(record):
     if collection.get("state") != "complete" or collection.get("actual_trials") != len(trials) or collection.get("failures") != 0:
         raise ValueError("GEO-02 collection must be complete and failure-free")
     scope = f"{len(trials)} measured affine-sum trials across {len(record.get('expected', {}))} tiny binary64 fixtures"
-    limits = "Full candidate cloud retained; validated reduction evidence is not applied; no comparator, speedup, application-scale, or scalability claim; binary64 tiny fixtures; profiling and internal solver-phase timings unavailable"
+    limits = ("Full candidate cloud retained; validated reduction evidence is not applied; no comparator, speedup, application-scale, or scalability claim; binary64 tiny fixtures; profiling and internal solver-phase timings unavailable"
+              if legacy else "Exact dyadic deletion certificates apply only to generated binary64 candidate hulls; no comparator, speedup, application-scale, or scalability claim; five tiny fixtures; source geometry remains numerical; profiling and internal solver-phase timings unavailable")
     return common.PublicationRecord("geo02-affine-sum", rid, digest, algorithm["source_commit"], scope, limits,
-                                    tuple(sorted(FILES)), SCHEMA, digest, rid)
+                                    tuple(sorted(FILES)), schema, digest, rid)
 
 
 def adapt(bundle):
@@ -139,7 +154,7 @@ def adapt(bundle):
                 "source_files": {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(FILES | {"manifest.json"})},
                 "source_zip_sha256": hashlib.sha256((bundle.parent / (bundle.name + ".zip")).read_bytes()).hexdigest(),
                 "publisher_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
-    public_id = item.source_report_id.rsplit("-", 1)[0] + "-" + _digest(identity)
+    public_id = LEGACY_PUBLICATION_IDS.get(item.source_report_id, item.source_report_id.rsplit("-", 1)[0] + "-" + _digest(identity))
     return common.PublicationRecord(item.kind, public_id, item.payload_sha256, item.source_commit, item.measured_scope,
                                     item.evidence_limits, item.files, item.payload_schema, item.native_payload_sha256,
                                     item.source_report_id)
@@ -147,10 +162,15 @@ def adapt(bundle):
 
 def _validate_saved_data(bundle, record):
     renderer = _renderer()
-    if (bundle / "index.html").read_text(encoding="utf-8") != renderer.render_html(record):
-        raise ValueError("GEO-02 HTML differs from saved records")
-    if (bundle / "timings.svg").read_text(encoding="utf-8") != renderer.render_svg(record):
-        raise ValueError("GEO-02 SVG differs from saved records")
+    if record["schema"] == SCHEMA:
+        if (bundle / "index.html").read_text(encoding="utf-8") != renderer.render_html(record):
+            raise ValueError("GEO-02 HTML differs from saved records")
+        if (bundle / "timings.svg").read_text(encoding="utf-8") != renderer.render_svg(record):
+            raise ValueError("GEO-02 SVG differs from saved records")
+    else:
+        legacy_html = (bundle / "index.html").read_text(encoding="utf-8")
+        if "GEO-02 affine-sum report" not in legacy_html or record["report_id"] not in legacy_html:
+            raise ValueError("legacy GEO-02 HTML identity differs from saved records")
     try:
         events = [json.loads(line) for line in (bundle / "raw-events.jsonl").read_text(encoding="utf-8").splitlines()]
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
@@ -187,8 +207,9 @@ def _compare_csv(path, fields, rows):
 
 
 def _validate_driver_csv(path, trials):
-    fields = ("scenario", "repetition", "status", "detail", "setup_ns", "operation_ns", "oracle_ns", "total_ns",
-              "output_points", "support_checks", "support_values", "oracle_passed")
+    fields = tuple(("scenario", "repetition", "status", "detail", "setup_ns", "operation_ns", "oracle_ns", "total_ns")
+                   + (REDUCTION_FIELDS if "generated_candidate_count" in trials[0] else ())
+                   + ("output_points", "support_checks", "support_values", "oracle_passed"))
     try:
         with path.open(newline="", encoding="utf-8-sig") as stream:
             reader = csv.DictReader(stream)
@@ -240,7 +261,10 @@ def _validate_source_zip(bundle, listed):
 
 
 def render_page(bundle, publication):
-    page = _renderer().render_html(_json(Path(bundle) / "records.json"))
+    bundle = Path(bundle)
+    record = _json(bundle / "records.json")
+    page = ((bundle / "index.html").read_text(encoding="utf-8") if record["schema"] == LEGACY_SCHEMA
+            else _renderer().render_html(record))
     links = ('<p>Publication <code>' + publication.report_id + '</code>; source <code>' + publication.source_report_id +
              '</code>. <a href="report-envelope.json">Versioned report envelope</a> · '
              '<a href="publication-manifest.json">Publication manifest</a></p>')

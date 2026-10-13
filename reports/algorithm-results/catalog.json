@@ -68,7 +68,8 @@
       "source_commit": "767f0c6a1bb26ddc76318cd519df41947a7b264b",
       "measured_scope": "28 measured affine-sum trials across 4 tiny binary64 fixtures",
       "evidence_limits": "Full candidate cloud retained; validated reduction evidence is not applied; no comparator, speedup, application-scale, or scalability claim; binary64 tiny fixtures; profiling and internal solver-phase timings unavailable",
-      "zip_sha256": "8f2fe77d30b69a0a314a7cd9dbe69342d2d5e9dde6eccc891afafcde04e578a9"
+      "zip_sha256": "8f2fe77d30b69a0a314a7cd9dbe69342d2d5e9dde6eccc891afafcde04e578a9",
+      "native_payload_sha256": "6b1f504ad3db6df458f041675a2ede1083e60d14c2bf92bdf234d8057fdea228"
     },
     {
       "report_id": "geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795",
@@ -80,6 +81,18 @@
       "measured_scope": "28 retained measured attempts across four GEO-05 analytic fixtures; 7 requested repetitions per fixture",
       "evidence_limits": "numeric sample checks only; H relation support Unestablished; no exact set equality or validated arithmetic claim; tiny analytic fixtures only; no comparator, speedup, application-scale, or scalability claim; binary64 numerical samples do not establish exact set equality or validated arithmetic; H relation support remains Unestablished; Phase summaries include successful trials only when the full run summary is valid; complete measurement trial matrix; attempt outcomes: {\"cancelled\": 0, \"failed\": 0, \"missing\": 0, \"passed\": 32, \"unsupported\": 0}; complete fixture attempt matrix; all attempts passed; eligible for independent review only",
       "zip_sha256": "51826297b765b011423ca58fb3160fbdd4884c176d73adaf5eabc5f2508fefba"
+    },
+    {
+      "report_id": "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754",
+      "report_kind": "geo02-affine-sum",
+      "source_report_id": "geo02-20261013T061151Z-338ff7d1d63c",
+      "payload_sha256": "338ff7d1d63cabd9010ea2924b5fb7845195b7dcc1e90752b0673bc3c5743b6c",
+      "source_commit": "6f450e09bdb247a94dc4365a7b36ac5d4d263ece",
+      "measured_scope": "35 measured affine-sum trials across 5 tiny binary64 fixtures",
+      "evidence_limits": "Exact dyadic deletion certificates apply only to generated binary64 candidate hulls; no comparator, speedup, application-scale, or scalability claim; five tiny fixtures; source geometry remains numerical; profiling and internal solver-phase timings unavailable",
+      "payload_schema": "csl.geo02-affine-sum-report/2",
+      "native_payload_sha256": "338ff7d1d63cabd9010ea2924b5fb7845195b7dcc1e90752b0673bc3c5743b6c",
+      "zip_sha256": "e9068d76389a5a5d66a4f73ca49e259edae618faad99c1b8b7a41f05df92669a"
     }
   ]
 }
