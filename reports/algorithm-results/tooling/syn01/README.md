@@ -34,6 +34,12 @@ forward module at the CMake project version and the fixed measured source
 commit. It lists selected provider IDs and actual versions, including the
 transitive HiGHS, Qhull, and hull-reducer registrations used by affine sum.
 
+Per-fixture phase summaries use completed (`available`) phase observations
+even if another trial failed. They report median/range, available/partial/not
+reached counts, and mark coverage incomplete whenever fewer than seven full
+phase observations exist. Partial elapsed durations remain visible per trial
+and are counted separately rather than mixed into completed-phase medians.
+
 The oracle checks every returned halfspace and equality row against literal
 expected bounds over the returned binary64 values. It is not a real-arithmetic
 certificate. Failures and unsupported/empty outcomes remain in captured raw

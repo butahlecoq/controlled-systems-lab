@@ -32,24 +32,30 @@ LIMITS = [
 ]
 
 
-def _timing(values):
-    if len(values) != 7:
-        return {"median_ns": None, "min_ns": None, "max_ns": None,
-                "range_ns": None, "successful_trials": len(values), "unavailable_trials": 7-len(values)}
-    return {"median_ns": statistics.median(values), "min_ns": min(values), "max_ns": max(values),
-            "range_ns": max(values)-min(values), "successful_trials": 7, "unavailable_trials": 0}
+def _timing(values, partial_trials, not_reached_trials):
+    attempts = 7
+    return {"median_ns": statistics.median(values) if values else None,
+            "min_ns": min(values) if values else None,
+            "max_ns": max(values) if values else None,
+            "range_ns": max(values)-min(values) if values else None,
+            "available_trials": len(values), "partial_trials": partial_trials,
+            "not_reached_trials": not_reached_trials,
+            "unavailable_trials": attempts-len(values),
+            "coverage": "complete" if len(values) == attempts else "incomplete"}
 
 
 def summarize(trials):
     rows = []
     for scenario in SCENARIOS:
         measured = [row for row in trials if row.get("scenario") == scenario and not row.get("warmup")]
-        all_successful = len(measured) == 7 and all(row.get("status") == "passed" and row.get("oracle_passed") is True for row in measured)
         phases = {}
         for phase in PHASES:
-            values = [row.get(phase) for row in measured if row.get(phase.removesuffix("_ns") + "_state") == "available"
-                      and type(row.get(phase)) is int and row[phase] >= 0] if all_successful else []
-            phases[phase] = _timing(values)
+            state_name = phase.removesuffix("_ns") + "_state"
+            values = [row.get(phase) for row in measured if row.get(state_name) == "available"
+                      and type(row.get(phase)) is int and row[phase] >= 0]
+            phases[phase] = _timing(values,
+                sum(row.get(state_name) == "partial" for row in measured),
+                sum(row.get(state_name) == "not_reached" for row in measured))
         rows.append({"scenario": scenario, "attempts": len(measured),
                      "passed": sum(row.get("status") == "passed" and row.get("oracle_passed") is True for row in measured),
                      "failed": sum(row.get("status") != "passed" or row.get("oracle_passed") is not True for row in measured),
@@ -161,6 +167,24 @@ def validate_record(record):
             if state not in PHASE_STATES or (state == "not_reached" and value is not None) or (
                     state in ("available", "partial") and (type(value) is not int or value < 0)):
                 errors.append("invalid_timing_" + phase)
+        setup_state, solve_state, oracle_state, execute_state = (
+            row.get("setup_state"), row.get("solve_state"), row.get("oracle_state"), row.get("execute_state"))
+        if setup_state not in ("available", "partial"):
+            errors.append("invalid_phase_order_setup")
+        if ((setup_state == "available" and solve_state == "not_reached") or
+                (setup_state == "partial" and solve_state != "not_reached")):
+            errors.append("invalid_phase_order_solve")
+        if ((solve_state == "available" and oracle_state == "not_reached") or
+                (solve_state != "available" and oracle_state != "not_reached")):
+            errors.append("invalid_phase_order_oracle")
+        if execute_state != "available":
+            errors.append("invalid_phase_order_execute")
+        passed = row.get("status") == "passed"
+        if row.get("status") not in ("passed", "failed") or row.get("oracle_passed") is not passed:
+            errors.append("trial_outcome_status_mismatch")
+        if passed and (any(row.get(phase.removesuffix("_ns") + "_state") != "available" or
+                            type(row.get(phase)) is not int or row[phase] < 0 for phase in PHASES)):
+            errors.append("passed_trial_phase_incomplete")
         if all(row.get(phase.removesuffix("_ns") + "_state") == "available" and
                type(row.get(phase)) is int and row[phase] >= 0 for phase in PHASES[:3]) and \
                 row.get("execute_state") == "available" and type(row.get("execute_ns")) is int and \
@@ -174,6 +198,8 @@ def validate_record(record):
         provider_ids = row.get("provider_identities")
         if provider_ids and provider_ids != (provenance.get("providers") if isinstance(provenance, dict) else None):
             errors.append("trial_provider_identity_mismatch")
+        if passed and (not provider_ids or provider_ids != (provenance.get("providers") if isinstance(provenance, dict) else None)):
+            errors.append("passed_trial_provider_stack_missing")
     if len(trials) != 16 or seen != {(scenario, repetition) for scenario in SCENARIOS for repetition in range(8)}:
         errors.append("incomplete_trial_matrix")
     if record.get("summary") != summarize(trials):
@@ -198,7 +224,8 @@ def render_svg(record):
     for index, (scenario, value) in enumerate(zip(SCENARIOS, values)):
         y = 30 + index * 46
         width = 0 if value is None else max(1, round(520 * value / maximum))
-        label = "unavailable" if value is None else f"{value:g} ns"
+        coverage = record["summary"][index]["phases"]["execute_ns"]["coverage"]
+        label = "unavailable" if value is None else f"{value:g} ns ({coverage})"
         parts.append(f'<text x="8" y="{y+15}">{html.escape(scenario)}</text>'
                      f'<rect x="170" y="{y}" width="{width}" height="22" fill="#3572a5"/>'
                      f'<text x="{180+width}" y="{y+15}">{html.escape(label)}</text>')
@@ -222,7 +249,11 @@ def render_html(record):
         stats = [row["phases"][phase] for phase in PHASES]
         summary.append("<tr><th>" + html.escape(row["scenario"]) + "</th>" +
                        f"<td>{row['attempts']}</td><td>{row['passed']}</td><td>{row['failed']}</td>" +
-                       "".join("<td>" + (f"{s['median_ns']} (range {s['min_ns']}–{s['max_ns']}) ns" if s["median_ns"] is not None else "unavailable") + "</td>" for s in stats) + "</tr>")
+                       "".join("<td>" + (f"{s['median_ns']} (range {s['min_ns']}–{s['max_ns']}) ns; "
+                           f"{s['available_trials']}/7 available, {s['partial_trials']} partial, "
+                           f"{s['not_reached_trials']} not reached; {s['coverage']} coverage"
+                           if s["median_ns"] is not None else
+                           f"unavailable; {s['partial_trials']} partial, {s['not_reached_trials']} not reached") + "</td>" for s in stats) + "</tr>")
     limits = "".join("<li>" + html.escape(item) + "</li>" for item in record["evidence_limits"])
     report_id = html.escape(str(record.get("report_id")))
     state = html.escape(record["collection"]["state"])

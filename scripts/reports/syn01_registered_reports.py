@@ -55,7 +55,7 @@ def _summary_csv(record):
     import io
     import csv
     fields = ("scenario", "phase", "median_ns", "min_ns", "max_ns", "range_ns",
-              "successful_trials", "unavailable_trials")
+              "available_trials", "partial_trials", "not_reached_trials", "unavailable_trials", "coverage")
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
     writer.writeheader()

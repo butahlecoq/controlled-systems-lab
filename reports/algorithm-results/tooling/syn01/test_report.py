@@ -78,7 +78,41 @@ class Syn01ReportTests(unittest.TestCase):
                                    environment={}, provenance=valid_provenance())
         self.assertEqual("failed", record["collection"]["state"])
         self.assertEqual("synthetic test failure", record["trials"][2]["detail"])
-        self.assertIsNone(record["summary"][0]["phases"]["execute_ns"]["median_ns"])
+        stats = record["summary"][0]["phases"]["execute_ns"]
+        self.assertEqual(7, stats["available_trials"])
+        self.assertEqual("complete", stats["coverage"])
+        self.assertEqual(330, stats["median_ns"])
+
+    def test_passed_trial_cannot_skip_solve_phase(self):
+        trials = complete_events()
+        trials[0] = {**trials[0], "solve_ns": None, "solve_state": "not_reached",
+                     "oracle_ns": None, "oracle_state": "not_reached"}
+        record = syn01.make_record(trials, source_commit="a" * 40, harness_commit="b" * 40,
+                                   environment={}, provenance=valid_provenance())
+        errors = syn01.validate_record(record)
+        self.assertIn("invalid_phase_order_solve", errors)
+        self.assertIn("passed_trial_phase_incomplete", errors)
+
+    def test_failure_retains_completed_phase_summary_with_incomplete_coverage(self):
+        trials = complete_events()
+        trials[2] = {**trials[2], "status": "failed", "outcome": "driver_exception",
+                     "oracle_passed": False, "provider_identities": {},
+                     "setup_ns": 47, "setup_state": "partial", "solve_ns": None,
+                     "solve_state": "not_reached", "oracle_ns": None,
+                     "oracle_state": "not_reached", "detail": "setup failed"}
+        record = syn01.make_record(trials, source_commit="a" * 40, harness_commit="b" * 40,
+                                   environment={}, provenance=valid_provenance())
+        self.assertEqual([], syn01.validate_record(record))
+        setup = record["summary"][0]["phases"]["setup_ns"]
+        self.assertEqual(6, setup["available_trials"])
+        self.assertEqual(1, setup["partial_trials"])
+        self.assertEqual("incomplete", setup["coverage"])
+        self.assertEqual(100, setup["median_ns"])
+        self.assertIn("incomplete coverage", syn01.render_html(record))
+        solve = record["summary"][0]["phases"]["solve_ns"]
+        self.assertEqual(6, solve["available_trials"])
+        self.assertEqual(1, solve["not_reached_trials"])
+        self.assertEqual("failed", record["collection"]["state"])
 
     def test_setup_failure_preserves_partial_setup_and_marks_later_phases_unreached(self):
         trials = complete_events()

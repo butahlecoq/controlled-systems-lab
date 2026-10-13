@@ -133,7 +133,7 @@ def summary_rows(record):
 
 
 SUMMARY_FIELDS = ("scenario", "phase", "median_ns", "min_ns", "max_ns", "range_ns",
-                  "successful_trials", "unavailable_trials")
+                  "available_trials", "partial_trials", "not_reached_trials", "unavailable_trials", "coverage")
 
 
 def summary_csv(record):
