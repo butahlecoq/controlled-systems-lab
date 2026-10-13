@@ -346,9 +346,11 @@ publication gate exemption.
 
 ## Registered non-LP publication adapters
 
-OPT-04's native `csl.opt04-phase-one-report/2` records are not yet a registered
-publisher input: the local renderer and bundle are private source evidence, and
-no OPT-04 page or URL is currently published by `site.py`. The exact tracked
+OPT-04's native `csl.opt04-phase-one-report/2` records have a registered saved-data
+adapter in `opt04_registered_reports.py`; the local renderer and native bundle
+remain private source evidence. No OPT-04 measurement bundle or production
+catalogue row is committed, and no OPT-04 public page or URL is established.
+The exact tracked
 migration into this contract's schema-3 catalogue and envelope is [issue #185](https://github.com/butahlecoq/controlled-systems-lab/issues/185).
 It assigns native bundle/schema and semantic validation, content-bound identity
 from the native report ID, complete source-file hashes and adapter hash,
@@ -360,12 +362,42 @@ the local producer page. Integration into the authoritative catalogue and
 main-only Pages workflow, followed by live URL verification, is required before
 any public page or URL can be claimed.
 
+The OPT-04 adapter requires the exact ten-file native inventory documented in its
+[tooling README](../../reports/algorithm-results/tooling/opt04/README.md), schema-v2
+and native semantic/package validation, the five-fixture protocol, complete
+eligible warmup/trial summaries, and matching saved JSONL and driver projections.
+Failed, missing and aborted evidence is retained privately and rejected before
+publication output. All source bytes, including producer HTML/SVG, native manifest,
+ZIP and ZIP checksum, are preserved under `source-evidence/` in the staged bundle
+and deterministic offline ZIP. Its public SVG is generated from typed records
+using the shared SVG CSS vocabulary; the source SVG is unchanged. The envelope
+contains the unchanged native payload, native ID/digest and provenance; the new
+public ID binds every native source-file hash and the LF-normalized adapter hash.
+The catalogue must carry the adapter's measured scope and limits, including
+Unestablished feasibility-numerics support and the descriptive five-fixture limit.
+Synthetic test bundles do not satisfy the missing genuine collection, reviewed
+catalogue integration, main deployment and live verification gates of #185.
+
+Because native schema v2 has no trusted collection/test discriminator, normal
+OPT-04 adaptation additionally requires a reviewed source ID and complete native
+inventory digest in `opt04_registered_reports.REVIEWED_NATIVE_BUNDLES`. The digest
+is SHA-256 of the canonical sorted filename-to-SHA-256 mapping of all ten original
+files, including raw producer files and native package/checksum data. The registry
+is deliberately empty: no v2 bundle currently has production admission. Hash-shaped
+commit IDs and self-declared purpose cannot establish genuine collection. A later
+reviewed bundle/catalogue change must pin the exact complete inventory separately
+from the payload's own claims. Changed evidence requires fresh admission.
+Synthetic fixtures explicitly declare `purpose: "test"` and require the Python
+test harness's `allow_test=True` on both adaptation and staging; default paths
+reject them. Unmarked or relabelled bundles cannot bypass the reviewed-inventory
+gate. The CLI exposes no test bypass and the main Pages workflow cannot invoke it.
+
 
 The shared Pages publisher accepts catalogue schema `csl.algorithm-report-catalog/3`
-for mixed LP, convex, OPT-05, GEO-02, GEO-03, GEO-04, GEO-05 and SYN-02 catalogues.
+for mixed LP, convex, OPT-04, OPT-05, GEO-02, GEO-03, GEO-04, GEO-05 and SYN-02 catalogues.
 LP/convex retain their validated view schemas and bundle projections. Other report
 kinds use the corresponding registered adapters: OPT-05 and GEO-03 in
-`registered_reports.py`, GEO-02 in `geo02_registered_reports.py`, GEO-04 in
+`registered_reports.py`, OPT-04 in `opt04_registered_reports.py`, GEO-02 in `geo02_registered_reports.py`, GEO-04 in
 `geo04_registered_reports.py`, GEO-05 in `geo05_registered_reports.py`, and
 SYN-02 in `syn02_registered_reports.py`.
 Each adapter validates its native source identity, typed trial/summary coherence,
@@ -389,7 +421,9 @@ without rewriting the original numerical archive. The repository source-tree fal
 uses `source_report_id`; the repository ZIP and public page/download links use
 `report_id`.
 Both native `trials.csv` and `summary.csv` must match the complete typed rows in
-`records.json`, even when their manifest and archive checksums are internally valid.
+`records.json`, where those CSV projections exist, even when their manifest and
+archive checksums are internally valid. OPT-04 uses `stdout.jsonl` plus saved
+`driver-stdout.txt` instead and validates both against typed trials and warmups.
 
 ## Shared publication envelope
 
