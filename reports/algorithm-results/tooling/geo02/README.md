@@ -1,11 +1,12 @@
 # GEO-02 affine-sum numerical report harness
 
-This tooling measures four tiny deterministic analytic fixtures through the public `csl.geometry.affine-sum` implementation:
+This tooling measures five tiny deterministic analytic fixtures through the public `csl.geometry.affine-sum` implementation:
 
 1. Scalar interval affine image: `[-1, 1]` under `x -> -2x`, giving `[-2, 2]`.
 2. Rectangular projection of the unit box: `(x,y) -> x+y`, giving `[0,2]`.
 3. Singular map of the unit box: `(x,y) -> (x+y, 2x+2y)`, giving the segment from `(0,0)` to `(2,4)`.
 4. Minkowski sum `[-1,1] + [2,3] = [1,4]`.
+5. Affine identity on `[0,0,0.5,1,1]`, with duplicate and interior candidates and hull `[0,1]`.
 
 The C++ report-only target is `csl_geo02_affine_sum_report`. Accepted collection requires the reviewed harness commit checked out, no tracked changes, and an actual configured Release target. Query the CMake File API before configuring:
 
@@ -20,7 +21,7 @@ cmake --build build-geo02 --config Release --target csl_geo02_affine_sum_report 
 
 The target links the public `CSL::affine_sum`, `CSL::hull`, `CSL::highs_lp`, `CSL::qhull_conversion`, and `CSL::phase_one` targets. `--smoke` runs one non-accepted functional repetition. It does not create or imply accepted benchmark data.
 
-Timing scopes are pinned in the saved record. `setup_ns` measures provider/registry construction, operation selection and preparation, and workspace creation after fixture construction. `operation_ns` measures the prepared workspace call. `oracle_ns` measures literal point and support checks, excluding output extraction and serialization. `total_ns` is end-to-end driver time from fixture construction through result extraction, serialization, and oracle checks; it includes the named phases plus intervening harness work. The report validates that total covers all named phases and describes their scopes in the HTML.
+Timing scopes are pinned in the saved record. `setup_ns` measures provider/registry construction, operation selection and preparation, and workspace creation after fixture construction. `operation_ns` measures the prepared workspace call. `oracle_ns` measures literal point and support checks, excluding output extraction and serialization. `total_ns` is end-to-end driver time from fixture construction through result extraction, serialization, and oracle checks; it includes the named phases plus intervening harness work. Each raw row records the generated candidate count, materialized output point count, and a status derived from those two observed counts; the collector rejects a status that contradicts the counts. The report validates that total covers all named phases and describes their scopes in the HTML.
 
 Do not collect accepted timings until the algorithm source and report harness commits have both been independently reviewed and fixed. The collector verifies the checked-out harness SHA, a clean tracked tree, the source-to-harness allowlist, the exact CMake merge-resolution/report-target delta, CMake File API Release/C++20/NDEBUG configuration, dependency graph and executable identity. It performs a final verbose Release build and saves its provenance. Warmup output and oracle outcomes are retained; any failed/missing warmup blocks a complete report. Supply nonempty operator notes:
 
@@ -36,4 +37,4 @@ python reports/algorithm-results/tooling/geo02/render.py --collection build-geo0
 
 Use fresh output paths. The collector requires at least seven measured repetitions and one warmup. The output includes raw driver CSV and JSONL records, the hashed canonical payload, per-phase summary CSV, environment and build notes, explicit failure/status files, and the deterministic offline bundle ZIP. `manifest.json` hashes every bundle file except itself.
 
-The reports use IEEE binary64 arithmetic, small analytic point/support oracles, and descriptive wall-clock measurements only. They do not establish exact or validated geometry, competitor performance, speedups, application-scale behavior, or scalability. The GEO-02 reducer currently validates candidate outputs but retains the full candidate cloud rather than applying deletions. Per-trial CPU, native-thread observations, peak memory, internal LP timings, and OS limiter profiling are not available in this harness.
+The reports use IEEE binary64 candidates, exact dyadic deletion predicates, small analytic point/support oracles, and descriptive wall-clock measurements only. Exact deletion certifies equality of the generated candidate hull; the affine/sum operation retains numerical assurance and does not establish validated geometry of the source model. The report makes no competitor, speedup, application-scale, or scalability claim. Per-trial CPU, native-thread observations, peak memory, internal LP timings, and OS limiter profiling are not available in this harness.

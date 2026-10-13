@@ -7,7 +7,7 @@ sys.path.insert(0,str(HERE))
 import collect,render,provenance
 class ContractTests(unittest.TestCase):
  def test_signed_payload_hash_and_tamper_detection(self):
-  p=collect.fixture_payload('20261013T000000Z');self.assertEqual(p['schema'],'csl.geo02-affine-sum-report/1');render.validate(p)
+  p=collect.fixture_payload('20261013T000000Z');self.assertEqual(p['schema'],'csl.geo02-affine-sum-report/2');render.validate(p)
   q=copy.deepcopy(p);q['trials'][0]['operation_ns']+=1
   with self.assertRaisesRegex(ValueError,'digest mismatch'):render.validate(q)
  def test_summaries_recompute_from_all_trials_and_fail_closed(self):
@@ -18,9 +18,17 @@ class ContractTests(unittest.TestCase):
   self.assertTrue(render.check_oracle('scalar_interval_affine_image',[[-2.0],[0.0],[2.0]]));self.assertFalse(render.check_oracle('scalar_interval_affine_image',[[-2.0],[2.1]]))
   self.assertTrue(render.check_oracle('singular_map_box_segment',[[0,0],[1,2],[1,2],[2,4]]));self.assertFalse(render.check_oracle('singular_map_box_segment',[[0,0],[1,2],[2,3],[2,4]]))
   self.assertTrue(render.check_supports('scalar_interval_affine_image',[2,2]));self.assertFalse(render.check_supports('scalar_interval_affine_image',[2,1.999]))
+ def test_candidate_reduction_claim_is_bound_to_materialized_cloud(self):
+  p=collect.fixture_payload('20261013T000000Z');render.validate(p)
+  reduced=next(t for t in p['trials'] if t['scenario']=='redundant_interval_candidates')
+  self.assertEqual((reduced['generated_candidate_count'],reduced['materialized_output_point_count'],reduced['reduction_status']),(5,2,'reduced'))
+  forged=copy.deepcopy(p);forged['trials'][0]['reduction_status']='reduced';collect.finalize(forged,'forged')
+  with self.assertRaisesRegex(ValueError,'candidate reduction evidence'):render.validate(forged)
+  forged=copy.deepcopy(p);forged['trials'][0]['materialized_output_point_count']+=1;collect.finalize(forged,'forged')
+  with self.assertRaisesRegex(ValueError,'candidate reduction evidence'):render.validate(forged)
  def test_safe_render_escapes_untrusted_driver_detail(self):
   p=collect.fixture_payload('20261013T000000Z');p['trials'][0]['detail']='<script>alert(1)</script>';collect.finalize(p,'20261013T000000Z')
-  page=render.render_html(p);self.assertIn('&lt;script&gt;',page);self.assertNotIn('<script>alert',page);self.assertIn('retains the full candidate cloud',page)
+  page=render.render_html(p);self.assertIn('&lt;script&gt;',page);self.assertNotIn('<script>alert',page);self.assertIn('Generated candidates',page);self.assertIn('Reduction status',page)
  def test_resigned_fabricated_summary_and_wrong_inputs_are_rejected(self):
   p=collect.fixture_payload('test');p['summary']['scalar_interval_affine_image']['phases']['total_ns']['median']=999;collect.finalize(p,'test')
   with self.assertRaisesRegex(ValueError,'phase summaries'):render.validate(p)

@@ -30,6 +30,14 @@ def check_supports(scenario,values,tol=1e-8):
  expected=collect.SCENARIOS.get(scenario,{}).get('support',[])
  return isinstance(values,list) and len(values)==len(expected) and all(abs(float(x)-float(y))<=tol for x,y in zip(values,expected))
 
+def check_candidate_reduction(scenario,row):
+ case=collect.SCENARIOS.get(scenario)
+ if not case:return False
+ generated=row.get('generated_candidate_count');materialized=row.get('materialized_output_point_count');points=row.get('output_points')
+ if type(generated)is not int or generated!=case['candidate_count'] or type(materialized)is not int or not isinstance(points,list) or materialized!=len(points) or materialized>generated:return False
+ expected_status='reduced' if materialized<generated else 'preserved'
+ return row.get('reduction_status')==expected_status
+
 def validate(payload):
  if payload.get('schema')!=collect.SCHEMA or payload.get('algorithm',{}).get('id')!='GEO-02':raise ValueError('unsupported GEO-02 record schema')
  if payload.get('timing_scopes')!=collect.TIMING_SCOPES:raise ValueError('timing scopes differ from the pinned report contract')
@@ -47,6 +55,7 @@ def validate(payload):
   for key in collect.PHASES:
    if type(t.get(key)) is not int or t[key]<0:raise ValueError('invalid nanosecond phase')
   if t['total_ns']<sum(t[k] for k in collect.PHASES[:-1]):raise ValueError('total duration does not cover measured phases')
+  if not check_candidate_reduction(name,t):raise ValueError('candidate reduction evidence does not match the generated and materialized clouds')
   if t.get('oracle_passed') is True and (not check_oracle(name,t.get('output_points')) or not check_supports(name,t.get('support_values')) or t.get('support_checks')!=len(case['directions'])):raise ValueError('saved output fails independent point/support oracle')
  state=collection.get('state');actual_count=collection.get('actual_trials');expected_count=collection.get('expected_trials');failures=collection.get('failures')
  process_code=collection.get('process_return_code');aborted=collection.get('aborted_or_timed_out');parse_error=collection.get('parse_error')
@@ -63,6 +72,7 @@ def validate(payload):
  if len(actual_warmups)!=len(warmups) or actual_warmups!=expected_warmups:raise ValueError('warmup scenario/repetition matrix mismatch')
  for row in warmups:
   if not isinstance(row.get('status'),str) or not isinstance(row.get('detail'),str) or type(row.get('oracle_passed'))is not bool:raise ValueError('invalid warmup status/detail/oracle')
+  if not check_candidate_reduction(row['scenario'],row):raise ValueError('warmup candidate reduction evidence does not match the generated and materialized clouds')
   if row['status']=='passed' and (not row['oracle_passed'] or not check_oracle(row['scenario'],row.get('output_points')) or not check_supports(row['scenario'],row.get('support_values')) or row.get('support_checks')!=len(collect.SCENARIOS[row['scenario']]['directions'])):raise ValueError('successful warmup fails its independent oracle')
  observed_warmup_failures=sum(row['status']!='passed' or row['oracle_passed'] is not True for row in warmups)
  if type(warmup_failures)is not int or warmup_failures!=observed_warmup_failures or (warmup_parse_error is not None and not isinstance(warmup_parse_error,str)):raise ValueError('warmup failure metadata differs from warmup outcomes')
@@ -79,12 +89,12 @@ def render_svg(payload):
  return '<svg xmlns="http://www.w3.org/2000/svg" width="700" height="'+str(max(140,40+28*len(lines)))+'" role="img" aria-label="GEO-02 scenario median total nanoseconds">'+''.join(lines)+'</svg>'
 
 def render_html(payload):
- rows=''.join('<tr><td>'+html.escape(t['scenario'])+'</td><td>'+str(t['repetition'])+'</td><td>'+html.escape(t['status'])+'</td><td>'+str(t['setup_ns'])+'</td><td>'+str(t['operation_ns'])+'</td><td>'+str(t['oracle_ns'])+'</td><td>'+str(t['total_ns'])+'</td><td>'+html.escape(t.get('detail',''))+'</td></tr>' for t in payload['trials'])
+ rows=''.join('<tr><td>'+html.escape(t['scenario'])+'</td><td>'+str(t['repetition'])+'</td><td>'+html.escape(t['status'])+'</td><td>'+str(t['generated_candidate_count'])+'</td><td>'+str(t['materialized_output_point_count'])+'</td><td>'+html.escape(t['reduction_status'])+'</td><td>'+str(t['setup_ns'])+'</td><td>'+str(t['operation_ns'])+'</td><td>'+str(t['oracle_ns'])+'</td><td>'+str(t['total_ns'])+'</td><td>'+html.escape(t.get('detail',''))+'</td></tr>' for t in payload['trials'])
  warmup_rows=''.join('<tr><td>'+html.escape(t['scenario'])+'</td><td>'+str(t['repetition'])+'</td><td>'+html.escape(t['status'])+'</td><td>'+('passed' if t['oracle_passed'] else 'failed')+'</td><td>'+html.escape(t.get('detail',''))+'</td></tr>' for t in payload['collection']['warmup_results'])
  svg=render_svg(payload)
- scope='Binary64; four tiny deterministic analytic fixtures. Descriptive only: no competitor, speedup, application-scale, or scalability claim. No exact or validated geometry guarantee. The reducer validates candidate outputs but retains the full candidate cloud (does not apply deletions). CPU counters, native-thread observations, peak-memory measurements, internal LP timings, and OS limiter profiling were unavailable/not collected.'
+ scope='Five tiny deterministic analytic fixtures. Raw records report generated candidates, materialized output points, and whether the cloud was reduced or preserved. Exact dyadic deletion certificates establish equality only for the generated binary64 candidate cloud; affine/sum operations remain numerical and do not establish validated geometry of the source model. Descriptive timing only: no competitor, speedup, application-scale, or scalability claim. CPU counters, native-thread observations, peak-memory measurements, internal LP timings, and OS limiter profiling were unavailable/not collected.'
  timing='<ul>'+''.join('<li><code>'+html.escape(name)+'</code>: '+html.escape(description)+'</li>' for name,description in payload['timing_scopes'].items())+'</ul>'
- return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GEO-02 affine-sum report</title></head><body><h1>GEO-02 affine-sum report</h1><p>'+html.escape(scope)+'</p><h2>Timing scope</h2>'+timing+'<p><a href="timings.svg">Open timing chart (SVG)</a></p><h2>Warmup checks</h2><table><thead><tr><th>Scenario</th><th>Warmup</th><th>Status</th><th>Oracle</th><th>Detail</th></tr></thead><tbody>'+warmup_rows+'</tbody></table><h2>Raw trials</h2><div tabindex="0"><table><thead><tr><th>Scenario</th><th>Repetition</th><th>Status</th><th>Setup ns</th><th>Operation ns</th><th>Oracle ns</th><th>Total ns</th><th>Detail</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>Report '+html.escape(payload['report_id'])+'; payload SHA-256 '+html.escape(payload['payload_sha256'])+'</p></body></html>\n'
+ return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GEO-02 affine-sum report</title></head><body><h1>GEO-02 affine-sum report</h1><p>'+html.escape(scope)+'</p><h2>Timing scope</h2>'+timing+'<p><a href="timings.svg">Open timing chart (SVG)</a></p><h2>Warmup checks</h2><table><thead><tr><th>Scenario</th><th>Warmup</th><th>Status</th><th>Oracle</th><th>Detail</th></tr></thead><tbody>'+warmup_rows+'</tbody></table><h2>Raw trials</h2><div tabindex="0"><table><thead><tr><th>Scenario</th><th>Repetition</th><th>Status</th><th>Generated candidates</th><th>Materialized output points</th><th>Reduction status</th><th>Setup ns</th><th>Operation ns</th><th>Oracle ns</th><th>Total ns</th><th>Detail</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>Report '+html.escape(payload['report_id'])+'; payload SHA-256 '+html.escape(payload['payload_sha256'])+'</p></body></html>\n'
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--collection',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();data_path=a.collection/'records.json'
