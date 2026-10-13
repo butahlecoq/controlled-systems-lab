@@ -1,0 +1,796 @@
+{
+  "source_commit": "2a7738f0ef9652501c68021a91c648723458569a",
+  "harness_commit": "cc972291b99665e8b3b16a620bcc08d4d1d99f82",
+  "tracked_clean": true,
+  "tracked_tree_binding": {
+    "scope": "complete tracked repository tree",
+    "source_tree_oid": "afbd7c391627faadd539c04751a7f709806c7748",
+    "harness_tree_oid": "cd4cba3f0adf71f033bb7451c06095f06fe0d9fd",
+    "allowed_harness_delta": [
+      "reports/algorithm-results/tooling/geo05/README.md",
+      "reports/algorithm-results/tooling/geo05/collect.py",
+      "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
+      "reports/algorithm-results/tooling/geo05/render.py",
+      "reports/algorithm-results/tooling/geo05/report.py",
+      "reports/algorithm-results/tooling/geo05/schema-v1.json",
+      "reports/algorithm-results/tooling/geo05/smoke.py",
+      "reports/algorithm-results/tooling/geo05/test_report_tools.py"
+    ],
+    "actual_changed_paths": [
+      "CMakeLists.txt",
+      "reports/algorithm-results/tooling/geo05/README.md",
+      "reports/algorithm-results/tooling/geo05/collect.py",
+      "reports/algorithm-results/tooling/geo05/projection_predecessor_driver.cpp",
+      "reports/algorithm-results/tooling/geo05/render.py",
+      "reports/algorithm-results/tooling/geo05/report.py",
+      "reports/algorithm-results/tooling/geo05/schema-v1.json",
+      "reports/algorithm-results/tooling/geo05/smoke.py",
+      "reports/algorithm-results/tooling/geo05/test_report_tools.py"
+    ]
+  },
+  "executable": {
+    "name": "csl_geo05_projection_predecessor_report.exe",
+    "sha256": "cc56bc7369f0fedf9a3cdb4458d5bec16a95265b8e2c57324dc96856d6a14be5"
+  },
+  "build_log_sha256": "9abeebe2f772f454f70487a11f9cb425b189b39a952e9b763d0908f51e5db811",
+  "configuration": "Release",
+  "cxx_standard": "20",
+  "cmake": {
+    "version": {
+      "isDirty": false,
+      "major": 3,
+      "minor": 31,
+      "patch": 6,
+      "string": "3.31.6-msvc6",
+      "suffix": "msvc6"
+    },
+    "generator": "Visual Studio 17 2022"
+  },
+  "compiler": {
+    "compiler": {
+      "id": "MSVC",
+      "implicit": {
+        "includeDirectories": [],
+        "linkDirectories": [],
+        "linkFrameworkDirectories": [],
+        "linkLibraries": []
+      },
+      "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+      "version": "19.44.35215.0"
+    },
+    "language": "CXX",
+    "sourceFileExtensions": [
+      "C",
+      "M",
+      "c++",
+      "cc",
+      "cpp",
+      "cxx",
+      "mm",
+      "mpp",
+      "CPP",
+      "ixx",
+      "cppm",
+      "ccm",
+      "cxxm",
+      "c++m"
+    ]
+  },
+  "dependency_targets": [
+    "ZERO_CHECK",
+    "csl_contracts",
+    "csl_geo05_projection_predecessor_report",
+    "csl_model",
+    "csl_numeric",
+    "csl_objectives",
+    "csl_optimization",
+    "csl_polyhedral",
+    "csl_problem",
+    "csl_registry",
+    "csl_resolved_core",
+    "csl_sets"
+  ],
+  "file_api_paths": {
+    "build": "SOURCE_ROOT/build/geo05-measure",
+    "source": "SOURCE_ROOT"
+  },
+  "targets": [
+    {
+      "name": "csl_geo05_projection_predecessor_report",
+      "type": "EXECUTABLE",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 2,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              2
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "link": {
+        "commandFragments": [
+          {
+            "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD",
+            "role": "flags"
+          },
+          {
+            "fragment": "/machine:x64 /INCREMENTAL:NO /subsystem:console",
+            "role": "flags"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_polyhedral.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 3,
+            "fragment": "Release\\csl_optimization.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 3,
+            "fragment": "Release\\csl_registry.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 4,
+            "fragment": "Release\\csl_resolved_core.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 5,
+            "fragment": "Release\\csl_problem.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 3,
+            "fragment": "Release\\csl_sets.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 6,
+            "fragment": "Release\\csl_model.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 5,
+            "fragment": "Release\\csl_objectives.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 7,
+            "fragment": "Release\\csl_numeric.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 8,
+            "fragment": "Release\\csl_contracts.lib",
+            "role": "libraries"
+          },
+          {
+            "fragment": "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+            "role": "libraries"
+          }
+        ],
+        "language": "CXX"
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_geo05_projection_predecessor_report.exe"
+        },
+        {
+          "path": "Release/csl_geo05_projection_predecessor_report.pdb"
+        }
+      ]
+    },
+    {
+      "name": "csl_polyhedral",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_polyhedral.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_model",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_model.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_contracts",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 4,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              5
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_contracts.lib"
+        }
+      ]
+    },
+    {
+      "name": "ZERO_CHECK",
+      "type": "UTILITY"
+    },
+    {
+      "name": "csl_numeric",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_numeric.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_optimization",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_optimization.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_objectives",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 7,
+              "define": "EIGEN_MPL2_ONLY"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 8,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 9,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build/geo05-measure/_deps/csl_objectives_eigen-src"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              10
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_objectives.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_registry",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 6,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              7
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_registry.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_sets",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_sets.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_resolved_core",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_resolved_core.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_problem",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_problem.lib"
+        }
+      ]
+    }
+  ],
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "cpu_count": 12,
+    "python": "3.13.5",
+    "arithmetic": "IEEE-754 binary64",
+    "native_backend": "none selected",
+    "native_threads": {
+      "configured": 0,
+      "observed": {
+        "available": false,
+        "reason": "this geometry provider exposes no native thread counter"
+      }
+    },
+    "resources": {
+      "requested_total_threads": 1,
+      "actual_outer_workers": 1,
+      "threads_per_worker": 1,
+      "memory_bytes": null
+    },
+    "numeric_context_tolerance": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "independent_sample_tolerance": 1e-09,
+    "random_seed": null,
+    "concurrent_work_note": "Pre-collection host snapshot UTC: 2026-10-13T01:53:29.8856743Z\nHost: Windows 11, 6 physical cores, 12 logical processors.\nWindows PerfOS total processor utilization at the pre-run snapshot: 1%.\nNo deliberate concurrent benchmark workload was started. Background desktop processes remained open; this is a single-process measurement with one requested total thread.\nA separate discarded CPU profiling attempt using Windows Performance Recorder failed to enable system performance profiling (error 0xc5585011). No profiler trace was produced; CPU-vs-overhead limiter attribution is unavailable.",
+    "collection_utc": "2026-10-13T01:53:33.775287+00:00"
+  },
+  "raw_stdout_sha256": "c3f2c2932009fd68c92e5dad9f723c935629feca67cd4addb5536cf9149f6445",
+  "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
