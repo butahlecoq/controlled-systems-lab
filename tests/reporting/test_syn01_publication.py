@@ -34,6 +34,8 @@ PROVENANCE = {"algorithm_module": {"id": "csl.reachability.nominal-forward", "ve
               "dependency_edges": {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
                                    "conversion": ["lp_backend"]},
               "runtime_settings": report.RUNTIME_SETTINGS,
+              "native_thread_observation": {"status": "unavailable", "observed_threads": None,
+                  "reason": "The driver has no supported runtime API to observe effective native worker threads."},
               "build_configuration": {"configuration": "Release", "generator": "Visual Studio 17 2022",
                   "generator_platform": "x64", "cxx_standard": "c++20", "compiler_id": "MSVC",
                   "compiler_version": "19.44.35215.0", "compiler_executable": "cl.exe", "cmake_version": "3.31.6",

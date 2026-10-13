@@ -21,7 +21,7 @@ class Syn01BuildEvidenceTests(unittest.TestCase):
 CMAKE_GENERATOR_PLATFORM:INTERNAL=x64
 CMAKE_CXX_FLAGS_RELEASE:STRING=/O2 /Ob2 /DNDEBUG
 """, encoding="utf-8")
-            (build / "csl_syn01_nominal_forward_report.vcxproj").write_text("""<Project>
+            (build / "csl_syn01_nominal_forward_report.vcxproj").write_text("""<Project xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">
 <ItemDefinitionGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'">
 <ClCompile><LanguageStandard>stdcpp20</LanguageStandard><Optimization>MaxSpeed</Optimization>
 <WarningLevel>Level4</WarningLevel><TreatWarningAsError>true</TreatWarningAsError>

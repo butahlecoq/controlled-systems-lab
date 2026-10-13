@@ -63,12 +63,14 @@ def build_configuration(build, compiler_id, compiler_version, compiler_executabl
     if "Visual Studio" in generator:
         config_path = build / "csl_syn01_nominal_forward_report.vcxproj"
         root = ET.parse(config_path).getroot()
-        group = next((item for item in root.findall("ItemDefinitionGroup")
+        namespace = root.tag.partition("}")[0].removeprefix("{")
+        qualified = (lambda name: "{" + namespace + "}" + name) if namespace else (lambda name: name)
+        group = next((item for item in root.findall(qualified("ItemDefinitionGroup"))
                       if "Release|" in item.attrib.get("Condition", "")), None)
-        compile = group.find("ClCompile") if group is not None else None
+        compile = group.find(qualified("ClCompile")) if group is not None else None
         if compile is None:
             raise ValueError("Release ClCompile properties missing from generated Visual Studio project")
-        properties = {item.tag: (item.text or "").strip() for item in compile}
+        properties = {item.tag.rsplit("}", 1)[-1]: (item.text or "").strip() for item in compile}
         if properties.get("LanguageStandard") != "stdcpp20":
             raise ValueError("generated report target is not configured for C++20")
         flags = ["/std:c++20"] + shlex.split(global_flags)
@@ -297,6 +299,9 @@ def collect(args):
                                                 "dependency_edges": {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
                                                                      "conversion": ["lp_backend"]},
                                                 "runtime_settings": trials[0].get("execution_settings"),
+                                                "native_thread_observation": {
+                                                    "status": "unavailable", "observed_threads": None,
+                                                    "reason": "The driver has no supported runtime API to observe effective native worker threads."},
                                                 "build_configuration": build_evidence,
                                                 "configuration": "Release", "generator": args.generator,
                                                 "cmake_version": cmake_version,

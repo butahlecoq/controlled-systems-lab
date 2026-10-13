@@ -37,13 +37,15 @@ transitive HiGHS, Qhull, and hull-reducer registrations used by affine sum.
 The saved runtime configuration explicitly records both numerical tolerances
 (`1e-8` absolute and relative) and the selected backend settings: HiGHS simplex
 with presolve and parallel mode off, one thread, seed zero, default feasibility
-tolerances, and no iteration/time limit; Qhull `qhull Qx` with no caller row or
+tolerances explicitly set to `1e-8` primal and dual, and no iteration/time limit; Qhull `qhull Qx` with no caller row or
 dimension cap; H-representation projection without a row cap; affine-sum
 candidate limit unset; and the default hull reducer. The Release provenance
 records the C++20 standard, compiler identity/version, CMake version, global
 Release flags, generated target properties/effective flags, and SHA-256 hashes
 of the actual `CMakeCache.txt`, generated build-configuration file, and build
-log. These settings describe this measured configuration and are validated
+log. Requested workers and configured HiGHS threads are both one; the
+effective native thread count is unavailable because this driver has no
+supported runtime observation API. These settings describe this measured configuration and are validated
 against each event before a result record is accepted.
 
 Per-fixture phase summaries use completed (`available`) phase observations

@@ -150,6 +150,17 @@ def validate_record(record):
         errors.append("provider_provenance_incomplete")
     if not isinstance(provenance, dict) or provenance.get("runtime_settings") != RUNTIME_SETTINGS:
         errors.append("effective_settings_incomplete")
+    thread_observation = provenance.get("native_thread_observation") if isinstance(provenance, dict) else None
+    if (not isinstance(thread_observation, dict) or
+            thread_observation.get("status") != "unavailable" or
+            thread_observation.get("observed_threads") is not None or
+            thread_observation.get("reason") !=
+            "The driver has no supported runtime API to observe effective native worker threads."):
+        errors.append("native_thread_observation_must_be_unavailable")
+    measurement = record.get("measurement")
+    if (not isinstance(measurement, dict) or measurement.get("requested_workers") != 1 or
+            measurement.get("configured_native_threads") != 1):
+        errors.append("thread_configuration_must_be_one")
     build = provenance.get("build_configuration") if isinstance(provenance, dict) else None
     required_build_fields = {"configuration", "generator", "generator_platform", "cxx_standard",
         "compiler_id", "compiler_version", "compiler_executable", "cmake_version",
@@ -309,6 +320,7 @@ def render_html(record):
 <ul>{''.join('<li>'+html.escape(name)+': <code>'+html.escape(item['id'])+'</code> version <code>'+html.escape(item['version'])+'</code></li>' for name,item in sorted(record['provenance']['providers'].items()))}</ul>
 <p>Nested dependencies: {html.escape(json.dumps(record['provenance']['dependency_edges'], sort_keys=True))}</p>
 <h2>Effective runtime settings</h2><pre>{html.escape(json.dumps(record['provenance']['runtime_settings'], sort_keys=True, indent=2))}</pre>
+<p>Requested workers: {record['measurement']['requested_workers']}; configured native threads: {record['measurement']['configured_native_threads']}; observed effective native threads: unavailable. {html.escape(record['provenance']['native_thread_observation']['reason'])}</p>
 <h2>Compiler and Release build evidence</h2><pre>{html.escape(json.dumps(record['provenance']['build_configuration'], sort_keys=True, indent=2))}</pre>
 <p>One registered provider stack; descriptive timings only, no speedup or comparison claim. Reachability support: <strong>Unestablished</strong>.</p>
 <h2>Evidence limits</h2><ul>{limits}</ul><h2>Median end-to-end timing by fixture</h2>{render_svg(record)}

@@ -44,6 +44,8 @@ def valid_provenance():
             "dependency_edges": {"affine_sum": ["hull_reducer", "lp_backend", "conversion"],
                                  "conversion": ["lp_backend"]},
             "runtime_settings": syn01.RUNTIME_SETTINGS,
+            "native_thread_observation": {"status": "unavailable", "observed_threads": None,
+                "reason": "The driver has no supported runtime API to observe effective native worker threads."},
             "build_configuration": {"configuration": "Release", "cxx_standard": "c++20",
                 "generator": "Visual Studio 17 2022", "generator_platform": "x64",
                 "compiler_id": "MSVC", "compiler_version": "19.44.35215.0", "compiler_executable": "cl.exe",
@@ -164,6 +166,19 @@ class Syn01ReportTests(unittest.TestCase):
         self.assertIn("/O2 /Ob2 /DNDEBUG", page)
         del record["provenance"]["runtime_settings"]["highs"]["threads"]
         self.assertIn("effective_settings_incomplete", syn01.validate_record(record))
+
+    def test_native_thread_observation_is_explicitly_unavailable_and_config_is_distinguished(self):
+        record = syn01.make_record(complete_events(), source_commit="a" * 40,
+                                   harness_commit="b" * 40, environment={}, provenance=valid_provenance())
+        page = syn01.render_html(record)
+        self.assertIn("observed effective native threads: unavailable", page.lower())
+        self.assertIn("requested workers: 1", page.lower())
+        self.assertIn("configured native threads: 1", page.lower())
+        record["provenance"]["native_thread_observation"]["observed_threads"] = 1
+        self.assertIn("native_thread_observation_must_be_unavailable", syn01.validate_record(record))
+        record["provenance"]["native_thread_observation"]["observed_threads"] = None
+        record["measurement"]["requested_workers"] = 2
+        self.assertIn("thread_configuration_must_be_one", syn01.validate_record(record))
 
     def test_saved_html_discloses_scope_and_support_limit(self):
         record = syn01.make_record(complete_events(), source_commit="a" * 40,
