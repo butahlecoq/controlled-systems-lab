@@ -1,4 +1,5 @@
 #include <csl/geometry/hull_reducer.hpp>
+#include "exact_convex_combination.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -66,51 +67,24 @@ std::optional<RemovalCertificate> certificate(const PointCloud& cloud,
     auto checked = optimization::evaluate_primal(
         program, *result.primal, context.numerical,
         {{"hull-reducer.barycentric-residual"}, "1"});
-    if (!std::holds_alternative<optimization::PrimalEvaluation>(checked)) return {};
-    const auto& primal = std::get<optimization::PrimalEvaluation>(checked);
-    const double primal_tolerance = context.numerical.absolute_tolerance +
-        context.numerical.relative_tolerance * primal.residuals.rows.scale;
-    const double variable_tolerance = context.numerical.absolute_tolerance +
-        context.numerical.relative_tolerance * primal.residuals.variables.scale;
-    if (!std::isfinite(primal_tolerance) || !std::isfinite(variable_tolerance) ||
-        primal.residuals.rows.violation > primal_tolerance ||
-        primal.residuals.variables.violation > variable_tolerance) return {};
-    // Recheck the barycentric equations against the original point data rather
-    // than trusting the adapter's claim or residual payload.
-    Vector weights = *result.primal;
-    const double tolerance = context.numerical.absolute_tolerance +
-        context.numerical.relative_tolerance;
-    double total = 0.0;
-    for (double& weight : weights) {
-        if (!std::isfinite(weight) || weight < -tolerance) return {};
-        weight = std::max(0.0, weight);
-        total += weight;
-    }
-    if (!std::isfinite(total) || total <= 0.0) return {};
-    for (double& weight : weights) weight /= total;
-    double normalized_total = 0.0;
-    for (double weight : weights) normalized_total += weight;
-    if (!std::isfinite(normalized_total)) return {};
-    double max_residual = std::abs(normalized_total - 1.0);
-    if (max_residual > tolerance) return {};
-    for (std::size_t r = 0; r < cloud.points[candidate].size(); ++r) {
-        double value = 0.0;
-        for (std::size_t c = 0; c < support.size(); ++c)
-            value += weights[c] * cloud.points[support[c]][r];
-        if (!std::isfinite(value)) return {};
-        const double residual = std::abs(value - cloud.points[candidate][r]);
-        const double scale = std::max({1.0, std::abs(value), std::abs(cloud.points[candidate][r])});
-        const double allowed = context.numerical.absolute_tolerance +
-            context.numerical.relative_tolerance * scale;
-        if (!std::isfinite(residual) || !std::isfinite(allowed) || residual > allowed) return {};
-        max_residual = std::max(max_residual, residual);
+    // The LP evaluation remains useful evidence for diagnosing solver quality,
+    // but only the exact check below can authorize a deletion.
+    double max_residual = 0.0;
+    if (const auto* primal = std::get_if<optimization::PrimalEvaluation>(&checked)) {
+        if (std::isfinite(primal->residuals.rows.violation))
+            max_residual = std::max(max_residual, primal->residuals.rows.violation);
+        if (std::isfinite(primal->residuals.variables.violation))
+            max_residual = std::max(max_residual, primal->residuals.variables.violation);
     }
     std::vector<ConvexCombination> terms;
     for (std::size_t c = 0; c < support.size(); ++c)
-        if (weights[c] > 0.0) terms.push_back({support[c], weights[c]});
+        terms.push_back({support[c], (*result.primal)[c]});
+    if (!detail::exact_convex_combination(cloud, candidate, terms)) return {};
+    terms.erase(std::remove_if(terms.begin(), terms.end(),
+        [](const ConvexCombination& term) { return term.weight == 0.0; }), terms.end());
     return RemovalCertificate{candidate, std::move(terms), program.identity(),
         {context.numerical.absolute_tolerance, context.numerical.relative_tolerance,
-         max_residual, {"hull-reducer.barycentric-residual"}}};
+         max_residual, {"hull-reducer.exact-binary64-convex-combination"}}};
 }
 
 bool completed_infeasibility(const ProgramResult& result) {
