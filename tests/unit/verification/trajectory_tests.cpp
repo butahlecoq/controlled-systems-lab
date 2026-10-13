@@ -202,6 +202,7 @@ TEST_CASE("published candidate and claimed optimum never establish family covera
         {1e-8,1e-8},Assurance::numerical,{"opaque-family"},{}};
     const FamilyIdentity identity{p.identity(),effective,coordinates,{"candidate-strategy"},"1",{}};
     const JointRelation relation{coordinates,effective.representation,{}};
+    q.expected_synthesis=ExpectedSynthesisBinding{effective,{"candidate-strategy"},"1",{}};
     q.family=accepted(FamilyPublisher::publish(identity,CandidateFamily{relation,
         HeuristicRelationEvidence{"literal candidate"},WitnessFeasibilityEvidence{q.witness,claim}}));
     auto r=verify_trajectory(p,q);
