@@ -1,0 +1,1 @@
+Profiling was not collected. No separate profiler run was performed; per-trial CPU usage, OS limiter state, peak memory, and internal LP timing are unavailable.

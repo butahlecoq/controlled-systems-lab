@@ -1,0 +1,11 @@
+{
+  "os": "Windows-11-10.0.22631-SP0",
+  "architecture": "AMD64",
+  "cpu_model": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+  "logical_cpu_count": 12,
+  "python": "3.13.5",
+  "native_threads_requested": 1,
+  "native_threads_observed": null,
+  "per_trial_cpu": null,
+  "per_trial_peak_memory": null
+}

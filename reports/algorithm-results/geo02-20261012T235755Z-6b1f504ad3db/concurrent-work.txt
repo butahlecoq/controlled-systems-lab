@@ -1,0 +1,1 @@
+No other task-specific computation was launched during timed trials. Background operating-system load was not sampled, so no limiter claim is made.

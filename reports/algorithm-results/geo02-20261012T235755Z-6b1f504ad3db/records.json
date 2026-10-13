@@ -1,0 +1,1411 @@
+{
+  "schema": "csl.geo02-affine-sum-report/1",
+  "report_id": "geo02-20261012T235755Z-6b1f504ad3db",
+  "algorithm": {
+    "id": "GEO-02",
+    "source_commit": "767f0c6a1bb26ddc76318cd519df41947a7b264b",
+    "harness_commit": "3cdec39daaad5421cfa3cd01336f2b511e403925",
+    "api": "csl.geometry.affine-sum"
+  },
+  "collection": {
+    "state": "complete",
+    "expected_trials": 28,
+    "actual_trials": 28,
+    "failures": 0,
+    "measured_repetitions": 7,
+    "warmups_per_scenario": 1,
+    "warmup_results": [
+      {
+        "scenario": "scalar_interval_affine_image",
+        "repetition": 0,
+        "status": "passed",
+        "detail": "",
+        "output_points": [
+          [
+            2
+          ],
+          [
+            -2
+          ]
+        ],
+        "support_checks": 2,
+        "support_values": [
+          2,
+          2
+        ],
+        "oracle_passed": true
+      },
+      {
+        "scenario": "rectangular_projection_box",
+        "repetition": 0,
+        "status": "passed",
+        "detail": "",
+        "output_points": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "support_checks": 2,
+        "support_values": [
+          2,
+          0
+        ],
+        "oracle_passed": true
+      },
+      {
+        "scenario": "singular_map_box_segment",
+        "repetition": 0,
+        "status": "passed",
+        "detail": "",
+        "output_points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            4
+          ]
+        ],
+        "support_checks": 4,
+        "support_values": [
+          2,
+          0,
+          4,
+          0
+        ],
+        "oracle_passed": true
+      },
+      {
+        "scenario": "minkowski_interval_sum",
+        "repetition": 0,
+        "status": "passed",
+        "detail": "",
+        "output_points": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ]
+        ],
+        "support_checks": 2,
+        "support_values": [
+          4,
+          -1
+        ],
+        "oracle_passed": true
+      }
+    ],
+    "warmup_failures": 0,
+    "warmup_parse_error": null,
+    "process_return_code": 0,
+    "aborted_or_timed_out": false,
+    "parse_error": null,
+    "order": "forward scenario order each repetition",
+    "timing_unit": "steady-clock nanoseconds"
+  },
+  "timing_scopes": {
+    "setup_ns": "Registry/provider construction, operation selection/preparation, and workspace creation; starts after fixture construction.",
+    "operation_ns": "Elapsed time inside the prepared geometry workspace run call.",
+    "oracle_ns": "Literal expected-point and support-value checks; excludes output extraction and serialization.",
+    "total_ns": "End-to-end driver time from fixture construction through output extraction, serialization, and oracle checks; includes the named phases plus intervening harness work."
+  },
+  "expected": {
+    "scalar_interval_affine_image": {
+      "inputs": {
+        "vertices": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "A": [
+          [
+            2.0
+          ]
+        ],
+        "b": [
+          0.0
+        ]
+      },
+      "outputs": [
+        [
+          -2.0
+        ],
+        [
+          2.0
+        ]
+      ],
+      "directions": [
+        [
+          1.0
+        ],
+        [
+          -1.0
+        ]
+      ],
+      "support": [
+        2.0,
+        2.0
+      ]
+    },
+    "rectangular_projection_box": {
+      "inputs": {
+        "vertices": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "A": [
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "b": [
+          0.0
+        ]
+      },
+      "outputs": [
+        [
+          0.0
+        ],
+        [
+          2.0
+        ]
+      ],
+      "directions": [
+        [
+          1.0
+        ],
+        [
+          -1.0
+        ]
+      ],
+      "support": [
+        2.0,
+        0.0
+      ]
+    },
+    "singular_map_box_segment": {
+      "inputs": {
+        "vertices": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "A": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            2.0,
+            2.0
+          ]
+        ],
+        "b": [
+          0.0,
+          0.0
+        ]
+      },
+      "outputs": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "directions": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          -1.0
+        ]
+      ],
+      "support": [
+        2.0,
+        0.0,
+        4.0,
+        0.0
+      ]
+    },
+    "minkowski_interval_sum": {
+      "inputs": {
+        "left_vertices": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "right_vertices": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ]
+        ]
+      },
+      "outputs": [
+        [
+          1.0
+        ],
+        [
+          4.0
+        ]
+      ],
+      "directions": [
+        [
+          1.0
+        ],
+        [
+          -1.0
+        ]
+      ],
+      "support": [
+        4.0,
+        -1.0
+      ]
+    }
+  },
+  "inputs": {
+    "scenario_catalog_sha256": "32ac37d4f778a93616b47e8bbd3a27078af305661ddcc91fbe73b5c5df906b57",
+    "executable_sha256": "821ce12aa23bfc39264034ec78855f810ba297fb7a2fe88e5e3217de8856e0b2",
+    "build_provenance_sha256": "bb4d7a9e484795887c0e55af16545044fd0eef6a7fd788b4d1f6f6b6771de754",
+    "concurrent_work_sha256": "6a813da0b6cced46690e86ccfcbd900c3271e4002d07eddf649a9ee97c48a5e3",
+    "profile_evidence_sha256": "2cf30274120c4b5ad7b5ec9c44864c9ceb684e229660bbc438071b34ca9a061d"
+  },
+  "summary": {
+    "scalar_interval_affine_image": {
+      "attempts": 7,
+      "passed": 7,
+      "failures": 0,
+      "phases": {
+        "setup_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 7600,
+          "min": 6700,
+          "max": 8800,
+          "range": 2100,
+          "trials_excluded_from_summary": 0
+        },
+        "operation_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 395800,
+          "min": 357100,
+          "max": 424300,
+          "range": 67200,
+          "trials_excluded_from_summary": 0
+        },
+        "oracle_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1700,
+          "min": 1600,
+          "max": 1900,
+          "range": 300,
+          "trials_excluded_from_summary": 0
+        },
+        "total_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 413800,
+          "min": 373600,
+          "max": 444100,
+          "range": 70500,
+          "trials_excluded_from_summary": 0
+        }
+      }
+    },
+    "rectangular_projection_box": {
+      "attempts": 7,
+      "passed": 7,
+      "failures": 0,
+      "phases": {
+        "setup_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 6800,
+          "min": 5900,
+          "max": 7300,
+          "range": 1400,
+          "trials_excluded_from_summary": 0
+        },
+        "operation_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 782600,
+          "min": 731000,
+          "max": 809100,
+          "range": 78100,
+          "trials_excluded_from_summary": 0
+        },
+        "oracle_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 1700,
+          "min": 1500,
+          "max": 2100,
+          "range": 600,
+          "trials_excluded_from_summary": 0
+        },
+        "total_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 801000,
+          "min": 747100,
+          "max": 826800,
+          "range": 79700,
+          "trials_excluded_from_summary": 0
+        }
+      }
+    },
+    "singular_map_box_segment": {
+      "attempts": 7,
+      "passed": 7,
+      "failures": 0,
+      "phases": {
+        "setup_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 7400,
+          "min": 6700,
+          "max": 8600,
+          "range": 1900,
+          "trials_excluded_from_summary": 0
+        },
+        "operation_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 807900,
+          "min": 771300,
+          "max": 849800,
+          "range": 78500,
+          "trials_excluded_from_summary": 0
+        },
+        "oracle_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 2700,
+          "min": 2600,
+          "max": 2800,
+          "range": 200,
+          "trials_excluded_from_summary": 0
+        },
+        "total_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 832800,
+          "min": 791200,
+          "max": 870700,
+          "range": 79500,
+          "trials_excluded_from_summary": 0
+        }
+      }
+    },
+    "minkowski_interval_sum": {
+      "attempts": 7,
+      "passed": 7,
+      "failures": 0,
+      "phases": {
+        "setup_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 7600,
+          "min": 6900,
+          "max": 9200,
+          "range": 2300,
+          "trials_excluded_from_summary": 0
+        },
+        "operation_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 815800,
+          "min": 764100,
+          "max": 850000,
+          "range": 85900,
+          "trials_excluded_from_summary": 0
+        },
+        "oracle_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 2100,
+          "min": 2000,
+          "max": 2200,
+          "range": 200,
+          "trials_excluded_from_summary": 0
+        },
+        "total_ns": {
+          "unit": "ns",
+          "successful_trials": 7,
+          "median": 833900,
+          "min": 782500,
+          "max": 870400,
+          "range": 87900,
+          "trials_excluded_from_summary": 0
+        }
+      }
+    }
+  },
+  "trials": [
+    {
+      "scenario": "scalar_interval_affine_image",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 8800,
+      "operation_ns": 424300,
+      "oracle_ns": 1900,
+      "total_ns": 444100,
+      "output_points": [
+        [
+          2
+        ],
+        [
+          -2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        2
+      ],
+      "oracle_passed": true,
+      "input_sha256": "2c9d98400ee6a342e1dcde232fea2c7e8ad6cd81d26eeca32572ba275d82d272"
+    },
+    {
+      "scenario": "rectangular_projection_box",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7300,
+      "operation_ns": 809100,
+      "oracle_ns": 1700,
+      "total_ns": 826800,
+      "output_points": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "127519d6bef621de30b37c15a1efa2e18e595043d73a37631bfdade2c410b91a"
+    },
+    {
+      "scenario": "singular_map_box_segment",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7300,
+      "operation_ns": 849800,
+      "oracle_ns": 2800,
+      "total_ns": 870700,
+      "output_points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "support_checks": 4,
+      "support_values": [
+        2,
+        0,
+        4,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "045ed50b4c1eeeed3aa0fca0461e3df5aa042efb8c3837f0bb7c31d17b06a01e"
+    },
+    {
+      "scenario": "minkowski_interval_sum",
+      "repetition": 0,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7900,
+      "operation_ns": 809900,
+      "oracle_ns": 2100,
+      "total_ns": 829400,
+      "output_points": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        4,
+        -1
+      ],
+      "oracle_passed": true,
+      "input_sha256": "7546cbc8cab9f58eb71540744db492d2328e24070f60df3d60e5ec7259153132"
+    },
+    {
+      "scenario": "scalar_interval_affine_image",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7600,
+      "operation_ns": 378500,
+      "oracle_ns": 1700,
+      "total_ns": 396700,
+      "output_points": [
+        [
+          2
+        ],
+        [
+          -2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        2
+      ],
+      "oracle_passed": true,
+      "input_sha256": "2c9d98400ee6a342e1dcde232fea2c7e8ad6cd81d26eeca32572ba275d82d272"
+    },
+    {
+      "scenario": "rectangular_projection_box",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 6800,
+      "operation_ns": 800600,
+      "oracle_ns": 1800,
+      "total_ns": 817800,
+      "output_points": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "127519d6bef621de30b37c15a1efa2e18e595043d73a37631bfdade2c410b91a"
+    },
+    {
+      "scenario": "singular_map_box_segment",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 8500,
+      "operation_ns": 807900,
+      "oracle_ns": 2700,
+      "total_ns": 838900,
+      "output_points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "support_checks": 4,
+      "support_values": [
+        2,
+        0,
+        4,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "045ed50b4c1eeeed3aa0fca0461e3df5aa042efb8c3837f0bb7c31d17b06a01e"
+    },
+    {
+      "scenario": "minkowski_interval_sum",
+      "repetition": 1,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 9200,
+      "operation_ns": 816800,
+      "oracle_ns": 2100,
+      "total_ns": 837900,
+      "output_points": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        4,
+        -1
+      ],
+      "oracle_passed": true,
+      "input_sha256": "7546cbc8cab9f58eb71540744db492d2328e24070f60df3d60e5ec7259153132"
+    },
+    {
+      "scenario": "scalar_interval_affine_image",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7900,
+      "operation_ns": 397300,
+      "oracle_ns": 1700,
+      "total_ns": 414300,
+      "output_points": [
+        [
+          2
+        ],
+        [
+          -2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        2
+      ],
+      "oracle_passed": true,
+      "input_sha256": "2c9d98400ee6a342e1dcde232fea2c7e8ad6cd81d26eeca32572ba275d82d272"
+    },
+    {
+      "scenario": "rectangular_projection_box",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7000,
+      "operation_ns": 782600,
+      "oracle_ns": 1700,
+      "total_ns": 801000,
+      "output_points": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "127519d6bef621de30b37c15a1efa2e18e595043d73a37631bfdade2c410b91a"
+    },
+    {
+      "scenario": "singular_map_box_segment",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 8600,
+      "operation_ns": 831700,
+      "oracle_ns": 2700,
+      "total_ns": 853600,
+      "output_points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "support_checks": 4,
+      "support_values": [
+        2,
+        0,
+        4,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "045ed50b4c1eeeed3aa0fca0461e3df5aa042efb8c3837f0bb7c31d17b06a01e"
+    },
+    {
+      "scenario": "minkowski_interval_sum",
+      "repetition": 2,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7600,
+      "operation_ns": 850000,
+      "oracle_ns": 2200,
+      "total_ns": 870400,
+      "output_points": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        4,
+        -1
+      ],
+      "oracle_passed": true,
+      "input_sha256": "7546cbc8cab9f58eb71540744db492d2328e24070f60df3d60e5ec7259153132"
+    },
+    {
+      "scenario": "scalar_interval_affine_image",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7900,
+      "operation_ns": 395800,
+      "oracle_ns": 1800,
+      "total_ns": 413800,
+      "output_points": [
+        [
+          2
+        ],
+        [
+          -2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        2
+      ],
+      "oracle_passed": true,
+      "input_sha256": "2c9d98400ee6a342e1dcde232fea2c7e8ad6cd81d26eeca32572ba275d82d272"
+    },
+    {
+      "scenario": "rectangular_projection_box",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 6900,
+      "operation_ns": 779600,
+      "oracle_ns": 1700,
+      "total_ns": 797600,
+      "output_points": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "127519d6bef621de30b37c15a1efa2e18e595043d73a37631bfdade2c410b91a"
+    },
+    {
+      "scenario": "singular_map_box_segment",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7500,
+      "operation_ns": 812200,
+      "oracle_ns": 2700,
+      "total_ns": 832800,
+      "output_points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "support_checks": 4,
+      "support_values": [
+        2,
+        0,
+        4,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "045ed50b4c1eeeed3aa0fca0461e3df5aa042efb8c3837f0bb7c31d17b06a01e"
+    },
+    {
+      "scenario": "minkowski_interval_sum",
+      "repetition": 3,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7000,
+      "operation_ns": 815800,
+      "oracle_ns": 2000,
+      "total_ns": 833900,
+      "output_points": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        4,
+        -1
+      ],
+      "oracle_passed": true,
+      "input_sha256": "7546cbc8cab9f58eb71540744db492d2328e24070f60df3d60e5ec7259153132"
+    },
+    {
+      "scenario": "scalar_interval_affine_image",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7200,
+      "operation_ns": 371800,
+      "oracle_ns": 1700,
+      "total_ns": 388900,
+      "output_points": [
+        [
+          2
+        ],
+        [
+          -2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        2
+      ],
+      "oracle_passed": true,
+      "input_sha256": "2c9d98400ee6a342e1dcde232fea2c7e8ad6cd81d26eeca32572ba275d82d272"
+    },
+    {
+      "scenario": "rectangular_projection_box",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 6500,
+      "operation_ns": 804900,
+      "oracle_ns": 2100,
+      "total_ns": 822100,
+      "output_points": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "127519d6bef621de30b37c15a1efa2e18e595043d73a37631bfdade2c410b91a"
+    },
+    {
+      "scenario": "singular_map_box_segment",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 6900,
+      "operation_ns": 797200,
+      "oracle_ns": 2600,
+      "total_ns": 816900,
+      "output_points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "support_checks": 4,
+      "support_values": [
+        2,
+        0,
+        4,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "045ed50b4c1eeeed3aa0fca0461e3df5aa042efb8c3837f0bb7c31d17b06a01e"
+    },
+    {
+      "scenario": "minkowski_interval_sum",
+      "repetition": 4,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7600,
+      "operation_ns": 841100,
+      "oracle_ns": 2000,
+      "total_ns": 859300,
+      "output_points": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        4,
+        -1
+      ],
+      "oracle_passed": true,
+      "input_sha256": "7546cbc8cab9f58eb71540744db492d2328e24070f60df3d60e5ec7259153132"
+    },
+    {
+      "scenario": "scalar_interval_affine_image",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 6700,
+      "operation_ns": 357100,
+      "oracle_ns": 1900,
+      "total_ns": 373600,
+      "output_points": [
+        [
+          2
+        ],
+        [
+          -2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        2
+      ],
+      "oracle_passed": true,
+      "input_sha256": "2c9d98400ee6a342e1dcde232fea2c7e8ad6cd81d26eeca32572ba275d82d272"
+    },
+    {
+      "scenario": "rectangular_projection_box",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 5900,
+      "operation_ns": 782000,
+      "oracle_ns": 1700,
+      "total_ns": 798600,
+      "output_points": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "127519d6bef621de30b37c15a1efa2e18e595043d73a37631bfdade2c410b91a"
+    },
+    {
+      "scenario": "singular_map_box_segment",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7400,
+      "operation_ns": 771300,
+      "oracle_ns": 2600,
+      "total_ns": 791200,
+      "output_points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "support_checks": 4,
+      "support_values": [
+        2,
+        0,
+        4,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "045ed50b4c1eeeed3aa0fca0461e3df5aa042efb8c3837f0bb7c31d17b06a01e"
+    },
+    {
+      "scenario": "minkowski_interval_sum",
+      "repetition": 5,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 6900,
+      "operation_ns": 783600,
+      "oracle_ns": 2000,
+      "total_ns": 800900,
+      "output_points": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        4,
+        -1
+      ],
+      "oracle_passed": true,
+      "input_sha256": "7546cbc8cab9f58eb71540744db492d2328e24070f60df3d60e5ec7259153132"
+    },
+    {
+      "scenario": "scalar_interval_affine_image",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7100,
+      "operation_ns": 400700,
+      "oracle_ns": 1600,
+      "total_ns": 416800,
+      "output_points": [
+        [
+          2
+        ],
+        [
+          -2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        2
+      ],
+      "oracle_passed": true,
+      "input_sha256": "2c9d98400ee6a342e1dcde232fea2c7e8ad6cd81d26eeca32572ba275d82d272"
+    },
+    {
+      "scenario": "rectangular_projection_box",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 6700,
+      "operation_ns": 731000,
+      "oracle_ns": 1500,
+      "total_ns": 747100,
+      "output_points": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        2,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "127519d6bef621de30b37c15a1efa2e18e595043d73a37631bfdade2c410b91a"
+    },
+    {
+      "scenario": "singular_map_box_segment",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 6700,
+      "operation_ns": 778000,
+      "oracle_ns": 2700,
+      "total_ns": 803100,
+      "output_points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "support_checks": 4,
+      "support_values": [
+        2,
+        0,
+        4,
+        0
+      ],
+      "oracle_passed": true,
+      "input_sha256": "045ed50b4c1eeeed3aa0fca0461e3df5aa042efb8c3837f0bb7c31d17b06a01e"
+    },
+    {
+      "scenario": "minkowski_interval_sum",
+      "repetition": 6,
+      "status": "passed",
+      "detail": "",
+      "setup_ns": 7600,
+      "operation_ns": 764100,
+      "oracle_ns": 2100,
+      "total_ns": 782500,
+      "output_points": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "support_checks": 2,
+      "support_values": [
+        4,
+        -1
+      ],
+      "oracle_passed": true,
+      "input_sha256": "7546cbc8cab9f58eb71540744db492d2328e24070f60df3d60e5ec7259153132"
+    }
+  ],
+  "evidence": {
+    "arithmetic": "IEEE 754 binary64",
+    "scope": "four tiny deterministic analytic fixtures; descriptive measurements",
+    "limiter_profile": "not collected; no OS limiter/CPU sampling available",
+    "unavailable_counters": [
+      "per-trial CPU time",
+      "native thread count",
+      "peak memory",
+      "OS limiter profiling",
+      "internal LP timings"
+    ],
+    "limitations": [
+      "tiny fixtures only",
+      "no competitor, speedup, application-scale, or scalability claim",
+      "no exact or validated geometry guarantee",
+      "candidate reducer validates output but retains full candidate cloud"
+    ]
+  },
+  "payload_hash_scope": "canonical JSON payload excluding report_id, payload_sha256, and payload_hash_scope",
+  "payload_sha256": "6b1f504ad3db6df458f041675a2ede1083e60d14c2bf92bdf234d8057fdea228"
+}

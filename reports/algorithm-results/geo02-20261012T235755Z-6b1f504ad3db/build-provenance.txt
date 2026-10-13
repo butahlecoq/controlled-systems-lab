@@ -1,0 +1,4297 @@
+{
+  "source_commit": "767f0c6a1bb26ddc76318cd519df41947a7b264b",
+  "harness_commit": "3cdec39daaad5421cfa3cd01336f2b511e403925",
+  "tracked_clean": true,
+  "tracked_tree_binding": {
+    "source_tree_oid": "bafe14421c106b7da9ea40208c9d1bca9072c496",
+    "harness_tree_oid": "ebffb7d94df44e8a74adfd9954e723d00c1995b1",
+    "scope": "complete tracked repository tree",
+    "allowed_harness_paths": [
+      "CMakeLists.txt",
+      "reports/algorithm-results/tooling/geo02/README.md",
+      "reports/algorithm-results/tooling/geo02/affine_sum_driver.cpp",
+      "reports/algorithm-results/tooling/geo02/collect.py",
+      "reports/algorithm-results/tooling/geo02/provenance.py",
+      "reports/algorithm-results/tooling/geo02/render.py",
+      "reports/algorithm-results/tooling/geo02/test_report_tools.py",
+      "scripts/reports/geo02_registered_reports.py",
+      "scripts/reports/report_data.py",
+      "scripts/reports/site.py",
+      "tests/reporting/test_geo02_publication.py"
+    ],
+    "actual_changed_paths": [
+      "CMakeLists.txt",
+      "reports/algorithm-results/tooling/geo02/README.md",
+      "reports/algorithm-results/tooling/geo02/affine_sum_driver.cpp",
+      "reports/algorithm-results/tooling/geo02/collect.py",
+      "reports/algorithm-results/tooling/geo02/provenance.py",
+      "reports/algorithm-results/tooling/geo02/render.py",
+      "reports/algorithm-results/tooling/geo02/test_report_tools.py",
+      "scripts/reports/geo02_registered_reports.py",
+      "scripts/reports/report_data.py",
+      "scripts/reports/site.py",
+      "tests/reporting/test_geo02_publication.py"
+    ]
+  },
+  "configuration": "Release",
+  "cxx_standard": "20",
+  "release_ndebug_verified": true,
+  "cmake": {
+    "version": {
+      "isDirty": false,
+      "major": 3,
+      "minor": 31,
+      "patch": 6,
+      "string": "3.31.6",
+      "suffix": ""
+    },
+    "generator": "Visual Studio 17 2022"
+  },
+  "compiler": {
+    "compiler": {
+      "id": "MSVC",
+      "implicit": {
+        "includeDirectories": [],
+        "linkDirectories": [],
+        "linkFrameworkDirectories": [],
+        "linkLibraries": []
+      },
+      "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+      "version": "19.44.35215.0"
+    },
+    "language": "CXX",
+    "sourceFileExtensions": [
+      "C",
+      "M",
+      "c++",
+      "cc",
+      "cpp",
+      "cxx",
+      "mm",
+      "mpp",
+      "CPP",
+      "ixx",
+      "cppm",
+      "ccm",
+      "cxxm",
+      "c++m"
+    ]
+  },
+  "driver_compile_group": {
+    "compileCommandFragments": [
+      {
+        "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+      }
+    ],
+    "includes": [
+      {
+        "backtrace": 2,
+        "path": "SOURCE_ROOT/include"
+      }
+    ],
+    "language": "CXX",
+    "languageStandard": {
+      "backtraces": [
+        15
+      ],
+      "standard": "20"
+    },
+    "sourceIndexes": [
+      0
+    ]
+  },
+  "dependency_targets": [
+    "ZERO_CHECK",
+    "csl_affine_sum",
+    "csl_contracts",
+    "csl_geo02_affine_sum_report",
+    "csl_highs_lp",
+    "csl_hull",
+    "csl_model",
+    "csl_numeric",
+    "csl_objectives",
+    "csl_optimization",
+    "csl_phase_one",
+    "csl_problem",
+    "csl_qhull_conversion",
+    "csl_qhull_r",
+    "csl_registry",
+    "csl_resolved_core",
+    "csl_sets",
+    "highs"
+  ],
+  "dependency_pin_file_sha256": {
+    "cmake/HighsDependencies.cmake": "05989b86e1695b20ba310f5055728bce94010be175f4aa26e3a747c8bbdc6057",
+    "cmake/QhullDependencies.cmake": "0d33dfd01c7ad898e4a2dccaa4d91467b692a3addde80fb395f49809ed75a076"
+  },
+  "file_api_paths": {
+    "build": "SOURCE_ROOT/build-geo02-check",
+    "source": "SOURCE_ROOT"
+  },
+  "executable": {
+    "path": "SOURCE_ROOT\\build-geo02-check\\Release\\csl_geo02_affine_sum_report.exe",
+    "sha256": "821ce12aa23bfc39264034ec78855f810ba297fb7a2fe88e5e3217de8856e0b2"
+  },
+  "targets": [
+    {
+      "name": "csl_geo02_affine_sum_report",
+      "type": "EXECUTABLE",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 2,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              15
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "link": {
+        "commandFragments": [
+          {
+            "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD",
+            "role": "flags"
+          },
+          {
+            "fragment": "/machine:x64 /INCREMENTAL:NO /subsystem:console",
+            "role": "flags"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_affine_sum.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_hull.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_highs_lp.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_qhull_conversion.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_phase_one.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 6,
+            "fragment": "Release\\bin\\highs.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 7,
+            "fragment": "Release\\csl_qhull_r.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 8,
+            "fragment": "Release\\csl_registry.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 9,
+            "fragment": "Release\\csl_resolved_core.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 10,
+            "fragment": "Release\\csl_problem.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 8,
+            "fragment": "Release\\csl_sets.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 11,
+            "fragment": "Release\\csl_model.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 10,
+            "fragment": "Release\\csl_objectives.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 12,
+            "fragment": "Release\\csl_optimization.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 13,
+            "fragment": "Release\\csl_numeric.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 14,
+            "fragment": "Release\\csl_contracts.lib",
+            "role": "libraries"
+          },
+          {
+            "fragment": "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+            "role": "libraries"
+          }
+        ],
+        "language": "CXX"
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_geo02_affine_sum_report.exe"
+        },
+        {
+          "path": "Release/csl_geo02_affine_sum_report.pdb"
+        }
+      ]
+    },
+    {
+      "name": "csl_sets",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_sets.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_contracts",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 4,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              5
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_contracts.lib"
+        }
+      ]
+    },
+    {
+      "name": "ZERO_CHECK",
+      "type": "UTILITY"
+    },
+    {
+      "name": "csl_numeric",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_numeric.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_optimization",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_optimization.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_model",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_model.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_objectives",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 7,
+              "define": "EIGEN_MPL2_ONLY"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 8,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 9,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_objectives_eigen-src"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              10
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_objectives.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_registry",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 6,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              7
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_registry.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_problem",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_problem.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_resolved_core",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_resolved_core.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_affine_sum",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_affine_sum.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_hull",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_hull.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_phase_one",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 5,
+              "define": "EIGEN_DONT_PARALLELIZE"
+            },
+            {
+              "backtrace": 5,
+              "define": "EIGEN_MPL2_ONLY"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 6,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 7,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_objectives_eigen-src"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              8
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_phase_one.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_qhull_conversion",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 5,
+              "define": "EIGEN_DONT_PARALLELIZE"
+            },
+            {
+              "backtrace": 5,
+              "define": "EIGEN_MPL2_ONLY"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 6,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 7,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_qhull-src/src/libqhull_r"
+            },
+            {
+              "backtrace": 7,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_objectives_eigen-src"
+            },
+            {
+              "backtrace": 3,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_qhull-src/src"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              8
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_qhull_conversion.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_highs_lp",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 9,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-build"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_highs_lp.lib"
+        }
+      ]
+    },
+    {
+      "name": "highs",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD"
+            },
+            {
+              "backtrace": 11,
+              "fragment": "-D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 12,
+              "fragment": "/MP"
+            },
+            {
+              "backtrace": 13,
+              "fragment": "/Z7"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/bigobj"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/Zc:preprocessor"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/fp:precise"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNDEBUG"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4005"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4018"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4065"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4068"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4101"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4146"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4200"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4244"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4251"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4267"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4305"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4307"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4309"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4334"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4355"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4477"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4506"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4715"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4800"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4996"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-build"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              1
+            ],
+            "standard": "11"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147
+          ]
+        },
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG -MD"
+            },
+            {
+              "backtrace": 11,
+              "fragment": "-D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 12,
+              "fragment": "/MP"
+            },
+            {
+              "backtrace": 13,
+              "fragment": "/Z7"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/bigobj"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/Zc:preprocessor"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/fp:precise"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNDEBUG"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4005"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4018"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4065"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4068"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4101"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4146"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4200"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4244"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4251"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4267"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4305"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4307"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4309"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4334"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4355"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4477"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4506"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4715"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4800"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4996"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-build"
+            }
+          ],
+          "language": "C",
+          "sourceIndexes": [
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175
+          ]
+        },
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "-DWIN32"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNDEBUG"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-build"
+            }
+          ],
+          "language": "RC",
+          "sourceIndexes": [
+            403
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/bin/highs.lib"
+        }
+      ]
+    },
+    {
+      "name": "csl_qhull_r",
+      "type": "STATIC_LIBRARY",
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG -MD"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_qhull-src/src"
+            }
+          ],
+          "language": "C",
+          "sourceIndexes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        }
+      ],
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_qhull_r.lib"
+        }
+      ]
+    }
+  ],
+  "final_build": {
+    "command": [
+      "USER_HOME/AppData/Roaming/Python/Python313/site-packages/cmake/data/bin/cmake.exe",
+      "--build",
+      "SOURCE_ROOT\\build-geo02-check",
+      "--config",
+      "Release",
+      "--target",
+      "csl_geo02_affine_sum_report",
+      "--parallel",
+      "4",
+      "--verbose"
+    ],
+    "return_code": 0,
+    "stdout_sha256": "7a940d3c5fb0c900df10735b53d8f7893f4ac82478ee7bded7c6e84a3ae1b4dc",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
+--- VERIFIED FINAL RELEASE BUILD LOG ---
+{
+  "cmake": {
+    "generator": "Visual Studio 17 2022",
+    "version": {
+      "isDirty": false,
+      "major": 3,
+      "minor": 31,
+      "patch": 6,
+      "string": "3.31.6",
+      "suffix": ""
+    }
+  },
+  "compiler": {
+    "compiler": {
+      "id": "MSVC",
+      "implicit": {
+        "includeDirectories": [],
+        "linkDirectories": [],
+        "linkFrameworkDirectories": [],
+        "linkLibraries": []
+      },
+      "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+      "version": "19.44.35215.0"
+    },
+    "language": "CXX",
+    "sourceFileExtensions": [
+      "C",
+      "M",
+      "c++",
+      "cc",
+      "cpp",
+      "cxx",
+      "mm",
+      "mpp",
+      "CPP",
+      "ixx",
+      "cppm",
+      "ccm",
+      "cxxm",
+      "c++m"
+    ]
+  },
+  "configuration": "Release",
+  "cxx_standard": "20",
+  "dependency_pin_file_sha256": {
+    "cmake/HighsDependencies.cmake": "05989b86e1695b20ba310f5055728bce94010be175f4aa26e3a747c8bbdc6057",
+    "cmake/QhullDependencies.cmake": "0d33dfd01c7ad898e4a2dccaa4d91467b692a3addde80fb395f49809ed75a076"
+  },
+  "dependency_targets": [
+    "ZERO_CHECK",
+    "csl_affine_sum",
+    "csl_contracts",
+    "csl_geo02_affine_sum_report",
+    "csl_highs_lp",
+    "csl_hull",
+    "csl_model",
+    "csl_numeric",
+    "csl_objectives",
+    "csl_optimization",
+    "csl_phase_one",
+    "csl_problem",
+    "csl_qhull_conversion",
+    "csl_qhull_r",
+    "csl_registry",
+    "csl_resolved_core",
+    "csl_sets",
+    "highs"
+  ],
+  "driver_compile_group": {
+    "compileCommandFragments": [
+      {
+        "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+      }
+    ],
+    "includes": [
+      {
+        "backtrace": 2,
+        "path": "SOURCE_ROOT/include"
+      }
+    ],
+    "language": "CXX",
+    "languageStandard": {
+      "backtraces": [
+        15
+      ],
+      "standard": "20"
+    },
+    "sourceIndexes": [
+      0
+    ]
+  },
+  "executable": {
+    "path": "SOURCE_ROOT\\build-geo02-check\\Release\\csl_geo02_affine_sum_report.exe",
+    "sha256": "821ce12aa23bfc39264034ec78855f810ba297fb7a2fe88e5e3217de8856e0b2"
+  },
+  "file_api_paths": {
+    "build": "SOURCE_ROOT/build-geo02-check",
+    "source": "SOURCE_ROOT"
+  },
+  "final_build": {
+    "command": [
+      "USER_HOME/AppData/Roaming/Python/Python313/site-packages/cmake/data/bin/cmake.exe",
+      "--build",
+      "SOURCE_ROOT\\build-geo02-check",
+      "--config",
+      "Release",
+      "--target",
+      "csl_geo02_affine_sum_report",
+      "--parallel",
+      "4",
+      "--verbose"
+    ],
+    "return_code": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "7a940d3c5fb0c900df10735b53d8f7893f4ac82478ee7bded7c6e84a3ae1b4dc"
+  },
+  "harness_commit": "3cdec39daaad5421cfa3cd01336f2b511e403925",
+  "release_ndebug_verified": true,
+  "source_commit": "767f0c6a1bb26ddc76318cd519df41947a7b264b",
+  "targets": [
+    {
+      "artifacts": [
+        {
+          "path": "Release/csl_geo02_affine_sum_report.exe"
+        },
+        {
+          "path": "Release/csl_geo02_affine_sum_report.pdb"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 2,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              15
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "link": {
+        "commandFragments": [
+          {
+            "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD",
+            "role": "flags"
+          },
+          {
+            "fragment": "/machine:x64 /INCREMENTAL:NO /subsystem:console",
+            "role": "flags"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_affine_sum.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_hull.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_highs_lp.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_qhull_conversion.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 2,
+            "fragment": "Release\\csl_phase_one.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 6,
+            "fragment": "Release\\bin\\highs.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 7,
+            "fragment": "Release\\csl_qhull_r.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 8,
+            "fragment": "Release\\csl_registry.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 9,
+            "fragment": "Release\\csl_resolved_core.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 10,
+            "fragment": "Release\\csl_problem.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 8,
+            "fragment": "Release\\csl_sets.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 11,
+            "fragment": "Release\\csl_model.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 10,
+            "fragment": "Release\\csl_objectives.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 12,
+            "fragment": "Release\\csl_optimization.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 13,
+            "fragment": "Release\\csl_numeric.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 14,
+            "fragment": "Release\\csl_contracts.lib",
+            "role": "libraries"
+          },
+          {
+            "fragment": "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+            "role": "libraries"
+          }
+        ],
+        "language": "CXX"
+      },
+      "name": "csl_geo02_affine_sum_report",
+      "type": "EXECUTABLE"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_sets.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_sets",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_contracts.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 3,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 4,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              5
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_contracts",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "name": "ZERO_CHECK",
+      "type": "UTILITY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_numeric.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_numeric",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_optimization.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "name": "csl_optimization",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_model.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_model",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_objectives.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 7,
+              "define": "EIGEN_MPL2_ONLY"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 8,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 9,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_objectives_eigen-src"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              10
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_objectives",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_registry.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 5,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 6,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              7
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_registry",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_problem.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "name": "csl_problem",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_resolved_core.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "name": "csl_resolved_core",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_affine_sum.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_affine_sum",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_hull.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              6
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_hull",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_phase_one.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 5,
+              "define": "EIGEN_DONT_PARALLELIZE"
+            },
+            {
+              "backtrace": 5,
+              "define": "EIGEN_MPL2_ONLY"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 6,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 7,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_objectives_eigen-src"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              8
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "name": "csl_phase_one",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_qhull_conversion.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 4,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 5,
+              "define": "EIGEN_DONT_PARALLELIZE"
+            },
+            {
+              "backtrace": 5,
+              "define": "EIGEN_MPL2_ONLY"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 6,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 7,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_qhull-src/src/libqhull_r"
+            },
+            {
+              "backtrace": 7,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_objectives_eigen-src"
+            },
+            {
+              "backtrace": 3,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_qhull-src/src"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              8
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "name": "csl_qhull_conversion",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_highs_lp.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 9,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 10,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-build"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_highs_lp",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/bin/highs.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD"
+            },
+            {
+              "backtrace": 11,
+              "fragment": "-D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 12,
+              "fragment": "/MP"
+            },
+            {
+              "backtrace": 13,
+              "fragment": "/Z7"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/bigobj"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/Zc:preprocessor"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/fp:precise"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNDEBUG"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4005"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4018"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4065"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4068"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4101"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4146"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4200"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4244"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4251"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4267"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4305"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4307"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4309"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4334"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4355"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4477"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4506"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4715"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4800"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4996"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-build"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              1
+            ],
+            "standard": "11"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147
+          ]
+        },
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG -MD"
+            },
+            {
+              "backtrace": 11,
+              "fragment": "-D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 12,
+              "fragment": "/MP"
+            },
+            {
+              "backtrace": 13,
+              "fragment": "/Z7"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/bigobj"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/Zc:preprocessor"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/fp:precise"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNDEBUG"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4005"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4018"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4065"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4068"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4101"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4146"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4200"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4244"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4251"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4267"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4305"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4307"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4309"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4334"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4355"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4477"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4506"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4715"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4800"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/wd4996"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-build"
+            }
+          ],
+          "language": "C",
+          "sourceIndexes": [
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175
+          ]
+        },
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "-DWIN32"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNOMINMAX"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DWIN32_LEAN_AND_MEAN=1"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_WARNINGS"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/D_CRT_SECURE_NO_DEPRECATE"
+            },
+            {
+              "backtrace": 14,
+              "fragment": "/DNDEBUG"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/filereader"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/pdqsort"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/extern/zstr"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/interfaces"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/io"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/ipx"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/ipm/basiclu"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/lp_data"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/mip"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/model"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/parallel"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/pdlp/cupdlp"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/presolve"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/qpsolver"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/simplex"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/test_kkt"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/util"
+            },
+            {
+              "backtrace": 15,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_highs-build"
+            }
+          ],
+          "language": "RC",
+          "sourceIndexes": [
+            403
+          ]
+        }
+      ],
+      "name": "highs",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_qhull_r.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG -MD"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 5,
+              "isSystem": true,
+              "path": "SOURCE_ROOT/build-geo02-check/_deps/csl_qhull-src/src"
+            }
+          ],
+          "language": "C",
+          "sourceIndexes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        }
+      ],
+      "name": "csl_qhull_r",
+      "type": "STATIC_LIBRARY"
+    }
+  ],
+  "tracked_clean": true,
+  "tracked_tree_binding": {
+    "actual_changed_paths": [
+      "CMakeLists.txt",
+      "reports/algorithm-results/tooling/geo02/README.md",
+      "reports/algorithm-results/tooling/geo02/affine_sum_driver.cpp",
+      "reports/algorithm-results/tooling/geo02/collect.py",
+      "reports/algorithm-results/tooling/geo02/provenance.py",
+      "reports/algorithm-results/tooling/geo02/render.py",
+      "reports/algorithm-results/tooling/geo02/test_report_tools.py",
+      "scripts/reports/geo02_registered_reports.py",
+      "scripts/reports/report_data.py",
+      "scripts/reports/site.py",
+      "tests/reporting/test_geo02_publication.py"
+    ],
+    "allowed_harness_paths": [
+      "CMakeLists.txt",
+      "reports/algorithm-results/tooling/geo02/README.md",
+      "reports/algorithm-results/tooling/geo02/affine_sum_driver.cpp",
+      "reports/algorithm-results/tooling/geo02/collect.py",
+      "reports/algorithm-results/tooling/geo02/provenance.py",
+      "reports/algorithm-results/tooling/geo02/render.py",
+      "reports/algorithm-results/tooling/geo02/test_report_tools.py",
+      "scripts/reports/geo02_registered_reports.py",
+      "scripts/reports/report_data.py",
+      "scripts/reports/site.py",
+      "tests/reporting/test_geo02_publication.py"
+    ],
+    "harness_tree_oid": "ebffb7d94df44e8a74adfd9954e723d00c1995b1",
+    "scope": "complete tracked repository tree",
+    "source_tree_oid": "bafe14421c106b7da9ea40208c9d1bca9072c496"
+  }
+}
+--- FINAL RELEASE BUILD STDOUT ---
+Change Dir: 'SOURCE_ROOT/build-geo02-check'
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" csl_geo02_affine_sum_report.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:4 /v:n
+Р’РµСЂСЃРёСЏ MSBuild 17.14.19+164abd434 РґР»СЏ .NET Framework
+РЎР±РѕСЂРєР° РЅР°С‡Р°С‚Р° 13.10.2026 2:57:53.
+
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\ZERO_CHECK.vcxproj" (2) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     2>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         1>Checking Build System
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+     2>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\ZERO_CHECK.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_contracts.vcxproj" (4) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     4>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_qhull_r.vcxproj" (18) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    18>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_highs_lp.vcxproj" (5) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     5>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_highs_lp.vcxproj" (5) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\_deps\csl_highs-build\highs\highs.vcxproj" (17) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    17>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+    18>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_qhull_r.dir\Release\csl_qhull_r.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_qhull_r.dir\Release\csl_qhull_r.tlog\unsuccessfulbuild".
+    17>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "highs.dir\Release\highs.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "highs.dir\Release\highs.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    18>CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    17>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/build-geo02-check/_deps/csl_highs-src/highs/CMakeLists.txt
+    18>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+     4>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_contracts.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_contracts.lib
+    18>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_qhull_r.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_qhull_r.lib
+    17>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    18>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_qhull_r.dir\Release\csl_qhull_r.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_qhull_r.dir\Release\csl_qhull_r.tlog\csl_qhull_r.lastbuildstate".
+    18>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_qhull_r.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     4>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate".
+     4>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_contracts.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    17>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_affine_sum.vcxproj" (3) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     3>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_affine_sum.vcxproj" (3) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_numeric.vcxproj" (9) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     9>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild".
+    17>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     9>CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    17>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ResourceCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     9>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    17>Lib:
+         highs.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\bin\highs.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "highs.dir\Release\highs.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "highs.dir\Release\highs.tlog\highs.lastbuildstate".
+    17>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\_deps\csl_highs-build\highs\highs.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     9>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_numeric.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_numeric.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate".
+     9>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_numeric.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     5>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_highs_lp.vcxproj" (5) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_objectives.vcxproj" (11) РІ СѓР·Р»Рµ 4 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    11>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild".
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_hull.vcxproj" (6) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_hull.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_optimization.vcxproj" (10) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    10>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+    11>CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    10>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_hull.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_problem.vcxproj" (8) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     8>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_problem.vcxproj" (8) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_sets.vcxproj" (12) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    12>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+    10>InitializeBuildStatus:
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    12>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    10>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    12>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    11>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+     3>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_affine_sum.vcxproj" (3) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_model.vcxproj" (7) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     7>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+    10>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+     7>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild".
+    10>SetModuleDependencies:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     7>CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    10>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_optimization.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_optimization.lib
+    11>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_objectives.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_objectives.lib
+    10>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_optimization.dir\Release\csl_optimization.tlog\csl_optimization.lastbuildstate".
+    10>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_optimization.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    11>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_objectives.dir\Release\csl_objectives.tlog\csl_objectives.lastbuildstate".
+    11>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_objectives.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     7>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_model.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_model.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate".
+     7>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_model.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    12>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_sets.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_sets.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_sets.dir\Release\csl_sets.tlog\csl_sets.lastbuildstate".
+    12>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_sets.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     8>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_problem.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_problem.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_problem.dir\Release\csl_problem.tlog\csl_problem.lastbuildstate".
+     8>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_problem.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_hull.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_resolved_core.vcxproj" (14) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    14>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_resolved_core.dir\Release\csl_reso.99805FB4.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_resolved_core.dir\Release\csl_reso.99805FB4.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_resolved_core.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_resolved_core.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_resolved_core.dir\Release\csl_reso.99805FB4.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_resolved_core.dir\Release\csl_reso.99805FB4.tlog\csl_resolved_core.lastbuildstate".
+    14>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_resolved_core.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     6>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_hull.vcxproj" (6) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_registry.vcxproj" (13) РІ СѓР·Р»Рµ 3 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    13>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_registry.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_registry.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate".
+    13>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_registry.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_phase_one.vcxproj" (15) РІ СѓР·Р»Рµ 1 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    15>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+     6>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+     5>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+    15>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild".
+     5>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+     6>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+     5>InitializeBuildStatus:
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild".
+     6>InitializeBuildStatus:
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild".
+    15>CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     6>CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     5>CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    15>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+     5>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+     6>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+    15>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+     5>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+     6>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+     5>SetModuleDependencies:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     6>SetModuleDependencies:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    15>SetModuleDependencies:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     5>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     6>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     5>Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_highs_lp.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_highs_lp.lib
+    15>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     6>Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_hull.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_hull.lib
+    15>Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_phase_one.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_phase_one.lib
+     6>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_hull.dir\Release\csl_hull.tlog\csl_hull.lastbuildstate".
+     6>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_hull.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    15>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_phase_one.dir\Release\csl_phase_one.tlog\csl_phase_one.lastbuildstate".
+    15>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_phase_one.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     5>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_highs_lp.dir\Release\csl_highs_lp.tlog\csl_highs_lp.lastbuildstate".
+     5>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_highs_lp.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     3>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_affine_sum.dir\Release\csl_affine_sum.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_affine_sum.dir\Release\csl_affine_sum.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+     1>РџСЂРѕРµРєС‚ "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" (1) РІС‹РїРѕР»РЅСЏРµС‚ СЃР±РѕСЂРєСѓ "SOURCE_ROOT\build-geo02-check\csl_qhull_conversion.vcxproj" (16) РІ СѓР·Р»Рµ 2 (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    16>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+     3>SetModuleDependencies:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+    16>InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_qhull_conversion.dir\Release\csl_qhul.C615F022.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_qhull_conversion.dir\Release\csl_qhul.C615F022.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+     3>ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_affine_sum.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_affine_sum.lib
+    16>CustomBuild:
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+     3>FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_affine_sum.dir\Release\csl_affine_sum.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_affine_sum.dir\Release\csl_affine_sum.tlog\csl_affine_sum.lastbuildstate".
+     3>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_affine_sum.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+    16>SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Lib:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_qhull_conversion.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_qhull_conversion.lib
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_qhull_conversion.dir\Release\csl_qhul.C615F022.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_qhull_conversion.dir\Release\csl_qhul.C615F022.tlog\csl_qhull_conversion.lastbuildstate".
+    16>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_qhull_conversion.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+     1>PrepareForBuild:
+         РЎС‚СЂСѓРєС‚СѓСЂРёСЂРѕРІР°РЅРЅС‹Р№ РІС‹РІРѕРґ РІРєР»СЋС‡РµРЅ. Р¤РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёРµ РґРёР°РіРЅРѕСЃС‚РёРєРё РєРѕРјРїРёР»СЏС‚РѕСЂР° Р±СѓРґРµС‚ РѕС‚СЂР°Р¶Р°С‚СЊ РёРµСЂР°СЂС…РёСЋ РѕС€РёР±РѕРє. РџРѕРґСЂРѕР±РЅРµРµ СЃРј. https://aka.ms/cpp/structured-output.
+       InitializeBuildStatus:
+         РЎРѕР·РґР°РЅРёРµ "csl_geo02_affine_sum_report.dir\Release\csl_geo0.8A738623.tlog\unsuccessfulbuild", С‚Р°Рє РєР°Рє Р±С‹Р»Рѕ Р·Р°РґР°РЅРѕ "AlwaysCreate".
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_geo02_affine_sum_report.dir\Release\csl_geo0.8A738623.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       ClCompile:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+       Link:
+         Р”Р»СЏ РІСЃРµС… РІС‹С…РѕРґРЅС‹С… РґР°РЅРЅС‹С… РѕР±РЅРѕРІР»РµРЅРёСЏ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.
+         csl_geo02_affine_sum_report.vcxproj -> SOURCE_ROOT\build-geo02-check\Release\csl_geo02_affine_sum_report.exe
+       FinalizeBuildStatus:
+         Р¤Р°Р№Р» "csl_geo02_affine_sum_report.dir\Release\csl_geo0.8A738623.tlog\unsuccessfulbuild" СѓРґР°Р»СЏРµС‚СЃСЏ.
+         РћР±СЂР°С‰РµРЅРёРµ Рє "csl_geo02_affine_sum_report.dir\Release\csl_geo0.8A738623.tlog\csl_geo02_affine_sum_report.lastbuildstate".
+     1>РЎР±РѕСЂРєР° РїСЂРѕРµРєС‚Р° "SOURCE_ROOT\build-geo02-check\csl_geo02_affine_sum_report.vcxproj" Р·Р°РІРµСЂС€РµРЅР° (С†РµР»РµРІС‹Рµ РѕР±СЉРµРєС‚С‹ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ).
+
+РЎР±РѕСЂРєР° СѓСЃРїРµС€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°.
+    РџСЂРµРґСѓРїСЂРµР¶РґРµРЅРёР№: 0
+    РћС€РёР±РѕРє: 0
+
+РџСЂРѕС€Р»Рѕ РІСЂРµРјРµРЅРё 00:00:01.85
+
+
+--- FINAL RELEASE BUILD STDERR ---

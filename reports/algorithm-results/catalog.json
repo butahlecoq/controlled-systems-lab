@@ -58,6 +58,17 @@
       "evidence_limits": "No comparator or speedup claim; binary64 numerical fixtures without exact validated geometry; no application-scale or scalability claim; HiGHS reduction remains incomplete and retains all rows; CPU profile and per-trial resource counters unavailable",
       "zip_sha256": "a708532a9068fa8127f742b7370f38836ce31e7af2d09f8633caf97ed8946db1",
       "source_report_id": "geo04-20261012T224946Z-c37852bcc80d"
+    },
+    {
+      "report_id": "geo02-20261012T235755Z-7275580339899c6ac27496fc2b05cb040d9fec14f8ec7f8bf219cc299c55eefc",
+      "report_kind": "geo02-affine-sum",
+      "source_report_id": "geo02-20261012T235755Z-6b1f504ad3db",
+      "payload_schema": "csl.geo02-affine-sum-report/1",
+      "payload_sha256": "6b1f504ad3db6df458f041675a2ede1083e60d14c2bf92bdf234d8057fdea228",
+      "source_commit": "767f0c6a1bb26ddc76318cd519df41947a7b264b",
+      "measured_scope": "28 measured affine-sum trials across 4 tiny binary64 fixtures",
+      "evidence_limits": "Full candidate cloud retained; validated reduction evidence is not applied; no comparator, speedup, application-scale, or scalability claim; binary64 tiny fixtures; profiling and internal solver-phase timings unavailable",
+      "zip_sha256": "8f2fe77d30b69a0a314a7cd9dbe69342d2d5e9dde6eccc891afafcde04e578a9"
     }
   ]
 }

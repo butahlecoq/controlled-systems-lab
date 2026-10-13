@@ -255,6 +255,7 @@ class Workspace final : public RepresentationConverterWorkspace {
         Eigen::VectorXd p=Eigen::VectorXd::Zero(n);
         Eigen::MatrixXd basis=Eigen::MatrixXd::Identity(n,n);
         double rank_tolerance=0;
+        double equality_residual=0;
         if (e.rows()>0) {
             Eigen::JacobiSVD<Eigen::MatrixXd> svd(e,Eigen::ComputeFullU|Eigen::ComputeFullV);
             if (svd.info()!=Eigen::Success) return unsupported("conversion.equalities","Equality rank decomposition failed.");
@@ -265,7 +266,7 @@ class Workspace final : public RepresentationConverterWorkspace {
                 else if (s>0) return unsupported("conversion.rank","Equality rank is numerically ambiguous; no dimension was discarded.");
             }
             p=svd.solve(f);
-            const double equality_residual=(e*p-f).norm();
+            equality_residual=(e*p-f).norm();
             const double equality_scale=std::max({1.0,e.norm()*p.norm(),f.norm()});
             const double rounding_bound=64*std::numeric_limits<double>::epsilon()*
                 static_cast<double>(std::max(e.rows(),e.cols()))*equality_scale;
@@ -298,7 +299,7 @@ class Workspace final : public RepresentationConverterWorkspace {
             Eigen::MatrixXd vertex(1,n); vertex.row(0)=p.transpose();
             auto set=make_v(result_id(request_),vertex);
             if (!set) return unsupported("conversion.output","Could not construct zero-dimensional V output.");
-            return publish(*set,context,rank_tolerance,{"explicit equality null-space reduction","zero-dimensional case; Qhull not used"});
+            return publish(*set,context,equality_residual,{"explicit equality null-space reduction","zero-dimensional case; Qhull not used"});
         }
         Eigen::MatrixXd constraints(a.rows()+e.rows(),n);
         constraints.topRows(a.rows())=a; constraints.bottomRows(e.rows())=e;

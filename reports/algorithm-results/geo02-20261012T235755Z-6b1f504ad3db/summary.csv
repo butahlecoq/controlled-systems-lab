@@ -1,0 +1,17 @@
+scenario,phase,unit,median,min,max,range,successful_trials,trials_excluded_from_summary
+scalar_interval_affine_image,setup_ns,ns,7600,6700,8800,2100,7,0
+scalar_interval_affine_image,operation_ns,ns,395800,357100,424300,67200,7,0
+scalar_interval_affine_image,oracle_ns,ns,1700,1600,1900,300,7,0
+scalar_interval_affine_image,total_ns,ns,413800,373600,444100,70500,7,0
+rectangular_projection_box,setup_ns,ns,6800,5900,7300,1400,7,0
+rectangular_projection_box,operation_ns,ns,782600,731000,809100,78100,7,0
+rectangular_projection_box,oracle_ns,ns,1700,1500,2100,600,7,0
+rectangular_projection_box,total_ns,ns,801000,747100,826800,79700,7,0
+singular_map_box_segment,setup_ns,ns,7400,6700,8600,1900,7,0
+singular_map_box_segment,operation_ns,ns,807900,771300,849800,78500,7,0
+singular_map_box_segment,oracle_ns,ns,2700,2600,2800,200,7,0
+singular_map_box_segment,total_ns,ns,832800,791200,870700,79500,7,0
+minkowski_interval_sum,setup_ns,ns,7600,6900,9200,2300,7,0
+minkowski_interval_sum,operation_ns,ns,815800,764100,850000,85900,7,0
+minkowski_interval_sum,oracle_ns,ns,2100,2000,2200,200,7,0
+minkowski_interval_sum,total_ns,ns,833900,782500,870400,87900,7,0
