@@ -156,6 +156,23 @@ TEST_CASE("direct H inequalities and equalities include initial and terminal dom
     CHECK(residual(r,"controls[0].inequalities[1]").measure.violation==1);
     CHECK(residual(r,"initial[0]").measure.violation==3);
 }
+TEST_CASE("injected temporal bounds are recomputed over the original joint history") {
+    auto input=scalar();
+    // The verifier's independent coordinate order is x0, x1, u0. These rows
+    // evaluate to x1 + u0 = 6 (above 5) and x0 - u0 = -1 (below 0).
+    input.temporal=TemporalConstraints{
+        {2,3,{0,2,4},{1,2,0,2},{1,1,1,-1}},
+        {{std::nullopt,5.0},{0.0,std::nullopt}}};
+    const auto p=resolve(input);
+    const auto r=verify_trajectory(p,request(p));
+    CHECK(r.feasibility==CheckStatus::violation);
+    CHECK(r.objective==CheckStatus::numerical_pass);
+    CHECK(residual(r,"temporal[0].upper").measure.violation==1);
+    CHECK(residual(r,"temporal[1].lower").measure.violation==1);
+    CHECK(r.optimality==CheckStatus::unsupported);
+    CHECK(r.completeness==CheckStatus::unsupported);
+    CHECK(r.validated==CheckStatus::unsupported);
+}
 TEST_CASE("empty universal singleton zero ports and zero horizon preserve their meanings") {
     auto input=scalar();input.states[1]=EmptySet{1};auto p=resolve(input);CHECK(verify_trajectory(p,request(p)).feasibility==CheckStatus::violation);
     input=scalar();input.times={0};input.controls=ContinuousDomain{{}};input.states={UniversalSet{1}};
