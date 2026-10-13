@@ -1,5 +1,4 @@
 #include <csl/registry/registry.hpp>
-#include <cmath>
 #include <algorithm>
 
 namespace csl::registry {
@@ -25,6 +24,8 @@ StrategyRequest StrategyPort::snapshot(const Request& request) {
     return request; // ResolvedProblem already owns immutable canonical data and its content.
 }
 SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,const ExecutionContext& context) {
+    auto admission=check_family_request(request.family,request.problem.identity());
+    if (!admission.empty()) return Unsupported{std::move(admission)};
     if (!(request.family.numerical==context.numerical))
         return Unsupported{{{DiagnosticCode::invalid_input,"family.numerical","ExecutionContext numerical policy differs from the prepared family request"}}};
     if (request.family.assurance==Assurance::validated)
@@ -107,11 +108,8 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     provenance.actual = entry.identity;
     if (provenance.requested.version && *provenance.requested.version != entry.identity.version)
         return detail::reject(provenance,"method.version","requested strategy version is unavailable");
-    if (request.family.objective!=request.problem.identity() || request.family.profile.empty() ||
-        !std::isfinite(request.family.numerical.absolute_tolerance) ||
-        !std::isfinite(request.family.numerical.relative_tolerance) ||
-        request.family.numerical.absolute_tolerance<0 || request.family.numerical.relative_tolerance<0)
-        return detail::reject(provenance,"family","Effective family request must bind the resolved objective/profile and finite nonnegative numerical policy");
+    auto request_diagnostics=check_family_request(request.family,request.problem.identity());
+    if (!request_diagnostics.empty()) return Rejection{provenance,std::move(request_diagnostics)};
     if ((requirements.output.family && *requirements.output.family!=request.family.target) ||
         requirements.output.assurance!=request.family.assurance)
         return detail::reject(provenance,"family","Registry requirements differ from the immutable effective family request");

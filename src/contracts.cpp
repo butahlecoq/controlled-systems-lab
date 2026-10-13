@@ -22,6 +22,14 @@ bool valid_lineage(const std::vector<TransformStepIdentity>& lineage) {
             return false;
     return true;
 }
+bool valid_request_provenance(const RequestProvenance& provenance) {
+    return !provenance.request.value.empty() && !provenance.port.empty() &&
+        !provenance.requested_module.value.empty() &&
+        (!provenance.requested_version || !provenance.requested_version->empty()) &&
+        provenance.actual_module.has_value()==provenance.actual_version.has_value() &&
+        (!provenance.actual_module || !provenance.actual_module->value.empty()) &&
+        (!provenance.actual_version || !provenance.actual_version->empty());
+}
 OperationScope operation_scope(const GeometryOperation& operation) {
     return std::visit(Overloaded{
         [](const AffineImage& op) { return OperationScope{{op.input.id},GeometryClaimScope::set_relation}; },
@@ -140,9 +148,23 @@ Diagnostics check_nominal_profile(const Problem& p, bool requires_inverse, Assur
         unsupported("assurance","No validated verifier is implemented in revision 1");
     return result;
 }
-Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& expected, Assurance assurance) {
+Diagnostics check_family_request(const FamilyRequest& request,const ProblemId& expected) {
     Diagnostics result;
+    if (expected.value.empty() || request.objective!=expected)
+        result.push_back({DiagnosticCode::evidence_mismatch,"family.objective",
+            "Effective family objective must bind the resolved problem"});
+    if (request.profile.empty())
+        result.push_back({DiagnosticCode::invalid_input,"family.profile","Effective family profile is required"});
+    if (!std::isfinite(request.numerical.absolute_tolerance) ||
+        !std::isfinite(request.numerical.relative_tolerance) ||
+        request.numerical.absolute_tolerance<0 || request.numerical.relative_tolerance<0)
+        result.push_back({DiagnosticCode::invalid_input,"family.numerical",
+            "Effective numerical policy requires finite nonnegative tolerances"});
+    return result;
+}
+Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& expected, Assurance assurance) {
     const auto& identity=family.identity();
+    auto result=check_family_request(identity.request,expected);
     if (assurance == Assurance::validated)
         result.push_back({DiagnosticCode::unsupported,"assurance","Numerical checks, symbolic arguments and unchecked certificate references are not validated evidence"});
     if (identity.problem != expected)
@@ -313,6 +335,9 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
             add(DiagnosticCode::invalid_claim,"result.stop","operation_rejected requires ScopedRequestRejection");
         else {
             const auto& rejected=std::get<ScopedRequestRejection>(result.stop);
+            if (!valid_request_provenance(rejected.request))
+                add(DiagnosticCode::invalid_claim,"result.stop.provenance",
+                    "Scoped rejection requires requested provider identity and paired nonempty actual module/version when available");
             if (rejected.request.request.value.empty() || rejected.request.port.empty() || rejected.diagnostics.empty())
                 add(DiagnosticCode::invalid_claim,"result.stop.rejection","Scoped rejection needs the exact request identity, port and provider diagnostic");
             if (!valid_lineage(rejected.completed_lineage))
@@ -354,6 +379,9 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const FamilyIde
             (result.termination==Termination::numerical_failure && reason!=StopReason::numerical_failure))
             add(DiagnosticCode::invalid_claim,"result.stop.reason","Execution termination and scoped stop reason differ");
         const auto& stopped=std::get<ScopedOperationStopped>(result.stop);
+        if (!valid_request_provenance(stopped.request))
+            add(DiagnosticCode::invalid_claim,"result.stop.provenance",
+                "Scoped stop requires requested provider identity and paired nonempty actual module/version when available");
         const RetainedEvidenceScope observed{result.objective.lower.has_value(),result.objective.upper.has_value(),
             result.incumbents.size(),result.family.has_value()};
         if (stopped.request.request.value.empty() || stopped.request.port.empty() || stopped.stop.diagnostics.empty() ||

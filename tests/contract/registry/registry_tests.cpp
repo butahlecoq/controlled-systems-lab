@@ -11,6 +11,183 @@ static_assert(!std::is_default_constructible_v<PreparedPipeline<LPPort>>);
 static_assert(!std::is_default_constructible_v<PreparedStrategy>);
 static_assert(!std::is_copy_constructible_v<BoundWorkspace<LPPort>>);
 
+TEST_CASE("direct family publication rejects malformed effective numerical policies") {
+    const auto original=candidate_family();
+    for (const auto policy:std::vector<NumericalPolicy>{{-1,0},{0,-1},
+        {std::numeric_limits<double>::infinity(),0},{0,std::numeric_limits<double>::infinity()},
+        {std::numeric_limits<double>::quiet_NaN(),0},{0,std::numeric_limits<double>::quiet_NaN()}}) {
+        auto identity=original.identity();identity.request.numerical=policy;
+        const auto published=FamilyPublisher::publish(identity,original.outcome());
+        REQUIRE(std::holds_alternative<Diagnostics>(published));
+        const auto& diagnostics=std::get<Diagnostics>(published);
+        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const auto& d){
+            return d.code==DiagnosticCode::invalid_input && d.field=="family.numerical";
+        }));
+    }
+    auto zero=original.identity();zero.request.numerical={0,0};
+    const auto accepted=FamilyPublisher::publish(zero,original.outcome());
+    REQUIRE(std::holds_alternative<OptimalFamily>(accepted));
+    CHECK(std::get<OptimalFamily>(accepted).identity().request.numerical==NumericalPolicy{0,0});
+    CHECK(original.identity().request.numerical==NumericalPolicy{1e-8,1e-8});
+}
+
+TEST_CASE("direct strategy admission rejects malformed effective requests before execution") {
+    class ObservedWorkspace final : public SynthesisWorkspace {
+    public:
+        std::size_t attempts{};
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+            const ExecutionContext&) override {
+            ++attempts;
+            return {Termination::completed,{problem.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
+                {},{},{},{}};
+        }
+    } workspace;
+    auto request=strategy_request();request.strategy_version="1";
+    for (const auto policy:std::vector<NumericalPolicy>{{-1,0},{0,-1},
+        {std::numeric_limits<double>::infinity(),0},{0,std::numeric_limits<double>::infinity()}}) {
+        request.family.numerical=policy;auto execution=context();execution.numerical=policy;
+        const auto rejected=StrategyPort::run(workspace,request,execution);
+        REQUIRE(std::holds_alternative<Unsupported>(rejected));
+        REQUIRE_FALSE(std::get<Unsupported>(rejected).diagnostics.empty());
+        CHECK(std::get<Unsupported>(rejected).diagnostics[0].field=="family.numerical");
+        CHECK(workspace.attempts==0);
+    }
+    request.family.numerical={0,0};auto execution=context();execution.numerical={0,0};
+    const auto objective=request.family.objective;
+    request.family.objective={"another-objective"};
+    auto rejected=StrategyPort::run(workspace,request,execution);
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    CHECK(std::get<Unsupported>(rejected).diagnostics[0].field=="family.objective");
+    CHECK(workspace.attempts==0);
+    request.family.objective=objective;request.family.profile.clear();
+    rejected=StrategyPort::run(workspace,request,execution);
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    CHECK(std::get<Unsupported>(rejected).diagnostics[0].field=="family.profile");
+    CHECK(workspace.attempts==0);
+    request.family.profile="nominal_open_loop";
+    rejected=StrategyPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    CHECK(std::get<Unsupported>(rejected).diagnostics[0].field=="family.numerical");
+    CHECK(workspace.attempts==0);
+    const auto accepted=StrategyPort::run(workspace,request,execution);
+    REQUIRE(std::holds_alternative<SynthesisResult>(accepted));
+    CHECK(std::get<SynthesisResult>(accepted).termination==Termination::completed);
+    CHECK(workspace.attempts==1);
+}
+
+TEST_CASE("scoped provider provenance is checked without erasing retained evidence") {
+    class RetainedWorkspace final : public SynthesisWorkspace {
+    public:
+        RequestProvenance provenance{{"generated/geometry/8"},"geometry",{"provider"},std::string{"2"},
+            ModuleId{"provider"},std::string{"2"}};
+        bool rejected{true};
+        StopReason reason{StopReason::numerical_failure};
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
+            const ExecutionContext&) override {
+            const auto id=problem.identity();
+            const ClaimEvidence support{id,SymbolicArgument{"synthetic retained evidence","literal fixture only"}};
+            const std::vector<TransformStepIdentity> lineage{{{"transform/1"},{"source"},{"relation"},{"converter"},"1"}};
+            const FamilyIdentity identity{id,request,problem.constraints().coordinates(),{"forward"},"1",lineage};
+            const JointRelation relation{identity.coordinates,request.representation,std::make_shared<const JointRelationPayload>()};
+            auto family=std::get<OptimalFamily>(FamilyPublisher::publish(identity,CandidateFamily{
+                relation,HeuristicRelationEvidence{"synthetic retained relation"},Unestablished{}}));
+            SynthesisResult result{Termination::operation_rejected,
+                {id,MathematicalOutcome::undetermined,Unestablished{},{}},
+                {ObjectiveBound{0,support},ObjectiveBound{5,support}},std::move(family),
+                {{{id,{{0},{1}},{{1}},5},support}},{{0,{},ModuleId{"forward"},0,1}}};
+            if (rejected)
+                result.stop=ScopedRequestRejection{provenance,
+                    {{DiagnosticCode::unsupported,"geometry.generated","literal provider rejection"}},lineage,
+                    {true,true,1,true}};
+            else {
+                result.termination=reason==StopReason::resource_limit?Termination::resource_limit:
+                    reason==StopReason::numerical_failure?Termination::numerical_failure:Termination::cancelled;
+                result.stop=ScopedOperationStopped{{reason,"literal provider stop"},provenance,{true,true,1,true}};
+            }
+            return result;
+        }
+    };
+    auto request=strategy_request();request.strategy_version="1";
+    const RequestProvenance full{{"generated/geometry/8"},"geometry",{"provider"},std::string{"2"},
+        ModuleId{"provider"},std::string{"2"}};
+    auto unknown=full;unknown.actual_module.reset();unknown.actual_version.reset();
+    RetainedWorkspace workspace;workspace.provenance=unknown;
+    const auto admitted=StrategyPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(admitted));
+    const auto& original=std::get<SynthesisResult>(admitted);
+    CHECK(original.termination==Termination::operation_rejected);
+    REQUIRE(original.family);
+    const auto saved_identity=original.family->identity();
+    REQUIRE(std::holds_alternative<ScopedRequestRejection>(original.stop));
+    CHECK_FALSE(std::get<ScopedRequestRejection>(original.stop).request.actual_module);
+    std::vector<RequestProvenance> malformed;
+    auto add=[&](auto mutation){auto p=full;mutation(p);malformed.push_back(std::move(p));};
+    add([](auto& p){p.requested_module.value.clear();});
+    add([](auto& p){p.requested_version=std::string{};});
+    add([](auto& p){p.actual_module.reset();});
+    add([](auto& p){p.actual_version.reset();});
+    add([](auto& p){p.actual_module=ModuleId{};});
+    add([](auto& p){p.actual_version=std::string{};});
+    for (const auto is_rejection:{true,false}) {
+        workspace.rejected=is_rejection;
+        for (const auto& provenance:malformed) {
+            workspace.provenance=provenance;
+            const auto answer=StrategyPort::run(workspace,request,context());
+            REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+            const auto& result=std::get<SynthesisResult>(answer);
+            CHECK(result.termination==Termination::contract_rejected);
+            REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+            const auto& failure=std::get<ContractValidationFailure>(result.stop);
+            CHECK(std::any_of(failure.diagnostics.begin(),failure.diagnostics.end(),[](const auto& d){
+                return d.field=="result.stop.provenance" && d.code==DiagnosticCode::invalid_claim;
+            }));
+            REQUIRE(result.family);
+            CHECK(result.family->identity()==saved_identity);
+            CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+            REQUIRE(result.objective.lower);CHECK(result.objective.lower->value==0);
+            REQUIRE(result.objective.upper);CHECK(result.objective.upper->value==5);
+            REQUIRE(result.incumbents.size()==1);CHECK(result.incumbents[0].witness.original_objective==5);
+            REQUIRE(result.spans.size()==1);CHECK(result.spans[0].end_seconds==1);
+            CHECK(failure.retained.lower_bound);CHECK(failure.retained.upper_bound);
+            CHECK(failure.retained.incumbents==1);CHECK(failure.retained.partial_or_candidate_family);
+            const auto& source=std::visit([](const auto& stop)->const RequestProvenance&{
+                using T=std::decay_t<decltype(stop)>;
+                if constexpr(std::is_same_v<T,std::monostate>) throw std::logic_error("missing source stop");
+                else return stop.request;
+            },failure.source_stop);
+            CHECK(source.request.value=="generated/geometry/8");CHECK(source.port=="geometry");
+            CHECK(source.requested_module==provenance.requested_module);
+            CHECK(source.requested_version==provenance.requested_version);
+            CHECK(source.actual_module==provenance.actual_module);CHECK(source.actual_version==provenance.actual_version);
+            if (is_rejection) {
+                REQUIRE(std::holds_alternative<ScopedRequestRejection>(failure.source_stop));
+                const auto& stopped=std::get<ScopedRequestRejection>(failure.source_stop);
+                CHECK(stopped.completed_lineage==saved_identity.lineage);
+                REQUIRE(stopped.diagnostics.size()==1);
+                CHECK(stopped.diagnostics[0].explanation=="literal provider rejection");
+            } else {
+                REQUIRE(std::holds_alternative<ScopedOperationStopped>(failure.source_stop));
+                CHECK(std::get<ScopedOperationStopped>(failure.source_stop).stop.reason==StopReason::numerical_failure);
+            }
+        }
+    }
+    workspace.provenance=full;workspace.rejected=false;
+    for (const auto reason:{StopReason::cancelled,StopReason::deadline_expired,StopReason::resource_limit,StopReason::numerical_failure}) {
+        workspace.reason=reason;
+        const auto answer=StrategyPort::run(workspace,request,context());
+        REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+        const auto& result=std::get<SynthesisResult>(answer);
+        REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+        CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==reason);
+        REQUIRE(result.family);CHECK(result.family->identity()==saved_identity);
+        REQUIRE(result.objective.lower);CHECK(result.objective.lower->value==0);
+        REQUIRE(result.objective.upper);CHECK(result.objective.upper->value==5);
+        REQUIRE(result.incumbents.size()==1);CHECK(result.incumbents[0].witness.original_objective==5);
+    }
+    CHECK(original.termination==Termination::operation_rejected);
+    CHECK(original.family->identity()==saved_identity);
+}
+
 TEST_CASE("configuration selects two working bounded LP algorithms") {
     Registry<LPPort> registry;
     REQUIRE_FALSE(registry.add(endpoint_registration()).has_value());
