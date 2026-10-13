@@ -81,5 +81,8 @@ new shared contract. No shared interface is changed by this module.
 The T-S01 and singular T-S03 tests independently establish the fixture's whole
 candidate line via equality rank and substitution of every H row to the literal
 parameter interval `[0,1]`. Constant T-S02 tests preserve multiple terminal points
-and all four corner histories. These finite analytic fixtures do not establish
+and all four corner histories. T-S01 evaluates the retained primal with the
+original resolved objective and asserts literal cost zero. HiGHS withholds
+optional program bounds; their absence is checked before any value access.
+These finite analytic fixtures do not establish
 global numerical family coverage. Issue #66 must remain open.

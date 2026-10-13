@@ -190,7 +190,11 @@ TEST_CASE("T-S01 registered candidate retains u0+u1=1 and rejects the marginal p
     CHECK_FALSE(contains(history.history.relation,{0,1,2,1,1}));
     entire_segment(history.history.relation,{0,0,1,0,1},{0,1,0,1,-1});
     REQUIRE(history.terminal);REQUIRE(history.terminal->optimization);
-    CHECK(history.terminal->optimization->objective.upper->value==doctest::Approx(0));
+    INFO(history.terminal->optimization->raw_diagnostics);
+    CHECK_FALSE(history.terminal->optimization->objective.upper);
+    REQUIRE(history.terminal->optimization->primal);
+    CHECK(take(optimization::evaluate(query.problem.objective(),
+        *history.terminal->optimization->primal))==doctest::Approx(0));
     CHECK(std::holds_alternative<Unestablished>(history.terminal->construction.support));
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
