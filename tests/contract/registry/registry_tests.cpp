@@ -1164,3 +1164,73 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
         CHECK(value.spans.size()==1);
     }
 }
+
+TEST_CASE("public strategy rejects unbounded outcomes that retain a finite lower bound") {
+    class ContradictoryOutcome final : public SynthesisWorkspace {
+    public:
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+            const ExecutionContext&) override {
+            const auto id=problem.identity();
+            const ClaimEvidence support{id,SymbolicArgument{
+                "state is fixed at zero by the fixture dynamics",
+                "B=0, x0=0 and zero offset imply x1=0; the terminal objective is identically zero"}};
+            return {Termination::completed,
+                {id,MathematicalOutcome::unbounded,
+                    SymbolicArgument{"synthetic outcome claim","used only to test evidence consistency"},{}},
+                {ObjectiveBound{0,support},{}},{},{},{}};
+        }
+    } workspace;
+
+    const LinearStage stage{{1,1,{0}},{1,1,{0}},{1,0,{}},{0}};
+    const Problem bounded_problem{{"bounded-lower-bound-fixture"},
+        std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,stage},{}}),
+        {0,1},KnownInitial{{0}},ContinuousDomain{{UniversalSet{1}}},
+        {UniversalSet{1},UniversalSet{1}},{},{},InformationPattern::nominal_open_loop,
+        LinearTerminal{{1},0}};
+    auto request=strategy_request();
+    request.problem=std::get<csl::problem::ResolvedProblem>(csl::problem::resolve(
+        bounded_problem,{csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    request.configuration.strategy={"contradictory-outcome-fixture"};
+    request.family.objective=request.problem.identity();
+    request.strategy_version="1";
+
+    const auto answer=StrategyPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto& result=std::get<SynthesisResult>(answer);
+    CHECK(result.termination==Termination::contract_rejected);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(result.objective.lower.has_value());
+    CHECK(result.objective.lower->value==0);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+    const auto& failure=std::get<ContractValidationFailure>(result.stop);
+    REQUIRE(failure.diagnostics.size()==1);
+    CHECK(failure.diagnostics[0].code==DiagnosticCode::invalid_claim);
+    CHECK(failure.diagnostics[0].field=="result.outcome.unbounded");
+    CHECK(failure.retained.lower_bound);
+    CHECK_FALSE(failure.retained.upper_bound);
+}
+
+TEST_CASE("public strategy accepts an unbounded outcome without a supported lower bound") {
+    class UnboundedOutcome final : public SynthesisWorkspace {
+    public:
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+            const ExecutionContext&) override {
+            const auto id=problem.identity();
+            return {Termination::completed,
+                {id,MathematicalOutcome::unbounded,
+                    SymbolicArgument{"synthetic outcome claim","used only to test absence of conflicting bound evidence"},{}},
+                {},{},{},{}};
+        }
+    } workspace;
+
+    auto request=strategy_request();
+    request.configuration.strategy={"unbounded-without-bound-fixture"};
+    request.strategy_version="1";
+    const auto answer=StrategyPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto& result=std::get<SynthesisResult>(answer);
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.value==MathematicalOutcome::unbounded);
+    CHECK_FALSE(result.objective.lower.has_value());
+    CHECK(std::holds_alternative<std::monostate>(result.stop));
+}
