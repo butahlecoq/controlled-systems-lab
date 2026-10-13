@@ -203,6 +203,16 @@ TEST_CASE("numerical failure preserves the caller-visible incumbent bound and ca
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
     const auto& data=payload(result);
     CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
+    REQUIRE(data.optimization);
+    CHECK(data.optimization->termination==Termination::numerical_failure);
+    CHECK(data.optimization->raw_diagnostics=="independent analytic oracle");
+    REQUIRE(data.optimization->objective.lower);
+    CHECK(data.optimization->objective.lower->value==0);
+    CHECK(data.optimization->objective.lower->evidence.subject==data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.lower->evidence.support));
+    REQUIRE(data.optimization->objective.upper);
+    CHECK(data.optimization->objective.upper->value==0);
+    CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
     REQUIRE(result.incumbents.size()==1);
     CHECK(result.incumbents.front().feasibility.problem==p.identity());
     CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility.support));
