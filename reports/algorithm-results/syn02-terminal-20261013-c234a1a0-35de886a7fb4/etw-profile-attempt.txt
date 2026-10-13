@@ -1,0 +1,6 @@
+Command: wpr -start CPU -filemode
+Result: Failed to enable the policy to profile system performance.
+Profile Id: CPU.Verbose.File
+Error code: 0xc5585011
+
+The separate process-counter run remains in profile-evidence.json and profile-raw.jsonl; it contains no call-stack attribution.
