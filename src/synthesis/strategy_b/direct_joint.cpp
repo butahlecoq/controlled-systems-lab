@@ -144,8 +144,8 @@ constexpr const char* strategy_id="csl.synthesis.strategy-b";
 constexpr const char* strategy_version="1";
 Termination stopped_termination(StopReason reason) {
     switch(reason) {
-    case StopReason::cancelled:return Termination::cancelled;
-    case StopReason::deadline_expired:case StopReason::resource_limit:return Termination::resource_limit;
+    case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
+    case StopReason::resource_limit:return Termination::resource_limit;
     case StopReason::numerical_failure:return Termination::numerical_failure;
     }
     return Termination::numerical_failure;
@@ -211,7 +211,12 @@ RetainedEvidenceScope retained(const SynthesisResult& r) {
 SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
     SynthesisResult result{Termination::completed,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{},{}};
     auto reject=[&](Diagnostics diagnostics,Termination termination) {
-        result.termination=termination; result.stop=ScopedRequestRejection{
+        result.termination=termination;
+        if(termination==Termination::contract_rejected) {
+            result.stop=ContractValidationFailure{std::move(diagnostics),retained(result),std::monostate{}};
+            return;
+        }
+        result.stop=ScopedRequestRejection{
             {{"syn04-admission:"+p.identity().value},"strategy",{strategy_id},{},ModuleId{strategy_id},strategy_version},std::move(diagnostics),{},retained(result)};
     };
     auto d=capabilities(p,request);
@@ -233,7 +238,10 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
     auto construction=std::get<JointProgram>(std::move(built));
     auto rows=feasible_rows(construction);
     if(request.materialization_limit && rows.inequalities.rows+rows.equalities.rows>*request.materialization_limit) {
-        reject({unsupported("joint.materialization","Feasible relation exceeds the caller's row materialization limit.")},Termination::resource_limit);return result;
+        result.termination=Termination::resource_limit;
+        result.stop=ScopedOperationStopped{{StopReason::resource_limit,"Feasible relation exceeds the caller's row materialization limit."},
+            {{"syn04-materialization:"+p.identity().value},"strategy",{strategy_id},{},ModuleId{strategy_id},strategy_version},retained(result)};
+        return result;
     }
     const SetId feasible_id{"syn04-feasible:"+p.identity().value};
     auto initial=rows.finish(feasible_id);
@@ -247,7 +255,10 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
         CandidateFamily candidate{{data->construction.coordinates,request.representation,data},
             HeuristicRelationEvidence{"binary64 full joint feasible/optimal-level relation; program/problem equivalence and optimal coverage unestablished"},std::move(feasibility)};
         auto family=FamilyPublisher::publish(std::move(identity),std::move(candidate));
-        if(const auto* errors=std::get_if<Diagnostics>(&family)) {data->diagnostics=*errors;result.termination=Termination::contract_rejected;return;}
+        if(const auto* errors=std::get_if<Diagnostics>(&family)) {
+            data->diagnostics=*errors;result.termination=Termination::contract_rejected;
+            result.stop=ContractValidationFailure{*errors,retained(result),std::monostate{}};return;
+        }
         result.family=std::get<OptimalFamily>(std::move(family));
     };
     publish();
@@ -287,11 +298,12 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
                 witness.original_objective=*value;verification::TrajectoryRequest q;q.witness=witness;
                 const auto checked=verification::verify_trajectory(p,q,context);
                 if(checked.termination!=Termination::completed) {
-                    result.termination=checked.termination;data->diagnostics=checked.diagnostics;
+                    data->diagnostics=checked.diagnostics;
                     StopReason reason=StopReason::numerical_failure;
                     if(context.cancellation.stop_requested())reason=StopReason::cancelled;
                     else if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)reason=StopReason::deadline_expired;
                     else if(checked.termination==Termination::resource_limit)reason=StopReason::resource_limit;
+                    result.termination=stopped_termination(reason);
                     result.stop=ScopedOperationStopped{{reason,"Original-problem anchor verification stopped; program evidence and feasible candidate retained."},provenance,retained(result)};
                 }
                 if(checked.bindings==verification::CheckStatus::numerical_pass && checked.feasibility==verification::CheckStatus::numerical_pass && checked.objective==verification::CheckStatus::numerical_pass) {

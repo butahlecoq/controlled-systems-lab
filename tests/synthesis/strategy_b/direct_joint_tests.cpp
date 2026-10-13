@@ -101,6 +101,23 @@ const DirectJointPayload& payload(const SynthesisResult& r) {
     const auto& candidate=std::get<CandidateFamily>(r.family->outcome());
     const auto cast=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);REQUIRE(cast);return *cast;
 }
+registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,bool foreign_provider=false) {
+    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
+    auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
+    if(foreign_provider) {
+        registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
+        const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
+        linear={{{"oracle-lp"},"1"},offer,[](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
+        convex={{{"oracle-qp"},"1"},offer,[](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
+    }
+    const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
+    CHECK_FALSE(strategies.add(make_registration(lp,qp)));
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};configuration.lp=lid;configuration.convex=qid;
+    configuration.representation={"csl.polyhedron.h"};
+    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.family=FamilyTarget::candidate_relaxation;requirements.output.completeness=registry::Completeness::unestablished;
+    return accepted(strategies.prepare({p,configuration,q,"1"},requirements));
+}
 }
 TEST_CASE("joint program preserves the two-step integrator and original terminal objective") {
     const auto p=resolve(integrator()); const auto program=accepted(build_joint_program(p,request(p)));
@@ -164,18 +181,7 @@ TEST_CASE("unsupported assurance targets and policy mismatch fail before solving
 }
 TEST_CASE("existing StrategyRegistry snapshots admitted native providers and returns the constant-objective relation") {
     const auto p=resolve(integrator(LinearTerminal{{0},3}));
-    auto prepare=[&] {
-        registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
-        auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
-        const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
-        CHECK_FALSE(strategies.add(make_registration(lp,qp)));
-        StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};configuration.lp=lid;configuration.convex=qid;
-        configuration.representation={"csl.polyhedron.h"};
-        registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
-        requirements.output.family=FamilyTarget::candidate_relaxation;requirements.output.completeness=registry::Completeness::unestablished;
-        return accepted(strategies.prepare({p,configuration,request(p),"1"},requirements));
-    };
-    const auto prepared=prepare();CHECK(prepared.provenance().size()==3);
+    const auto prepared=registered_prepared(p,request(p));CHECK(prepared.provenance().size()==3);
     auto workspace=prepared.create();ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     const auto result=accepted(workspace->run(context));const auto& data=payload(result);
     CHECK(contains(data.relation,{0,0,0,0,0}));CHECK(contains(data.relation,{0,1,2,1,1}));
@@ -199,9 +205,25 @@ TEST_CASE("early cancellation and deadline retain their distinct source stop rea
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(cancelled.stop));CHECK(std::get<ScopedOperationStopped>(cancelled.stop).stop.reason==StopReason::cancelled);
     CHECK_FALSE(cancelled.family);
     ExecutionContext deadline;deadline.deadline=std::chrono::steady_clock::now();
-    const auto expired=workspace.solve(p,request(p),deadline);CHECK(expired.termination==Termination::resource_limit);
+    const auto expired=workspace.solve(p,request(p),deadline);CHECK(expired.termination==Termination::cancelled);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(expired.stop));CHECK(std::get<ScopedOperationStopped>(expired.stop).stop.reason==StopReason::deadline_expired);
     CHECK_FALSE(expired.family);
+    const FamilyIdentity expected{p.identity(),request(p),p.constraints().coordinates(),{"csl.synthesis.strategy-b"},"1",{}};
+    CHECK(check_synthesis_result(expired,expected).empty());
+}
+TEST_CASE("early materialization row limit is a resource stop accepted by the shared boundary") {
+    const auto p=resolve(integrator());auto q=request(p);q.materialization_limit=0;
+    const auto r=oracle({0,0.25,1,0.25,0.75},0).solve(p,q,{});
+    CHECK(r.termination==Termination::resource_limit);CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
+    const auto& stop=std::get<ScopedOperationStopped>(r.stop);
+    CHECK(stop.stop.reason==StopReason::resource_limit);CHECK(stop.request.port=="strategy");
+    CHECK_FALSE(stop.request.request.value.empty());CHECK_FALSE(stop.stop.diagnostics.empty());
+    CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==0);CHECK_FALSE(stop.retained.partial_or_candidate_family);
+    CHECK_FALSE(r.family);CHECK(r.incumbents.empty());CHECK_FALSE(r.objective.upper);
+    const FamilyIdentity expected{p.identity(),q,p.constraints().coordinates(),{"csl.synthesis.strategy-b"},"1",{}};
+    CHECK(check_synthesis_result(r,expected).empty());
 }
 TEST_CASE("residual norm keeps the original value rather than its solver square") {
     const auto p=resolve(integrator(ResidualNormTerminal{{1,1,{2}},{7}}));
@@ -239,4 +261,33 @@ TEST_CASE("cancellation after solving retains program evidence and stops origina
     CHECK(r.termination==Termination::cancelled);const auto& data=payload(r);REQUIRE(data.optimization);
     CHECK(contains(data.relation,{0,1,2,1,1}));CHECK(r.incumbents.empty());CHECK_FALSE(r.objective.upper);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason==StopReason::cancelled);
+}
+TEST_CASE("registered deadline stop survives public result sanitization") {
+    const auto p=resolve(integrator());const auto prepared=registered_prepared(p,request(p));
+    ExecutionContext context;context.deadline=std::chrono::steady_clock::now()-std::chrono::seconds(1);
+    auto workspace=prepared.create();const auto r=accepted(workspace->run(context));
+    CHECK(r.termination==Termination::cancelled);REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
+    CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason==StopReason::deadline_expired);
+    CHECK_FALSE(r.family);CHECK(r.incumbents.empty());CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+}
+TEST_CASE("registered early row-budget stop survives public result sanitization") {
+    const auto p=resolve(integrator());auto q=request(p);q.materialization_limit=0;
+    const auto prepared=registered_prepared(p,q);auto workspace=prepared.create();const auto r=accepted(workspace->run({}));
+    CHECK(r.termination==Termination::resource_limit);REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
+    CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason==StopReason::resource_limit);
+    CHECK_FALSE(r.family);CHECK(r.incumbents.empty());CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+}
+TEST_CASE("validation failure uses the contract product without a sanitizer replacement") {
+    const auto p=resolve(integrator());const auto q=request(p);ExecutionContext context;context.numerical={1e-3,1e-3};
+    const auto direct=oracle({0,0.25,1,0.25,0.75},0).solve(p,q,context);
+    CHECK(direct.termination==Termination::contract_rejected);REQUIRE(std::holds_alternative<ContractValidationFailure>(direct.stop));
+    const FamilyIdentity expected{p.identity(),q,p.constraints().coordinates(),{"csl.synthesis.strategy-b"},"1",{}};
+    CHECK(check_synthesis_result(direct,expected).empty());
+    const auto prepared=registered_prepared(p,q,true);auto workspace=prepared.create();const auto r=accepted(workspace->run({}));
+    CHECK(r.termination==Termination::contract_rejected);REQUIRE(std::holds_alternative<ContractValidationFailure>(r.stop));
+    const auto& failure=std::get<ContractValidationFailure>(r.stop);REQUIRE_FALSE(failure.diagnostics.empty());
+    for(const auto& error:failure.diagnostics) {CHECK(error.code==DiagnosticCode::evidence_mismatch);CHECK(error.field!="result.stop");}
+    CHECK(r.incumbents.empty());CHECK(failure.retained.partial_or_candidate_family);
+    const auto& data=payload(r);CHECK_FALSE(data.optimization);CHECK(contains(data.relation,{0,1,2,1,1}));
+    CHECK(check_synthesis_result(r,expected).empty());
 }

@@ -108,11 +108,37 @@ production root registration must be followed by fresh top-level verification.
 The first broad build also hit an object-file permission error from an overlapping
 targeted build; the subsequent single broad build succeeded.
 
+### Production integration and stop-contract review follow-up
+
+Production library/test registration was added in commit `002c75a`. Review fixes
+keep pre-expired deadlines as `Termination::cancelled` with the distinct typed
+`StopReason::deadline_expired`, represent early materialization exhaustion as
+`Termination::resource_limit` with `ScopedOperationStopped(resource_limit)`, and
+use `ContractValidationFailure` for validation failures. Registered execution
+tests exercise the shared result validation/sanitization boundary for all three.
+No mathematical claim is strengthened by these stop-contract fixes.
+
+The follow-up focused Release executable passed **23 cases / 431 assertions**.
+The full production Release build and **69/69 CTest tests** passed after refreshing
+CMake build metadata. An initial production CTest attempt failed
+`convex_report_smoke` because its executable had a stale source-commit identity;
+reconfiguration and rebuilding corrected that provenance mismatch.
+
+Exact follow-up commands from the repository root (using `$taskCMake` above):
+
+```powershell
+& $taskCMake --build D:/work/PhD/worktrees/syn04-production-build --config Release --target direct_joint_strategy_tests --parallel 4
+& D:/work/PhD/worktrees/syn04-production-build/Release/direct_joint_strategy_tests.exe
+& $taskCMake -S . -B D:/work/PhD/worktrees/syn04-production-build
+& $taskCMake --build D:/work/PhD/worktrees/syn04-production-build --config Release --parallel 4
+& 'C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/ctest.exe' --test-dir D:/work/PhD/worktrees/syn04-production-build -C Release --output-on-failure
+```
+
 ## Unmet acceptance criteria
 
 Complete-family publication and cross-strategy complete-relation acceptance
 remain blocked on the reviewed coverage/provenance procedures. This slice does
 not close #67 and does not satisfy T-X01's complete-family acceptance merely by
-matching sampled histories or objective values. Production CMake registration,
-paired strategy integration, and full-family independent verification belong to
-integration/review after this source slice.
+matching sampled histories or objective values. Paired strategy integration and
+full-family independent verification remain for integration/review. Production
+CMake registration and top-level Release verification are now in place.
