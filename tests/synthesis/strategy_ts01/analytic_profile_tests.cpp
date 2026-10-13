@@ -3,12 +3,15 @@
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/problem/validator.hpp>
 #include <csl/sets/data.hpp>
+#include "compiled_verifiers.hpp"
 #include <cmath>
 #include <iostream>
 #include <limits>
 
 using namespace csl;
 using namespace csl::registry;
+static_assert(!std::is_assignable_v<decltype(StrategyRegistration::complete_family_verifier)&,std::function<Diagnostics(const StrategyRequest&,const CompleteFamilyProposal&)>>,
+    "Installed strategy registrations must not accept executable verifier callbacks");
 namespace {
 template<class T,class... R> T take(std::variant<T,R...> value) {
     REQUIRE(std::holds_alternative<T>(value));
@@ -53,9 +56,9 @@ StrategyRequest request(problem::ResolvedProblem p) {
     family.representation={"csl.polyhedron.h"};
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.ts01-analytic"};
     configuration.representation=family.representation;
-    return {std::move(p),configuration,std::move(family),{}};
+    return {std::move(p),configuration,std::move(family),{},{}};
 }
-ExecutionContext execution() {
+ExecutionContext make_execution_context() {
     ExecutionContext result;result.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     return result;
 }
@@ -67,7 +70,7 @@ SynthesisResult run(StrategyRequest request_) {
     requirements.output.completeness=Completeness::established;
     auto prepared=take(strategies.prepare(request_,requirements));
     auto workspace=prepared.create();
-    return take(workspace->run(execution()));
+    return take(workspace->run(make_execution_context()));
 }
 bool rejected(Problem p) {
     auto request_=request(resolve(std::move(p)));
@@ -78,6 +81,7 @@ bool rejected(Problem p) {
     requirements.output.completeness=Completeness::established;
     return std::holds_alternative<Rejection>(strategies.prepare(request_,requirements));
 }
+
 }
 
 TEST_CASE("registered T-S01 exact profile publishes its canonical complete family") {
@@ -118,6 +122,18 @@ TEST_CASE("registered T-S01 exact profile publishes its canonical complete famil
     CHECK_FALSE(relation->contains(Vector{0,0,0,0,0}));
     CHECK_FALSE(relation->contains(Vector{0,1,2,1,1}));
     CHECK_FALSE(relation->contains(Vector{0,1,1,1,std::numeric_limits<double>::denorm_min()}));
+}
+
+TEST_CASE("registry fails closed for verifier keys absent from the compiled catalog") {
+    for(const auto& version:std::vector<std::string>{"1","2"}) {
+        auto registration=synthesis::strategy_ts01::make_registration();
+        registration.complete_family_verifier={ModuleId{"unknown.compiled.verifier"},version};
+        StrategyRegistry strategies;REQUIRE_FALSE(strategies.add(std::move(registration)).has_value());
+        auto request_=request(resolve(source()));
+        Requirements requirements;requirements.output.representation=request_.family.representation;
+        requirements.output.family=request_.family.target;requirements.output.completeness=Completeness::established;
+        CHECK(std::holds_alternative<Rejection>(strategies.prepare(request_,requirements)));
+    }
 }
 
 TEST_CASE("T-S01 admission rejects objective, dynamics, controls, initial and temporal mutations") {
@@ -164,6 +180,33 @@ TEST_CASE("T-S01 publication binds the immutable request, coordinates and regist
     }
 }
 
+TEST_CASE("compiled T-S01 verifier rejects independently tampered proposal claims") {
+    auto original_request=request(resolve(source()));
+    original_request.strategy_version="1";
+    const auto result=run(original_request);
+    REQUIRE(result.family);
+    const auto verifier=detail::find_compiled_verifier({"csl.verifier.ts01-analytic"},"1");
+    REQUIRE(verifier);
+    const CompleteFamilyProposal original{result.family->identity(),
+        std::get<CompleteOptimalFamily>(result.family->outcome())};
+    CHECK(verifier->verify(original_request,original).empty());
+    auto rejects=[&](auto mutate) {
+        auto proposal=original;mutate(proposal);
+        CHECK_FALSE(verifier->verify(original_request,proposal).empty());
+    };
+    rejects([](auto& proposal){proposal.family.relation.payload=std::make_shared<const JointRelationPayload>();});
+    rejects([](auto& proposal){proposal.family.optimum.optimum.support=SymbolicArgument{"forged","changed theorem"};});
+    rejects([](auto& proposal){proposal.family.optimum.bounds.lower->value=-1;});
+    rejects([](auto& proposal){proposal.family.optimum.bounds.upper->value=1;});
+    rejects([](auto& proposal){proposal.identity.request.profile="different";proposal.family.completeness.binding=proposal.identity;});
+    rejects([](auto& proposal){proposal.identity.coordinates.horizon=3;proposal.family.completeness.binding=proposal.identity;});
+    rejects([](auto& proposal){proposal.identity.lineage.push_back({{"transform"},{"input"},{"output"},{"module"},"1"});proposal.family.completeness.binding=proposal.identity;});
+    rejects([](auto& proposal){std::get<RegisteredCompletenessEvidence>(proposal.family.completeness.support).verifier={"unknown"};});
+    rejects([](auto& proposal){std::get<RegisteredCompletenessEvidence>(proposal.family.completeness.support).verifier_version="2";});
+    auto changed_request=original_request;changed_request.family.profile="tampered";
+    CHECK_FALSE(verifier->verify(changed_request,original).empty());
+}
+
 TEST_CASE("T-S01 registry rejects mismatched request and selected strategy identity") {
     auto base=request(resolve(source()));
     StrategyRegistry strategies;
@@ -194,8 +237,8 @@ TEST_CASE("generic numerical and unchecked certificate strings cannot publish co
         std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>{
             ValidatedCoverageEvidence{"artifact:unverified",ModuleId{"checker:unregistered"},"exact-looking"}}}) {
         const auto completeness_support=std::holds_alternative<NumericalCoverageEvidence>(support)?
-            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence>{std::get<NumericalCoverageEvidence>(support)}:
-            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,Ts01AnalyticCoverageEvidence>{std::get<ValidatedCoverageEvidence>(support)};
+            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,RegisteredCompletenessEvidence>{std::get<NumericalCoverageEvidence>(support)}:
+            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,RegisteredCompletenessEvidence>{std::get<ValidatedCoverageEvidence>(support)};
         CompleteOptimalFamily untrusted{{complete.relation.coordinates,identity.request.representation,fake},
             {{identity.problem,arbitrary},{}},{identity,completeness_support},Assurance::numerical};
         CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,std::move(untrusted))));

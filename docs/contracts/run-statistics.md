@@ -57,13 +57,29 @@ reproduction.
 A family record retains the source `FamilyIdentity` (resolved problem, effective
 family request, joint coordinates, strategy/version and ordered transformation
 lineage) and exactly one typed complete, partial or candidate product. The
-opaque live relation payload is never serialized. With no exporter its payload
-is `unavailable_no_exporter`, while relation metadata and evidence survive.
-Complete- and partial-family publication are refused until reviewed coverage
-and every-history optimality procedures are implemented. Candidate feasibility
-is scoped to the whole relation, a named full-history witness, or unknown;
-an outer enclosure with one feasible witness does not claim whole-relation
-feasibility. Feasible incumbents retain their own feasibility support. A late generated-request rejection retains request/provider
+opaque live relation payload is never serialized. With no exporter its external
+family attachment is `unavailable_no_exporter`, while relation metadata and
+evidence survive. Ordinarily `project_final` drops the live payload. For the
+T-S01 profile it retains the exact relation object in the in-memory owner
+because the typed capability binds that object; `encode_run` then refuses the
+record under the v3 wire contract.
+Generic complete- and partial-family publication are refused until reviewed
+coverage and every-history optimality procedures are implemented. The dedicated
+T-S01 analytic profile is a narrow live exception for the exact two-step scalar
+integrator, exact known initial state 0, A=B=1, zero offsets/external map,
+independent closed controls `[0,1]`, no extra restrictions, and exact squared
+objective `(x2-1)^2`. Its typed capability is bound to the resolved problem,
+effective request, coordinates, strategy/version and exact relation; it is
+numerically assured and does not create a generic coverage verifier. The v3
+schema has no T-S01 support tag, so `encode_run` returns `unsupported` for such
+a live family. This is a wire-contract limitation, not a mathematical
+rejection. The decoder never reconstructs trusted proof capability from text;
+the future generic versioned verifier seam remains tracked in
+[issue #202](https://github.com/butahlecoq/controlled-systems-lab/issues/202).
+Candidate feasibility is scoped to the whole relation, a named full-history
+witness, or unknown; an outer enclosure with one feasible witness does not
+claim whole-relation feasibility. Feasible incumbents retain their own
+feasibility support. A late generated-request rejection retains request/provider
 provenance, completed lineage and the scope of bounds, incumbents and candidate
 or partial family that survived the stop. A separate contract-validation failure
 retains the original stop record without inventing provider provenance. An external attachment is a digest/size/schema/media claim,

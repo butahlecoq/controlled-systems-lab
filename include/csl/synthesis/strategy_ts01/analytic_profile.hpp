@@ -14,8 +14,8 @@ inline constexpr const char* profile_id = "ts01_exact_integrator";
 class ExactJointRelation final : public JointRelationPayload {
     sets::SetData h_polyhedron_;
     explicit ExactJointRelation(sets::SetData);
-    friend class RelationFactory;
 public:
+    static std::variant<std::shared_ptr<const ExactJointRelation>,Diagnostics> canonical();
     const sets::SetData& h_polyhedron() const noexcept { return h_polyhedron_; }
     bool contains(std::span<const double> canonical_history) const noexcept;
 };

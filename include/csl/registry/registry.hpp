@@ -40,7 +40,9 @@ struct StrategyRequest {
     StrategyConfiguration configuration;
     FamilyRequest family;
     std::string strategy_version; // selected registration, frozen at preparation
+    std::vector<TransformStepIdentity> lineage;
 };
+using CompleteFamilyVerifier = std::function<Diagnostics(const StrategyRequest&,const CompleteFamilyProposal&)>;
 
 struct LPPort {
     using Request = LinearProgram; using Workspace = LPWorkspace;
@@ -346,21 +348,46 @@ struct StrategyRegistration {
     // Pure planning only: declare every required typed dependency with
     // check_pipeline, then compose_strategy. No prepare/create/native work here.
     std::function<std::variant<StrategyPlan,Rejection>(const StrategyRequest&,const Requirements&)> planner;
+    struct CompleteFamilyVerifierKey { ModuleId id; std::string version; } complete_family_verifier{};
 };
+namespace detail {
+class CompiledCompleteFamilyVerifier;
+class VerifiedStrategyWorkspace final : public SynthesisWorkspace {
+    std::unique_ptr<SynthesisWorkspace> workspace_;
+    std::shared_ptr<const StrategyRequest> request_;
+    std::shared_ptr<const CompiledCompleteFamilyVerifier> verifier_;
+    VerifiedFamilyAuthority authority_;
+public:
+    VerifiedStrategyWorkspace(std::unique_ptr<SynthesisWorkspace> workspace,
+        std::shared_ptr<const StrategyRequest> request,std::shared_ptr<const CompiledCompleteFamilyVerifier> verifier,
+        VerifiedFamilyAuthority authority)
+        :workspace_(std::move(workspace)),request_(std::move(request)),verifier_(std::move(verifier)),
+         authority_(std::move(authority)) {}
+    SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override;
+};
+}
 class PreparedStrategy {
     std::shared_ptr<const StrategyRequest> request_;
     Requirements requirements_;
     std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest&,const Requirements&)> factory_;
+    std::shared_ptr<const detail::CompiledCompleteFamilyVerifier> complete_family_verifier_;
+    std::optional<detail::VerifiedFamilyAuthority> family_authority_;
     std::vector<Provenance> provenance_;
     friend class StrategyRegistry;
     PreparedStrategy(std::shared_ptr<const StrategyRequest> request, Requirements requirements,
-        std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest&,const Requirements&)> factory, std::vector<Provenance> provenance)
-        : request_(std::move(request)),requirements_(std::move(requirements)),factory_(std::move(factory)),provenance_(std::move(provenance)) {}
+        std::function<std::unique_ptr<SynthesisWorkspace>(const StrategyRequest&,const Requirements&)> factory,
+        std::shared_ptr<const detail::CompiledCompleteFamilyVerifier> verifier,std::optional<detail::VerifiedFamilyAuthority> authority,std::vector<Provenance> provenance)
+        : request_(std::move(request)),requirements_(std::move(requirements)),factory_(std::move(factory)),
+          complete_family_verifier_(std::move(verifier)),family_authority_(std::move(authority)),provenance_(std::move(provenance)) {}
 public:
     const std::vector<Provenance>& provenance() const { return provenance_; }
     const Requirements& requirements() const { return requirements_; }
     std::unique_ptr<BoundWorkspace<StrategyPort>> create() const {
-        return detail::PipelineAccess::bind<StrategyPort>(request_,factory_(*request_,requirements_));
+        auto workspace=factory_(*request_,requirements_);
+        if(complete_family_verifier_&&family_authority_)
+            workspace=std::make_unique<detail::VerifiedStrategyWorkspace>(std::move(workspace),request_,
+                complete_family_verifier_,*family_authority_);
+        return detail::PipelineAccess::bind<StrategyPort>(request_,std::move(workspace));
     }
 };
 class StrategyRegistry {
