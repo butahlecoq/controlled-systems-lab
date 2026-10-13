@@ -69,6 +69,7 @@ class FreshBuildTests(unittest.TestCase):
         self.dirty_after_build = False
         self.commands = []
         self.tracked_paths = []
+        self.source_delta = []
         self.addCleanup(patch.stopall)
         self.real_check_output = collect.subprocess.check_output
         patch.object(collect, "_git", side_effect=self.git).start()
@@ -82,17 +83,17 @@ class FreshBuildTests(unittest.TestCase):
             return "changed-head" if self.change_after_build and self.head_checks > 1 else "harness-head"
         if args == ("status", "--porcelain=v1"):
             return " M src/geometry.cpp" if self.dirty_after_build and self.commands else ""
-        if args == ("diff", "--name-only", "source-head", "harness-head"):
-            return ""
         if args == ("rev-parse", "source-head^{tree}"):
             return "source-tree"
         if args == ("rev-parse", "harness-head^{tree}"):
             return "harness-tree"
-        if args == ("-C", str(self.source), "ls-files", "-z"):
-            return "\0".join(self.tracked_paths)
         raise AssertionError(f"unexpected git command: {args}")
 
     def git_show(self, command, **kwargs):
+        if command == ["git", "-C", str(self.source), "ls-files", "-z"]:
+            return b"".join(path.encode("utf-8") + b"\0" for path in self.tracked_paths)
+        if command == ["git", "diff", "--name-only", "-z", "source-head", "harness-head"]:
+            return b"".join(path.encode("utf-8") + b"\0" for path in self.source_delta)
         if command == ["git", "show", "source-head:CMakeLists.txt"]:
             return self.source_cmake
         if command == ["git", "show", "harness-head:CMakeLists.txt"]:
@@ -133,6 +134,43 @@ class FreshBuildTests(unittest.TestCase):
         self.assertIn("warning in BUILD_ROOT", log)
         self.assertNotIn("Private User", log)
         self.assertNotIn("unrelated old", log)
+
+    def test_reviewed_artifacts_are_classified_separately_and_still_require_fresh_rebuild(self):
+        self.source_delta = [
+            "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/measurement-interpretation.md",
+            "reports/algorithm-results/geo05-7fddaba0c7698f72/records.json"]
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            try:
+                provenance = self.provenance()
+            except ValueError as error:
+                self.fail(f"reviewed artifact delta must reach fresh rebuild admission: {error}")
+        self.assertEqual(provenance["tracked_tree_binding"]["actual_reviewed_artifact_delta"], [
+            "reports/algorithm-results/geo05-7fddaba0c7698f72-evidence/measurement-interpretation.md",
+            "reports/algorithm-results/geo05-7fddaba0c7698f72/records.json"])
+        self.assertNotIn("reports/algorithm-results/geo05-7fddaba0c7698f72/records.json",
+                         provenance["tracked_tree_binding"]["allowed_harness_delta"])
+        self.assertIn("records.json", provenance["tracked_tree_binding"]["reviewed_artifact_path_policy"]["bundle_filenames"])
+        self.assertEqual(provenance["tracked_tree_binding"]["reviewed_artifact_path_policy"]["bundle_directory_pattern"],
+                         "reports/algorithm-results/geo05-[0-9a-f]{16}")
+        self.assertEqual(provenance["executable"]["sha256"], hashlib.sha256(b"fresh executable").hexdigest())
+        self.assertEqual(provenance["fresh_build"]["return_code"], 0)
+        self.assertEqual(len(self.commands), 1)
+
+    def test_source_configuration_inside_artifact_directory_is_rejected_before_rebuild(self):
+        self.source_delta = ["reports/algorithm-results/geo05-7fddaba0c7698f72/config.json"]
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
+                self.provenance()
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
+        self.assertEqual(self.commands, [])
+
+    def test_newline_inside_changed_path_cannot_split_into_allowed_artifact_and_cmake(self):
+        self.source_delta = ["reports/algorithm-results/geo05-0123456789abcdef/records.json\nCMakeLists.txt"]
+        with patch.object(collect.subprocess, "run", side_effect=self.build_process):
+            with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
+                self.provenance()
+        self.assertEqual(self.exe.read_bytes(), b"stale executable")
+        self.assertEqual(self.commands, [])
 
     def test_failed_rebuild_rejects_stale_executable_without_measurements(self):
         def fail(command, **kwargs):
@@ -275,10 +313,9 @@ class FreshBuildTests(unittest.TestCase):
         self.real_check_output(["git", "add", "driver.cpp"], cwd=self.source)
         self.log.unlink()
         self.log.hardlink_to(tracked)
-        def git_from_nested_directory(*args):
-            return self.real_check_output(["git", *args], cwd=self.exe.parent,
-                                          text=True, encoding="utf-8").strip()
-        with patch.object(collect, "_git", side_effect=git_from_nested_directory):
+        def git_from_nested_directory(command, **kwargs):
+            return self.real_check_output(command, cwd=self.exe.parent, **kwargs)
+        with patch.object(collect.subprocess, "check_output", side_effect=git_from_nested_directory):
             with self.assertRaisesRegex(ValueError, "build log must not alias a tracked source file"):
                 collect._validate_build_log(self.log, self.build, self.exe, self.source)
         self.assertEqual(tracked.read_bytes(), b"tracked source")

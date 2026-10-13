@@ -1,5 +1,6 @@
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/reachability/nominal_predecessor.hpp>
+#include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -10,6 +11,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <variant>
 #include <vector>
 #include <utility>
@@ -24,8 +26,63 @@ std::shared_ptr<const ResourcePolicy> report_resources() {
 ExecutionContext report_context() {
     return {report_resources(),{}, {},{1e-8,1e-8},"geo05-report"};
 }
+struct TrialFailure : std::runtime_error {
+    std::string status;
+    std::optional<reachability::NominalPredecessorFailure> predecessor_failure;
+    TrialFailure(std::string status_value, std::string detail)
+        : std::runtime_error(status_value + ": " + detail), status(std::move(status_value)) {}
+};
+const char* diagnostic_code(DiagnosticCode code) {
+    switch (code) {
+    case DiagnosticCode::invalid_input: return "invalid_input";
+    case DiagnosticCode::unsupported: return "unsupported";
+    case DiagnosticCode::evidence_mismatch: return "evidence_mismatch";
+    case DiagnosticCode::invalid_claim: return "invalid_claim";
+    }
+    throw std::logic_error("unknown diagnostic code");
+}
+[[noreturn]] void reject(const Diagnostics& diagnostics, bool unsupported = false) {
+    std::string detail;
+    for (const auto& diagnostic : diagnostics) {
+        unsupported = unsupported || diagnostic.code == DiagnosticCode::unsupported;
+        if (!detail.empty()) detail += "; ";
+        detail += std::string(diagnostic_code(diagnostic.code)) + ": " + diagnostic.field + ": " + diagnostic.explanation;
+    }
+    throw TrialFailure(unsupported ? "unsupported" : "failed", detail);
+}
+[[noreturn]] void reject(const Diagnostic& diagnostic) { reject(Diagnostics{diagnostic}); }
+[[noreturn]] void reject(const registry::Rejection& rejection) { reject(rejection.diagnostics); }
+[[noreturn]] void reject(const Unsupported& unsupported) { reject(unsupported.diagnostics, true); }
+[[noreturn]] void reject(const OperationStopped& stopped) {
+    switch (stopped.reason) {
+    case StopReason::cancelled: throw TrialFailure("cancelled", "cancelled: " + stopped.diagnostics);
+    case StopReason::deadline_expired: throw TrialFailure("cancelled", "deadline_expired: " + stopped.diagnostics);
+    case StopReason::resource_limit: throw TrialFailure("failed", "resource_limit: " + stopped.diagnostics);
+    case StopReason::numerical_failure: throw TrialFailure("failed", "numerical_failure: " + stopped.diagnostics);
+    }
+    throw std::logic_error("unknown stop reason");
+}
+[[noreturn]] void reject(const reachability::NominalPredecessorFailure& failure) {
+    try {
+        std::visit([](const auto& cause) { reject(cause); }, failure.cause);
+    } catch (TrialFailure& error) {
+        error.predecessor_failure = failure;
+        throw;
+    }
+    throw std::logic_error("predecessor failure has no cause");
+}
+[[noreturn]] void reject(const SupportResult&) {
+    throw TrialFailure("failed", "public geometry API returned an unexpected support-query result");
+}
+[[noreturn]] void reject(const ContainmentResult&) {
+    throw TrialFailure("failed", "public geometry API returned an unexpected containment-query result");
+}
 template<class T, class... E> T take(std::variant<T,E...> value) {
-    if (!std::holds_alternative<T>(value)) throw std::runtime_error("public geometry API returned diagnostics or rejection");
+    if (!std::holds_alternative<T>(value)) {
+        std::visit([](const auto& outcome) {
+            if constexpr (!std::is_same_v<std::decay_t<decltype(outcome)>, T>) reject(outcome);
+        }, value);
+    }
     return std::get<T>(std::move(value));
 }
 struct Trial {
@@ -33,13 +90,80 @@ struct Trial {
     std::size_t repetition{}, input_rows{}, rows{}, vertices{}, rays{};
     std::string result_kind;
     std::string result_encoding;
+    std::string end_to_end_scope{"through_verification_and_fixture_teardown"};
     std::optional<std::size_t> expected_fm_peak_rows;
     bool oracle_passed{}, work_observed{};
     bool output_observed{};
     std::optional<std::size_t> max_rows{128};
     std::uint64_t setup_ns{}, run_ns{}, verification_ns{}, end_to_end_ns{};
     std::optional<std::uint64_t> workspace_ns{0};
+    std::optional<reachability::NominalPredecessorFailure> predecessor_failure;
 };
+using Json = nlohmann::json;
+Json failure_json(const GeometryReference& reference) {
+    auto inputs = Json::array();
+    for (const auto& input : reference.inputs) inputs.push_back(input.value);
+    return {{"identity", {{"problem", reference.identity.problem.value}, {"request", reference.identity.request.value},
+        {"ideal_output", reference.identity.ideal_output.value}}}, {"inputs", std::move(inputs)}};
+}
+Json failure_json(const Unestablished&) { return {{"kind", "unestablished"}}; }
+Json failure_json(const NumericalCheck& support) {
+    return {{"kind", "numerical_check"}, {"absolute_tolerance", support.absolute_tolerance},
+        {"relative_tolerance", support.relative_tolerance}, {"max_residual", support.max_residual}, {"verifier", support.verifier.value}};
+}
+Json failure_json(const SymbolicArgument& support) {
+    return {{"kind", "symbolic_argument"}, {"reference", support.reference}, {"assumptions", support.assumptions}};
+}
+Json failure_json(const CertificateReference& support) {
+    return {{"kind", "certificate_reference"}, {"artifact", support.artifact}, {"verifier", support.verifier}};
+}
+const char* scope_name(GeometryClaimScope scope) {
+    switch (scope) {
+    case GeometryClaimScope::set_relation: return "set_relation";
+    case GeometryClaimScope::support_value: return "support_value";
+    case GeometryClaimScope::containment: return "containment";
+    }
+    throw std::logic_error("unknown geometry claim scope");
+}
+Json failure_json(const GeometryEvidence& evidence) {
+    Json error_bound = nullptr;
+    if (evidence.error_bound) error_bound = {{"metric", evidence.error_bound->metric.value},
+        {"bound", evidence.error_bound->bound}, {"units", evidence.error_bound->units}};
+    return {{"reference", failure_json(evidence.reference)}, {"scope", scope_name(evidence.scope)},
+        {"support", std::visit([](const auto& support) { return failure_json(support); }, evidence.support)},
+        {"assumptions", evidence.assumptions}, {"error_bound", std::move(error_bound)}};
+}
+Json failure_json(const RequestProvenance& provider) {
+    return {{"request", provider.request.value}, {"port", provider.port}, {"requested_module", provider.requested_module.value},
+        {"requested_version", provider.requested_version ? Json(*provider.requested_version) : Json(nullptr)},
+        {"actual_module", provider.actual_module ? Json(provider.actual_module->value) : Json(nullptr)},
+        {"actual_version", provider.actual_version ? Json(*provider.actual_version) : Json(nullptr)}};
+}
+Json failure_json(const Unsupported& cause) {
+    auto diagnostics = Json::array();
+    for (const auto& diagnostic : cause.diagnostics) diagnostics.push_back({{"code", diagnostic_code(diagnostic.code)},
+        {"field", diagnostic.field}, {"explanation", diagnostic.explanation}});
+    return {{"kind", "unsupported"}, {"diagnostics", std::move(diagnostics)}};
+}
+const char* stop_reason(StopReason reason) {
+    switch (reason) {
+    case StopReason::cancelled: return "cancelled";
+    case StopReason::deadline_expired: return "deadline_expired";
+    case StopReason::resource_limit: return "resource_limit";
+    case StopReason::numerical_failure: return "numerical_failure";
+    }
+    throw std::logic_error("unknown stop reason");
+}
+Json failure_json(const OperationStopped& cause) {
+    return {{"kind", "operation_stopped"}, {"reason", stop_reason(cause.reason)}, {"diagnostics", cause.diagnostics}};
+}
+Json failure_json(const reachability::NominalPredecessorFailure& failure) {
+    auto lineage = Json::array();
+    for (const auto& evidence : failure.completed_lineage) lineage.push_back(failure_json(evidence));
+    return {{"predecessor", failure_json(failure.predecessor)}, {"projection", failure_json(failure.projection)},
+        {"projection_provider", failure_json(failure.projection_provider)}, {"completed_lineage", std::move(lineage)},
+        {"cause", std::visit([](const auto& cause) { return failure_json(cause); }, failure.cause)}};
+}
 std::string json_escape(const std::string& value) {
     std::string escaped;
     for (unsigned char ch:value) {
@@ -187,23 +311,37 @@ void run_v(Trial& t) {
     t.verification_ns=verify.elapsed(); t.work_observed=t.vertices+t.rays>0;
     t.max_rows.reset(); t.status=t.oracle_passed?"passed":"oracle_failed";
 }
-Trial execute(const std::string& name,std::size_t repetition,std::string purpose="measurement") {
+template<class Run> Trial execute_attempt(const std::string& name,std::size_t repetition,std::string purpose,Run run) {
     Trial t; t.purpose=std::move(purpose); t.scenario=name; t.repetition=repetition; Timer total;
+    if (name=="v_projection_preserves_ray") t.max_rows.reset();
+    if (name=="integrator_predecessor") t.expected_fm_peak_rows=6;
     try {
+        run(t);
+    } catch (const TrialFailure& e) {
+        t.detail=e.what(); t.status=e.status; t.predecessor_failure=e.predecessor_failure;
+        t.end_to_end_scope="through_failure_unwind";
+    }
+    catch (const std::exception& e) { t.detail=e.what(); t.status="failed"; t.end_to_end_scope="through_failure_unwind"; }
+    t.end_to_end_ns=total.elapsed(); return t;
+}
+Trial execute(const std::string& name,std::size_t repetition,std::string purpose="measurement") {
+    return execute_attempt(name,repetition,std::move(purpose),[&](Trial& t) {
         if (name=="singular_a") run_predecessor(t);
         else if (name=="unreachable_equality_target") run_unreachable(t);
         else if (name=="integrator_predecessor") run_integrator(t);
         else if (name=="v_projection_preserves_ray") run_v(t);
         else throw std::runtime_error("unknown scenario");
-    } catch (const std::exception& e) { t.detail=e.what(); t.status="failed"; }
-    t.end_to_end_ns=total.elapsed(); return t;
+    });
 }
 std::vector<std::string> scenarios{"singular_a","unreachable_equality_target","integrator_predecessor","v_projection_preserves_ray"};
 std::uint64_t count(const char* value) { auto n=std::stoull(value); if (!n||n>1000) throw std::runtime_error("count must be in [1,1000]"); return n; }
 void emit(const Trial& t) {
     std::cout << "{\"purpose\":\""<<json_escape(t.purpose)<<"\",\"scenario\":\""<<json_escape(t.scenario)<<"\",\"repetition\":"<<t.repetition
       <<",\"status\":\""<<json_escape(t.status)<<"\",\"detail\":\""<<json_escape(t.detail)<<"\",\"oracle_scope\":\"numeric_literal_samples\",\"oracle_passed\":"<<(t.oracle_passed?"true":"false")
-      <<",\"work_observed\":"<<(t.work_observed?"true":"false")<<",\"max_rows\":";
+      <<",\"work_observed\":"<<(t.work_observed?"true":"false")
+      <<",\"end_to_end_scope\":\""<<json_escape(t.end_to_end_scope)<<"\"";
+    if (t.predecessor_failure) std::cout<<",\"predecessor_failure\":"<<failure_json(*t.predecessor_failure).dump();
+    std::cout<<",\"max_rows\":";
     if (t.max_rows) std::cout<<*t.max_rows; else std::cout<<"null";
     std::cout<<",\"input_rows\":"<<t.input_rows<<",\"output_rows\":";
     if(t.output_observed) std::cout<<t.rows; else std::cout<<"null";

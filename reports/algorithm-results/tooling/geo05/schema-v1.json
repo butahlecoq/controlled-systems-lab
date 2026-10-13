@@ -26,13 +26,57 @@
         "scenario": {"enum": ["singular_a", "unreachable_equality_target", "integrator_predecessor", "v_projection_preserves_ray"]},
         "repetition": {"type": "integer", "minimum": 0},
         "status": {"enum": ["passed", "failed", "unsupported", "cancelled", "oracle_failed"]},
+        "end_to_end_scope": {"enum": ["through_verification_and_fixture_teardown", "through_failure_unwind"]},
+        "predecessor_failure": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/predecessor_failure"}]},
         "oracle_scope": {"const": "numeric_literal_samples"}, "oracle_passed": {"type": "boolean"},
         "work_observed": {"type": "boolean"}, "max_rows": {"type": ["integer", "null"]},
         "input_rows": {"type": "integer", "minimum": 0}, "output_rows": {"type": ["integer", "null"], "minimum": 0},
         "result_kind": {"enum": ["empty", "h", "v", null]}, "result_encoding": {"enum": ["empty", "h_rows", "h_contradiction_row", "v_generators", null]},
         "input_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "scenario_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "expected_fm_peak_rows": {"type": ["integer", "null"]}, "durations_ns": {"type": "object"}},
-      "additionalProperties": true}
+      "additionalProperties": true,
+      "dependentSchemas": {"predecessor_failure": {"oneOf": [
+        {"properties": {"predecessor_failure": {"type": "null"}}},
+        {"properties": {"status": {"const": "unsupported"}, "predecessor_failure": {"type": "object", "properties": {
+          "cause": {"properties": {"kind": {"const": "unsupported"}}}}}}},
+        {"properties": {"status": {"const": "cancelled"}, "predecessor_failure": {"type": "object", "properties": {
+          "cause": {"properties": {"kind": {"const": "operation_stopped"}, "reason": {"enum": ["cancelled", "deadline_expired"]}}}}}}},
+        {"properties": {"status": {"const": "failed"}, "predecessor_failure": {"type": "object", "properties": {
+          "cause": {"properties": {"kind": {"const": "operation_stopped"}, "reason": {"enum": ["resource_limit", "numerical_failure"]}}}}}}}
+      ]}}},
+    "geometry_reference": {"type": "object", "required": ["identity", "inputs"], "properties": {
+      "identity": {"type": "object", "required": ["problem", "request", "ideal_output"], "properties": {
+        "problem": {"type": "string"}, "request": {"type": "string"}, "ideal_output": {"type": "string"}}, "additionalProperties": false},
+      "inputs": {"type": "array", "items": {"type": "string"}}}, "additionalProperties": false},
+    "projection_provider": {"type": "object", "required": ["request", "port", "requested_module", "requested_version", "actual_module", "actual_version"], "properties": {
+      "request": {"type": "string"}, "port": {"type": "string"}, "requested_module": {"type": "string"},
+      "requested_version": {"type": ["string", "null"]}, "actual_module": {"type": ["string", "null"]}, "actual_version": {"type": ["string", "null"]}}, "additionalProperties": false},
+    "evidence_support": {"oneOf": [
+      {"type": "object", "required": ["kind"], "properties": {"kind": {"const": "unestablished"}}, "additionalProperties": false},
+      {"type": "object", "required": ["kind", "absolute_tolerance", "relative_tolerance", "max_residual", "verifier"], "properties": {
+        "kind": {"const": "numerical_check"}, "absolute_tolerance": {"type": "number"}, "relative_tolerance": {"type": "number"},
+        "max_residual": {"type": "number"}, "verifier": {"type": "string"}}, "additionalProperties": false},
+      {"type": "object", "required": ["kind", "reference", "assumptions"], "properties": {
+        "kind": {"const": "symbolic_argument"}, "reference": {"type": "string"}, "assumptions": {"type": "string"}}, "additionalProperties": false},
+      {"type": "object", "required": ["kind", "artifact", "verifier"], "properties": {
+        "kind": {"const": "certificate_reference"}, "artifact": {"type": "string"}, "verifier": {"type": "string"}}, "additionalProperties": false}]},
+    "geometry_evidence": {"type": "object", "required": ["reference", "scope", "support", "assumptions", "error_bound"], "properties": {
+      "reference": {"$ref": "#/$defs/geometry_reference"}, "scope": {"enum": ["set_relation", "support_value", "containment"]},
+      "support": {"$ref": "#/$defs/evidence_support"}, "assumptions": {"type": "array", "items": {"type": "string"}},
+      "error_bound": {"oneOf": [{"type": "null"}, {"type": "object", "required": ["metric", "bound", "units"], "properties": {
+        "metric": {"type": "string"}, "bound": {"type": "number"}, "units": {"type": "string"}}, "additionalProperties": false}]}}, "additionalProperties": false},
+    "failure_cause": {"oneOf": [
+      {"type": "object", "required": ["kind", "diagnostics"], "properties": {"kind": {"const": "unsupported"},
+        "diagnostics": {"type": "array", "items": {"type": "object", "required": ["code", "field", "explanation"], "properties": {
+          "code": {"enum": ["invalid_input", "unsupported", "evidence_mismatch", "invalid_claim"]},
+          "field": {"type": "string"}, "explanation": {"type": "string"}}, "additionalProperties": false}}}, "additionalProperties": false},
+      {"type": "object", "required": ["kind", "reason", "diagnostics"], "properties": {"kind": {"const": "operation_stopped"},
+        "reason": {"enum": ["cancelled", "deadline_expired", "resource_limit", "numerical_failure"]},
+        "diagnostics": {"type": "string"}}, "additionalProperties": false}]},
+    "predecessor_failure": {"type": "object", "required": ["predecessor", "projection", "projection_provider", "completed_lineage", "cause"], "properties": {
+      "predecessor": {"$ref": "#/$defs/geometry_reference"}, "projection": {"$ref": "#/$defs/geometry_reference"},
+      "projection_provider": {"$ref": "#/$defs/projection_provider"}, "completed_lineage": {"type": "array", "items": {"$ref": "#/$defs/geometry_evidence"}},
+      "cause": {"$ref": "#/$defs/failure_cause"}}, "additionalProperties": false}
   },
   "additionalProperties": false
 }

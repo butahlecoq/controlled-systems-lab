@@ -15,12 +15,18 @@ import zipfile
 from pathlib import Path
 
 from report import (HARNESS_PATH_ALLOWLIST, PHASES, SCENARIOS, bind_fixture_identity, make_record,
+                    is_reviewed_artifact_path, reviewed_artifact_path_policy,
                     scenario_order, strict_json_loads, validate_cmake_delta, validate_source_tree_delta)
 from smoke import validate_smoke
 
 
 def _git(*args: str) -> str:
     return subprocess.check_output(["git", *args], text=True, encoding="utf-8").strip()
+
+
+def _git_paths(*args: str) -> list[str]:
+    output = subprocess.check_output(["git", *args])
+    return [path.decode("utf-8", errors="surrogateescape") for path in output.split(b"\0") if path]
 
 
 def _sha(path: Path) -> str:
@@ -109,9 +115,7 @@ def _validate_build_log(build_log: Path, build: Path, exe: Path, source_root: Pa
         raise ValueError("build log must resolve inside the configured build directory")
     if build_log == exe or (build_log.is_file() and exe.is_file() and build_log.samefile(exe)):
         raise ValueError("build log must not alias the executable")
-    for name in _git("-C", str(source_root), "ls-files", "-z").split("\0"):
-        if not name:
-            continue
+    for name in _git_paths("-C", str(source_root), "ls-files", "-z"):
         tracked = source_root / name
         if build_log == tracked.resolve() or (build_log.is_file() and tracked.is_file()
                                              and build_log.samefile(tracked)):
@@ -127,7 +131,7 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
     if _git("status", "--porcelain=v1"):
         raise ValueError("source and harness worktree must be clean before collection")
     _validate_build_log(build_log, build, exe, source_root)
-    changed = _git("diff", "--name-only", source_commit, harness_commit).splitlines()
+    changed = _git_paths("diff", "--name-only", "-z", source_commit, harness_commit)
     validate_source_tree_delta(changed)
     source_cmake = subprocess.check_output(["git", "show", f"{source_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
     harness_cmake = subprocess.check_output(["git", "show", f"{harness_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
@@ -162,7 +166,10 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
                 "scope": "complete tracked repository tree",
                 "source_tree_oid": _git("rev-parse", f"{source_commit}^{{tree}}"),
                 "harness_tree_oid": _git("rev-parse", f"{harness_commit}^{{tree}}"),
-                "allowed_harness_delta": sorted(HARNESS_PATH_ALLOWLIST), "actual_changed_paths": changed},
+                "allowed_harness_delta": sorted(HARNESS_PATH_ALLOWLIST), "actual_changed_paths": changed,
+                "reviewed_artifact_path_policy": reviewed_artifact_path_policy(),
+                "actual_reviewed_artifact_delta": sorted({path.replace("\\", "/") for path in changed
+                                                          if is_reviewed_artifact_path(path)})},
             "executable": {"name": exe.name, "sha256": _sha(exe)},
             "build_log_sha256": _sha(build_log), "fresh_build": fresh_build,
             "configuration": "Release", "cxx_standard": "20",
@@ -191,39 +198,76 @@ def _matrix_error(rows: list[dict], repetitions: int) -> None:
         raise ValueError("attempts are duplicated or out of fixed alternating order")
 
 
-def _write_collection(out: Path, stdout: str, stderr: str, rows: list[dict],
-                      provenance: dict, command: list[str], repetitions: int,
-                      process_return_code: int, parse_errors: list[dict], timed_out: bool = False) -> None:
-    warmups = [row for row in rows if row["purpose"] == "warmup"]
-    trials = [row for row in rows if row["purpose"] == "measurement"]
-    record = make_record(trials, purpose="measurement", provenance=provenance,
-                         measured_repetitions=repetitions, warmups=1, warmup_trials=warmups,
-                         process_return_code=process_return_code, parse_errors=len(parse_errors), timed_out=timed_out)
+def _durable_text(path: Path, source: str) -> None:
+    with path.open("w", encoding="utf-8") as stream:
+        stream.write(source)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def _write_capture(out: Path, stdout: str, stderr: str, command: list[str],
+                   process_return_code: int, timed_out: bool) -> None:
     out.mkdir(parents=True, exist_ok=False)
+    _durable_text(out / "stdout.jsonl", stdout)
+    _durable_text(out / "stderr.txt", stderr)
+    _durable_text(out / "command.json", json.dumps(command, indent=2)+"\n")
+    _durable_text(out / "process-capture.json", json.dumps({
+        "schema": "csl.geo05-process-capture/1", "process_return_code": process_return_code,
+        "timed_out": timed_out, "stdout_file_sha256": _sha(out / "stdout.jsonl"),
+        "stderr_file_sha256": _sha(out / "stderr.txt")}, indent=2)+"\n")
+
+
+def _write_validation_error(out: Path, error: Exception) -> None:
+    _durable_text(out / "validation-error.json", json.dumps({
+        "schema": "csl.geo05-rejected-capture/1", "error_type": type(error).__name__,
+        "error": str(error)}, indent=2)+"\n")
+
+
+def _finish_collection(out: Path, rows: list[dict], provenance: dict, repetitions: int,
+                       process_return_code: int, parse_errors: list[dict], timed_out: bool) -> None:
+    try:
+        _matrix_error(rows, repetitions)
+        warmups = [row for row in rows if row["purpose"] == "warmup"]
+        trials = [row for row in rows if row["purpose"] == "measurement"]
+        record = make_record(trials, purpose="measurement", provenance=provenance,
+                             measured_repetitions=repetitions, warmups=1, warmup_trials=warmups,
+                             process_return_code=process_return_code, parse_errors=len(parse_errors), timed_out=timed_out)
+    except Exception as error:
+        _write_validation_error(out, error)
+        raise
     (out / "records.json").write_text(json.dumps(record, indent=2, allow_nan=False)+"\n", encoding="utf-8")
     (out / "provenance.json").write_text(json.dumps(provenance, indent=2, allow_nan=False)+"\n", encoding="utf-8")
-    (out / "command.json").write_text(json.dumps(command, indent=2)+"\n", encoding="utf-8")
-    (out / "stdout.jsonl").write_text(stdout, encoding="utf-8")
-    (out / "stderr.txt").write_text(stderr, encoding="utf-8")
     (out / "parse-errors.json").write_text(json.dumps(parse_errors, indent=2)+"\n", encoding="utf-8")
     with (out / "trials.jsonl").open("w", encoding="utf-8", newline="\n") as stream:
         for row in rows:
             stream.write(json.dumps(row, sort_keys=True, allow_nan=False)+"\n")
-    fields = ["purpose", "scenario", "repetition", "status", "detail", "oracle_passed", "work_observed",
+    fields = ["purpose", "scenario", "repetition", "status", "detail", "predecessor_failure", "oracle_passed", "work_observed", "end_to_end_scope",
               "max_rows", "input_rows", "output_rows", "result_kind", "result_encoding", "input_sha256", "scenario_sha256", "expected_fm_peak_rows", *PHASES]
     with (out / "trials.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         for row in rows:
-            writer.writerow({**row, **row.get("durations_ns", {})})
+            context = row.get("predecessor_failure")
+            writer.writerow({**row, **row.get("durations_ns", {}),
+                "predecessor_failure": json.dumps(context, sort_keys=True, allow_nan=False) if context is not None else ""})
     from render import render_html
     (out / "index.html").write_text(render_html(record), encoding="utf-8")
+    # The validated record now carries process outcome metadata. Keep the
+    # historical successful bundle inventory; rejected captures retain the snapshot.
+    (out / "process-capture.json").unlink()
     inventory = {path.name: _sha(path) for path in sorted(out.iterdir()) if path.is_file()}
     (out / "manifest.json").write_text(json.dumps({"schema": "csl.geo05-report-files/1", "files": inventory},
                                                         indent=2, sort_keys=True)+"\n", encoding="utf-8")
     with zipfile.ZipFile(out.with_suffix(".zip"), "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(out.iterdir()):
             archive.write(path, arcname=path.name)
+
+
+def _write_collection(out: Path, stdout: str, stderr: str, rows: list[dict],
+                      provenance: dict, command: list[str], repetitions: int,
+                      process_return_code: int, parse_errors: list[dict], timed_out: bool = False) -> None:
+    _write_capture(out, stdout, stderr, command, process_return_code, timed_out)
+    _finish_collection(out, rows, provenance, repetitions, process_return_code, parse_errors, timed_out)
 
 
 def main() -> int:
@@ -271,9 +315,12 @@ def main() -> int:
     if before != provenance["executable"]["sha256"]:
         raise SystemExit("measurement executable changed after the fresh Release rebuild")
     raw_stdout, raw_stderr, return_code, timed_out = _run_capture(command)
+    _write_capture(out, raw_stdout, raw_stderr, command, return_code, timed_out)
     after = _sha(args.exe)
     if before != after:
-        raise SystemExit("measurement executable changed while collection was running")
+        error = ValueError("measurement executable changed while collection was running")
+        _write_validation_error(out, error)
+        raise error
     rows, parse_errors = [], []
     for line_number, line in enumerate(raw_stdout.splitlines(), 1):
         if not line.strip():
@@ -283,7 +330,6 @@ def main() -> int:
         except ValueError as error:
             parse_errors.append({"line": line_number, "error": str(error),
                                  "line_sha256": hashlib.sha256(line.encode("utf-8")).hexdigest()})
-    _matrix_error(rows, args.repetitions)
     provenance["executable"]["sha256"] = before
     provenance["environment"] = {"os": platform.platform(), "processor": platform.processor() or "unavailable",
                                   "cpu_count": os.cpu_count(), "python": platform.python_version(),
@@ -302,8 +348,7 @@ def main() -> int:
         provenance["timed_out"] = True
     provenance["raw_stdout_sha256"] = hashlib.sha256(raw_stdout.encode("utf-8")).hexdigest()
     provenance["raw_stderr_sha256"] = hashlib.sha256(raw_stderr.encode("utf-8")).hexdigest()
-    _write_collection(out, raw_stdout, raw_stderr, rows, provenance,
-                      command, args.repetitions, return_code, parse_errors, timed_out)
+    _finish_collection(out, rows, provenance, args.repetitions, return_code, parse_errors, timed_out)
     return return_code
 
 
