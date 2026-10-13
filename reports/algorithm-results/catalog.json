@@ -129,6 +129,18 @@
       "measured_scope": "Five analytic equality/nonnegative feasibility fixtures; phase-one-bland and HiGHS reference; 70 measured attempts plus 10 excluded warmups; fresh requests and workspaces; setup, BoundWorkspace.run, independent verification and input-to-verified-result timing; process startup and serialization excluded",
       "evidence_limits": "Descriptive five-fixture report; feasibility-numerics support remains Unestablished; Unvalidated binary64 checks, no exact feasibility certificate or complete solution family; No speedup, application-scale or scalability claim; limiter attribution remains unestablished; Collinear-input acceptance and OPT-04 issue #29 remain outside this report; Five small analytic equality/nonnegative fixtures only.; No exact or validated arithmetic feasibility certificate is claimed.; No application-scale, scalability, or speedup claim is made.; The collinear-input acceptance case is not included; OPT-04 issue #29 remains open.; A witness sample is not the complete feasible or optimal solution family.",
       "zip_sha256": "4e9d2d193cf83d56fa308ba3b7b3ebddf2728d8090e804ed0c2178ab0fbf3db7"
+    },
+    {
+      "report_id": "syn07-ts01-5f46eaee678c04b251c4bd9a78dcfb5ea45ce4f417c6bff7b8ba6225e04a6d66",
+      "payload_sha256": "d2fd1191931a3f857950ba2e19ca176d3e388b89bf60a64caa439e5086ae9fa1",
+      "source_commit": "e22d9c2aeb05dc7567038801e6a21b8780184c9e",
+      "zip_sha256": "998c864e16f70274cee1a4dcd23a7dfc7a1681171ed7499346918650a9efd5fb",
+      "report_kind": "syn07-ts01-analytic",
+      "measured_scope": "Exact analytic optimal relation for the strict two-step scalar integrator profile; exploratory single-strategy timings",
+      "evidence_limits": "The complete relation is established analytically only for the strict profile listed above; admission rejects mutations outside that profile.; The outer API labels assurance numerical. Validated assurance is unavailable in the shared registry contract.; The proof capability is internally issued and non-forgeable by clients; serialized decoding creates an untrusted capability which publication rejects until a reviewed proof replay/exporter exists.; This does not establish completeness for any generic synthesis strategy, another profile, or a decoded artifact.; This report records the profile theorem and exact membership examples; it is not an independent mathematical review of the source implementation.; Single-strategy timing observations are exploratory and performance conclusions are inconclusive; no speedup is claimed.",
+      "payload_schema": "csl.syn07-ts01-analytic-report/2",
+      "native_payload_sha256": "d2fd1191931a3f857950ba2e19ca176d3e388b89bf60a64caa439e5086ae9fa1",
+      "source_report_id": "syn07-ts01-20261014-e22d9c2aeb05"
     }
   ]
 }

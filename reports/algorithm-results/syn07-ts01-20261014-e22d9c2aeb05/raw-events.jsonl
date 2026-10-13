@@ -1,0 +1,7 @@
+{"actual_member":true,"expected_member":true,"id":"s=0","point":[0,0,1,0,1],"reason":"Closed-segment endpoint; exact equations and bounds hold."}
+{"actual_member":true,"expected_member":true,"id":"s=1/4","point":[0,0.25,1,0.25,0.75],"reason":"Interior dyadic parameter; exact equations and bounds hold."}
+{"actual_member":true,"expected_member":true,"id":"s=1","point":[0,1,1,1,0],"reason":"Closed-segment endpoint; exact equations and bounds hold."}
+{"actual_member":true,"expected_member":true,"id":"s=1-2^-53","point":[0,0.9999999999999999,1,0.9999999999999999,1.1102230246251565e-16],"reason":"Adjacent representable dyadic coordinates sum to exactly one."}
+{"actual_member":false,"expected_member":false,"id":"feasible_nonoptimal_zero","point":[0,0,0,0,0],"reason":"Feasible controls, but x2 is not one and objective is one."}
+{"actual_member":false,"expected_member":false,"id":"feasible_nonoptimal_endpoint","point":[0,1,2,1,1],"reason":"Feasible controls, but x2 is two and objective is one."}
+{"actual_member":false,"expected_member":false,"id":"off_relation_dyadic_perturbation","point":[0,1,1,1,5e-324],"reason":"Exact binary64 sum is greater than one; no tolerance is applied."}

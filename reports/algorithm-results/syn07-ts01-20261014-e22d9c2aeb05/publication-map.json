@@ -1,0 +1,20 @@
+{
+  "native_payload_schema": "csl.syn07-ts01-analytic-report/2",
+  "native_payload_sha256": "d2fd1191931a3f857950ba2e19ca176d3e388b89bf60a64caa439e5086ae9fa1",
+  "public_id": {
+    "prefix": "syn07-ts01-",
+    "publisher_sha256": "SHA-256 of scripts/reports/ts01_registered_reports.py bytes",
+    "source_files": "SHA-256 of each validated native file by sorted relative path, including manifest.json"
+  },
+  "publication_contract": {
+    "catalogue_schema": "csl.algorithm-report-catalog/3",
+    "envelope_schema": "csl.algorithm-report-envelope/1",
+    "evidence_limits": "payload.evidence_limits joined in stored order",
+    "measured_scope": "strict-profile analytic relation; exploratory timings available; performance conclusion inconclusive",
+    "payload_schema": "csl.syn07-ts01-analytic-report/2",
+    "report_kind": "syn07-ts01-analytic",
+    "source_commit": "payload.source_commit"
+  },
+  "schema": "csl.algorithm-report-publication-map/1",
+  "source_report_id": "syn07-ts01-20261014-e22d9c2aeb05"
+}

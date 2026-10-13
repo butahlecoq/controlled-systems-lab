@@ -423,6 +423,28 @@ Both native `trials.csv` and `summary.csv` must match the complete typed rows in
 archive checksums are internally valid. OPT-04 uses `stdout.jsonl` plus saved
 `driver-stdout.txt` instead and validates both against typed trials and warmups.
 
+SYN-07 T-S01 uses the native schema `csl.syn07-ts01-analytic-report/1` and
+`ts01_registered_reports.py`. Its saved exact-membership examples are the raw
+JSONL source and the CSV projection; the adapter checks both against the typed
+record and builds the standalone page from that record. The report identifies
+its strict analytic profile. A standalone Release executable exercises the
+registered public StrategyPort and verifies each returned complete H-relation;
+the record includes one excluded warmup and seven raw end-to-end observations.
+They are exploratory single-strategy timings, with no comparator or speedup
+claim and an inconclusive performance conclusion because no limiter profile was
+collected. The versioned URL remains pending until the main-only Pages workflow
+deploys the catalogue.
+
+The T-S01 collector creates a detached worktree at the report's pinned solver
+commit and checks its full HEAD and clean status before building and after each
+measurement. A separately versioned harness wrapper builds the named Release
+target against that checkout; the saved collection records the source and
+harness commits, CMake/compiler identity and hashes, generated Release project,
+build logs, executable hash, and exact configure/build commands. The standalone
+bundle builder requires this measurement collection and cannot emit an
+incomplete no-measurement bundle. The record validator recomputes all displayed
+timing summary fields from the seven non-warmup raw events.
+
 ## Shared publication envelope
 
 Every report in a schema-3 mixed catalogue uses the same versioned

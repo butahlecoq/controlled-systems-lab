@@ -1,0 +1,18 @@
+{
+  "files": {
+    "README.md": "9169564bd7027dfe239a77b16b282e380f9119391a4a3d7f9c59954ef3703e08",
+    "environment.json": "fe391c7471ac1f380323a2ca67aa8bfe28550c613186b21ac4337129b515fc3a",
+    "index.html": "652322c2f3da4d973b25c8fc83a617e0524ccfa1d9b8d8d4b179d759521a5f30",
+    "measurement-events.jsonl": "01940077d1e92c7f948bb98a12c6687adf0ef4168e2fd11276dd138b81c35e72",
+    "measurement.json": "75039691e2ba358e3a9f1e73a1fc516b9c3ee6816dde58b279b889b4eea2147b",
+    "publication-map.json": "a9b6c1a7ff2c5c70017972531e086ab3acebbd146f363666ce2880286a3f6f2b",
+    "raw-events.jsonl": "4ef9ea25170803adfde7e920a8fa15963b0fbbe1abfd3bc1f3f9af86b4ece56c",
+    "records.json": "75688a6530a87000d395ec19621a826c62ce9d59d3d7bbbfc2d18db99a4402bd",
+    "scenarios.json": "a530b009e5e4a21107ab353c8425ae4dcb7edf59c1aef1060d19f93e784bd19c",
+    "timings.csv": "056de7c1bb8cbe52df8bf9e804c9b03388c86005f85f9f58571ce86fe9b8f68b",
+    "trials.csv": "f68b9bfcc840c9cc82ec27933287711971240a20475902e8ced25c7ea889682d"
+  },
+  "report_id": "syn07-ts01-20261014-e22d9c2aeb05",
+  "schema": "csl.syn07-ts01-report-manifest/1",
+  "source_commit": "e22d9c2aeb05dc7567038801e6a21b8780184c9e"
+}
