@@ -86,5 +86,100 @@
     "parametric_form": "(0,s,1,s,1-s), 0<=s<=1",
     "proof_summary": "x2=u0+u1 and J=(x2-1)^2>=0. Equality holds iff u0+u1=1; the control bounds then yield exactly the displayed closed segment.",
     "representation": "csl.polyhedron.h"
+  },
+  "input": {
+    "sha256": "816162785675a960051adeef7027c85489cc9adee6267c140227e942b99a0d30",
+    "value": {
+      "controls": [
+        {
+          "lower": [
+            0
+          ],
+          "upper": [
+            1
+          ]
+        },
+        {
+          "lower": [
+            0
+          ],
+          "upper": [
+            1
+          ]
+        }
+      ],
+      "initial_state": [
+        0
+      ],
+      "request": {
+        "assurance": "numerical",
+        "profile": "ts01_exact_integrator",
+        "representation": "csl.polyhedron.h",
+        "target": "exact_optimal_relation"
+      },
+      "terminal_objective": {
+        "Q": [
+          [
+            2
+          ]
+        ],
+        "linear": [
+          -2
+        ],
+        "offset": 1
+      },
+      "times": [
+        0,
+        1,
+        2
+      ],
+      "transitions": [
+        {
+          "A": [
+            [
+              1
+            ]
+          ],
+          "B": [
+            [
+              1
+            ]
+          ],
+          "offset": [
+            0
+          ]
+        },
+        {
+          "A": [
+            [
+              1
+            ]
+          ],
+          "B": [
+            [
+              1
+            ]
+          ],
+          "offset": [
+            0
+          ]
+        }
+      ]
+    }
+  },
+  "scenario": {
+    "sha256": "1137cd7638206310d13f0bf635c06450d0036d83f2dc3550368f256f3f5fc146",
+    "value": {
+      "assumptions": [
+        "Discrete-time, two-step scalar system with times (0,1,2).",
+        "Known initial state x0=0; unrestricted one-dimensional state at every stage.",
+        "Both transitions are exactly x[t+1]=x[t]+u[t], with zero offsets and no external channels.",
+        "Independent closed control intervals u0,u1 in [0,1].",
+        "Nominal open-loop information; no observations, temporal constraints, or other constraints.",
+        "Terminal quadratic objective has Q=2, linear coefficient -2, and offset 1: J(x2)=x2^2-2*x2+1.",
+        "Requested target is exact_optimal_relation, representation csl.polyhedron.h, numerical assurance, no materialization limit, and empty transformation lineage."
+      ],
+      "expected_objective_minimum": 0
+    }
   }
 }

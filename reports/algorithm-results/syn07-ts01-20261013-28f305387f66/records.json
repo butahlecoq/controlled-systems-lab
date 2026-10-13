@@ -106,6 +106,86 @@
     "This does not establish completeness for any generic synthesis strategy, another profile, or a decoded artifact.",
     "This report records the profile theorem and exact membership examples; it is not an independent mathematical review of the source implementation."
   ],
+  "input": {
+    "sha256": "816162785675a960051adeef7027c85489cc9adee6267c140227e942b99a0d30",
+    "value": {
+      "controls": [
+        {
+          "lower": [
+            0
+          ],
+          "upper": [
+            1
+          ]
+        },
+        {
+          "lower": [
+            0
+          ],
+          "upper": [
+            1
+          ]
+        }
+      ],
+      "initial_state": [
+        0
+      ],
+      "request": {
+        "assurance": "numerical",
+        "profile": "ts01_exact_integrator",
+        "representation": "csl.polyhedron.h",
+        "target": "exact_optimal_relation"
+      },
+      "terminal_objective": {
+        "Q": [
+          [
+            2
+          ]
+        ],
+        "linear": [
+          -2
+        ],
+        "offset": 1
+      },
+      "times": [
+        0,
+        1,
+        2
+      ],
+      "transitions": [
+        {
+          "A": [
+            [
+              1
+            ]
+          ],
+          "B": [
+            [
+              1
+            ]
+          ],
+          "offset": [
+            0
+          ]
+        },
+        {
+          "A": [
+            [
+              1
+            ]
+          ],
+          "B": [
+            [
+              1
+            ]
+          ],
+          "offset": [
+            0
+          ]
+        }
+      ]
+    }
+  },
   "measurement": {
     "algorithm_source_checkout": {
       "clean_after_run": true,
@@ -117,13 +197,13 @@
     },
     "algorithm_source_commit": "28f305387f66caf8f72f057e16a39050cc5dbdba",
     "binary": {
-      "bytes": 379392,
+      "bytes": 383488,
       "configuration": "Release",
       "cxx_standard": "c++20",
       "ndebug": true,
       "path": "release-build\\Release\\csl_syn07_ts01_report.exe",
       "release_properties": {
-        "AdditionalIncludeDirectories": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-verified3\\solver-source\\include;%(AdditionalIncludeDirectories)",
+        "AdditionalIncludeDirectories": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-p2\\solver-source\\include;%(AdditionalIncludeDirectories)",
         "AssemblerListingLocation": "$(IntDir)",
         "BasicRuntimeChecks": "Default",
         "ConformanceMode": "true",
@@ -143,13 +223,13 @@
         "UseFullPaths": "false",
         "WarningLevel": "Level4"
       },
-      "sha256": "e5b69d3b89986f9a0f1a3009e1b197b69146a86f263ea88aadaa7db1c750a91b"
+      "sha256": "e7157ba6e934c90342b89973703f6515bffb6414ab239a54be205c1d7034b396"
     },
     "build_provenance": {
       "build_command": [
         "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
         "--build",
-        "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-verified3\\release-build",
+        "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-p2\\release-build",
         "--config",
         "Release",
         "--target",
@@ -157,8 +237,8 @@
         "--parallel",
         "4"
       ],
-      "build_log_sha256": "f83cf0c00adb38cfd2065d07eee2c27c2f21def924a6e3b47de291080533a7ae",
-      "cmake_cache_sha256": "9605405615f56570d44f0932e99435943be335154eb1d63fdaaf257494c14abf",
+      "build_log_sha256": "87e27b9b9b1f62d323c71cad0fe16e80459aa3d12e29daef263133fa5c53351e",
+      "cmake_cache_sha256": "a946b1e093d4e62d8676100958a42099cefcfb53207fbd39d549e61a957ae6a2",
       "cmake_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
       "cmake_sha256": "b540efece9172930877dff0c9fedda7a69b0dd82446e0e8bba13372aac6c8ac8",
       "cmake_version": "cmake version 3.31.6-msvc6",
@@ -172,20 +252,20 @@
         "-S",
         "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\reports\\algorithm-results\\tooling\\ts01\\runner",
         "-B",
-        "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-verified3\\release-build",
+        "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-p2\\release-build",
         "-G",
         "Visual Studio 17 2022",
         "-A",
         "x64",
-        "-DCSL_SOURCE_ROOT=C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-verified3\\solver-source",
+        "-DCSL_SOURCE_ROOT=C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-source-build-p2\\solver-source",
         "-DBUILD_TESTING=OFF",
         "-DFETCHCONTENT_BASE_DIR=C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-report\\_deps",
         "-DFETCHCONTENT_FULLY_DISCONNECTED=ON"
       ],
-      "configure_log_sha256": "79e0cbcf1014ae11051db5770c26fe7032735c62faf3b61f4f51e4a189ebd1a7",
+      "configure_log_sha256": "827de77f08830c99c8cbe8d7b564cd0e8a4ebeee9427cb957e0240980513f16f",
       "dependency_cache": "C:\\Users\\f5spb\\.codex\\worktrees\\ts01-report-200\\build\\ts01-report\\_deps",
       "generator": "Visual Studio 17 2022 x64",
-      "target_project_sha256": "2a091fa11050ec77fecfca02f6015b2f6d5648e69c180993f3378b38112b677e"
+      "target_project_sha256": "58485daed06e6def34529078ae16fcb093764edb5fc3ad2b80a35ec91367550d"
     },
     "counts": {
       "all_outputs_consumed_and_validated": true,
@@ -202,86 +282,126 @@
       "os": "Windows-11-10.0.22631-SP0",
       "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
       "python": "3.13.5",
-      "total_cpu_percent_1s_after": 5.4,
-      "total_cpu_percent_1s_before": 6.4
+      "total_cpu_percent_1s_after": 5.3,
+      "total_cpu_percent_1s_before": 4.2
     },
     "events": [
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 201900,
+        "elapsed_ns": 197200,
         "error": "",
+        "objective_lower": 0,
+        "objective_upper": 0,
+        "outcome": "optimal",
         "repetition": 0,
-        "schema": "csl.syn07-ts01-measurement-event/1",
+        "residuals_available": false,
+        "schema": "csl.syn07-ts01-measurement-event/2",
         "status": "passed",
+        "termination": "completed",
         "warmup": true
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 41100,
+        "elapsed_ns": 34500,
         "error": "",
+        "objective_lower": 0,
+        "objective_upper": 0,
+        "outcome": "optimal",
         "repetition": 1,
-        "schema": "csl.syn07-ts01-measurement-event/1",
+        "residuals_available": false,
+        "schema": "csl.syn07-ts01-measurement-event/2",
         "status": "passed",
+        "termination": "completed",
         "warmup": false
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 32400,
+        "elapsed_ns": 29400,
         "error": "",
+        "objective_lower": 0,
+        "objective_upper": 0,
+        "outcome": "optimal",
         "repetition": 2,
-        "schema": "csl.syn07-ts01-measurement-event/1",
+        "residuals_available": false,
+        "schema": "csl.syn07-ts01-measurement-event/2",
         "status": "passed",
+        "termination": "completed",
         "warmup": false
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 31500,
+        "elapsed_ns": 27200,
         "error": "",
+        "objective_lower": 0,
+        "objective_upper": 0,
+        "outcome": "optimal",
         "repetition": 3,
-        "schema": "csl.syn07-ts01-measurement-event/1",
+        "residuals_available": false,
+        "schema": "csl.syn07-ts01-measurement-event/2",
         "status": "passed",
+        "termination": "completed",
         "warmup": false
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 30700,
+        "elapsed_ns": 26500,
         "error": "",
+        "objective_lower": 0,
+        "objective_upper": 0,
+        "outcome": "optimal",
         "repetition": 4,
-        "schema": "csl.syn07-ts01-measurement-event/1",
+        "residuals_available": false,
+        "schema": "csl.syn07-ts01-measurement-event/2",
         "status": "passed",
+        "termination": "completed",
         "warmup": false
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 30200,
+        "elapsed_ns": 26500,
         "error": "",
+        "objective_lower": 0,
+        "objective_upper": 0,
+        "outcome": "optimal",
         "repetition": 5,
-        "schema": "csl.syn07-ts01-measurement-event/1",
+        "residuals_available": false,
+        "schema": "csl.syn07-ts01-measurement-event/2",
         "status": "passed",
+        "termination": "completed",
         "warmup": false
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 29500,
+        "elapsed_ns": 26000,
         "error": "",
+        "objective_lower": 0,
+        "objective_upper": 0,
+        "outcome": "optimal",
         "repetition": 6,
-        "schema": "csl.syn07-ts01-measurement-event/1",
+        "residuals_available": false,
+        "schema": "csl.syn07-ts01-measurement-event/2",
         "status": "passed",
+        "termination": "completed",
         "warmup": false
       },
       {
         "consumed_result_marker": 1805158144890476961,
-        "elapsed_ns": 29600,
+        "elapsed_ns": 26900,
         "error": "",
+        "objective_lower": 0,
+        "objective_upper": 0,
+        "outcome": "optimal",
         "repetition": 7,
-        "schema": "csl.syn07-ts01-measurement-event/1",
+        "residuals_available": false,
+        "schema": "csl.syn07-ts01-measurement-event/2",
         "status": "passed",
+        "termination": "completed",
         "warmup": false
       }
     ],
-    "harness_commit": "7477f568d39098d2f2de5f35b2324755d530a1d6",
+    "harness_commit": "94cc44f2d94b45f190b852ee4e69bf18a4d11a1a",
     "harness_sources": {
-      "driver_sha256": "2a03c2c71ff773fdfd27699fd4470c827b353450befa6745a7eb82b1b2ac3762",
+      "driver_sha256": "1983dac4e12ae69cffd1a80e75a358effb28208e03fa944fcb244fd98e3f698b",
       "runner_cmake_sha256": "60c5f83bc3bacd682bd6c22c1240bfa02982817bfd673520248b5024a1ea3f27"
     },
     "limiter": {
@@ -291,23 +411,33 @@
     "order": "One excluded warmup, followed by seven measured repetitions in one process. Single strategy only; alternation is inapplicable and no comparator was measured.",
     "performance_conclusion": "inconclusive",
     "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "raw_stdout_sha256": "132c2b1660f8da3c2c78537f105e057b85972dc170300de506355b466d259d61",
+    "raw_stdout_sha256": "999a9a9a1d14d9882460dbbd3dec49bc118f7ff45512f2c48f4f98451d897c43",
     "schema": "csl.syn07-ts01-measurement-collection/1",
     "scope": "Fresh problem construction and resolution, strategy registration/selection/preparation, exclusive workspace creation, public bound-workspace run, and independent complete-H-relation plus exact-membership validation. Excludes process startup, JSON serialization, build, collection, and rendering.",
+    "strategy_observation": {
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "residuals": {
+        "available": false,
+        "reason": "StrategyPort result exposes no residual fields"
+      },
+      "termination": "completed"
+    },
     "timing_ns": {
-      "max": 41100,
-      "median": 30700,
-      "min": 29500,
+      "max": 34500,
+      "median": 26900,
+      "min": 26000,
       "observations": [
-        41100,
-        32400,
-        31500,
-        30700,
-        30200,
-        29500,
-        29600
+        34500,
+        29400,
+        27200,
+        26500,
+        26500,
+        26000,
+        26900
       ],
-      "range": 11600
+      "range": 8500
     }
   },
   "membership_examples": [
@@ -411,6 +541,21 @@
     "status": "exploratory_single_strategy"
   },
   "report_id": "syn07-ts01-20261013-28f305387f66",
-  "schema": "csl.syn07-ts01-analytic-report/1",
+  "scenario": {
+    "sha256": "1137cd7638206310d13f0bf635c06450d0036d83f2dc3550368f256f3f5fc146",
+    "value": {
+      "assumptions": [
+        "Discrete-time, two-step scalar system with times (0,1,2).",
+        "Known initial state x0=0; unrestricted one-dimensional state at every stage.",
+        "Both transitions are exactly x[t+1]=x[t]+u[t], with zero offsets and no external channels.",
+        "Independent closed control intervals u0,u1 in [0,1].",
+        "Nominal open-loop information; no observations, temporal constraints, or other constraints.",
+        "Terminal quadratic objective has Q=2, linear coefficient -2, and offset 1: J(x2)=x2^2-2*x2+1.",
+        "Requested target is exact_optimal_relation, representation csl.polyhedron.h, numerical assurance, no materialization limit, and empty transformation lineage."
+      ],
+      "expected_objective_minimum": 0
+    }
+  },
+  "schema": "csl.syn07-ts01-analytic-report/2",
   "source_commit": "28f305387f66caf8f72f057e16a39050cc5dbdba"
 }

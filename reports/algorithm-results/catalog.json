@@ -131,15 +131,15 @@
       "zip_sha256": "4e9d2d193cf83d56fa308ba3b7b3ebddf2728d8090e804ed0c2178ab0fbf3db7"
     },
     {
-      "report_id": "syn07-ts01-a82a6a0e1d37ef526174685887ec83697b82701a0a8296c69b3b16ccb571aa93",
-      "payload_sha256": "9a4c21efa715efa1b3d2cc5e69add99f958bc471e2db8f4845c867c2e3fb3d51",
+      "report_id": "syn07-ts01-c327e5f887e6081f1195ca540cb4790b559919233c7c46aadf5a3f7a91390c05",
+      "payload_sha256": "28b5d27781e5519e37fa37c35e7b10f5766888449478282c0322a6f990c1c572",
       "source_commit": "28f305387f66caf8f72f057e16a39050cc5dbdba",
-      "zip_sha256": "6ac317680ffd68344db9f3c492e9d8332c26774c98ddd837efb6d5854d3005cf",
+      "zip_sha256": "eb6607b82b71a8a27eea326e23c5854f841729510f42c8b4fc5c901454d54523",
       "report_kind": "syn07-ts01-analytic",
       "measured_scope": "Exact analytic optimal relation for the strict two-step scalar integrator profile; exploratory single-strategy timings",
       "evidence_limits": "The complete relation is established analytically only for the strict profile listed above; admission rejects mutations outside that profile.; The outer API labels assurance numerical. Validated assurance is unavailable in the shared registry contract.; The proof capability is internally issued and non-forgeable by clients; serialized decoding creates an untrusted capability which publication rejects until a reviewed proof replay/exporter exists.; This does not establish completeness for any generic synthesis strategy, another profile, or a decoded artifact.; This report records the profile theorem and exact membership examples; it is not an independent mathematical review of the source implementation.; Single-strategy timing observations are exploratory and performance conclusions are inconclusive; no speedup is claimed.",
-      "payload_schema": "csl.syn07-ts01-analytic-report/1",
-      "native_payload_sha256": "9a4c21efa715efa1b3d2cc5e69add99f958bc471e2db8f4845c867c2e3fb3d51",
+      "payload_schema": "csl.syn07-ts01-analytic-report/2",
+      "native_payload_sha256": "28b5d27781e5519e37fa37c35e7b10f5766888449478282c0322a6f990c1c572",
       "source_report_id": "syn07-ts01-20261013-28f305387f66"
     }
   ]
