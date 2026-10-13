@@ -24,6 +24,11 @@ def _git(*args: str) -> str:
     return subprocess.check_output(["git", *args], text=True, encoding="utf-8").strip()
 
 
+def _git_paths(*args: str) -> list[str]:
+    output = subprocess.check_output(["git", *args])
+    return [path.decode("utf-8", errors="surrogateescape") for path in output.split(b"\0") if path]
+
+
 def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -110,9 +115,7 @@ def _validate_build_log(build_log: Path, build: Path, exe: Path, source_root: Pa
         raise ValueError("build log must resolve inside the configured build directory")
     if build_log == exe or (build_log.is_file() and exe.is_file() and build_log.samefile(exe)):
         raise ValueError("build log must not alias the executable")
-    for name in _git("-C", str(source_root), "ls-files", "-z").split("\0"):
-        if not name:
-            continue
+    for name in _git_paths("-C", str(source_root), "ls-files", "-z"):
         tracked = source_root / name
         if build_log == tracked.resolve() or (build_log.is_file() and tracked.is_file()
                                              and build_log.samefile(tracked)):
@@ -128,7 +131,7 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
     if _git("status", "--porcelain=v1"):
         raise ValueError("source and harness worktree must be clean before collection")
     _validate_build_log(build_log, build, exe, source_root)
-    changed = _git("diff", "--name-only", source_commit, harness_commit).splitlines()
+    changed = _git_paths("diff", "--name-only", "-z", source_commit, harness_commit)
     validate_source_tree_delta(changed)
     source_cmake = subprocess.check_output(["git", "show", f"{source_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
     harness_cmake = subprocess.check_output(["git", "show", f"{harness_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
