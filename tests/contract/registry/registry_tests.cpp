@@ -974,6 +974,19 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
                         ModuleId{"synthetic"},std::string{"1"}}, {false,false,1,false}};
                 return result;
             }
+            if (request.profile=="resource-limit") {
+                result.termination=Termination::resource_limit;
+                result.objective={ObjectiveBound{4,support},ObjectiveBound{5,support}};
+                auto candidate=FamilyPublisher::publish(identity,CandidateFamily{relation,
+                    HeuristicRelationEvidence{"synthetic"},
+                    WitnessFeasibilityEvidence{result.incumbents[0].witness,support}});
+                result.family=std::get<OptimalFamily>(std::move(candidate));
+                result.spans.push_back({0,{},ModuleId{"synthetic"},0,1});
+                result.stop=ScopedOperationStopped{{StopReason::resource_limit,"synthetic resource budget exhausted"},
+                    RequestProvenance{{"generated/step/4"},"strategy",{"synthetic"},std::string{"1"},
+                        ModuleId{"synthetic"},std::string{"1"}}, {true,true,1,true}};
+                return result;
+            }
             if (request.target==FamilyTarget::candidate_relaxation) {
                 if (request.profile=="outcome-identity-mismatch") result.outcome.subject={"other-problem"};
                 auto candidate_identity=identity;
@@ -1163,6 +1176,66 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
         CHECK(value.incumbents[0].witness.original_objective==5);
         CHECK(value.spans.size()==1);
     }
+    request.family.target=FamilyTarget::candidate_relaxation;
+    request.family.profile="resource-limit";
+    auto limited_prepared=registry.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(limited_prepared));
+    const auto limited_answer=std::get<PreparedStrategy>(std::move(limited_prepared)).create()->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(limited_answer));
+    const auto& limited=std::get<SynthesisResult>(limited_answer);
+    CHECK(limited.termination==Termination::resource_limit);
+    CHECK(limited.outcome.subject==request.problem.identity());
+    CHECK(limited.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(limited.objective.lower.has_value());
+    CHECK(limited.objective.lower->value==4);
+    CHECK(limited.objective.lower->evidence.problem==request.problem.identity());
+    REQUIRE(std::holds_alternative<SymbolicArgument>(limited.objective.lower->evidence.support));
+    CHECK(std::get<SymbolicArgument>(limited.objective.lower->evidence.support).reference=="synthetic fixture assertion");
+    CHECK(std::get<SymbolicArgument>(limited.objective.lower->evidence.support).assumptions=="literal fixture only");
+    REQUIRE(limited.objective.upper.has_value());
+    CHECK(limited.objective.upper->value==5);
+    CHECK(limited.objective.upper->evidence.problem==request.problem.identity());
+    REQUIRE(std::holds_alternative<SymbolicArgument>(limited.objective.upper->evidence.support));
+    CHECK(std::get<SymbolicArgument>(limited.objective.upper->evidence.support).reference=="synthetic fixture assertion");
+    CHECK(std::get<SymbolicArgument>(limited.objective.upper->evidence.support).assumptions=="literal fixture only");
+    REQUIRE(limited.incumbents.size()==1);
+    CHECK(limited.incumbents[0].witness.original_objective==5);
+    CHECK(limited.incumbents[0].feasibility.problem==request.problem.identity());
+    REQUIRE(std::holds_alternative<SymbolicArgument>(limited.incumbents[0].feasibility.support));
+    CHECK(std::get<SymbolicArgument>(limited.incumbents[0].feasibility.support).reference=="synthetic fixture assertion");
+    CHECK(std::get<SymbolicArgument>(limited.incumbents[0].feasibility.support).assumptions=="literal fixture only");
+    REQUIRE(limited.family.has_value());
+    CHECK(limited.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(limited.family->identity().request==request.family);
+    const auto& feasibility=std::get<CandidateFamily>(limited.family->outcome()).feasibility;
+    REQUIRE(std::holds_alternative<WitnessFeasibilityEvidence>(feasibility));
+    const auto& candidate_witness=std::get<WitnessFeasibilityEvidence>(feasibility);
+    CHECK(candidate_witness.witness.problem==request.problem.identity());
+    CHECK(candidate_witness.witness.states==std::vector<Vector>{{0},{1}});
+    CHECK(candidate_witness.witness.controls==std::vector<Vector>{{1}});
+    CHECK(candidate_witness.witness.original_objective==5);
+    CHECK(candidate_witness.support.problem==request.problem.identity());
+    REQUIRE(std::holds_alternative<SymbolicArgument>(candidate_witness.support.support));
+    CHECK(std::get<SymbolicArgument>(candidate_witness.support.support).reference=="synthetic fixture assertion");
+    CHECK(std::get<SymbolicArgument>(candidate_witness.support.support).assumptions=="literal fixture only");
+    REQUIRE(limited.spans.size()==1);
+    CHECK(limited.spans[0].module==ModuleId{"synthetic"});
+    CHECK(limited.spans[0].start_seconds==0);
+    CHECK(limited.spans[0].end_seconds==1);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(limited.stop));
+    const auto& scoped=std::get<ScopedOperationStopped>(limited.stop);
+    CHECK(scoped.stop.reason==StopReason::resource_limit);
+    CHECK(scoped.stop.diagnostics=="synthetic resource budget exhausted");
+    CHECK(scoped.request.request.value=="generated/step/4");
+    CHECK(scoped.request.port=="strategy");
+    CHECK(scoped.request.requested_module==ModuleId{"synthetic"});
+    CHECK(scoped.request.requested_version==std::optional<std::string>{"1"});
+    CHECK(scoped.request.actual_module==std::optional<ModuleId>{ModuleId{"synthetic"}});
+    CHECK(scoped.request.actual_version==std::optional<std::string>{"1"});
+    CHECK(scoped.retained.lower_bound);
+    CHECK(scoped.retained.upper_bound);
+    CHECK(scoped.retained.incumbents==1);
+    CHECK(scoped.retained.partial_or_candidate_family);
 }
 
 TEST_CASE("public strategy rejects unbounded outcomes that retain a finite lower bound") {
