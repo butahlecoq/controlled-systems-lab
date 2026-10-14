@@ -70,9 +70,16 @@ does not make every numerical trajectory report a completeness proof.
 The current [installed examples](../../README.md#quick-start) execute component
 workflows, including real LP backend substitution; the two LP providers are not
 two synthesis strategies. The scenario examples evaluate supplied controls.
-[PR #250](https://github.com/butahlecoq/controlled-systems-lab/pull/250), open at
-this baseline, owns the guarded installed T-S01 A/B comparison. It must be
-integrated before describing that comparison as a main-branch executable.
+The delivered
+[registered synthesis comparison](../../examples/registered_synthesis_comparison.cpp)
+runs both strategies on the same immutable T-S01 problem, selects witness
+histories and independently checks them against original problem data. Its JSON
+summary identifies the shared problem/request, each strategy and outcome,
+selected witnesses and verification status/residuals. It does not serialize the
+live optimal-family relation or proof payload. This is a functional guarded
+fixture example, not general profile support or paired performance evidence.
+Measured paired results and standalone HTML publication remain under
+[OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83).
 
 A general scenario-to-family-to-export application remains pending. General
 family proofs, broader selector profiles, CLI behavior and trusted proof

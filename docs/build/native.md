@@ -13,6 +13,12 @@ Requires CMake/CTest >=3.31 and a C++20 compiler. Run from the repository root.
 Check each command's exit code before continuing. Keep generated trees under the
 ignored `tmp/`, `build/`, `install/` or `cmake-build-*` directories.
 
+For Ninja builds on Windows, run `chcp 65001` in the Visual Studio developer
+shell before configure and build, including each new shell. This preserves
+localized MSVC `/showIncludes` dependency detection; `VSLANG=1033` alone does
+not fix a machine with only the Russian language pack. See the
+[development presets](development.md#configure-once-check-the-module).
+
 Windows x64 / Visual Studio 2022, PowerShell:
 
 ```powershell

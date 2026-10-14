@@ -9,7 +9,11 @@ imply that every strategy accepts that data.
 
 Requires CMake/CTest 3.31+, a C++20 compiler and Git. Run from the repository root,
 checking each exit code. `dev` uses Ninja Release; on Windows run it from a Visual
-Studio developer shell with Ninja and CMake on PATH. `dev-windows` uses Visual
+Studio developer shell with Ninja and CMake on PATH. Before both configure and
+build, run `chcp 65001` in that shell (repeat in each new shell). This lets CMake
+and Ninja decode localized MSVC `/showIncludes` dependency output correctly.
+Setting `VSLANG=1033` alone is insufficient when only the Russian language pack
+is installed. `dev-windows` uses Visual
 Studio 2022 x64 and Release. `core` uses Ninja Release with the HiGHS and Qhull
 adapters disabled. First configure may acquire pinned production dependencies;
 `core` avoids those two adapter vendors, not every dependency.
@@ -37,10 +41,16 @@ Do not infer a performance improvement from test duration.
 
 The [README installed examples](../../README.md#quick-start) use an external
 `find_package(CSL CONFIG)` project. They demonstrate registered LP/convex solves,
-scenario intake and LP backend substitution. They do not execute synthesis.
-[PR #250](https://github.com/butahlecoq/controlled-systems-lab/pull/250) owns the
-installed T-S01 Strategy A/B comparison and is open at this documentation baseline;
-use its final integrated example after merge. No comparison source is claimed here.
+scenario intake and LP backend substitution. The delivered
+[registered synthesis comparison](../../examples/registered_synthesis_comparison.cpp)
+also runs both strategies on the same immutable T-S01 problem, selects witnesses
+and verifies them against original data. Its JSON summary records shared
+problem/request identities, strategy outcomes, selected witnesses and verification
+status/residuals. It does not serialize the live family relation or proof payload.
+This functional example is limited to the exact guarded fixture; paired measured
+results and standalone HTML publication remain under
+[OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83). CTest
+durations are not performance evidence.
 
 For installation, use `cmake --install <configured-build-directory> --config Release
 --prefix <absolute-install-directory>`, then the README external example commands
