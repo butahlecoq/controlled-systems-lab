@@ -354,6 +354,9 @@ struct StrategyRegistration {
     // Omitted callbacks preserve the empty-lineage contract.
     std::function<std::vector<TransformStepIdentity>(const StrategyRequest&)> expected_lineage{};
     struct PartialFamilyVerifierKey { ModuleId id; std::string version; } partial_family_verifier{};
+    // Optional pure selector for request-profile-specific complete-family proof
+    // authority. When present it replaces (never falls back to) the static key.
+    std::function<std::optional<CompleteFamilyVerifierKey>(const StrategyRequest&)> complete_family_verifier_selector{};
 };
 namespace detail {
 class CompiledCompleteFamilyVerifier;
