@@ -15,7 +15,7 @@
 
 namespace csl {
 namespace problem { class ResolvedProblem; }
-namespace registry { class StrategyRegistry; namespace detail { class VerifiedFamilyAuthority; } }
+namespace registry { class StrategyRegistry; namespace detail { class VerifiedFamilyAuthority; class VerifiedPartialFamilyAuthority; } }
 // Revision 1.6. This is a source contract, not a stable binary ABI.
 struct ProblemId { std::string value; bool operator==(const ProblemId&) const = default; };
 struct ProgramId { std::string value; bool operator==(const ProgramId&) const = default; };
@@ -473,6 +473,9 @@ struct PartialOptimalFamily {
     InnerSubsetEvidence optimal_subset;
     CoverageScope known_scope;
 };
+// A partial-family proposal is an untrusted strategy result until the verifier
+// selected by the prepared registry validates its exact scope and identity.
+struct PartialFamilyProposal { FamilyIdentity identity; PartialOptimalFamily family; };
 struct OuterCandidateEvidence { ClaimEvidence enclosure; };
 struct FeasibleCandidateEvidence { ClaimEvidence feasibility; };
 struct HeuristicRelationEvidence { std::string method; };
@@ -497,12 +500,16 @@ public:
         return FamilyTarget::candidate_relaxation;
     }
     bool registry_verified() const noexcept { return registry_verified_; }
+    bool partial_registry_verified() const noexcept { return partial_registry_verified_; }
 private:
     FamilyIdentity identity_;
     OptimalFamilyOutcome outcome_;
     bool registry_verified_{};
-    OptimalFamily(FamilyIdentity identity, OptimalFamilyOutcome outcome, bool registry_verified = false)
-        : identity_(std::move(identity)), outcome_(std::move(outcome)), registry_verified_(registry_verified) {}
+    bool partial_registry_verified_{};
+    OptimalFamily(FamilyIdentity identity, OptimalFamilyOutcome outcome, bool registry_verified = false,
+        bool partial_registry_verified = false)
+        : identity_(std::move(identity)), outcome_(std::move(outcome)), registry_verified_(registry_verified),
+          partial_registry_verified_(partial_registry_verified) {}
     friend class FamilyPublisher;
 };
 class registry::detail::VerifiedFamilyAuthority {
@@ -515,6 +522,24 @@ class registry::detail::VerifiedFamilyAuthority {
 public:
     bool matches(const ModuleId& strategy,const std::string& version) const noexcept {
         return strategy_==strategy&&version_==version&&!strategy_.value.empty()&&!version_.empty();
+    }
+};
+class registry::detail::VerifiedPartialFamilyAuthority {
+    ModuleId strategy_;
+    std::string strategy_version_;
+    ModuleId verifier_;
+    std::string verifier_version_;
+    VerifiedPartialFamilyAuthority(ModuleId strategy,std::string strategy_version,ModuleId verifier,std::string verifier_version)
+        : strategy_(std::move(strategy)),strategy_version_(std::move(strategy_version)),
+          verifier_(std::move(verifier)),verifier_version_(std::move(verifier_version)) {}
+    friend class registry::StrategyRegistry;
+    friend class FamilyPublisher;
+public:
+    bool matches(const ModuleId& strategy,const std::string& strategy_version,const ModuleId& verifier,
+        const std::string& verifier_version) const noexcept {
+        return strategy_==strategy&&strategy_version_==strategy_version&&verifier_==verifier&&
+            verifier_version_==verifier_version&&!strategy_.value.empty()&&!strategy_version_.empty()&&
+            !verifier_.value.empty()&&!verifier_version_.empty();
     }
 };
 Diagnostics check_family_evidence(const OptimalFamily&, const ProblemId&, Assurance);
@@ -533,6 +558,18 @@ public:
             return Diagnostics{{DiagnosticCode::evidence_mismatch,"family.verifier",
                 "A complete family must carry authority from its selected strategy registration"}};
         OptimalFamily proposed{std::move(identity),std::move(outcome),true};
+        auto diagnostics=check_family_evidence(proposed,proposed.identity().problem,proposed.identity().request.assurance);
+        if(!diagnostics.empty())return diagnostics;
+        return proposed;
+    }
+    static std::variant<OptimalFamily,Diagnostics> publish_verified_partial(FamilyIdentity identity,
+        PartialOptimalFamily partial,const registry::detail::VerifiedPartialFamilyAuthority& authority,
+        const ModuleId& verifier,const std::string& verifier_version) {
+        if(!authority.matches(identity.strategy,identity.strategy_version,verifier,verifier_version)||
+            identity.request.target!=FamilyTarget::partial_relation)
+            return Diagnostics{{DiagnosticCode::evidence_mismatch,"family.partial.verifier",
+                "A partial family requires authority from its selected partial-family verifier and strategy registration"}};
+        OptimalFamily proposed{std::move(identity),OptimalFamilyOutcome{std::move(partial)},false,true};
         auto diagnostics=check_family_evidence(proposed,proposed.identity().problem,proposed.identity().request.assurance);
         if(!diagnostics.empty())return diagnostics;
         return proposed;
@@ -619,6 +656,7 @@ struct SynthesisResult {
     std::vector<TimingSpan> spans;
     SynthesisStopEvidence stop{};
     std::optional<CompleteFamilyProposal> complete_proposal{};
+    std::optional<PartialFamilyProposal> partial_proposal{};
 };
 using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
 struct StrategyConfiguration {

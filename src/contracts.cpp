@@ -215,6 +215,9 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                     "Opaque completeness payload must identify a verifier and contain its proof payload"});
         },
         [&](const PartialOptimalFamily& partial) {
+            if(!family.partial_registry_verified())
+                result.push_back({DiagnosticCode::unsupported,"family.partial.optimality",
+                    "Partial-family claims require the selected registry partial-family verifier"});
             if (partial.relation.coordinates != identity.coordinates ||
                 partial.optimum.optimum.problem != expected ||
                 partial.optimal_subset.every_history_optimal.problem != expected)
@@ -224,8 +227,6 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 std::holds_alternative<Unestablished>(partial.optimal_subset.every_history_optimal.support) ||
                 std::holds_alternative<NumericalCheck>(partial.optimal_subset.every_history_optimal.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.partial.optimality","An inner subset is not known optimal without scoped optimal-membership support"});
-            result.push_back({DiagnosticCode::unsupported,"family.partial.optimality",
-                "No reviewed verifier can establish that every history in a partial relation is optimal"});
         },
         [&](const CandidateFamily& candidate) {
             if (candidate.relation.coordinates != identity.coordinates)
@@ -309,6 +310,9 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const Synthesis
     if(result.complete_proposal)
         diagnostics.push_back({DiagnosticCode::unsupported,"family.proposal",
             "An unpublished complete-family proposal must be consumed by its selected registry verifier"});
+    if(result.partial_proposal)
+        diagnostics.push_back({DiagnosticCode::unsupported,"family.partial_proposal",
+            "An unpublished partial-family proposal must be consumed by its selected registry verifier"});
     const FamilyIdentity expected_identity{expected.problem,expected.request,expected.coordinates,
         expected.strategy,expected.strategy_version,expected.lineage.value_or(std::vector<TransformStepIdentity>{})};
     auto add=[&](DiagnosticCode code,std::string field,std::string explanation) {
@@ -361,9 +365,23 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const Synthesis
                 add(DiagnosticCode::evidence_mismatch,"result.objective.complete_family",
                     "Top-level objective bounds must match the registered verifier's complete-family proof");
         }
+        if(const auto* partial=std::get_if<PartialOptimalFamily>(&result.family->outcome())) {
+            if(result.outcome.subject!=partial->optimum.optimum.problem||
+                !same_support(result.outcome.support,partial->optimum.optimum.support)||
+                !result.outcome.assumptions.empty())
+                add(DiagnosticCode::evidence_mismatch,"result.outcome.partial_family",
+                    "Top-level optimality claim must match the registered partial-family proof");
+            if(!same_bound(result.objective.lower,partial->optimum.bounds.lower)||
+                !same_bound(result.objective.upper,partial->optimum.bounds.upper))
+                add(DiagnosticCode::evidence_mismatch,"result.objective.partial_family",
+                    "Top-level objective bounds must match the registered partial-family proof");
+        }
         if (result.family->target()==FamilyTarget::exact_optimal_relation &&
             (result.termination!=Termination::completed || result.outcome.value!=MathematicalOutcome::optimal))
             add(DiagnosticCode::invalid_claim,"family.complete","Only a completed, supported optimal outcome may carry a complete family");
+        if (result.family->target()==FamilyTarget::partial_relation &&
+            (result.termination!=Termination::completed || result.outcome.value!=MathematicalOutcome::optimal))
+            add(DiagnosticCode::invalid_claim,"family.partial","Only a completed, supported optimal outcome may carry a partial optimal family");
         if (result.outcome.value==MathematicalOutcome::infeasible ||
             result.outcome.value==MathematicalOutcome::unbounded ||
             result.outcome.value==MathematicalOutcome::infimum_not_attained)
