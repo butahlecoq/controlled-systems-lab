@@ -231,7 +231,11 @@ TEST_CASE("exact reviewed T-S01 executes registered Strategy A providers and com
     // The ordinary registration below must then accept the same proposal.
     auto staged=take(admit(query,false,{},true));
     auto staged_workspace=staged.create();
-    auto staged_result=take(staged_workspace->run(ExecutionContext{.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}})}));
+    auto staged_result=take(staged_workspace->run(ExecutionContext{
+        .resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),
+        .cancellation={},
+        .deadline={},
+        .run_id={}}));
     REQUIRE(staged_result.family);
     CHECK(staged_result.family->target()==FamilyTarget::candidate_relaxation);
     CHECK(staged_result.family->identity().request==query.family);
