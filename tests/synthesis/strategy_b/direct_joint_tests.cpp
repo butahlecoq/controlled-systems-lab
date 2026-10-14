@@ -1,9 +1,11 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
+#include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
+#include "compiled_verifiers.hpp"
 #include <algorithm>
 #include <cmath>
 using namespace csl;
@@ -183,7 +185,6 @@ TEST_CASE("numerical failure preserves the caller-visible incumbent bound and ca
     auto workspace=prepared.create();
     ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     const auto result=accepted(workspace->run(context));
-
     CHECK(result.termination==Termination::numerical_failure);
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     CHECK(result.spans.empty());
@@ -224,6 +225,128 @@ TEST_CASE("numerical failure preserves the caller-visible incumbent bound and ca
     CHECK(stop.retained.upper_bound);
     CHECK(stop.retained.incumbents==1);
     CHECK(stop.retained.partial_or_candidate_family);
+}
+
+TEST_CASE("registered Strategy B publishes complete T-S01 evidence only through the exact profile gate") {
+    const auto p=resolve(integrator());
+    auto exact=request(p);exact.profile=synthesis::strategy_ts01::profile_id;exact.target=FamilyTarget::exact_optimal_relation;
+    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
+    auto lp_registration=accepted(adapters::lp::make_highs_registration());
+    auto convex_registration=accepted(adapters::convex::make_highs_registration());
+    const auto lp_id=lp_registration.identity.id,convex_id=convex_registration.identity.id;
+    REQUIRE_FALSE(lp.add(std::move(lp_registration)));
+    REQUIRE_FALSE(qp.add(std::move(convex_registration)));
+    REQUIRE_FALSE(strategies.add(make_registration(lp,qp)));
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
+    configuration.lp=lp_id;configuration.convex=convex_id;configuration.representation={"csl.polyhedron.h"};
+    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.assurance=Assurance::numerical;requirements.output.family=FamilyTarget::exact_optimal_relation;
+    requirements.output.completeness=registry::Completeness::established;
+    auto prepared=strategies.prepare({p,configuration,exact,"1"},requirements);
+    REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
+    auto workspace=std::get<registry::PreparedStrategy>(std::move(prepared)).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.numerical=exact.numerical;
+    const auto result=accepted(workspace->run(context));
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->registry_verified());
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    const auto& identity=result.family->identity();
+    CHECK(identity.strategy==ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(identity.strategy_version=="1");
+    REQUIRE(identity.lineage.size()==2);
+    CHECK(identity.lineage[0].request==RequestId{"syn04-build:"+p.identity().value});
+    CHECK(identity.lineage[1].request==RequestId{"syn04-extract:"+p.identity().value});
+    const SetId feasible_id{"syn04-feasible:"+p.identity().value};
+    const SetId optimal_id{"syn04-optimal-level:"+p.identity().value};
+    const std::vector<TransformStepIdentity> expected_lineage{
+        {{"syn04-build:"+p.identity().value},{p.identity().value},feasible_id,{"csl.synthesis.strategy-b"},"1"},
+        {{"syn04-extract:"+p.identity().value},feasible_id,optimal_id,{"csl.synthesis.strategy-b"},"1"}};
+    CHECK(identity.lineage==expected_lineage);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto relation=std::dynamic_pointer_cast<const synthesis::strategy_ts01::ExactJointRelation>(complete.relation.payload);
+    REQUIRE(relation);
+    CHECK(relation->contains(Vector{0,0.5,1,0.5,0.5}));
+    CHECK(relation->contains(Vector{0,0.75,1,0.75,0.25}));
+    CHECK_FALSE(relation->contains(Vector{0,0.5,1,0.5,0.25}));
+
+    const registry::StrategyRequest frozen{p,configuration,exact,"1",expected_lineage};
+    const CompleteFamilyProposal proposal{identity,complete};
+    const auto verifier=registry::detail::find_compiled_verifier({"csl.verifier.ts01-analytic"},"1");
+    REQUIRE(verifier);
+    CHECK(verifier->verify(frozen,proposal).empty());
+    auto wrong_request=frozen;wrong_request.lineage[1].version="foreign";
+    CHECK_FALSE(verifier->verify(wrong_request,proposal).empty());
+    auto wrong_proposal=proposal;wrong_proposal.identity.lineage[1].version="foreign";
+    wrong_proposal.family.completeness.binding=wrong_proposal.identity;
+    CHECK_FALSE(verifier->verify(frozen,wrong_proposal).empty());
+
+    const auto neighboring=resolve(integrator(QuadraticTerminal{{1,1,{2}},{-1},0.25}));
+    auto unsupported=request(neighboring);unsupported.profile=synthesis::strategy_ts01::profile_id;
+    unsupported.target=FamilyTarget::exact_optimal_relation;
+    CHECK(std::holds_alternative<registry::Rejection>(strategies.prepare({neighboring,configuration,unsupported,"1"},requirements)));
+}
+TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and executed lineage") {
+    const auto p=resolve(integrator());
+    auto exact=request(p);exact.profile=synthesis::strategy_ts01::profile_id;
+    exact.target=FamilyTarget::exact_optimal_relation;
+    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
+    registry::StrategyRegistry strategies;
+    auto lp_registration=accepted(adapters::lp::make_highs_registration());
+    auto convex_registration=accepted(adapters::convex::make_highs_registration());
+    const auto lp_id=lp_registration.identity.id,convex_id=convex_registration.identity.id;
+    convex_registration.capabilities=[](const ConvexProgram&,const registry::Requirements&)->registry::Capability {
+        return Diagnostics{{DiagnosticCode::unsupported,"injected.late_rejection","Rejected after joint construction."}};
+    };
+    REQUIRE_FALSE(lp.add(std::move(lp_registration)));
+    REQUIRE_FALSE(qp.add(std::move(convex_registration)));
+    REQUIRE_FALSE(strategies.add(make_registration(lp,qp)));
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
+    configuration.lp=lp_id;configuration.convex=convex_id;configuration.representation={"csl.polyhedron.h"};
+    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.assurance=Assurance::numerical;
+    requirements.output.family=FamilyTarget::exact_optimal_relation;
+    requirements.output.completeness=registry::Completeness::established;
+    auto prepared=strategies.prepare({p,configuration,exact,"1"},requirements);
+    REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
+    auto workspace=std::get<registry::PreparedStrategy>(std::move(prepared)).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.numerical=exact.numerical;
+    const auto result=accepted(workspace->run(context));
+    CHECK(result.termination==Termination::operation_rejected);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& identity=result.family->identity();
+    CHECK(identity.problem==p.identity());
+    CHECK(identity.request==exact);
+    CHECK(identity.strategy==ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(identity.strategy_version=="1");
+    REQUIRE(identity.lineage.size()==1);
+    CHECK(identity.lineage[0].request==RequestId{"syn04-build:"+p.identity().value});
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    CHECK(candidate.relation.representation==RepresentationId{"csl.polyhedron.h"});
+    CHECK(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
+    CHECK(std::holds_alternative<Unestablished>(candidate.feasibility));
+    const auto retained_payload=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
+    REQUIRE(retained_payload);
+    CHECK_FALSE(retained_payload->optimization);
+    CHECK(contains(retained_payload->relation,{0,0,1,0,1}));
+    CHECK(contains(retained_payload->relation,{0,1,1,1,0}));
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.objective.upper);
+    CHECK(result.incumbents.empty());
+    REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
+    const auto& stop=std::get<ScopedRequestRejection>(result.stop);
+    CHECK(stop.completed_lineage==identity.lineage);
+    CHECK(stop.retained.partial_or_candidate_family);
+    CHECK_FALSE(stop.retained.lower_bound);
+    CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==0);
 }
 TEST_CASE("unsupported assurance targets and policy mismatch fail before solving") {
     const auto p=resolve(integrator());auto workspace=oracle({0,0.25,1,0.25,0.75},0);

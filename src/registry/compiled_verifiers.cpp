@@ -1,4 +1,5 @@
 #include "compiled_verifiers.hpp"
+#include "strategy_b_lineage.hpp"
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <algorithm>
 #include <array>
@@ -59,12 +60,11 @@ bool control_interval(const AdmissibleSet& set) {
         matrix_is(h->equalities,0,1,{})&&vector_is(h->equality_values,{});
 }
 
-bool ts01_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
-    const auto& family=request.family;
+bool ts01_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
+    const RepresentationId& representation) {
     if(family.profile!=synthesis::strategy_ts01::profile_id||family.objective!=problem.identity()||
         family.target!=FamilyTarget::exact_optimal_relation||family.assurance!=Assurance::numerical||
-        family.representation!=h_polyhedron||family.materialization_limit||
-        request.configuration.strategy.value!=synthesis::strategy_ts01::strategy_id||request.configuration.representation!=h_polyhedron)
+        family.representation!=h_polyhedron||family.materialization_limit||representation!=h_polyhedron)
         return false;
     const auto source=problem.description();
     if(!source||!source->model||source->model->dynamics.time_domain!=TimeDomain::discrete||
@@ -99,6 +99,15 @@ bool ts01_profile_valid(const ::csl::problem::ResolvedProblem& problem,const Str
     const auto* quadratic=std::get_if<::csl::optimization::QuadraticCoefficients>(&coefficients);
     return quadratic&&objective.dimension()==1&&matrix_is(quadratic->Q,1,1,{2})&&
         vector_is(quadratic->linear,{-2})&&quadratic->offset==1;
+}
+bool ts01_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
+    return ts01_case_valid(problem,request.family,request.configuration.representation)&&
+        request.configuration.strategy.value==synthesis::strategy_ts01::strategy_id;
+}
+bool strategy_b_ts01_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
+    return ts01_case_valid(problem,request.family,request.configuration.representation)&&
+        request.configuration.strategy.value=="csl.synthesis.strategy-b"&&request.strategy_version=="1"&&
+        request.lineage==synthesis::strategy_b::detail::expected_ts01_lineage(problem.identity());
 }
 
 }
@@ -140,18 +149,21 @@ public:
     const std::string& version() const noexcept override { static const std::string value{"1"}; return value; }
     Diagnostics verify(const StrategyRequest& request,const CompleteFamilyProposal& proposal) const override {
         Diagnostics diagnostics;
-        if(!ts01_profile_valid(request.problem,request))
+        const bool standalone=ts01_profile_valid(request.problem,request);
+        const bool strategy_b=strategy_b_ts01_profile_valid(request.problem,request);
+        if(!standalone&&!strategy_b)
             return {{DiagnosticCode::unsupported,"ts01.verifier.profile","Verifier rejected a noncanonical resolved problem or effective request"}};
+        const auto expected_strategy=standalone?synthesis::strategy_ts01::strategy_id:"csl.synthesis.strategy-b";
+        const auto expected_version=standalone?synthesis::strategy_ts01::strategy_version:"1";
         const auto& identity=proposal.identity;const auto& complete=proposal.family;
         const auto exact_identity=identity.problem==request.problem.identity()&&identity.request==request.family&&
             identity.coordinates==request.problem.constraints().coordinates()&&
             identity.strategy==request.configuration.strategy&&identity.strategy_version==request.strategy_version&&
-            identity.lineage==request.lineage&&identity.lineage.empty()&&request.lineage.empty();
+            identity.lineage==request.lineage&&identity.strategy.value==expected_strategy&&
+            identity.strategy_version==expected_version&&(!standalone||identity.lineage.empty());
         if(!exact_identity||complete.completeness.binding!=identity||
             complete.relation.coordinates!=identity.coordinates||complete.relation.representation!=request.family.representation||
-            complete.assurance!=request.family.assurance||request.family.assurance!=Assurance::numerical||
-            identity.strategy.value!=synthesis::strategy_ts01::strategy_id||
-            identity.strategy_version!=synthesis::strategy_ts01::strategy_version)
+            complete.assurance!=request.family.assurance||request.family.assurance!=Assurance::numerical)
             diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.verifier.binding","T-S01 proof must bind the selected strategy, effective request, authoritative problem, coordinates and lineage"});
         const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
         if(!proof||proof->verifier.value!="csl.verifier.ts01-analytic"||

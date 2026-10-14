@@ -349,6 +349,10 @@ struct StrategyRegistration {
     // check_pipeline, then compose_strategy. No prepare/create/native work here.
     std::function<std::variant<StrategyPlan,Rejection>(const StrategyRequest&,const Requirements&)> planner;
     struct CompleteFamilyVerifierKey { ModuleId id; std::string version; } complete_family_verifier{};
+    // Pure description of the ordered transformations this prepared strategy
+    // expects to execute. Frozen into StrategyRequest before workspace creation.
+    // Omitted callbacks preserve the empty-lineage contract.
+    std::function<std::vector<TransformStepIdentity>(const StrategyRequest&)> expected_lineage{};
 };
 namespace detail {
 class CompiledCompleteFamilyVerifier;
