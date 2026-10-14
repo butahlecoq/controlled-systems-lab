@@ -1,6 +1,6 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/optimization/lp_backend.hpp>
-#include <Highs.h>
+#include "../highs_session.hpp"
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
@@ -44,40 +44,7 @@ ProgramResult result_for(const LinearProgram& p) {
     return {Termination::numerical_failure,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},
         {"HiGHS binary64 report; no independent mathematical outcome certificate"}}, {}, {}, {}, {}};
 }
-struct CallbackState {
-    const ExecutionContext& context;
-    std::optional<Termination> stop;
-    std::string log;
-    void poll() {
-        if (stop) return;
-        if (context.cancellation.stop_requested()) stop = Termination::cancelled;
-        else if (context.deadline && std::chrono::steady_clock::now() >= *context.deadline)
-            stop = Termination::resource_limit;
-    }
-};
-// The callbacks borrow only this synchronous attempt; the native object retains
-// no pointer to an ExecutionContext after the guard is destroyed.
-struct CallbackGuard {
-    Highs& native;
-    explicit CallbackGuard(Highs& h, CallbackState& state) : native(h) {
-        const auto status = native.setCallback([](int type,const std::string& message,
-            const HighsCallbackOutput*,HighsCallbackInput* input,void* user) {
-            auto& current = *static_cast<CallbackState*>(user);
-            if (type == kCallbackLogging) current.log += message;
-            if (type == kCallbackSimplexInterrupt) {
-                current.poll();
-                if (input && current.stop) input->user_interrupt = true;
-            }
-        },&state);
-        if (status == HighsStatus::kError) throw std::runtime_error("HiGHS callback registration failed");
-        if (native.startCallback(kCallbackLogging) == HighsStatus::kError ||
-            native.startCallback(kCallbackSimplexInterrupt) == HighsStatus::kError) {
-            native.setCallback(HighsCallbackFunctionType{},nullptr);
-            throw std::runtime_error("HiGHS callback activation failed");
-        }
-    }
-    ~CallbackGuard() { native.setCallback(HighsCallbackFunctionType{},nullptr); }
-};
+using highs_detail::CallbackState;
 void require_option(HighsStatus status) {
     if (status == HighsStatus::kError) throw std::runtime_error("Pinned HiGHS option rejected");
 }
@@ -201,27 +168,14 @@ class HighsLPWorkspace final : public LPWorkspace {
         }
         if (!native_) native_ = std::make_unique<Highs>();
         auto& h = *native_;
-        CallbackGuard guard(h,state);
-        // HiGHS 1.11 gates callbacks on log_to_console as well. An active
-        // logging callback replaces console output (HighsIO.cpp).
-        require_option(h.setOptionValue("log_to_console",true));
-        require_option(h.setOptionValue("output_flag",true));
+        highs_detail::CallbackGuard guard(h,state,require_option);
+        highs_detail::configure_common(h,require_option);
         require_option(h.setOptionValue("solver","simplex"));
-        require_option(h.setOptionValue("presolve","off"));
-        require_option(h.setOptionValue("parallel","off"));
-        require_option(h.setOptionValue("threads",HighsInt{1}));
-        require_option(h.setOptionValue("random_seed",HighsInt{0}));
-        require_option(h.setOptionValue("allow_unbounded_or_infeasible",false));
-        require_option(h.setOptionValue("small_matrix_value",1e-12));
-        require_option(h.setOptionValue("large_matrix_value",kHighsInf));
-        require_option(h.setOptionValue("infinite_bound",kHighsInf));
-        require_option(h.setOptionValue("infinite_cost",kHighsInf));
         require_option(h.setOptionValue("primal_feasibility_tolerance",c.numerical.absolute_tolerance));
         require_option(h.setOptionValue("dual_feasibility_tolerance",c.numerical.absolute_tolerance));
         require_option(h.setOptionValue("simplex_iteration_limit",static_cast<HighsInt>(options_.simplex_iteration_limit.value_or(static_cast<std::size_t>(kHighsIInf)))));
         h.zeroAllClocks();
-        const double remaining = c.deadline ? std::max(0.0,std::chrono::duration<double>(*c.deadline-std::chrono::steady_clock::now()).count()) : kHighsInf;
-        require_option(h.setOptionValue("time_limit",remaining));
+        const double remaining=highs_detail::deadline(h,c,require_option);
         raw << "\noptions.time_limit=" << remaining;
         const bool reused = loaded_ && loaded_->identity() == p.identity();
         raw << "\nmodel.reused=" << (reused ? "true" : "false");
