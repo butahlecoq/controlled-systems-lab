@@ -215,6 +215,20 @@ TEST_CASE("real T-S01 partial family is rejected by selector admission without L
     REQUIRE(result.family);
     REQUIRE(result.family->target()==FamilyTarget::partial_relation);
     REQUIRE(std::holds_alternative<PartialOptimalFamily>(result.family->outcome()));
+    const auto published_identity=result.family->identity();
+    const auto& published_partial=std::get<PartialOptimalFamily>(result.family->outcome());
+    const auto published_scope=published_partial.known_scope.description;
+    const auto published_procedure=published_partial.optimal_subset.procedure;
+    const auto published_midpoint_claim=std::get<SymbolicArgument>(published_partial.optimal_subset.every_history_optimal.support);
+    const auto published_optimum_claim=std::get<SymbolicArgument>(published_partial.optimum.optimum.support);
+    REQUIRE(published_scope=="s=1/2");
+    REQUIRE(published_procedure=="T-S01 exact midpoint singleton");
+    REQUIRE(published_midpoint_claim.reference=="T-S01 exact midpoint singleton");
+    REQUIRE(published_midpoint_claim.assumptions==
+        "At s=1/2, (x0,x1,x2,u0,u1)=(0,1/2,1,1/2,1/2) satisfies both dynamics equations and both control bounds. Its exact objective is (1-1)^2=0, while the objective is nonnegative for every feasible history.");
+    REQUIRE(published_optimum_claim.reference=="T-S01 exact midpoint optimality");
+    REQUIRE(published_optimum_claim.assumptions==
+        "The resolved objective is (x2-1)^2, so it is nonnegative for every feasible history. At the feasible midpoint history x2=1, hence the objective equals zero and the global optimum is zero.");
     CHECK_FALSE(result.family->registry_verified());
     CHECK(result.family->partial_registry_verified());
 
@@ -239,9 +253,44 @@ TEST_CASE("real T-S01 partial family is rejected by selector admission without L
     REQUIRE(std::holds_alternative<Unsupported>(direct_result));
     CHECK(std::get<Unsupported>(direct_result).diagnostics.front().code==DiagnosticCode::unsupported);
     CHECK(*creations==0);
-    CHECK(query.family.identity()==result.family->identity());
+
+    auto invalid_evidence=std::get<PartialOptimalFamily>(query.family.outcome());
+    invalid_evidence.known_scope.description="";
+    const auto invalid_publication=FamilyPublisher::publish(query.family.identity(),invalid_evidence);
+    REQUIRE(std::holds_alternative<Diagnostics>(invalid_publication));
+    CHECK_FALSE(std::get<Diagnostics>(invalid_publication).empty());
+
+    CHECK(result.family->identity()==published_identity);
+    CHECK(result.family->identity().problem==partial_request.problem.identity());
+    CHECK(result.family->identity().request.profile=="ts01_exact_integrator");
+    CHECK(result.family->identity().request.target==FamilyTarget::partial_relation);
+    CHECK(result.family->identity().request.representation==RepresentationId{"csl.polyhedron.h"});
+    CHECK(result.family->identity().coordinates==JointCoordinates{{1,1,0},2});
+    CHECK(result.family->identity().strategy==ModuleId{"csl.synthesis.ts01-analytic"});
+    CHECK(result.family->identity().strategy_version=="1");
+    CHECK(result.family->identity().lineage.empty());
     CHECK(query.family.target()==FamilyTarget::partial_relation);
     CHECK_FALSE(std::holds_alternative<CompleteOptimalFamily>(query.family.outcome()));
+    CHECK(result.family->target()==FamilyTarget::partial_relation);
+    REQUIRE(std::holds_alternative<PartialOptimalFamily>(result.family->outcome()));
+    const auto& unchanged=std::get<PartialOptimalFamily>(result.family->outcome());
+    CHECK(unchanged.known_scope.description=="s=1/2");
+    CHECK(unchanged.optimal_subset.procedure=="T-S01 exact midpoint singleton");
+    CHECK(std::get<SymbolicArgument>(unchanged.optimal_subset.every_history_optimal.support).reference==
+        "T-S01 exact midpoint singleton");
+    CHECK(std::get<SymbolicArgument>(unchanged.optimal_subset.every_history_optimal.support).assumptions==
+        "At s=1/2, (x0,x1,x2,u0,u1)=(0,1/2,1,1/2,1/2) satisfies both dynamics equations and both control bounds. Its exact objective is (1-1)^2=0, while the objective is nonnegative for every feasible history.");
+    CHECK(std::get<SymbolicArgument>(unchanged.optimum.optimum.support).reference==
+        "T-S01 exact midpoint optimality");
+    CHECK(std::get<SymbolicArgument>(unchanged.optimum.optimum.support).assumptions==
+        "The resolved objective is (x2-1)^2, so it is nonnegative for every feasible history. At the feasible midpoint history x2=1, hence the objective equals zero and the global optimum is zero.");
+    REQUIRE(unchanged.optimum.bounds.lower);
+    REQUIRE(unchanged.optimum.bounds.upper);
+    CHECK(unchanged.optimum.bounds.lower->value==0);
+    CHECK(unchanged.optimum.bounds.upper->value==0);
+    CHECK_FALSE(result.family->registry_verified());
+    CHECK(result.family->partial_registry_verified());
+    CHECK(*creations==0);
 }
 
 namespace {
