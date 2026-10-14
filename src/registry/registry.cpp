@@ -177,6 +177,7 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     // Every pure dependency/transition check has succeeded. Only now copy numerical requests.
     auto frozen=StrategyPort::snapshot(request);
     frozen.strategy_version=entry.identity.version;
+    if(entry.expected_lineage) frozen.lineage=entry.expected_lineage(frozen);
     auto snapshot = std::make_shared<const StrategyRequest>(std::move(frozen));
     auto factory = plan.snapshot_();
     std::optional<detail::VerifiedFamilyAuthority> authority;

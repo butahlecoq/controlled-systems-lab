@@ -81,6 +81,11 @@ nor the runtime client dispatches on an algorithm ID. The optional third
 `prepare` argument pins the strategy version; dependency `Method` values pin
 their own versions. Successful provenance includes the strategy followed by
 every selected dependency, with both requested and actual identity/version.
+An optional pure `expected_lineage` callback can freeze the strategy's ordered
+transformation identities into the prepared request before workspace creation.
+The strategy must emit those same identities at runtime, and any complete-family
+verifier still checks the proposed mathematical evidence against the frozen
+problem, request, strategy and lineage.
 
 A new interface supplies `Request`, `Workspace`, `name`, a `snapshot` function
 and a typed `run` function, then instantiates `Registry<NewPort>`. No central
