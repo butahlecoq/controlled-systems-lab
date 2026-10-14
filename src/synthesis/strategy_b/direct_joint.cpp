@@ -3,11 +3,14 @@
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/verification/trajectory.hpp>
 #include "../../registry/compiled_verifiers.hpp"
+#include "../../registry/runtime_lineage.hpp"
 #include "../../registry/strategy_b_lineage.hpp"
 #include <algorithm>
+#include <atomic>
 #include <limits>
 #include <numeric>
 #include <type_traits>
+#include <utility>
 
 namespace csl::synthesis::strategy_b {
 namespace {
@@ -190,6 +193,23 @@ RelationRows feasible_rows(const JointProgram& p) {
     }
     return r;
 }
+RelationRows relation_rows(const sets::SetData& relation) {
+    const auto representation=relation.representation();
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if(!h) throw std::logic_error("Strategy B extraction requires its retained H-relation artifact");
+    RelationRows rows{h->inequalities.cols()};
+    for(std::size_t i=0;i<h->inequalities.rows();++i) {
+        Vector row(h->inequalities.cols());
+        for(std::size_t j=0;j<row.size();++j)row[j]=h->inequalities(i,j);
+        rows.inequality(row,h->upper_bounds[i]);
+    }
+    for(std::size_t i=0;i<h->equalities.rows();++i) {
+        Vector row(h->equalities.cols());
+        for(std::size_t j=0;j<row.size();++j)row[j]=h->equalities(i,j);
+        rows.equality(row,h->equality_values[i]);
+    }
+    return rows;
+}
 void optimal_level(RelationRows& rows,const JointProgram& p,const Vector& anchor) {
     const auto width=p.constraints.cols;
     auto add=[&](const Vector& row) {double rhs=0;for(std::size_t j=0;j<width;++j)rhs+=row[j]*anchor[j];rows.equality(row,rhs);};
@@ -214,8 +234,36 @@ RequestProvenance scope(const ProgramIdentity& id,const registry::Provenance& pr
 RetainedEvidenceScope retained(const SynthesisResult& r) {
     return {r.objective.lower.has_value(),r.objective.upper.has_value(),r.incumbents.size(),r.family.has_value()};
 }
+std::uint64_t next_attempt_id() noexcept {
+    static std::atomic<std::uint64_t> next{1};
+    auto value=next.fetch_add(1,std::memory_order_relaxed);
+    if(value==0)value=next.fetch_add(1,std::memory_order_relaxed);
+    return value;
+}
+}
+namespace detail {
+class Ts01ExecutionRunner final : public SynthesisWorkspace, public registry::detail::RuntimeReceiptSource {
+    registry::PreparedProvider<registry::LPPort> lp_;
+    registry::PreparedProvider<registry::ConvexPort> convex_;
+    std::optional<registry::StrategyRequest> prepared_request_;
+    std::optional<registry::detail::StrategyBRuntimeLineageReceipt> receipt_;
+public:
+    Ts01ExecutionRunner(registry::PreparedProvider<registry::LPPort> lp,
+        registry::PreparedProvider<registry::ConvexPort> convex,
+        std::optional<registry::StrategyRequest> prepared_request={})
+        :lp_(std::move(lp)),convex_(std::move(convex)),prepared_request_(std::move(prepared_request)){}
+    SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override;
+    std::optional<registry::detail::StrategyBRuntimeLineageReceipt> take_runtime_receipt() noexcept override {
+        return std::exchange(receipt_,std::nullopt);
+    }
+};
 }
 SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
+    detail::Ts01ExecutionRunner runner{lp_,convex_};
+    return runner.solve(p,request,context);
+}
+SynthesisResult detail::Ts01ExecutionRunner::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
+    receipt_.reset();
     SynthesisResult result{Termination::completed,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{},{}};
     auto reject=[&](Diagnostics diagnostics,Termination termination) {
         result.termination=termination;
@@ -244,7 +292,8 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
         result.stop=ScopedOperationStopped{*stop,{{"syn04-build:"+p.identity().value},"strategy",{strategy_id},{},ModuleId{strategy_id},strategy_version},retained(result)};return result;
     }
     auto construction=std::get<JointProgram>(std::move(built));
-    auto rows=feasible_rows(construction);
+    auto build_artifact=std::make_shared<const JointProgram>(std::move(construction));
+    auto rows=feasible_rows(*build_artifact);
     if(request.materialization_limit && rows.inequalities.rows+rows.equalities.rows>*request.materialization_limit) {
         result.termination=Termination::resource_limit;
         result.stop=ScopedOperationStopped{{StopReason::resource_limit,"Feasible relation exceeds the caller's row materialization limit."},
@@ -254,13 +303,14 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
     const SetId feasible_id{"syn04-feasible:"+p.identity().value};
     auto initial=rows.finish(feasible_id);
     if(const auto* errors=std::get_if<Diagnostics>(&initial)){reject(*errors,Termination::contract_rejected);return result;}
-    auto data=std::make_shared<DirectJointPayload>(std::move(construction),std::get<sets::SetData>(std::move(initial)));
+    auto feasible_artifact=std::make_shared<const sets::SetData>(std::get<sets::SetData>(std::move(initial)));
+    auto data=std::make_shared<DirectJointPayload>(*build_artifact,*feasible_artifact);
     std::vector<TransformStepIdentity> lineage{{{"syn04-build:"+p.identity().value},{p.identity().value},feasible_id,{strategy_id},strategy_version}};
     auto publish=[&] {
-        FamilyIdentity identity{p.identity(),request,data->construction.coordinates,{strategy_id},strategy_version,lineage};
+        FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,lineage};
         CandidateFeasibility feasibility=Unestablished{};
         if(!result.incumbents.empty()) feasibility=WitnessFeasibilityEvidence{result.incumbents.front().witness,result.incumbents.front().feasibility};
-        CandidateFamily candidate{{data->construction.coordinates,request.representation,data},
+        CandidateFamily candidate{{build_artifact->coordinates,request.representation,data},
             HeuristicRelationEvidence{"binary64 full joint feasible/optimal-level relation; program/problem equivalence and optimal coverage unestablished"},std::move(feasibility)};
         auto family=FamilyPublisher::publish(std::move(identity),std::move(candidate));
         if(const auto* errors=std::get_if<Diagnostics>(&family)) {
@@ -270,6 +320,7 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
         result.family=std::get<OptimalFamily>(std::move(family));
     };
     publish();
+    std::shared_ptr<const sets::SetData> extracted_artifact;
     auto run_program=[&]<class Program,class Port>(const Program& program,const registry::PreparedProvider<Port>& provider) {
         data->provider=provider.provenance();const auto provenance=scope(program.identity(),provider.provenance());
         auto preparation=provider.prepare(program);
@@ -295,7 +346,7 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
         result.termination=solved.termination;data->optimization=std::move(solved);
         const auto& evidence=*data->optimization;
         if(evidence.primal) {
-            const auto& anchor=*evidence.primal;const auto coordinates=data->construction.coordinates;
+            const auto& anchor=*evidence.primal;const auto coordinates=build_artifact->coordinates;
             Witness witness{p.identity(),{},{},0};const auto n=coordinates.dimensions.state,m=coordinates.dimensions.control,T=coordinates.horizon;
             for(std::size_t t=0;t<=T;++t)witness.states.emplace_back(anchor.begin()+t*n,anchor.begin()+(t+1)*n);
             for(std::size_t t=0;t<T;++t)witness.controls.emplace_back(anchor.begin()+(T+1)*n+t*m,anchor.begin()+(T+1)*n+(t+1)*m);
@@ -320,7 +371,7 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
                     // bounds stay in the program-scoped retained payload.
                     result.objective.upper=ObjectiveBound{*value,feasibility};
                     if(evidence.outcome.value==MathematicalOutcome::optimal) {
-                        auto optimal=rows;optimal_level(optimal,data->construction,anchor);
+                        auto optimal=relation_rows(*feasible_artifact);optimal_level(optimal,*build_artifact,anchor);
                         if(request.materialization_limit && optimal.inequalities.rows+optimal.equalities.rows>*request.materialization_limit) {
                             result.termination=Termination::resource_limit;data->diagnostics={unsupported("joint.materialization","Optimal-level relation exceeds caller row limit; feasible candidate and evidence retained.")};
                             result.stop=ScopedOperationStopped{{StopReason::resource_limit,data->diagnostics.front().explanation},provenance,retained(result)};
@@ -330,7 +381,9 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
                                 result.termination=Termination::numerical_failure;data->diagnostics=*failures;
                                 result.stop=ScopedOperationStopped{{StopReason::numerical_failure,"Optimal-level arithmetic failed; feasible candidate retained."},provenance,retained(result)};
                             } else {
-                                data->relation=std::get<sets::SetData>(std::move(refined));
+                                auto extracted=std::get<sets::SetData>(std::move(refined));
+                                data->relation=extracted;
+                                extracted_artifact=std::make_shared<const sets::SetData>(std::move(extracted));
                                 lineage.push_back({{"syn04-extract:"+p.identity().value},feasible_id,id,{strategy_id},strategy_version});
                             }
                         }
@@ -349,9 +402,9 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
     std::visit([&]<class Program>(const Program& program) {
         if constexpr(std::is_same_v<Program,LinearProgram>) run_program(program,lp_);
         else run_program(program,convex_);
-    },data->construction.program);
+    },build_artifact->program);
     if(reviewed_ts01) {
-        const bool completed_extraction=lineage==detail::expected_ts01_lineage(p.identity());
+        const bool completed_extraction=lineage==::csl::synthesis::strategy_b::detail::expected_ts01_lineage(p.identity());
         const bool supported_optimum=data->optimization&&data->optimization->termination==Termination::completed&&
             data->optimization->outcome.value==MathematicalOutcome::optimal&&result.incumbents.size()==1&&
             result.incumbents.front().witness.original_objective==0&&result.objective.upper&&result.objective.upper->value==0;
@@ -363,14 +416,21 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
                 return result;
             }
             auto payload=std::get<std::shared_ptr<const synthesis::strategy_ts01::ExactJointRelation>>(std::move(relation));
-            const FamilyIdentity identity{p.identity(),request,data->construction.coordinates,{strategy_id},strategy_version,lineage};
+            const FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,lineage};
             const SymbolicArgument derivation{"T-S01 exact analytic derivation",
                 "x2=u0+u1 and (x2-1)^2>=0; zero is attained exactly when u0+u1=1. With u0,u1 in [0,1], the full canonical optimal history relation is the segment (0,s,1,s,1-s), s in [0,1]."};
             const ClaimEvidence optimum{p.identity(),derivation};
             const ObjectiveBound bound{0,{p.identity(),derivation}};
             const OptimumEvidence optimum_evidence{optimum,{bound,bound}};
-            CompleteOptimalFamily complete{{data->construction.coordinates,request.representation,payload},optimum_evidence,
+            CompleteOptimalFamily complete{{build_artifact->coordinates,request.representation,payload},optimum_evidence,
                 {identity,RegisteredCompletenessEvidence{{"csl.verifier.ts01-analytic"},"1","TS01-analytic-v1"}},Assurance::numerical};
+            if(prepared_request_&&extracted_artifact&&prepared_request_->problem.identity()==p.identity()&&
+                prepared_request_->family==request&&prepared_request_->configuration.strategy.value==strategy_id&&
+                prepared_request_->strategy_version==strategy_version&&
+                registry::detail::strategy_b_ts01_profile_valid(p,*prepared_request_)) {
+                receipt_=registry::detail::StrategyBRuntimeLineageReceipt{*prepared_request_,build_artifact,
+                    feasible_artifact,feasible_artifact,std::move(extracted_artifact),next_attempt_id()};
+            }
             result.outcome={p.identity(),MathematicalOutcome::optimal,derivation,{}};
             result.objective=optimum_evidence.bounds;
             result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
@@ -404,8 +464,9 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
         auto fixed=registry::check_pipeline();
         return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(fixed)),
             std::get<registry::CheckedProviders<registry::LPPort,registry::ConvexPort>>(std::move(generated)),
-            [](auto,auto providers,const registry::StrategyRequest&,const registry::Requirements&)->std::unique_ptr<SynthesisWorkspace> {
-                return std::make_unique<DirectJointWorkspace>(std::get<0>(std::move(providers)),std::get<1>(std::move(providers)));
+            [](auto,auto providers,const registry::StrategyRequest& prepared,const registry::Requirements&)->std::unique_ptr<SynthesisWorkspace> {
+                return std::make_unique<detail::Ts01ExecutionRunner>(std::get<0>(std::move(providers)),
+                    std::get<1>(std::move(providers)),prepared);
             });
     },{{"csl.verifier.ts01-analytic"},"1"}};
     registration.expected_lineage=[](const registry::StrategyRequest& request) {
