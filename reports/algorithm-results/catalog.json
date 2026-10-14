@@ -176,6 +176,18 @@
       "measured_scope": "Exact T-S01 profile; one registered Strategy A; seven validated measured trials; performance conclusion inconclusive",
       "evidence_limits": "Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.; The result reports Assurance::numerical; validated arithmetic assurance is unavailable.; This is one Strategy A measurement, not a Strategy A versus Strategy B comparison, speedup, application-scale, throughput, or scalability claim.; All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.; No source-mapped performance limiter was identified because WPR CPU stack profiling was denied by Windows policy.; Strategy A stage and submodule timing counters are unavailable; only whole end-to-end StrategyPort duration is measured.",
       "zip_sha256": "9ff4f8abe7f89ecbbfd154995cf6778a09106eea482b239f6a06a0904a902739"
+    },
+    {
+      "report_id": "syn04-strategy-b-ts02-3999b008c529fd57b5cfb6a78841a9963a7e9c4c9919e0c4edafe705b236f929",
+      "source_report_id": "syn04-strategy-b-ts02-20261014-e7f66a9e",
+      "payload_schema": "csl.syn04-strategy-b-ts02-report/1",
+      "payload_sha256": "5b7ff180ddfbb5e5e6d813b0db6721610d7a6bc6447c1e5b3e9faa4f839590e0",
+      "native_payload_sha256": "5b7ff180ddfbb5e5e6d813b0db6721610d7a6bc6447c1e5b3e9faa4f839590e0",
+      "source_commit": "e7f66a9ee698d05ed8779621116319158fa70158",
+      "measured_scope": "Exact T-S02 profile; one registered Strategy B; seven validated measured trials; performance conclusion inconclusive",
+      "evidence_limits": "Completeness applies only to the exact admitted T-S02 constant-integrator profile and csl.verifier.ts02-constant-integrator v1.; Assurance::numerical is reported; validated arithmetic is unavailable.; Seven observations of one tiny profile are exploratory evidence only; no comparator, speedup, general performance, application-scale, throughput or scalability claim.; This report does not cover T-S03, singular A, other dynamics or objectives, or generic complete-family support; SYN-04 #67 remains open.; The admitted T-S02 production path constructs and verifies the full feasible relation analytically; LP and convex providers are registered and prepared but their numerical solve operations are not invoked.; The separate diagnostic workload is excluded from the seven observations; no source-mapped unprofiled latency limiter is established.; Internal preparation, native LP/QP, relation construction, compiled verifier and export timings/counters are unavailable.",
+      "report_kind": "syn04-strategy-b-ts02",
+      "zip_sha256": "b2d38a913d3addbee9ad1493f611bfb41abda921be7356dbb2a8b0c9859e6878"
     }
   ]
 }

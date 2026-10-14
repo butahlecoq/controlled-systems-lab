@@ -1,0 +1,49 @@
+{
+  "etl_path": null,
+  "process_samples": [
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 724840628424900,
+      "rss_bytes": 1802240
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 724840630629700,
+      "rss_bytes": 3043328
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 724840632871300,
+      "rss_bytes": 4665344
+    },
+    {
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 724840635496900
+    }
+  ],
+  "sampled_process_cpu_system_seconds_max": 0.0,
+  "sampled_process_cpu_user_seconds_max": 0.0,
+  "sampled_process_peak_rss_bytes": 4665344,
+  "separate_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "separate_stdout_sha256": "f9a03993abe308a14a7e14d76185488031ba0711532a45ee9a3f0df6d3e9cfdd",
+  "separate_wall_ns": 17951300,
+  "separate_workload_return_code": 0,
+  "separate_workload_timed_out": false,
+  "wpr": {
+    "command": [
+      "wpr",
+      "-start",
+      "CPU",
+      "-filemode"
+    ],
+    "return_code": 3310899217,
+    "stderr": "\r\n\tFailed to enable the policy to profile system performance.\r\r\n\r\n\tProfile Id: CPU.Verbose.File\r\n\t\r\n\tError code: 0xc5585011\r\n\t\r\n\tFailed to enable the policy to profile system performance.\r\r\n\t\r\n\t\r\n",
+    "stdout": ""
+  }
+}

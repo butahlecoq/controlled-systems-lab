@@ -1,0 +1,40 @@
+{
+  "build": [
+    "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "--build",
+    "BUILD_ROOT",
+    "--config",
+    "Release",
+    "--target",
+    "csl_syn04_ts02_report",
+    "--parallel",
+    "4"
+  ],
+  "configure": [
+    "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "-S",
+    "HARNESS_ROOT\\reports\\algorithm-results\\tooling\\syn04_ts02\\runner",
+    "-B",
+    "BUILD_ROOT",
+    "-G",
+    "Visual Studio 17 2022",
+    "-A",
+    "x64",
+    "-DCSL_SOURCE_ROOT=SOURCE_ROOT",
+    "-DBUILD_TESTING=OFF",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=DEPENDENCY_ROOT\\csl_highs-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=DEPENDENCY_ROOT\\csl_objectives_eigen-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=DEPENDENCY_ROOT\\csl_qhull-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=DEPENDENCY_ROOT\\csl_json-src"
+  ],
+  "measure": [
+    "BUILD_ROOT\\Release\\csl_syn04_ts02_report.exe"
+  ],
+  "profile": [
+    "wpr",
+    "-start",
+    "CPU",
+    "-filemode",
+    "BUILD_ROOT\\Release\\csl_syn04_ts02_report.exe"
+  ]
+}

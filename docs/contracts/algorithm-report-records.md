@@ -489,3 +489,26 @@ validates the SVG with the shared safe-SVG policy and renders the public page
 from validated records rather than copying producer HTML. Staging does not
 publish the report; reviewed measurements, catalogue integration and the
 main-only Pages workflow remain required.
+
+## SYN-04 T-S02 saved records
+
+The additive `csl.syn04-strategy-b-ts02-report/1` native schema and
+`syn04-strategy-b-ts02` registered kind use the existing SYN-04/schema-3 flow.
+The T-S01 record, verifier, numerical archive and publication identity remain
+separate. T-S02 records bind the merged solver source, fixed clean harness,
+scenario SHA-256, canonical 4-inequality/3-equality joint-history relation and
+one excluded warmup plus seven measured observations. Every raw event records
+completed optimal status, accepted compiled completeness verifier, numerical
+assurance, [3,3] bounds, canonical-relation validation and the distinct-history
+same-terminal check. The adapter recomputes the saved timing summary and checks
+raw JSONL, CSV, sidecars, build evidence, complete inventory hashes and generated
+HTML before publication output. Separate profile output is checked against the
+same scientific profile and excluded from latency statistics.
+
+The measured interval includes local owner destruction before the checked
+one_run call returns. Internal phase durations/counters are unavailable; neither
+LP nor convex solve is invoked by the admitted analytic T-S02 branch. The report
+makes only a single-profile exploratory observation with an inconclusive
+performance conclusion. Staging produces the shared envelope, exact-file
+publication manifest and deterministic offline ZIP. Main-only deployment and
+verified immutable live page/download URLs remain required later gates.

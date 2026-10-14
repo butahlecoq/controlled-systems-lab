@@ -1,0 +1,127 @@
+{
+  "build_command": [
+    "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "--build",
+    "BUILD_ROOT",
+    "--config",
+    "Release",
+    "--target",
+    "csl_syn04_ts02_report",
+    "--parallel",
+    "4"
+  ],
+  "build_log_sha256": "39ed6c06362cfc92a594220843accb78154ac59c86c1df5c41b988bb5ea9ee42",
+  "cache_sha256": "3922c94c5d50fcbd73f9c63fe1253a4bf04e42e0d8f54903be7fd5ff5d93d1d3",
+  "cmake": "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+  "cmake_version": "cmake version 3.31.6-msvc6",
+  "compiler": "MSVC",
+  "compiler_config_sha256": "eb5b10b1860b7da082a2230651976c7280df6ea4236b08258b6c9c442a393392",
+  "compiler_version": "set(CMAKE_CXX_COMPILER_VERSION \"19.44.35215.0\")",
+  "configuration": "Release",
+  "configure_command": [
+    "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "-S",
+    "HARNESS_ROOT\\reports\\algorithm-results\\tooling\\syn04_ts02\\runner",
+    "-B",
+    "BUILD_ROOT",
+    "-G",
+    "Visual Studio 17 2022",
+    "-A",
+    "x64",
+    "-DCSL_SOURCE_ROOT=SOURCE_ROOT",
+    "-DBUILD_TESTING=OFF",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=DEPENDENCY_ROOT\\csl_highs-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=DEPENDENCY_ROOT\\csl_objectives_eigen-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=DEPENDENCY_ROOT\\csl_qhull-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=DEPENDENCY_ROOT\\csl_json-src"
+  ],
+  "configure_log_sha256": "ac3b28a3401ce3f20df8a88d44039e149b0d18306183e28f9c0a2f32fe3dd371",
+  "cxx_standard": "C++20",
+  "dependencies": {
+    "highs": {
+      "adapter_version": "1.0.0+highs.1.11.0",
+      "pinned_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
+    },
+    "json": {
+      "pinned_sha256": "0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406"
+    },
+    "objectives_eigen": {
+      "pinned_sha256": "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+    },
+    "qhull": {
+      "pinned_sha256": "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"
+    },
+    "resolved_sources": {
+      "CSL_HIGHS": {
+        "commit": "source-archive-no-git-metadata",
+        "directory_sha256": "ffdc2fef01c491ca5bb83b501e2d349fc07e5cca385e8bee4eaa0eeb6e5e75ec",
+        "source": "DEPENDENCY_ROOT\\csl_highs-src"
+      },
+      "CSL_JSON": {
+        "commit": "source-archive-no-git-metadata",
+        "directory_sha256": "1e4e4c85a0b46c29a341514681d4e6189fd0b5fb60e94b77075540ecf17c318a",
+        "source": "DEPENDENCY_ROOT\\csl_json-src"
+      },
+      "CSL_OBJECTIVES_EIGEN": {
+        "commit": "source-archive-no-git-metadata",
+        "directory_sha256": "f062692628c933e5fe7cb6c725fc179e6073197245861e098d69516df1d2fdf4",
+        "source": "DEPENDENCY_ROOT\\csl_objectives_eigen-src"
+      },
+      "CSL_QHULL": {
+        "commit": "source-archive-no-git-metadata",
+        "directory_sha256": "d34a90ce3602cfd6685ee0de08a4852496fdadc01025214fafdd68ca5e786dae",
+        "source": "DEPENDENCY_ROOT\\csl_qhull-src"
+      }
+    }
+  },
+  "executable_bytes": 4149248,
+  "executable_sha256": "2b0281a6eab82e16c61c5dc6d914c456b14200532bd829a4ce13cf951b6e79b3",
+  "generator": "Visual Studio 17 2022 x64",
+  "ndebug": true,
+  "project_sha256": "767dc0db6db29b068b02594de1cd5be7fdba1a27e21d3539aacc17a9c454b1ee",
+  "release_properties": {
+    "AdditionalIncludeDirectories": "SOURCE_ROOT\\include;%(AdditionalIncludeDirectories)",
+    "AssemblerListingLocation": "$(IntDir)",
+    "BasicRuntimeChecks": "Default",
+    "ConformanceMode": "true",
+    "DebugInformationFormat": "\n      ",
+    "ExceptionHandling": "Sync",
+    "InlineFunctionExpansion": "AnySuitable",
+    "LanguageStandard": "stdcpp20",
+    "MinimalRebuild": "",
+    "ObjectFileName": "$(IntDir)",
+    "Optimization": "MaxSpeed",
+    "PrecompiledHeader": "NotUsing",
+    "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+    "RuntimeLibrary": "MultiThreadedDLL",
+    "ScanSourceForModuleDependencies": "true",
+    "SupportJustMyCode": "",
+    "TreatWarningAsError": "true",
+    "UseFullPaths": "false",
+    "WarningLevel": "Level4"
+  },
+  "report_driver_sha256": "3297644eb62da7eeba35f09efb636e5db876da52df5415de426a59479a8ffa5a",
+  "runner_cmake_sha256": "198f5faa4b9e642fbe7cc51853fbb99bec84d5a4710e5299db177b33d40d9fdf",
+  "sanitization": {
+    "original_build_evidence_sha256": {
+      "CMakeCXXCompiler.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+      "CMakeCache.txt": "fc2329df041b2ffae2208fce9c5a5b4cb0eaa0f76dcdb67d585cc4ae942163ce",
+      "build.log": "84f3fa3a15532e57e4011cc340b186afea3b88975b41ead5eef3831c5b17b91b",
+      "configure.log": "95b0b242e6dfcdcd8e537d528ce0213cff1c6dc10f63b92e0da1034280ab2618",
+      "release-target.vcxproj": "d76076dc8bba6c351983ca5a3ec6fe91304047d6800dcc2f5550691b6e708004"
+    },
+    "original_collection_sha256": "a708734dbba0947179683e5531e9dea913527f6d8b80ce64b54d4fe39ae7cc5b",
+    "original_commands_sha256": "f83f3bfd742f7ee60e971135e9e74e2f82dac8650ce8927d59fb29e015541925",
+    "policy": "Replace original absolute host roots with portable placeholders; preserve versions, flags, source identities and hashes. Published build-evidence hashes bind sanitized bytes; original hashes remain available without the private source bytes.",
+    "root_placeholders": {
+      "BUILD_ROOT": "Configured Release build directory",
+      "DEPENDENCY_ROOT": "Directory holding the recorded dependency sources",
+      "HARNESS_ROOT": "Checkout of the separately versioned measurement harness",
+      "MEASUREMENT_ROOT": "Parent directory holding the solver and Release build",
+      "PROGRAM_FILES_ROOT": "Machine-specific program installation prefix",
+      "SOURCE_ROOT": "Pinned clean solver checkout",
+      "VISUAL_STUDIO_ROOT": "Installed Visual Studio root; version is retained"
+    },
+    "schema": "csl.report-public-provenance/1"
+  }
+}
