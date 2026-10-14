@@ -144,6 +144,9 @@ class StrategyAReportContractTests(unittest.TestCase):
 
     def test_html_describes_the_strategy_a_scope(self):
         self.assertIn("Strategy A on the T-S01 profile", report.render_html(valid_record()))
+        page=report.render_html(valid_record())
+        self.assertIn("issues/66",page)
+        self.assertNotIn("issues/67",page)
 
     def test_source_report_identity_has_repository_fallback_links(self):
         tree,archive,label=report_data.artifact_links(report.REPORT_ID)

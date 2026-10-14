@@ -96,7 +96,7 @@ def render_html(record):
         '<h2>Evidence limits</h2><ul>'+limits+'</ul>',
         '<h2>Environment and reproduction evidence</h2><p>Machine, operating system, compiler, Release configuration, dependency pins, provider identity, system load observations, profiling attempt and all unavailable phase counters are retained in the machine-readable sidecars.</p>',
         '<p><a href="records.json">Typed report</a> · <a href="measurement-events.jsonl">Raw timing events</a> · <a href="trials.csv">Timing CSV</a> · <a href="measurement.json">Measurement and host evidence</a> · <a href="build-provenance.json">Build provenance</a> · <a href="scenarios.json">Scenario</a> · <a href="profile.json">Separate profile attempt</a></p>',
-        '<p>No Strategy A versus Strategy B comparison or performance ranking is made. This result is partial SYN-03 evidence and does not close issue <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/67">#67</a>.</p></body></html>'
+        '<p>No Strategy A versus Strategy B comparison or performance ranking is made. This result is partial SYN-03 evidence and does not close issue <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/66">#66</a>.</p></body></html>'
     ])
 
 if __name__=="__main__":
