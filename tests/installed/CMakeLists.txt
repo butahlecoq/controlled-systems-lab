@@ -281,7 +281,7 @@ set(installed_contract_headers
 foreach(header IN LISTS installed_contract_headers)
   string(MAKE_C_IDENTIFIER "${header}" header_name)
   set(source "${CMAKE_CURRENT_BINARY_DIR}/header-checks/${header_name}.cpp")
-  file(WRITE "${source}" "#include <csl/${header}>\n")
+  file(GENERATE OUTPUT "${source}" CONTENT "#include <csl/${header}>\n")
   add_library(installed_header_${header_name} OBJECT "${source}")
   target_link_libraries(installed_header_${header_name} PRIVATE CSL::contracts)
 endforeach()
