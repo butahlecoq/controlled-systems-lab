@@ -1377,6 +1377,91 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
     CHECK(scoped.retained.partial_or_candidate_family);
 }
 
+TEST_CASE("prepared strategy rejects malformed operation-rejection result combinations at the public boundary") {
+    enum class Malformation { missing_scoped_rejection, incompatible_termination, complete_claim_after_rejection };
+    class MalformedWorkspace final : public SynthesisWorkspace {
+        Malformation malformation_;
+    public:
+        explicit MalformedWorkspace(Malformation malformation) : malformation_(malformation) {}
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
+            const ExecutionContext&) override {
+            const auto id=problem.identity();
+            SynthesisResult result{Termination::operation_rejected,
+                {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{}};
+            if (malformation_!=Malformation::missing_scoped_rejection) {
+                result.stop=ScopedRequestRejection{
+                    RequestProvenance{{"generated/lp/7"},"lp",{"endpoint"},std::string{"1.0"},
+                        ModuleId{"endpoint"},std::string{"1.0"}},
+                    {{DiagnosticCode::unsupported,"lp.generated","provider rejected generated request"}},
+                    {},{false,false,0,false}};
+            }
+            if (malformation_==Malformation::incompatible_termination)
+                result.termination=Termination::completed;
+            if (malformation_==Malformation::complete_claim_after_rejection) {
+                const auto coordinates=problem.constraints().coordinates();
+                const FamilyIdentity identity{id,request,coordinates,{"malformed"},"1",{}};
+                const ClaimEvidence optimum{id,SymbolicArgument{"synthetic optimum","test fixture"}};
+                const CompleteOptimalFamily family{
+                    {coordinates,request.representation,std::make_shared<const JointRelationPayload>()},
+                    {optimum,{}},
+                    {identity,NumericalCoverageEvidence{"synthetic",request.numerical,{"fixture"},""}},
+                    Assurance::numerical};
+                result.complete_proposal=CompleteFamilyProposal{identity,family};
+            }
+            return result;
+        }
+    };
+
+    const auto check_rejected=[&](Malformation malformation,const std::string& expected_field,
+        DiagnosticCode expected_code) {
+        StrategyRegistry strategies;
+        REQUIRE_FALSE(strategies.add({{{"malformed"},"1"},
+            [](const StrategyRequest& request,const Requirements&) -> Capability {
+                Output output;output.family=request.family.target;return Offer{output};
+            },
+            [malformation](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+                return compose_strategy(std::get<CheckedPipeline<>>(check_pipeline()),
+                    [malformation](auto,const StrategyRequest&,const Requirements&) {
+                        return std::make_unique<MalformedWorkspace>(malformation);
+                    });
+            }}));
+        auto request=strategy_request();
+        request.configuration.strategy={"malformed"};
+        if (malformation==Malformation::complete_claim_after_rejection)
+            request.family.target=FamilyTarget::exact_optimal_relation;
+        Requirements requirements;
+        requirements.output.family=request.family.target;
+        auto prepared=strategies.prepare(request,requirements);
+        REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+        const auto answer=std::get<PreparedStrategy>(std::move(prepared)).create()->run(context());
+        REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+        const auto& result=std::get<SynthesisResult>(answer);
+        CHECK(result.termination==Termination::contract_rejected);
+        CHECK_FALSE(result.family.has_value());
+        REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+        const auto& failure=std::get<ContractValidationFailure>(result.stop);
+        REQUIRE(failure.diagnostics.size()==1);
+        CHECK(failure.diagnostics[0].code==expected_code);
+        CHECK(failure.diagnostics[0].field==expected_field);
+        if (malformation==Malformation::complete_claim_after_rejection) {
+            REQUIRE(std::holds_alternative<ScopedRequestRejection>(failure.source_stop));
+            const auto& rejection=std::get<ScopedRequestRejection>(failure.source_stop);
+            CHECK(rejection.request.request.value=="generated/lp/7");
+            CHECK(rejection.diagnostics[0].field=="lp.generated");
+        }
+    };
+
+    SUBCASE("operation_rejected without scoped request rejection") {
+        check_rejected(Malformation::missing_scoped_rejection,"result.stop",DiagnosticCode::invalid_claim);
+    }
+    SUBCASE("scoped request rejection under completed termination") {
+        check_rejected(Malformation::incompatible_termination,"result.stop",DiagnosticCode::invalid_claim);
+    }
+    SUBCASE("complete-family proposal after generated-request rejection") {
+        check_rejected(Malformation::complete_claim_after_rejection,"family.proposal",DiagnosticCode::unsupported);
+    }
+}
+
 TEST_CASE("public strategy rejects unbounded outcomes that retain a finite lower bound") {
     class ContradictoryOutcome final : public SynthesisWorkspace {
     public:
