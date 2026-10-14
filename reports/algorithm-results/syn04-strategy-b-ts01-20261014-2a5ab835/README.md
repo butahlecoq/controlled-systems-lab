@@ -1,0 +1,5 @@
+# SYN-04 registered Strategy B T-S01 result
+
+This measured bundle pins algorithm source `2a5ab835295dfd22f02b19d440bb8158267d985a` and harness `4fc8e28587a7fe0e4130f1cb435cf6502ba0e4e2`. It contains one warmup and seven measured public StrategyPort executions; all results passed the compiled T-S01 verifier and canonical relation checks. Performance conclusion: inconclusive because Windows denied sampled CPU stack profiling (0xc5585011), so no source-mapped limiter is known. This is not a comparison or speedup claim and does not close #67.
+
+Reproduce from a clean checkout with the exact dependency archive hashes in `build-provenance.json`: run `tooling/syn04/collect.py`, then `tooling/syn04/build_bundle.py`. The report page is generated from validated typed records.

@@ -1,0 +1,9 @@
+repetition,warmup,elapsed_ns,termination,outcome,result_disposition,registry_verified,assurance,canonical_relation_checked,completeness_verifier,completeness_verifier_version,status,consumed_result_marker,trajectory_objective,trajectory_max_residual,absolute_tolerance,relative_tolerance,residual_verifier,error
+0,True,1649900,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts01-analytic,1,passed,1805158144890476961,0,0,1e-08,1e-08,csl.trajectory.original,
+1,False,982800,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts01-analytic,1,passed,1805158144890476961,0,0,1e-08,1e-08,csl.trajectory.original,
+2,False,962500,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts01-analytic,1,passed,1805158144890476961,0,0,1e-08,1e-08,csl.trajectory.original,
+3,False,1059300,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts01-analytic,1,passed,1805158144890476961,0,0,1e-08,1e-08,csl.trajectory.original,
+4,False,1087100,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts01-analytic,1,passed,1805158144890476961,0,0,1e-08,1e-08,csl.trajectory.original,
+5,False,966900,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts01-analytic,1,passed,1805158144890476961,0,0,1e-08,1e-08,csl.trajectory.original,
+6,False,1010400,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts01-analytic,1,passed,1805158144890476961,0,0,1e-08,1e-08,csl.trajectory.original,
+7,False,972000,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts01-analytic,1,passed,1805158144890476961,0,0,1e-08,1e-08,csl.trajectory.original,

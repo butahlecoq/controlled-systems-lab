@@ -61,7 +61,7 @@ class StrategyBReportContractTests(unittest.TestCase):
 
     def test_schema_three_site_stages_and_hashes_the_offline_zip(self):
         catalog=ROOT/"reports/algorithm-results/catalog.json"
-        public_id="syn04-strategy-b-ts01-44a9e2b37ec933f71ad59a609d2e20733ac354c5c9ee642e17f0dfade1d4eb7e"
+        public_id=publication.adapt(ROOT/"reports/algorithm-results"/report.REPORT_ID).report_id
         with tempfile.TemporaryDirectory() as temporary:
             output=Path(temporary)/"site"
             report_site.stage(catalog,output,check=True)

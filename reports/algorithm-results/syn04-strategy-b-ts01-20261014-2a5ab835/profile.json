@@ -1,0 +1,73 @@
+{
+  "etl_path": null,
+  "process_samples": [
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 687831591843100,
+      "rss_bytes": 1798144
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 687831594005000,
+      "rss_bytes": 3072000
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 687831596132600,
+      "rss_bytes": 5386240
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 687831598224500,
+      "rss_bytes": 6836224
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 687831600737100,
+      "rss_bytes": 6680576
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 687831602810500,
+      "rss_bytes": 6737920
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 687831604884000,
+      "rss_bytes": 6340608
+    }
+  ],
+  "sampled_process_cpu_system_seconds_max": 0.0,
+  "sampled_process_cpu_user_seconds_max": 0.0,
+  "sampled_process_peak_rss_bytes": 6836224,
+  "separate_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "separate_stdout_sha256": "b9068dacf5014c599f289b96a9fe26e810e354ec2741835772791e4b16aa5215",
+  "separate_wall_ns": 18814200,
+  "separate_workload_return_code": 0,
+  "separate_workload_timed_out": false,
+  "wpr": {
+    "command": [
+      "wpr",
+      "-start",
+      "CPU",
+      "-filemode"
+    ],
+    "return_code": 3310899217,
+    "stderr": "\r\n\tFailed to enable the policy to profile system performance.\r\r\n\r\n\tProfile Id: CPU.Verbose.File\r\n\t\r\n\tError code: 0xc5585011\r\n\t\r\n\tFailed to enable the policy to profile system performance.\r\r\n\t\r\n\t\r\n",
+    "stdout": ""
+  }
+}

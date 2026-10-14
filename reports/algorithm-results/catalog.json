@@ -152,6 +152,18 @@
       "measured_scope": "42 verified measured trials across three small two-dimensional point clouds",
       "evidence_limits": "Descriptive paired timings only; no speedup claim or limiter profile; input-containment oracle uses numerical HiGHS LP checks",
       "zip_sha256": "165fe50a882e37334e30e3bd04f613b261fb801c540fe806304942ac146c361f"
+    },
+    {
+      "report_id": "syn04-strategy-b-ts01-3422fe6af929ff1a326b7d9b61699dd6a9499256ca5191ec71056934dc552633",
+      "report_kind": "syn04-strategy-b-ts01",
+      "source_report_id": "syn04-strategy-b-ts01-20261014-2a5ab835",
+      "payload_schema": "csl.syn04-strategy-b-ts01-report/1",
+      "payload_sha256": "9cd51606ae5a38e1a4c55a6142377b49a40ebcadaf2a9111cfbea1edf20ee530",
+      "native_payload_sha256": "9cd51606ae5a38e1a4c55a6142377b49a40ebcadaf2a9111cfbea1edf20ee530",
+      "source_commit": "2a5ab835295dfd22f02b19d440bb8158267d985a",
+      "measured_scope": "Exact T-S01 profile; one registered Strategy B; seven validated measured trials; performance conclusion inconclusive",
+      "evidence_limits": "Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.; The result reports Assurance::numerical; validated arithmetic assurance is unavailable.; This is one Strategy B measurement, not a comparison, speedup, application-scale, throughput, or scalability claim.; All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.; No source-mapped performance limiter was identified because WPR CPU stack profiling was denied by Windows policy.; Internal preparation, LP, QP, extraction, verifier and export timing counters are unavailable.",
+      "zip_sha256": "1b53f05e717999b7752151d3b68842978503ba577eddbafca3a3f620ddc56e97"
     }
   ]
 }

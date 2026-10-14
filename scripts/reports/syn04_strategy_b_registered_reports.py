@@ -1,14 +1,14 @@
 """Typed publication adapter for registered SYN-04 Strategy B records."""
 from __future__ import annotations
-import csv,hashlib,io,json
+import csv,hashlib,importlib.util,io,json
 from html import escape
 from pathlib import Path
 import sys
 
 import registered_reports as common
 ROOT=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(ROOT/"reports/algorithm-results/tooling/syn04"))
-import report
+REPORT_SPEC=importlib.util.spec_from_file_location("csl_syn04_strategy_b_report_contract",ROOT/"reports/algorithm-results/tooling/syn04/report.py")
+report=importlib.util.module_from_spec(REPORT_SPEC);sys.modules[REPORT_SPEC.name]=report;REPORT_SPEC.loader.exec_module(report)
 
 KIND="syn04-strategy-b-ts01"
 FILES={"README.md","build-provenance.json","commands.json","environment.json","index.html","measurement-events.jsonl","measurement.json","process-stderr.txt","profile.json","records.json","scenarios.json","trials.csv"}
