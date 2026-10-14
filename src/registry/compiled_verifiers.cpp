@@ -23,14 +23,14 @@ StrategyBRuntimeLineageReceipt::StrategyBRuntimeLineageReceipt(const StrategyReq
     std::shared_ptr<const ::csl::sets::SetData> feasible_output,
     std::shared_ptr<const ::csl::sets::SetData> extraction_input,
     std::shared_ptr<const ::csl::sets::SetData> extracted_output,
-    StrategyRegistration::CompleteFamilyVerifierKey verifier_binding,std::uint64_t attempt_id)
+    StrategyRegistration::CompleteFamilyVerifierKey verifier_binding)
     :binding_(binding),build_output_(std::move(build_output)),feasible_output_(std::move(feasible_output)),
      extraction_input_(std::move(extraction_input)),extracted_output_(std::move(extracted_output)),
-     verifier_binding_(std::move(verifier_binding)),attempt_id_(attempt_id) {}
+     verifier_binding_(std::move(verifier_binding)) {}
 
 bool StrategyBRuntimeLineageReceipt::matches(const StrategyRequest& request,const FamilyIdentity& identity,
     const StrategyRegistration::CompleteFamilyVerifierKey& verifier_binding) const {
-    if(attempt_id_==0||verifier_binding_.id.value.empty()||verifier_binding_.version.empty()||
+    if(verifier_binding_.id.value.empty()||verifier_binding_.version.empty()||
         verifier_binding_.id!=verifier_binding.id||verifier_binding_.version!=verifier_binding.version||
         !build_output_||!feasible_output_||!extraction_input_||!extracted_output_)return false;
     const auto feasible_metadata=feasible_output_->metadata();

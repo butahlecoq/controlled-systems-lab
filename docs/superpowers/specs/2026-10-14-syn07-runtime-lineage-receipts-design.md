@@ -2,13 +2,13 @@
 
 ## Goal
 
-Close the execution-provenance gap for the registered Strategy B T-S01 complete-family profile. A strategy that copies the expected transformation IDs into a proposal must not pass the complete-family gate unless the trusted library execution actually performed the required transformations for the same prepared request and solve attempt.
+Close the execution-provenance gap for the registered Strategy B T-S01 complete-family profile. A strategy that copies the expected transformation IDs into a proposal must not pass the complete-family gate unless the trusted library execution actually performed the required transformations for the same prepared request and retained artifacts in the current solve.
 
 ## Chosen module and seam
 
 Keep the public workflow (`StrategyRegistry::prepare`, `PreparedStrategy::create`, `run`) unchanged. Add a private compiled Strategy B T-S01 execution module behind that seam. It owns per-solve receipt state and observes the actual construction and extraction artifacts. `FamilyIdentity::lineage` remains a readable projection, not proof. Do not add a public recorder, caller-supplied digest, or arbitrary callback-based receipt API.
 
-The receipt binds immutable prepared problem content, effective family request, coordinate schema, selected strategy and verifier versions, and a fresh solve-attempt identity. The only accepted sequence is successful joint-feasible construction followed by optimal-level extraction from that exact retained artifact. The strategy cannot mint or edit receipts. Other strategies and profiles remain fail-closed under this mechanism.
+The receipt binds immutable prepared problem content, effective family request, coordinate schema, selected strategy and verifier versions, and the artifacts observed during its solve. Freshness follows the runner lifecycle: it clears stored receipt state at each `solve()` entry, creates a receipt only after successful extraction, and the verifier wrapper takes that receipt once for admission. The only accepted sequence is successful joint-feasible construction followed by optimal-level extraction from that exact retained artifact. The strategy cannot mint or edit receipts. Other strategies and profiles remain fail-closed under this mechanism.
 
 ## Proof separation and limits
 

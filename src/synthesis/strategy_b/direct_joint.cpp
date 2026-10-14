@@ -6,7 +6,6 @@
 #include "../../registry/runtime_lineage.hpp"
 #include "../../registry/strategy_b_lineage.hpp"
 #include <algorithm>
-#include <atomic>
 #include <limits>
 #include <numeric>
 #include <type_traits>
@@ -236,12 +235,6 @@ RequestProvenance scope(const ProgramIdentity& id,const registry::Provenance& pr
 RetainedEvidenceScope retained(const SynthesisResult& r) {
     return {r.objective.lower.has_value(),r.objective.upper.has_value(),r.incumbents.size(),r.family.has_value()};
 }
-std::uint64_t next_attempt_id() noexcept {
-    static std::atomic<std::uint64_t> next{1};
-    auto value=next.fetch_add(1,std::memory_order_relaxed);
-    if(value==0)value=next.fetch_add(1,std::memory_order_relaxed);
-    return value;
-}
 }
 namespace detail {
 class Ts01ExecutionRunner final : public SynthesisWorkspace, public registry::detail::RuntimeReceiptSource {
@@ -434,7 +427,7 @@ SynthesisResult detail::Ts01ExecutionRunner::solve(const problem::ResolvedProble
                 prepared_request_->strategy_version==strategy_version&&
                 registry::detail::strategy_b_ts01_profile_valid(p,*prepared_request_)) {
                 receipt_=registry::detail::StrategyBRuntimeLineageReceipt{*prepared_request_,build_artifact,
-                    feasible_artifact,feasible_artifact,std::move(extracted_artifact),*verifier_binding_,next_attempt_id()};
+                    feasible_artifact,feasible_artifact,std::move(extracted_artifact),*verifier_binding_};
             }
             result.outcome={p.identity(),MathematicalOutcome::optimal,derivation,{}};
             result.objective=optimum_evidence.bounds;

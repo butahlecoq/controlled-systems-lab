@@ -18,12 +18,11 @@ class StrategyBRuntimeLineageReceipt {
     std::shared_ptr<const sets::SetData> extraction_input_;
     std::shared_ptr<const sets::SetData> extracted_output_;
     StrategyRegistration::CompleteFamilyVerifierKey verifier_binding_;
-    std::uint64_t attempt_id_{};
 
     StrategyBRuntimeLineageReceipt(const StrategyRequest&,
         std::shared_ptr<const synthesis::strategy_b::JointProgram>,
         std::shared_ptr<const sets::SetData>,std::shared_ptr<const sets::SetData>,
-        std::shared_ptr<const sets::SetData>,StrategyRegistration::CompleteFamilyVerifierKey,std::uint64_t);
+        std::shared_ptr<const sets::SetData>,StrategyRegistration::CompleteFamilyVerifierKey);
     friend class ::csl::synthesis::strategy_b::detail::Ts01ExecutionRunner;
 public:
     StrategyBRuntimeLineageReceipt(const StrategyBRuntimeLineageReceipt&)=delete;
