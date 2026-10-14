@@ -36,6 +36,10 @@ double cost(const LoadedScenario& scenario, const Vector& state) {
 TEST_CASE("minimal LTI linear-objective template loads and has a literal transition and cost") {
     const auto scenario = load("minimal-lti-linear.json");
     CHECK(scenario.problem().model().horizon() == 1);
+    CHECK(scenario.metadata()->state_labels == std::vector<std::string>{"x"});
+    CHECK(scenario.metadata()->control_labels == std::vector<std::string>{"u"});
+    CHECK(scenario.metadata()->state_units == std::vector<std::string>{"dimensionless"});
+    CHECK(scenario.metadata()->control_units == std::vector<std::string>{"dimensionless"});
     CHECK(step(scenario, 0, {0}, {0.5}) == Vector{0.5});
     CHECK(cost(scenario, {0.5}) == doctest::Approx(0.5));
 }
@@ -43,6 +47,10 @@ TEST_CASE("minimal LTI linear-objective template loads and has a literal transit
 TEST_CASE("state-constrained quadratic template retains its horizon and authored state slices") {
     const auto scenario = load("state-constrained-quadratic.json");
     CHECK(scenario.problem().model().horizon() == 2);
+    CHECK(scenario.metadata()->state_labels == std::vector<std::string>{"x"});
+    CHECK(scenario.metadata()->control_labels == std::vector<std::string>{"u"});
+    CHECK(scenario.metadata()->state_units == std::vector<std::string>{"dimensionless"});
+    CHECK(scenario.metadata()->control_units == std::vector<std::string>{"dimensionless"});
     CHECK(scenario.problem().constraints().states()->size() == 3);
     const auto x1 = step(scenario, 0, {0}, {0.25});
     const auto x2 = step(scenario, 1, x1, {0.75});
@@ -54,6 +62,10 @@ TEST_CASE("state-constrained quadratic template retains its horizon and authored
 TEST_CASE("LTV residual-norm template evaluates every authored stage against a literal answer") {
     const auto scenario = load("ltv-residual-norm.json");
     CHECK(scenario.problem().model().horizon() == 2);
+    CHECK(scenario.metadata()->state_labels == std::vector<std::string>{"x"});
+    CHECK(scenario.metadata()->control_labels == std::vector<std::string>{"u"});
+    CHECK(scenario.metadata()->state_units == std::vector<std::string>{"dimensionless"});
+    CHECK(scenario.metadata()->control_units == std::vector<std::string>{"dimensionless"});
     const auto x1 = step(scenario, 0, {1}, {1});
     const auto x2 = step(scenario, 1, x1, {0});
     CHECK(x1 == Vector{2});

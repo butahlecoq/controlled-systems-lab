@@ -17,5 +17,11 @@
       { "kind": "box", "lower": [0], "upper": [2] }
     ]
   },
-  "objective": { "kind": "quadratic", "Q": [[2]], "linear": [-2], "offset": 1 }
+  "objective": { "kind": "quadratic", "Q": [[2]], "linear": [-2], "offset": 1 },
+  "metadata": {
+    "state_labels": ["x"],
+    "control_labels": ["u"],
+    "state_units": ["dimensionless"],
+    "control_units": ["dimensionless"]
+  }
 }

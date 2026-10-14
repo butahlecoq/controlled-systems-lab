@@ -11,5 +11,11 @@
   },
   "initial_state": [1],
   "controls": { "kind": "box", "lower": [0], "upper": [1] },
-  "objective": { "kind": "residual_norm", "L": [[1], [0]], "target": [5, 0] }
+  "objective": { "kind": "residual_norm", "L": [[1], [0]], "target": [5, 0] },
+  "metadata": {
+    "state_labels": ["x"],
+    "control_labels": ["u"],
+    "state_units": ["dimensionless"],
+    "control_units": ["dimensionless"]
+  }
 }
