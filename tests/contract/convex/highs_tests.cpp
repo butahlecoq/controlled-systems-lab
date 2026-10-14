@@ -72,6 +72,7 @@ TEST_CASE("registered convex adapter solves the minimal five-variable lifted int
     const auto result=accepted(worker->run(context()));
     INFO(result.raw_diagnostics);
     optimum(result,p,0);
+    CHECK(result.raw_diagnostics.find("native.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b")!=std::string::npos);
     CHECK(result.raw_diagnostics.find("phase.qp.attempt1=optimal_but_original_checks_rejected")!=std::string::npos);
     CHECK(result.raw_diagnostics.find("phase.qp.attempt1.check.stationarity.violation=2")!=std::string::npos);
     CHECK(result.raw_diagnostics.find("phase.qp.attempt1.check.rows.violation=0")!=std::string::npos);

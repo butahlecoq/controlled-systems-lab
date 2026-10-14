@@ -54,6 +54,7 @@ TEST_CASE("registered native triangle reports literal optimum and independent re
     CHECK(result.termination == Termination::completed);
     CHECK(result.outcome.value == MathematicalOutcome::optimal);
     cost(result, program, -2);
+    CHECK(result.raw_diagnostics.find("native.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b") != std::string::npos);
     REQUIRE(result.primal->size() == 2);
     CHECK((*result.primal)[0] == 0);
     CHECK((*result.primal)[1] == 1);

@@ -22,6 +22,7 @@ TEST_CASE("literal catalogue uses the actual registered LP and owns the returned
         CHECK(trial.attempt->state == csl::SolveAttemptState::returned_result);
         CHECK(trial.attempt->stamp.program().identity() == fixtures[i].input.identity);
         CHECK(trial.result->raw_diagnostics.find("native_run=true") != std::string::npos);
+        CHECK(trial.result->raw_diagnostics.find("native.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b") != std::string::npos);
         CHECK(trial.result->raw_diagnostics.find("model.reused=false") != std::string::npos);
         if (i < 3) {
             REQUIRE(trial.objective.has_value());

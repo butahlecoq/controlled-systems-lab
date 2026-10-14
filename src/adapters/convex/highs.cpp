@@ -323,6 +323,7 @@ class Workspace final : public ConvexWorkspace {
         auto result=result_for(p); Capture capture{c,{},{}}; std::ostringstream raw;
         raw<<std::setprecision(17)<<"adapter.version="<<version<<"\nnative.version="<<highsVersion()
             <<"\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
+            <<"\nnative.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b"
             <<"\nprogram.original="<<p.identity().program.value<<"\nprogram.solver="<<p.quadratic_program().identity().program.value
             <<"\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096"
             <<"\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off"

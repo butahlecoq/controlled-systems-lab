@@ -7,6 +7,19 @@ function(csl_add_private_highs)
     URL_HASH SHA256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
     SOURCE_SUBDIR csl-no-build)
   FetchContent_MakeAvailable(csl_highs)
+  # Keep the upstream archive/hash pinned and apply this narrowly scoped
+  # downstream initialization fix to the fetched source before compiling it.
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}"
+      "-DSOURCE_FILE=${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h"
+      "-DPATCH_FILE=${PROJECT_SOURCE_DIR}/patches/highs-v1.11.0-hvectorbase-initialization.patch"
+      -P "${PROJECT_SOURCE_DIR}/cmake/ApplyPinnedHighsPatch.cmake"
+    RESULT_VARIABLE patch_result
+    OUTPUT_VARIABLE patch_output
+    ERROR_VARIABLE patch_error)
+  if(NOT patch_result EQUAL 0)
+    message(FATAL_ERROR "Failed to apply pinned HiGHS downstream patch: ${patch_output}${patch_error}")
+  endif()
   set(FAST_BUILD ON)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_CXX ON)

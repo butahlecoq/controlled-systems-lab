@@ -1,0 +1,42 @@
+--- a/highs/util/HVectorBase.h
++++ b/highs/util/HVectorBase.h
+@@ -37,17 +37,17 @@
+   void clear();
+   void clearScalars();
+
+-  HighsInt size;           //!< Dimension of the vector
+-  HighsInt count;          //!< Number of nonzeros
++  HighsInt size = 0;       //!< Dimension of the vector
++  HighsInt count = 0;      //!< Number of nonzeros
+   vector<HighsInt> index;  //!< Packed indices of nonzeros
+   vector<Real> array;      //!< Full-length array of values
+
+-  double synthetic_tick;  //!< Synthetic clock for operations with this vector
++  double synthetic_tick = 0;  //!< Synthetic clock for operations with this vector
+
+   // For update
+   vector<char> cwork;       //!< char working buffer for UPDATE
+   vector<HighsInt> iwork;   //!< integer working buffer for UPDATE
+-  HVectorBase<Real>* next;  //!< Allows vectors to be linked for PAMI
++  HVectorBase<Real>* next = nullptr;  //!< Allows vectors to be linked for PAMI
+
+   /*
+    * Zero values in Vector.array that exceed kHighsTiny in magnitude
+    */
+   void tight();
+
+   /**
+    * @brief Packing (if packFlag set): Pack values/indices in Vector.array into
+    * packValue/Index
+    *
+    */
+   void pack();
+
+@@ -68,8 +68,8 @@
+    */
+   void reIndex();
+
+-  bool packFlag;               //!< Flag to indicate whether to pack or not
+-  HighsInt packCount;          //!< Number of nonzeros packed
++  bool packFlag = false;       //!< Flag to indicate whether to pack or not
++  HighsInt packCount = 0;      //!< Number of nonzeros packed

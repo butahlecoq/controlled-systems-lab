@@ -396,7 +396,15 @@ TEST_CASE("T-S02 constant objective preserves histories at different terminal po
     CHECK(take(optimization::evaluate(query.problem.objective(),*history.terminal->optimization->primal))==7);
 }
 TEST_CASE("T-S03 singular A keeps free earlier controls with a unique terminal minimizer") {
+    // Reproduce an ordinary preceding Strategy A call that exits at the late
+    // terminal provider boundary, then exercise the real T-S03 user result.
+    const auto rejected=run(request(integrator()),true);
+    CHECK(rejected.termination==Termination::operation_rejected);
+    REQUIRE(rejected.family);
+    const auto& rejected_history=payload(rejected);
+    CHECK(contains(rejected_history.history.relation,{0,1,2,1,1}));
     auto result=run(request(integrator(false,true)));const auto& history=payload(result);
+    CHECK(result.termination==Termination::completed);
     CHECK(contains(history.history.relation,{0,0,1,0,1}));
     CHECK(contains(history.history.relation,{0,1,1,1,1}));
     CHECK_FALSE(contains(history.history.relation,{0,1,0,1,0}));
