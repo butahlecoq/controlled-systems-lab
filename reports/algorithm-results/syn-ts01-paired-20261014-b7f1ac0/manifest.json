@@ -1,0 +1,21 @@
+{
+  "files": {
+    "README.md": "915dbe5632e1c5b8cd6cd751addccece4232e37be1508c144f79dac2e9a7826b",
+    "build-provenance.json": "6e0def364599f5d9c3d5c3428573f498405845ff55efe2647d8e3cac1b903b21",
+    "commands.json": "dfea07591da15f8944c9c862042d1a037d56193f0a71f3b0bec894838ca11402",
+    "environment.json": "546558e68cc93f03f7c319ba3e214ec29762a4de41a0f42a363b874ccd4a30e7",
+    "index.html": "d7996d79d6e8634e6b27cf0c26acc7095c40d1528885e7a9d49792db6e9cbf4d",
+    "limiter-profile.json": "ed156f3a1bc5a51022526b13e07316959f8605aeae77a0f893bfa4fb1e847f42",
+    "measurement-events.jsonl": "f66e15953bb7bc0c235941465ad49cc0034fd1a4eb5c6a19d214addbd4856639",
+    "performance.svg": "78a0085540e138d92addb977a8b2c2deba061167f3318760b6b02994ee2d8a43",
+    "process-run.json": "93dfe1d557cf8fe5562760e6cc20280ca1c63a64cd93c0f4b73ad0ac985a5dce",
+    "process-stderr.bin": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "process-stdout.bin": "b076e535fa91cae62f1c4638abf5d14887489f31e7460b29cd351fc0a129a029",
+    "records.json": "4be448bb69baa4ca6af60a9f48d047d0cda97e8c97c7facb2faeb5015dc8de93",
+    "scenario.json": "f9f067beb75288884c79133d2c81e4578f9de445f03eca7f6b697c5486681c04",
+    "trials.csv": "4a28be2ea13c688e6dc1b161ec9f443302790bbf7fdf382765fec04c5fc28f52",
+    "validation.json": "628bcf571a7f191042329c7f4f414ae1c659a838700cb3c5207ee0f33f5e0d24"
+  },
+  "report_id": "syn-ts01-paired-20261014-b7f1ac0",
+  "schema": "csl.paired-ts01-bundle-manifest/1"
+}

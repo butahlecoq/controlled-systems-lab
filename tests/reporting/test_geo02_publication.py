@@ -92,6 +92,33 @@ class Geo02PublicationTests(unittest.TestCase):
                          "8f2fe77d30b69a0a314a7cd9dbe69342d2d5e9dde6eccc891afafcde04e578a9")
         self.assertIn("Full candidate cloud retained", item.evidence_limits)
 
+    def test_latest_published_geo02_url_and_archive_remain_immutable(self):
+        root = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results"
+        bundle = root / "geo02-20261013T061151Z-338ff7d1d63c"
+        item = geo02.adapt(bundle)
+        catalogue = json.loads((root / "catalog.json").read_text(encoding="utf-8"))
+        row = next(report for report in catalogue["reports"] if report.get("source_report_id") == bundle.name)
+        archive_path = root / (item.report_id + ".zip")
+
+        self.assertEqual(item.report_id, "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754")
+        self.assertEqual(row["report_id"], item.report_id)
+        self.assertEqual(hashlib.sha256(archive_path.read_bytes()).hexdigest(), row["zip_sha256"])
+        self.assertEqual(geo02.offline_zip(bundle, item), archive_path.read_bytes())
+
+        artifacts = geo02.publication_artifacts(bundle, item)
+        with zipfile.ZipFile(archive_path) as archive:
+            self.assertEqual(archive.testzip(), None)
+            for name, content in artifacts.items():
+                self.assertEqual(archive.read(item.report_id + "/" + name), content, name)
+
+        with tempfile.TemporaryDirectory() as temp:
+            isolated_bundle = Path(temp) / bundle.name
+            isolated_bundle.mkdir()
+            corrupt_archive = Path(temp) / archive_path.name
+            corrupt_archive.write_bytes(archive_path.read_bytes() + b"tampered")
+            with self.assertRaisesRegex(ValueError, "archive digest mismatch"):
+                geo02.offline_zip(isolated_bundle, item)
+
     def test_source_identity_is_digest_bound(self):
         record = fixture_record()
         record["report_id"] = "geo02-20261013T120000Z-000000000000"

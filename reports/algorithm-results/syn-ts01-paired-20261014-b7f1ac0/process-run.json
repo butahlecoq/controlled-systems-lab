@@ -1,0 +1,21 @@
+{
+  "algorithm_return_code": 0,
+  "command": [
+    "registered_synthesis_comparison.exe",
+    "--measure",
+    "two-stage-integrator.json",
+    "measurement-events.jsonl"
+  ],
+  "ended_utc": "2026-10-14T18:23:17.753772+00:00",
+  "events_sha256": "f66e15953bb7bc0c235941465ad49cc0034fd1a4eb5c6a19d214addbd4856639",
+  "external_wall_ns": 67192500,
+  "launcher_exit_code": 1,
+  "record_count": 17,
+  "schema": "csl.paired-ts01-process-run/1",
+  "started_utc": "2026-10-14T18:23:17.686565+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_equals_events_after_crlf_normalization": true,
+  "stdout_equals_events_exactly": false,
+  "stdout_sha256": "b076e535fa91cae62f1c4638abf5d14887489f31e7460b29cd351fc0a129a029",
+  "wrapper_exit_reason": "Incorrect byte-for-byte stdout/event-file comparison ignored CRLF conversion on Windows; the preserved streams differ only by CRLF-to-LF normalization."
+}
