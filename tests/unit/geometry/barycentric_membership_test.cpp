@@ -89,6 +89,8 @@ TEST_CASE("square hull reduction preserves analytic support and every extreme po
     REQUIRE(result.status == geometry::ReductionStatus::complete);
     for (std::size_t extreme = 0; extreme < 4; ++extreme)
         CHECK(std::find(result.retained.begin(), result.retained.end(), extreme) != result.retained.end());
+    CHECK(std::find(result.retained.begin(), result.retained.end(), 4) == result.retained.end());
+    CHECK(std::find(result.retained.begin(), result.retained.end(), 5) == result.retained.end());
 
     const std::array<Vector, 8> directions{{
         {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}
