@@ -1,0 +1,42 @@
+from pathlib import Path
+import argparse
+import html
+import json
+
+parser=argparse.ArgumentParser()
+parser.add_argument('--records',type=Path,required=True)
+parser.add_argument('--out',type=Path,required=True)
+args=parser.parse_args()
+record=json.loads(args.records.read_text(encoding='utf-8'))
+args.out.parent.mkdir(parents=True,exist_ok=True)
+summary=record['summary']
+max_value=max((row['median_ns'] or 1 for row in summary),default=1)
+colors={'baseline':'#4976a8','basis-reuse':'#d27b35'}
+svg=['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 310" role="img" aria-label="Median measured reducer duration by fixture and method"><style>text{font:14px sans-serif}</style>']
+for i,row in enumerate(summary):
+    y=35+i*43
+    width=round((row['median_ns'] or 0)/max_value*640)
+    label=html.escape(f"{row['case_id']} / {row['method']}")
+    svg.append(f'<text x="8" y="{y+15}">{label}</text>')
+    svg.append(f'<rect x="230" y="{y}" width="{width}" height="22" fill="{colors.get(row["method"],"#777")}"/>')
+    svg.append(f'<text x="{240+width}" y="{y+16}">{row["median_ns"]/1e6:.3f} ms; n={row["successes"]}</text>')
+svg.append('</svg>')
+svg_text=''.join(svg)
+args.out.with_name('latency.svg').write_text(svg_text,encoding='utf-8')
+labels={'median_membership_lp_calls':'Membership LP calls (excludes Phase-I solve)','median_basis_solves':'Phase-I basis solves'}
+header=''.join(f'<th>{html.escape(labels.get(key,key))}</th>' for key in summary[0])
+body=''.join('<tr>'+''.join(f'<td>{html.escape(str(row[key]))}</td>' for key in row)+'</tr>' for row in summary)
+complexity=record['complexity']
+page=(
+'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">'
+'<title>OPT-06 basis-reuse results</title><style>body{font:16px system-ui;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#202a35}'
+'table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #ccd3da;padding:.45rem;text-align:left}th{background:#eef2f6}code{overflow-wrap:anywhere}.note{background:#f3f6f8;padding:1rem}svg{max-width:100%;height:auto}</style></head><body>'
+'<h1>OPT-06: within-solve basis-reuse hull classification</h1><p>Descriptive Release measurements for one implementation and three small 2D fixtures. No speedup or general scaling claim is made.</p>'
+'<div class="note"><b>Measured source commit:</b> <code>'+html.escape(record['code_commit'])+'</code><br><b>Evidence:</b> '+str(record['process']['measured_rows'])+' measured rows, '+str(record['process']['failures'])+' failed rows; no separate limiter profile was collected.<br><b>Timing scope:</b> '+html.escape(record['environment']['timing_scope'])+'.</div>'
+'<h2>Median durations</h2>'+svg_text+'<p><a href="latency.svg">Standalone SVG chart</a></p>'
+'<h2>Per-method summary</h2><table><thead><tr>'+header+'</tr></thead><tbody>'+body+'</tbody></table>'
+'<h2>Complexity and representation</h2><p>'+html.escape(complexity['representation'])+'</p><p>'+html.escape(complexity['work'])+'</p>'
+'<h2>Evaluation plan</h2><p>'+html.escape(record['evaluation_plan'])+'</p>'
+'<h2>Evidence and limits</h2><p>'+html.escape(record['oracle'])+'</p><p>Hardware/compiler/build details and all raw rows are retained in <a href="records.json">records.json</a>, <a href="trials.csv">trials.csv</a>, <a href="summary.csv">summary.csv</a>, <a href="raw-stdout.jsonl">raw stdout JSONL</a>, <a href="raw-stderr.txt">raw stderr</a>, and the sanitized build log. LP/pivot/bulk counters describe operations, not elapsed-time components.</p>'
+'<p>The fixtures are small and do not model the fuel-consumption workload or establish production workload scaling. The timings are descriptive and inconclusive.</p></body></html>')
+args.out.write_text(page,encoding='utf-8')

@@ -14,6 +14,7 @@ import zipfile
 OPT_TOP_FILES = {"README.md", "analyze_profile.py", "collect.py", "index.html", "latency.svg", "records.json", "render_saved.py", "summary.csv", "test_validate_report.py", "trials.csv", "validate_report.py"}
 OPT_NESTED_FILES = {"evidence/accepted-001/build-log-sanitized.txt", "evidence/accepted-001/concurrent-work.txt", "evidence/accepted-001/process-stderr.txt", "evidence/accepted-001/process-stdout.jsonl", "evidence/accepted-001/records.json", "evidence/accepted-001/summary.csv", "evidence/accepted-001/trials.csv", "evidence/accepted-002/build-log-sanitized.txt", "evidence/accepted-002/build-provenance.json", "evidence/accepted-002/concurrent-work.txt", "evidence/accepted-002/hull_measure.cpp", "evidence/accepted-002/process-stderr.txt", "evidence/accepted-002/process-stdout.jsonl", "evidence/accepted-002/records.json", "evidence/accepted-002/summary.csv", "evidence/accepted-002/trials.csv", "harness/CMakeLists.txt", "harness/hull_measure.cpp", "profile/README.md", "profile/final/profile-stderr.txt", "profile/final/profile-summary.jsonl", "profile/profile-stderr.txt", "profile/raw-profile.jsonl", "profile/target-process-samples.csv", "profile/target-process-samples.json"}
 GEO_FILES = {"README.md", "build-provenance.txt", "environment.json", "index.html", "latency.svg", "measurement-command.txt", "process-stderr.txt", "profile.txt", "raw-driver-output.csv", "raw-events.jsonl", "records.json", "scenarios.json", "summary.csv", "trials.csv"}
+LEGACY_REGISTERED_PUBLISHER_SHA256 = "7c6d9913396b1f8a2dd8d74e14a37536b659bc7552c0a5d0d3ed85fbb801793a"
 
 
 @dataclass(frozen=True)
@@ -44,6 +45,58 @@ def _adapt_payload(record):
     schema = record.get("schema")
     rid = record.get("report_id")
     if schema == "csl.hull-benchmark-records/1":
+        if re.fullmatch(r"opt06-basis-reuse-\d{8}-[0-9a-f]{8}-r2", str(rid)):
+            trials = record.get("trials")
+            fixtures = record.get("fixtures")
+            summary = record.get("summary")
+            if not isinstance(trials, list) or len(trials) != 48 or not isinstance(fixtures, list) or not isinstance(summary, list):
+                raise ValueError("OPT-06 requires the frozen 48-row accepted collection")
+            points = {row.get("case_id"): row.get("points") for row in fixtures if isinstance(row, dict)}
+            expected = {"permuted": 10, "degenerate": 7, "interior-basis": 5}
+            if points != expected or len(summary) != 6:
+                raise ValueError("OPT-06 fixture or summary catalog differs")
+            measured = [trial for trial in trials if not trial.get("warmup")]
+            from collections import Counter
+            groups = Counter((trial.get("case_id"), trial.get("method")) for trial in measured)
+            expected_groups = {(case, method) for case in expected for method in ("baseline", "basis-reuse")}
+            if len(measured) != 42 or groups != {key: 7 for key in expected_groups}:
+                raise ValueError("OPT-06 requires seven measured pairs per fixture and method")
+            for trial in trials:
+                case, method = trial.get("case_id"), trial.get("method")
+                ids = trial.get("retained_points")
+                if (case not in expected or method not in ("baseline", "basis-reuse") or trial.get("status") != "complete"
+                        or trial.get("verified") is not True or trial.get("output_ids_valid") is not True
+                        or trial.get("contains_all_inputs") is not True or not isinstance(ids, list) or not ids
+                        or len(ids) != len(set(ids)) or any(type(i) is not int or not 0 <= i < expected[case] for i in ids)
+                        or trial.get("retained") != len(ids)):
+                    raise ValueError("OPT-06 trial failed completion, oracle, or point-ID validation")
+            interior = [trial for trial in measured if trial["case_id"] == "interior-basis"]
+            if any(0 not in trial.get("basis_points", []) or 0 not in trial["retained_points"] for trial in interior if trial["method"] == "basis-reuse"):
+                raise ValueError("OPT-06 structural interior-basis evidence missing")
+            if not all(trial["status"] == "complete" for trial in interior if trial["method"] == "baseline"):
+                raise ValueError("OPT-06 interior baseline incomplete")
+            for row in summary:
+                group = [trial for trial in measured if (trial["case_id"], trial["method"]) == (row.get("case_id"), row.get("method"))]
+                times = [trial["elapsed_ns"] for trial in group]
+                if len(group) != 7 or row.get("attempts") != 7 or row.get("successes") != 7 or row.get("failures") != 0:
+                    raise ValueError("OPT-06 summary group does not match trials")
+                if (row.get("median_ns") != statistics.median(times) or row.get("min_ns") != min(times)
+                        or row.get("max_ns") != max(times)):
+                    raise ValueError("OPT-06 timing summary differs from trials")
+                for field, trial_field in (("median_membership_lp_calls", "lp_calls"), ("median_basis_solves", "basis_solves"),
+                                           ("median_pivots", "pivots"), ("median_degenerate_pivots", "degenerate_pivots"),
+                                           ("median_bulk_candidates", "bulk_candidates"), ("median_bulk_removals", "bulk_removals")):
+                    if row.get(field) != statistics.median([trial[trial_field] for trial in group]):
+                        raise ValueError("OPT-06 counter summary differs from trials")
+            code_commit = record.get("code_commit", "")
+            if not re.fullmatch(r"[0-9a-f]{40}", str(code_commit)) or not rid.endswith(code_commit[:8] + "-r2"):
+                raise ValueError("OPT-06 measured source identity mismatch")
+            if not record.get("complexity", {}).get("representation") or not record.get("complexity", {}).get("work") or not record.get("evaluation_plan"):
+                raise ValueError("OPT-06 complexity/evaluation contract missing")
+            return PublicationRecord("opt06-basis-reuse", rid, _digest(record), code_commit,
+                "42 verified measured trials across three small two-dimensional point clouds",
+                "Descriptive paired timings only; no speedup claim or limiter profile; input-containment oracle uses numerical HiGHS LP checks",
+                payload_schema=schema, source_report_id=rid)
         if not re.fullmatch(r"opt05-hull-\d{8}-[0-9a-f]{8}", str(rid)):
             raise ValueError("unsafe OPT-05 report ID")
         trials = record.get("trials")
@@ -139,7 +192,7 @@ def adapt(bundle):
     result = adapt_payload(record)
     if bundle.name != (result.source_report_id or result.report_id):
         raise ValueError("registered source bundle identity mismatch")
-    if result.kind == "opt05-hull":
+    if result.kind in ("opt05-hull", "opt06-basis-reuse"):
         listed = {}
         for line in (bundle / "manifest.sha256").read_text(encoding="utf-8").splitlines():
             match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9_./-]+)", line)
@@ -151,9 +204,13 @@ def adapt(bundle):
         if manifest.get("schema") != "csl.geo03-report-manifest/1" or manifest.get("report_id") != result.report_id:
             raise ValueError("GEO-03 manifest identity mismatch")
         listed = manifest.get("files", {})
-    if result.kind == "opt05-hull":
+    if result.kind in ("opt05-hull", "opt06-basis-reuse"):
         allowed=OPT_TOP_FILES|OPT_NESTED_FILES
-        if not set(listed)<=allowed or not set(OPT_TOP_FILES)-{"test_validate_report.py"}<=set(listed) or not OPT_NESTED_FILES<=set(listed):
+        if result.kind == "opt06-basis-reuse":
+            safe_names = all(re.fullmatch(r"(?:README\.md|index\.html|latency\.svg|measurement-attestation\.json|records\.json|raw-(?:stdout\.jsonl|stderr\.txt)|release-build-log-sanitized\.txt|summary\.csv|trials\.csv|harness/(?:manifest\.sha256|CMakeLists\.txt|collect\.py|opt06_measure\.cpp|package\.py|render\.py|validate\.py)|evidence/manifest\.sha256|evidence/(?:accepted-002|failed-attempts(?:/failed-attempt-[0-9]{3}|/failed-attempt-collector-[0-9]{3})?|superseded(?:/superseded-[A-Za-z0-9-]+)?)/(?:README\.md|index\.html|latency\.svg|manifest\.sha256|records\.json|raw-(?:stdout\.jsonl|stderr\.txt)|release-build-log-sanitized\.txt|summary\.csv|trials\.csv))", name) for name in listed)
+            if not safe_names or not set(listed) or not {"README.md", "index.html", "latency.svg", "records.json", "raw-stdout.jsonl", "raw-stderr.txt", "summary.csv", "trials.csv", "release-build-log-sanitized.txt", "harness/opt06_measure.cpp", "harness/collect.py", "harness/render.py", "harness/validate.py", "harness/package.py", "evidence/accepted-002/records.json", "evidence/accepted-002/raw-stdout.jsonl", "evidence/accepted-002/trials.csv"} <= set(listed):
+                raise ValueError("OPT-06 registered inventory pattern mismatch")
+        elif not set(listed)<=allowed or not set(OPT_TOP_FILES)-{"test_validate_report.py"}<=set(listed) or not OPT_NESTED_FILES<=set(listed):
             raise ValueError("OPT-05 registered inventory pattern mismatch")
         expected_files=set(listed)|{"manifest.sha256","bundle.zip","bundle.zip.sha256"}
     elif set(listed) != GEO_FILES:
@@ -172,7 +229,7 @@ def adapt(bundle):
         if relative.is_absolute() or ".." in relative.parts or any(part.is_symlink() for part in [bundle, *(bundle / Path(*relative.parts[:i]) for i in range(1, len(relative.parts)))]) or not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError("unsafe or tampered registered bundle file: " + name)
     _validate_saved_csv(bundle, record, result.kind)
-    if result.kind == "opt05-hull":
+    if result.kind in ("opt05-hull", "opt06-basis-reuse"):
         _validate_opt05_bundle_zip(bundle, listed)
     public_id = _publication_id(bundle, result.source_report_id, actual_files)
     return PublicationRecord(result.kind, public_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema, source_report_id=result.source_report_id)
@@ -183,16 +240,26 @@ def _publication_id(bundle, source_id, source_files):
     # inventory, including native manifests/ZIPs, introduces no digest cycle.
     # This module owns the staged page, envelope, manifest and offline ZIP.
     publisher_source = Path(__file__).read_text(encoding="utf-8").replace("\r\n", "\n").encode("utf-8")
+    publisher_digest = (LEGACY_REGISTERED_PUBLISHER_SHA256 if source_id.startswith(("opt05-hull-", "geo03-"))
+                        else hashlib.sha256(publisher_source).hexdigest())
     identity = {
         "schema": "csl.registered-publication-identity/1",
         "source_report_id": source_id,
         "source_files": {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(source_files)},
-        "publisher_sha256": hashlib.sha256(publisher_source).hexdigest(),
+        "publisher_sha256": publisher_digest,
     }
     return source_id.rsplit("-", 1)[0] + "-" + _digest(identity)
 
 
 def _validate_saved_csv(bundle, record, kind):
+    if kind == "opt06-basis-reuse":
+        trial_fields = ("round", "case_id", "method", "warmup", "elapsed_ns", "status", "verified", "output_ids_valid", "contains_all_inputs", "lp_calls", "basis_solves", "pivots", "degenerate_pivots", "bulk_candidates", "bulk_removals", "retained", "fallback", "retained_points", "basis_points")
+        trials = [{field: json.dumps(trial[field]) if field in ("retained_points", "basis_points") else trial[field] for field in trial_fields} for trial in record["trials"]]
+        summary_fields = ("case_id", "method", "attempts", "successes", "failures", "median_ns", "min_ns", "max_ns", "median_membership_lp_calls", "median_basis_solves", "median_pivots", "median_degenerate_pivots", "median_bulk_candidates", "median_bulk_removals")
+        summary = [{field: row[field] for field in summary_fields} for row in record["summary"]]
+        _compare_csv(bundle / "trials.csv", trial_fields, trials)
+        _compare_csv(bundle / "summary.csv", summary_fields, summary)
+        return
     if kind == "opt05-hull":
         trial_fields = ("case_id", "round", "points", "warmup", "elapsed_ns", "status", "verified", "lp_calls", "attempts", "removed", "retained")
         outcome_fields = ("feasible", "infeasible", "unsupported", "stopped", "numerical_failure", "malformed_result")
@@ -265,9 +332,13 @@ def render_page(bundle, publication):
     links = [f'<a href="{escape(name, quote=True)}">{escape(name)}</a>' for name in publication.files if name in {"records.json", "trials.csv", "summary.csv", "latency.svg"}]
     record=json.loads((bundle/"records.json").read_text(encoding="utf-8"))
     if publication.kind=="geo03-hv": record=record["payload"]
-    if publication.kind=="opt05-hull":
-        rows=''.join('<tr><td>'+escape(str(row["case_id"]))+'</td><td>'+str(row["points"])+'</td><td>'+str(row["attempts"])+'</td><td>'+str(row["failures"])+'</td><td>'+f'{row["median_ns"]:,}'+'</td><td>'+f'{row["min_ns"]:,}'+'</td><td>'+f'{row["max_ns"]:,}'+'</td><td>'+str(row["median_lp_calls"])+'</td></tr>' for row in record["summary"])
-        table='<table><thead><tr><th>Case</th><th>Points</th><th>Attempts</th><th>Failures</th><th>Median ns</th><th>Min ns</th><th>Max ns</th><th>Median LP calls</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    if publication.kind in ("opt05-hull", "opt06-basis-reuse"):
+        if publication.kind == "opt06-basis-reuse":
+            rows=''.join('<tr><td>'+escape(str(row["case_id"]))+'</td><td>'+escape(str(row["method"]))+'</td><td>'+str(row["attempts"])+'</td><td>'+str(row["failures"])+'</td><td>'+f'{row["median_ns"]:,}'+'</td><td>'+f'{row["min_ns"]:,}'+'</td><td>'+f'{row["max_ns"]:,}'+'</td><td>'+str(row["median_membership_lp_calls"])+'</td><td>'+str(row["median_basis_solves"])+'</td><td>'+str(row["median_pivots"])+'</td><td>'+str(row["median_bulk_removals"])+'</td></tr>' for row in record["summary"])
+            table='<table><thead><tr><th>Case</th><th>Method</th><th>Trials</th><th>Failures</th><th>Median ns</th><th>Min ns</th><th>Max ns</th><th>Membership LP calls (excluding Phase-I)</th><th>Phase-I solves</th><th>Pivots</th><th>Bulk removals</th></tr></thead><tbody>'+rows+'</tbody></table>'
+        else:
+            rows=''.join('<tr><td>'+escape(str(row["case_id"]))+'</td><td>'+str(row["points"])+'</td><td>'+str(row["attempts"])+'</td><td>'+str(row["failures"])+'</td><td>'+f'{row["median_ns"]:,}'+'</td><td>'+f'{row["min_ns"]:,}'+'</td><td>'+f'{row["max_ns"]:,}'+'</td><td>'+str(row["median_lp_calls"])+'</td></tr>' for row in record["summary"])
+            table='<table><thead><tr><th>Case</th><th>Points</th><th>Attempts</th><th>Failures</th><th>Median ns</th><th>Min ns</th><th>Max ns</th><th>Median LP calls</th></tr></thead><tbody>'+rows+'</tbody></table>'
     else:
         rows=''.join('<tr><td>'+escape(row["fixture"])+'</td><td>'+escape(row["direction"])+'</td><td>'+str(row["trials"])+'</td><td>'+str(row["failures"])+'</td>'+''.join('<td>'+f'{row[metric][key]:,}'+'</td>' for metric in ("run_ns","total_ns") for key in ("median","min","max"))+'</tr>' for row in record["summary"])
         table='<table><thead><tr><th>Fixture</th><th>Direction</th><th>Trials</th><th>Failures</th>'+''.join('<th>'+metric.replace("_ns", "")+' '+key+' ns</th>' for metric in ("run_ns","total_ns") for key in ("median","min","max"))+'</tr></thead><tbody>'+rows+'</tbody></table>'
@@ -284,7 +355,7 @@ def _json_bytes(value):
 
 def publication_envelope(bundle, publication):
     record = _json(Path(bundle) / "records.json")
-    payload = record if publication.kind in ("lp", "convex", "opt05-hull") else record["payload"]
+    payload = record if publication.kind in ("lp", "convex", "opt05-hull", "opt06-basis-reuse") else record["payload"]
     envelope = {
         "schema": "csl.algorithm-report-envelope/1",
         "report_id": publication.report_id,

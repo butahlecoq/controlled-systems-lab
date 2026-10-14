@@ -6,6 +6,7 @@ import copy
 import importlib.util
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -428,12 +429,42 @@ class RegisteredKindTests(unittest.TestCase):
                         (out/rid/'publication-manifest.json').read_bytes())
                     self.assertTrue(site.validate_publication_manifest(out/rid,report))
 
+    def test_opt06_bundle_manifest_is_read_only_and_publication_site_stages(self):
+        repo=Path(__file__).resolve().parents[2]
+        root=repo/'reports'/'algorithm-results'
+        source_id='opt06-basis-reuse-20261014-ef70e8c5-r2'
+        source=root/source_id
+        item=registered.adapt(source)
+        self.assertEqual(item.kind,'opt06-basis-reuse')
+        self.assertEqual(item.source_commit,'ef70e8c580a9556b0f5d96e49070d33221bf5b64')
+        self.assertEqual(len(item.files),93)
+        self.assertIn('42 verified measured trials',item.measured_scope)
+        page=registered.render_page(source,item)
+        self.assertIn('Membership LP calls (excluding Phase-I)',page)
+        self.assertIn('Phase-I solves',page)
+        with tempfile.TemporaryDirectory() as temp:
+            copied=Path(temp)/source.name
+            shutil.copytree(source,copied)
+            manifest=copied/'manifest.sha256'
+            before=hashlib.sha256(manifest.read_bytes()).hexdigest()
+            with (copied/'summary.csv').open('ab') as stream:
+                stream.write(b'tampered\n')
+            validator=copied/'harness'/'validate.py'
+            result=subprocess.run([sys.executable,str(validator),str(copied)],capture_output=True,text=True)
+            self.assertNotEqual(result.returncode,0)
+            self.assertEqual(hashlib.sha256(manifest.read_bytes()).hexdigest(),before)
+            staged=site.stage(root/'catalog.json',Path(temp)/'site',check=True)
+            self.assertTrue((staged/item.report_id/'index.html').is_file())
+            self.assertTrue((staged/(item.report_id+'.zip')).is_file())
+            published=(staged/item.report_id/'index.html').read_text(encoding='utf-8')
+            self.assertIn('42 verified measured trials',published)
+
     def test_production_catalogue_uses_shared_outer_contract_for_all_kinds(self):
         repo=Path(__file__).resolve().parents[2]
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))
@@ -442,7 +473,7 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertRegex(report['payload_sha256'],r'^[0-9a-f]{64}$')
             self.assertRegex(report['source_commit'],r'^[0-9a-f]{40}$')
             self.assertRegex(report['zip_sha256'],r'^[0-9a-f]{64}$')
-            if report['report_kind'] in ('opt05-hull','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward','syn02-terminal-minimizers'):
+            if report['report_kind'] in ('opt05-hull','opt06-basis-reuse','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','syn01-nominal-forward','syn02-terminal-minimizers'):
                 self.assertTrue({'measured_scope','evidence_limits'} <= set(report))
                 # Per-kind saved schemas/manifests are validated at the boundary,
                 # then projected into the same catalogue identity contract.
@@ -458,16 +489,16 @@ class RegisteredKindTests(unittest.TestCase):
                 self.assertEqual(report['source_report_id'],adapted.source_report_id)
                 self.assertEqual((report['measured_scope'],report['evidence_limits']),
                                  (adapted.measured_scope,adapted.evidence_limits))
-        registered_rows=[report for report in catalogue['reports'] if report['report_kind'] in ('opt05-hull','geo03-hv')]
+        registered_rows=[report for report in catalogue['reports'] if report['report_kind'] in ('opt05-hull','opt06-basis-reuse','geo03-hv')]
         source_ids={report['source_report_id'] for report in registered_rows}
         public_ids={report['report_id'] for report in registered_rows}
-        self.assertEqual(source_ids,{path.name for path in root.iterdir() if path.is_dir() and path.name.startswith(('opt05-hull-','geo03-'))})
+        self.assertEqual(source_ids,{path.name for path in root.iterdir() if path.is_dir() and path.name.startswith(('opt05-hull-','opt06-basis-reuse-','geo03-'))})
         producer_geo_zip=root/'geo03-20261012-3c12ca125831.zip'
         self.assertEqual(hashlib.sha256(producer_geo_zip.read_bytes()).hexdigest(),
                          'e518e1c1786a67561d4cc0336231746f5f2e748cd0aaaba707d2c4eaf97dfd50')
         self.assertEqual(producer_geo_zip.read_bytes(),(root/'geo03-20261012-3c12ca125831.source.zip').read_bytes())
         self.assertEqual(public_ids|{'geo03-20261012-3c12ca125831'},
-                         {path.stem for path in root.iterdir() if path.suffix=='.zip' and not path.name.endswith('.source.zip') and path.name.startswith(('opt05-hull-','geo03-'))})
+                         {path.stem for path in root.iterdir() if path.suffix=='.zip' and not path.name.endswith('.source.zip') and path.name.startswith(('opt05-hull-','opt06-basis-reuse-','geo03-'))})
         with tempfile.TemporaryDirectory() as temp:
             first=site.stage(root/'catalog.json',Path(temp)/'stage-a',check=True)
             second=site.stage(root/'catalog.json',Path(temp)/'stage-b',check=True)
