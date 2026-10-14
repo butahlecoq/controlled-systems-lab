@@ -507,7 +507,7 @@ TEST_CASE("exact T-S02 recovered preimage contains the entire feasible control b
     // Affine rows attaining their maximum on these four vertices admit every
     // point (0,s,s+t,s,t), s,t in [0,1], by convexity. The three dynamics
     // equalities and literal control bounds exclude every other history.
-    for(const Vector point:std::vector<Vector>{{0,0,0,0,0},{0,1,1,1,0},{0,0,1,0,1},{0,1,2,1,1}})
+    for(const Vector& point:std::vector<Vector>{{0,0,0,0,0},{0,1,1,1,0},{0,0,1,0,1},{0,1,2,1,1}})
         CHECK(contains(history.history.relation,point));
     CHECK(has_equality(h,{1,0,0,0,0},0));
     CHECK(has_equality(h,{-1,1,0,-1,0},0));
