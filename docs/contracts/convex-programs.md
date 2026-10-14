@@ -185,13 +185,15 @@ bounded-start Cholesky shortcut that cannot generally handle singular Q at zero
 regularization. Presolve remains off. The full QP then receives the current finite solution first and
 valid basis second. Current flags, dimensions, warm-start setting, native absolute
 bound predicate and independently recomputed Ax are checked before QP run.
-If HiGHS reports optimal but the independently recomputed original-space KKT
-checks reject that candidate, the adapter records the rejected attempt and
-rebuilds the same QP in a fresh HiGHS instance with warm-start disabled. It
-accepts a retry result only when the ordinary original-space checks pass; the
-first attempt's diagnostics remain in the returned record. This bounded retry
-does not run after other solver statuses and does not relax validation. Failure
-withholds optimality; no hidden default native phase-I fallback is allowed.
+For direct `QuadraticTerminal` objectives only, if HiGHS reports optimal but
+the independently recomputed original-space KKT checks reject that candidate,
+the adapter records the rejected attempt and rebuilds the same QP in a fresh
+HiGHS instance with warm-start disabled. It accepts a retry result only when
+the ordinary original-space checks pass; the first attempt's residual metrics
+remain namespaced in the returned diagnostics. Residual-norm reformulations
+and other objective kinds retain the existing single-attempt behavior. This
+bounded retry does not run after other solver statuses and does not relax
+validation. Failure withholds optimality; no hidden default native phase-I fallback is allowed.
 Authored Ax activities are recomputed from the original CSR; the extra
 private activity is checked separately as x0, including a nonzero phase-I start.
 Original primal residuals use only the authored rows. A native private-row dual

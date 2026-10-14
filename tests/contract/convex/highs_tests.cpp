@@ -73,6 +73,8 @@ TEST_CASE("registered convex adapter solves the minimal five-variable lifted int
     INFO(result.raw_diagnostics);
     optimum(result,p,0);
     CHECK(result.raw_diagnostics.find("phase.qp.attempt1=optimal_but_original_checks_rejected")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.attempt1.check.stationarity.violation=2")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.attempt1.check.rows.violation=0")!=std::string::npos);
     CHECK(result.raw_diagnostics.find("phase.qp.retry=cold_fresh_model")!=std::string::npos);
     CHECK(result.raw_diagnostics.find("phase.qp.retry.model_status=7")!=std::string::npos);
     CHECK(result.primal->at(0)==doctest::Approx(0));
