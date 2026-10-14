@@ -1,5 +1,6 @@
 #include "compiled_verifiers.hpp"
 #include "strategy_b_lineage.hpp"
+#include "strategy_a_lineage.hpp"
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <algorithm>
 #include <array>
@@ -109,6 +110,11 @@ bool strategy_b_ts01_profile_valid(const ::csl::problem::ResolvedProblem& proble
         request.configuration.strategy.value=="csl.synthesis.strategy-b"&&request.strategy_version=="1"&&
         request.lineage==synthesis::strategy_b::detail::expected_ts01_lineage(problem.identity());
 }
+bool strategy_a_ts01_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
+    return ts01_case_valid(problem,request.family,request.configuration.representation)&&
+        request.configuration.strategy.value=="csl.synthesis.reach-back"&&request.strategy_version=="1"&&
+        request.lineage==synthesis::strategy_a::detail::expected_ts01_lineage(problem.identity());
+}
 
 }
 namespace csl::synthesis::strategy_ts01 {
@@ -151,9 +157,11 @@ public:
         Diagnostics diagnostics;
         const bool standalone=ts01_profile_valid(request.problem,request);
         const bool strategy_b=strategy_b_ts01_profile_valid(request.problem,request);
-        if(!standalone&&!strategy_b)
+        const bool strategy_a=strategy_a_ts01_profile_valid(request.problem,request);
+        if(!standalone&&!strategy_b&&!strategy_a)
             return {{DiagnosticCode::unsupported,"ts01.verifier.profile","Verifier rejected a noncanonical resolved problem or effective request"}};
-        const auto expected_strategy=standalone?synthesis::strategy_ts01::strategy_id:"csl.synthesis.strategy-b";
+        const auto expected_strategy=standalone?synthesis::strategy_ts01::strategy_id:
+            strategy_b?"csl.synthesis.strategy-b":"csl.synthesis.reach-back";
         const auto expected_version=standalone?synthesis::strategy_ts01::strategy_version:"1";
         const auto& identity=proposal.identity;const auto& complete=proposal.family;
         const auto exact_identity=identity.problem==request.problem.identity()&&identity.request==request.family&&
