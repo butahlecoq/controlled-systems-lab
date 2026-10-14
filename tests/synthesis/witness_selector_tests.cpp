@@ -200,6 +200,50 @@ TEST_CASE("unsupported family and late direction capability reject before any LP
     CHECK(*creations==0);
 }
 
+TEST_CASE("real T-S01 partial family is rejected by selector admission without LP creation or witnesses") {
+    auto partial_request=request(resolve(source()));
+    partial_request.family.target=FamilyTarget::partial_relation;
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
+    Requirements strategy_output;
+    strategy_output.output.representation=partial_request.family.representation;
+    strategy_output.output.family=FamilyTarget::partial_relation;
+    strategy_output.output.completeness=Completeness::unestablished;
+    auto prepared=take(strategies.prepare(partial_request,strategy_output));
+    auto strategy_workspace=prepared.create();
+    auto result=take(strategy_workspace->run(make_execution_context()));
+    REQUIRE(result.family);
+    REQUIRE(result.family->target()==FamilyTarget::partial_relation);
+    REQUIRE(std::holds_alternative<PartialOptimalFamily>(result.family->outcome()));
+    CHECK_FALSE(result.family->registry_verified());
+    CHECK(result.family->partial_registry_verified());
+
+    auto backend=take(adapters::lp::make_highs_registration());
+    auto factory=backend.factory;auto creations=std::make_shared<int>(0);
+    backend.factory=[factory,creations](const LinearProgram& p){++*creations;return factory(p);};
+    Registry<LPPort> lp;REQUIRE_FALSE(lp.add(std::move(backend)));
+    Requirements program_output;program_output.output.representation={"csl.program-result.v1"};
+    auto provider=take(prepare_provider(select_provider(lp,Method{{"csl.lp.highs"},{}},program_output)));
+    auto selector=synthesis::witness_selector::make_registration(provider);
+    SelectorRequest query{*result.family,{2,0,{{1,-1},{-1,1}},19}};
+    Requirements witness_output;witness_output.output.representation={"csl.witness-batch.v1"};
+
+    Registry<SelectorPort> selectors;REQUIRE_FALSE(selectors.add(selector));
+    auto admission_result=prepare_pipeline(select(selectors,Method{{synthesis::witness_selector::selector_id},{}},query,witness_output));
+    REQUIRE(std::holds_alternative<Rejection>(admission_result));
+    CHECK(std::get<Rejection>(admission_result).diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(*creations==0);
+
+    auto workspace=selector.factory(query);
+    auto direct_result=workspace->select(query.family,query.selection,make_execution_context());
+    REQUIRE(std::holds_alternative<Unsupported>(direct_result));
+    CHECK(std::get<Unsupported>(direct_result).diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(*creations==0);
+    CHECK(query.family.identity()==result.family->identity());
+    CHECK(query.family.target()==FamilyTarget::partial_relation);
+    CHECK_FALSE(std::holds_alternative<CompleteOptimalFamily>(query.family.outcome()));
+}
+
 namespace {
 template<class Port> PreparedProvider<Port> selected(Registration<Port> entry,std::string representation) {
     Registry<Port> registry;Method method{entry.identity.id,entry.identity.version};
