@@ -1,0 +1,294 @@
+{
+  "algorithm_process_return_code": 0,
+  "all_algorithm_trials_preserved": true,
+  "all_original_witness_checks_passed": true,
+  "alternation": "Warmup AB; measured AB, BA, AB, BA, AB, BA, AB.",
+  "complete_family_verified_trials": 16,
+  "event_count": 17,
+  "failed_trials": 0,
+  "header_count": 1,
+  "launcher_exit_code": 1,
+  "launcher_validation_error": "The wrapper incorrectly required Windows text-mode stdout bytes to equal the binary JSONL event file. stdout uses CRLF and events.jsonl uses LF; replacing CRLF with LF makes the complete byte streams identical. Both exact streams and the wrapper process-run.json were retained; algorithm was not rerun.",
+  "measured_pairs": 7,
+  "measured_per_strategy": 7,
+  "passed_trials": 16,
+  "performance_conclusion": "inconclusive; no winner claimed; separate limiter profile not performed",
+  "raw_files": {
+    "environment-pre.json": {
+      "bytes": 5681,
+      "sha256": "81a0316ed727ed71fa415a624e319a4a34faf103f7a2dffc03e9fa8277244149"
+    },
+    "events.jsonl": {
+      "bytes": 83266,
+      "sha256": "f66e15953bb7bc0c235941465ad49cc0034fd1a4eb5c6a19d214addbd4856639"
+    },
+    "process-run.json": {
+      "bytes": 938,
+      "sha256": "47c9fbb40354a149cbb854a037e337837939a860ad4c35547c9ac267f346ba03"
+    },
+    "stderr.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout.bin": {
+      "bytes": 83283,
+      "sha256": "b076e535fa91cae62f1c4638abf5d14887489f31e7460b29cd351fc0a129a029"
+    }
+  },
+  "schema": "csl.paired-ts01-collection-validation/1",
+  "selected_witness_count_each_trial": 2,
+  "source_commit": "b7f1ac0a9800326c825b6d8e35a8f23656496682",
+  "stdout_equals_events_exactly": false,
+  "stdout_matches_events_after_crlf_normalization": true,
+  "timing_summary_ns": {
+    "csl.synthesis.reach-back": {
+      "end_to_end_strategy": {
+        "max_ns": 5207700,
+        "median_ns": 4992900,
+        "min_ns": 4626500,
+        "observations_ns": [
+          5123800,
+          4866800,
+          4992900,
+          5153000,
+          5207700,
+          4967700,
+          4626500
+        ],
+        "range_ns": 581200
+      },
+      "family_construction": {
+        "max_ns": 4627700,
+        "median_ns": 4481400,
+        "min_ns": 4094500,
+        "observations_ns": [
+          4627700,
+          4364400,
+          4481400,
+          4625700,
+          4627100,
+          4409400,
+          4094500
+        ],
+        "range_ns": 533200
+      },
+      "measured_count": 7,
+      "original_verification": {
+        "max_ns": 29400,
+        "median_ns": 13100,
+        "min_ns": 12000,
+        "observations_ns": [
+          12000,
+          12700,
+          15300,
+          29400,
+          13100,
+          13100,
+          12300
+        ],
+        "range_ns": 17400
+      },
+      "preparation": {
+        "max_ns": 33500,
+        "median_ns": 28700,
+        "min_ns": 26100,
+        "observations_ns": [
+          33500,
+          26100,
+          28400,
+          28700,
+          30200,
+          30400,
+          28300
+        ],
+        "range_ns": 7400
+      },
+      "selector_preparation": {
+        "max_ns": 16000,
+        "median_ns": 15800,
+        "min_ns": 15500,
+        "observations_ns": [
+          15800,
+          15600,
+          16000,
+          15800,
+          15900,
+          15600,
+          15500
+        ],
+        "range_ns": 500
+      },
+      "selector_workspace_creation": {
+        "max_ns": 300,
+        "median_ns": 200,
+        "min_ns": 200,
+        "observations_ns": [
+          300,
+          200,
+          200,
+          200,
+          200,
+          200,
+          300
+        ],
+        "range_ns": 100
+      },
+      "witness_query": {
+        "max_ns": 515900,
+        "median_ns": 446800,
+        "min_ns": 428800,
+        "observations_ns": [
+          428800,
+          442300,
+          446300,
+          446800,
+          515900,
+          493500,
+          469400
+        ],
+        "range_ns": 87100
+      },
+      "workspace_creation": {
+        "max_ns": 2200,
+        "median_ns": 1500,
+        "min_ns": 1500,
+        "observations_ns": [
+          1700,
+          1500,
+          1500,
+          1800,
+          1500,
+          1500,
+          2200
+        ],
+        "range_ns": 700
+      }
+    },
+    "csl.synthesis.strategy-b": {
+      "end_to_end_strategy": {
+        "max_ns": 1440000,
+        "median_ns": 1373600,
+        "min_ns": 1318500,
+        "observations_ns": [
+          1318500,
+          1345000,
+          1440000,
+          1373600,
+          1354000,
+          1429100,
+          1434000
+        ],
+        "range_ns": 121500
+      },
+      "family_construction": {
+        "max_ns": 959000,
+        "median_ns": 883900,
+        "min_ns": 852300,
+        "observations_ns": [
+          852300,
+          883900,
+          863200,
+          907100,
+          886100,
+          959000,
+          879500
+        ],
+        "range_ns": 106700
+      },
+      "measured_count": 7,
+      "original_verification": {
+        "max_ns": 17300,
+        "median_ns": 11500,
+        "min_ns": 11200,
+        "observations_ns": [
+          13100,
+          11500,
+          16700,
+          11400,
+          11400,
+          11200,
+          17300
+        ],
+        "range_ns": 6100
+      },
+      "preparation": {
+        "max_ns": 16000,
+        "median_ns": 15500,
+        "min_ns": 14400,
+        "observations_ns": [
+          15900,
+          15500,
+          15300,
+          16000,
+          15000,
+          14400,
+          15500
+        ],
+        "range_ns": 1600
+      },
+      "selector_preparation": {
+        "max_ns": 14200,
+        "median_ns": 14000,
+        "min_ns": 13600,
+        "observations_ns": [
+          13600,
+          13800,
+          14200,
+          14000,
+          14000,
+          14200,
+          13900
+        ],
+        "range_ns": 600
+      },
+      "selector_workspace_creation": {
+        "max_ns": 300,
+        "median_ns": 200,
+        "min_ns": 200,
+        "observations_ns": [
+          200,
+          200,
+          300,
+          300,
+          200,
+          200,
+          300
+        ],
+        "range_ns": 100
+      },
+      "witness_query": {
+        "max_ns": 526100,
+        "median_ns": 423000,
+        "min_ns": 416200,
+        "observations_ns": [
+          419300,
+          416200,
+          526100,
+          421200,
+          423000,
+          426200,
+          503400
+        ],
+        "range_ns": 109900
+      },
+      "workspace_creation": {
+        "max_ns": 1500,
+        "median_ns": 1300,
+        "min_ns": 1100,
+        "observations_ns": [
+          1300,
+          1100,
+          1300,
+          1300,
+          1500,
+          1400,
+          1300
+        ],
+        "range_ns": 400
+      }
+    }
+  },
+  "trial_count": 16,
+  "validated_utc": "2026-10-14T18:24:15.694174+00:00",
+  "warmup_pairs": 1
+}

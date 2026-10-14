@@ -1,0 +1,5 @@
+{
+  "limiter_identified": false,
+  "performed": false,
+  "reason": "No separate limiter profile was performed; the latency limiter remains unknown and this exact-fixture comparison is inconclusive."
+}

@@ -1,0 +1,16 @@
+{
+  "clean_source_commit": "b7f1ac0a9800326c825b6d8e35a8f23656496682",
+  "collection_policy": "Preserve stdout, stderr, JSONL, process exit status and failures before validating. On Windows compare stdout with JSONL after explicit CRLF-to-LF normalization; never discard failed trial events.",
+  "configuration": [
+    "cmake -S <source>/examples -B <build> -G \"Visual Studio 17 2022\" -A x64 -DCMAKE_PREFIX_PATH=<installed-prefix>",
+    "cmake --build <build> --config Release --target registered_synthesis_comparison --parallel 4"
+  ],
+  "measurement": [
+    "registered_synthesis_comparison.exe --measure examples/scenarios/two-stage-integrator.json <new-output>/measurement-events.jsonl"
+  ],
+  "report_regeneration": [
+    "python reports/algorithm-results/tooling/syn_ts01_paired/build_bundle.py --run-root <saved-run> --source-root <clean-source> --build-root <release-build> --dependency-source-root <linked-library-source> --library-prefix <installed-prefix> --out reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0"
+  ],
+  "saved_record_only": true,
+  "schema": "csl.paired-ts01-reproduction-commands/1"
+}
