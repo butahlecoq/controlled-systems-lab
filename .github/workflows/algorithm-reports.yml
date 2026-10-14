@@ -38,6 +38,11 @@ jobs:
             if test -f reports/algorithm-results/syn06-publications.json; then
               python scripts/reports/stage_syn06.py --catalog reports/algorithm-results/syn06-publications.json --site build/report-site
             fi
+            if test -d reports/algorithm-results/perf03-ts01-single-process-correlation-20261014; then
+              python scripts/reports/stage_perf03.py \
+                --source reports/algorithm-results/perf03-ts01-single-process-correlation-20261014 \
+                --site build/report-site
+            fi
             echo 'has_reports=true' >> "$GITHUB_OUTPUT"
           else
             echo 'No measured catalogue has been committed; publication remains pending.'

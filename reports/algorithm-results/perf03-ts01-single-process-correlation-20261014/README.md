@@ -1,4 +1,6 @@
-# PERF-03 T-S01 single-process correlation`n`nOpen the [standalone HTML result](index.html) for a concise visual report.
+# PERF-03 T-S01 single-process correlation
+
+Open the [standalone HTML result](index.html) for a concise visual report.
 
 This companion evidence run resolves the sampled CPU path inside the timed T-S01 request operation. It supports a sampled hotspot attribution for this exact repeated diagnostic workload; it does not establish a latency improvement, compare algorithms, or generalize beyond T-S01. Issue #220 remains open for independent review.
 
@@ -33,10 +35,15 @@ The 33.79-second ETL is 48,037,888 bytes and contains 468,186 events, including 
 
 ## Reproduction commands
 
-From a clean checkout of the pinned source and the report's tooling, copy `strategy_b_measure.cpp` and `runner/CMakeLists.txt` to a temporary directory, apply `harness-change.patch`, then configure and build the diagnostic target. The recorded build used cached sources for the dependencies pinned by the existing report; those paths can be replaced with equivalent pinned FetchContent sources.
+The reproduction patch targets the report-driver file at baseline harness provenance `4fc8e28587a7fe0e4130f1cb435cf6502ba0e4e2`. Check out that harness commit, make the evidence `harness-change.patch` available locally, and apply it from the checkout root. The solver source remains separately pinned to `2a5ab835295dfd22f02b19d440bb8158267d985a`; point CMake at that source checkout. The recorded build used cached sources for the dependencies pinned by the existing report; those paths can be replaced with equivalent pinned FetchContent sources.
 
 ```powershell
-cmake -S <temp>\runner -B <temp>\build `
+$harness = "C:\path\to\checkout-at-4fc8e28"
+$patch = "C:\path\to\harness-change.patch"
+$tooling = Join-Path $harness "reports/algorithm-results/tooling/syn04"
+git -C $harness apply --check $patch
+git -C $harness apply $patch
+cmake -S (Join-Path $tooling "runner") -B "C:\temp\perf03\build" `
   -G "Visual Studio 17 2022" -A x64 `
   -DCSL_SOURCE_ROOT=<checkout-at-2a5ab835> `
   -DBUILD_TESTING=OFF `
@@ -65,4 +72,3 @@ The actual session GUID, executable/PDB/config/trace hashes, paired timing distr
 ## Limits
 
 This profile supports a source-resolved sampled CPU hotspot for the exact registered Strategy B T-S01 request path. It is diagnostic evidence only. It does not claim a speedup, performance comparison, application-scale behavior, throughput or scalability, nor does the one-pair run isolate profiler overhead from host-load variance. Issue #220 is intentionally left open for independent review of the attribution and acceptance.
-
