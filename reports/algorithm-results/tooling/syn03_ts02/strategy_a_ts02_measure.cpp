@@ -60,7 +60,7 @@ Problem source() {
         {UniversalSet{1},UniversalSet{1},UniversalSet{1}},{},{},
         InformationPattern::nominal_open_loop,LinearTerminal{{0},3}};
 }
-struct RunObservation { std::uint64_t token; std::string lp_provider; std::string convex_provider; std::string providers_json; std::string lineage_json; std::string completeness_verifier; std::string completeness_verifier_version; double witness_objective; double max_residual; double abs_tolerance; double rel_tolerance; std::string residual_verifier; };
+struct RunObservation { std::uint64_t token; std::string lp_provider; std::string convex_provider; std::string providers_json; std::string lineage_json; std::string completeness_verifier; std::string completeness_verifier_version; };
 template<class Port> PreparedProvider<Port> selected(Registration<Port> entry,std::string representation) {
     Registry<Port> registry;Method method{entry.identity.id,entry.identity.version};
     require(!registry.add(std::move(entry)),"Strategy A subprovider registration failed");
@@ -68,22 +68,6 @@ template<class Port> PreparedProvider<Port> selected(Registration<Port> entry,st
     if constexpr(std::is_same_v<Port,GeometryPort>||std::is_same_v<Port,ConversionPort>)
         requirements.output.relation=SetRelation::equivalent;
     return take(prepare_provider(select_provider(registry,method,requirements)));
-}
-double independently_check_original_trajectory(const Vector& point) {
-    require(point.size()==5,"independent trajectory coordinates differ");
-    const double x0=point[0],x1=point[1],x2=point[2],u0=point[3],u1=point[4];
-    double residual=std::abs(x0);
-    residual=std::max(residual,std::abs(x1-x0-u0));
-    residual=std::max(residual,std::abs(x2-x1-u1));
-    residual=std::max(residual,std::max(0.0,-u0));
-    residual=std::max(residual,std::max(0.0,u0-1.0));
-    residual=std::max(residual,std::max(0.0,-u1));
-    residual=std::max(residual,std::max(0.0,u1-1.0));
-    const double original_objective=(x2-1.0)*(x2-1.0);
-    require(original_objective==0,"independent canonical family member is not an optimizer");
-    residual=std::max(residual,std::abs(original_objective));
-    require(std::isfinite(residual)&&residual<=1e-8,"independent original trajectory residual exceeds tolerance");
-    return residual;
 }
 RunObservation one_run() {
     auto resolved=take(problem::resolve(source(),{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
@@ -217,13 +201,10 @@ RunObservation one_run() {
     require(!contains({0,0,1,1,0})&&!contains({0,2,2,2,0}),"canonical relation accepted an infeasible history");
     const double corners[4][5]={{0,0,0,0,0},{0,0,1,0,1},{0,1,1,1,0},{0,1,2,1,1}};
     for(const auto& corner:corners) require(contains(Vector{corner[0],corner[1],corner[2],corner[3],corner[4]}),"control-box corner rejected");
-    const double independent_residual=0;
     std::uint64_t token=1469598103934665603ull;
     for(double value:Vector{0,0.25,1,0.25,0.75}) { token^=std::bit_cast<std::uint64_t>(value);token*=1099511628211ull; }
     token^=static_cast<std::uint64_t>(h->inequalities.rows()+h->equalities.rows());
-    require(independent_residual>=0,"independent original trajectory check did not run");
-    return {token,lp_identity,convex_identity,providers_json,lineage_json,registered_completeness->verifier.value,registered_completeness->verifier_version,3,independent_residual,
-        1e-8,1e-8,"syn03-strategy-a-independent-original-check/1"};
+    return {token,lp_identity,convex_identity,providers_json,lineage_json,registered_completeness->verifier.value,registered_completeness->verifier_version};
 }
 }
 int main() {
@@ -250,12 +231,8 @@ int main() {
             <<",\"assurance\":\""<<(passed?"numerical":"unavailable")<<"\",\"canonical_relation_checked\":"<<(passed?"true":"false")
             <<",\"completeness_verifier\":\""<<(passed?json_escape(observation.completeness_verifier):"")
             <<"\",\"completeness_verifier_version\":\""<<(passed?json_escape(observation.completeness_verifier_version):"")<<"\""
-            <<",\"representative_coordinates\":"<<(passed?"[0,0.25,1,0.25,0.75]":"[]")
-            <<",\"trajectory_objective\":"<<(passed?observation.witness_objective:0)
-            <<",\"trajectory_max_residual\":"<<(passed?observation.max_residual:0)<<",\"absolute_tolerance\":"<<(passed?observation.abs_tolerance:0)
-            <<",\"relative_tolerance\":"<<(passed?observation.rel_tolerance:0)<<",\"objective_lower\":"<<(passed?3:0)<<",\"objective_upper\":"<<(passed?3:0)
-            <<",\"four_box_corners_checked\":"<<(passed?"true":"false")<<",\"distinct_histories_same_terminal_checked\":"<<(passed?"true":"false")<<",\"residual_verifier\":\""
-            <<(passed?json_escape(observation.residual_verifier):"")<<"\",\"error\":\""<<json_escape(error)<<"\"}\n";
+            <<",\"objective_lower\":"<<(passed?3:0)<<",\"objective_upper\":"<<(passed?3:0)
+            <<",\"four_box_corners_checked\":"<<(passed?"true":"false")<<",\"distinct_histories_same_terminal_checked\":"<<(passed?"true":"false")<<",\"error\":\""<<json_escape(error)<<"\"}\n";
     }
     return failures==0?0:1;
 }

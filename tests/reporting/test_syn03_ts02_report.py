@@ -17,6 +17,21 @@ class StrategyATs02ReportTests(unittest.TestCase):
             self.assertTrue(event["four_box_corners_checked"])
             self.assertTrue(event["distinct_histories_same_terminal_checked"])
 
+    def test_saved_events_do_not_claim_unperformed_trajectory_residual_check(self):
+        spec=importlib.util.spec_from_file_location("syn03_ts02_report",REPORT_PATH)
+        report=importlib.util.module_from_spec(spec);spec.loader.exec_module(report)
+        bundle=ROOT/"reports/algorithm-results"/report.REPORT_ID
+        record=json.loads((bundle/"records.json").read_text(encoding="utf-8"))
+        forbidden={"representative_coordinates","trajectory_objective","trajectory_max_residual","absolute_tolerance","relative_tolerance","residual_verifier"}
+        injected=json.loads(json.dumps(record));injected["measurement"]["events"][0]["trajectory_max_residual"]=0
+        self.assertIn("event_invalid",report.validate(injected))
+        self.assertTrue(all(not forbidden.intersection(event) for event in record["measurement"]["events"]))
+        self.assertFalse(forbidden.intersection(record["environment"]))
+        raw=[json.loads(line) for line in (bundle/"measurement-events.jsonl").read_text(encoding="utf-8").splitlines()]
+        self.assertEqual(raw,record["measurement"]["events"])
+        profile=[json.loads(line) for line in (bundle/"separate-profile-events.jsonl").read_text(encoding="utf-8").splitlines()]
+        self.assertTrue(all(not forbidden.intersection(event) for event in profile))
+
     def test_standalone_html_identifies_analytical_path_and_scope(self):
         spec=importlib.util.spec_from_file_location("syn03_ts02_report",REPORT_PATH)
         report=importlib.util.module_from_spec(spec);spec.loader.exec_module(report)

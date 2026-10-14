@@ -26,8 +26,9 @@ def validate(record):
     m=record.get("measurement",{});events=m.get("events",[])
     if len(events)!=8 or [(e.get("repetition"),e.get("warmup")) for e in events]!=[(0,True),*[(i,False) for i in range(1,8)]]:errors.append("event_matrix")
     expected={"schema":EVENT_SCHEMA,"status":"passed","termination":"completed","outcome":"optimal","result_disposition":"complete_optimal_family","registry_verified":True,"assurance":"numerical","canonical_relation_checked":True,"completeness_verifier":"csl.verifier.ts02-constant-integrator","completeness_verifier_version":"1","lp_provider":ALGORITHM["lp_provider"],"convex_provider":ALGORITHM["convex_provider"],"objective_lower":3,"objective_upper":3,"distinct_histories_same_terminal_checked":True,"four_box_corners_checked":True,"error":""}
+    unreported_checks={"representative_coordinates","trajectory_objective","trajectory_max_residual","absolute_tolerance","relative_tolerance","residual_verifier"}
     providers=set(ALGORITHM["registered_providers"]+[ALGORITHM["strategy_id"]+"@1"])
-    if any(any(e.get(k)!=v for k,v in expected.items()) or any(e.get(k) is not True for k in ("registry_verified","canonical_relation_checked","distinct_histories_same_terminal_checked","four_box_corners_checked")) or not providers.issubset(set(e.get("providers",[]))) or type(e.get("elapsed_ns")) is not int or e["elapsed_ns"]<0 or type(e.get("consumed_result_marker")) is not int or e["consumed_result_marker"]<=0 for e in events):errors.append("event_invalid")
+    if any(any(e.get(k)!=v for k,v in expected.items()) or unreported_checks.intersection(e) or any(e.get(k) is not True for k in ("registry_verified","canonical_relation_checked","distinct_histories_same_terminal_checked","four_box_corners_checked")) or not providers.issubset(set(e.get("providers",[]))) or type(e.get("elapsed_ns")) is not int or e["elapsed_ns"]<0 or type(e.get("consumed_result_marker")) is not int or e.get("consumed_result_marker",0)<=0 for e in events):errors.append("event_invalid")
     observed=[e.get("elapsed_ns") for e in events[1:]];summary=m.get("timing_ns",{})
     if len(observed)!=7 or any(type(v) is not int for v in observed) or summary.get("observations")!=observed:errors.append("timing_observations")
     elif any(summary.get(k)!=v for k,v in {"median":statistics.median(observed),"min":min(observed),"max":max(observed),"range":max(observed)-min(observed)}.items()):errors.append("timing_summary")
@@ -40,7 +41,7 @@ def validate(record):
     if not isinstance(record.get("harness_commit"),str) or re.fullmatch(r"[0-9a-f]{40}",record["harness_commit"]) is None or m.get("harness_commit")!=record.get("harness_commit"):errors.append("harness_provenance")
     build=record.get("build",{})
     if m.get("build")!=build or any(build.get(k)!=v for k,v in {"configuration":"Release","compiler":"MSVC","cxx_standard":"C++20","ndebug":True,"generator":"Visual Studio 17 2022 x64"}.items()):errors.append("build_provenance")
-    if m.get("environment")!=record.get("environment") or record.get("environment",{}).get("requested_resources")!={"total_threads":1,"outer_workers":1,"threads_per_worker":1,"memory_bytes":None}:errors.append("environment_provenance")
+    if m.get("environment")!=record.get("environment") or record.get("environment",{}).get("requested_resources")!={"total_threads":1,"outer_workers":1,"threads_per_worker":1,"memory_bytes":None} or unreported_checks.intersection(record.get("environment",{})):errors.append("environment_provenance")
     profile=m.get("profile_attempt",{})
     if profile.get("separate_workload_return_code")!=0 or profile.get("separate_workload_timed_out") is not False:errors.append("profile_outcome")
     return errors
