@@ -15,8 +15,9 @@ and Ninja decode localized MSVC `/showIncludes` dependency output correctly.
 Setting `VSLANG=1033` alone is insufficient when only the Russian language pack
 is installed. `dev-windows` uses Visual
 Studio 2022 x64 and Release. `core` uses Ninja Release with the HiGHS and Qhull
-adapters disabled. First configure may acquire pinned production dependencies;
-`core` avoids those two adapter vendors, not every dependency.
+adapters disabled; `highs` enables HiGHS without Qhull. First configure may acquire pinned production dependencies;
+`core` avoids those two adapter vendors and still uses Eigen and JSON, plus
+doctest when tests are enabled.
 
 ```sh
 cmake --preset dev
@@ -24,7 +25,7 @@ cmake --build --preset dev
 ctest --preset dev
 ```
 
-Substitute `dev-windows` or `core` consistently for another configuration. Focused
+Substitute `dev-windows`, `core` or `highs` consistently for another configuration. Focused
 presets build and test a module in the `dev` tree after `cmake --preset dev`:
 
 | Task | Owning code / public seam | Focused commands |
@@ -47,10 +48,15 @@ also runs both strategies on the same immutable T-S01 problem, selects witnesses
 and verifies them against original data. Its JSON summary records shared
 problem/request identities, strategy outcomes, selected witnesses and verification
 status/residuals. It does not serialize the live family relation or proof payload.
-This functional example is limited to the exact guarded fixture; paired measured
-results and standalone HTML publication remain under
-[OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83). CTest
+This functional example is limited to the exact guarded fixture. The
+[saved paired T-S01 report](../../reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0/index.html)
+contains measured results and HTML; its performance conclusion is inconclusive.
+Broader workflow and performance claims require separate evidence. CTest
 durations are not performance evidence.
+
+Standalone examples follow the installed package capabilities: `core` supplies
+`resolved_scenario` and `scenario_file`; `highs` adds registered LP/convex and LP
+backend substitution; the full package also supplies the synthesis comparison.
 
 For installation, use `cmake --install <configured-build-directory> --config Release
 --prefix <absolute-install-directory>`, then the README external example commands

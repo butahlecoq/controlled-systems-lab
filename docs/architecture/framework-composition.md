@@ -78,15 +78,16 @@ summary identifies the shared problem/request, each strategy and outcome,
 selected witnesses and verification status/residuals. It does not serialize the
 live optimal-family relation or proof payload. This is a functional guarded
 fixture example, not general profile support or paired performance evidence.
-Measured paired results and standalone HTML publication remain under
-[OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83).
+The [saved paired T-S01 report](../../reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0/index.html)
+delivers measured records and standalone HTML for this fixture, with an
+inconclusive performance conclusion and no general strategy ranking.
 
 A general scenario-to-family-to-export application remains pending. General
 family proofs, broader selector profiles, CLI behavior and trusted proof
 serialization/replay retain their feature-ticket ownership. JSON run records
 preserve metadata; decoding does not mint trusted complete-family authority.
-The synthesis-to-report adapter remains missing glue. Existing saved LP/convex
-reports do not supply a general synthesis comparison.
+The synthesis-to-report adapter remains missing glue. Saved LP/convex reports and the paired T-S01 fixture report do not supply a
+general synthesis comparison.
 
 Applications compose existing strategy preparation, `make_task` and
 `Executor::run`, retain immutable resolved owners and actual provider provenance,

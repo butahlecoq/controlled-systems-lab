@@ -47,7 +47,9 @@ HiGHS and Qhull adapters and acquires their pinned vendors. JSON is also a
 production dependency. `CSL_DEPENDENCY_PROBES` controls the separate historical
 [CORE-01 probes](../../probes/core-01/README.md), not production adapter acquisition.
 Use the `core` preset to disable both optional native adapters; this remains a
-library build with production dependencies, rather than a dependency-free mode.
+library build using Eigen and JSON, plus doctest when tests are enabled. The
+`highs` preset enables HiGHS without Qhull. Installed standalone examples adapt
+to these package capabilities; see the [development guide](development.md).
 The [development guide](development.md) describes the installed-package checks.
 
 ## Installed consumer
