@@ -1,17 +1,18 @@
 {
   "files": {
-    "README.md": "857967cc6a9472aa99391e50a9be7b5136d435c626b6a6341a144752644441f2",
+    "README.md": "67388126bc3f98c745fb705dd1ad080a6892ab5fbb50c3fed8eee64eca295a6d",
     "build-provenance.json": "dc9392824e59645090d08d913fd532b13795a9902ee6e3a9d032620326261c1a",
     "commands.json": "9c00debd6b77e7a99ba2aeb31270a5b1b1ee50cc9d292c136f81136bcac89974",
     "environment.json": "818fc2a7b5f9354c160408022de2d5ca900824b794ca0d561d420d41df5c4c2f",
-    "index.html": "8e962e069b1574435054ddb05fb009c6ff0ac3ed3535d1705562ad4835696b33",
+    "index.html": "8dc1ee9dbb91efcd0a55f74ec6add16d72caf446974f4ae421d61f0049f91e21",
     "measurement-events.jsonl": "b47ae46a2dd074d474708278b15d1b8615d134a1887ccbe4d3b7031563b2be8c",
-    "measurement.json": "efe25f73e6090d7100170898af1cd99b3ca568102db2381d4027766b99684d3e",
+    "measurement.json": "f04abbb3e839c8172dc01b6cc8b149295ad6910e9f9363a531014c2dcf3fd9b3",
     "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "profile.json": "dfc54741ed7dac2d34c79a0a05a899cf0d26bd2e34886e2e9388e60d17539a87",
-    "records.json": "45a781fa67d46784b7e006d309b465589ac3d7f6c131e36f7abf0aea583f886d",
+    "records.json": "0322bc9386e53b8af88d2bc12a867e70d47c4cf95de56a6da94c0d17d86bea82",
     "scenarios.json": "b5ae6f768232bdeb2b74b6618457eab797b474cebbebca657c19f062278d6c12",
-    "trials.csv": "e1794ba7d6e5d7d3de4618ec16b1b6dc9e7a394934d17e2873e0ef8cb7f0eb9d"
+    "trials.csv": "e1794ba7d6e5d7d3de4618ec16b1b6dc9e7a394934d17e2873e0ef8cb7f0eb9d",
+    "visual-studio-cpu-profile.json": "396a1adfe3791898d6afa2715c08286a78546ff06292c57d0c7f50f9548fe31c"
   },
   "harness_commit": "4fc8e28587a7fe0e4130f1cb435cf6502ba0e4e2",
   "report_id": "syn04-strategy-b-ts01-20261014-2a5ab835",

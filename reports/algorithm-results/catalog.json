@@ -154,16 +154,16 @@
       "zip_sha256": "165fe50a882e37334e30e3bd04f613b261fb801c540fe806304942ac146c361f"
     },
     {
-      "report_id": "syn04-strategy-b-ts01-3422fe6af929ff1a326b7d9b61699dd6a9499256ca5191ec71056934dc552633",
+      "report_id": "syn04-strategy-b-ts01-46513fc77b3e1e9e7795b887b1d2a12d7bfa5dbde4d6c74563b7f06c6a0aff24",
       "report_kind": "syn04-strategy-b-ts01",
       "source_report_id": "syn04-strategy-b-ts01-20261014-2a5ab835",
       "payload_schema": "csl.syn04-strategy-b-ts01-report/1",
-      "payload_sha256": "9cd51606ae5a38e1a4c55a6142377b49a40ebcadaf2a9111cfbea1edf20ee530",
-      "native_payload_sha256": "9cd51606ae5a38e1a4c55a6142377b49a40ebcadaf2a9111cfbea1edf20ee530",
+      "payload_sha256": "35af556727eebae8134effaeceb793d4669aa7c6e87db9c9217e1cf4cdf0bfff",
+      "native_payload_sha256": "35af556727eebae8134effaeceb793d4669aa7c6e87db9c9217e1cf4cdf0bfff",
       "source_commit": "2a5ab835295dfd22f02b19d440bb8158267d985a",
       "measured_scope": "Exact T-S01 profile; one registered Strategy B; seven validated measured trials; performance conclusion inconclusive",
-      "evidence_limits": "Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.; The result reports Assurance::numerical; validated arithmetic assurance is unavailable.; This is one Strategy B measurement, not a comparison, speedup, application-scale, throughput, or scalability claim.; All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.; No source-mapped performance limiter was identified because WPR CPU stack profiling was denied by Windows policy.; Internal preparation, LP, QP, extraction, verifier and export timing counters are unavailable.",
-      "zip_sha256": "1b53f05e717999b7752151d3b68842978503ba577eddbafca3a3f620ddc56e97"
+      "evidence_limits": "Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.; The result reports Assurance::numerical; validated arithmetic assurance is unavailable.; This is one Strategy B measurement, not a comparison, speedup, application-scale, throughput, or scalability claim.; All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.; WPR CPU stack collection was denied by Windows policy, but Visual Studio process-scoped CPU Usage sampling succeeded without SeSystemProfilePrivilege.; A separate 20-process sequential PDB-enabled Release diagnostic profile resolved a sampled CPU path through StrategyPort, DirectJointWorkspace, and the HiGHS QP solver; this does not establish an unprofiled latency limiter.; The diagnostic profile is separate and excluded from all reported latency statistics; profiling overhead and build symbols may affect sampling.; Internal preparation, LP, QP, extraction, verifier and export timing counters are unavailable.",
+      "zip_sha256": "aaf13eac7b3a5beb9eb7bf90b793dbbd4b909f37b826a4a85316721bcbb8fc8e"
     },
     {
       "report_id": "syn03-strategy-a-ts01-77f669553a7c803b4f061401d5c1f7ffb22ef7f973368cd1b7c3494686fa8e2a",
