@@ -371,6 +371,21 @@ TEST_CASE("registered Strategy B publishes complete T-S01 evidence only through 
     wrong_proposal.family.completeness.binding=wrong_proposal.identity;
     CHECK_FALSE(verifier->verify(frozen,wrong_proposal).empty());
 
+    // The registered workspace is reusable, but runtime evidence belongs to one solve only.
+    std::stop_source stop;stop.request_stop();
+    auto stopped_context=context;stopped_context.cancellation=stop.get_token();
+    const auto stopped=accepted(workspace->run(stopped_context));
+    CHECK(stopped.termination==Termination::cancelled);
+    CHECK_FALSE(stopped.family);
+
+    const auto rerun=accepted(workspace->run(context));
+    REQUIRE(rerun.termination==Termination::completed);
+    REQUIRE(rerun.family);
+    CHECK(rerun.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(rerun.family->registry_verified());
+    CHECK(rerun.family->identity()==identity);
+    CHECK(check_synthesis_result(rerun,identity).empty());
+
     const auto neighboring=resolve(integrator(QuadraticTerminal{{1,1,{2}},{-1},0.25}));
     auto unsupported=request(neighboring);unsupported.profile=synthesis::strategy_ts01::profile_id;
     unsupported.target=FamilyTarget::exact_optimal_relation;
