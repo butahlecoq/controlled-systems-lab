@@ -23,6 +23,7 @@ import syn04_strategy_b_registered_reports as syn04_strategy_b
 import syn04_ts02_registered_reports as syn04_ts02
 import syn03_strategy_a_registered_reports as syn03_strategy_a
 import syn03_strategy_a_ts02_registered_reports as syn03_strategy_a_ts02
+import syn_ts01_paired_registered_reports as syn_ts01_paired
 import opt04_registered_reports as opt04
 import registered_reports as registered
 
@@ -65,7 +66,7 @@ class OfflineHTML(HTMLParser):
                 data.require(re.search(r"@import|url\s*\(|expression\s*\(",local,re.I) is None,"external/active inline style")
             if key in {"href","src","xlink:href"} and value:
                 if value.startswith("#"): continue
-                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt04-\d{8}T\d{6}Z-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-[0-9a-f]{64}\.zip)",value): continue
+                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/[0-9a-f]{40}|issues/[0-9]+|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/(?:lp|convex)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt04-\d{8}T\d{6}Z-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo04-\d{8}T\d{6}Z-[0-9a-f]{12}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn02-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn01-[0-9a-f]{64}\.zip|tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/syn-ts01-paired-[0-9a-f]{64}\.zip)",value): continue
                 data.require(value in self.files,"external/escaping HTML asset")
     def handle_endtag(self,tag):
         if tag=="style": self.in_style=False
@@ -189,7 +190,7 @@ def catalogue_index(catalogue):
         label_kind='HiGHS reference LP, five analytic microfixtures'
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
-                data.require(report["report_kind"] in ("lp","convex","opt04-phase-one","opt05-hull","opt06-basis-reuse","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward","syn07-ts01-analytic","syn04-strategy-b-ts01","syn04-strategy-b-ts02","syn03-strategy-a-ts01","syn03-strategy-a-ts02"),"unknown catalogue kind")
+                data.require(report["report_kind"] in ("lp","convex","opt04-phase-one","opt05-hull","opt06-basis-reuse","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward","syn07-ts01-analytic","syn04-strategy-b-ts01","syn04-strategy-b-ts02","syn03-strategy-a-ts01","syn03-strategy-a-ts02","syn-ts01-paired-comparison"),"unknown catalogue kind")
                 data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"schema-v3 scope/evidence metadata required")
                 label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
             else:
@@ -198,7 +199,7 @@ def catalogue_index(catalogue):
         csv_name = "stdout.jsonl" if report.get("report_kind") == opt04.KIND else "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
         trial_label = "trial JSONL" if report.get("report_kind") == opt04.KIND else "CSV"
         figure_link = (' · <a href="'+escape(rid,quote=True)+'/performance.svg">performance SVG</a>'
-                       if report.get("report_kind") == opt04.KIND else
+                       if report.get("report_kind") in (opt04.KIND, "syn-ts01-paired-comparison") else
                        ' · <a href="'+escape(rid,quote=True)+'/latency.svg">latency SVG</a>'
                        if report.get("report_kind") == "opt06-basis-reuse" else "")
         parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/'+csv_name+'">'+trial_label+'</a>'+figure_link+' · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
@@ -262,7 +263,7 @@ def stage(catalog_path,out,check=True,allow_test=False):
         rid=report["report_id"]
         data.require(isinstance(rid,str) and rid not in ids,"unsafe/duplicate report ID")
         ids.add(rid)
-        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt04-phase-one","opt05-hull","opt06-basis-reuse","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward","syn07-ts01-analytic","syn04-strategy-b-ts01","syn04-strategy-b-ts02","syn03-strategy-a-ts01","syn03-strategy-a-ts02"):
+        if catalogue["schema"]=="csl.algorithm-report-catalog/3" and report.get("report_kind") in ("opt04-phase-one","opt05-hull","opt06-basis-reuse","geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","syn02-terminal-minimizers","syn01-nominal-forward","syn07-ts01-analytic","syn04-strategy-b-ts01","syn04-strategy-b-ts02","syn03-strategy-a-ts01","syn03-strategy-a-ts02","syn-ts01-paired-comparison"):
             source_id=report.get("source_report_id",rid)
             source_pattern = (opt04.SOURCE_PATTERN if report["report_kind"] == opt04.KIND else
                               r"opt05-hull-\d{8}-[0-9a-f]{8}" if report["report_kind"]=="opt05-hull" else
@@ -277,9 +278,10 @@ def stage(catalog_path,out,check=True,allow_test=False):
                               r"syn04-strategy-b-ts02-\d{8}-[0-9a-f]{8,12}" if report["report_kind"]=="syn04-strategy-b-ts02" else
                               r"syn03-strategy-a-ts01-\d{8}-[0-9a-f]{8,12}" if report["report_kind"]=="syn03-strategy-a-ts01" else
                               r"syn03-strategy-a-ts02-\d{8}-[0-9a-f]{8,12}" if report["report_kind"]=="syn03-strategy-a-ts02" else
+                              r"syn-ts01-paired-20261014-b7f1ac0" if report["report_kind"]=="syn-ts01-paired-comparison" else
                               r"geo03-\d{8}-[0-9a-f]{12}")
             data.require(isinstance(source_id,str) and re.fullmatch(source_pattern,source_id) is not None,"invalid registered source bundle identity")
-            publisher = opt04 if report["report_kind"] == opt04.KIND else geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else syn01 if report["report_kind"] == "syn01-nominal-forward" else ts01 if report["report_kind"] == "syn07-ts01-analytic" else syn04_strategy_b if report["report_kind"] == "syn04-strategy-b-ts01" else syn04_ts02 if report["report_kind"] == "syn04-strategy-b-ts02" else syn03_strategy_a_ts02 if report["report_kind"] == "syn03-strategy-a-ts02" else syn03_strategy_a if report["report_kind"] == "syn03-strategy-a-ts01" else registered
+            publisher = opt04 if report["report_kind"] == opt04.KIND else geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else syn01 if report["report_kind"] == "syn01-nominal-forward" else ts01 if report["report_kind"] == "syn07-ts01-analytic" else syn04_strategy_b if report["report_kind"] == "syn04-strategy-b-ts01" else syn04_ts02 if report["report_kind"] == "syn04-strategy-b-ts02" else syn03_strategy_a_ts02 if report["report_kind"] == "syn03-strategy-a-ts02" else syn03_strategy_a if report["report_kind"] == "syn03-strategy-a-ts01" else syn_ts01_paired if report["report_kind"] == "syn-ts01-paired-comparison" else registered
             item=publisher.adapt(root/source_id, allow_test=allow_test) if report["report_kind"] == opt04.KIND else publisher.adapt(root/source_id)
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
             data.require(report.get("source_report_id","")==item.source_report_id,"registered catalogue source identity mismatch")
@@ -293,7 +295,7 @@ def stage(catalog_path,out,check=True,allow_test=False):
             if report["report_kind"] == opt04.KIND:
                 page_files |= {"source-evidence/" + name for name in item.files}
             OfflineHTML(page_files).feed(generated_page)
-            if report["report_kind"] not in ("geo05-projection-predecessor", "syn07-ts01-analytic", "syn04-strategy-b-ts01", "syn04-strategy-b-ts02", "syn03-strategy-a-ts01", "syn03-strategy-a-ts02"):
+            if report["report_kind"] not in ("geo05-projection-predecessor", "syn07-ts01-analytic", "syn04-strategy-b-ts01", "syn04-strategy-b-ts02", "syn03-strategy-a-ts01", "syn03-strategy-a-ts02", "syn-ts01-paired-comparison"):
                 if report["report_kind"] == opt04.KIND:
                     data.validate_svg(opt04.public_svg(data.parse_json((root/source_id/"records.json").read_text(encoding="utf-8"))))
                 else:
