@@ -11,16 +11,13 @@ import stage_perf03
 
 SOURCE = ROOT / "reports" / "algorithm-results" / stage_perf03.BUNDLE_NAME
 HARNESS_PATH = "reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp"
-HARNESS_COMMIT = "4fc8e28587a7fe0e4130f1cb435cf6502ba0e4e2"
+HARNESS_BLOB = "6838def7f89861de80d1b9def4d9aa4beeb12104"
 
 
 class Perf03PublicationTests(unittest.TestCase):
     def test_reproduction_patch_applies_to_pinned_harness_blob(self):
-        pinned_blob = subprocess.check_output(
-            ["git", "rev-parse", f"{HARNESS_COMMIT}:{HARNESS_PATH}"], cwd=ROOT, text=True
-        ).strip()
         worktree_blob = subprocess.check_output(["git", "hash-object", HARNESS_PATH], cwd=ROOT, text=True).strip()
-        self.assertEqual(worktree_blob, pinned_blob)
+        self.assertEqual(worktree_blob, HARNESS_BLOB)
         subprocess.run(
             ["git", "apply", "--check", str(SOURCE / "harness-change.patch")],
             cwd=ROOT, check=True, capture_output=True, text=True,
