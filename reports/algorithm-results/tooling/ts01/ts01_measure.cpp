@@ -75,7 +75,7 @@ SynthesisResult one_run(std::uint64_t& token) {
     StrategyConfiguration configuration;
     configuration.strategy={"csl.synthesis.ts01-analytic"};
     configuration.representation=family.representation;
-    StrategyRequest request{std::move(problem),configuration,family,{}};
+    StrategyRequest request{std::move(problem),configuration,family,{},{}};
 
     StrategyRegistry strategies;
     if (strategies.add(synthesis::strategy_ts01::make_registration())) throw std::runtime_error("T-S01 registration was rejected");
