@@ -125,6 +125,23 @@ registry::PreparedProvider<registry::LPPort> provider(int mode,std::shared_ptr<i
         },[mode,factories](const LinearProgram&){++*factories;return std::make_unique<Membership>(mode);}}));
     return accepted(registry::prepare_provider(registry::select_provider(registry,{{"membership-literal"},"1"})));
 }
+class CancelAfterMembership final:public LPWorkspace {
+    std::stop_source& stop_;
+public:
+    explicit CancelAfterMembership(std::stop_source& stop):stop_(stop){}
+    ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext&) override {
+        stop_.request_stop();
+        return ProgramResult{Termination::completed,
+            {p.identity(),MathematicalOutcome::optimal,Unestablished{},{}},Vector{0.25,0.75},{},"literal barycentric answer"};
+    }
+};
+registry::PreparedProvider<registry::LPPort> cancel_after_membership_provider(std::stop_source& stop) {
+    registry::Registry<registry::LPPort> registry;
+    REQUIRE(!registry.add({{{"cancel-after-membership"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability{return registry::Offer{};},
+        [&stop](const LinearProgram&){return std::make_unique<CancelAfterMembership>(stop);}}));
+    return accepted(registry::prepare_provider(registry::select_provider(registry,{{"cancel-after-membership"},"1"})));
+}
 }
 TEST_CASE("three-stage singular rectangular LTV uses prescribed external sequence and full history") {
     auto p=resolve(ltv());auto q=ltv_request(p);auto r=verify_trajectory(p,q);
@@ -201,6 +218,22 @@ TEST_CASE("stops and count limits retain supplied evidence and checked prefixes"
     c={};c.deadline=std::chrono::steady_clock::time_point::min();CHECK(verify_trajectory(p,q,c).termination==Termination::resource_limit);
     q.limits.residuals=1;r=verify_trajectory(p,q);CHECK(r.termination==Termination::resource_limit);CHECK(r.residuals.size()==1);
     CHECK(r.feasibility!=CheckStatus::numerical_pass);
+}
+TEST_CASE("late cancellation after registered membership retains evidence without completing claims") {
+    auto input=scalar();input.states[1]=segment_v();auto p=resolve(input);auto q=request(p);
+    q.bounds.lower=ObjectiveBound{2,{p.identity(),CertificateReference{"retained","external"}}};
+    std::stop_source stop;ExecutionContext c;c.cancellation=stop.get_token();
+    auto r=verify_trajectory(p,q,c,cancel_after_membership_provider(stop));
+    CHECK(r.termination==Termination::cancelled);
+    CHECK(r.bindings==CheckStatus::numerical_pass);
+    CHECK(r.feasibility==CheckStatus::not_checked);CHECK(r.objective==CheckStatus::not_checked);
+    CHECK(r.optimality==CheckStatus::unsupported);CHECK(r.completeness==CheckStatus::unsupported);
+    CHECK(r.validated==CheckStatus::unsupported);
+    REQUIRE(r.input.bounds.lower);
+    CHECK(r.input.bounds.lower->value==2);
+    CHECK(std::get<CertificateReference>(r.input.bounds.lower->evidence.support).artifact=="retained");
+    CHECK(residual(r,"initial[0]").satisfied);
+    CHECK(r.membership_queries.size()==1);
 }
 TEST_CASE("unsupported rich profiles are never silently dropped") {
     auto input=scalar();input.controls=FiniteDomain{1,{{3}}};auto p=resolve(input);CHECK(verify_trajectory(p,request(p)).feasibility==CheckStatus::unsupported);
