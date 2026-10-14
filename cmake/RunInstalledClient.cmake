@@ -77,7 +77,6 @@ execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/build"
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
 
-if(CSL_NATIVE_EXAMPLES)
 # Exercise the README examples as a second, isolated installed-package consumer.
 # Copy only their public sources/template: no repository include or build paths.
 set(example_source "${work}/examples-source")
@@ -98,4 +97,3 @@ execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/examples-build"
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/examples-build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
 
-endif()
