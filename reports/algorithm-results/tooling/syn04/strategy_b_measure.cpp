@@ -9,8 +9,10 @@
 #include <array>
 #include <bit>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <iomanip>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -54,7 +56,7 @@ Problem source() {
         {UniversalSet{1},UniversalSet{1},UniversalSet{1}},{},{},
         InformationPattern::nominal_open_loop,QuadraticTerminal{{1,1,{2}},{-2},1}};
 }
-struct RunObservation { std::uint64_t token; std::string lp_provider; std::string convex_provider; };
+struct RunObservation { std::uint64_t token; std::string lp_provider; std::string convex_provider; std::string completeness_verifier; std::string completeness_verifier_version; double witness_objective; double max_residual; double abs_tolerance; double rel_tolerance; std::string residual_verifier; };
 RunObservation one_run() {
     auto resolved=take(problem::resolve(source(),{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     FamilyRequest family;
@@ -109,12 +111,26 @@ RunObservation one_run() {
     require(result.family->identity().lineage.size()==2,"Strategy B result lineage is incomplete");
     const auto* complete=std::get_if<CompleteOptimalFamily>(&result.family->outcome());
     require(complete&&complete->assurance==Assurance::numerical,"verified numerical complete-family evidence is missing");
+    const auto* registered_completeness=std::get_if<RegisteredCompletenessEvidence>(&complete->completeness.support);
+    require(registered_completeness&&registered_completeness->verifier.value=="csl.verifier.ts01-analytic"&&
+        registered_completeness->verifier_version=="1","complete-family verifier identity differs");
     require(complete->completeness.binding==result.family->identity(),"completeness evidence is not bound to the result identity");
     require(complete->relation.coordinates==JointCoordinates{{1,1,0},2},"canonical relation coordinates differ");
     require(result.objective.lower&&result.objective.upper&&result.objective.lower->value==0&&result.objective.upper->value==0,
         "T-S01 optimum bounds differ from zero");
+    require(result.incumbents.size()==1,"expected one independently checked feasible optimizer anchor");
+    const auto& witness=result.incumbents.front().witness;
+    require(witness.original_objective==0&&witness.states.size()==3&&witness.controls.size()==2&&
+        std::all_of(witness.states.begin(),witness.states.end(),[](const Vector& value){return value.size()==1;})&&
+        std::all_of(witness.controls.begin(),witness.controls.end(),[](const Vector& value){return value.size()==1;}),
+        "independently verified optimizer anchor has the wrong dimensions or objective");
+    const auto* numerical=std::get_if<NumericalCheck>(&result.incumbents.front().feasibility.support);
+    require(numerical&&numerical->absolute_tolerance==1e-8&&numerical->relative_tolerance==1e-8&&std::isfinite(numerical->max_residual),
+        "independent trajectory numerical residual evidence is unavailable or unexpected");
     const auto* relation=dynamic_cast<const synthesis::strategy_ts01::ExactJointRelation*>(complete->relation.payload.get());
     require(relation,"complete relation payload is not the verified T-S01 relation");
+    const Vector anchor{witness.states[0][0],witness.states[1][0],witness.states[2][0],witness.controls[0][0],witness.controls[1][0]};
+    require(relation->contains(anchor),"independently verified optimizer anchor lies outside the published complete relation");
     const auto representation=relation->h_polyhedron().representation();
     const auto* h=std::get_if<sets::HRepresentation>(&representation);
     require(h&&h->inequalities.rows()==4&&h->inequalities.cols()==5&&h->equalities.rows()==4&&h->equalities.cols()==5,
@@ -138,10 +154,12 @@ RunObservation one_run() {
     std::uint64_t token=1469598103934665603ull;
     for(double value:Vector{0,0.25,1,0.25,0.75}) { token^=std::bit_cast<std::uint64_t>(value);token*=1099511628211ull; }
     token^=static_cast<std::uint64_t>(h->inequalities.rows()+h->equalities.rows());
-    return {token,lp_identity,convex_identity};
+    return {token,lp_identity,convex_identity,registered_completeness->verifier.value,registered_completeness->verifier_version,witness.original_objective,numerical->max_residual,
+        numerical->absolute_tolerance,numerical->relative_tolerance,numerical->verifier.value};
 }
 }
 int main() {
+    std::cout<<std::setprecision(17);
     constexpr int warmups=1;
     constexpr int repetitions=7;
     int failures=0;
@@ -159,7 +177,15 @@ int main() {
             <<"\",\"consumed_result_marker\":"<<observation.token<<",\"result_disposition\":\""
             <<(passed?"complete_optimal_family":"unavailable")<<"\",\"lp_provider\":\""
             <<(passed?json_escape(observation.lp_provider):"")<<"\",\"convex_provider\":\""
-            <<(passed?json_escape(observation.convex_provider):"")<<"\",\"error\":\""<<json_escape(error)<<"\"}\n";
+            <<(passed?json_escape(observation.convex_provider):"")<<"\",\"termination\":\""<<(passed?"completed":"unavailable")
+            <<"\",\"outcome\":\""<<(passed?"optimal":"unavailable")<<"\",\"registry_verified\":"<<(passed?"true":"false")
+            <<",\"assurance\":\""<<(passed?"numerical":"unavailable")<<"\",\"canonical_relation_checked\":"<<(passed?"true":"false")
+            <<",\"completeness_verifier\":\""<<(passed?json_escape(observation.completeness_verifier):"")
+            <<"\",\"completeness_verifier_version\":\""<<(passed?json_escape(observation.completeness_verifier_version):"")<<"\""
+            <<",\"trajectory_objective\":"<<(passed?observation.witness_objective:0)
+            <<",\"trajectory_max_residual\":"<<(passed?observation.max_residual:0)<<",\"absolute_tolerance\":"<<(passed?observation.abs_tolerance:0)
+            <<",\"relative_tolerance\":"<<(passed?observation.rel_tolerance:0)<<",\"residual_verifier\":\""
+            <<(passed?json_escape(observation.residual_verifier):"")<<"\",\"error\":\""<<json_escape(error)<<"\"}\n";
     }
     return failures==0?0:1;
 }

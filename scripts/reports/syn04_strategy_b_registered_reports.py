@@ -39,7 +39,7 @@ def adapt(bundle):
     try: raw_events=[json.loads(line) for line in (bundle/"measurement-events.jsonl").read_text(encoding="utf-8").splitlines()]
     except (UnicodeError,json.JSONDecodeError) as error: raise ValueError("SYN-04 raw event file is malformed") from error
     if raw_events!=record["measurement"]["events"]: raise ValueError("SYN-04 raw event file differs")
-    stream=io.StringIO(newline="");fields=("repetition","warmup","elapsed_ns","result_disposition","status","consumed_result_marker","error")
+    stream=io.StringIO(newline="");fields=("repetition","warmup","elapsed_ns","termination","outcome","result_disposition","registry_verified","assurance","canonical_relation_checked","completeness_verifier","completeness_verifier_version","status","consumed_result_marker","trajectory_objective","trajectory_max_residual","absolute_tolerance","relative_tolerance","residual_verifier","error")
     writer=csv.DictWriter(stream,fieldnames=fields,lineterminator="\n");writer.writeheader()
     for event in record["measurement"]["events"]: writer.writerow({key:event[key] for key in fields})
     if (bundle/"trials.csv").read_bytes()!=stream.getvalue().encode("utf-8"): raise ValueError("SYN-04 CSV differs from typed timing events")
