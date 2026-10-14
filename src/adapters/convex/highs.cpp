@@ -1,5 +1,5 @@
 #include <csl/adapters/convex/highs.hpp>
-#include <Highs.h>
+#include "../highs_session.hpp"
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
@@ -101,37 +101,11 @@ ProgramResult result_for(const ConvexProgram& p) {
     return {Termination::numerical_failure,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},
         {"binary64 numerical PSD and original-space KKT checks; no validated outcome certificate"}},{},{},{},{}};
 }
-struct Capture {
-    const ExecutionContext& context;
-    std::optional<Termination> stop;
-    std::string log;
-    void poll() {
-        if(stop) return;
-        if(context.cancellation.stop_requested()) stop=Termination::cancelled;
-        else if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline) stop=Termination::resource_limit;
-    }
-};
-struct Callbacks {
-    Highs& h;
-    Callbacks(Highs& native,Capture& capture):h(native) {
-        require(h.setCallback([](int type,const std::string& message,const HighsCallbackOutput*,HighsCallbackInput* input,void* user) {
-            auto& state=*static_cast<Capture*>(user);
-            if(type==kCallbackLogging) state.log+=message;
-            if(type==kCallbackSimplexInterrupt) { state.poll(); if(input && state.stop) input->user_interrupt=true; }
-        },&capture));
-        try { require(h.startCallback(kCallbackLogging)); require(h.startCallback(kCallbackSimplexInterrupt)); }
-        catch(...) { h.setCallback(HighsCallbackFunctionType{},nullptr); throw; }
-    }
-    ~Callbacks() { h.setCallback(HighsCallbackFunctionType{},nullptr); }
-};
+using Capture=highs_detail::CallbackState;
 void configure(Highs& h,const ExecutionContext& c,const HighsConvexOptions& options,bool qp) {
     require(h.clear());
-    require(h.setOptionValue("output_flag",true)); require(h.setOptionValue("log_to_console",true));
-    require(h.setOptionValue("solver",qp?"choose":"simplex")); require(h.setOptionValue("presolve","off"));
-    require(h.setOptionValue("parallel","off")); require(h.setOptionValue("threads",HighsInt{1}));
-    require(h.setOptionValue("random_seed",HighsInt{0})); require(h.setOptionValue("allow_unbounded_or_infeasible",false));
-    require(h.setOptionValue("small_matrix_value",1e-12)); require(h.setOptionValue("large_matrix_value",kHighsInf));
-    require(h.setOptionValue("infinite_bound",kHighsInf)); require(h.setOptionValue("infinite_cost",kHighsInf));
+    highs_detail::configure_common(h,require);
+    require(h.setOptionValue("solver",qp?"choose":"simplex"));
     const double tolerance=std::max(c.numerical.absolute_tolerance,1e-10);
     require(h.setOptionValue("primal_feasibility_tolerance",tolerance)); require(h.setOptionValue("dual_feasibility_tolerance",tolerance));
     require(h.setOptionValue("simplex_iteration_limit",static_cast<HighsInt>(options.feasibility_iteration_limit.value_or(kHighsIInf))));
@@ -143,11 +117,6 @@ void configure(Highs& h,const ExecutionContext& c,const HighsConvexOptions& opti
     require(h.getOptionValue("qp_regularization_value",regularization));
     if(!warm || nullspace!=4096 || regularization!=0) throw SetupError("native audited profile readback differs");
     h.zeroAllClocks();
-}
-double deadline(Highs& h,const ExecutionContext& c) {
-    const auto remaining=c.deadline?std::max(0.0,std::chrono::duration<double>(*c.deadline-std::chrono::steady_clock::now()).count()):kHighsInf;
-    require(h.setOptionValue("time_limit",remaining));
-    return remaining;
 }
 HighsModel translate(const ConvexProgram& p) {
     const auto& q=p.quadratic_program();
@@ -366,9 +335,9 @@ class Workspace final : public ConvexWorkspace {
         try {
             if(qp) {
                 if(!feasibility_) feasibility_=std::make_unique<Highs>();
-                auto& phase=*feasibility_; configure(phase,c,options_,false); Callbacks phase_callbacks(phase,capture);
+                auto& phase=*feasibility_; configure(phase,c,options_,false); highs_detail::CallbackGuard phase_callbacks(phase,capture,require);
                 auto lp=model.lp_; lp.col_cost_.assign(q.variables().size(),0); lp.offset_=0;
-                require(phase.passModel(lp)); raw<<"\nphase.feasibility.time_limit="<<deadline(phase,c); capture.poll(); if(capture.stop) return finish();
+                require(phase.passModel(lp)); raw<<"\nphase.feasibility.time_limit="<<highs_detail::deadline(phase,c,require); capture.poll(); if(capture.stop) return finish();
                 auto api=phase.run(); const auto status=phase.getModelStatus();
                 raw<<"\nphase.feasibility.api_status="<<static_cast<int>(api)<<"\nphase.feasibility.model_status="<<static_cast<int>(status);
                 if(api!=HighsStatus::kError && phase.getInfo().valid) raw<<"\nphase.feasibility.iterations="<<phase.getInfo().simplex_iteration_count;
@@ -380,7 +349,7 @@ class Workspace final : public ConvexWorkspace {
                     return finish();
                 }
                 if(!solver_) solver_=std::make_unique<Highs>();
-                auto& h=*solver_; configure(h,c,options_,true); Callbacks qp_callbacks(h,capture);
+                auto& h=*solver_; configure(h,c,options_,true); highs_detail::CallbackGuard qp_callbacks(h,capture,require);
                 require(h.passModel(model));
                 HighsSolution start=phase.getSolution(); start.dual_valid=false; start.col_dual.clear(); start.row_dual.clear();
                 require(h.setSolution(start)); require(h.setBasis(phase.getBasis()));
@@ -388,7 +357,7 @@ class Workspace final : public ConvexWorkspace {
                 require(h.getOptionValue("use_warm_start",warm)); require(h.getOptionValue("dual_feasibility_tolerance",tolerance));
                 if(!warm || !feasible_start(h,model.lp_,p,tolerance)) {raw<<"\nqp_run=false\nstart.valid=false";return finish();}
                 raw<<"\nstart.valid=true\nstart.default_fallback=false";
-                raw<<"\nphase.qp.time_limit="<<deadline(h,c); capture.poll(); if(capture.stop) return finish();
+                raw<<"\nphase.qp.time_limit="<<highs_detail::deadline(h,c,require); capture.poll(); if(capture.stop) return finish();
                 api=h.run(); const auto qp_status=h.getModelStatus();
                 raw<<"\nphase.qp.api_status="<<static_cast<int>(api)<<"\nphase.qp.model_status="<<static_cast<int>(qp_status);
                 if(api!=HighsStatus::kError && h.getInfo().valid) raw<<"\nphase.qp.iterations="<<h.getInfo().qp_iteration_count;
@@ -400,11 +369,11 @@ class Workspace final : public ConvexWorkspace {
                     raw<<"\nphase.qp.attempt1=optimal_but_original_checks_rejected";
                     append_attempt_residuals(raw,"phase.qp.attempt1",result);
                     result=result_for(p);
-                    Highs retry; configure(retry,c,options_,true); Callbacks retry_callbacks(retry,capture);
+                    Highs retry; configure(retry,c,options_,true); highs_detail::CallbackGuard retry_callbacks(retry,capture,require);
                     require(retry.passModel(model)); require(retry.setOptionValue("use_warm_start",false));
                     bool retry_warm=true; require(retry.getOptionValue("use_warm_start",retry_warm));
                     if(retry_warm) {raw<<"\nphase.qp.retry=false\nretry.error=warm_start_not_disabled"; return finish();}
-                    raw<<"\nphase.qp.retry=cold_fresh_model\nphase.qp.retry.time_limit="<<deadline(retry,c);
+                    raw<<"\nphase.qp.retry=cold_fresh_model\nphase.qp.retry.time_limit="<<highs_detail::deadline(retry,c,require);
                     capture.poll(); if(capture.stop) return finish();
                     const auto retry_api=retry.run(); const auto retry_status=retry.getModelStatus();
                     raw<<"\nphase.qp.retry.api_status="<<static_cast<int>(retry_api)<<"\nphase.qp.retry.model_status="<<static_cast<int>(retry_status);
@@ -413,8 +382,8 @@ class Workspace final : public ConvexWorkspace {
                 }
             } else {
                 if(!solver_) solver_=std::make_unique<Highs>();
-                auto& h=*solver_; configure(h,c,options_,false); Callbacks callbacks(h,capture);
-                require(h.passModel(model.lp_)); raw<<"\nphase.linear.time_limit="<<deadline(h,c); capture.poll(); if(capture.stop) return finish();
+                auto& h=*solver_; configure(h,c,options_,false); highs_detail::CallbackGuard callbacks(h,capture,require);
+                require(h.passModel(model.lp_)); raw<<"\nphase.linear.time_limit="<<highs_detail::deadline(h,c,require); capture.poll(); if(capture.stop) return finish();
                 const auto api=h.run(); const auto status=h.getModelStatus();
                 raw<<"\nphase.linear.api_status="<<static_cast<int>(api)<<"\nphase.linear.model_status="<<static_cast<int>(status);
                 if(api!=HighsStatus::kError && h.getInfo().valid) raw<<"\nphase.linear.iterations="<<h.getInfo().simplex_iteration_count;
