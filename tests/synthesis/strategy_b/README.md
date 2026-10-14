@@ -153,6 +153,31 @@ Linux suite. Production MSVC Release verification using the commands above
 passed **23 cases / 431 assertions** and **71/71 full CTest tests** on the rebased
 branch. The additional full-suite tests come from merged Strategy A integration.
 
+### Registered T-S02 constant-objective profile
+
+Strategy B now supports one exact analytic profile, `ts02_constant_integrator`,
+for the discrete two-step scalar integrator `x0=0`, `x(t+1)=x(t)+u(t)`,
+`u(t) in [0,1]`, universal state constraints, and no temporal/external inputs.
+Its admitted terminal objectives are a zero linear objective with offset 3, a
+zero quadratic objective with offset 3, or the residual norm `||0*x-3||2`.
+For this profile the optimal relation equals the complete feasible joint-history
+polyhedron. Strategy B builds that H-relation and returns its analytic proposal
+without consulting solver status or witness samples. The compiled shared proof
+authority independently checks the immutable resolved source, effective request,
+strategy lineage, exact objective, canonical H coefficients and objective bounds.
+Both Strategy A and Strategy B use the payload
+`csl::synthesis::Ts02ConstantIntegratorRelation` and verifier
+`csl.verifier.ts02-constant-integrator@1`.
+
+This is an exact-fixture result, not a general completeness procedure for
+constant objectives, arbitrary integrator dimensions, nontrivial state sets,
+other control bounds, external inputs, or temporal constraints. T-S03 and the
+remaining #67 acceptance criteria remain open. Direct focused test command:
+
+```powershell
+& D:/work/PhD/worktrees/syn04-ts02-direct-build/Release/syn04_tests.exe --test-case='Strategy B registers the exact T-S02 constant-objective history family'
+```
+
 ## Unmet acceptance criteria
 
 Complete-family publication and cross-strategy complete-relation acceptance

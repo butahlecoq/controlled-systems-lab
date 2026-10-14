@@ -3,6 +3,7 @@
 #include "strategy_a_lineage.hpp"
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/sets/data.hpp>
 #include <algorithm>
 #include <array>
@@ -52,6 +53,11 @@ bool StrategyBRuntimeLineageReceipt::matches(const StrategyRequest& request,cons
         return false;
 
     const auto problem_id=prepared.problem.identity().value;
+    if(verifier_binding_.id.value==synthesis::ts02_constant_integrator_verifier) {
+        const auto expected=synthesis::strategy_b::detail::expected_ts02_lineage(prepared.problem.identity());
+        return prepared.lineage==expected&&identity.lineage==expected&&
+            feasible_metadata->id==SetId{"syn04-feasible:"+problem_id};
+    }
     const std::vector<TransformStepIdentity> observed_lineage{
         {{"syn04-build:"+problem_id},{problem_id},feasible_metadata->id,{"csl.synthesis.strategy-b"},"1"},
         {{"syn04-extract:"+problem_id},feasible_metadata->id,extracted_metadata->id,{"csl.synthesis.strategy-b"},"1"}};
@@ -111,9 +117,9 @@ bool control_interval(const AdmissibleSet& set) {
         matrix_is(h->equalities,0,1,{})&&vector_is(h->equality_values,{});
 }
 
-bool ts01_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
+bool integrator_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
     const RepresentationId& representation,FamilyTarget target) {
-    if(family.profile!=synthesis::strategy_ts01::profile_id||family.objective!=problem.identity()||
+    if(family.objective!=problem.identity()||
         family.target!=target||family.assurance!=Assurance::numerical||
         family.representation!=h_polyhedron||family.materialization_limit||representation!=h_polyhedron)
         return false;
@@ -146,10 +152,28 @@ bool ts01_case_valid(const ::csl::problem::ResolvedProblem& problem,const Family
         const auto* universal=std::get_if<UniversalSet>(&state);
         if(!universal||universal->dimension!=1)return false;
     }
+    return true;
+}
+bool ts01_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
+    const RepresentationId& representation,FamilyTarget target) {
+    if(family.profile!=synthesis::strategy_ts01::profile_id||!integrator_case_valid(problem,family,representation,target))return false;
     const auto objective=problem.objective();const auto coefficients=objective.coefficients();
     const auto* quadratic=std::get_if<::csl::optimization::QuadraticCoefficients>(&coefficients);
     return quadratic&&objective.dimension()==1&&matrix_is(quadratic->Q,1,1,{2})&&
         vector_is(quadratic->linear,{-2})&&quadratic->offset==1;
+}
+bool ts02_constant_objective_valid(const ::csl::problem::ResolvedProblem& problem) {
+    const auto objective=problem.objective();const auto coefficients=objective.coefficients();
+    return std::visit([](const auto& value) {
+        using T=std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T,::csl::optimization::LinearCoefficients>)
+            return value.coefficients.size()==1&&value.coefficients[0]==0&&value.offset==3;
+        else if constexpr(std::is_same_v<T,::csl::optimization::QuadraticCoefficients>)
+            return value.Q.rows()==1&&value.Q.cols()==1&&value.Q(0,0)==0&&
+                value.linear.size()==1&&value.linear[0]==0&&value.offset==3;
+        else return value.map.rows()==1&&value.map.cols()==1&&value.map(0,0)==0&&
+            value.target.size()==1&&value.target[0]==3;
+    },coefficients);
 }
 bool ts01_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
     return ts01_case_valid(problem,request.family,request.configuration.representation)&&
@@ -170,6 +194,23 @@ bool strategy_a_ts01_profile_valid(const ::csl::problem::ResolvedProblem& proble
     return ts01_case_valid(problem,request.family,request.configuration.representation)&&
         request.configuration.strategy.value=="csl.synthesis.reach-back"&&request.strategy_version=="1"&&
         request.lineage==synthesis::strategy_a::detail::expected_ts01_lineage(problem.identity());
+}
+bool strategy_b_ts02_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
+    return ts02_case_valid(problem,request.family,request.configuration.representation)&&request.configuration.strategy.value=="csl.synthesis.strategy-b"&&
+        request.strategy_version=="1"&&request.lineage==synthesis::strategy_b::detail::expected_ts02_lineage(problem.identity());
+}
+bool strategy_a_ts02_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
+    return ts02_case_valid(problem,request.family,request.configuration.representation)&&request.configuration.strategy.value=="csl.synthesis.reach-back"&&
+        request.strategy_version=="1"&&
+        request.lineage==synthesis::strategy_a::detail::expected_ts01_lineage(problem.identity());
+}
+
+bool ts02_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
+    const RepresentationId& representation) {
+    return family.profile==synthesis::ts02_constant_integrator_profile&&
+        family.target==FamilyTarget::exact_optimal_relation&&
+        integrator_case_valid(problem,family,representation,FamilyTarget::exact_optimal_relation)&&
+        ts02_constant_objective_valid(problem);
 }
 
 }
@@ -247,6 +288,64 @@ public:
             complete.optimum.bounds.lower->value!=0||complete.optimum.bounds.upper->value!=0||
             !same_derivation(complete.optimum.bounds.lower->evidence)||!same_derivation(complete.optimum.bounds.upper->evidence))
             diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.verifier.optimum","T-S01 proof must bind the exact analytic optimum and matching zero lower/upper bounds"});
+        return diagnostics;
+    }
+};
+class Ts02ConstantIntegratorVerifier final : public CompiledCompleteFamilyVerifier {
+public:
+    const ModuleId& id() const noexcept override {
+        static const ModuleId value{synthesis::ts02_constant_integrator_verifier};return value;
+    }
+    const std::string& version() const noexcept override { static const std::string value{"1"};return value; }
+    Diagnostics verify(const StrategyRequest& request,const CompleteFamilyProposal& proposal) const override {
+        Diagnostics diagnostics;
+        const bool strategy_b=strategy_b_ts02_profile_valid(request.problem,request);
+        const bool strategy_a=strategy_a_ts02_profile_valid(request.problem,request);
+        if(!strategy_b&&!strategy_a)
+            return {{DiagnosticCode::unsupported,"ts02.verifier.profile",
+                "Verifier only admits the exact constant-objective two-step integrator profile and registered strategy lineage."}};
+        const auto& identity=proposal.identity;const auto& complete=proposal.family;
+        if(identity.problem!=request.problem.identity()||identity.request!=request.family||
+            identity.coordinates!=request.problem.constraints().coordinates()||
+            identity.strategy!=request.configuration.strategy||identity.strategy_version!=request.strategy_version||
+            identity.lineage!=request.lineage||complete.completeness.binding!=identity||
+            complete.relation.coordinates!=identity.coordinates||
+            complete.relation.representation!=request.family.representation||
+            complete.assurance!=Assurance::numerical)
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts02.verifier.binding",
+                "T-S02 proof must bind the exact resolved problem, effective request, strategy, coordinates and frozen lineage."});
+        const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+        if(!proof||proof->verifier!=id()||proof->verifier_version!=version()||
+            proof->proof!=synthesis::ts02_constant_integrator_proof)
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts02.verifier.support",
+                "T-S02 proof requires the registered constant-integrator analytic payload."});
+        const auto* relation=dynamic_cast<const synthesis::Ts02ConstantIntegratorRelation*>(complete.relation.payload.get());
+        bool exact_relation=false;
+        if(relation) {
+            const auto& set=relation->h_polyhedron();const auto metadata=set.metadata();
+            const auto representation=set.representation();const auto* h=std::get_if<::csl::sets::HRepresentation>(&representation);
+            exact_relation=metadata&&metadata->id==SetId{"ts02-optimal-histories"}&&metadata->set.dimension==5&&
+                metadata->coordinate_labels==std::vector<std::string>{"x0","x1","x2","u0","u1"}&&h&&
+                matrix_is(h->inequalities,4,5,{0,0,0,1,0, 0,0,0,-1,0, 0,0,0,0,1, 0,0,0,0,-1})&&
+                vector_is(h->upper_bounds,{1,0,1,0})&&
+                matrix_is(h->equalities,3,5,{1,0,0,0,0, -1,1,0,-1,0, 0,-1,1,0,-1})&&
+                vector_is(h->equality_values,{0,0,0});
+        }
+        if(!exact_relation)
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts02.verifier.relation",
+                "T-S02 relation must be the exact canonical feasible joint-history H-polyhedron."});
+        const SymbolicArgument derivation{"T-S02 exact constant-objective derivation",
+            "For x0=0, x1=x0+u0, x2=x1+u1 and u0,u1 in [0,1], every feasible history has terminal objective 3. Therefore the argmin relation is exactly the full feasible joint-history polyhedron."};
+        const auto same_claim=[&](const ClaimEvidence& claim) {
+            const auto* support=std::get_if<SymbolicArgument>(&claim.support);
+            return claim.problem==request.problem.identity()&&support&&support->reference==derivation.reference&&
+                support->assumptions==derivation.assumptions;
+        };
+        if(!same_claim(complete.optimum.optimum)||!complete.optimum.bounds.lower||!complete.optimum.bounds.upper||
+            complete.optimum.bounds.lower->value!=3||complete.optimum.bounds.upper->value!=3||
+            !same_claim(complete.optimum.bounds.lower->evidence)||!same_claim(complete.optimum.bounds.upper->evidence))
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts02.verifier.optimum",
+                "T-S02 proof must bind the exact constant objective and equal lower/upper bounds of 3."});
         return diagnostics;
     }
 };
@@ -346,6 +445,8 @@ public:
 std::shared_ptr<const CompiledCompleteFamilyVerifier> find_compiled_verifier(const ModuleId& id,const std::string& version) {
     static const auto ts01=std::make_shared<const Ts01Verifier>();
     if(id==ts01->id()&&version==ts01->version())return ts01;
+    static const auto ts02=std::make_shared<const Ts02ConstantIntegratorVerifier>();
+    if(id==ts02->id()&&version==ts02->version())return ts02;
 #ifdef CSL_TEST_VERIFIER_CATALOG
     static const auto second=std::make_shared<const TestCatalogVerifier>();
     if(id==second->id()&&version==second->version())return second;
