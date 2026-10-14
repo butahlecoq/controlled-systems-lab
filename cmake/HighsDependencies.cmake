@@ -19,6 +19,18 @@ function(csl_add_private_highs)
   if(NOT patch_result EQUAL 0)
     message(FATAL_ERROR "Failed to apply pinned HiGHS downstream patch: ${patch_output}${patch_error}")
   endif()
+  file(SHA256 "${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h" patched_source_sha256)
+  if(WIN32)
+    set(expected_source_sha256 "f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3")
+  else()
+    set(expected_source_sha256 "8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b")
+  endif()
+  if(NOT patched_source_sha256 STREQUAL expected_source_sha256)
+    message(FATAL_ERROR "Configured HiGHS patch hash is not the verified platform postimage: ${patched_source_sha256}")
+  endif()
+  set(CSL_HIGHS_PATCHED_SOURCE_SHA256 "${patched_source_sha256}" PARENT_SCOPE)
+  target_compile_definitions(csl_highs_lp PRIVATE
+    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${patched_source_sha256}\"")
   add_test(NAME pinned_highs_patch_contract
     COMMAND "${CMAKE_COMMAND}"
       "-DUPSTREAM_HEADER=${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h"

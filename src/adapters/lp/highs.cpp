@@ -166,7 +166,7 @@ class HighsLPWorkspace final : public LPWorkspace {
         raw << std::setprecision(17) << "adapter.version=" << adapter_version
             << "\nnative.version=" << highsVersion() << "\nnative.githash=" << highsGithash()
             << "\nnative.archive_sha256=" << archive_hash
-            << "\nnative.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b"
+            << "\nnative.downstream.hvectorbase_sha256=" << CSL_HIGHS_PATCHED_SOURCE_SHA256
             << "\nprogram.problem=" << p.identity().problem.value << "\nprogram.id=" << p.identity().program.value
             << "\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1"
             << "\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback"
