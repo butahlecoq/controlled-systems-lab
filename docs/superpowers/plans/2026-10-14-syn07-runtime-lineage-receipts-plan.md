@@ -27,9 +27,11 @@
 
 ## Task Ledger
 
-- [ ] Task 1 — Add the private runtime receipt and verifier acceptance contract with failing behavior tests.
-- [ ] Task 2 — Integrate the receipt-producing Strategy B execution path and adversarial caller-path tests.
+- [x] Task 1 — Add the private runtime receipt and verifier acceptance contract with failing behavior tests.
+- [x] Task 2 — Integrate the receipt-producing Strategy B execution path and adversarial caller-path tests.
 - [ ] Task 3 — Run full verification, obtain independent Standards and Spec review, fix findings, and prepare the PR.
+
+Task 1 and Task 2 are implemented in commits `74c40bc` and `0a2d918`. The Release build and full 76-test CTest run pass after reconfiguring CMake to embed the current branch SHA. Independent review and PR publication remain in Task 3.
 
 ## Rulings
 
