@@ -48,7 +48,7 @@ The [registered synthesis comparison example](examples/registered_synthesis_comp
 
 ## Current numerical reports
 
-Open the published [reference LP report](https://butahlecoq.github.io/controlled-systems-lab/lp-20261012T000346Z-ee5e9193b7a5/index.html) and [reference convex report](https://butahlecoq.github.io/controlled-systems-lab/convex-20261012T041854Z-4d54a407c9b2/index.html), including raw records, figures and source provenance. These are single-adapter measurements on analytic fixtures, not a two-strategy control comparison or speedup claim. [Repository copies and offline ZIPs](reports/algorithm-results/index.html) remain available. Example test durations, including the planned functional synthesis example, are not benchmarks.
+Open the published [reference LP report](https://butahlecoq.github.io/controlled-systems-lab/lp-20261012T000346Z-ee5e9193b7a5/index.html) and [reference convex report](https://butahlecoq.github.io/controlled-systems-lab/convex-20261012T041854Z-4d54a407c9b2/index.html), including raw records, figures and source provenance. These are single-adapter measurements on analytic fixtures, not a two-strategy control comparison or speedup claim. [Repository copies and offline ZIPs](reports/algorithm-results/index.html) remain available. Example test durations, including the functional synthesis example, are not benchmarks.
 
 ## Research and contracts
 
