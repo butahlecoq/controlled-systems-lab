@@ -18,6 +18,8 @@ from report import (HARNESS_PATH_ALLOWLIST, PHASES, SCENARIOS, bind_fixture_iden
                     is_reviewed_artifact_path, reviewed_artifact_path_policy,
                     scenario_order, strict_json_loads, validate_cmake_delta, validate_source_tree_delta)
 from smoke import validate_smoke
+sys.path.append(str(Path(__file__).resolve().parents[4] / "scripts" / "reports"))
+import collector_common
 
 
 def _git(*args: str) -> str:
@@ -33,81 +35,16 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _run_capture(command: list[str], timeout_seconds: int = 600) -> tuple[str, str, int, bool]:
-    try:
-        completed = subprocess.run(command, text=True, capture_output=True, timeout=timeout_seconds)
-        return completed.stdout or "", completed.stderr or "", completed.returncode, False
-    except subprocess.TimeoutExpired as timeout:
-        decode = lambda value: value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
-        return decode(timeout.stdout), decode(timeout.stderr), 124, True
-
-
-def _redact_paths(value, source_root: Path, build_root: Path):
-    if isinstance(value, str):
-        for path, token in ((build_root, "BUILD_ROOT"), (source_root, "SOURCE_ROOT"),
-                            (Path.home(), "USER_HOME")):
-            value = value.replace(str(path), token).replace(str(path).replace("\\", "/"), token)
-        return value
-    if isinstance(value, list):
-        return [_redact_paths(item, source_root, build_root) for item in value]
-    if isinstance(value, dict):
-        return {key: _redact_paths(item, source_root, build_root) for key, item in value.items()}
-    return value
+_run_capture = collector_common.capture_process
+_redact_paths = collector_common.redact_paths
 
 
 def _release_graph(build: Path, exe: Path, source_root: Path) -> dict:
-    reply = build / ".cmake" / "api" / "v1" / "reply"
-    indices = sorted(reply.glob("index-*.json"))
-    if not indices:
-        raise ValueError("CMake File API reply missing; query codemodel-v2 and toolchains-v1 before configuring")
-    index = strict_json_loads(indices[-1].read_text(encoding="utf-8"))
-    load = lambda name: strict_json_loads((reply / name).read_text(encoding="utf-8"))
-    codemodel = load(index["reply"]["codemodel-v2"]["jsonFile"])
-    configurations = [item for item in codemodel["configurations"] if item["name"] == "Release"]
-    if len(configurations) != 1:
-        raise ValueError("actual Release configuration missing from CMake File API")
-    targets = {item["id"]: load(item["jsonFile"]) for item in configurations[0]["targets"]}
-    roots = [key for key, target in targets.items() if target.get("name") == "csl_geo05_projection_predecessor_report"]
-    if len(roots) != 1:
-        raise ValueError("GEO-05 executable missing from configured Release graph")
-    selected: dict[str, dict] = {}
-    def visit(key: str) -> None:
-        if key in selected:
-            return
-        target = targets[key]
-        selected[key] = {field: target[field] for field in
-                         ("name", "type", "compileGroups", "link", "archive", "artifacts") if field in target}
-        for dependency in target.get("dependencies", []):
-            visit(dependency["id"])
-    visit(roots[0])
-    root = targets[roots[0]]
-    artifacts = [build / item["path"] for item in root.get("artifacts", [])
-                 if Path(item["path"]).name == exe.name]
-    if len(artifacts) != 1 or artifacts[0].resolve() != exe.resolve():
-        raise ValueError("provided executable is not the configured Release target artifact")
-    groups = [group for group in root.get("compileGroups", []) if group.get("language") == "CXX"]
-    if len(groups) != 1 or groups[0].get("languageStandard", {}).get("standard") != "20":
-        raise ValueError("driver must have a C++20 Release compile group")
-    flags = " ".join(fragment["fragment"] for fragment in groups[0].get("compileCommandFragments", []))
-    if "/DNDEBUG" not in flags and "-DNDEBUG" not in flags:
-        raise ValueError("Release/NDEBUG flag missing from actual driver compile group")
-    toolchains = load(index["reply"]["toolchains-v1"]["jsonFile"])["toolchains"]
-    compilers = [item for item in toolchains if item.get("language") == "CXX"]
-    if len(compilers) != 1:
-        raise ValueError("configured C++ compiler missing")
-    required = {"csl_geo05_projection_predecessor_report", "csl_polyhedral", "csl_sets",
-                "csl_optimization", "csl_registry", "csl_numeric", "csl_contracts"}
-    names = {item["name"] for item in selected.values()}
-    if not required <= names:
-        raise ValueError(f"report dependency graph is incomplete: {sorted(required-names)}")
-    paths = codemodel["paths"]
-    if not Path(paths["source"]).samefile(source_root) or not Path(paths["build"]).samefile(build):
-        raise ValueError("CMake source/build path ownership differs from this collection")
-    return {"cmake": {"version": index.get("cmake", {}).get("version"),
-                      "generator": index.get("cmake", {}).get("generator", {}).get("name")},
-            "compiler": _redact_paths(compilers[0], source_root, build), "dependency_targets": sorted(names),
-            "file_api_paths": _redact_paths(paths, source_root, build),
-            "targets": _redact_paths(list(selected.values()), source_root, build)}
+    return collector_common.release_graph(build, exe, source_root,
+        target_name="csl_geo05_projection_predecessor_report",
+        required={"csl_geo05_projection_predecessor_report", "csl_polyhedral", "csl_sets",
+                  "csl_optimization", "csl_registry", "csl_numeric", "csl_contracts"},
+        load_json=strict_json_loads)
 
 
 def _validate_build_log(build_log: Path, build: Path, exe: Path, source_root: Path) -> None:
@@ -135,32 +72,20 @@ def build_provenance(build: Path, exe: Path, source_commit: str,
     validate_source_tree_delta(changed)
     source_cmake = subprocess.check_output(["git", "show", f"{source_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
     harness_cmake = subprocess.check_output(["git", "show", f"{harness_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
-    validate_cmake_delta(source_cmake, harness_cmake)
+    if source_commit != harness_commit:
+        validate_cmake_delta(source_cmake, harness_cmake)
     _release_graph(build, exe, source_root)
-    command = ["cmake", "--build", str(build), "--config", "Release", "--target",
-               "csl_geo05_projection_predecessor_report", "--clean-first", "--verbose"]
-    try:
-        stdout, stderr, return_code, timed_out = _run_capture(command)
-    except OSError as error:
-        stdout, stderr, return_code, timed_out = "", str(error), 127, False
-    fresh_build = _redact_paths({"command": command, "source_commit": source_commit,
-                                "harness_commit": harness_commit, "stdout": stdout,
-                                "stderr": stderr, "return_code": return_code,
-                                "timed_out": timed_out}, source_root, build)
-    _validate_build_log(build_log.resolve(), build, exe, source_root)
-    build_log.parent.mkdir(parents=True, exist_ok=True)
-    build_log.write_text(json.dumps(fresh_build, indent=2, allow_nan=False)+"\n", encoding="utf-8")
-    if return_code or timed_out:
-        reason = "timed out" if timed_out else "failed"
-        raise ValueError(f"fresh Release rebuild {reason} (exit {return_code}); diagnostics saved to "
-                         f"{_redact_paths(str(build_log), source_root, build)}")
+    fresh_build = collector_common.fresh_release_build(
+        build, "csl_geo05_projection_predecessor_report", build_log, source_root,
+        source_commit=source_commit, harness_commit=harness_commit, run=_run_capture,
+        validate_log=lambda: _validate_build_log(build_log.resolve(), build, exe, source_root))
     if _git("rev-parse", "HEAD") != harness_commit:
         raise ValueError("harness HEAD changed during the fresh Release rebuild")
     if _git("status", "--porcelain=v1"):
         raise ValueError("source and harness worktree must remain clean during the fresh Release rebuild")
-    graph = _release_graph(build, exe, source_root)
     if not exe.is_file():
         raise ValueError("fresh Release rebuild did not produce the configured executable")
+    graph = _release_graph(build, exe, source_root)
     return {"source_commit": source_commit, "harness_commit": harness_commit,
             "tracked_clean": True, "tracked_tree_binding": {
                 "scope": "complete tracked repository tree",
@@ -198,29 +123,17 @@ def _matrix_error(rows: list[dict], repetitions: int) -> None:
         raise ValueError("attempts are duplicated or out of fixed alternating order")
 
 
-def _durable_text(path: Path, source: str) -> None:
-    with path.open("w", encoding="utf-8") as stream:
-        stream.write(source)
-        stream.flush()
-        os.fsync(stream.fileno())
+_durable_text = collector_common.durable_text
 
 
 def _write_capture(out: Path, stdout: str, stderr: str, command: list[str],
                    process_return_code: int, timed_out: bool) -> None:
-    out.mkdir(parents=True, exist_ok=False)
-    _durable_text(out / "stdout.jsonl", stdout)
-    _durable_text(out / "stderr.txt", stderr)
-    _durable_text(out / "command.json", json.dumps(command, indent=2)+"\n")
-    _durable_text(out / "process-capture.json", json.dumps({
-        "schema": "csl.geo05-process-capture/1", "process_return_code": process_return_code,
-        "timed_out": timed_out, "stdout_file_sha256": _sha(out / "stdout.jsonl"),
-        "stderr_file_sha256": _sha(out / "stderr.txt")}, indent=2)+"\n")
+    collector_common.write_capture(out, stdout, stderr, command, process_return_code, timed_out,
+                                   schema="csl.geo05-process-capture/1")
 
 
 def _write_validation_error(out: Path, error: Exception) -> None:
-    _durable_text(out / "validation-error.json", json.dumps({
-        "schema": "csl.geo05-rejected-capture/1", "error_type": type(error).__name__,
-        "error": str(error)}, indent=2)+"\n")
+    collector_common.write_validation_error(out, error, schema="csl.geo05-rejected-capture/1")
 
 
 def _finish_collection(out: Path, rows: list[dict], provenance: dict, repetitions: int,

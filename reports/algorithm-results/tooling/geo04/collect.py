@@ -92,18 +92,7 @@ def vertices_match_expected(points: list, expected_points: list, tolerance: floa
     return len(consumed) == len(expected_points)
 
 
-def redact_paths(value, source_root: Path, build: Path):
-    replacements = [(str(source_root), "SOURCE_ROOT"), (str(build), "BUILD_ROOT"),
-                    (str(Path.home()), "USER_HOME")]
-    if isinstance(value, str):
-        for actual, token in replacements:
-            value = value.replace(actual, token).replace(actual.replace("\\", "/"), token)
-        return value
-    if isinstance(value, list):
-        return [redact_paths(item, source_root, build) for item in value]
-    if isinstance(value, dict):
-        return {key: redact_paths(item, source_root, build) for key, item in value.items()}
-    return value
+redact_paths = collector_common.redact_paths
 
 
 def clean_tracked() -> None:
@@ -119,69 +108,36 @@ def build_provenance(build: Path, exe: Path, source_commit: str, harness_commit:
     validate_source_tree_delta([path for path in changed_paths if path != "CMakeLists.txt"])
     source_cmake = subprocess.check_output(["git", "show", f"{source_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
     harness_cmake = subprocess.check_output(["git", "show", f"{harness_commit}:CMakeLists.txt"], text=True, encoding="utf-8")
-    validate_cmake_delta(source_cmake, harness_cmake)
+    if source_commit != harness_commit:
+        validate_cmake_delta(source_cmake, harness_cmake)
     source_tree_oid = git("rev-parse", f"{source_commit}^{{tree}}")
     harness_tree_oid = git("rev-parse", f"{harness_commit}^{{tree}}")
-    reply = build / ".cmake" / "api" / "v1" / "reply"
-    indices = sorted(reply.glob("index-*.json"))
-    if not indices:
-        raise ValueError("CMake File API reply missing; query codemodel-v2 and toolchains-v1 before configuring")
-    index = json.loads(indices[-1].read_text(encoding="utf-8"))
-    def load(filename: str) -> dict:
-        return json.loads((reply / filename).read_text(encoding="utf-8"))
-    codemodel = load(index["reply"]["codemodel-v2"]["jsonFile"])
-    configurations = [item for item in codemodel["configurations"] if item["name"] == "Release"]
-    if len(configurations) != 1:
-        raise ValueError("actual Release configuration missing from CMake File API")
-    targets = {item["id"]: load(item["jsonFile"]) for item in configurations[0]["targets"]}
-    roots = [key for key, target in targets.items() if target["name"] == "csl_geo04_intersection_report"]
-    if len(roots) != 1:
-        raise ValueError("GEO-04 report executable missing from configured Release graph")
-    selected: dict[str, dict] = {}
-    def visit(key: str) -> None:
-        if key in selected:
-            return
-        target = targets[key]
-        selected[key] = {field: target[field] for field in ("name", "type", "compileGroups", "link", "archive", "artifacts") if field in target}
-        for dep in target.get("dependencies", []):
-            visit(dep["id"])
-    visit(roots[0])
-    root = targets[roots[0]]
-    artifacts = [build / artifact["path"] for artifact in root.get("artifacts", []) if Path(artifact["path"]).name == exe.name]
-    if len(artifacts) != 1 or not artifacts[0].is_file() or not artifacts[0].samefile(exe):
-        raise ValueError("provided executable is not the configured Release target artifact")
-    compile_groups = [group for group in root.get("compileGroups", []) if group.get("language") == "CXX"]
-    if len(compile_groups) != 1 or compile_groups[0].get("languageStandard", {}).get("standard") != "20":
-        raise ValueError("report driver must have one C++20 Release compile group")
-    flags = " ".join(fragment["fragment"] for fragment in compile_groups[0].get("compileCommandFragments", []))
-    if "/DNDEBUG" not in flags and "-DNDEBUG" not in flags:
-        raise ValueError("Release/NDEBUG flag missing from actual report driver compile group")
-    toolchains = load(index["reply"]["toolchains-v1"]["jsonFile"])["toolchains"]
-    cxx = [item for item in toolchains if item.get("language") == "CXX"]
-    if len(cxx) != 1:
-        raise ValueError("actual C++ toolchain missing")
-    names = {target["name"] for target in selected.values()}
-    required = {"csl_geo04_intersection_report", "csl_polyhedral", "csl_qhull_conversion", "csl_highs_lp", "highs", "csl_optimization", "csl_registry", "csl_sets", "csl_numeric"}
-    if not required <= names:
-        raise ValueError("report executable dependency graph is incomplete")
+    source_root = Path(git("rev-parse", "--show-toplevel")).resolve()
+    required = {"csl_geo04_intersection_report", "csl_polyhedral", "csl_qhull_conversion", "csl_highs_lp",
+                "highs", "csl_optimization", "csl_registry", "csl_sets", "csl_numeric"}
+    def graph():
+        return collector_common.release_graph(build, exe, source_root,
+            target_name="csl_geo04_intersection_report", required=required)
+    graph()
+    fresh_build = collector_common.fresh_release_build(
+        build, "csl_geo04_intersection_report", build / "geo04-fresh-build.json", source_root,
+        source_commit=source_commit, harness_commit=harness_commit)
+    clean_tracked()
+    if git("rev-parse", "HEAD") != harness_commit:
+        raise ValueError("harness HEAD changed during the fresh Release rebuild")
+    actual_graph = graph()
     source_root = Path(git("rev-parse", "--show-toplevel")).resolve()
     pin_files = [Path("cmake/HighsDependencies.cmake"), Path("cmake/QhullDependencies.cmake")]
     dependency_pins = {str(path).replace("\\", "/"): hashlib.sha256((source_root / path).read_bytes()).hexdigest()
                        for path in pin_files}
-    paths = codemodel["paths"]
-    if not Path(paths["source"]).samefile(source_root) or not Path(paths["build"]).samefile(build):
-        raise ValueError("CMake source/build path ownership differs from this collection")
-    cmake_version = index.get("cmake", {}).get("version", {})
     return {"source_commit": source_commit, "harness_commit": harness_commit, "tracked_clean": True,
             "tracked_tree_binding": {"scope": "complete tracked repository tree", "source_tree_oid": source_tree_oid,
                                      "harness_tree_oid": harness_tree_oid, "allowed_harness_delta": sorted(HARNESS_PATH_ALLOWLIST),
                                      "actual_changed_paths": changed_paths},
             "executable": {"name": exe.name, "sha256": hashlib.sha256(exe.read_bytes()).hexdigest()},
-            "cmake": {"version": cmake_version, "generator": index.get("cmake", {}).get("generator", {}).get("name")},
-            "configuration": "Release", "cxx_standard": "20", "compiler": cxx[0],
-            "dependency_pin_file_sha256": dependency_pins,
-            "driver_compile_group": compile_groups[0], "dependency_targets": sorted(names),
-            "file_api_paths": paths, "targets": list(selected.values())}
+            "configuration": "Release", "cxx_standard": "20",
+            "dependency_pin_file_sha256": dependency_pins, "fresh_build": fresh_build, **actual_graph}
+
 
 
 def summarize(trials: list[dict], complete_group: bool) -> dict:
@@ -222,23 +178,9 @@ def main() -> int:
     if args.out.exists():
         parser.error(f"refusing to overwrite existing collection: {args.out}")
     build = args.build_dir.resolve()
-    reply = build / ".cmake" / "api" / "v1" / "reply"
-    indices = sorted(reply.glob("index-*.json"))
-    if not indices:
-        parser.error("CMake File API query/reply missing; configure with codemodel-v2 and toolchains-v1 queries")
-    index = json.loads(indices[-1].read_text(encoding="utf-8"))
-    cmake = index["cmake"]["paths"]["cmake"]
-    final_build_command = [cmake, "--build", str(build), "--config", "Release", "--target", "csl_geo04_intersection_report", "--parallel", "4", "--verbose"]
-    final_build = subprocess.run(final_build_command, text=True, capture_output=True, check=False, timeout=1200)
-    if final_build.returncode:
-        args.out.mkdir(parents=True)
-        (args.out / "final-build-stdout.txt").write_text(final_build.stdout, encoding="utf-8")
-        (args.out / "final-build-stderr.txt").write_text(final_build.stderr, encoding="utf-8")
-        raise SystemExit(f"final Release build failed ({final_build.returncode}); logs saved to {args.out}")
     provenance = build_provenance(build, args.exe.resolve(), args.source_commit, args.harness_commit)
-    provenance["final_build"] = {"command": final_build_command, "return_code": final_build.returncode,
-                                 "stdout_sha256": sha256_bytes(final_build.stdout.encode()),
-                                 "stderr_sha256": sha256_bytes(final_build.stderr.encode())}
+    final_build = provenance["fresh_build"]
+    final_build_command = final_build["command"]
     out = args.out
     if out.exists():
         parser.error(f"refusing to overwrite existing collection: {out}")
@@ -246,30 +188,27 @@ def main() -> int:
     safe_provenance = redact_paths(provenance, source_root, build)
     out.mkdir(parents=True)
     (out / "build-provenance.json").write_text(json.dumps(safe_provenance, indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
-    safe_stdout = redact_paths(final_build.stdout, source_root, build)
-    safe_stderr = redact_paths(final_build.stderr, source_root, build)
+    safe_stdout = redact_paths(final_build["stdout"], source_root, build)
+    safe_stderr = redact_paths(final_build["stderr"], source_root, build)
     (out / "build-provenance.txt").write_text(safe_stdout+"\n--- STDERR ---\n"+safe_stderr+
         "\n--- FILE API ---\n"+json.dumps(safe_provenance,indent=2,ensure_ascii=False)+"\n", encoding="utf-8")
     (out / "final-build-command.txt").write_text(redact_paths(subprocess.list2cmdline(final_build_command),source_root,build)+"\n", encoding="utf-8")
     command = [str(args.exe.resolve()), "--repetitions", str(args.repetitions), "--warmups", str(args.warmups)]
     before = collector_common.machine_snapshot()
     executable_hash = hashlib.sha256(args.exe.read_bytes()).hexdigest()
-    aborted = False
+    stdout, stderr, return_code, aborted = collector_common.capture_process(command, timeout_seconds=300)
+    collector_common.write_capture(out, stdout, stderr, command, return_code, aborted,
+        schema="csl.geo04-process-capture/1", stdout_name="raw-driver-output.csv",
+        stderr_name="process-stderr.txt", create=False)
     try:
-        process = subprocess.run(command, text=True, capture_output=True, check=False, timeout=300)
-        return_code, stdout, stderr = process.returncode, process.stdout, process.stderr
-    except subprocess.TimeoutExpired as error:
-        aborted = True
-        return_code = None
-        stdout = error.stdout.decode(errors="replace") if isinstance(error.stdout, bytes) else (error.stdout or "")
-        stderr = error.stderr.decode(errors="replace") if isinstance(error.stderr, bytes) else (error.stderr or "")
-    if hashlib.sha256(args.exe.read_bytes()).hexdigest() != executable_hash:
-        raise SystemExit("measurement executable changed while collection was running")
-    clean_tracked()
+        if hashlib.sha256(args.exe.read_bytes()).hexdigest() != executable_hash:
+            raise ValueError("measurement executable changed while collection was running")
+        clean_tracked()
+    except Exception as error:
+        collector_common.write_validation_error(out, error, schema="csl.geo04-rejected-capture/1")
+        raise
     after = collector_common.machine_snapshot()
     machine_load = collector_common.public_load(copy.deepcopy(before),copy.deepcopy(after))
-    (out / "raw-driver-output.csv").write_text(stdout, encoding="utf-8")
-    (out / "process-stderr.txt").write_text(stderr, encoding="utf-8")
     (out / "measurement-command.txt").write_text(redact_paths(subprocess.list2cmdline(command),source_root,build) + "\n", encoding="utf-8")
     concurrent_note = args.concurrent_work.read_text(encoding="utf-8", errors="replace").strip()
     profile_note = args.profile_evidence.read_text(encoding="utf-8", errors="replace").strip()
@@ -299,10 +238,10 @@ def main() -> int:
         actual = {(row["scenario"], row["repetition"]) for row in trials}
         if actual != expected or len(actual) != len(trials):
             raise ValueError("missing, duplicate, or unexpected scenario repetitions")
-    except (ValueError, KeyError, csv.Error) as error:
+    except (ValueError, KeyError, TypeError, csv.Error) as error:
         parse_error = str(error)
     if parse_error:
-        trials = []
+        collector_common.write_validation_error(out, ValueError(parse_error), schema="csl.geo04-rejected-capture/1")
     for row in trials:
         expected_case = EXPECTED.get(row["scenario"])
         if expected_case is None:
@@ -383,6 +322,9 @@ def main() -> int:
     (out / "raw-events.jsonl").write_text("".join(json.dumps(row, sort_keys=True, allow_nan=False)+"\n" for row in trials), encoding="utf-8")
     (out / "scenarios.json").write_text(json.dumps(EXPECTED, indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
     (out / "environment.json").write_text(json.dumps(payload["environment"], indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
+    if all_passed:
+        (out / "process-capture.json").unlink()
+        (out / "command.json").unlink()
     print(report_id)
     return 0 if all_passed else 2
 

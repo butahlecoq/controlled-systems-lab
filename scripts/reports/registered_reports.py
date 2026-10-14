@@ -1,5 +1,5 @@
 """Explicit boundary adapters for validated non-LP report records."""
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import csv
 import hashlib
 import json
@@ -232,8 +232,10 @@ def adapt(bundle):
     if result.kind in ("opt05-hull", "opt06-basis-reuse"):
         _validate_opt05_bundle_zip(bundle, listed)
     public_id = _publication_id(bundle, result.source_report_id, actual_files)
-    return PublicationRecord(result.kind, public_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema, source_report_id=result.source_report_id)
+    publication = PublicationRecord(result.kind, public_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema, source_report_id=result.source_report_id)
 
+
+    return preserve_historical_publication(bundle, publication, offline_zip)
 
 def _publication_id(bundle, source_id, source_files):
     # Source files contain no publication output, so hashing the full validated
@@ -451,3 +453,62 @@ def offline_zip(bundle, publication):
     bundle=Path(bundle)
     files=publication_artifacts(bundle,publication)
     return publication_zip(publication.report_id,files)
+
+
+def validate_source_inventory(bundle, listed, expected_files, *, label):
+    """Apply the same local-file and complete-inventory boundary to native kinds."""
+    bundle = Path(bundle)
+    if bundle.is_symlink():
+        raise ValueError(f"{label} source bundle cannot be a symlink")
+    if not isinstance(listed, dict) or set(listed) != set(expected_files):
+        raise ValueError(f"{label} registered source inventory mismatch")
+    expected = set(expected_files) | {"manifest.json"}
+    actual = set()
+    for path in bundle.rglob("*"):
+        if path.is_symlink():
+            raise ValueError(f"symlinks are forbidden in {label} bundle")
+        if path.is_file():
+            actual.add(path.relative_to(bundle).as_posix())
+    if actual != expected:
+        raise ValueError(f"{label} bundle has missing or unregistered files")
+    for name, digest in listed.items():
+        relative = Path(name)
+        if (not isinstance(name, str) or relative.is_absolute() or ".." in relative.parts
+                or "\\" in name or ":" in name or not name or
+                not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None):
+            raise ValueError(f"unsafe {label} bundle file: {name}")
+        path = bundle / relative
+        if not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise ValueError(f"{label} source file hash mismatch: {name}")
+
+
+def assemble_publication(bundle, publication, *, page, envelope, source_files):
+    """Stage the common page/envelope/manifest inventory from admitted native data."""
+    bundle = Path(bundle)
+    files = {name: (bundle / name).read_bytes() for name in source_files if name != "index.html"}
+    files["index.html"] = page.encode("utf-8")
+    files["report-envelope.json"] = _json_bytes(envelope)
+    files["publication-manifest.json"] = _json_bytes({
+        "schema": "csl.algorithm-report-publication-manifest/1", "report_id": publication.report_id,
+        "report_kind": publication.kind,
+        "files": {name: hashlib.sha256(files[name]).hexdigest() for name in sorted(files)}})
+    return files
+
+
+# Exact pre-#251 source and publication bytes; never applies to changed evidence.
+_HISTORICAL_PUBLICATIONS = {'geo04-20261012T224946Z-c37852bcc80d': {'inventory_sha256': '5a5ec6f0ffbe4731c5e1ed6287ee46e86bde7ca3d79c4ea4c7ba49f5b55bc1e5', 'report_id': 'geo04-20261012T224946Z-30606c76deb657567eb86a451c474c5aa796827651262a550b15fa4cb4ece549', 'zip_sha256': 'a708532a9068fa8127f742b7370f38836ce31e7af2d09f8633caf97ed8946db1'}, 'geo05-4dc3c0557570a52e': {'inventory_sha256': '4e01fdca414522270a70b80818273c1e7b8baf80a223d4e76514936a4cb46f1c', 'report_id': 'geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795', 'zip_sha256': '51826297b765b011423ca58fb3160fbdd4884c176d73adaf5eabc5f2508fefba'}, 'opt06-basis-reuse-20261014-ef70e8c5-r2': {'inventory_sha256': 'a4f8e08919479c26ccb6cb03f5e50fe2e2972c2132b2b625aef5c22541149a11', 'report_id': 'opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d', 'zip_sha256': '165fe50a882e37334e30e3bd04f613b261fb801c540fe806304942ac146c361f'}}
+
+
+def preserve_historical_publication(bundle, publication, archive_builder):
+    pin = _HISTORICAL_PUBLICATIONS.get(publication.source_report_id)
+    if pin is None:
+        return publication
+    bundle = Path(bundle)
+    inventory = {path.relative_to(bundle).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+                 for path in sorted(bundle.rglob("*")) if path.is_file()}
+    if _digest(inventory) != pin["inventory_sha256"]:
+        return publication
+    historical = replace(publication, report_id=pin["report_id"])
+    if hashlib.sha256(archive_builder(bundle, historical)).hexdigest() != pin["zip_sha256"]:
+        return publication
+    return historical

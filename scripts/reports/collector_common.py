@@ -406,3 +406,135 @@ def main(profile=LP):
 
 
 if __name__=="__main__": raise SystemExit(main())
+
+
+# Filesystem/process lifecycle shared by the standalone geometry collectors.
+def capture_process(command: list[str], timeout_seconds: int = 600) -> tuple[str, str, int, bool]:
+    try:
+        completed = subprocess.run(command, text=True, capture_output=True, timeout=timeout_seconds)
+        return completed.stdout or "", completed.stderr or "", completed.returncode, False
+    except OSError as error:
+        return "", str(error), 127, False
+    except subprocess.TimeoutExpired as timeout:
+        decode = lambda value: value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
+        return decode(timeout.stdout), decode(timeout.stderr), 124, True
+
+
+def redact_paths(value, source_root: Path, build_root: Path):
+    if isinstance(value, str):
+        for path, token in ((build_root, "BUILD_ROOT"), (source_root, "SOURCE_ROOT"),
+                            (Path.home(), "USER_HOME")):
+            value = value.replace(str(path), token).replace(str(path).replace("\\", "/"), token)
+        return value
+    if isinstance(value, list):
+        return [redact_paths(item, source_root, build_root) for item in value]
+    if isinstance(value, dict):
+        return {key: redact_paths(item, source_root, build_root) for key, item in value.items()}
+    return value
+
+
+def release_graph(build: Path, exe: Path, source_root: Path, *, target_name: str, required: set[str], load_json=json.loads) -> dict:
+    reply = build / ".cmake" / "api" / "v1" / "reply"
+    indices = sorted(reply.glob("index-*.json"))
+    if not indices:
+        raise ValueError("CMake File API reply missing; query codemodel-v2 and toolchains-v1 before configuring")
+    index = load_json(indices[-1].read_text(encoding="utf-8"))
+    def load(name):
+        if not isinstance(name, str) or Path(name).name != name or ":" in name or "\\" in name:
+            raise ValueError("unsafe CMake File API reply path")
+        path = reply / name
+        if path.is_symlink():
+            raise ValueError("symlink CMake File API reply")
+        return load_json(path.read_text(encoding="utf-8"))
+    codemodel = load(index["reply"]["codemodel-v2"]["jsonFile"])
+    configurations = [item for item in codemodel["configurations"] if item["name"] == "Release"]
+    if len(configurations) != 1:
+        raise ValueError("actual Release configuration missing from CMake File API")
+    targets = {item["id"]: load(item["jsonFile"]) for item in configurations[0]["targets"]}
+    roots = [key for key, target in targets.items() if target.get("name") == target_name]
+    if len(roots) != 1:
+        raise ValueError("report executable missing from configured Release graph")
+    selected: dict[str, dict] = {}
+    def visit(key: str) -> None:
+        if key in selected:
+            return
+        target = targets[key]
+        selected[key] = {field: target[field] for field in
+                         ("name", "type", "compileGroups", "link", "archive", "artifacts") if field in target}
+        for dependency in target.get("dependencies", []):
+            visit(dependency["id"])
+    visit(roots[0])
+    root = targets[roots[0]]
+    artifacts = [build / item["path"] for item in root.get("artifacts", [])
+                 if Path(item["path"]).name == exe.name]
+    if len(artifacts) != 1 or (not artifacts[0].is_file() or not exe.is_file() or not artifacts[0].samefile(exe)):
+        raise ValueError("provided executable is not the configured Release target artifact")
+    groups = [group for group in root.get("compileGroups", []) if group.get("language") == "CXX"]
+    if len(groups) != 1 or groups[0].get("languageStandard", {}).get("standard") != "20":
+        raise ValueError("driver must have a C++20 Release compile group")
+    flags = " ".join(fragment["fragment"] for fragment in groups[0].get("compileCommandFragments", []))
+    if "/DNDEBUG" not in flags and "-DNDEBUG" not in flags:
+        raise ValueError("Release/NDEBUG flag missing from actual driver compile group")
+    toolchains = load(index["reply"]["toolchains-v1"]["jsonFile"])["toolchains"]
+    compilers = [item for item in toolchains if item.get("language") == "CXX"]
+    if len(compilers) != 1:
+        raise ValueError("configured C++ compiler missing")
+    names = {item["name"] for item in selected.values()}
+    if not required <= names:
+        raise ValueError(f"report dependency graph is incomplete: {sorted(required-names)}")
+    paths = codemodel["paths"]
+    if not Path(paths["source"]).samefile(source_root) or not Path(paths["build"]).samefile(build):
+        raise ValueError("CMake source/build path ownership differs from this collection")
+    return {"cmake": {"version": index.get("cmake", {}).get("version"),
+                      "generator": index.get("cmake", {}).get("generator", {}).get("name")},
+            "compiler": redact_paths(compilers[0], source_root, build), "dependency_targets": sorted(names),
+            "file_api_paths": redact_paths(paths, source_root, build),
+            "targets": redact_paths(list(selected.values()), source_root, build)}
+
+
+def durable_text(path: Path, source: str) -> None:
+    with path.open("w", encoding="utf-8") as stream:
+        stream.write(source)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+
+def write_capture(out, stdout, stderr, command, return_code, timed_out, *, schema,
+                  stdout_name="stdout.jsonl", stderr_name="stderr.txt", create=True):
+    """Persist the process result before parsing or scientific admission."""
+    out = Path(out)
+    if create:
+        out.mkdir(parents=True, exist_ok=False)
+    durable_text(out / stdout_name, stdout)
+    durable_text(out / stderr_name, stderr)
+    durable_text(out / "command.json", json.dumps(command, indent=2)+"\n")
+    durable_text(out / "process-capture.json", json.dumps({
+        "schema": schema, "process_return_code": return_code, "timed_out": timed_out,
+        "stdout_file_sha256": sha_bytes((out / stdout_name).read_bytes()),
+        "stderr_file_sha256": sha_bytes((out / stderr_name).read_bytes())}, indent=2)+"\n")
+
+
+def write_validation_error(out, error, *, schema):
+    durable_text(Path(out) / "validation-error.json", json.dumps({
+        "schema": schema, "error_type": type(error).__name__, "error": str(error)}, indent=2)+"\n")
+
+
+def fresh_release_build(build, target_name, build_log, source_root, *, source_commit,
+                        harness_commit, run=capture_process, validate_log=None):
+    """Keep failed/timeout rebuild evidence before rejecting collection."""
+    command = ["cmake", "--build", str(build), "--config", "Release", "--target",
+               target_name, "--clean-first", "--verbose"]
+    stdout, stderr, return_code, timed_out = run(command)
+    result = redact_paths({"command": command, "source_commit": source_commit,
+                           "harness_commit": harness_commit, "stdout": stdout, "stderr": stderr,
+                           "return_code": return_code, "timed_out": timed_out}, source_root, build)
+    if validate_log:
+        validate_log()
+    build_log.parent.mkdir(parents=True, exist_ok=True)
+    durable_text(build_log, json.dumps(result, indent=2, allow_nan=False)+"\n")
+    if return_code or timed_out:
+        reason = "timed out" if timed_out else "failed"
+        raise ValueError(f"fresh Release rebuild {reason} (exit {return_code}); diagnostics saved to "
+                         f"{redact_paths(str(build_log), source_root, build)}")
+    return result
