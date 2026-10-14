@@ -168,3 +168,37 @@ TEST_CASE("a profile cannot publish evidence from another selected verifier") {
     REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
     CHECK(std::get<ContractValidationFailure>(result.stop).diagnostics.front().field=="family.proposal.verifier");
 }
+TEST_CASE("non-established completeness keeps the static verifier and does not call the selector") {
+    const auto problem=resolved_problem();auto registration=second_verifier_registration();
+    registration.capabilities=[](const StrategyRequest&,const Requirements& requirements)->Capability {
+        Output output;output.representation={"test.relation"};output.assurance=Assurance::numerical;
+        output.family=FamilyTarget::exact_optimal_relation;output.completeness=requirements.output.completeness;
+        return Offer{std::move(output)};
+    };
+    std::atomic<std::size_t> selector_calls=0;
+    registration.complete_family_verifier_selector=[&selector_calls](const StrategyRequest&)
+        ->std::optional<StrategyRegistration::CompleteFamilyVerifierKey> {
+        ++selector_calls;
+        return std::nullopt;
+    };
+    StrategyRegistry registry;REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+    auto family=family_request(problem);
+    StrategyRequest request{problem,StrategyConfiguration{ModuleId{"test.strategy.second"},{},{},{},{},{},{},{},family.representation},family,"",{}};
+    Requirements requirements;requirements.output.representation=family.representation;
+    requirements.output.family=family.target;requirements.output.completeness=Completeness::unestablished;
+    auto preparation=registry.prepare(request,requirements);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(preparation));
+    CHECK(selector_calls.load()==0);
+    ExecutionContext context;context.numerical=family.numerical;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    auto outcome=std::get<PreparedStrategy>(std::move(preparation)).create()->run(context);
+    REQUIRE(std::holds_alternative<SynthesisResult>(outcome));
+    const auto& result=std::get<SynthesisResult>(outcome);
+    REQUIRE(result.family);
+    CHECK(result.family->registry_verified());
+    const auto& evidence=std::get<RegisteredCompletenessEvidence>(
+        std::get<CompleteOptimalFamily>(result.family->outcome()).completeness.support);
+    CHECK(evidence.verifier==ModuleId{"test.verifier.second"});
+    CHECK(evidence.verifier_version=="7");
+    CHECK(selector_calls.load()==0);
+}
