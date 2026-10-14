@@ -9,7 +9,7 @@
 #include "strategy_b_lineage.hpp"
 #include <algorithm>
 #include <cmath>
-#include <thread>
+#include <functional>
 using namespace csl;
 using namespace csl::synthesis::strategy_b;
 namespace {
@@ -167,19 +167,17 @@ bool contains(const sets::SetData& set,const Vector& x) {
 }
 template<class Program,class Base> class OracleWorkspace final:public Base {
     Vector anchor_;double value_;bool wrong_;Termination termination_;std::stop_source* stop_;
-    bool expire_deadline_;
-    ProgramOutcome do_solve(const Program& p,const ExecutionContext& context) override {
+    std::function<void()> before_return_;
+    ProgramOutcome do_solve(const Program& p,const ExecutionContext&) override {
         auto id=p.identity();if(wrong_)id.program={"foreign"};
         EvidenceSupport support=SymbolicArgument{"literal-joint-oracle","Hand-minimized objective on the authored joint relation."};
         ProgramObjectiveBound bound{value_,{id,support,{}}};
         if(stop_)stop_->request_stop();
-        if(expire_deadline_) {
-            REQUIRE(context.deadline);
-            std::this_thread::sleep_until(*context.deadline);
-        }
-        return ProgramResult{termination_,{id,MathematicalOutcome::optimal,support,{}},anchor_,{bound,bound},"independent analytic oracle"};
+        ProgramResult result{termination_,{id,MathematicalOutcome::optimal,support,{}},anchor_,{bound,bound},"independent analytic oracle"};
+        if(before_return_)before_return_();
+        return result;
     }
-public: OracleWorkspace(Vector a,double v,bool wrong,Termination term,std::stop_source* stop,bool expire_deadline=false):anchor_(std::move(a)),value_(v),wrong_(wrong),termination_(term),stop_(stop),expire_deadline_(expire_deadline){}
+public: OracleWorkspace(Vector a,double v,bool wrong,Termination term,std::stop_source* stop,std::function<void()> before_return={}):anchor_(std::move(a)),value_(v),wrong_(wrong),termination_(term),stop_(stop),before_return_(std::move(before_return)){}
 };
 DirectJointWorkspace oracle(Vector anchor,double value,bool wrong=false,bool reject=false,Termination term=Termination::completed,std::stop_source* stop=nullptr) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
@@ -199,7 +197,7 @@ const DirectJointPayload& payload(const SynthesisResult& r) {
     const auto cast=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);REQUIRE(cast);return *cast;
 }
 registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
-    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,bool expire_deadline=false) {
+    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,std::function<void()> before_return={}) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
     auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
     if(foreign_provider) {
@@ -207,11 +205,11 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
         linear={{{"oracle-lp"},"1"},offer,[](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
         convex={{{"oracle-qp"},"1"},offer,[](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
-    } else if(solver_termination!=Termination::completed || stop || expire_deadline) {
+    } else if(solver_termination!=Termination::completed || stop || before_return) {
         registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
-        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,expire_deadline);}};
-        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,expire_deadline);}};
+        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return);}};
+        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return);}};
     }
     const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
     CHECK_FALSE(strategies.add(make_registration(lp,qp)));
@@ -355,11 +353,15 @@ TEST_CASE("registered cancellation after optimization retains candidate and scop
 
 TEST_CASE("registered deadline expiry after optimization retains candidate and scoped objective evidence") {
     const auto p=resolve(integrator());const auto q=request(p);
-    const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,true);
-    auto workspace=prepared.create();ExecutionContext context;
-    // The optimizer finishes its analytic result only once this deadline expires.
-    // Allow time for admission/building so this exercises the post-optimizer stop.
-    context.deadline=std::chrono::steady_clock::now()+std::chrono::seconds{2};
+    ExecutionContext context;
+    // A test-only synchronous hook expires the caller-owned context after the
+    // optimizer constructs its result. No deadline exists during admission or
+    // program construction, so scheduling delays cannot cause pre-solve expiry.
+    const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,[&context] {
+        REQUIRE_FALSE(context.deadline);
+        context.deadline=std::chrono::steady_clock::now();
+    });
+    auto workspace=prepared.create();
     const auto result=accepted(workspace->run(context));
     CHECK(result.termination==Termination::cancelled);
     CHECK(result.outcome.subject==p.identity());
