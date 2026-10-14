@@ -201,6 +201,8 @@ TEST_CASE("compiled T-S01 verifier rejects independently tampered proposal claim
     };
     rejects_with([](auto& proposal){proposal.family.relation.payload=std::make_shared<const JointRelationPayload>();},"ts01.verifier.relation");
     rejects_with([](auto& proposal){proposal.family.optimum.optimum.support=Unestablished{};},"ts01.verifier.optimum");
+    rejects_with([](auto& proposal){proposal.family.optimum.optimum.support=CertificateReference{"artifact:unchecked-optimum","unregistered.checker"};},"ts01.verifier.optimum");
+    rejects_with([](auto& proposal){proposal.family.optimum.optimum.support=NumericalCheck{1e-8,1e-8,0,ModuleId{"unregistered.residual-checker"}};},"ts01.verifier.optimum");
     rejects_with([](auto& proposal){proposal.family.optimum.optimum.support=SymbolicArgument{"forged","changed theorem"};},"ts01.verifier.optimum");
     rejects_with([](auto& proposal){proposal.family.optimum.bounds.lower->value=-1;},"ts01.verifier.optimum");
     rejects_with([](auto& proposal){proposal.family.optimum.bounds.upper->value=1;},"ts01.verifier.optimum");
