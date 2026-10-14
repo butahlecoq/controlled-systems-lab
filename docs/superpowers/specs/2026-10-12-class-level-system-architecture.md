@@ -211,20 +211,23 @@ complete-family verifier as a compiled, versioned module selected during
 strategy preparation. A registration may optionally provide a pure resolver
 from the full immutable `StrategyRequest` to an optional verifier key
 `(ModuleId, version)`. If omitted, the existing static verifier key is used
-unchanged, preserving existing registration behavior. If present, the resolver
-owns every request: no key means an explicit preparation rejection, even when
-the static key is populated. An unknown key also rejects. Neither case may
-silently use another profile's verifier.
+unchanged, preserving existing registration behavior. The resolver is used
+only when the requested output completeness is `established`. For requests
+that do not require established completeness, preserve the existing static-key
+behavior and do not consult the resolver. In the established-completeness
+path, the resolver owns selection: no key means an explicit preparation
+rejection, even when the static key is populated. An unknown key also rejects.
+Neither case may silently use another profile's verifier.
 
-Resolve the key and compiled verifier before invoking the strategy planner,
-dependency snapshot callbacks, workspace factories, or native/backend setup.
-Freeze both the selected key and verifier binding in `PreparedStrategy` and its
-complete-family authority. Carry that identity into the complete-family result
-evidence, bound to the resolved problem and effective request/profile,
-strategy ID/version, canonical joint-coordinate schema, and ordered
-transformation lineage. The independent evidence boundary checks the binding;
-the key is not evidence by itself. This selection seam does not change the
-scientific acceptance policy in T-V02.
+For established-completeness requests, resolve the key and compiled verifier
+before invoking the strategy planner, dependency snapshot callbacks, workspace
+factories, or native/backend setup. Freeze both the selected key and verifier
+binding in `PreparedStrategy` and its complete-family authority. Carry that
+identity into the complete-family result evidence, bound to the resolved
+problem and effective request/profile, strategy ID/version, canonical
+joint-coordinate schema, and ordered transformation lineage. The independent
+evidence boundary checks the binding; the key is not evidence by itself. This
+selection seam does not change the scientific acceptance policy in T-V02.
 
 The resolver must be deterministic for equal immutable requests, side-effect
 free, thread-safe, and independent of solver state, execution order, and
@@ -236,14 +239,19 @@ Distinct requests prepared concurrently retain their own selected identity.
 The public contract and concrete behavioral examples are recorded in the
 [registry contract](../../contracts/registry.md#request-dependent-complete-family-verifier-selection).
 
-For the accepted T-S01/T-S02 example, one strategy registration can select
+For the accepted T-S01/T-S02 example, a request requiring established
+completeness can use one strategy registration to select
 `csl.verifier.ts01-analytic@1` for T-S01 and a distinct constant-objective
-verifier key for T-S02. Empty selection for any other profile rejects before
-workspace/native creation. Tests must prove static-key compatibility,
-per-profile identities, no static fallback, unknown-key rejection, identity
-binding through result evidence, and no cross-request leakage under concurrent
-preparation. T-S01 and T-S02 verifiers must each reject evidence bound to the
-other key; selecting a verifier does not prove full coverage or completeness.
+verifier key for T-S02. An unsupported profile or unknown key rejects before
+workspace/native creation only on this established-completeness path. For a
+request that does not require established completeness, tests must prove that
+the configured static key continues to be used and the resolver is not called.
+Tests must also prove static-key compatibility without a resolver,
+per-profile identities, no static fallback for missing established-proof
+selection, identity binding through result evidence, and no cross-request
+leakage under concurrent preparation. T-S01 and T-S02 verifiers must each
+reject evidence bound to the other key; selecting a verifier does not prove
+full coverage or completeness.
 
 The current overload lacks `FamilyRequest` and `StrategyPort::run` passes a DTO `Problem`. The migration updates request snapshots, `PreparedResolvedStrategy`, strategy registration capability callbacks/factories, and callers together. The existing include graph has `problem/validator.hpp` include `registry/registry.hpp` before `ResolvedProblem` is defined, so this by-value request cannot simply be placed in `registry.hpp`. Break the cycle as part of the same migration: move the immutable `ResolvedProblem` handle declaration and storage-independent identity into a lower-level `problem/resolved_problem.hpp` included by both headers, or define an immutable owning `ResolvedProblemHandle` there. Move only registry-independent data/identity into that header; keep registry admission glue in a layer that can include both modules without making either depend on the other. Do not use a raw pointer or permit a mutable DTO across the admission boundary. Retire the old solve overload once callers move; it must not remain a route that bypasses family admission. `PreparedResolvedStrategy` retains the resolved owner and effective request through execution and verification. `PreparedStrategy` retains selected registration/provenance after registry destruction. Whole-plan admission checks every known dependency before factories run. Each generated concrete request then passes through `PreparedProvider<Port>::prepare(request)` with frozen requirements before its request-specific workspace is created. No per-query requirement override is added.
 

@@ -92,24 +92,32 @@ problem, request, strategy and lineage.
 `StrategyRegistration` may provide a pure request-dependent resolver for the
 complete-family verifier key. The resolver receives the complete immutable
 `StrategyRequest` and returns either one `(ModuleId, version)` key or no key.
-The static `complete_family_verifier` key remains the exact compatibility path
-when no resolver is registered. When a resolver is present, it owns selection
-for every request: an empty result rejects preparation and never falls back to
-the static key. A resolver result that does not identify a registered compiled
-verifier also rejects preparation. The static key may be left empty when a
-resolver is installed; if it is populated, it is not a fallback.
+This resolver selects proof authority only when the request requires
+`Completeness::established`. If no resolver is registered, the static
+`complete_family_verifier` key retains its exact current behavior. If a
+resolver is registered but established completeness is not required, the
+static key also retains its current behavior and the resolver is not consulted.
+For a request that does require established completeness, the resolver owns
+selection: an empty result rejects preparation and never falls back to the
+static key. A selected key that does not identify a registered compiled
+verifier also rejects in this established-completeness path. A static key may
+be empty when a resolver is installed; it is not a fallback for a missing or
+unknown resolver selection when established completeness is required.
 
-Selection and verifier lookup occur synchronously during `StrategyRegistry::prepare`,
-before the strategy planner can snapshot dependencies, before any workspace
-factory is invoked, and before native solver/backend creation. The selected key
-and resolved verifier binding are frozen into `PreparedStrategy`; later mutation
-or destruction of the registration/registry cannot change them. The compiled
+For requests requiring established completeness, selection and verifier lookup
+occur synchronously during `StrategyRegistry::prepare`, before the strategy
+planner can snapshot dependencies, before any workspace factory is invoked,
+and before native solver/backend creation. The selected key and resolved
+verifier binding are frozen into `PreparedStrategy`; later mutation or
+destruction of the registration/registry cannot change them. The compiled
 verifier identity is carried with the prepared complete-family authority and is
 bound into result evidence alongside the problem/request/profile, strategy
 identity/version, canonical coordinates and ordered transformation lineage.
 Evidence from another verifier key, even one registered for the same strategy,
 must fail the binding check. The selected key identifies the checker; it is not
-itself proof of completeness.
+itself proof of completeness. Requests not requiring established completeness
+retain existing static-key behavior, including the current behavior when no
+static key is configured.
 
 The resolver is deterministic for an equal immutable request and has no
 observable effects. It must not inspect mutable external state, allocate or
@@ -117,32 +125,36 @@ create native resources, call a solver/provider, or depend on call order. Any
 configuration it needs is immutable and owned by the callback value without
 mutable transitive aliases. Concurrent preparation of different request
 profiles must not leak verifier identity between prepared values. The resolver
-must be total for valid `StrategyRequest` values: unsupported profiles return
-no key. If it throws, the exception follows the existing callback exception
+must be total for valid `StrategyRequest` values in the
+established-completeness path: unsupported profiles return no key. If it throws,
+the exception follows the existing callback exception
 policy and propagates; it is not converted to a mathematical outcome or to a
-static-key fallback. An empty selection or unknown key is a scoped admission
-rejection with requested strategy identity and verifier-selection diagnostics,
-and creates no workspace.
+static-key fallback. In the established-completeness path, an empty selection
+or unknown key is a scoped admission rejection with requested strategy identity
+and verifier-selection diagnostics, and creates no workspace.
 
 Contract examples:
 
 | Registration/request | Expected preparation result |
 |---|---|
-| Static key `csl.verifier.ts01-analytic@1`, no resolver, T-S01 | Same verifier selected as before this extension. |
-| Static T-S01 key plus resolver; T-S01 request | Resolver explicitly selects `csl.verifier.ts01-analytic@1`. |
-| Same registration; T-S02 constant-objective request | Resolver selects its distinct T-S02 verifier key and that identity remains bound in the prepared authority/evidence. |
-| Resolver installed, request profile unsupported | Reject before planner snapshot/workspace/native creation; do not use the static T-S01 key. |
-| Resolver selects an unregistered key or T-S01 evidence is presented under the T-S02 prepared value | Reject admission or evidence binding respectively. |
+| Static key `csl.verifier.ts01-analytic@1`, no resolver, T-S01 | Same verifier behavior as before this extension. |
+| Static T-S01 key plus resolver; T-S01 requires established completeness | Resolver explicitly selects `csl.verifier.ts01-analytic@1`. |
+| Same registration; T-S02 constant-objective request requires established completeness | Resolver selects its distinct T-S02 verifier key and that identity remains bound in the prepared authority/evidence. |
+| Same registration; request does not require established completeness | Preserve current static-key behavior and do not call the resolver. |
+| Resolver installed, unsupported profile requires established completeness | Reject before planner snapshot/workspace/native creation; do not use the static T-S01 key. |
+| Resolver selects an unregistered key for established completeness, or T-S01 evidence is presented under T-S02 prepared authority | Reject admission or evidence binding respectively. |
 
 The registry contract tests must exercise the public preparation/result path:
-static-key compatibility; two requests selecting distinct keys from one
-strategy registration; empty resolver result despite a populated static key;
-unknown-key rejection; proof/evidence rejection when verifier identity is
-crossed; and concurrent preparation of T-S01/T-S02 with no identity leakage.
-Use observable callback, planner, factory and native-backend counters to prove
-that missing/unknown selection rejects before planning or workspace creation.
-Doctest/contract assertions must include literal expected verifier IDs and
-versions, not just callback invocation counts. T-S01 retains its analytic
+static-key compatibility with and without a resolver; a non-established
+request using the static key without invoking the resolver; two established-
+completeness requests selecting distinct keys from one strategy registration;
+empty resolver result despite a populated static key; unknown-key rejection;
+proof/evidence rejection when verifier identity is crossed; and concurrent
+preparation of T-S01/T-S02 with no identity leakage. Use observable resolver,
+planner, factory and native-backend counters to prove that missing/unknown
+selection on the established-completeness path rejects before planning or
+workspace creation. Doctest/contract assertions must include literal expected
+verifier IDs and versions, not just callback invocation counts. T-S01 retains its analytic
 verifier identity. T-S02's constant-objective profile must use its own verifier
 identity because its full feasible-history relation is a different proof
 obligation; neither profile may authorize the other's completeness evidence.
