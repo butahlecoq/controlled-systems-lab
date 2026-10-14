@@ -9,6 +9,7 @@
 #include "strategy_b_lineage.hpp"
 #include <algorithm>
 #include <cmath>
+#include <functional>
 using namespace csl;
 using namespace csl::synthesis::strategy_b;
 namespace {
@@ -166,14 +167,17 @@ bool contains(const sets::SetData& set,const Vector& x) {
 }
 template<class Program,class Base> class OracleWorkspace final:public Base {
     Vector anchor_;double value_;bool wrong_;Termination termination_;std::stop_source* stop_;
+    std::function<void()> before_return_;
     ProgramOutcome do_solve(const Program& p,const ExecutionContext&) override {
         auto id=p.identity();if(wrong_)id.program={"foreign"};
         EvidenceSupport support=SymbolicArgument{"literal-joint-oracle","Hand-minimized objective on the authored joint relation."};
         ProgramObjectiveBound bound{value_,{id,support,{}}};
         if(stop_)stop_->request_stop();
-        return ProgramResult{termination_,{id,MathematicalOutcome::optimal,support,{}},anchor_,{bound,bound},"independent analytic oracle"};
+        ProgramResult result{termination_,{id,MathematicalOutcome::optimal,support,{}},anchor_,{bound,bound},"independent analytic oracle"};
+        if(before_return_)before_return_();
+        return result;
     }
-public: OracleWorkspace(Vector a,double v,bool wrong,Termination term,std::stop_source* stop):anchor_(std::move(a)),value_(v),wrong_(wrong),termination_(term),stop_(stop){}
+public: OracleWorkspace(Vector a,double v,bool wrong,Termination term,std::stop_source* stop,std::function<void()> before_return={}):anchor_(std::move(a)),value_(v),wrong_(wrong),termination_(term),stop_(stop),before_return_(std::move(before_return)){}
 };
 DirectJointWorkspace oracle(Vector anchor,double value,bool wrong=false,bool reject=false,Termination term=Termination::completed,std::stop_source* stop=nullptr) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
@@ -193,7 +197,7 @@ const DirectJointPayload& payload(const SynthesisResult& r) {
     const auto cast=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);REQUIRE(cast);return *cast;
 }
 registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
-    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr) {
+    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,std::function<void()> before_return={}) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
     auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
     if(foreign_provider) {
@@ -201,11 +205,11 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
         linear={{{"oracle-lp"},"1"},offer,[](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
         convex={{{"oracle-qp"},"1"},offer,[](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
-    } else if(solver_termination!=Termination::completed || stop) {
+    } else if(solver_termination!=Termination::completed || stop || before_return) {
         registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
-        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop);}};
-        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop);}};
+        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return);}};
+        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return);}};
     }
     const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
     CHECK_FALSE(strategies.add(make_registration(lp,qp)));
@@ -340,6 +344,71 @@ TEST_CASE("registered cancellation after optimization retains candidate and scop
     REQUIRE(data.optimization->objective.upper);CHECK(data.optimization->objective.upper->value==0);
     CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
     CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.upper->evidence.support));
+    CHECK(result.incumbents.empty());
+    CHECK_FALSE(stop.retained.lower_bound);
+    CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==0);
+    CHECK(stop.retained.partial_or_candidate_family);
+}
+
+TEST_CASE("registered deadline expiry after optimization retains candidate and scoped objective evidence") {
+    const auto p=resolve(integrator());const auto q=request(p);
+    ExecutionContext context;
+    // A test-only synchronous hook expires the caller-owned context after the
+    // optimizer constructs its result. No deadline exists during admission or
+    // program construction, so scheduling delays cannot cause pre-solve expiry.
+    const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,[&context] {
+        REQUIRE_FALSE(context.deadline);
+        context.deadline=std::chrono::steady_clock::now();
+    });
+    auto workspace=prepared.create();
+    const auto result=accepted(workspace->run(context));
+    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason==StopReason::deadline_expired);
+    CHECK(stop.stop.diagnostics=="Original-problem anchor verification stopped; program evidence and feasible candidate retained.");
+    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
+    CHECK(stop.request.port=="convex");
+    CHECK(result.spans.empty()); // No timing spans are emitted here; instrumentation is tracked in #89.
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->identity().request==q);
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    CHECK_FALSE(result.family->registry_verified());
+    CHECK_FALSE(result.complete_proposal);
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    CHECK(candidate.relation.coordinates==JointCoordinates{{1,1,0},2});
+    CHECK(candidate.relation.representation==RepresentationId{"csl.polyhedron.h"});
+    CHECK(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
+    CHECK(std::holds_alternative<Unestablished>(candidate.feasibility));
+    const auto& data=payload(result);REQUIRE(data.optimization);
+    REQUIRE(data.diagnostics.size()==1);
+    CHECK(data.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(data.diagnostics[0].field=="verification");
+    CHECK(data.diagnostics[0].explanation=="deadline observed");
+    CHECK(data.optimization->termination==Termination::completed);
+    CHECK(data.optimization->outcome.value==MathematicalOutcome::optimal);
+    CHECK(data.optimization->outcome.subject.problem==p.identity());
+    CHECK(data.optimization->outcome.subject.program==ProgramId{"syn04-joint:"+p.identity().value});
+    CHECK(data.optimization->primal==std::optional<Vector>{{0,0.25,1,0.25,0.75}});
+    CHECK(data.optimization->raw_diagnostics=="independent analytic oracle");
+    CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
+    for(const auto* bound:{&data.optimization->objective.lower,&data.optimization->objective.upper}) {
+        REQUIRE(*bound);
+        CHECK((*bound)->value==0);
+        CHECK((*bound)->evidence.subject.problem==p.identity());
+        CHECK((*bound)->evidence.subject.program==ProgramId{"syn04-joint:"+p.identity().value});
+        REQUIRE(std::holds_alternative<SymbolicArgument>((*bound)->evidence.support));
+        const auto& support=std::get<SymbolicArgument>((*bound)->evidence.support);
+        CHECK(support.reference=="literal-joint-oracle");
+        CHECK(support.assumptions=="Hand-minimized objective on the authored joint relation.");
+    }
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.objective.upper);
     CHECK(result.incumbents.empty());
     CHECK_FALSE(stop.retained.lower_bound);
     CHECK_FALSE(stop.retained.upper_bound);
