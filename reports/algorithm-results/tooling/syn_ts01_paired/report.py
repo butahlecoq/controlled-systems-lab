@@ -4,10 +4,20 @@ from __future__ import annotations
 import html
 import csv
 import hashlib
+import importlib.util
 import io
 import json
 import statistics
 from pathlib import Path
+
+_REPORT_DATA_SPEC = importlib.util.spec_from_file_location(
+    "csl_paired_ts01_report_data",
+    Path(__file__).resolve().parents[4] / "scripts" / "reports" / "report_data.py",
+)
+if _REPORT_DATA_SPEC is None or _REPORT_DATA_SPEC.loader is None:
+    raise ImportError("could not load shared strict report JSON parser")
+_REPORT_DATA = importlib.util.module_from_spec(_REPORT_DATA_SPEC)
+_REPORT_DATA_SPEC.loader.exec_module(_REPORT_DATA)
 
 SCHEMA = "csl.syn-ts01-paired-comparison-report/1"
 EVENT_SCHEMA = "csl.synthesis.paired-ts01-event/1"
@@ -57,6 +67,10 @@ def sha256_bytes(value):
     return hashlib.sha256(value).hexdigest()
 
 
+def parse_json(text):
+    return _REPORT_DATA.parse_json(text)
+
+
 def trials_csv_bytes(record):
     fields = ["repetition", "warmup", "order_position", "strategy", "status", *PHASES]
     stream = io.StringIO(newline="")
@@ -87,11 +101,11 @@ def validate_bundle(bundle):
     actual = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*") if path.is_file()}
     if any(path.is_symlink() for path in bundle.rglob("*")) or actual != BUNDLE_FILES:
         raise ValueError("paired T-S01 bundle inventory differs")
-    record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))
+    record = parse_json((bundle / "records.json").read_text(encoding="utf-8"))
     errors = validate(record)
     if errors:
         raise ValueError("invalid paired T-S01 record: " + ", ".join(errors))
-    manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+    manifest = parse_json((bundle / "manifest.json").read_text(encoding="utf-8"))
     if manifest.get("schema") != "csl.paired-ts01-bundle-manifest/1" or manifest.get("report_id") != record["report_id"]:
         raise ValueError("paired T-S01 manifest identity differs")
     if set(manifest.get("files", {})) != BUNDLE_FILES - {"manifest.json"}:
@@ -107,9 +121,9 @@ def validate_bundle(bundle):
         ("process-run.json", record["process"]),
         ("limiter-profile.json", record["measurement"]["limiter_profile"]),
     ):
-        if json.loads((bundle / name).read_text(encoding="utf-8")) != expected:
+        if parse_json((bundle / name).read_text(encoding="utf-8")) != expected:
             raise ValueError("paired T-S01 sidecar differs from typed record: " + name)
-    if json.loads((bundle / "scenario.json").read_text(encoding="utf-8")) != record["scenario"]["value"]:
+    if parse_json((bundle / "scenario.json").read_text(encoding="utf-8")) != record["scenario"]["value"]:
         raise ValueError("paired T-S01 scenario sidecar differs")
     if (bundle / "performance.svg").read_text(encoding="utf-8") != render_svg(record):
         raise ValueError("paired T-S01 SVG differs from typed record")
@@ -118,9 +132,9 @@ def validate_bundle(bundle):
 
     raw_events = (bundle / "measurement-events.jsonl").read_bytes()
     try:
-        events = [json.loads(line) for line in raw_events.decode("utf-8", errors="strict").splitlines() if line]
-    except (UnicodeError, json.JSONDecodeError) as error:
-        raise ValueError("paired T-S01 raw event stream is malformed") from error
+        events = [parse_json(line) for line in raw_events.decode("utf-8", errors="strict").splitlines() if line]
+    except (UnicodeError, ValueError) as error:
+        raise ValueError(f"paired T-S01 raw event stream is malformed: {error}") from error
     if events != record["measurement"]["events"] or sha256_bytes(raw_events) != record["measurement"]["events_sha256"]:
         raise ValueError("paired T-S01 raw events differ from typed record")
     stdout = (bundle / "process-stdout.bin").read_bytes()

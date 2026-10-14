@@ -92,6 +92,32 @@ class PairedTs01ReportTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "trial CSV differs"):
                 REPORT.validate_bundle(bundle)
 
+    def test_strict_json_parser_rejects_duplicate_keys_and_nonfinite_values(self) -> None:
+        for payload in ('{"schema": "first", "schema": "second"}', '{"value": NaN}', '{"value": Infinity}'):
+            with self.subTest(payload=payload), self.assertRaises(ValueError):
+                REPORT.parse_json(payload)
+
+    def test_bundle_rejects_duplicate_keys_in_records_manifest_sidecar_and_jsonl(self) -> None:
+        mutations = {
+            "records.json": lambda text: text.replace('"schema":', '"schema": "shadow", "schema":', 1),
+            "manifest.json": lambda text: text.replace('"schema":', '"schema": "shadow", "schema":', 1),
+            "environment.json": lambda text: text.replace('"schema":', '"schema": "shadow", "schema":', 1),
+            "measurement-events.jsonl": lambda text: text.replace('"event":"header"', '"event":"header","event":"header"', 1),
+        }
+        for filename, mutate in mutations.items():
+            with self.subTest(filename=filename), tempfile.TemporaryDirectory() as temp:
+                bundle = Path(temp) / REPORT.REPORT_ID
+                shutil.copytree(REPORT_DIR, bundle)
+                path = bundle / filename
+                path.write_text(mutate(path.read_text(encoding="utf-8")), encoding="utf-8")
+                if filename != "manifest.json":
+                    manifest_path = bundle / "manifest.json"
+                    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                    manifest["files"][filename] = hashlib.sha256(path.read_bytes()).hexdigest()
+                    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
+                    REPORT.validate_bundle(bundle)
+
 
 if __name__ == "__main__":
     unittest.main()
