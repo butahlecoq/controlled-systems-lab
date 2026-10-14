@@ -2,6 +2,8 @@
 #include <doctest/doctest.h>
 #include <csl/problem/validator.hpp>
 #include <csl/registry/registry.hpp>
+#include <atomic>
+#include <future>
 
 using namespace csl;
 using namespace csl::registry;
@@ -81,7 +83,7 @@ TEST_CASE("a second test-only compiled verifier uses the generic complete-family
 TEST_CASE("complete-family verifier selection is frozen per immutable request profile") {
     const auto problem=resolved_problem();
     auto registration=second_verifier_registration();
-    std::size_t planner_calls=0;
+    std::atomic<std::size_t> planner_calls=0;
     auto original_planner=std::move(registration.planner);
     registration.planner=[&planner_calls,planner=std::move(original_planner)](const StrategyRequest& request,const Requirements& requirements) {
         ++planner_calls;
@@ -93,6 +95,8 @@ TEST_CASE("complete-family verifier selection is frozen per immutable request pr
             return StrategyRegistration::CompleteFamilyVerifierKey{{"test.verifier.second"},"7"};
         if(request.family.profile=="profile-b")
             return StrategyRegistration::CompleteFamilyVerifierKey{{"test.verifier.third"},"8"};
+        if(request.family.profile=="profile-unknown-verifier")
+            return StrategyRegistration::CompleteFamilyVerifierKey{{"test.verifier.not-compiled"},"99"};
         return std::nullopt;
     };
     StrategyRegistry registry;REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
@@ -106,8 +110,16 @@ TEST_CASE("complete-family verifier selection is frozen per immutable request pr
         requirements.output.family=request.family.target;requirements.output.completeness=Completeness::established;
         return requirements;
     };
-    auto a=registry.prepare(make_request("profile-a"),requirements_for(make_request("profile-a")));
-    auto b=registry.prepare(make_request("profile-b"),requirements_for(make_request("profile-b")));
+    auto prepare_async=[&registry,&make_request,&requirements_for](const std::string& profile) {
+        return std::async(std::launch::async,[&registry,&make_request,&requirements_for,profile] {
+            auto request=make_request(profile);
+            return registry.prepare(request,requirements_for(request));
+        });
+    };
+    auto future_a=prepare_async("profile-a");
+    auto future_b=prepare_async("profile-b");
+    auto a=future_a.get();
+    auto b=future_b.get();
     REQUIRE(std::holds_alternative<PreparedStrategy>(a));
     REQUIRE(std::holds_alternative<PreparedStrategy>(b));
     ExecutionContext context;
@@ -118,7 +130,7 @@ TEST_CASE("complete-family verifier selection is frozen per immutable request pr
     REQUIRE(std::holds_alternative<SynthesisResult>(outcome_a));
     auto result_b=std::get<SynthesisResult>(std::move(outcome_b));
     auto result_a=std::get<SynthesisResult>(std::move(outcome_a));
-    CHECK(planner_calls==2);
+    CHECK(planner_calls.load()==2);
     REQUIRE(result_a.family);REQUIRE(result_b.family);
     const auto evidence=[](const OptimalFamily& family)->const RegisteredCompletenessEvidence& {
         return std::get<RegisteredCompletenessEvidence>(std::get<CompleteOptimalFamily>(family.outcome()).completeness.support);
@@ -130,7 +142,12 @@ TEST_CASE("complete-family verifier selection is frozen per immutable request pr
     auto missing=registry.prepare(make_request("profile-c"),requirements_for(make_request("profile-c")));
     REQUIRE(std::holds_alternative<Rejection>(missing));
     CHECK(std::get<Rejection>(missing).diagnostics.front().field=="family.verifier.profile");
-    CHECK(planner_calls==2);
+    CHECK(planner_calls.load()==2);
+    auto unknown_verifier=registry.prepare(make_request("profile-unknown-verifier"),
+        requirements_for(make_request("profile-unknown-verifier")));
+    REQUIRE(std::holds_alternative<Rejection>(unknown_verifier));
+    CHECK(std::get<Rejection>(unknown_verifier).diagnostics.front().field=="family.verifier");
+    CHECK(planner_calls.load()==2);
 }
 TEST_CASE("a profile cannot publish evidence from another selected verifier") {
     const auto problem=resolved_problem();auto registration=second_verifier_registration();
