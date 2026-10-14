@@ -218,6 +218,22 @@ TEST_CASE("square Minkowski support identities survive actual LP backend substit
     }
 }
 
+TEST_CASE("unavailable typed geometry operations are rejected at public admission") {
+    const auto segment = vertices("operation-admission-segment", 2, {0, 0, 1, 1}, 2, {"x", "y"});
+    const auto req = request(Projection{segment, {1}}, "unsupported-projection");
+
+    CHECK(check_operation_shape(req).empty());
+    const auto result = run(req, dependencies());
+
+    REQUIRE(std::holds_alternative<Unsupported>(result));
+    const auto& diagnostics = std::get<Unsupported>(result).diagnostics;
+    REQUIRE(diagnostics.size() == 1);
+    CHECK(diagnostics.front().code == DiagnosticCode::unsupported);
+    CHECK(diagnostics.front().field == "geometry.operation");
+    CHECK(diagnostics.front().explanation.find("affine images and Minkowski sums") != std::string::npos);
+    CHECK_FALSE(std::holds_alternative<OperationResult>(result));
+}
+
 TEST_CASE("affine and sum operations use the selected hull reducer") {
     auto selected=dependencies();
     selected.hull=provider(make_keep_all_hull_registration());
