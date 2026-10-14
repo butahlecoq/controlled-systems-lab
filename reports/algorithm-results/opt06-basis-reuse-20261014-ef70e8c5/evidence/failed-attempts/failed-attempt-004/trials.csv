@@ -1,0 +1,7 @@
+round,case_id,method,warmup,elapsed_ns,status,verified,lp_calls,pivots,degenerate_pivots,bulk_candidates,bulk_removals,retained,fallback,basis_points
+0,permuted,baseline,True,2279200,complete,True,10,0,0,0,6,4,False,[]
+0,permuted,basis-reuse,True,133800,complete,True,0,4,0,7,2,8,False,"[4, 3, 1]"
+0,degenerate,baseline,True,1074100,complete,True,7,0,0,0,3,4,False,[]
+0,degenerate,basis-reuse,True,67500,complete,True,0,4,0,4,2,5,False,"[2, 3, 0]"
+0,interior-basis,baseline,True,1126100,failed,False,9,0,0,0,4,5,False,[]
+0,interior-basis,basis-reuse,True,57300,complete,True,0,3,0,6,1,8,False,"[3, 4, 0]"

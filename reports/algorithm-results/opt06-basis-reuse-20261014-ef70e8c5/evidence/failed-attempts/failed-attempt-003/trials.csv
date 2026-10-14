@@ -1,0 +1,5 @@
+round,case_id,method,warmup,elapsed_ns,status,verified,lp_calls,pivots,degenerate_pivots,bulk_candidates,bulk_removals,retained,fallback,basis_points
+0,permuted,baseline,True,2064200,complete,True,10,0,0,0,6,4,False,[]
+0,permuted,basis-reuse,True,113300,complete,True,0,4,0,7,2,8,False,"[4, 3, 1]"
+0,degenerate,baseline,True,519400,failed,False,4,0,0,0,0,4,False,[]
+0,degenerate,basis-reuse,True,43700,complete,True,0,3,0,3,0,4,False,[2]

@@ -1,0 +1,7 @@
+case_id,method,attempts,successes,failures,median_ns,min_ns,max_ns,median_lp_calls,median_pivots,median_degenerate_pivots,median_bulk_candidates,median_bulk_removals
+degenerate,baseline,7,7,0,633400,623800,656100,7,0,0,0,3
+degenerate,basis-reuse,7,7,0,51200,48800,53600,0,4,0,4,2
+interior-basis,baseline,7,7,0,471200,456100,664300,5,0,0,0,1
+interior-basis,basis-reuse,7,7,0,44400,42800,51500,0,4,2,2,0
+permuted,baseline,7,7,0,901200,890100,936700,10,0,0,0,6
+permuted,basis-reuse,7,7,0,52200,49400,55500,0,4,0,7,2
