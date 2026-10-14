@@ -634,16 +634,53 @@ TEST_CASE("post-terminal cancellation keeps scoped optimizer and completed termi
     auto prepared=take(admit(query,false,stop_source));auto workspace=prepared.create();
     ExecutionContext context;context.cancellation=stop_source.get_token();
     context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    auto result=take(workspace->run(context));CHECK(result.termination==Termination::cancelled);
+    auto result=take(workspace->run(context));
+    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
+    CHECK(result.incumbents.empty());CHECK_FALSE(result.complete_proposal);CHECK_FALSE(result.partial_proposal);
+    REQUIRE(result.family);CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());CHECK_FALSE(result.family->partial_registry_verified());
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    REQUIRE(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
+    CHECK(std::get<HeuristicRelationEvidence>(candidate.relation_to_target).method==
+        "binary64 feasible-history preimage of forward terminal slice; objective has not restricted this candidate");
+    CHECK(std::holds_alternative<Unestablished>(candidate.feasibility));
     const auto& history=payload(result);REQUIRE(history.terminal);REQUIRE(history.terminal->relation);
     CHECK(history.target==synthesis::strategy_a::PreimageTarget::forward_terminal_slice);
-    REQUIRE(history.terminal->optimization);CHECK(history.terminal->optimization->outcome.value==MathematicalOutcome::optimal);
+    CHECK(contains(*history.terminal->relation,{1.0}));
+    CHECK_FALSE(contains(*history.terminal->relation,{0.0}));
+    CHECK_FALSE(contains(*history.terminal->relation,{2.0}));
+    CHECK(std::holds_alternative<Unestablished>(history.terminal->construction.support));
+    REQUIRE(history.terminal->optimum);
+    CHECK(history.terminal->optimum->optimum.problem==query.problem.identity());
+    CHECK(std::holds_alternative<Unestablished>(history.terminal->optimum->optimum.support));
+    CHECK_FALSE(history.terminal->optimum->bounds.lower);CHECK_FALSE(history.terminal->optimum->bounds.upper);
+    REQUIRE(history.terminal->optimization);
+    CHECK(history.terminal->optimization->termination==Termination::completed);
+    CHECK(history.terminal->optimization->outcome.value==MathematicalOutcome::optimal);
+    CHECK_FALSE(history.terminal->optimization->objective.lower);
+    CHECK_FALSE(history.terminal->optimization->objective.upper);
+    CHECK(history.terminal->optimization->raw_diagnostics.find("bounds=unavailable")!=std::string::npos);
     CHECK(contains(history.history.relation,{0,1,2,1,1})); // unrecovered feasible candidate stays correctly scoped
     const auto& lineage=result.family->identity().lineage;
     REQUIRE(lineage.size()==5);
     CHECK(lineage.back().output==history.terminal->relation->metadata()->id);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
-    CHECK(std::get<ScopedOperationStopped>(result.stop).retained.partial_or_candidate_family);
+    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason==StopReason::cancelled);
+    CHECK(stop.stop.diagnostics=="Cancelled between Strategy A phases.");
+    CHECK(stop.request.request==RequestId{"strategy-a/terminal-preimage"});
+    CHECK(stop.request.port=="strategy");
+    CHECK(stop.request.requested_module==ModuleId{"csl.synthesis.reach-back"});
+    CHECK(stop.request.requested_version=="1");
+    CHECK(stop.request.actual_module==ModuleId{"csl.synthesis.reach-back"});
+    CHECK(stop.request.actual_version=="1");
+    CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
+    // Strategy A publishes no caller-visible timing spans on this stop; timing evidence remains a #89 dependency.
+    CHECK(result.spans.empty());
 }
 TEST_CASE("registered terminal numerical failure retains the feasible candidate and scoped optimizer evidence") {
     const auto query=request(integrator());
