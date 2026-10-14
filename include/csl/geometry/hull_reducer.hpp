@@ -30,6 +30,9 @@ struct MembershipAttempt {
 
 struct BasisReuseMetrics {
     std::size_t basis_solves{};
+    // Original PointCloud indices of structural columns in the validated basis;
+    // auxiliary phase-I columns are excluded.
+    std::vector<std::size_t> structural_basis_points;
     std::uint64_t pivots{};
     std::uint64_t degenerate_pivots{};
     std::size_t bulk_candidates{};

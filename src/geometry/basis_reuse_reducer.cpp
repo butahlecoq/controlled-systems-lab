@@ -124,6 +124,7 @@ public:
                 if (structural->index >= cloud.points.size() || is_basis[structural->index])
                     return fallback(cloud, lp, context, metrics);
                 basis_points.push_back(structural->index);
+                metrics.structural_basis_points.push_back(structural->index);
                 is_basis[structural->index] = 1;
             } else if (std::holds_alternative<AuxiliaryColumn>(column)) {
                 basis_points.push_back(std::nullopt);
