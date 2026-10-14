@@ -95,7 +95,14 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install cmake==3.31.6
-      - run: cmake --preset ${{ matrix.preset }}
+      - name: Configure selected package and backend-neutral report regression
+        shell: bash
+        run: |
+          if [ '${{ matrix.preset }}' = core ]; then
+            cmake --preset core -DCSL_BUILD_SYN07_REPORT=ON
+          else
+            cmake --preset highs
+          fi
       - name: Disabled vendors were not acquired
         shell: bash
         run: |
