@@ -284,7 +284,10 @@ class DeadlineOrCapacity final : public LPWorkspace {
     std::unique_ptr<LPWorkspace> inner_;bool deadline_;std::shared_ptr<int> calls_;
 protected:
     ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext& c) override {
-        if(++*calls_==2)return ProgramResult{Termination::resource_limit,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},"provider capacity exhausted",{}};
+        if(++*calls_==2) {
+            if(c.deadline)std::this_thread::sleep_until(*c.deadline);
+            return ProgramResult{Termination::resource_limit,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},"provider capacity exhausted",{}};
+        }
         auto result=inner_->solve(p,c);
         if(deadline_)std::this_thread::sleep_until(*c.deadline);
         return result;
@@ -302,7 +305,7 @@ TEST_CASE("deadline and provider capacity remain distinct and retain earlier obs
         auto provider=take(prepare_provider(select_provider(lp,Method{{"csl.lp.highs"},{}},req)));
         auto registration=synthesis::witness_selector::make_registration(provider);SelectorRequest query{*synthesis.family,{2,0,{{1,-1},{-1,1}},0}};
         auto workspace=registration.factory(query);auto context=make_execution_context();
-        if(deadline)context.deadline=std::chrono::steady_clock::now()+std::chrono::seconds(1);
+        context.deadline=std::chrono::steady_clock::now()+std::chrono::seconds(1);
         auto selected=take(workspace->select(query.family,query.selection,context));
         CHECK(selected.termination==(deadline?Termination::cancelled:Termination::resource_limit));
         CHECK(selected.diagnostics.find(deadline?"deadline":"capacity")!=std::string::npos);
@@ -333,7 +336,7 @@ TEST_CASE("post-solve allocation failure returns a resource stop and retains col
         auto registration=synthesis::witness_selector::make_registration(provider);SelectorRequest query{*synthesis.family,{1,0,{{1,-1}},0}};
         auto workspace=registration.factory(query);selector_allocation_probe::injected=false;
         std::optional<WitnessSelection> selected;bool escaped=false;
-        try {selected=take(workspace->select(query.family,query.selection,make_execution_context()));}
+        try {selected=std::get<WitnessSelection>(workspace->select(query.family,query.selection,make_execution_context()));}
         catch(const std::bad_alloc&){escaped=true;}
         selector_allocation_probe::fail_small_allocation=0;
         CHECK_FALSE(escaped);
