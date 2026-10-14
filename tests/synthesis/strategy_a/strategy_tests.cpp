@@ -102,8 +102,23 @@ public:
     CancelAfterTerminal(std::unique_ptr<ConvexWorkspace> inner,std::stop_source stop)
         :inner_(std::move(inner)),stop_(std::move(stop)){}
 };
+class NumericalFailureAfterTerminal final : public ConvexWorkspace {
+    std::unique_ptr<ConvexWorkspace> inner_;
+    optimization::ProgramOutcome do_solve(const optimization::ConvexProgram& program,
+        const ExecutionContext& context) override {
+        auto outcome=inner_->solve(program,context);
+        if(auto* solved=std::get_if<optimization::ProgramResult>(&outcome)) {
+            solved->termination=Termination::numerical_failure;
+            solved->raw_diagnostics="injected terminal numerical failure after real optimizer result";
+        }
+        return outcome;
+    }
+public:
+    explicit NumericalFailureAfterTerminal(std::unique_ptr<ConvexWorkspace> inner):inner_(std::move(inner)){}
+};
 std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,bool reject_terminal=false,
-    std::optional<std::stop_source> stop_after_terminal={},bool omit_test_verifier=false) {
+    std::optional<std::stop_source> stop_after_terminal={},bool omit_test_verifier=false,
+    bool fail_terminal_numerically=false) {
     auto lp=take(adapters::lp::make_highs_registration());
     auto convex=take(adapters::convex::make_highs_registration());
     auto converter=take(adapters::polyhedral::make_qhull_registration(lp));
@@ -118,6 +133,12 @@ std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,b
         const auto factory=convex.factory;const auto stop=*stop_after_terminal;
         convex.factory=[factory,stop](const ConvexProgram& program) {
             return std::make_unique<CancelAfterTerminal>(factory(program),stop);
+        };
+    }
+    if(fail_terminal_numerically) {
+        const auto factory=convex.factory;
+        convex.factory=[factory](const ConvexProgram& program) {
+            return std::make_unique<NumericalFailureAfterTerminal>(factory(program));
         };
     }
     Registry<GeometryPort> projections,affines;Registry<ConversionPort> conversions;
@@ -623,6 +644,40 @@ TEST_CASE("post-terminal cancellation keeps scoped optimizer and completed termi
     CHECK(lineage.back().output==history.terminal->relation->metadata()->id);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
     CHECK(std::get<ScopedOperationStopped>(result.stop).retained.partial_or_candidate_family);
+}
+TEST_CASE("registered terminal numerical failure retains the feasible candidate and scoped optimizer evidence") {
+    const auto query=request(integrator());
+    auto prepared=take(admit(query,false,{},false,true));auto workspace=prepared.create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=take(workspace->run(context));
+    CHECK(result.termination==Termination::numerical_failure);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
+    CHECK(result.incumbents.empty());CHECK_FALSE(result.complete_proposal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& history=payload(result);
+    CHECK(history.target==synthesis::strategy_a::PreimageTarget::forward_terminal_slice);
+    CHECK(contains(history.history.relation,{0,1,2,1,1}));
+    REQUIRE(history.terminal);CHECK_FALSE(history.terminal->relation);
+    REQUIRE(history.terminal->optimization);
+    CHECK(history.terminal->optimization->termination==Termination::numerical_failure);
+    CHECK(history.terminal->optimization->raw_diagnostics==
+        "injected terminal numerical failure after real optimizer result");
+    CHECK(history.terminal->optimization->outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(history.terminal->optimization->objective.lower);
+    CHECK(history.terminal->optimization->objective.lower->value==doctest::Approx(0));
+    REQUIRE(history.terminal->optimization->objective.upper);
+    CHECK(history.terminal->optimization->objective.upper->value==doctest::Approx(0));
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason==StopReason::numerical_failure);
+    CHECK(stop.stop.diagnostics=="Terminal optimization stopped; slice-scoped evidence retained.");
+    CHECK(stop.request.port=="convex");
+    CHECK(stop.request.actual_module==ModuleId{"csl.convex.highs"});
+    CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
 }
 TEST_CASE("coverage and materialization requests fail closed at strategy preparation") {
     auto query=request(integrator());
