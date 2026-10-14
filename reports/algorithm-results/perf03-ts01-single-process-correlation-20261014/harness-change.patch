@@ -1,0 +1,5 @@
+--- a/strategy_b_measure.cpp
++++ b/strategy_b_measure.cpp
+@@
+-    constexpr int repetitions=7;
++    constexpr int repetitions=30000;

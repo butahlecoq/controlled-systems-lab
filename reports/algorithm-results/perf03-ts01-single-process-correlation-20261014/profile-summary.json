@@ -1,0 +1,172 @@
+{
+  "schema": "csl.perf03-ts01-single-process-correlation/1",
+  "purpose": "Non-reported, process-scoped CPU sampling for PERF-03; not part of published latency statistics.",
+  "identity": {
+    "issue": 220,
+    "source_commit": "2a5ab835295dfd22f02b19d440bb8158267d985a",
+    "baseline_harness_commit": "4fc8e28587a7fe0e4130f1cb435cf6502ba0e4e2",
+    "original_harness_sha256": "EDE47392E0C17C1A537251C2F1DA9989BC13D998F3459021DC5E05AB7AC399DA",
+    "profile_harness_sha256": "A8F2679D4DE76B194A13CAFDDA63A56F2287A1AE884BBE497B73AB43BA77906B",
+    "harness_delta": "Only the main repetition count changed from 7 to 30000; one_run() and its T-S01 validation body are unchanged."
+  },
+  "build": {
+    "compiler": "MSVC 19.44.35215.0",
+    "visual_studio": "17.14.19 build tools",
+    "cmake": "3.31.6-msvc6",
+    "generator": "Visual Studio 17 2022 x64",
+    "configuration": "Release",
+    "flags": [
+      "/O2 (MaxSpeed)",
+      "/Zi",
+      "/DEBUG",
+      "NDEBUG",
+      "/MD"
+    ],
+    "highs": "1.11.0",
+    "executable_sha256": "BC4BE7647964F51A0458BBAC0A7E81356C4F5E2B610507035FD2A58E5C78EBFA",
+    "executable_bytes": 6714880,
+    "pdb_sha256": "808E5B8453401245A9C02ABDEE98BEB9EBF5E7CFE762DEFA9BCE0CCD59326FB8",
+    "pdb_bytes": 66424832,
+    "symbol_resolution": "xperf resolved target executable functions from the colocated matching PDB; no source line-level DWARF/PDB line report was used.",
+    "pinned_highs_archive_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
+  },
+  "workload": {
+    "profile": "ts01_exact_integrator",
+    "single_process_pid": 23164,
+    "warmups": 1,
+    "measured_repetitions": 30000,
+    "per_repetition_work": "The unchanged one_run() body constructs/resolves the T-S01 problem, prepares registered Strategy B and HiGHS LP/convex providers, executes StrategyPort, verifies the registered complete optimal family and trajectory anchor, and checks the literal canonical H-relation/membership points.",
+    "successes": 30000,
+    "failures": 0,
+    "stdout_records_including_warmup": 30001
+  },
+  "paired_execution": {
+    "unprofiled": {
+      "command": "csl_syn04_strategy_b_report.exe",
+      "exit_code": 0,
+      "wall_ms": 36136,
+      "stdout_bytes": 21313038,
+      "stderr_bytes": 0,
+      "stdout_sha256": "E7DA5CD508DE145E733145DAD72FA544E5E5C249865582EB74B35E43F0D58423",
+      "per_call": {
+        "n": 30000,
+        "median_ns": 1130300.0,
+        "mean_ns": 1155787.4,
+        "min_ns": 800700,
+        "max_ns": 2333700,
+        "range_width_ns": 1533000
+      }
+    },
+    "profiled": {
+      "command": "VSDiagnostics session 89 -> attach PID 23164 -> run same executable -> stop session",
+      "exit_code": 0,
+      "wall_ms": 33309,
+      "stdout_bytes": 21302977,
+      "stderr_bytes": 0,
+      "stdout_sha256": "AACB489AFC03E89A063A2811C9754975491E1449461ABD9C8FB2BA767941CAD4",
+      "per_call": {
+        "n": 30000,
+        "median_ns": 975100.0,
+        "mean_ns": 1059753.1,
+        "min_ns": 840200,
+        "max_ns": 2184200,
+        "range_width_ns": 1344000
+      }
+    },
+    "assessment": "Inconclusive. This is one sequential unprofiled/profiled pair under a changing, busy host. The profiled median is lower but the distributions overlap substantially; no profiler-overhead ratio, speedup, or latency difference is claimed."
+  },
+  "profiler": {
+    "collector": "Visual Studio DiagnosticsHub VSDiagnostics 17.14.36412.1",
+    "agent": "DiagnosticsHub.CpuAgent.dll",
+    "config": "AgentConfigs/CpuUsageHigh.json",
+    "sample_rate_hz": 4000,
+    "mode": "Process-scoped sampled CPU stacks; collector started before target launch and attached only to PID 23164.",
+    "privilege": "No SeSystemProfilePrivilege; process-scoped sampling succeeded. WPR was not used in this capture.",
+    "commands": [
+      "VSDiagnostics.exe start 89 /loadConfig:AgentConfigs\\CpuUsageHigh.json /scratchLocation:<scratch> /package:dir",
+      "VSDiagnostics.exe update 89 /attach:23164",
+      "VSDiagnostics.exe stop 89 /output:profiled.diagsession",
+      "VSDiagnostics.exe expandDiagSession profiled.diagsession",
+      "xperf.exe -i sc.user_aux.etl -symbols verbose -o target-stack.html -a stack -pid 23164 -butterfly 1",
+      "xperf.exe -i sc.user_aux.etl -a profile -util"
+    ],
+    "trace": {
+      "duration_seconds": 33.786631,
+      "etl_bytes": 48037888,
+      "etl_sha256": "87E6B8C444E62EE22DC346B9DF76DFE633F0E28C64C57FFA1D3243F182F31A46",
+      "buffers_processed": 733,
+      "total_events": 468186,
+      "sampleprof_events": 211895,
+      "stackwalk_events": 137835,
+      "lost_events": 0,
+      "target_process_stack_hits": 130813,
+      "target_process_root_hits": 130813,
+      "target_stack_report_sha256": "CECDE625DAB92A3BE008E771D2EF982E31A22962C887D1BA18930AFE3A41859C",
+      "raw_etl_and_stack_html": "Retained locally; not committed. Hashes above identify the exact local artifacts."
+    },
+    "session_id": 89,
+    "session_guid": "5997E42F-003D-4F91-A845-6404CF289E84",
+    "config_sha256": "2CA721E4D6CDA0D46521F40E5D330F8FA179C01530E409D9E22855748340920A",
+    "symbol_search_path": "<diagnostic-build>/Release (contains the exact matching executable PDB)"
+  },
+  "host": {
+    "cpu": "12th Gen Intel Core i5-12400F",
+    "physical_cores": 6,
+    "logical_processors": 12,
+    "os_build": "Windows NT 10.0.22631 (build 22631)",
+    "trace_load_observation": "xperf per-logical-CPU utilization over 34 intervals (33.79 s): mean 12.45%, range 0.03–69.32%; includes the target plus unrelated background work.",
+    "load_context": "Host was concurrently running other compiler/build and desktop processes; system utilization is retained as trace context, not normalized away."
+  },
+  "sampled_cpu_attribution": [
+    {
+      "rank": 1,
+      "symbol": "`anonymous namespace`::one_run",
+      "inclusive_hits": 126542,
+      "share_of_target_stack_hits_percent": 96.74,
+      "source": "reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp:60"
+    },
+    {
+      "rank": 2,
+      "symbol": "csl::registry::StrategyPort::run",
+      "inclusive_hits": 118950,
+      "share_of_target_stack_hits_percent": 90.93,
+      "source": "src/registry/registry.cpp:65"
+    },
+    {
+      "rank": 3,
+      "symbol": "csl::synthesis::strategy_b::DirectJointWorkspace::solve",
+      "inclusive_hits": 116354,
+      "share_of_target_stack_hits_percent": 88.95,
+      "source": "src/synthesis/strategy_b/direct_joint.cpp:218"
+    },
+    {
+      "rank": 4,
+      "symbol": "csl::adapters::convex::Workspace::solve_native",
+      "inclusive_hits": 104178,
+      "share_of_target_stack_hits_percent": 79.64,
+      "source": "src/adapters/convex/highs.cpp:320"
+    },
+    {
+      "rank": 5,
+      "symbol": "Highs::optimizeModel",
+      "inclusive_hits": 60301,
+      "share_of_target_stack_hits_percent": 46.1,
+      "source": "HiGHS 1.11.0 highs/lp_data/Highs.cpp:958"
+    },
+    {
+      "rank": 6,
+      "symbol": "Highs::callSolveQp",
+      "inclusive_hits": 47804,
+      "share_of_target_stack_hits_percent": 36.54,
+      "source": "HiGHS 1.11.0 highs/lp_data/Highs.cpp:3837"
+    }
+  ],
+  "conclusion": "This single-process profile provides source-resolved evidence that sampled CPU work during the repeated, individually timed T-S01 one_run() operation is concentrated in the public StrategyPort -> Strategy B DirectJointWorkspace -> convex HiGHS QP path. It supports identifying that path as the sampled CPU hotspot for this exact diagnostic workload. It does not quantify exact unprofiled single-call latency attribution, generalize beyond T-S01, or support speedup, comparison, application-scale, or scalability claims. Independent review is still required for issue closure.",
+  "limitations": [
+    "One profiled and one unprofiled execution only; order was unprofiled then profiled, not alternated.",
+    "The one_run() body is unchanged, but the diagnostic harness repetition count is increased to 30,000 to obtain usable in-process samples.",
+    "PDB-enabled Release semantics were retained, but this is not the exact no-PDB published binary.",
+    "Per-call timings include synchronous microsecond-scale operations; median and range vary substantially, and the paired wall-time difference is inconclusive.",
+    "Windows host utilization includes background work."
+  ]
+}
