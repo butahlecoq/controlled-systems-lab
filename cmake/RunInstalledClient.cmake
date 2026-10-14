@@ -71,19 +71,19 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -S "${work}/source" -B "${work}/build
   "-DCMAKE_CXX_COMPILER=${CSL_CXX_COMPILER}"
   "-DCMAKE_CXX_FLAGS=${CSL_CXX_FLAGS}"
   "-DCMAKE_EXE_LINKER_FLAGS=${CSL_EXE_LINKER_FLAGS}"
+  "-DCSL_EXPECT_HIGHS=${CSL_EXPECT_HIGHS}" "-DCSL_EXPECT_QHULL=${CSL_EXPECT_QHULL}"
   COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/build"
   --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
 
-if(CSL_NATIVE_EXAMPLES)
 # Exercise the README examples as a second, isolated installed-package consumer.
 # Copy only their public sources/template: no repository include or build paths.
 set(example_source "${work}/examples-source")
 file(MAKE_DIRECTORY "${example_source}/scenarios")
 foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
-    resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp)
+    resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp registered_synthesis_comparison.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()
 file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
@@ -97,5 +97,3 @@ execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/examples-build"
   --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/examples-build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
-
-endif()

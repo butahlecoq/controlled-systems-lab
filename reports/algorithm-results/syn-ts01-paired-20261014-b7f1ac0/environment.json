@@ -1,0 +1,62 @@
+{
+  "captured_utc": "2026-10-14T18:22:50Z",
+  "computer_alias": "measurement-host-1",
+  "concurrent_benchmark_detected": false,
+  "concurrent_build_or_test_detected": false,
+  "cpu_samples": [
+    {
+      "captured_utc": "2026-10-14T18:22:43Z",
+      "percent_privileged_time": 0,
+      "percent_processor_time": 0,
+      "percent_user_time": 0,
+      "sample": 0
+    },
+    {
+      "captured_utc": "2026-10-14T18:22:45Z",
+      "percent_privileged_time": 0,
+      "percent_processor_time": 0,
+      "percent_user_time": 0,
+      "sample": 1
+    },
+    {
+      "captured_utc": "2026-10-14T18:22:46Z",
+      "percent_privileged_time": 0,
+      "percent_processor_time": 0,
+      "percent_user_time": 0,
+      "sample": 2
+    },
+    {
+      "captured_utc": "2026-10-14T18:22:47Z",
+      "percent_privileged_time": 0,
+      "percent_processor_time": 0,
+      "percent_user_time": 0,
+      "sample": 3
+    },
+    {
+      "captured_utc": "2026-10-14T18:22:48Z",
+      "percent_privileged_time": 0,
+      "percent_processor_time": 0,
+      "percent_user_time": 0,
+      "sample": 4
+    }
+  ],
+  "cpu_samples_summary": "0% total processor utilization in all five 1-second pre-run samples",
+  "logical_processors": 12,
+  "memory_bytes": 34189107200,
+  "observed_idle_background": [
+    "Three persistent MSBuild node-reuse workers were idle.",
+    "One localhost Python process served a previously staged static report; no collection or benchmark work was active."
+  ],
+  "os": "Windows 11 Home",
+  "os_version": "10.0.22631",
+  "physical_cores": 6,
+  "processor": "12th Gen Intel(R) Core(TM) i5-12400F",
+  "requested_concurrency": {
+    "memory_bytes": null,
+    "outer_workers": 1,
+    "threads_per_worker": 1,
+    "total_threads": 1
+  },
+  "schema": "csl.paired-ts01-environment/1",
+  "snapshot_sha256": "81a0316ed727ed71fa415a624e319a4a34faf103f7a2dffc03e9fa8277244149"
+}

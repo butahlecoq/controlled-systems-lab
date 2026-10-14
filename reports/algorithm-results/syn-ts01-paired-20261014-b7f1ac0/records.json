@@ -1,0 +1,4306 @@
+{
+  "build": {
+    "build_configuration": "Release",
+    "compiler": "MSVC 19.44.35215.0",
+    "dependency_library_hash_count": 30,
+    "executable_sha256": "78707cf76bec303a1bf28839a803b6232d99141c0fe78aa23d938737607eec02",
+    "generator": "Visual Studio 17 2022",
+    "language_standard": "C++20",
+    "library_source_comparison_scope": [
+      "src",
+      "include",
+      "CMakeLists.txt",
+      "cmake"
+    ],
+    "linked_algorithm_code_equivalent_to_measured_source": true,
+    "linked_installed_libraries": [
+      {
+        "name": "csl_affine_sum.lib",
+        "sha256": "d28f4890525a90142ea54ed64c5be24915befd43bc3a77bfad923a557e9d9952"
+      },
+      {
+        "name": "csl_contracts.lib",
+        "sha256": "5a260a6ce9340d1d1865ce9c446aba1fb247f2d48e4fc6042473ff74ed739a76"
+      },
+      {
+        "name": "csl_control_recovery.lib",
+        "sha256": "c62f99fc9390b09df6f10322a93a0ee07ec5877b4636bfe8df00834aa9581780"
+      },
+      {
+        "name": "csl_convex.lib",
+        "sha256": "1e0804b140fcbb274669f7fa4dd47fa8b79812bd78ed5acfd85f6e3bb0b2c52a"
+      },
+      {
+        "name": "csl_highs_convex.lib",
+        "sha256": "f3333ebc18bc6babeb534745334e11775d04f11dd0a916380babb5cda6738a2b"
+      },
+      {
+        "name": "csl_highs_lp.lib",
+        "sha256": "6097be314f15bc57b686c83182d578a2d2d7a27a3b0c38bb52213389bec59683"
+      },
+      {
+        "name": "csl_hull.lib",
+        "sha256": "df7de5e1706e0c792949e1e6c8b3d723aa2d4a440409be21036fe3f9d477a0f3"
+      },
+      {
+        "name": "csl_input.lib",
+        "sha256": "f40224935c2215cb1a27efea9bb06e5cda723d1a13be415745ae2b835e630d1d"
+      },
+      {
+        "name": "csl_model.lib",
+        "sha256": "c7c15cbfbf46cea786b908f89b8c3675e190fcf06025bcb7ef8d5f988044314f"
+      },
+      {
+        "name": "csl_nominal_forward.lib",
+        "sha256": "f416db60217f98b6fe6b10a29815996b6dc9dd83b2f1963ba0243ceb51192c9f"
+      },
+      {
+        "name": "csl_numeric.lib",
+        "sha256": "67fe6383946426e7d845d89eca99500eefdb8b018257d207c3bdaba092f18a44"
+      },
+      {
+        "name": "csl_objectives.lib",
+        "sha256": "4d6ece2f441e825f3943451d88b5e45a1a948d4c9b96be557aa313e4d677b935"
+      },
+      {
+        "name": "csl_optimization.lib",
+        "sha256": "5773d20a74fa5121dcd98076dcdddf793d8f78f67256a89d9e69b28ffb77318e"
+      },
+      {
+        "name": "csl_phase_one.lib",
+        "sha256": "8d677d86f41c29b1e45b824978ad8ece17d6fd2ab75d4aa0413eb6c3afc8db08"
+      },
+      {
+        "name": "csl_polyhedral.lib",
+        "sha256": "a5bd398791b77f18375628d4b0b768755564fd986acdefac1ded5a288276ede8"
+      },
+      {
+        "name": "csl_problem.lib",
+        "sha256": "afbdc190a7ffc2f15256b4556358a8a43604fef12a331e3a1598f64369cbe9eb"
+      },
+      {
+        "name": "csl_qhull_conversion.lib",
+        "sha256": "5fd50f701943b07d518e7071a2f435402d3c3372237b4975927bcba52bf5042b"
+      },
+      {
+        "name": "csl_qhull_r.lib",
+        "sha256": "47dabeb036d2fc6dc1012396b352b6a95eaa7b6ab3ae9f6f66310f00bc934e62"
+      },
+      {
+        "name": "csl_registry.lib",
+        "sha256": "8192ad75ad27e147aa1202b372757736938aa672a12ad5226f19ad59512f8f20"
+      },
+      {
+        "name": "csl_resolved_core.lib",
+        "sha256": "edf1a179c58842eec84c8eb95dfa0f3d5d7690a1ce0d7cc5ffc578bc956b3f1e"
+      },
+      {
+        "name": "csl_resolved_problem.lib",
+        "sha256": "a1a82b133439b7cf4d6c06c724ad1a3c13ad1d0f31143d0ee3733bd6871f7df3"
+      },
+      {
+        "name": "csl_sets.lib",
+        "sha256": "23b4afa9ac9d5e043cf92cd83063225f63c06af6fdac419db8b2ea83f9154b9f"
+      },
+      {
+        "name": "csl_strategy_a.lib",
+        "sha256": "e4f3dff40e2a2d8224b6d57eb3367f5a9cb87fa1b51e7570d04e7d37b09c2820"
+      },
+      {
+        "name": "csl_strategy_b.lib",
+        "sha256": "287801f0fbd9f0c037bc6576a596a51a5991d62d8ef622d7407ef50e589f1da8"
+      },
+      {
+        "name": "csl_strategy_ts01.lib",
+        "sha256": "88bf854af9e8a09c3f83236ce04f69e137046eff8bb7fc4e43a799850ec72ee4"
+      },
+      {
+        "name": "csl_terminal_minimizers.lib",
+        "sha256": "9b61e7e5759c4c786fda3f57af769454c1eea75c0f2b3fed8e7a130d393e0410"
+      },
+      {
+        "name": "csl_verification.lib",
+        "sha256": "8b2683a558765d13951d5432d2bc4c005eaa1612324cd92008a95495bb3b8ca6"
+      },
+      {
+        "name": "csl_verifiers.lib",
+        "sha256": "8a83d2aa70913b6c59fc06fce9e589e3633916401911abfc69a93b58b1c16ffe"
+      },
+      {
+        "name": "csl_witness_selector.lib",
+        "sha256": "87f3006f3da7cc5b6043db6ececb325e5e8d26a361f8cc1fd9ecc484758b01f7"
+      },
+      {
+        "name": "highs.lib",
+        "sha256": "8bc161126bc9e77f4be794d001b25747626aa28f458ce849ba2b3b8e50f66c11"
+      }
+    ],
+    "linked_library_source_commit": "b2b1eea88570977f31df3a607dda282cef631792",
+    "measured_source_commit": "b7f1ac0a9800326c825b6d8e35a8f23656496682",
+    "measured_source_file_sha256": "eeaa8ddadceb3d30b219486b81375f977b108369f999cb39a05e0fb3a2067c3c",
+    "ndebug": true,
+    "optimization": "MaxSpeed",
+    "platform": "x64",
+    "schema": "csl.paired-ts01-build-provenance/1",
+    "warnings_as_errors": true
+  },
+  "created_utc": "2026-10-14T18:23:17.753772+00:00",
+  "environment": {
+    "captured_utc": "2026-10-14T18:22:50Z",
+    "computer_alias": "measurement-host-1",
+    "concurrent_benchmark_detected": false,
+    "concurrent_build_or_test_detected": false,
+    "cpu_samples": [
+      {
+        "captured_utc": "2026-10-14T18:22:43Z",
+        "percent_privileged_time": 0,
+        "percent_processor_time": 0,
+        "percent_user_time": 0,
+        "sample": 0
+      },
+      {
+        "captured_utc": "2026-10-14T18:22:45Z",
+        "percent_privileged_time": 0,
+        "percent_processor_time": 0,
+        "percent_user_time": 0,
+        "sample": 1
+      },
+      {
+        "captured_utc": "2026-10-14T18:22:46Z",
+        "percent_privileged_time": 0,
+        "percent_processor_time": 0,
+        "percent_user_time": 0,
+        "sample": 2
+      },
+      {
+        "captured_utc": "2026-10-14T18:22:47Z",
+        "percent_privileged_time": 0,
+        "percent_processor_time": 0,
+        "percent_user_time": 0,
+        "sample": 3
+      },
+      {
+        "captured_utc": "2026-10-14T18:22:48Z",
+        "percent_privileged_time": 0,
+        "percent_processor_time": 0,
+        "percent_user_time": 0,
+        "sample": 4
+      }
+    ],
+    "cpu_samples_summary": "0% total processor utilization in all five 1-second pre-run samples",
+    "logical_processors": 12,
+    "memory_bytes": 34189107200,
+    "observed_idle_background": [
+      "Three persistent MSBuild node-reuse workers were idle.",
+      "One localhost Python process served a previously staged static report; no collection or benchmark work was active."
+    ],
+    "os": "Windows 11 Home",
+    "os_version": "10.0.22631",
+    "physical_cores": 6,
+    "processor": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "requested_concurrency": {
+      "memory_bytes": null,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "total_threads": 1
+    },
+    "schema": "csl.paired-ts01-environment/1",
+    "snapshot_sha256": "81a0316ed727ed71fa415a624e319a4a34faf103f7a2dffc03e9fa8277244149"
+  },
+  "evidence_limits": [
+    "Complete-family status is exact-profile and registered-verifier evidence for this admitted T-S01 fixture under Assurance::numerical; validated arithmetic is unavailable.",
+    "This is one tiny scalar two-stage integrator fixture; the observed timing distributions do not establish an application-scale or general strategy performance ranking.",
+    "No separate limiter profile was performed. The source-level latency limiter is unknown; the result is explicitly inconclusive and claims no winner.",
+    "The live complete-family proof payload is not serialized. Original-data witness checks establish bindings, feasibility, and objective only; independent optimality and completeness statuses remain unsupported.",
+    "Internal LP/convex, projection, affine-sum, conversion, hull-membership, verifier subphase durations/call counts, CPU time, and per-call peak memory are unavailable.",
+    "The collector launcher exited 1 on an overly strict stdout byte comparison; algorithm return code was 0 and retained stdout matches the raw event file after CRLF-to-LF normalization."
+  ],
+  "measurement": {
+    "algorithm_return_code": 0,
+    "events": [
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "event": "header",
+        "order_policy": "One excluded A-then-B warmup pair; seven measured pairs alternate A/B then B/A. Both members of every pair share this immutable resolved problem and provider registries.",
+        "per_strategy_scope": "Fresh StrategyRegistry::prepare through exclusive workspace creation, public StrategyPort run and complete-family acceptance, selector preparation/query returning two distinct histories, and witness-only verification of both histories against the original resolved problem. Excludes process startup, shared scenario/provider setup, JSON serialization/file I/O, build, plots and report rendering.",
+        "phase_counters_unavailable": [
+          "Internal LP/convex, projection, affine-sum, conversion, hull-membership and verifier subphase durations/call counts are not exposed by these public APIs.",
+          "CPU time and per-call peak memory are not measured by this timing driver."
+        ],
+        "phase_scope": {
+          "end_to_end_strategy_ns": "Preparation start through completion of both original-data witness checks; inclusive total, not a sum of other measured phases",
+          "family_construction_ns": "Public workspace run through result return, including the registered exact-profile verifier",
+          "original_verification_ns": "verification::verify_trajectory for both selected witnesses",
+          "preparation_ns": "StrategyRegistry::prepare including capability admission and immutable plan creation",
+          "selector_preparation_ns": "Selector selection/preparation for this strategy result",
+          "selector_workspace_creation_ns": "Prepared selector create through exclusive query workspace return",
+          "witness_query_ns": "Selector workspace run and checked batch binding/count",
+          "workspace_creation_ns": "Prepared strategy create through exclusive workspace return"
+        },
+        "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+        "profile": "ts01_exact_integrator",
+        "relative_tolerance": 1e-08,
+        "representation": "csl.polyhedron.h",
+        "resource_policy": {
+          "memory_bytes": null,
+          "outer_workers": 1,
+          "threads_per_worker": 1,
+          "total_threads": 1
+        },
+        "scenario_sha256": "f9f067beb75288884c79133d2c81e4578f9de445f03eca7f6b697c5486681c04",
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "shared_setup_ns": {
+          "provider_and_registry_setup": 105100,
+          "scenario_load_and_resolution": 366700
+        },
+        "shared_setup_scope": "Scenario JSON parse and immutable resolution are timed once; provider registration/selection, strategy and selector registries, and prepared membership provider are timed once. These shared setup values are excluded from per-strategy totals.",
+        "target": "exact_optimal_relation"
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 0,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 6466500
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 5846500
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 27900
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 85600
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15600
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 300
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 476800
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 7500
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": true,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 0,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 1682400
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 1037500
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 11900
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 26700
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 14600
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 585600
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 3400
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": true,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 1,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 5123800
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 4627700
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 12000
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 33500
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15800
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 300
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 428800
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1700
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 1,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 1318500
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 852300
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 13100
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15900
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 13600
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 419300
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1300
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 2,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 1345000
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 883900
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 11500
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15500
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 13800
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 416200
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1100
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 2,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4866800
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 4364400
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 12700
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 26100
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15600
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 442300
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1500
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 3,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4992900
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 4481400
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 15300
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 28400
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 16000
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 446300
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1500
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 3,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 1440000
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 863200
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 16700
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15300
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 14200
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 300
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 526100
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1300
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 4,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 1373600
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 907100
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 11400
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 16000
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 14000
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 300
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 421200
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1300
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 4,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 5153000
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 4625700
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 29400
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 28700
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15800
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 446800
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1800
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 5,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 5207700
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 4627100
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 13100
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 30200
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15900
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 515900
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1500
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 5,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 1354000
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 886100
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 11400
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15000
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 14000
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 423000
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1500
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 6,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 1429100
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 959000
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 11200
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 14400
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 14200
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 426200
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1400
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 6,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4967700
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 4409400
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 13100
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 30400
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15600
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 200
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 493500
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1500
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 7,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4626500
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 4094500
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 12300
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 28300
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15500
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 300
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 469400
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 2200
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 7,
+        "schema": "csl.synthesis.paired-ts01-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.0.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 1434000
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 879500
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 17300
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 15500
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 13900
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 300
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 503400
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1300
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    ],
+    "events_sha256": "f66e15953bb7bc0c235941465ad49cc0034fd1a4eb5c6a19d214addbd4856639",
+    "failed_trials": 0,
+    "launcher_exit_code": 1,
+    "limiter_profile": {
+      "limiter_identified": false,
+      "performed": false,
+      "reason": "No separate limiter profile was performed; the latency limiter remains unknown and this exact-fixture comparison is inconclusive."
+    },
+    "measured_pairs": 7,
+    "passed_trials": 16,
+    "performance_conclusion": "inconclusive",
+    "phase_counters_unavailable": [
+      "Internal LP/convex, projection, affine-sum, conversion, hull-membership and verifier subphase durations/call counts are not exposed by these public APIs.",
+      "CPU time and per-call peak memory are not measured by this timing driver."
+    ],
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_normalized_to_events": true,
+    "stdout_sha256": "b076e535fa91cae62f1c4638abf5d14887489f31e7460b29cd351fc0a129a029",
+    "summary": {
+      "csl.synthesis.reach-back": {
+        "end_to_end_strategy": {
+          "max_ns": 5207700,
+          "median_ns": 4992900,
+          "min_ns": 4626500,
+          "observations_ns": [
+            5123800,
+            4866800,
+            4992900,
+            5153000,
+            5207700,
+            4967700,
+            4626500
+          ],
+          "range_ns": 581200
+        },
+        "family_construction": {
+          "max_ns": 4627700,
+          "median_ns": 4481400,
+          "min_ns": 4094500,
+          "observations_ns": [
+            4627700,
+            4364400,
+            4481400,
+            4625700,
+            4627100,
+            4409400,
+            4094500
+          ],
+          "range_ns": 533200
+        },
+        "measured_count": 7,
+        "original_verification": {
+          "max_ns": 29400,
+          "median_ns": 13100,
+          "min_ns": 12000,
+          "observations_ns": [
+            12000,
+            12700,
+            15300,
+            29400,
+            13100,
+            13100,
+            12300
+          ],
+          "range_ns": 17400
+        },
+        "preparation": {
+          "max_ns": 33500,
+          "median_ns": 28700,
+          "min_ns": 26100,
+          "observations_ns": [
+            33500,
+            26100,
+            28400,
+            28700,
+            30200,
+            30400,
+            28300
+          ],
+          "range_ns": 7400
+        },
+        "selector_preparation": {
+          "max_ns": 16000,
+          "median_ns": 15800,
+          "min_ns": 15500,
+          "observations_ns": [
+            15800,
+            15600,
+            16000,
+            15800,
+            15900,
+            15600,
+            15500
+          ],
+          "range_ns": 500
+        },
+        "selector_workspace_creation": {
+          "max_ns": 300,
+          "median_ns": 200,
+          "min_ns": 200,
+          "observations_ns": [
+            300,
+            200,
+            200,
+            200,
+            200,
+            200,
+            300
+          ],
+          "range_ns": 100
+        },
+        "witness_query": {
+          "max_ns": 515900,
+          "median_ns": 446800,
+          "min_ns": 428800,
+          "observations_ns": [
+            428800,
+            442300,
+            446300,
+            446800,
+            515900,
+            493500,
+            469400
+          ],
+          "range_ns": 87100
+        },
+        "workspace_creation": {
+          "max_ns": 2200,
+          "median_ns": 1500,
+          "min_ns": 1500,
+          "observations_ns": [
+            1700,
+            1500,
+            1500,
+            1800,
+            1500,
+            1500,
+            2200
+          ],
+          "range_ns": 700
+        }
+      },
+      "csl.synthesis.strategy-b": {
+        "end_to_end_strategy": {
+          "max_ns": 1440000,
+          "median_ns": 1373600,
+          "min_ns": 1318500,
+          "observations_ns": [
+            1318500,
+            1345000,
+            1440000,
+            1373600,
+            1354000,
+            1429100,
+            1434000
+          ],
+          "range_ns": 121500
+        },
+        "family_construction": {
+          "max_ns": 959000,
+          "median_ns": 883900,
+          "min_ns": 852300,
+          "observations_ns": [
+            852300,
+            883900,
+            863200,
+            907100,
+            886100,
+            959000,
+            879500
+          ],
+          "range_ns": 106700
+        },
+        "measured_count": 7,
+        "original_verification": {
+          "max_ns": 17300,
+          "median_ns": 11500,
+          "min_ns": 11200,
+          "observations_ns": [
+            13100,
+            11500,
+            16700,
+            11400,
+            11400,
+            11200,
+            17300
+          ],
+          "range_ns": 6100
+        },
+        "preparation": {
+          "max_ns": 16000,
+          "median_ns": 15500,
+          "min_ns": 14400,
+          "observations_ns": [
+            15900,
+            15500,
+            15300,
+            16000,
+            15000,
+            14400,
+            15500
+          ],
+          "range_ns": 1600
+        },
+        "selector_preparation": {
+          "max_ns": 14200,
+          "median_ns": 14000,
+          "min_ns": 13600,
+          "observations_ns": [
+            13600,
+            13800,
+            14200,
+            14000,
+            14000,
+            14200,
+            13900
+          ],
+          "range_ns": 600
+        },
+        "selector_workspace_creation": {
+          "max_ns": 300,
+          "median_ns": 200,
+          "min_ns": 200,
+          "observations_ns": [
+            200,
+            200,
+            300,
+            300,
+            200,
+            200,
+            300
+          ],
+          "range_ns": 100
+        },
+        "witness_query": {
+          "max_ns": 526100,
+          "median_ns": 423000,
+          "min_ns": 416200,
+          "observations_ns": [
+            419300,
+            416200,
+            526100,
+            421200,
+            423000,
+            426200,
+            503400
+          ],
+          "range_ns": 109900
+        },
+        "workspace_creation": {
+          "max_ns": 1500,
+          "median_ns": 1300,
+          "min_ns": 1100,
+          "observations_ns": [
+            1300,
+            1100,
+            1300,
+            1300,
+            1500,
+            1400,
+            1300
+          ],
+          "range_ns": 400
+        }
+      }
+    },
+    "warmup_pairs": 1,
+    "wrapper_issue": "The wrapper incorrectly required Windows text-mode stdout bytes to equal the binary JSONL event file. stdout uses CRLF and events.jsonl uses LF; replacing CRLF with LF makes the complete byte streams identical. Both exact streams and the wrapper process-run.json were retained; algorithm was not rerun."
+  },
+  "process": {
+    "algorithm_return_code": 0,
+    "command": [
+      "registered_synthesis_comparison.exe",
+      "--measure",
+      "two-stage-integrator.json",
+      "measurement-events.jsonl"
+    ],
+    "ended_utc": "2026-10-14T18:23:17.753772+00:00",
+    "events_sha256": "f66e15953bb7bc0c235941465ad49cc0034fd1a4eb5c6a19d214addbd4856639",
+    "external_wall_ns": 67192500,
+    "launcher_exit_code": 1,
+    "record_count": 17,
+    "schema": "csl.paired-ts01-process-run/1",
+    "started_utc": "2026-10-14T18:23:17.686565+00:00",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_equals_events_after_crlf_normalization": true,
+    "stdout_equals_events_exactly": false,
+    "stdout_sha256": "b076e535fa91cae62f1c4638abf5d14887489f31e7460b29cd351fc0a129a029",
+    "wrapper_exit_reason": "Incorrect byte-for-byte stdout/event-file comparison ignored CRLF conversion on Windows; the preserved streams differ only by CRLF-to-LF normalization."
+  },
+  "report_id": "syn-ts01-paired-20261014-b7f1ac0",
+  "request": {
+    "absolute_tolerance": 1e-08,
+    "assurance": "numerical",
+    "materialization_limit": null,
+    "problem_identity": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+    "profile": "ts01_exact_integrator",
+    "relative_tolerance": 1e-08,
+    "representation": "csl.polyhedron.h",
+    "resource_policy": {
+      "memory_bytes": null,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "total_threads": 1
+    },
+    "selector": {
+      "count": 2,
+      "directions": [
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "distinctness_tolerance": 0,
+      "seed": 31
+    },
+    "selector_source": {
+      "commit": "b7f1ac0a9800326c825b6d8e35a8f23656496682",
+      "file_sha256": "eeaa8ddadceb3d30b219486b81375f977b108369f999cb39a05e0fb3a2067c3c"
+    },
+    "target": "exact_optimal_relation"
+  },
+  "scenario": {
+    "canonical_sha256": "ee66ab350c67ca6448f19cf1616913dc210c848281f577607cce8bb564c8997d",
+    "sha256": "f9f067beb75288884c79133d2c81e4578f9de445f03eca7f6b697c5486681c04",
+    "value": {
+      "controls": {
+        "kind": "box",
+        "lower": [
+          0
+        ],
+        "upper": [
+          1
+        ]
+      },
+      "horizon": 2,
+      "id": "two-stage-integrator",
+      "initial_state": [
+        0
+      ],
+      "model": {
+        "A": [
+          [
+            1
+          ]
+        ],
+        "B": [
+          [
+            1
+          ]
+        ],
+        "kind": "linear_discrete"
+      },
+      "objective": {
+        "Q": [
+          [
+            2
+          ]
+        ],
+        "kind": "quadratic",
+        "linear": [
+          -2
+        ],
+        "offset": 1
+      },
+      "schema": "csl.scenario/1"
+    }
+  },
+  "schema": "csl.syn-ts01-paired-comparison-report/1",
+  "source": {
+    "harness_commit": "b7f1ac0a9800326c825b6d8e35a8f23656496682",
+    "measurement_source_file_sha256": "eeaa8ddadceb3d30b219486b81375f977b108369f999cb39a05e0fb3a2067c3c"
+  },
+  "strategies": [
+    "csl.synthesis.reach-back",
+    "csl.synthesis.strategy-b"
+  ]
+}

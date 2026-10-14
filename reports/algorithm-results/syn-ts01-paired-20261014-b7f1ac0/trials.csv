@@ -1,0 +1,17 @@
+repetition,warmup,order_position,strategy,status,end_to_end_strategy,preparation,workspace_creation,family_construction,selector_preparation,selector_workspace_creation,witness_query,original_verification
+0,True,0,csl.synthesis.reach-back,passed,6466500,85600,7500,5846500,15600,300,476800,27900
+0,True,1,csl.synthesis.strategy-b,passed,1682400,26700,3400,1037500,14600,200,585600,11900
+1,False,0,csl.synthesis.reach-back,passed,5123800,33500,1700,4627700,15800,300,428800,12000
+1,False,1,csl.synthesis.strategy-b,passed,1318500,15900,1300,852300,13600,200,419300,13100
+2,False,0,csl.synthesis.strategy-b,passed,1345000,15500,1100,883900,13800,200,416200,11500
+2,False,1,csl.synthesis.reach-back,passed,4866800,26100,1500,4364400,15600,200,442300,12700
+3,False,0,csl.synthesis.reach-back,passed,4992900,28400,1500,4481400,16000,200,446300,15300
+3,False,1,csl.synthesis.strategy-b,passed,1440000,15300,1300,863200,14200,300,526100,16700
+4,False,0,csl.synthesis.strategy-b,passed,1373600,16000,1300,907100,14000,300,421200,11400
+4,False,1,csl.synthesis.reach-back,passed,5153000,28700,1800,4625700,15800,200,446800,29400
+5,False,0,csl.synthesis.reach-back,passed,5207700,30200,1500,4627100,15900,200,515900,13100
+5,False,1,csl.synthesis.strategy-b,passed,1354000,15000,1500,886100,14000,200,423000,11400
+6,False,0,csl.synthesis.strategy-b,passed,1429100,14400,1400,959000,14200,200,426200,11200
+6,False,1,csl.synthesis.reach-back,passed,4967700,30400,1500,4409400,15600,200,493500,13100
+7,False,0,csl.synthesis.reach-back,passed,4626500,28300,2200,4094500,15500,300,469400,12300
+7,False,1,csl.synthesis.strategy-b,passed,1434000,15500,1300,879500,13900,300,503400,17300
