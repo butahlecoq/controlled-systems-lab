@@ -16,12 +16,19 @@ HARNESS_BLOB = "6838def7f89861de80d1b9def4d9aa4beeb12104"
 
 class Perf03PublicationTests(unittest.TestCase):
     def test_reproduction_patch_applies_to_pinned_harness_blob(self):
-        worktree_blob = subprocess.check_output(["git", "hash-object", HARNESS_PATH], cwd=ROOT, text=True).strip()
+        maintained = "benchmarks/reporting/syn04/strategy_b_measure.cpp"
+        worktree_blob = subprocess.check_output(["git", "hash-object", maintained], cwd=ROOT, text=True).strip()
         self.assertEqual(worktree_blob, HARNESS_BLOB)
-        subprocess.run(
-            ["git", "apply", "--check", str(SOURCE / "harness-change.patch")],
-            cwd=ROOT, check=True, capture_output=True, text=True,
-        )
+        # The patch records the original path at the fixed historical blob.
+        # Recreate that evidence input, independent of today's compatibility entry point.
+        with tempfile.TemporaryDirectory() as temporary:
+            historical = Path(temporary) / HARNESS_PATH
+            historical.parent.mkdir(parents=True)
+            historical.write_bytes(subprocess.check_output(["git", "cat-file", "blob", HARNESS_BLOB], cwd=ROOT))
+            subprocess.run(
+                ["git", "apply", "--check", str(SOURCE / "harness-change.patch")],
+                cwd=temporary, check=True, capture_output=True, text=True,
+            )
 
     def test_stages_immutable_page_and_all_local_download_links(self):
         with tempfile.TemporaryDirectory() as temporary:

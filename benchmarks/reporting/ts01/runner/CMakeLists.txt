@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.31)
+project(CSLTS01Measurement LANGUAGES C CXX)
+
+if(NOT DEFINED CSL_SOURCE_ROOT)
+  message(FATAL_ERROR "CSL_SOURCE_ROOT must name the pinned clean solver checkout")
+endif()
+set(BUILD_TESTING OFF CACHE BOOL "Build repository tests" FORCE)
+add_subdirectory("${CSL_SOURCE_ROOT}" csl-source)
+
+add_executable(csl_syn07_ts01_report "${CMAKE_CURRENT_LIST_DIR}/../ts01_measure.cpp")
+target_link_libraries(csl_syn07_ts01_report PRIVATE CSL::strategy_ts01)
+target_compile_features(csl_syn07_ts01_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_syn07_ts01_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+if(MSVC)
+  target_compile_options(csl_syn07_ts01_report PRIVATE /W4 /WX /permissive-)
+else()
+  target_compile_options(csl_syn07_ts01_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()

@@ -7,7 +7,7 @@ import sys
 
 import registered_reports as common
 ROOT=Path(__file__).resolve().parents[2]
-REPORT_SPEC=importlib.util.spec_from_file_location("csl_syn03_strategy_a_report_contract",ROOT/"reports/algorithm-results/tooling/syn03/strategy_a_report.py")
+REPORT_SPEC=importlib.util.spec_from_file_location("csl_syn03_strategy_a_report_contract",ROOT/"scripts/reports/syn03/strategy_a_report.py")
 report=importlib.util.module_from_spec(REPORT_SPEC);sys.modules[REPORT_SPEC.name]=report;REPORT_SPEC.loader.exec_module(report)
 
 KIND="syn03-strategy-a-ts01"
@@ -20,6 +20,7 @@ def _pretty(value): return (json.dumps(value,ensure_ascii=False,sort_keys=True,i
 def public_report_id(identity):
     return "syn03-strategy-a-ts01-"+hashlib.sha256(_canonical(identity)).hexdigest()
 
+@common.preserve_publication
 def adapt(bundle):
     bundle=Path(bundle)
     if bundle.is_symlink(): raise ValueError("SYN-03 report directory cannot be a symlink")

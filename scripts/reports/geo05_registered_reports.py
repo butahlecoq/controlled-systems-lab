@@ -258,20 +258,7 @@ def adapt(bundle):
     if manifest.get("schema") != "csl.geo05-report-files/1" or set(manifest) != {"schema", "files"}:
         raise ValueError("GEO-05 manifest schema mismatch")
     listed = manifest.get("files")
-    if not isinstance(listed, dict) or set(listed) != FILES:
-        raise ValueError("GEO-05 registered source inventory mismatch")
-    actual = set()
-    for path in bundle.rglob("*"):
-        if path.is_symlink():
-            raise ValueError("symlinks are forbidden in GEO-05 bundle")
-        if path.is_file():
-            actual.add(path.relative_to(bundle).as_posix())
-    if actual != FILES | {"manifest.json"}:
-        raise ValueError("GEO-05 bundle has missing or unregistered files")
-    for name, expected in listed.items():
-        if (not isinstance(expected, str) or re.fullmatch(r"[0-9a-f]{64}", expected) is None
-                or hashlib.sha256((bundle / name).read_bytes()).hexdigest() != expected):
-            raise ValueError("GEO-05 source file hash mismatch: " + name)
+    common.validate_source_inventory(bundle, listed, FILES, label="GEO-05")
     _validate_saved_data(bundle, record)
     source_zip = bundle.parent / (bundle.name + ".zip")
     _validate_source_zip(bundle, source_zip)
@@ -282,9 +269,12 @@ def adapt(bundle):
                 "source_zip_sha256": hashlib.sha256(source_zip.read_bytes()).hexdigest(),
                 "publisher_sha256": hashlib.sha256(publisher_source).hexdigest()}
     public_id = "geo05-" + _digest(identity)
-    return common.PublicationRecord(item.kind, public_id, item.payload_sha256, item.source_commit,
+    publication = common.PublicationRecord(item.kind, public_id, item.payload_sha256, item.source_commit,
                                     item.measured_scope, item.evidence_limits, item.files,
                                     item.payload_schema, item.native_payload_sha256, item.source_report_id)
+
+
+    return common.preserve_historical_publication(bundle, publication, offline_zip)
 
 
 def _validate_saved_data(bundle, record):
@@ -422,8 +412,6 @@ def render_page(bundle, publication):
 
 def publication_artifacts(bundle, publication):
     bundle = Path(bundle)
-    files = {name: (bundle / name).read_bytes() for name in publication.files if name != "index.html"}
-    files["index.html"] = render_page(bundle, publication).encode("utf-8")
     record = _json(bundle / "records.json")
     envelope = {"schema": "csl.algorithm-report-envelope/1", "report_id": publication.report_id,
                 "report_kind": publication.kind, "payload_schema": publication.payload_schema,
@@ -433,12 +421,9 @@ def publication_artifacts(bundle, publication):
                 "source_report_id": publication.source_report_id,
                 "payload": {key: value for key, value in record.items()
                             if key not in ("report_id", "payload_sha256")}}
-    files["report-envelope.json"] = common._json_bytes(envelope)
-    files["publication-manifest.json"] = common._json_bytes({
-        "schema": "csl.algorithm-report-publication-manifest/1", "report_id": publication.report_id,
-        "report_kind": publication.kind,
-        "files": {name: hashlib.sha256(files[name]).hexdigest() for name in sorted(files)}})
-    return files
+    return common.assemble_publication(bundle, publication,
+        page=render_page(bundle, publication), envelope=envelope, source_files=publication.files)
+
 
 
 def offline_zip(bundle, publication):

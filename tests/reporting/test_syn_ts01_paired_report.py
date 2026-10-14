@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-TOOL_DIR = ROOT / "reports" / "algorithm-results" / "tooling" / "syn_ts01_paired"
+TOOL_DIR = ROOT / "scripts" / "reports" / "syn_ts01_paired"
 REPORT_DIR = ROOT / "reports" / "algorithm-results" / "syn-ts01-paired-20261014-b7f1ac0"
 sys.path.insert(0, str(TOOL_DIR))
 SPEC = importlib.util.spec_from_file_location("syn_ts01_paired_report", TOOL_DIR / "report.py")

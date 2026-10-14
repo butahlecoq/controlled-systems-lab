@@ -22,7 +22,7 @@ FILES = {
 
 
 def _map():
-    path = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "syn01" / "publication_map.py"
+    path = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "syn01" / "publication_map.py"
     spec = importlib.util.spec_from_file_location("csl_syn01_publication_map", path)
     if spec is None or spec.loader is None:
         raise ValueError("SYN-01 publication map is unavailable")
@@ -67,7 +67,7 @@ def _summary_csv(record):
 
 def _validate_bundle(bundle, record):
     import importlib.util
-    tooling = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "syn01" / "report.py"
+    tooling = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "syn01" / "report.py"
     spec = importlib.util.spec_from_file_location("csl_syn01_saved_report", tooling)
     report = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(report)
@@ -104,6 +104,7 @@ def _validate_bundle(bundle, record):
         raise ValueError("SYN-01 profiling limitation is not explicit")
 
 
+@common.preserve_publication
 def adapt(bundle):
     bundle = Path(bundle)
     if bundle.is_symlink():
@@ -140,7 +141,7 @@ def adapt(bundle):
 
 def render_page(bundle, publication):
     record = _json(Path(bundle) / "records.json")
-    report_path = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "syn01" / "report.py"
+    report_path = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "syn01" / "report.py"
     spec = importlib.util.spec_from_file_location("csl_syn01_page_report", report_path)
     report = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(report)
