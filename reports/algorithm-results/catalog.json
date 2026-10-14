@@ -188,6 +188,18 @@
       "evidence_limits": "Completeness applies only to the exact admitted T-S02 constant-integrator profile and csl.verifier.ts02-constant-integrator v1.; Assurance::numerical is reported; validated arithmetic is unavailable.; Seven observations of one tiny profile are exploratory evidence only; no comparator, speedup, general performance, application-scale, throughput or scalability claim.; This report does not cover T-S03, singular A, other dynamics or objectives, or generic complete-family support; SYN-04 #67 remains open.; The admitted T-S02 production path constructs and verifies the full feasible relation analytically; LP and convex providers are registered and prepared but their numerical solve operations are not invoked.; The separate diagnostic workload is excluded from the seven observations; no source-mapped unprofiled latency limiter is established.; Internal preparation, native LP/QP, relation construction, compiled verifier and export timings/counters are unavailable.",
       "report_kind": "syn04-strategy-b-ts02",
       "zip_sha256": "b2d38a913d3addbee9ad1493f611bfb41abda921be7356dbb2a8b0c9859e6878"
+    },
+    {
+        "report_id": "syn03-strategy-a-ts02-d86cbd113c83a52d204db38af9edf90fcb5c1f5ba240898e1c6170a898c8e3c0",
+        "report_kind": "syn03-strategy-a-ts02",
+        "source_report_id": "syn03-strategy-a-ts02-20261014-272fb9a5",
+        "payload_schema": "csl.syn03-strategy-a-ts02-report/1",
+        "payload_sha256": "20d3d76b76513320761cb5297ccd57492d0b7db4afb4f5078aa7acce8e8e34fc",
+        "native_payload_sha256": "20d3d76b76513320761cb5297ccd57492d0b7db4afb4f5078aa7acce8e8e34fc",
+        "source_commit": "272fb9a51c40dedeb20dfcb1ea11dfc6b694edd7",
+        "measured_scope": "Exact T-S02 profile; one registered Strategy A; seven validated measured trials; performance conclusion inconclusive",
+        "evidence_limits": "Completeness applies only to the exact admitted Strategy A T-S02 constant-integrator profile and csl.verifier.ts02-constant-integrator v1.; Assurance::numerical is reported; validated arithmetic is unavailable.; Seven observations of one tiny profile are exploratory evidence only; no comparator, speedup, general performance, application-scale, throughput or scalability claim.; This report does not cover T-S01, T-S03, singular A, other dynamics or objectives, or generic complete-family support; SYN-03 #66 remains open.; The Strategy A profile performs forward reachability, terminal optimization and joint-history recovery before exact T-S02 relation verification. Native LP/geometry provider activity may occur in that path; submodule call counts and timings are unavailable.; The separate diagnostic workload is excluded from the seven observations; no source-mapped unprofiled latency limiter is established.; Internal preparation, native LP/QP, relation construction, compiled verifier and export timings/counters are unavailable.",
+        "zip_sha256": "c01da15949cbf467fd1e55e43b9b46fc10beeba84292afbbb6e3b0513d04b8da"
     }
   ]
 }

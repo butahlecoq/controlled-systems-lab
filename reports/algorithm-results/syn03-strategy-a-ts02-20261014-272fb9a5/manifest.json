@@ -1,0 +1,27 @@
+{
+  "files": {
+    "README.md": "a5d6aae498836367a62c1c0e2e46a9366371c16905877e2075a05cccfdbfc881",
+    "build-evidence/CMakeCXXCompiler.cmake": "eb5b10b1860b7da082a2230651976c7280df6ea4236b08258b6c9c442a393392",
+    "build-evidence/CMakeCache.txt": "87d36d9c4da549c55eabb1057dada96320b31f220ebbee86738d0eddc498f4fe",
+    "build-evidence/build.log": "cebb86593570cc4aaf0bbf4f5e2c29444aaee2267a66b9ea89d3fa573f722ada",
+    "build-evidence/configure.log": "1ae845f568502eab83f35cbe077155acf083ef6283001a29d90408d6dc00bee0",
+    "build-evidence/release-target.vcxproj": "247838541459e6f6aa6ced95275ce0493945ea2896b7736d49d1709e5174a0a1",
+    "build-provenance.json": "e6671446fe26b78e1b43208ae7d309240ade49ad401cd2d2dea679b65a14735c",
+    "commands.json": "23db0a3e70e79d5ef146e6aa45f97e1a3951b911eb1ac525646e3a79481b8da2",
+    "environment.json": "73242e910fc276eac1c87662d5bf3380569b60a7e03eef15dc523a61e0466d7c",
+    "index.html": "5c0b3192b6ed7dcf8c93f044c79c61116851a63831503baaba6dfd756f3bf45a",
+    "measurement-events.jsonl": "935c3d6e20a93f7d39194fb2ff5f84979116817cb8745b45da83607d683c25c8",
+    "measurement.json": "871ccca3f47d8421dfe6b204992be8fc44de505d05f3a231a08984a01d6a60af",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile.json": "39b18ed052f70367fb59234be44d6ab52bcccb9a7d220e5998f65c83fb7df407",
+    "records.json": "004866d21a8e55756ffc81ccbf0af71dca51da8392795288458346af07e5b291",
+    "scenarios.json": "283013c21d342e8e1db9bae7bd3b6295cf1e82a4283449113f21d2fd20d8b4ed",
+    "separate-profile-events.jsonl": "dc018add8d4b7257ce3957de528086925974a54657e00f075a5760777f57756c",
+    "separate-profile-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials.csv": "df8868f0f486c9a531764c53f1d1380ccb512088e2814cc33269609177648f8b"
+  },
+  "harness_commit": "2474dc69758ff2f990630300ce54eca0afc827d5",
+  "report_id": "syn03-strategy-a-ts02-20261014-272fb9a5",
+  "schema": "csl.syn03-strategy-a-ts02-manifest/1",
+  "source_commit": "272fb9a51c40dedeb20dfcb1ea11dfc6b694edd7"
+}

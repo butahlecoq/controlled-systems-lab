@@ -1,0 +1,175 @@
+{
+  "etl_path": null,
+  "process_samples": [
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.0,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428085726000,
+      "rss_bytes": 1839104
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 25.0,
+      "monotonic_ns": 728428087924200,
+      "rss_bytes": 3059712
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428090491900,
+      "rss_bytes": 6565888
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428093050000,
+      "rss_bytes": 6852608
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428095603600,
+      "rss_bytes": 6975488
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428098130700,
+      "rss_bytes": 6955008
+    },
+    {
+      "cpu_system_seconds": 0.0,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428100238300,
+      "rss_bytes": 6967296
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 50.0,
+      "monotonic_ns": 728428102337100,
+      "rss_bytes": 7065600
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428104405900,
+      "rss_bytes": 6991872
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428106473300,
+      "rss_bytes": 7012352
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428108538800,
+      "rss_bytes": 6955008
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428111061500,
+      "rss_bytes": 7000064
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428113128800,
+      "rss_bytes": 6926336
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428115693100,
+      "rss_bytes": 7172096
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428118326900,
+      "rss_bytes": 7069696
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428120575100,
+      "rss_bytes": 7258112
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428122720000,
+      "rss_bytes": 7241728
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428124867800,
+      "rss_bytes": 7266304
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428127378200,
+      "rss_bytes": 7217152
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428129526500,
+      "rss_bytes": 7299072
+    },
+    {
+      "cpu_system_seconds": 0.015625,
+      "cpu_user_seconds": 0.015625,
+      "host_cpu_percent": 0.0,
+      "monotonic_ns": 728428131895900,
+      "rss_bytes": 6889472
+    },
+    {
+      "host_cpu_percent": 8.3,
+      "monotonic_ns": 728428134490800
+    }
+  ],
+  "sampled_process_cpu_system_seconds_max": 0.015625,
+  "sampled_process_cpu_user_seconds_max": 0.015625,
+  "sampled_process_peak_rss_bytes": 7299072,
+  "separate_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "separate_stdout_sha256": "dc018add8d4b7257ce3957de528086925974a54657e00f075a5760777f57756c",
+  "separate_wall_ns": 60465300,
+  "separate_workload_return_code": 0,
+  "separate_workload_timed_out": false,
+  "wpr": {
+    "command": [
+      "wpr",
+      "-start",
+      "CPU",
+      "-filemode"
+    ],
+    "return_code": 3310899217,
+    "stderr": "\r\n\tFailed to enable the policy to profile system performance.\r\r\n\r\n\tProfile Id: CPU.Verbose.File\r\n\t\r\n\tError code: 0xc5585011\r\n\t\r\n\tFailed to enable the policy to profile system performance.\r\r\n\t\r\n\t\r\n",
+    "stdout": ""
+  }
+}
