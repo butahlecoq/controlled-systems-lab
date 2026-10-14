@@ -894,6 +894,37 @@ TEST_CASE("all-port factory counts stay zero across capability and registration 
     CHECK(ports.factories == std::array<int,7>{0,0,0,0,0,0,0});
 }
 
+TEST_CASE("strategy registry rejects validated family assurance before planning") {
+    StrategyRegistry strategies;
+    strategies.add({{{"numerical-only"},"1.0"},
+        [](const StrategyRequest&,const Requirements&) -> Capability { return Offer{}; },
+        [](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+            return Rejection{{"planner",{{"unexpected-planner"},std::string{"1.0"}},{}},
+                {{DiagnosticCode::unsupported,"planner.reached","planning must not run for validated assurance"}}};
+        }});
+
+    auto request=strategy_request();
+    request.configuration.strategy={"numerical-only"};
+    request.family.assurance=Assurance::validated;
+    Requirements requirements;
+    requirements.output.family=request.family.target;
+    requirements.output.assurance=Assurance::validated;
+
+    const auto prepared=strategies.prepare(request,requirements,std::string{"1.0"});
+    REQUIRE(std::holds_alternative<Rejection>(prepared));
+    const auto& rejection=std::get<Rejection>(prepared);
+    CHECK(rejection.provenance.port=="strategy");
+    CHECK(rejection.provenance.requested.id.value=="numerical-only");
+    CHECK(rejection.provenance.requested.version==std::optional<std::string>{"1.0"});
+    REQUIRE(rejection.provenance.actual.has_value());
+    CHECK(rejection.provenance.actual->id.value=="numerical-only");
+    CHECK(rejection.provenance.actual->version=="1.0");
+    REQUIRE(rejection.diagnostics.size()==1);
+    CHECK(rejection.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics[0].field=="family.assurance");
+    CHECK(rejection.diagnostics[0].explanation=="Validated family evidence is not implemented");
+}
+
 TEST_CASE("runtime strategy extension adds a different typed dependency tuple without changing the caller") {
     struct CustomStrategy final : SynthesisWorkspace {
         std::unique_ptr<BoundWorkspace<CounterPort>> counter;
