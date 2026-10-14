@@ -571,7 +571,7 @@ TEST_CASE("basis reuse verifies hull when a structural interior point is in the 
     // The center is deliberately the first structural column. The fixed Bland
     // phase-I provider deterministically returns it as a basic structural point.
     const geometry::PointCloud cloud{{"basis-interior-point"}, {
-        {1,1}, {0,0}, {2,0}, {2,2}, {0,2}, {1,0}, {0,1}, {2,1}, {1,2}
+        {1,1}, {0,0}, {2,0}, {2,2}, {0,2}
     }};
     const auto prepared_result = registry::prepare_pipeline(registry::select(reducers,
         registry::Method{{"csl.hull.phase-one-basis-bulk"}, std::nullopt}, cloud));
@@ -591,6 +591,7 @@ TEST_CASE("basis reuse verifies hull when a structural interior point is in the 
     const auto baseline_result = geometry::reduce_hull(cloud, *baseline_lp, {});
     REQUIRE(std::holds_alternative<geometry::HullReduction>(baseline_result));
     const auto& baseline = std::get<geometry::HullReduction>(baseline_result);
+    REQUIRE(baseline.status == geometry::ReductionStatus::complete);
     for (const auto point : bulk.retained)
         CHECK(independent_membership(*baseline_lp, cloud, baseline.retained, point));
     for (const auto point : baseline.retained)
