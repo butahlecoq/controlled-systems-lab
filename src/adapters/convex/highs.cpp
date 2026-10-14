@@ -250,6 +250,21 @@ bool passes(const ProgramResult& r,NumericalPolicy policy) {
         if(m->violation>policy.absolute_tolerance+policy.relative_tolerance*m->scale) return false;
     return true;
 }
+void append_attempt_residuals(std::ostringstream& raw,const char* attempt,const ProgramResult& result) {
+    auto measure=[&](const char* name,const ResidualMeasure& value) {
+        raw<<'\n'<<attempt<<".check."<<name<<".violation="<<value.violation
+           <<'\n'<<attempt<<".check."<<name<<".scale="<<value.scale;
+    };
+    if(result.residuals.primal) {
+        measure("rows",result.residuals.primal->rows);
+        measure("variables",result.residuals.primal->variables);
+    }
+    if(result.residuals.dual) {
+        if(result.residuals.dual->stationarity) measure("stationarity",*result.residuals.dual->stationarity);
+        if(result.residuals.dual->signs) measure("signs",*result.residuals.dual->signs);
+        if(result.residuals.dual->complementarity) measure("complementarity",*result.residuals.dual->complementarity);
+    }
+}
 void candidate(ProgramResult& result,const ConvexProgram& p,const ExecutionContext& c,const HighsSolution& s,std::ostringstream& raw,bool allow_dual,bool private_free_row=false) {
     const auto& q=p.quadratic_program();
     if(!s.value_valid || !finite(s.col_value,q.variables().size())) return;
@@ -379,6 +394,22 @@ class Workspace final : public ConvexWorkspace {
                 else raw<<"\nphase.qp.info=unavailable";
                 classify(result,api,qp_status);
                 if(api!=HighsStatus::kError) candidate(result,p,c,h.getSolution(),raw,true,private_free_row);
+                if(std::holds_alternative<optimization::QuadraticCoefficients>(p.original_objective().coefficients()) &&
+                    result.outcome.value==MathematicalOutcome::optimal && !passes(result,c.numerical)) {
+                    raw<<"\nphase.qp.attempt1=optimal_but_original_checks_rejected";
+                    append_attempt_residuals(raw,"phase.qp.attempt1",result);
+                    result=result_for(p);
+                    Highs retry; configure(retry,c,options_,true); Callbacks retry_callbacks(retry,capture);
+                    require(retry.passModel(model)); require(retry.setOptionValue("use_warm_start",false));
+                    bool retry_warm=true; require(retry.getOptionValue("use_warm_start",retry_warm));
+                    if(retry_warm) {raw<<"\nphase.qp.retry=false\nretry.error=warm_start_not_disabled"; return finish();}
+                    raw<<"\nphase.qp.retry=cold_fresh_model\nphase.qp.retry.time_limit="<<deadline(retry,c);
+                    capture.poll(); if(capture.stop) return finish();
+                    const auto retry_api=retry.run(); const auto retry_status=retry.getModelStatus();
+                    raw<<"\nphase.qp.retry.api_status="<<static_cast<int>(retry_api)<<"\nphase.qp.retry.model_status="<<static_cast<int>(retry_status);
+                    classify(result,retry_api,retry_status);
+                    if(retry_api!=HighsStatus::kError) candidate(result,p,c,retry.getSolution(),raw,true,private_free_row);
+                }
             } else {
                 if(!solver_) solver_=std::make_unique<Highs>();
                 auto& h=*solver_; configure(h,c,options_,false); Callbacks callbacks(h,capture);

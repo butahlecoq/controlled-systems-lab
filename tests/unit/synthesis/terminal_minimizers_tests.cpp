@@ -102,7 +102,7 @@ TEST_CASE("wrong slice identity and unsupported representation are explicit") {
 }
 TEST_CASE("real HiGHS undetermined degenerate QP preserves diagnostics without a relation") {
     auto p=resolved(ResidualNormTerminal{{1,2,{1,0}},{0.5}});FamilyRequest q;q.objective=p.identity();ExecutionContext c;c.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    auto r=real_optimizer().solve(p,q,{p.identity(),box()},c);CHECK(r.outcome==MathematicalOutcome::undetermined);CHECK_FALSE(r.relation);REQUIRE(r.optimization);CHECK(r.optimization->raw_diagnostics.find("optimality.withheld=")!=std::string::npos);REQUIRE(r.provider);CHECK(r.provider->actual->id.value!="analytic-qp");
+    auto r=real_optimizer().solve(p,q,{p.identity(),box()},c);CHECK(r.outcome==MathematicalOutcome::undetermined);CHECK_FALSE(r.relation);REQUIRE(r.optimization);CHECK(r.optimization->raw_diagnostics.find("optimality.withheld=")!=std::string::npos);CHECK(r.optimization->raw_diagnostics.find("phase.qp.retry=")==std::string::npos);REQUIRE(r.provider);CHECK(r.provider->actual->id.value!="analytic-qp");
 }
 TEST_CASE("real HiGHS preserves zero-target degenerate quadratic and residual relations") {
     for(const TerminalObjective objective:std::vector<TerminalObjective>{QuadraticTerminal{{2,2,{2,0,0,0}},{0,0},0},ResidualNormTerminal{{1,2,{1,0}},{0}}}) {
