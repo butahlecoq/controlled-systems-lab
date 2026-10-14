@@ -21,6 +21,14 @@ HARNESS_PATHS = {
     "tests/reporting/test_geo02_publication.py",
 }
 
+# Maintained counterparts; retain the historical exact source/CMake policy.
+HARNESS_PATHS |= {
+    "scripts/reports/geo02/README.md", "scripts/reports/geo02/collect.py",
+    "scripts/reports/geo02/provenance.py", "scripts/reports/geo02/render.py",
+    "scripts/reports/geo02/test_report_tools.py",
+    "benchmarks/reporting/geo02/affine_sum_driver.cpp",
+}
+
 CMAKE_CONFLICT = """<<<<<<< HEAD
 install(FILES include/csl/geometry/polyhedral_intersection.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
 install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)

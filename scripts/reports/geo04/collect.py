@@ -30,6 +30,17 @@ HARNESS_PATH_ALLOWLIST = {
     "reports/algorithm-results/tooling/geo04/render.py",
     "reports/algorithm-results/tooling/geo04/test_report_tools.py",
 }
+
+# Maintained counterparts of the original explicitly reviewed harness paths.
+HARNESS_PATH_ALLOWLIST |= {
+    'benchmarks/reporting/geo04/polyhedral_intersection_driver.cpp',
+    'scripts/reports/collector_common.py',
+    'scripts/reports/geo04/README.md',
+    'scripts/reports/geo04/collect.py',
+    'scripts/reports/geo04/geo04_catalog.py',
+    'scripts/reports/geo04/render.py',
+    'scripts/reports/geo04/test_report_tools.py',
+}
 GEO04_CMAKE_OPTION = 'option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report driver" OFF)'
 GEO04_CMAKE_TARGET = '''if(CSL_BUILD_GEO04_REPORT)
   add_executable(csl_geo04_intersection_report reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp)

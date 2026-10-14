@@ -140,7 +140,8 @@ def validate_checkout(source_commit, harness_commit):
         raise ValueError("collection requires a clean checkout")
     changed = git(ROOT, "diff", "--name-only", source_commit + ".." + harness_commit).splitlines()
     allowed_prefixes = ("reports/algorithm-results/tooling/syn01/", "scripts/reports/", "tests/reporting/")
-    allowed_files = {"CMakeLists.txt", "reports/algorithm-results/catalog.json"}
+    allowed_files = {"CMakeLists.txt", "reports/algorithm-results/catalog.json",
+                     "benchmarks/reporting/syn01/nominal_forward_driver.cpp"}
     unexpected = [name for name in changed if name not in allowed_files and not name.startswith(allowed_prefixes)]
     if unexpected:
         raise ValueError("source commit differs outside the reporting-only allowlist: " + ", ".join(unexpected))

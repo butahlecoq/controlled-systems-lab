@@ -29,7 +29,7 @@ adapter retains its scientific validation and typed page rendering. Rendering
 and staging read saved data and never execute numerical collectors.
 
 The explicit historical publication pins bind **both** the complete native
-source inventory and the exact offline ZIP output. Current validation always
+source inventory, any sibling archive used by the adapter identity, and the exact offline ZIP output. Current validation always
 runs first. A changed source file or changed generated output cannot reuse a
 historical route; the current content-bound identity applies. These pins preserve
 existing IDs and bytes across mechanical moves, without extending scientific

@@ -4,6 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
+import shutil
+import zipfile
 import sys
 import tempfile
 import unittest
@@ -64,8 +66,44 @@ class CaptureTests(unittest.TestCase):
             self.assertEqual(publications.preserve_historical_publication(changed, item, archive_builder).report_id, "current")
             archive_builder.assert_not_called()
 
+    def test_repacked_identity_source_archive_cannot_reuse_historical_route(self):
+        import geo02_registered_reports
+        import geo05_registered_reports
+        for adapter, source_id in ((geo02_registered_reports, "geo02-20261013T061151Z-338ff7d1d63c"),
+                                   (geo05_registered_reports, "geo05-4dc3c0557570a52e")):
+            with self.subTest(kind=adapter.__name__), tempfile.TemporaryDirectory() as temporary:
+                source = ROOT / "reports" / "algorithm-results" / source_id
+                bundle = Path(temporary) / source_id
+                shutil.copytree(source, bundle)
+                archive_path = bundle.with_suffix(".zip")
+                shutil.copyfile(source.with_suffix(".zip"), archive_path)
+                historical = adapter.adapt(bundle)
+                self.assertEqual(historical.report_id, publications._HISTORICAL_PUBLICATIONS[source_id]["report_id"])
+                before = archive_path.read_bytes()
+                # ZIP comments alter source identity without changing any admitted entry.
+                with zipfile.ZipFile(archive_path, "a") as archive:
+                    archive.comment = b"repacked source identity fixture"
+                self.assertNotEqual(before, archive_path.read_bytes())
+                current = adapter.adapt(bundle)
+                self.assertEqual(current.source_report_id, historical.source_report_id)
+                self.assertNotEqual(current.report_id, historical.report_id)
+                self.assertEqual(current.payload_sha256, historical.payload_sha256)
+
 
 class GeometryCollectionTests(unittest.TestCase):
+    def test_current_geometry_harness_paths_are_admitted_explicitly(self):
+        for kind, filename, driver in (("geo04", "collect.py", "polyhedral_intersection_driver.cpp"),
+                                        ("geo05", "report.py", "projection_predecessor_driver.cpp")):
+            tooling = ROOT / "scripts" / "reports" / kind
+            with self.subTest(kind=kind), patch.object(sys, "path", [str(tooling), *sys.path]):
+                spec = importlib.util.spec_from_file_location(kind + "_current_harness", tooling / filename)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                module.validate_source_tree_delta([f"scripts/reports/{kind}/{filename}",
+                    f"benchmarks/reporting/{kind}/{driver}", "scripts/reports/collector_common.py"])
+                with self.assertRaisesRegex(ValueError, "outside the report harness allowlist"):
+                    module.validate_source_tree_delta([f"scripts/reports/{kind}/unreviewed.py"])
+
     def test_geo04_malformed_and_timeout_keep_raw_and_reached_attempts(self):
         tooling = ROOT / "scripts" / "reports" / "geo04"
         with patch.object(sys, "path", [str(tooling), *sys.path]):

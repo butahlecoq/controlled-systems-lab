@@ -26,6 +26,21 @@ HARNESS_PATH_ALLOWLIST = {
     "reports/algorithm-results/tooling/geo05/test_driver_outcomes.cpp",
     "reports/algorithm-results/tooling/geo05/test_fresh_build.py",
 }
+
+# Maintained counterparts of the original explicitly reviewed harness paths.
+HARNESS_PATH_ALLOWLIST |= {
+    'benchmarks/reporting/geo05/projection_predecessor_driver.cpp',
+    'benchmarks/reporting/geo05/test_driver_outcomes.cpp',
+    'scripts/reports/collector_common.py',
+    'scripts/reports/geo05/README.md',
+    'scripts/reports/geo05/collect.py',
+    'scripts/reports/geo05/render.py',
+    'scripts/reports/geo05/report.py',
+    'scripts/reports/geo05/schema-v1.json',
+    'scripts/reports/geo05/smoke.py',
+    'scripts/reports/geo05/test_fresh_build.py',
+    'scripts/reports/geo05/test_report_tools.py',
+}
 # Data path policy only; every nonlisted basename remains excluded.
 BUNDLE_ARTIFACT_FILENAMES = frozenset({
     "command.json", "index.html", "manifest.json", "parse-errors.json", "provenance.json", "records.json",

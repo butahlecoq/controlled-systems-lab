@@ -498,11 +498,17 @@ def assemble_publication(bundle, publication, *, page, envelope, source_files):
 # Exact pre-#251 source and publication bytes; never applies to changed evidence.
 _HISTORICAL_PUBLICATIONS = {
     "geo02-20261012T235755Z-6b1f504ad3db": {
+        "identity_files_sha256": {
+            "geo02-20261012T235755Z-6b1f504ad3db.zip": "faa9ec723875f6ab9072b38aaa0f3d0d4be30eb7732b887f1c9aa99f46d00b40"
+        },
         "inventory_sha256": "88d808f0005a6a1bc88fa36c3de90b0e0175135345dc3cd842e2e44fb2d59729",
         "report_id": "geo02-20261012T235755Z-7275580339899c6ac27496fc2b05cb040d9fec14f8ec7f8bf219cc299c55eefc",
         "zip_sha256": "8f2fe77d30b69a0a314a7cd9dbe69342d2d5e9dde6eccc891afafcde04e578a9"
     },
     "geo02-20261013T061151Z-338ff7d1d63c": {
+        "identity_files_sha256": {
+            "geo02-20261013T061151Z-338ff7d1d63c.zip": "4d8e35cedaa2a7fd228a461ac88678c3d23652f2f71193cfeb88601e0731bb47"
+        },
         "inventory_sha256": "0993f90fb86db847c71bf7821dd5c7cc3bce34bbf3435eef5e0d86f1f3a953c2",
         "report_id": "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754",
         "zip_sha256": "e9068d76389a5a5d66a4f73ca49e259edae618faad99c1b8b7a41f05df92669a"
@@ -518,6 +524,9 @@ _HISTORICAL_PUBLICATIONS = {
         "zip_sha256": "a708532a9068fa8127f742b7370f38836ce31e7af2d09f8633caf97ed8946db1"
     },
     "geo05-4dc3c0557570a52e": {
+        "identity_files_sha256": {
+            "geo05-4dc3c0557570a52e.zip": "9201451f2f8c2424a93da031d480405ef30ef459e734b0591a6462a66befb4aa"
+        },
         "inventory_sha256": "4e01fdca414522270a70b80818273c1e7b8baf80a223d4e76514936a4cb46f1c",
         "report_id": "geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795",
         "zip_sha256": "51826297b765b011423ca58fb3160fbdd4884c176d73adaf5eabc5f2508fefba"
@@ -589,6 +598,14 @@ def preserve_historical_publication(bundle, publication, archive_builder):
                  for path in sorted(bundle.rglob("*")) if path.is_file()}
     if _digest(inventory) != pin["inventory_sha256"]:
         return publication
+    # Some adapters bind identity inputs outside the native directory (notably
+    # the original source ZIP). Matching generated publication bytes cannot
+    # substitute for binding these inputs: a valid repack changes that identity.
+    for name, digest in pin.get("identity_files_sha256", {}).items():
+        path = bundle.parent / name
+        if (Path(name).name != name or path.is_symlink() or not path.is_file()
+                or hashlib.sha256(path.read_bytes()).hexdigest() != digest):
+            return publication
     historical = replace(publication, report_id=pin["report_id"])
     if hashlib.sha256(archive_builder(bundle, historical)).hexdigest() != pin["zip_sha256"]:
         return publication

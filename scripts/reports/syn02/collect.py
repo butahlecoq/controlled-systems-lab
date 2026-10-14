@@ -26,6 +26,16 @@ ALLOWLIST = {
  "reports/algorithm-results/tooling/syn02/publication_map.py",
 }
 
+# Maintained counterparts of the original explicitly reviewed harness paths.
+ALLOWLIST |= {
+    'benchmarks/reporting/syn02/terminal_driver.cpp',
+    'scripts/reports/syn02/README.md',
+    'scripts/reports/syn02/collect.py',
+    'scripts/reports/syn02/publication_map.py',
+    'scripts/reports/syn02/render_saved.py',
+    'scripts/reports/syn02/test_report.py',
+}
+
 def run(command, *, cwd=ROOT, check=True, timeout=None):
     return subprocess.run(command, cwd=cwd, capture_output=True, check=check, timeout=timeout)
 def out(command, **kwargs): return run(command, **kwargs).stdout.decode("utf-8", "replace").strip()
