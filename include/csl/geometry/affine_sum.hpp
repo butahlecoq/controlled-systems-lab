@@ -1,5 +1,7 @@
 #pragma once
 
+#include <csl/geometry/contracts.hpp>
+
 #include <csl/geometry/hull_reducer.hpp>
 #include <csl/registry/provider.hpp>
 

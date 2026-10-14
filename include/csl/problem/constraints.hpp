@@ -1,5 +1,7 @@
 #pragma once
 
+#include <csl/problem/contracts.hpp>
+
 #include <csl/problem/domains.hpp>
 
 namespace csl::problem {

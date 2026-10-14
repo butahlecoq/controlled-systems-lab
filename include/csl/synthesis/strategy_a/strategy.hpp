@@ -1,4 +1,6 @@
 #pragma once
+
+#include <csl/synthesis/contracts.hpp>
 #include <csl/reachability/nominal_forward.hpp>
 #include <csl/synthesis/control_recovery.hpp>
 #include <csl/synthesis/terminal_minimizers.hpp>

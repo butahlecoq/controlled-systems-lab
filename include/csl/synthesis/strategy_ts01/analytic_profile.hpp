@@ -1,5 +1,7 @@
 #pragma once
 
+#include <csl/synthesis/contracts.hpp>
+
 #include <csl/registry/registry.hpp>
 #include <csl/sets/data.hpp>
 

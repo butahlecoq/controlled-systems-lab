@@ -1,5 +1,9 @@
 #pragma once
 
+#include <csl/core/outcomes.hpp>
+
+#include <csl/model/contracts.hpp>
+
 #include <csl/numeric/data.hpp>
 
 namespace csl::model {

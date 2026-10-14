@@ -242,3 +242,27 @@ set_target_properties(installed_witness_selector_client PROPERTIES CXX_EXTENSION
 add_test(NAME installed_witness_selector_client COMMAND installed_witness_selector_client)
 
 endif()
+
+# A separate translation unit per contract prevents umbrella/include-order masking.
+set(installed_contract_headers
+  core/values.hpp
+  core/diagnostics.hpp
+  core/outcomes.hpp
+  evidence/contracts.hpp
+  model/contracts.hpp
+  sets/contracts.hpp
+  optimization/objective_contracts.hpp
+  problem/contracts.hpp
+  execution/contracts.hpp
+  optimization/contracts.hpp
+  geometry/contracts.hpp
+  synthesis/contracts.hpp
+  numeric/data.hpp
+)
+foreach(header IN LISTS installed_contract_headers)
+  string(MAKE_C_IDENTIFIER "${header}" header_name)
+  set(source "${CMAKE_CURRENT_BINARY_DIR}/header-checks/${header_name}.cpp")
+  file(WRITE "${source}" "#include <csl/${header}>\n")
+  add_library(installed_header_${header_name} OBJECT "${source}")
+  target_link_libraries(installed_header_${header_name} PRIVATE CSL::contracts)
+endforeach()

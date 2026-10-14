@@ -1,5 +1,7 @@
 #pragma once
 
+#include <csl/problem/contracts.hpp>
+
 #include <csl/model/linear_system.hpp>
 #include <csl/sets/data.hpp>
 

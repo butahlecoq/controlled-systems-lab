@@ -1,6 +1,6 @@
 #pragma once
 
-#include <csl/contracts.hpp>
+#include <csl/synthesis/contracts.hpp>
 #include <csl/problem/resolved_problem.hpp>
 #include <array>
 #include <functional>
