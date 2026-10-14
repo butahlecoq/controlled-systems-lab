@@ -679,6 +679,17 @@ TEST_CASE("registered terminal numerical failure retains the feasible candidate 
     CHECK(optimizer.residuals.primal->context.verifier.version=="1");
     CHECK(optimizer.residuals.primal->context.absolute_tolerance==query.family.numerical.absolute_tolerance);
     CHECK(optimizer.residuals.primal->context.relative_tolerance==query.family.numerical.relative_tolerance);
+    REQUIRE(optimizer.primal);
+    REQUIRE(optimizer.primal->size()==1);
+    const auto terminal_state=optimizer.primal->front();
+    const auto primal_tolerance=optimizer.residuals.primal->context.absolute_tolerance+
+        optimizer.residuals.primal->context.relative_tolerance;
+    CHECK(std::abs(terminal_state-1.0)<=primal_tolerance);
+    CHECK(terminal_state>=0.0);CHECK(terminal_state<=2.0);
+    CHECK(optimizer.residuals.primal->rows.violation==0.0);
+    CHECK(optimizer.residuals.primal->rows.scale==doctest::Approx(2.0));
+    CHECK(optimizer.residuals.primal->variables.violation==0.0);
+    CHECK(optimizer.residuals.primal->variables.scale==1.0);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
     const auto& stop=std::get<ScopedOperationStopped>(result.stop);
     CHECK(stop.stop.reason==StopReason::numerical_failure);
