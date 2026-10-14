@@ -656,7 +656,11 @@ TEST_CASE("Strategy B registers the exact T-S02 constant-objective history famil
     REQUIRE(payload);
     CHECK(contains(payload->h_polyhedron(),{0,0,0,0,0}));
     CHECK(contains(payload->h_polyhedron(),{0,1,2,1,1}));
-    CHECK(contains(payload->h_polyhedron(),{0,0.3,1.1,0.3,0.8}));
+    const Vector first_same_terminal_history{0,0.3,1.1,0.3,0.8};
+    const Vector second_same_terminal_history{0,0.5,1.1,0.5,0.6};
+    CHECK(contains(payload->h_polyhedron(),first_same_terminal_history));
+    CHECK(contains(payload->h_polyhedron(),second_same_terminal_history));
+    CHECK(first_same_terminal_history[2]==second_same_terminal_history[2]);
     CHECK_FALSE(contains(payload->h_polyhedron(),{0,0,1,1,0}));
     REQUIRE(complete.optimum.bounds.lower);REQUIRE(complete.optimum.bounds.upper);
     CHECK(complete.optimum.bounds.lower->value==3);
