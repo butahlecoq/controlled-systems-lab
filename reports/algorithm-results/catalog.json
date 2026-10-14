@@ -154,7 +154,7 @@
       "zip_sha256": "165fe50a882e37334e30e3bd04f613b261fb801c540fe806304942ac146c361f"
     },
     {
-      "report_id": "syn04-strategy-b-ts01-e29298568a7e307468e810df2235e190815f45a21e7a2db5696ea9798695b8a1",
+      "report_id": "syn04-strategy-b-ts01-46513fc77b3e1e9e7795b887b1d2a12d7bfa5dbde4d6c74563b7f06c6a0aff24",
       "report_kind": "syn04-strategy-b-ts01",
       "source_report_id": "syn04-strategy-b-ts01-20261014-2a5ab835",
       "payload_schema": "csl.syn04-strategy-b-ts01-report/1",
@@ -163,7 +163,7 @@
       "source_commit": "2a5ab835295dfd22f02b19d440bb8158267d985a",
       "measured_scope": "Exact T-S01 profile; one registered Strategy B; seven validated measured trials; performance conclusion inconclusive",
       "evidence_limits": "Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.; The result reports Assurance::numerical; validated arithmetic assurance is unavailable.; This is one Strategy B measurement, not a comparison, speedup, application-scale, throughput, or scalability claim.; All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.; WPR CPU stack collection was denied by Windows policy, but Visual Studio process-scoped CPU Usage sampling succeeded without SeSystemProfilePrivilege.; A separate 20-process sequential PDB-enabled Release diagnostic profile resolved a sampled CPU path through StrategyPort, DirectJointWorkspace, and the HiGHS QP solver; this does not establish an unprofiled latency limiter.; The diagnostic profile is separate and excluded from all reported latency statistics; profiling overhead and build symbols may affect sampling.; Internal preparation, LP, QP, extraction, verifier and export timing counters are unavailable.",
-      "zip_sha256": "1a98cd6ccacc41e23ff287081ef80aa21cf0a2289396dd58bbe4a26012991fd6"
+      "zip_sha256": "aaf13eac7b3a5beb9eb7bf90b793dbbd4b909f37b826a4a85316721bcbb8fc8e"
     },
     {
       "report_id": "syn03-strategy-a-ts01-77f669553a7c803b4f061401d5c1f7ffb22ef7f973368cd1b7c3494686fa8e2a",

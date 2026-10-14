@@ -36,6 +36,7 @@ def adapt(bundle):
     if _json(bundle/"scenarios.json")!=record["scenario"]: raise ValueError("SYN-04 scenario sidecar differs from typed record")
     if _json(bundle/"environment.json")!=record["environment"] or _json(bundle/"build-provenance.json")!=record["build"]: raise ValueError("SYN-04 environment/build sidecar differs")
     if _json(bundle/"profile.json")!=record["measurement"]["profile_attempt"]: raise ValueError("SYN-04 separate profile sidecar differs")
+    if _json(bundle/"visual-studio-cpu-profile.json")!=record["measurement"].get("visual_studio_diagnostic_profile"): raise ValueError("SYN-04 Visual Studio profile sidecar differs from typed record")
     try: raw_events=[json.loads(line) for line in (bundle/"measurement-events.jsonl").read_text(encoding="utf-8").splitlines()]
     except (UnicodeError,json.JSONDecodeError) as error: raise ValueError("SYN-04 raw event file is malformed") from error
     if raw_events!=record["measurement"]["events"]: raise ValueError("SYN-04 raw event file differs")

@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import hashlib
+import shutil
 import subprocess
 import unittest
 
@@ -27,7 +28,7 @@ def scenario_fixture():
     return {"profile":"ts01_exact_integrator","time_domain":"discrete","times":[0,1,2],"initial_state":[0],"dynamics":[{"A":[[1]],"B":[[1]],"offset":[0]},{"A":[[1]],"B":[[1]],"offset":[0]}],"controls":[{"lower":[0],"upper":[1]},{"lower":[0],"upper":[1]}],"state_constraints":"universal at all stages","external_channels":0,"information":"nominal_open_loop","terminal_objective":{"Q":[[2]],"linear":[-2],"offset":1},"effective_request":{"target":"exact_optimal_relation","representation":"csl.polyhedron.h","assurance":"numerical","materialization_limit":None}}
 
 ASSUMPTIONS=["Discrete two-step scalar integrator at times 0, 1, 2.","Known initial state x0=0; all state constraints are universal.","Both transitions are x[t+1]=x[t]+u[t] with zero affine offsets and no external channels.","Continuous controls independently constrained to [0,1].","Nominal open-loop information; no observations or temporal constraints.","Terminal quadratic objective J(x2)=x2^2-2*x2+1=(x2-1)^2.","Effective request asks for exact_optimal_relation in H-representation under Assurance::numerical and no materialization limit."]
-EVIDENCE_LIMITS=["Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.","The result reports Assurance::numerical; validated arithmetic assurance is unavailable.","This is one Strategy B measurement, not a comparison, speedup, application-scale, throughput, or scalability claim.","All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.","No source-mapped performance limiter was identified because WPR CPU stack profiling was denied by Windows policy.","Internal preparation, LP, QP, extraction, verifier and export timing counters are unavailable."]
+EVIDENCE_LIMITS=["Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.","The result reports Assurance::numerical; validated arithmetic assurance is unavailable.","This is one Strategy B measurement, not a comparison, speedup, application-scale, throughput, or scalability claim.","All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.","WPR CPU stack collection was denied by Windows policy, but Visual Studio process-scoped CPU Usage sampling succeeded without SeSystemProfilePrivilege.","A separate 20-process sequential PDB-enabled Release diagnostic profile resolved a sampled CPU path through StrategyPort, DirectJointWorkspace, and the HiGHS QP solver; this does not establish an unprofiled latency limiter.","The diagnostic profile is separate and excluded from all reported latency statistics; profiling overhead and build symbols may affect sampling.","Internal preparation, LP, QP, extraction, verifier and export timing counters are unavailable."]
 
 def valid_record():
     times=[100,110,90,120,105,95,115]
@@ -42,6 +43,12 @@ def valid_record():
 class StrategyBReportContractTests(unittest.TestCase):
     def test_accepts_only_complete_validated_trials_with_recomputed_summary(self):
         self.assertEqual(report.validate(valid_record()),[])
+
+    def test_discloses_process_scoped_profile_and_limits_the_limiter_claim(self):
+        limits=valid_record()["evidence_limits"]
+        self.assertIn("WPR CPU stack collection was denied by Windows policy, but Visual Studio process-scoped CPU Usage sampling succeeded without SeSystemProfilePrivilege.",limits)
+        self.assertIn("A separate 20-process sequential PDB-enabled Release diagnostic profile resolved a sampled CPU path through StrategyPort, DirectJointWorkspace, and the HiGHS QP solver; this does not establish an unprofiled latency limiter.",limits)
+        self.assertIn("The diagnostic profile is separate and excluded from all reported latency statistics; profiling overhead and build symbols may affect sampling.",limits)
 
     def test_rejects_candidate_downgrade_even_when_timing_is_present(self):
         record=valid_record();record["measurement"]["events"][1]["result_disposition"]="candidate_relaxation"
@@ -101,6 +108,21 @@ class StrategyBReportContractTests(unittest.TestCase):
         page=publication.render_page(bundle,item)
         self.assertIn("complete_optimal_family",page)
         self.assertIn("Performance conclusion: inconclusive",page)
+
+    def test_registered_adapter_rejects_visual_studio_profile_sidecar_divergence(self):
+        bundle=ROOT/"reports/algorithm-results"/report.REPORT_ID
+        with tempfile.TemporaryDirectory() as temporary:
+            copy=Path(temporary)/bundle.name
+            shutil.copytree(bundle,copy)
+            sidecar=copy/"visual-studio-cpu-profile.json"
+            profile=json.loads(sidecar.read_text(encoding="utf-8"))
+            profile["interpretation"]="mutated diagnostic claim"
+            sidecar.write_text(json.dumps(profile,ensure_ascii=False,sort_keys=True,indent=2)+"\n",encoding="utf-8",newline="\n")
+            manifest=json.loads((copy/"manifest.json").read_text(encoding="utf-8"))
+            manifest["files"][sidecar.name]=hashlib.sha256(sidecar.read_bytes()).hexdigest()
+            (copy/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,sort_keys=True,indent=2)+"\n",encoding="utf-8",newline="\n")
+            with self.assertRaisesRegex(ValueError,"Visual Studio profile sidecar differs from typed record"):
+                publication.adapt(copy)
 
     def test_schema_three_site_stages_and_hashes_the_offline_zip(self):
         catalog=ROOT/"reports/algorithm-results/catalog.json"
