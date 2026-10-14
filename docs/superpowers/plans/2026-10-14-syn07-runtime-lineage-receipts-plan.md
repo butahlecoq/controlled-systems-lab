@@ -29,9 +29,9 @@
 
 - [x] Task 1 — Add the private runtime receipt and verifier acceptance contract with failing behavior tests.
 - [x] Task 2 — Integrate the receipt-producing Strategy B execution path and adversarial caller-path tests.
-- [ ] Task 3 — Run full verification, obtain independent Standards and Spec review, fix findings, and prepare the PR.
+- [x] Task 3 — Run full verification, obtain independent Standards and Spec review, fix findings, and prepare the PR.
 
-Task 1 and Task 2 are implemented in commits `74c40bc` and `0a2d918`. The Release build and full 76-test CTest run pass after reconfiguring CMake to embed the current branch SHA. Independent review and PR publication remain in Task 3.
+Tasks 1 and 2 are implemented in commits `74c40bc` and `0a2d918`. Verification on the final implementation: Windows MSVC Release build succeeded; all 76/76 CTests passed after configuring the build with the current source SHA. Independent Standards and Spec reviews covered base `4b85727e6fc94b889872ac6fdb7b9773f1bafc9a` through implementation head `126cdfdc0d908fa63e7f52024264082d179c616d`; both reported zero remaining actionable findings after review fixes. The caller-path freshness regression covers success, pre-cancellation, and successful rerun on the same prepared workspace.
 
 ## Rulings
 
