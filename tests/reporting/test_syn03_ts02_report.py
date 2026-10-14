@@ -1,5 +1,5 @@
 from __future__ import annotations
-import importlib.util, json, unittest, sys, zipfile, re
+import importlib.util, json, unittest, sys, zipfile, re, tempfile, csv
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -55,9 +55,31 @@ class StrategyATs02ReportTests(unittest.TestCase):
         self.assertEqual(item.kind,"syn03-strategy-a-ts02")
         page=publisher.render_page(bundle,item)
         self.assertIn("objective bounds [3,3]",page)
-        with zipfile.ZipFile(ROOT/"reports/algorithm-results"/(item.report_id+".zip")) as archive:
-            self.assertIn("index.html",archive.namelist())
-            for name in archive.namelist():
-                self.assertIsNone(re.search(rb"[A-Za-z]:[\\/](?!/)",archive.read(name)),name)
+        forbidden=(b"representative_coordinates",b"trajectory_objective",b"trajectory_max_residual",b"absolute_tolerance",b"relative_tolerance",b"residual_verifier",b"syn03-strategy-a-independent-original-check/1")
+        self.assertFalse(any(token in page.lower().encode() for token in forbidden))
+        with (bundle/"trials.csv").open(encoding="utf-8",newline="") as stream:
+            rows=list(csv.DictReader(stream))
+        self.assertTrue(rows)
+        self.assertFalse(set(key.encode() for key in rows[0]) & set(forbidden))
+        sys.path.insert(0,str(ROOT/"scripts/reports"))
+        site_spec=importlib.util.spec_from_file_location("csl_syn03_ts02_test_site",ROOT/"scripts/reports/site.py")
+        site=importlib.util.module_from_spec(site_spec);site_spec.loader.exec_module(site)
+        with tempfile.TemporaryDirectory() as temporary:
+            staged=site.stage(ROOT/"reports/algorithm-results/catalog.json",Path(temporary)/"site",check=True)
+            published=staged/item.report_id
+            envelope=json.loads((published/"report-envelope.json").read_text(encoding="utf-8"))
+            self.assertEqual(envelope["payload"]["measurement"]["events"],record["measurement"]["events"])
+            text_files=[p for p in published.rglob("*") if p.is_file()]
+            self.assertTrue(any(p.name=="trials.csv" for p in text_files))
+            for path in text_files:
+                content=path.read_bytes().lower()
+                self.assertFalse(any(token in content for token in forbidden),path.name)
+            zip_path=staged/(item.report_id+".zip")
+            with zipfile.ZipFile(zip_path) as archive:
+                self.assertIn("index.html",archive.namelist())
+                for name in archive.namelist():
+                    content=archive.read(name).lower()
+                    self.assertFalse(any(token in content for token in forbidden),name)
+                    self.assertIsNone(re.search(rb"[A-Za-z]:[\\/](?!/)",content),name)
 
 if __name__=="__main__": unittest.main()
