@@ -7,9 +7,9 @@ import sys
 
 import registered_reports as common
 ROOT=Path(__file__).resolve().parents[2]
-REPORT_SPEC=importlib.util.spec_from_file_location("csl_syn04_ts02_report_contract",ROOT/"reports/algorithm-results/tooling/syn04_ts02/report.py")
+REPORT_SPEC=importlib.util.spec_from_file_location("csl_syn04_ts02_report_contract",ROOT/"scripts/reports/syn04_ts02/report.py")
 report=importlib.util.module_from_spec(REPORT_SPEC);sys.modules[REPORT_SPEC.name]=report;REPORT_SPEC.loader.exec_module(report)
-PROVENANCE_SPEC=importlib.util.spec_from_file_location("csl_syn04_ts02_public_provenance",ROOT/"reports/algorithm-results/tooling/syn04_ts02/provenance.py")
+PROVENANCE_SPEC=importlib.util.spec_from_file_location("csl_syn04_ts02_public_provenance",ROOT/"scripts/reports/syn04_ts02/provenance.py")
 provenance=importlib.util.module_from_spec(PROVENANCE_SPEC);PROVENANCE_SPEC.loader.exec_module(provenance)
 
 KIND="syn04-strategy-b-ts02"
@@ -19,6 +19,7 @@ def _json(path): return json.loads(Path(path).read_text(encoding="utf-8"))
 def _canonical(value): return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(",",":"),allow_nan=False).encode("utf-8")
 def _pretty(value): return (json.dumps(value,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False)+"\n").encode("utf-8")
 
+@common.preserve_publication
 def adapt(bundle):
     bundle=Path(bundle)
     if bundle.is_symlink() or any(p.is_symlink() for p in bundle.rglob("*")): raise ValueError("SYN-04 report directory cannot be a symlink")

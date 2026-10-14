@@ -36,7 +36,7 @@ def _json(path):
 
 
 def _map_module():
-    path = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "syn02" / "publication_map.py"
+    path = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "syn02" / "publication_map.py"
     spec = importlib.util.spec_from_file_location("csl_syn02_publication_map", path)
     if spec is None or spec.loader is None:
         raise ValueError("SYN-02 publication map is unavailable")
@@ -240,6 +240,7 @@ def _validate_summary_csv(bundle, summary):
         raise ValueError("SYN-02 summary.csv differs from recomputed records summary")
 
 
+@common.preserve_publication
 def adapt(bundle):
     bundle = Path(bundle)
     if bundle.is_symlink():

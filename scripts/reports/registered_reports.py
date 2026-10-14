@@ -1,5 +1,5 @@
 """Explicit boundary adapters for validated non-LP report records."""
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import csv
 import hashlib
 import json
@@ -232,8 +232,10 @@ def adapt(bundle):
     if result.kind in ("opt05-hull", "opt06-basis-reuse"):
         _validate_opt05_bundle_zip(bundle, listed)
     public_id = _publication_id(bundle, result.source_report_id, actual_files)
-    return PublicationRecord(result.kind, public_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema, source_report_id=result.source_report_id)
+    publication = PublicationRecord(result.kind, public_id, result.payload_sha256, result.source_commit, result.measured_scope, result.evidence_limits, tuple(sorted(listed)), result.payload_schema, source_report_id=result.source_report_id)
 
+
+    return preserve_historical_publication(bundle, publication, offline_zip)
 
 def _publication_id(bundle, source_id, source_files):
     # Source files contain no publication output, so hashing the full validated
@@ -451,3 +453,175 @@ def offline_zip(bundle, publication):
     bundle=Path(bundle)
     files=publication_artifacts(bundle,publication)
     return publication_zip(publication.report_id,files)
+
+
+def validate_source_inventory(bundle, listed, expected_files, *, label):
+    """Apply the same local-file and complete-inventory boundary to native kinds."""
+    bundle = Path(bundle)
+    if bundle.is_symlink():
+        raise ValueError(f"{label} source bundle cannot be a symlink")
+    if not isinstance(listed, dict) or set(listed) != set(expected_files):
+        raise ValueError(f"{label} registered source inventory mismatch")
+    expected = set(expected_files) | {"manifest.json"}
+    actual = set()
+    for path in bundle.rglob("*"):
+        if path.is_symlink():
+            raise ValueError(f"symlinks are forbidden in {label} bundle")
+        if path.is_file():
+            actual.add(path.relative_to(bundle).as_posix())
+    if actual != expected:
+        raise ValueError(f"{label} bundle has missing or unregistered files")
+    for name, digest in listed.items():
+        relative = Path(name)
+        if (not isinstance(name, str) or relative.is_absolute() or ".." in relative.parts
+                or "\\" in name or ":" in name or not name or
+                not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None):
+            raise ValueError(f"unsafe {label} bundle file: {name}")
+        path = bundle / relative
+        if not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise ValueError(f"{label} source file hash mismatch: {name}")
+
+
+def assemble_publication(bundle, publication, *, page, envelope, source_files):
+    """Stage the common page/envelope/manifest inventory from admitted native data."""
+    bundle = Path(bundle)
+    files = {name: (bundle / name).read_bytes() for name in source_files if name != "index.html"}
+    files["index.html"] = page.encode("utf-8")
+    files["report-envelope.json"] = _json_bytes(envelope)
+    files["publication-manifest.json"] = _json_bytes({
+        "schema": "csl.algorithm-report-publication-manifest/1", "report_id": publication.report_id,
+        "report_kind": publication.kind,
+        "files": {name: hashlib.sha256(files[name]).hexdigest() for name in sorted(files)}})
+    return files
+
+
+# Exact pre-#251 source and publication bytes; never applies to changed evidence.
+_HISTORICAL_PUBLICATIONS = {
+    "geo02-20261012T235755Z-6b1f504ad3db": {
+        "identity_files_sha256": {
+            "geo02-20261012T235755Z-6b1f504ad3db.zip": "faa9ec723875f6ab9072b38aaa0f3d0d4be30eb7732b887f1c9aa99f46d00b40"
+        },
+        "inventory_sha256": "88d808f0005a6a1bc88fa36c3de90b0e0175135345dc3cd842e2e44fb2d59729",
+        "report_id": "geo02-20261012T235755Z-7275580339899c6ac27496fc2b05cb040d9fec14f8ec7f8bf219cc299c55eefc",
+        "zip_sha256": "8f2fe77d30b69a0a314a7cd9dbe69342d2d5e9dde6eccc891afafcde04e578a9"
+    },
+    "geo02-20261013T061151Z-338ff7d1d63c": {
+        "identity_files_sha256": {
+            "geo02-20261013T061151Z-338ff7d1d63c.zip": "4d8e35cedaa2a7fd228a461ac88678c3d23652f2f71193cfeb88601e0731bb47"
+        },
+        "inventory_sha256": "0993f90fb86db847c71bf7821dd5c7cc3bce34bbf3435eef5e0d86f1f3a953c2",
+        "report_id": "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754",
+        "zip_sha256": "e9068d76389a5a5d66a4f73ca49e259edae618faad99c1b8b7a41f05df92669a"
+    },
+    "geo03-20261012-3c12ca125831": {
+        "inventory_sha256": "9b6c03f342b1c82fbd7e582c9c08846dea5983f0e1bc2d9b3d031a2afbabbf82",
+        "report_id": "geo03-20261012-30157d9ac59269cc26a2ca24dfd1744297971b435a8bba13dcb68f2a1dbcd104",
+        "zip_sha256": "8e62aa3394ae02797329ab1244d863966a7c770fbcbdd60a51eb4362d8e49abe"
+    },
+    "geo04-20261012T224946Z-c37852bcc80d": {
+        "inventory_sha256": "5a5ec6f0ffbe4731c5e1ed6287ee46e86bde7ca3d79c4ea4c7ba49f5b55bc1e5",
+        "report_id": "geo04-20261012T224946Z-30606c76deb657567eb86a451c474c5aa796827651262a550b15fa4cb4ece549",
+        "zip_sha256": "a708532a9068fa8127f742b7370f38836ce31e7af2d09f8633caf97ed8946db1"
+    },
+    "geo05-4dc3c0557570a52e": {
+        "identity_files_sha256": {
+            "geo05-4dc3c0557570a52e.zip": "9201451f2f8c2424a93da031d480405ef30ef459e734b0591a6462a66befb4aa"
+        },
+        "inventory_sha256": "4e01fdca414522270a70b80818273c1e7b8baf80a223d4e76514936a4cb46f1c",
+        "report_id": "geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795",
+        "zip_sha256": "51826297b765b011423ca58fb3160fbdd4884c176d73adaf5eabc5f2508fefba"
+    },
+    "opt04-20261013T172839Z-6451c4b89d3b": {
+        "inventory_sha256": "238ff015f68d98e385593d844436a562317e12bb0f7cdedbe07e96af7f32bda7",
+        "report_id": "opt04-20261013T172839Z-bf1844fdf81c94c82ca91aadbd9d0988c7367093c5cf70269c2d0e0ca7d44b2f",
+        "zip_sha256": "4e9d2d193cf83d56fa308ba3b7b3ebddf2728d8090e804ed0c2178ab0fbf3db7"
+    },
+    "opt05-hull-20261012-d1c211c2": {
+        "inventory_sha256": "a5b97b8f4ac0acb877d2bc9776ea0a991244c87c7cac2313d61513b5e7939bc3",
+        "report_id": "opt05-hull-20261012-d6d3282081d5ea90d8a0c440ccc1ec774d40221e209a01d8207ebd06a551dbf5",
+        "zip_sha256": "46f77edf5b5485b18a310eb45763d07dd73f338659ba49c6246f2ecb156411af"
+    },
+    "opt06-basis-reuse-20261014-ef70e8c5-r2": {
+        "inventory_sha256": "a4f8e08919479c26ccb6cb03f5e50fe2e2972c2132b2b625aef5c22541149a11",
+        "report_id": "opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d",
+        "zip_sha256": "165fe50a882e37334e30e3bd04f613b261fb801c540fe806304942ac146c361f"
+    },
+    "syn-ts01-paired-20261014-b7f1ac0": {
+        "inventory_sha256": "c41cd22f7248369b9d7f11831ceb8c9fd6e4cfab7bfa666c9e2e45dfd55752c4",
+        "report_id": "syn-ts01-paired-411d200c8ca76b1aee772297aaf6ed97738b72f2c2cb2a6035e1002a4a57ad22",
+        "zip_sha256": "c75227f9fcdb0bb90b724d698a170306662562e79ef4835589be26b0b0c5da11"
+    },
+    "syn01-nominal-20261013-f7ba310d-48a679cfc0d4": {
+        "inventory_sha256": "f977f289ac3942098140373435e7322dae5f43eb030239952c25a3ac29c47aa3",
+        "report_id": "syn01-6e207b2ee1f300929f054e679c8cd5707f979c02b173292660520e403ebf2852",
+        "zip_sha256": "84de33d3a3f6500a9e8aea07fe8297a71cdbd44b269f94aa4358bc332b28ec65"
+    },
+    "syn02-terminal-20261013-c234a1a0-35de886a7fb4": {
+        "inventory_sha256": "0212ce9d7f65bf66de374895853c5119214e27c531e578a7751ddb3c1843e843",
+        "report_id": "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3",
+        "zip_sha256": "8acb23c42447455385e63aefccbf25a680384d39de5f50339838e98af7f10bf8"
+    },
+    "syn03-strategy-a-ts01-20261014-451d0f75": {
+        "inventory_sha256": "bbf59746a528f35a8a5f9762f347162eabcc9fc209c9c48e1432131ebb8d3d80",
+        "report_id": "syn03-strategy-a-ts01-77f669553a7c803b4f061401d5c1f7ffb22ef7f973368cd1b7c3494686fa8e2a",
+        "zip_sha256": "9ff4f8abe7f89ecbbfd154995cf6778a09106eea482b239f6a06a0904a902739"
+    },
+    "syn03-strategy-a-ts02-20261014-272fb9a5": {
+        "inventory_sha256": "7f8b6dcbd62ba45eb1efd8d77b24094618752fae0c7fb3c6186fbda7eb2735ed",
+        "report_id": "syn03-strategy-a-ts02-cfe716d94d74b7da3caf38130d9dd88f1b17c50711c69cbfbb2531e60a1fe416",
+        "zip_sha256": "ad676698868382c2a3b76288d47a18bb9289f0e4c2a003d9a8175e54a6e1ee96"
+    },
+    "syn04-strategy-b-ts01-20261014-2a5ab835": {
+        "inventory_sha256": "53c4e475b3ea20eec83ef98acaa23a3e502e99b1885ff437e4c1f052867f187d",
+        "report_id": "syn04-strategy-b-ts01-46513fc77b3e1e9e7795b887b1d2a12d7bfa5dbde4d6c74563b7f06c6a0aff24",
+        "zip_sha256": "aaf13eac7b3a5beb9eb7bf90b793dbbd4b909f37b826a4a85316721bcbb8fc8e"
+    },
+    "syn04-strategy-b-ts02-20261014-e7f66a9e": {
+        "inventory_sha256": "deeae8cbcffe2672f50245298733b73dbd2a3f46fc9ddb87be2787c945215d6a",
+        "report_id": "syn04-strategy-b-ts02-3999b008c529fd57b5cfb6a78841a9963a7e9c4c9919e0c4edafe705b236f929",
+        "zip_sha256": "b2d38a913d3addbee9ad1493f611bfb41abda921be7356dbb2a8b0c9859e6878"
+    },
+    "syn06-verifier-20261012-f0e32e2b": {
+        "inventory_sha256": "3a04c3a133abdac9174e4b50ebefb5b1290c7639bb860f25632e5b65e7f8f6db",
+        "report_id": "syn06-verifier-20261012-7c39d67859c50ffb697ab07b1d788134ef15ac05485207d1428dbf4a2d335cbc",
+        "zip_sha256": "657284bdf33b1786ba6bf74a37e47c48092a146d878fe86482074a682bb6b14a"
+    },
+    "syn07-ts01-20261014-e22d9c2aeb05": {
+        "inventory_sha256": "d756b967fd2af2ac3fd9b8d2c7c7a5b3a9dc8610a32914e1ba9094f76c9fe865",
+        "report_id": "syn07-ts01-5f46eaee678c04b251c4bd9a78dcfb5ea45ce4f417c6bff7b8ba6225e04a6d66",
+        "zip_sha256": "998c864e16f70274cee1a4dcd23a7dfc7a1681171ed7499346918650a9efd5fb"
+    }
+}
+
+
+def preserve_historical_publication(bundle, publication, archive_builder):
+    pin = _HISTORICAL_PUBLICATIONS.get(publication.source_report_id)
+    if pin is None:
+        return publication
+    bundle = Path(bundle)
+    inventory = {path.relative_to(bundle).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+                 for path in sorted(bundle.rglob("*")) if path.is_file()}
+    if _digest(inventory) != pin["inventory_sha256"]:
+        return publication
+    # Some adapters bind identity inputs outside the native directory (notably
+    # the original source ZIP). Matching generated publication bytes cannot
+    # substitute for binding these inputs: a valid repack changes that identity.
+    for name, digest in pin.get("identity_files_sha256", {}).items():
+        path = bundle.parent / name
+        if (Path(name).name != name or path.is_symlink() or not path.is_file()
+                or hashlib.sha256(path.read_bytes()).hexdigest() != digest):
+            return publication
+    historical = replace(publication, report_id=pin["report_id"])
+    if hashlib.sha256(archive_builder(bundle, historical)).hexdigest() != pin["zip_sha256"]:
+        return publication
+    return historical
+
+
+def preserve_publication(adapter):
+    """Retain old routes only when current validation and exact output both agree."""
+    from functools import wraps
+    @wraps(adapter)
+    def adapt_with_history(bundle, *args, **kwargs):
+        publication = adapter(bundle, *args, **kwargs)
+        return preserve_historical_publication(bundle, publication, adapter.__globals__["offline_zip"])
+    return adapt_with_history

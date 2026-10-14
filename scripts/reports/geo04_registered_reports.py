@@ -17,7 +17,7 @@ SCHEMA = "csl.geo04-polyhedral-report/1"
 
 
 def _renderer():
-    path = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "geo04" / "render.py"
+    path = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "geo04" / "render.py"
     spec = importlib.util.spec_from_file_location("csl_geo04_publication_renderer", path)
     if spec is None or spec.loader is None:
         raise ValueError("GEO-04 renderer is unavailable")
@@ -78,35 +78,23 @@ def adapt(bundle):
     if (set(manifest) != {"schema", "report_id", "files"} or
         manifest.get("schema") != "csl.geo04-report-manifest/1" or manifest.get("report_id") != item.source_report_id):
         raise ValueError("GEO-04 manifest identity mismatch")
-    if not isinstance(listed, dict) or set(listed) != FILES:
-        raise ValueError("GEO-04 registered bundle inventory mismatch")
-    expected_files = FILES | {"manifest.json"}
-    actual_files = set()
-    for path in bundle.rglob("*"):
-        if path.is_symlink():
-            raise ValueError("symlinks are forbidden in GEO-04 bundle")
-        if path.is_file():
-            actual_files.add(path.relative_to(bundle).as_posix())
-    if actual_files != expected_files:
-        raise ValueError("GEO-04 bundle has missing or unregistered files")
-    for name, expected in listed.items():
-        relative = Path(name)
-        path = bundle / relative
-        if relative.is_absolute() or ".." in relative.parts or not path.is_file() or path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
-            raise ValueError("unsafe or tampered GEO-04 bundle file: " + name)
+    common.validate_source_inventory(bundle, listed, FILES, label="GEO-04")
     _validate_saved_data(bundle, record)
     _validate_source_zip(bundle, listed)
     publisher_source = Path(__file__).read_text(encoding="utf-8").replace("\r\n", "\n").encode("utf-8")
     identity = {
         "schema": "csl.registered-publication-identity/1",
         "source_report_id": item.source_report_id,
-        "source_files": {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(expected_files)},
+        "source_files": {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(FILES | {"manifest.json"})},
         "publisher_sha256": hashlib.sha256(publisher_source).hexdigest(),
     }
     public_id = item.source_report_id.rsplit("-", 1)[0] + "-" + common._digest(identity)
-    return common.PublicationRecord(item.kind, public_id, item.payload_sha256, item.source_commit,
+    publication = common.PublicationRecord(item.kind, public_id, item.payload_sha256, item.source_commit,
         item.measured_scope, item.evidence_limits, tuple(sorted(FILES)), item.payload_schema,
         item.native_payload_sha256, item.source_report_id)
+
+
+    return common.preserve_historical_publication(bundle, publication, offline_zip)
 
 
 def _validate_saved_data(bundle, record):
@@ -211,8 +199,6 @@ def render_page(bundle, publication):
 
 def publication_artifacts(bundle, publication):
     bundle = Path(bundle)
-    files = {name: (bundle / name).read_bytes() for name in publication.files if name != "index.html"}
-    files["index.html"] = render_page(bundle, publication).encode("utf-8")
     payload = _json(bundle / "records.json")
     envelope = {
         "schema": "csl.algorithm-report-envelope/1", "report_id": publication.report_id,
@@ -222,13 +208,9 @@ def publication_artifacts(bundle, publication):
         "native_payload_sha256": publication.native_payload_sha256,
         "source_report_id": publication.source_report_id, "payload": payload,
     }
-    files["report-envelope.json"] = common._json_bytes(envelope)
-    files["publication-manifest.json"] = common._json_bytes({
-        "schema": "csl.algorithm-report-publication-manifest/1", "report_id": publication.report_id,
-        "report_kind": publication.kind,
-        "files": {name: hashlib.sha256(files[name]).hexdigest() for name in sorted(files)},
-    })
-    return files
+    return common.assemble_publication(bundle, publication,
+        page=render_page(bundle, publication), envelope=envelope, source_files=publication.files)
+
 
 
 def offline_zip(bundle, publication):

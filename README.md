@@ -2,7 +2,9 @@
 
 C++20 library and research repository for constrained discrete-time control. The library currently provides immutable affine models and problem data, JSON scenario intake, registered LP/convex backends, phase-I feasibility, execution and numerical reporting. Start with the installed-package examples below.
 
-Both registered synthesis strategies now publish complete optimal-family results for the tightly guarded analytic T-S01 and T-S02 profiles. These exact-fixture paths do not yet provide the general nominal workflow, arbitrary supported constraints, reusable numerical family-coverage procedure, or a paired comparison and saved synthesis report. See the [current framework composition](docs/architecture/framework-composition.md) for the implemented module map and remaining integration work.
+Strategy A (reachability, terminal minimization and backward recovery), Strategy B (direct joint optimization), witness selection and independent trajectory verification are implemented. Complete optimal families are supported only for the reviewed T-S01/T-S02 profiles; general family coverage and trusted proof serialization remain pending. See the [current framework composition](docs/architecture/framework-composition.md) for the module map, public interfaces and missing glue.
+
+Start development with the [task-to-module guide and focused commands](docs/build/development.md). Use the canonical [glossary](docs/research/glossary.md) for mathematical and software terms.
 
 ## Quick start
 
@@ -19,7 +21,7 @@ cmake --build build/examples --config Release --parallel 4
 ctest --test-dir build/examples -C Release --output-on-failure --no-tests=error
 ```
 
-Expected: **12/12 example tests pass**, including both real feasibility backends and rejected unknown backends/missing or malformed files. [The standalone CMake project](examples/CMakeLists.txt) uses only `find_package(CSL CONFIG)` and installed public targets. The existing installed-consumer CI gate copies and builds the same examples independently of repository headers.
+The example suite covers both real feasibility backends and rejected unknown backends/missing or malformed files. [The standalone CMake project](examples/CMakeLists.txt) uses only `find_package(CSL CONFIG)` and installed public targets. The existing installed-consumer CI gate copies and builds the same examples independently of repository headers.
 
 | Executable/source | What it actually does | Expected numerical output |
 | --- | --- | --- |
@@ -44,11 +46,11 @@ Backend IDs are positional arguments, with HiGHS defaults in the first two examp
 
 The file template uses `0.5*x'Q*x + q'x + c`, here `Q=2`, `q=-2`, `c=1`, so the original terminal cost is `(x2-1)^2`. Its default comparison request is intent only: no synthesis strategy is selected or executed. The history `(u0,u1)=(0.25,0.75)` is supplied by the example, not found by a solver. This small reader is not a general scenario runner or independent constraint verifier.
 
-The [registered synthesis comparison example](examples/registered_synthesis_comparison.cpp) provides a functional comparison bounded to the two-stage integrator and exact T-S01 request. It runs both registered strategies against the same immutable problem, selects witness histories, and reports independent checks against the original problem data. Its JSON summary identifies the shared problem/request and each strategy, outcome, selected witnesses, and original-data verification status/residuals; the example does not serialize the live optimal-family relation or proof payload. Its functional output and CTest duration are not performance evidence. A measured, reproducible paired report with HTML and raw records remains outstanding under [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83) and the [published-results policy](docs/architecture/published-algorithm-results.md).
+The [registered synthesis comparison example](examples/registered_synthesis_comparison.cpp) provides a functional comparison bounded to the two-stage integrator and exact T-S01 request. It runs both registered strategies against the same immutable problem, selects witness histories, and reports independent checks against the original problem data. Its JSON summary identifies the shared problem/request and each strategy, outcome, selected witnesses, and original-data verification status/residuals; the example does not serialize the live optimal-family relation or proof payload. Its functional output and CTest duration are not performance evidence. The [saved paired T-S01 report](reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0/index.html) supplies HTML and raw records for this tiny fixture; its performance conclusion is inconclusive and establishes no general strategy ranking. Broader comparisons follow the [published-results policy](docs/architecture/published-algorithm-results.md).
 
 ## Current numerical reports
 
-Open the published [reference LP report](https://butahlecoq.github.io/controlled-systems-lab/lp-20261012T000346Z-ee5e9193b7a5/index.html) and [reference convex report](https://butahlecoq.github.io/controlled-systems-lab/convex-20261012T041854Z-4d54a407c9b2/index.html), including raw records, figures and source provenance. These are single-adapter measurements on analytic fixtures, not a two-strategy control comparison or speedup claim. [Repository copies and offline ZIPs](reports/algorithm-results/index.html) remain available. Example test durations, including the functional synthesis example, are not benchmarks.
+Open the published [reference LP report](https://butahlecoq.github.io/controlled-systems-lab/lp-20261012T000346Z-ee5e9193b7a5/index.html) and [reference convex report](https://butahlecoq.github.io/controlled-systems-lab/convex-20261012T041854Z-4d54a407c9b2/index.html), including raw records, figures and source provenance. These are single-adapter measurements on analytic fixtures. The [paired T-S01 report](reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0/index.html) records the guarded two-strategy experiment with an inconclusive performance result; it establishes no speedup or general ranking. [Repository copies and offline ZIPs](reports/algorithm-results/index.html) remain available. Example test durations, including the functional synthesis example, are not benchmarks.
 
 ## Research and contracts
 

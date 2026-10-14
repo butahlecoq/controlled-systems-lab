@@ -14,7 +14,7 @@ SCHEMA = "csl.opt04-phase-one-report/2"
 SOURCE_PATTERN = r"opt04-\d{8}T\d{6}Z-[0-9a-f]{12}"
 SOURCE_FILES = frozenset({"records.json", "stdout.jsonl", "driver-stdout.txt", "stderr.txt",
     "release-build.txt", "index.html", "performance.svg", "manifest.sha256", "bundle.zip", "bundle.zip.sha256"})
-TOOLING = Path(__file__).resolve().parents[2] / "reports/algorithm-results/tooling/opt04"
+TOOLING = Path(__file__).resolve().parents[2] / "scripts/reports/opt04"
 # Native schema v2 has no trustworthy collection/test discriminator. Only an
 # independently reviewed, exact saved bundle may cross production admission.
 # Pins are reviewed against the complete saved native inventory (all ten files),
@@ -89,6 +89,7 @@ def _publication_id(source_id, source_hashes):
     return source_id.rsplit("-", 1)[0] + "-" + common._digest(identity)
 
 
+@common.preserve_publication
 def adapt(bundle, *, allow_test=False):
     """Cross the native evidence boundary before projecting publication data."""
     bundle = Path(bundle)

@@ -1,17 +1,23 @@
 # Native C++20 build and public package
 
-CORE-02 builds the integrated [interface revision 1.1](../contracts/core-interfaces.md)
-and its guards as the static `CSL::contracts` target. This is a compatible-toolchain
-source contract, not a stable binary/plugin ABI. No numerical/model/synthesis
-adapter or scenario-file application is supplied by this ticket. Project licensing
-remains undecided; installation is a local development check, not an authorized
-binary release.
+The root build supplies the current library modules, installed public targets and
+optional native adapters. Start routine edits with the [development presets and
+module map](development.md); see [current composition](../architecture/framework-composition.md)
+for synthesis scope. Public interfaces require compatible C++20 toolchains; they
+are not a stable binary/plugin ABI. Installation is a local development check;
+project licensing remains an owner decision.
 
 ## Configure, build, test and install
 
 Requires CMake/CTest >=3.31 and a C++20 compiler. Run from the repository root.
 Check each command's exit code before continuing. Keep generated trees under the
 ignored `tmp/`, `build/`, `install/` or `cmake-build-*` directories.
+
+For Ninja builds on Windows, run `chcp 65001` in the Visual Studio developer
+shell before configure and build, including each new shell. This preserves
+localized MSVC `/showIncludes` dependency detection; `VSLANG=1033` alone does
+not fix a machine with only the Russian language pack. See the
+[development presets](development.md#configure-once-check-the-module).
 
 Windows x64 / Visual Studio 2022, PowerShell:
 
@@ -35,39 +41,64 @@ cmake --install tmp/native --prefix install
 ```
 
 Set `CC`/`CXX` before a fresh configure to choose a compatible compiler pair.
-`BUILD_TESTING=OFF` builds/installs only the contracts, without downloading any
-dependency. With tests enabled, doctest is private. `CSL_DEPENDENCY_PROBES=OFF`
-(the default) omits Eigen/HiGHS/JSON. Turning it on builds the preserved
-[CORE-01 isolated project](../../probes/core-01/README.md) with its own build/cache
-tree and install rules; it never exports backend/test dependencies to the public
-package. The separate build always checks its source dependencies on rebuild.
+`BUILD_TESTING=OFF` disables tests; it does not select a contracts-only build or
+remove production dependencies. The default full configuration builds the real
+HiGHS and Qhull adapters and acquires their pinned vendors. JSON is also a
+production dependency. `CSL_DEPENDENCY_PROBES` controls the separate historical
+[CORE-01 probes](../../probes/core-01/README.md), not production adapter acquisition.
+Use the `core` preset to disable both optional native adapters; this remains a
+library build using Eigen and JSON, plus doctest when tests are enabled. The
+`highs` preset enables HiGHS without Qhull. Installed standalone examples adapt
+to these package capabilities; see the [development guide](development.md).
+The [development guide](development.md) describes the installed-package checks.
 
 ## Installed consumer
 
-The `installed_public_client` CTest installs the public library/header/config,
-copies only the standalone consumer CMake file and backend-neutral client into
-`tmp/native/installed-consumer/source`, configures/builds a separate project and
-runs its own CTest. Its package dependency is `find_package(CSL 0.1 CONFIG REQUIRED)`;
-it links `CSL::contracts`. No repository include path or backend/test header is
-provided. Product version 0.1 denotes the package, independently of interface
-document revision 1.1. The imported target propagates C++20.
+The `installed_public_client` CTest installs the configured package into
+`<build>/installed-consumer/prefix`, copies the standalone consumer CMake project
+and its module clients into `<build>/installed-consumer/source`, and builds/tests
+that separate project. It also copies the public examples and scenario template
+into `examples-source` and builds/tests them separately. The authoritative copy
+list is [RunInstalledClient.cmake](../../cmake/RunInstalledClient.cmake).
 
-To repeat that consumer manually after installation (the two input files may be
-copied anywhere):
+Both projects resolve `find_package(CSL CONFIG)` from the installed prefix without
+repository include paths. Clients link the relevant installed `CSL::` module
+targets, including `CSL::contracts`; the package propagates C++20. The consumer
+checks enabled/disabled adapter expectations. Optional clients and examples follow
+package capabilities: core examples cover scenario construction/intake; HiGHS adds
+LP/convex and backend substitution; the full package adds the synthesis comparison.
+Product version 0.1 is independent of interface document revision 1.1.
+
+After running that gate for the `dev` preset, repeat its copied module-client
+project in a fresh build directory with:
 
 ```sh
-cmake -S tmp/native/installed-consumer/source -B tmp/manual-consumer -DCMAKE_PREFIX_PATH=/absolute/path/to/install -DCMAKE_BUILD_TYPE=Release
-cmake --build tmp/manual-consumer --config Release --parallel 4
-ctest --test-dir tmp/manual-consumer -C Release --output-on-failure --no-tests=error
+cmake -S build/dev/installed-consumer/source -B build/manual-consumer -DCMAKE_PREFIX_PATH="$PWD/build/dev/installed-consumer/prefix" -DCMAKE_BUILD_TYPE=Release -DCSL_EXPECT_HIGHS=ON -DCSL_EXPECT_QHULL=ON
+cmake --build build/manual-consumer --config Release --parallel 4
+ctest --test-dir build/manual-consumer -C Release --output-on-failure --no-tests=error
 ```
 
-On Windows add `-G "Visual Studio 17 2022" -A x64`. Installed files contain no
-vendored source or third-party libraries; the contracts use only the standard
-library. Test/dependency tools remain in the ignored build tree. Any later binary
-distribution including native backends must collect actual bundled notices and
-meet the [ADR 0002 restrictions](../architecture/decisions/0002-native-integrations.md).
+For `core`, substitute `build/core` in source/prefix paths and set both expectations
+to `OFF`; for `highs`, substitute `build/highs` and set only Qhull to `OFF`. Use a
+fresh manual-consumer directory per configuration. For `dev-windows`, substitute
+`build/dev-windows` and add `-G "Visual Studio 17 2022" -A x64` at configure. For
+Windows Ninja, apply the UTF-8 shell step above. These commands require the gate's
+complete copied source set, not just the original contracts client.
 
-## Acceptance evidence and limits
+Public headers hide native dependency types. Full installations nevertheless
+include private static native archives and bundled dependency notices needed by
+the exported static targets; contents depend on enabled adapters. JSON notices are
+also installed. This is not a dependency-free package. Inspect the actual install
+manifest and `share/CSL/notices` before distribution and meet the
+[ADR 0002 restrictions](../architecture/decisions/0002-native-integrations.md).
+Test/dependency build tools remain in the ignored build tree.
+
+## Historical CORE-02 evidence and limits
+
+The following records the original CORE-02 checks and environment. It is retained
+as historical evidence, not the current module inventory, dependency inventory or
+a fresh verification of the commands above. Later modules have their own tests
+and reports.
 
 T-M01's master oracle is: **Reject wrong dimensions/stage counts; constant and
 stagewise providers produce the same model behavior.** The public client checks
