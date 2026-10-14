@@ -109,7 +109,7 @@ class NumericalFailureAfterTerminal final : public ConvexWorkspace {
         auto outcome=inner_->solve(program,context);
         if(auto* solved=std::get_if<optimization::ProgramResult>(&outcome)) {
             solved->termination=Termination::numerical_failure;
-            solved->raw_diagnostics="injected terminal numerical failure after real optimizer result";
+            solved->raw_diagnostics+="\ninjected terminal numerical failure after real optimizer result";
         }
         return outcome;
     }
@@ -663,13 +663,22 @@ TEST_CASE("registered terminal numerical failure retains the feasible candidate 
     REQUIRE(history.terminal);CHECK_FALSE(history.terminal->relation);
     REQUIRE(history.terminal->optimization);
     CHECK(history.terminal->optimization->termination==Termination::numerical_failure);
-    CHECK(history.terminal->optimization->raw_diagnostics==
-        "injected terminal numerical failure after real optimizer result");
+    CHECK(history.terminal->optimization->raw_diagnostics.find(
+        "injected terminal numerical failure after real optimizer result")!=std::string::npos);
     CHECK(history.terminal->optimization->outcome.value==MathematicalOutcome::optimal);
-    REQUIRE(history.terminal->optimization->objective.lower);
-    CHECK(history.terminal->optimization->objective.lower->value==doctest::Approx(0));
-    REQUIRE(history.terminal->optimization->objective.upper);
-    CHECK(history.terminal->optimization->objective.upper->value==doctest::Approx(0));
+    const auto& optimizer=*history.terminal->optimization;
+    CHECK(optimizer.outcome.subject.problem==query.problem.identity());
+    CHECK(optimizer.outcome.subject.program.value==
+        "syn02-terminal:"+history.terminal->construction.feasible_slice.value);
+    CHECK(std::holds_alternative<Unestablished>(optimizer.outcome.support));
+    CHECK_FALSE(optimizer.objective.lower);CHECK_FALSE(optimizer.objective.upper);
+    CHECK(optimizer.raw_diagnostics.find("bounds=unavailable")!=std::string::npos);
+    REQUIRE(optimizer.residuals.primal);
+    CHECK(optimizer.residuals.primal->context.subject==optimizer.outcome.subject);
+    CHECK(optimizer.residuals.primal->context.verifier.id==ModuleId{"csl.convex.highs.primal"});
+    CHECK(optimizer.residuals.primal->context.verifier.version=="1");
+    CHECK(optimizer.residuals.primal->context.absolute_tolerance==query.family.numerical.absolute_tolerance);
+    CHECK(optimizer.residuals.primal->context.relative_tolerance==query.family.numerical.relative_tolerance);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
     const auto& stop=std::get<ScopedOperationStopped>(result.stop);
     CHECK(stop.stop.reason==StopReason::numerical_failure);
@@ -678,6 +687,7 @@ TEST_CASE("registered terminal numerical failure retains the feasible candidate 
     CHECK(stop.request.actual_module==ModuleId{"csl.convex.highs"});
     CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
     CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
+    CHECK(result.spans.empty());
 }
 TEST_CASE("coverage and materialization requests fail closed at strategy preparation") {
     auto query=request(integrator());
