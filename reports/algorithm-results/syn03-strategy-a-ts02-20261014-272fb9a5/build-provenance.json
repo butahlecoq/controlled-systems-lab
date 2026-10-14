@@ -10,7 +10,7 @@
     "--parallel",
     "4"
   ],
-  "build_log_sha256": "cebb86593570cc4aaf0bbf4f5e2c29444aaee2267a66b9ea89d3fa573f722ada",
+  "build_log_sha256": "46c1de169b8708554f965d0f7b546897121070851495a19b581b437f6a5bbd13",
   "cache_sha256": "87d36d9c4da549c55eabb1057dada96320b31f220ebbee86738d0eddc498f4fe",
   "cmake": "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
   "cmake_version": "cmake version 3.31.6-msvc6",
@@ -35,7 +35,7 @@
     "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=DEPENDENCY_ROOT\\csl_qhull-src",
     "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=DEPENDENCY_ROOT\\csl_json-src"
   ],
-  "configure_log_sha256": "1ae845f568502eab83f35cbe077155acf083ef6283001a29d90408d6dc00bee0",
+  "configure_log_sha256": "2f909451706a770a4311dcfc1fff67933d9f338d1107f44adccc4d6657ed941f",
   "cxx_standard": "C++20",
   "dependencies": {
     "highs": {
@@ -74,11 +74,11 @@
       }
     }
   },
-  "executable_bytes": 4894208,
-  "executable_sha256": "f6316461a14d59292de6a0fca6ae6ebfcca3b2f872be3545aac0daab108d7b50",
+  "executable_bytes": 4892672,
+  "executable_sha256": "1adc70eafcf51f0b5332f276843037abc4b706da5fb6d6ff723d7d3c4dcd93cc",
   "generator": "Visual Studio 17 2022 x64",
   "ndebug": true,
-  "project_sha256": "247838541459e6f6aa6ced95275ce0493945ea2896b7736d49d1709e5174a0a1",
+  "project_sha256": "70be06c51180855b9df3ce03dcfc5a56a0dba4b24626b53313e724412a8ea6a7",
   "release_properties": {
     "AdditionalIncludeDirectories": "SOURCE_ROOT\\include;%(AdditionalIncludeDirectories)",
     "AssemblerListingLocation": "$(IntDir)",
@@ -100,18 +100,18 @@
     "UseFullPaths": "false",
     "WarningLevel": "Level4"
   },
-  "report_driver_sha256": "cbe26f53f6f4e18b494b106f8fe4a2d3d882951dcc15e3902808250061e08f44",
+  "report_driver_sha256": "d08eb524e84e3d88cdb2b5f85e5ad939788cd3bcbd260ca0711ff68f5b4d6e8d",
   "runner_cmake_sha256": "e81b077358b3982493f7aa63bb12a8942d7c24fd8f1fda41a1070e95bb5d7273",
   "sanitization": {
     "original_build_evidence_sha256": {
       "CMakeCXXCompiler.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
-      "CMakeCache.txt": "d121ba1f0adc2264c54ecd19feae5aafb7d048dad6f2ca70ee90d356807754a9",
-      "build.log": "89a65fc90362c0bad709e78aea795543a3fa78c173f31d878df64651b18933f0",
-      "configure.log": "75f3c1ab38adf386d2dea7beb8fa211e7c3c090eedcca873bfbd7ff5cb46cdff",
-      "release-target.vcxproj": "4b3af5d620b5336aa3df85bd4ddadbb17b0ebfa9f85a15c0f8a5b0219737246f"
+      "CMakeCache.txt": "93028c0e6b46f4da1abcdce8e31ea897d9fde371534426b59630cc6f0405032c",
+      "build.log": "0c72c4cda8f3d4f65e316e2edab031ca7948d8d0c86e2a157ce462d8fd1b61a5",
+      "configure.log": "e90a2ecdc21932bfe3527b591f77ad101b3bbc14f5b4a7a0009bcea09a15f5aa",
+      "release-target.vcxproj": "3bdc45f93014c3cd5469f3aa1e221c91b06af6c6717a425b75cc4f7b3b6672c3"
     },
-    "original_collection_sha256": "aefcc20c3bf52897ed6137b8aa5e53a478756b5585171c9163957ba727c87dab",
-    "original_commands_sha256": "05e3d7b79bbe91934855f27a97bae68d574158944ce8caa7147bacf516d35a5e",
+    "original_collection_sha256": "a08172623aa5bb5ce94b28dcad4ae910fdd0c6e2b4aac02efacfd228c699672a",
+    "original_commands_sha256": "f3965be63d7492640807bdd48ea14a6bf496c8b63db354c064cb70ab283c57ea",
     "policy": "Replace original absolute host roots with portable placeholders; preserve versions, flags, source identities and hashes. Published build-evidence hashes bind sanitized bytes; original hashes remain available without the private source bytes.",
     "root_placeholders": {
       "BUILD_ROOT": "Configured Release build directory",

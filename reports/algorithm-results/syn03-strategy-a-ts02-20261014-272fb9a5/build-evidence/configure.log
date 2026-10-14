@@ -80,5 +80,5 @@
 -- Performing Test COMPILER_HAS_DEPRECATED - Success
 -- .Net: Use .Net Framework 2.1 support: ON
 -- Configuring done (12.8s)
--- Generating done (0.4s)
+-- Generating done (0.3s)
 -- Build files have been written to: BUILD_ROOT

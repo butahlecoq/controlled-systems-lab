@@ -35,7 +35,7 @@
       "--parallel",
       "4"
     ],
-    "build_log_sha256": "cebb86593570cc4aaf0bbf4f5e2c29444aaee2267a66b9ea89d3fa573f722ada",
+    "build_log_sha256": "46c1de169b8708554f965d0f7b546897121070851495a19b581b437f6a5bbd13",
     "cache_sha256": "87d36d9c4da549c55eabb1057dada96320b31f220ebbee86738d0eddc498f4fe",
     "cmake": "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
     "cmake_version": "cmake version 3.31.6-msvc6",
@@ -60,7 +60,7 @@
       "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=DEPENDENCY_ROOT\\csl_qhull-src",
       "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=DEPENDENCY_ROOT\\csl_json-src"
     ],
-    "configure_log_sha256": "1ae845f568502eab83f35cbe077155acf083ef6283001a29d90408d6dc00bee0",
+    "configure_log_sha256": "2f909451706a770a4311dcfc1fff67933d9f338d1107f44adccc4d6657ed941f",
     "cxx_standard": "C++20",
     "dependencies": {
       "highs": {
@@ -99,11 +99,11 @@
         }
       }
     },
-    "executable_bytes": 4894208,
-    "executable_sha256": "f6316461a14d59292de6a0fca6ae6ebfcca3b2f872be3545aac0daab108d7b50",
+    "executable_bytes": 4892672,
+    "executable_sha256": "1adc70eafcf51f0b5332f276843037abc4b706da5fb6d6ff723d7d3c4dcd93cc",
     "generator": "Visual Studio 17 2022 x64",
     "ndebug": true,
-    "project_sha256": "247838541459e6f6aa6ced95275ce0493945ea2896b7736d49d1709e5174a0a1",
+    "project_sha256": "70be06c51180855b9df3ce03dcfc5a56a0dba4b24626b53313e724412a8ea6a7",
     "release_properties": {
       "AdditionalIncludeDirectories": "SOURCE_ROOT\\include;%(AdditionalIncludeDirectories)",
       "AssemblerListingLocation": "$(IntDir)",
@@ -125,18 +125,18 @@
       "UseFullPaths": "false",
       "WarningLevel": "Level4"
     },
-    "report_driver_sha256": "cbe26f53f6f4e18b494b106f8fe4a2d3d882951dcc15e3902808250061e08f44",
+    "report_driver_sha256": "d08eb524e84e3d88cdb2b5f85e5ad939788cd3bcbd260ca0711ff68f5b4d6e8d",
     "runner_cmake_sha256": "e81b077358b3982493f7aa63bb12a8942d7c24fd8f1fda41a1070e95bb5d7273",
     "sanitization": {
       "original_build_evidence_sha256": {
         "CMakeCXXCompiler.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
-        "CMakeCache.txt": "d121ba1f0adc2264c54ecd19feae5aafb7d048dad6f2ca70ee90d356807754a9",
-        "build.log": "89a65fc90362c0bad709e78aea795543a3fa78c173f31d878df64651b18933f0",
-        "configure.log": "75f3c1ab38adf386d2dea7beb8fa211e7c3c090eedcca873bfbd7ff5cb46cdff",
-        "release-target.vcxproj": "4b3af5d620b5336aa3df85bd4ddadbb17b0ebfa9f85a15c0f8a5b0219737246f"
+        "CMakeCache.txt": "93028c0e6b46f4da1abcdce8e31ea897d9fde371534426b59630cc6f0405032c",
+        "build.log": "0c72c4cda8f3d4f65e316e2edab031ca7948d8d0c86e2a157ce462d8fd1b61a5",
+        "configure.log": "e90a2ecdc21932bfe3527b591f77ad101b3bbc14f5b4a7a0009bcea09a15f5aa",
+        "release-target.vcxproj": "3bdc45f93014c3cd5469f3aa1e221c91b06af6c6717a425b75cc4f7b3b6672c3"
       },
-      "original_collection_sha256": "aefcc20c3bf52897ed6137b8aa5e53a478756b5585171c9163957ba727c87dab",
-      "original_commands_sha256": "05e3d7b79bbe91934855f27a97bae68d574158944ce8caa7147bacf516d35a5e",
+      "original_collection_sha256": "a08172623aa5bb5ce94b28dcad4ae910fdd0c6e2b4aac02efacfd228c699672a",
+      "original_commands_sha256": "f3965be63d7492640807bdd48ea14a6bf496c8b63db354c064cb70ab283c57ea",
       "policy": "Replace original absolute host roots with portable placeholders; preserve versions, flags, source identities and hashes. Published build-evidence hashes bind sanitized bytes; original hashes remain available without the private source bytes.",
       "root_placeholders": {
         "BUILD_ROOT": "Configured Release build directory",
@@ -274,13 +274,12 @@
     "parametric_form": "(0,s,s+t,s,t), 0<=s<=1, 0<=t<=1"
   },
   "environment": {
-    "absolute_tolerance": 1e-08,
     "assurance": "numerical",
     "cache_policy": "One excluded in-process warmup; each repetition constructs a fresh problem, registries, provider selections, prepared strategy and exclusive workspace. Process/runtime may be warm; no cold-cache claim.",
-    "clock": "std::chrono::steady_clock, integer nanoseconds",
+    "clock": "std::chrono.steady_clock, integer nanoseconds",
     "cpu_count_physical": 6,
-    "cpu_percent_after": 1.3,
-    "cpu_percent_before": 4.7,
+    "cpu_percent_after": 1.5,
+    "cpu_percent_before": 1.3,
     "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
     "logical_cpu_count": 12,
     "memory_total_bytes": 34189107200,
@@ -288,7 +287,6 @@
     "os": "Windows-11-10.0.22631-SP0",
     "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
     "python": "3.13.5",
-    "relative_tolerance": 1e-08,
     "requested_resources": {
       "memory_bytes": null,
       "outer_workers": 1,
@@ -306,7 +304,7 @@
     "The separate diagnostic workload is excluded from the seven observations; no source-mapped unprofiled latency limiter is established.",
     "Internal preparation, native LP, relation construction, compiled verifier and export timings/counters are unavailable."
   ],
-  "harness_commit": "2474dc69758ff2f990630300ce54eca0afc827d5",
+  "harness_commit": "2d9aa9e67a8e7635d3a877069f2aae186bd6d7f9",
   "measurement": {
     "algorithm_source_commit": "272fb9a51c40dedeb20dfcb1ea11dfc6b694edd7",
     "build": {
@@ -321,7 +319,7 @@
         "--parallel",
         "4"
       ],
-      "build_log_sha256": "cebb86593570cc4aaf0bbf4f5e2c29444aaee2267a66b9ea89d3fa573f722ada",
+      "build_log_sha256": "46c1de169b8708554f965d0f7b546897121070851495a19b581b437f6a5bbd13",
       "cache_sha256": "87d36d9c4da549c55eabb1057dada96320b31f220ebbee86738d0eddc498f4fe",
       "cmake": "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
       "cmake_version": "cmake version 3.31.6-msvc6",
@@ -346,7 +344,7 @@
         "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=DEPENDENCY_ROOT\\csl_qhull-src",
         "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=DEPENDENCY_ROOT\\csl_json-src"
       ],
-      "configure_log_sha256": "1ae845f568502eab83f35cbe077155acf083ef6283001a29d90408d6dc00bee0",
+      "configure_log_sha256": "2f909451706a770a4311dcfc1fff67933d9f338d1107f44adccc4d6657ed941f",
       "cxx_standard": "C++20",
       "dependencies": {
         "highs": {
@@ -385,11 +383,11 @@
           }
         }
       },
-      "executable_bytes": 4894208,
-      "executable_sha256": "f6316461a14d59292de6a0fca6ae6ebfcca3b2f872be3545aac0daab108d7b50",
+      "executable_bytes": 4892672,
+      "executable_sha256": "1adc70eafcf51f0b5332f276843037abc4b706da5fb6d6ff723d7d3c4dcd93cc",
       "generator": "Visual Studio 17 2022 x64",
       "ndebug": true,
-      "project_sha256": "247838541459e6f6aa6ced95275ce0493945ea2896b7736d49d1709e5174a0a1",
+      "project_sha256": "70be06c51180855b9df3ce03dcfc5a56a0dba4b24626b53313e724412a8ea6a7",
       "release_properties": {
         "AdditionalIncludeDirectories": "SOURCE_ROOT\\include;%(AdditionalIncludeDirectories)",
         "AssemblerListingLocation": "$(IntDir)",
@@ -411,18 +409,18 @@
         "UseFullPaths": "false",
         "WarningLevel": "Level4"
       },
-      "report_driver_sha256": "cbe26f53f6f4e18b494b106f8fe4a2d3d882951dcc15e3902808250061e08f44",
+      "report_driver_sha256": "d08eb524e84e3d88cdb2b5f85e5ad939788cd3bcbd260ca0711ff68f5b4d6e8d",
       "runner_cmake_sha256": "e81b077358b3982493f7aa63bb12a8942d7c24fd8f1fda41a1070e95bb5d7273",
       "sanitization": {
         "original_build_evidence_sha256": {
           "CMakeCXXCompiler.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
-          "CMakeCache.txt": "d121ba1f0adc2264c54ecd19feae5aafb7d048dad6f2ca70ee90d356807754a9",
-          "build.log": "89a65fc90362c0bad709e78aea795543a3fa78c173f31d878df64651b18933f0",
-          "configure.log": "75f3c1ab38adf386d2dea7beb8fa211e7c3c090eedcca873bfbd7ff5cb46cdff",
-          "release-target.vcxproj": "4b3af5d620b5336aa3df85bd4ddadbb17b0ebfa9f85a15c0f8a5b0219737246f"
+          "CMakeCache.txt": "93028c0e6b46f4da1abcdce8e31ea897d9fde371534426b59630cc6f0405032c",
+          "build.log": "0c72c4cda8f3d4f65e316e2edab031ca7948d8d0c86e2a157ce462d8fd1b61a5",
+          "configure.log": "e90a2ecdc21932bfe3527b591f77ad101b3bbc14f5b4a7a0009bcea09a15f5aa",
+          "release-target.vcxproj": "3bdc45f93014c3cd5469f3aa1e221c91b06af6c6717a425b75cc4f7b3b6672c3"
         },
-        "original_collection_sha256": "aefcc20c3bf52897ed6137b8aa5e53a478756b5585171c9163957ba727c87dab",
-        "original_commands_sha256": "05e3d7b79bbe91934855f27a97bae68d574158944ce8caa7147bacf516d35a5e",
+        "original_collection_sha256": "a08172623aa5bb5ce94b28dcad4ae910fdd0c6e2b4aac02efacfd228c699672a",
+        "original_commands_sha256": "f3965be63d7492640807bdd48ea14a6bf496c8b63db354c064cb70ab283c57ea",
         "policy": "Replace original absolute host roots with portable placeholders; preserve versions, flags, source identities and hashes. Published build-evidence hashes bind sanitized bytes; original hashes remain available without the private source bytes.",
         "root_placeholders": {
           "BUILD_ROOT": "Configured Release build directory",
@@ -444,13 +442,12 @@
       "warmup": 1
     },
     "environment": {
-      "absolute_tolerance": 1e-08,
       "assurance": "numerical",
       "cache_policy": "One excluded in-process warmup; each repetition constructs a fresh problem, registries, provider selections, prepared strategy and exclusive workspace. Process/runtime may be warm; no cold-cache claim.",
-      "clock": "std::chrono::steady_clock, integer nanoseconds",
+      "clock": "std::chrono.steady_clock, integer nanoseconds",
       "cpu_count_physical": 6,
-      "cpu_percent_after": 1.3,
-      "cpu_percent_before": 4.7,
+      "cpu_percent_after": 1.5,
+      "cpu_percent_before": 1.3,
       "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
       "logical_cpu_count": 12,
       "memory_total_bytes": 34189107200,
@@ -458,7 +455,6 @@
       "os": "Windows-11-10.0.22631-SP0",
       "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
       "python": "3.13.5",
-      "relative_tolerance": 1e-08,
       "requested_resources": {
         "memory_bytes": null,
         "outer_workers": 1,
@@ -469,7 +465,6 @@
     },
     "events": [
       {
-        "absolute_tolerance": 1e-08,
         "assurance": "numerical",
         "canonical_relation_checked": true,
         "completeness_verifier": "csl.verifier.ts02-constant-integrator",
@@ -477,7 +472,7 @@
         "consumed_result_marker": 1805158144890476974,
         "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
         "distinct_histories_same_terminal_checked": true,
-        "elapsed_ns": 5763600,
+        "elapsed_ns": 5562400,
         "error": "",
         "four_box_corners_checked": true,
         "lineage": [
@@ -502,26 +497,14 @@
           "csl.hull.lp-membership@1.0.0"
         ],
         "registry_verified": true,
-        "relative_tolerance": 1e-08,
         "repetition": 0,
-        "representative_coordinates": [
-          0,
-          0.25,
-          1,
-          0.25,
-          0.75
-        ],
-        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
         "result_disposition": "complete_optimal_family",
         "schema": "csl.syn03-strategy-a-ts02-measurement-event/1",
         "status": "passed",
         "termination": "completed",
-        "trajectory_max_residual": 0,
-        "trajectory_objective": 3,
         "warmup": true
       },
       {
-        "absolute_tolerance": 1e-08,
         "assurance": "numerical",
         "canonical_relation_checked": true,
         "completeness_verifier": "csl.verifier.ts02-constant-integrator",
@@ -529,7 +512,7 @@
         "consumed_result_marker": 1805158144890476974,
         "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
         "distinct_histories_same_terminal_checked": true,
-        "elapsed_ns": 4825000,
+        "elapsed_ns": 5218200,
         "error": "",
         "four_box_corners_checked": true,
         "lineage": [
@@ -554,26 +537,14 @@
           "csl.hull.lp-membership@1.0.0"
         ],
         "registry_verified": true,
-        "relative_tolerance": 1e-08,
         "repetition": 1,
-        "representative_coordinates": [
-          0,
-          0.25,
-          1,
-          0.25,
-          0.75
-        ],
-        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
         "result_disposition": "complete_optimal_family",
         "schema": "csl.syn03-strategy-a-ts02-measurement-event/1",
         "status": "passed",
         "termination": "completed",
-        "trajectory_max_residual": 0,
-        "trajectory_objective": 3,
         "warmup": false
       },
       {
-        "absolute_tolerance": 1e-08,
         "assurance": "numerical",
         "canonical_relation_checked": true,
         "completeness_verifier": "csl.verifier.ts02-constant-integrator",
@@ -581,7 +552,7 @@
         "consumed_result_marker": 1805158144890476974,
         "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
         "distinct_histories_same_terminal_checked": true,
-        "elapsed_ns": 4689600,
+        "elapsed_ns": 5112000,
         "error": "",
         "four_box_corners_checked": true,
         "lineage": [
@@ -606,26 +577,14 @@
           "csl.hull.lp-membership@1.0.0"
         ],
         "registry_verified": true,
-        "relative_tolerance": 1e-08,
         "repetition": 2,
-        "representative_coordinates": [
-          0,
-          0.25,
-          1,
-          0.25,
-          0.75
-        ],
-        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
         "result_disposition": "complete_optimal_family",
         "schema": "csl.syn03-strategy-a-ts02-measurement-event/1",
         "status": "passed",
         "termination": "completed",
-        "trajectory_max_residual": 0,
-        "trajectory_objective": 3,
         "warmup": false
       },
       {
-        "absolute_tolerance": 1e-08,
         "assurance": "numerical",
         "canonical_relation_checked": true,
         "completeness_verifier": "csl.verifier.ts02-constant-integrator",
@@ -633,7 +592,7 @@
         "consumed_result_marker": 1805158144890476974,
         "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
         "distinct_histories_same_terminal_checked": true,
-        "elapsed_ns": 5048800,
+        "elapsed_ns": 5163900,
         "error": "",
         "four_box_corners_checked": true,
         "lineage": [
@@ -658,26 +617,14 @@
           "csl.hull.lp-membership@1.0.0"
         ],
         "registry_verified": true,
-        "relative_tolerance": 1e-08,
         "repetition": 3,
-        "representative_coordinates": [
-          0,
-          0.25,
-          1,
-          0.25,
-          0.75
-        ],
-        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
         "result_disposition": "complete_optimal_family",
         "schema": "csl.syn03-strategy-a-ts02-measurement-event/1",
         "status": "passed",
         "termination": "completed",
-        "trajectory_max_residual": 0,
-        "trajectory_objective": 3,
         "warmup": false
       },
       {
-        "absolute_tolerance": 1e-08,
         "assurance": "numerical",
         "canonical_relation_checked": true,
         "completeness_verifier": "csl.verifier.ts02-constant-integrator",
@@ -685,7 +632,7 @@
         "consumed_result_marker": 1805158144890476974,
         "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
         "distinct_histories_same_terminal_checked": true,
-        "elapsed_ns": 5818000,
+        "elapsed_ns": 5017600,
         "error": "",
         "four_box_corners_checked": true,
         "lineage": [
@@ -710,26 +657,14 @@
           "csl.hull.lp-membership@1.0.0"
         ],
         "registry_verified": true,
-        "relative_tolerance": 1e-08,
         "repetition": 4,
-        "representative_coordinates": [
-          0,
-          0.25,
-          1,
-          0.25,
-          0.75
-        ],
-        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
         "result_disposition": "complete_optimal_family",
         "schema": "csl.syn03-strategy-a-ts02-measurement-event/1",
         "status": "passed",
         "termination": "completed",
-        "trajectory_max_residual": 0,
-        "trajectory_objective": 3,
         "warmup": false
       },
       {
-        "absolute_tolerance": 1e-08,
         "assurance": "numerical",
         "canonical_relation_checked": true,
         "completeness_verifier": "csl.verifier.ts02-constant-integrator",
@@ -737,7 +672,7 @@
         "consumed_result_marker": 1805158144890476974,
         "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
         "distinct_histories_same_terminal_checked": true,
-        "elapsed_ns": 5295800,
+        "elapsed_ns": 4570500,
         "error": "",
         "four_box_corners_checked": true,
         "lineage": [
@@ -762,26 +697,14 @@
           "csl.hull.lp-membership@1.0.0"
         ],
         "registry_verified": true,
-        "relative_tolerance": 1e-08,
         "repetition": 5,
-        "representative_coordinates": [
-          0,
-          0.25,
-          1,
-          0.25,
-          0.75
-        ],
-        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
         "result_disposition": "complete_optimal_family",
         "schema": "csl.syn03-strategy-a-ts02-measurement-event/1",
         "status": "passed",
         "termination": "completed",
-        "trajectory_max_residual": 0,
-        "trajectory_objective": 3,
         "warmup": false
       },
       {
-        "absolute_tolerance": 1e-08,
         "assurance": "numerical",
         "canonical_relation_checked": true,
         "completeness_verifier": "csl.verifier.ts02-constant-integrator",
@@ -789,7 +712,7 @@
         "consumed_result_marker": 1805158144890476974,
         "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
         "distinct_histories_same_terminal_checked": true,
-        "elapsed_ns": 4762400,
+        "elapsed_ns": 4477000,
         "error": "",
         "four_box_corners_checked": true,
         "lineage": [
@@ -814,26 +737,14 @@
           "csl.hull.lp-membership@1.0.0"
         ],
         "registry_verified": true,
-        "relative_tolerance": 1e-08,
         "repetition": 6,
-        "representative_coordinates": [
-          0,
-          0.25,
-          1,
-          0.25,
-          0.75
-        ],
-        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
         "result_disposition": "complete_optimal_family",
         "schema": "csl.syn03-strategy-a-ts02-measurement-event/1",
         "status": "passed",
         "termination": "completed",
-        "trajectory_max_residual": 0,
-        "trajectory_objective": 3,
         "warmup": false
       },
       {
-        "absolute_tolerance": 1e-08,
         "assurance": "numerical",
         "canonical_relation_checked": true,
         "completeness_verifier": "csl.verifier.ts02-constant-integrator",
@@ -841,7 +752,7 @@
         "consumed_result_marker": 1805158144890476974,
         "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
         "distinct_histories_same_terminal_checked": true,
-        "elapsed_ns": 4738800,
+        "elapsed_ns": 4389000,
         "error": "",
         "four_box_corners_checked": true,
         "lineage": [
@@ -866,26 +777,15 @@
           "csl.hull.lp-membership@1.0.0"
         ],
         "registry_verified": true,
-        "relative_tolerance": 1e-08,
         "repetition": 7,
-        "representative_coordinates": [
-          0,
-          0.25,
-          1,
-          0.25,
-          0.75
-        ],
-        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
         "result_disposition": "complete_optimal_family",
         "schema": "csl.syn03-strategy-a-ts02-measurement-event/1",
         "status": "passed",
         "termination": "completed",
-        "trajectory_max_residual": 0,
-        "trajectory_objective": 3,
         "warmup": false
       }
     ],
-    "harness_commit": "2474dc69758ff2f990630300ce54eca0afc827d5",
+    "harness_commit": "2d9aa9e67a8e7635d3a877069f2aae186bd6d7f9",
     "limiter": {
       "available": false,
       "reason": "The separate diagnostic workload and process counters do not establish a source-mapped limiter on the unprofiled tiny T-S02 public path. Performance remains inconclusive; no latency limiter is claimed."
@@ -912,160 +812,153 @@
           "cpu_system_seconds": 0.0,
           "cpu_user_seconds": 0.0,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428085726000,
-          "rss_bytes": 1839104
+          "monotonic_ns": 729600884067800,
+          "rss_bytes": 1843200
         },
         {
           "cpu_system_seconds": 0.0,
-          "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 25.0,
-          "monotonic_ns": 728428087924200,
-          "rss_bytes": 3059712
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 729600886269300,
+          "rss_bytes": 3088384
         },
         {
           "cpu_system_seconds": 0.0,
-          "cpu_user_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428090491900,
-          "rss_bytes": 6565888
+          "monotonic_ns": 729600888780700,
+          "rss_bytes": 6569984
         },
         {
           "cpu_system_seconds": 0.0,
-          "cpu_user_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428093050000,
-          "rss_bytes": 6852608
+          "monotonic_ns": 729600890864000,
+          "rss_bytes": 6873088
         },
         {
           "cpu_system_seconds": 0.0,
-          "cpu_user_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428095603600,
-          "rss_bytes": 6975488
+          "monotonic_ns": 729600892923600,
+          "rss_bytes": 6864896
         },
         {
           "cpu_system_seconds": 0.0,
-          "cpu_user_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428098130700,
-          "rss_bytes": 6955008
+          "monotonic_ns": 729600894979000,
+          "rss_bytes": 6877184
         },
         {
           "cpu_system_seconds": 0.0,
-          "cpu_user_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428100238300,
-          "rss_bytes": 6967296
+          "monotonic_ns": 729600897034100,
+          "rss_bytes": 6942720
+        },
+        {
+          "cpu_system_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 11.1,
+          "monotonic_ns": 729600899145100,
+          "rss_bytes": 7008256
+        },
+        {
+          "cpu_system_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 729600901294000,
+          "rss_bytes": 7004160
+        },
+        {
+          "cpu_system_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 729600903445700,
+          "rss_bytes": 6971392
+        },
+        {
+          "cpu_system_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 729600905587600,
+          "rss_bytes": 7024640
+        },
+        {
+          "cpu_system_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 729600907726400,
+          "rss_bytes": 7020544
+        },
+        {
+          "cpu_system_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 729600910253800,
+          "rss_bytes": 7024640
+        },
+        {
+          "cpu_system_seconds": 0.015625,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 729600912396300,
+          "rss_bytes": 7151616
         },
         {
           "cpu_system_seconds": 0.015625,
           "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 50.0,
-          "monotonic_ns": 728428102337100,
-          "rss_bytes": 7065600
+          "host_cpu_percent": 5.9,
+          "monotonic_ns": 729600914529500,
+          "rss_bytes": 7196672
         },
         {
           "cpu_system_seconds": 0.015625,
           "cpu_user_seconds": 0.015625,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428104405900,
-          "rss_bytes": 6991872
-        },
-        {
-          "cpu_system_seconds": 0.015625,
-          "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428106473300,
-          "rss_bytes": 7012352
-        },
-        {
-          "cpu_system_seconds": 0.015625,
-          "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428108538800,
-          "rss_bytes": 6955008
-        },
-        {
-          "cpu_system_seconds": 0.015625,
-          "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428111061500,
-          "rss_bytes": 7000064
-        },
-        {
-          "cpu_system_seconds": 0.015625,
-          "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428113128800,
-          "rss_bytes": 6926336
-        },
-        {
-          "cpu_system_seconds": 0.015625,
-          "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428115693100,
+          "monotonic_ns": 729600916781800,
           "rss_bytes": 7172096
         },
         {
           "cpu_system_seconds": 0.015625,
           "cpu_user_seconds": 0.015625,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428118326900,
-          "rss_bytes": 7069696
+          "monotonic_ns": 729600919023500,
+          "rss_bytes": 7249920
         },
         {
           "cpu_system_seconds": 0.015625,
           "cpu_user_seconds": 0.015625,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428120575100,
-          "rss_bytes": 7258112
+          "monotonic_ns": 729600921254600,
+          "rss_bytes": 7155712
         },
         {
           "cpu_system_seconds": 0.015625,
           "cpu_user_seconds": 0.015625,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428122720000,
-          "rss_bytes": 7241728
+          "monotonic_ns": 729600923480400,
+          "rss_bytes": 7127040
         },
         {
           "cpu_system_seconds": 0.015625,
           "cpu_user_seconds": 0.015625,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428124867800,
-          "rss_bytes": 7266304
+          "monotonic_ns": 729600925996600,
+          "rss_bytes": 7340032
         },
         {
-          "cpu_system_seconds": 0.015625,
-          "cpu_user_seconds": 0.015625,
           "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428127378200,
-          "rss_bytes": 7217152
-        },
-        {
-          "cpu_system_seconds": 0.015625,
-          "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428129526500,
-          "rss_bytes": 7299072
-        },
-        {
-          "cpu_system_seconds": 0.015625,
-          "cpu_user_seconds": 0.015625,
-          "host_cpu_percent": 0.0,
-          "monotonic_ns": 728428131895900,
-          "rss_bytes": 6889472
-        },
-        {
-          "host_cpu_percent": 8.3,
-          "monotonic_ns": 728428134490800
+          "monotonic_ns": 729600928566600
         }
       ],
       "sampled_process_cpu_system_seconds_max": 0.015625,
       "sampled_process_cpu_user_seconds_max": 0.015625,
-      "sampled_process_peak_rss_bytes": 7299072,
+      "sampled_process_peak_rss_bytes": 7340032,
       "separate_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "separate_stdout_sha256": "dc018add8d4b7257ce3957de528086925974a54657e00f075a5760777f57756c",
-      "separate_wall_ns": 60465300,
+      "separate_stdout_sha256": "e176e9c04337374c1931f4772020c2930baeb0f4cdb902acecdd07c3fa032255",
+      "separate_wall_ns": 54325900,
       "separate_workload_return_code": 0,
       "separate_workload_timed_out": false,
       "wpr": {
@@ -1103,19 +996,19 @@
       "tree": "8e5539358daae0e81e245e0f2a77321783fc81e1"
     },
     "timing_ns": {
-      "max": 5818000,
-      "median": 4825000,
-      "min": 4689600,
+      "max": 5218200,
+      "median": 5017600,
+      "min": 4389000,
       "observations": [
-        4825000,
-        4689600,
-        5048800,
-        5818000,
-        5295800,
-        4762400,
-        4738800
+        5218200,
+        5112000,
+        5163900,
+        5017600,
+        4570500,
+        4477000,
+        4389000
       ],
-      "range": 1128400
+      "range": 829200
     }
   },
   "report_id": "syn03-strategy-a-ts02-20261014-272fb9a5",

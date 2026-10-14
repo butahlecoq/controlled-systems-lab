@@ -22,7 +22,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{371520BF-EF62-399B-BFC1-0D0D450AEDA6}</ProjectGuid>
+    <ProjectGuid>{80DA046B-8B89-3A8E-B227-841E13DBBA75}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
@@ -345,109 +345,109 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="BUILD_ROOT\ZERO_CHECK.vcxproj">
-      <Project>{A60786F7-1B09-388B-B79F-DE62130C5CD4}</Project>
+      <Project>{023BED67-0655-3DD8-9E5E-09C13E52A869}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_affine_sum.vcxproj">
-      <Project>{E7B45C8C-2AFC-3320-AC9E-CD439585A72A}</Project>
+      <Project>{55E5F8E6-030F-3DC2-9E73-235C388AAA23}</Project>
       <Name>csl_affine_sum</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_contracts.vcxproj">
-      <Project>{4677D64A-7AD4-3865-811F-56621B86C44E}</Project>
+      <Project>{7D1E618C-954B-3380-B8B2-2C79AB038B51}</Project>
       <Name>csl_contracts</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_control_recovery.vcxproj">
-      <Project>{AA183399-7FC9-3817-8C7C-E39988978A70}</Project>
+      <Project>{44F4B01B-74E8-3001-AD44-D4A40277F907}</Project>
       <Name>csl_control_recovery</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_convex.vcxproj">
-      <Project>{E8B1DE35-3256-34EE-A193-162748D60515}</Project>
+      <Project>{751ABEE9-02AE-3DE3-A077-9CDE3A922F6E}</Project>
       <Name>csl_convex</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_highs_convex.vcxproj">
-      <Project>{50EAF349-8C5B-3F87-BED2-D3BEBF52FE60}</Project>
+      <Project>{1DC0BB85-AE09-3420-8BE9-9CEFDFCA4C88}</Project>
       <Name>csl_highs_convex</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_highs_lp.vcxproj">
-      <Project>{3D4DB4D5-187A-31AA-9F98-3DA671F2CF16}</Project>
+      <Project>{42E3CB40-480A-3FB2-87B8-5ADD716FEF64}</Project>
       <Name>csl_highs_lp</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_hull.vcxproj">
-      <Project>{534E31EF-44D7-3DD6-8463-D7363DC3CC03}</Project>
+      <Project>{B0A5448E-4F48-3BD6-8C71-3513AC439468}</Project>
       <Name>csl_hull</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_model.vcxproj">
-      <Project>{44E4CE11-9305-39BB-BD65-C9593BB95E4E}</Project>
+      <Project>{832051EE-E8AD-3237-8F64-1223DE43C91A}</Project>
       <Name>csl_model</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_nominal_forward.vcxproj">
-      <Project>{13FC824B-2814-3A18-86BD-F18CD790B9E8}</Project>
+      <Project>{FE340D81-03A7-313B-B79E-DF1F1849C5BB}</Project>
       <Name>csl_nominal_forward</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_numeric.vcxproj">
-      <Project>{E84266F0-A178-333E-8EDF-66357A630FEE}</Project>
+      <Project>{BE5A0E5B-22C3-3E9F-9724-2E0C6918B780}</Project>
       <Name>csl_numeric</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_objectives.vcxproj">
-      <Project>{5B53C53A-A599-35E2-9F0D-2CD735C7D854}</Project>
+      <Project>{E0CD38BB-B03C-3B95-9134-3E25721056A4}</Project>
       <Name>csl_objectives</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_optimization.vcxproj">
-      <Project>{1F4FEC79-43DE-3767-8E07-41A7761491EA}</Project>
+      <Project>{AEBE11FA-C41E-3A96-BA1A-D4D39906BE9B}</Project>
       <Name>csl_optimization</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_phase_one.vcxproj">
-      <Project>{98AA8B6A-4DB3-32BF-9136-062DD072E16C}</Project>
+      <Project>{C8FEB32F-37A6-30B0-B36A-AABD77C00D40}</Project>
       <Name>csl_phase_one</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_polyhedral.vcxproj">
-      <Project>{71BE1573-C70C-3280-8135-D56BDB7EADF4}</Project>
+      <Project>{BD6A6723-2ED6-3264-980F-2AD349077B47}</Project>
       <Name>csl_polyhedral</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_problem.vcxproj">
-      <Project>{CB808102-2D16-3BD3-8B9F-9DE988955BC0}</Project>
+      <Project>{AF4224D9-B1B0-330D-B567-DA47B1C75CA6}</Project>
       <Name>csl_problem</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_qhull_conversion.vcxproj">
-      <Project>{D2C31D7A-D29B-35A5-A112-785CD4D23C0D}</Project>
+      <Project>{A9CE66D0-3E1B-3481-9CD5-F94538D81AC3}</Project>
       <Name>csl_qhull_conversion</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_qhull_r.vcxproj">
-      <Project>{F4039BC1-92C7-3319-98ED-9F9A1F424832}</Project>
+      <Project>{3EE5AD5C-51FB-302B-90D8-413C0A13BE31}</Project>
       <Name>csl_qhull_r</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_registry.vcxproj">
-      <Project>{982206B4-6B31-318D-B3AA-B6E23BDBE96C}</Project>
+      <Project>{5517BDBA-C1B2-38C0-A00B-8671B59F57B2}</Project>
       <Name>csl_registry</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_resolved_core.vcxproj">
-      <Project>{8CFD1F99-D69A-39B0-B452-BA78E888939A}</Project>
+      <Project>{B5FBFAB5-4850-3C8E-9E69-36773A5E16D1}</Project>
       <Name>csl_resolved_core</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_resolved_problem.vcxproj">
-      <Project>{283E6772-10CC-37CF-A810-2146F5919FD3}</Project>
+      <Project>{B80A012E-3D9A-35F6-9A42-E4387C4E81DA}</Project>
       <Name>csl_resolved_problem</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_sets.vcxproj">
-      <Project>{84EE303B-A841-3BB5-88B3-BDE2F716B537}</Project>
+      <Project>{05D03C07-4157-37A1-8D6F-2881A7BD68E5}</Project>
       <Name>csl_sets</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_strategy_a.vcxproj">
-      <Project>{BEFD3CC7-C8E2-33BA-BC02-D861B8C33656}</Project>
+      <Project>{F4E8F796-06DD-3C10-A3D9-9556A5D0FD6E}</Project>
       <Name>csl_strategy_a</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_terminal_minimizers.vcxproj">
-      <Project>{FD6131AD-E853-30F3-8C2C-C2AB7F45A390}</Project>
+      <Project>{04952A4E-4FE5-3632-8501-EF62D9F71E8B}</Project>
       <Name>csl_terminal_minimizers</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\csl-source\csl_verifiers.vcxproj">
-      <Project>{B35565DE-2C71-3CE8-845A-5ED3B5238DA1}</Project>
+      <Project>{8A1649DF-8426-3FAB-AB10-008EAB55CA9A}</Project>
       <Name>csl_verifiers</Name>
     </ProjectReference>
     <ProjectReference Include="BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj">
-      <Project>{C5B9F25C-54C7-3E3B-8FC5-18D1D14FFE98}</Project>
+      <Project>{9FE7105B-AD2F-3611-9C0D-767C7BCA55C0}</Project>
       <Name>highs</Name>
     </ProjectReference>
   </ItemGroup>

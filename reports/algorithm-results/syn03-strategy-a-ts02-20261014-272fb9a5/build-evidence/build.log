@@ -3,45 +3,45 @@
   1>Checking Build System
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Building Custom Rule DEPENDENCY_ROOT/csl_highs-src/highs/CMakeLists.txt
-  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Проверка источников на наличие зависимостей модуля…
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   contracts.cpp
-  global_r.c
-  stat_r.c
-  geom2_r.c
   reader.cpp
-  poly2_r.c
   highs_c_api.cpp
-  Компиляция…
   Filereader.cpp
   FilereaderEms.cpp
   FilereaderLp.cpp
   FilereaderMps.cpp
+  global_r.c
   HighsIO.cpp
   HMpsFF.cpp
   HMPSIO.cpp
   LoadOptions.cpp
   IpxWrapper.cpp
   Highs.cpp
+  stat_r.c
+  geom2_r.c
+  poly2_r.c
+  Компиляция…
   merge_r.c
   libqhull_r.c
   geom_r.c
+  contracts.cpp
   poly_r.c
   qset_r.c
-  contracts.cpp
   mem_r.c
   random_r.c
   usermem_r.c
   userprintf_r.c
+  HighsCallback.cpp
+  HighsDebug.cpp
   io_r.c
   user_r.c
-  rboxlib_r.c
-  HighsCallback.cpp
-  userprintf_rbox_r.c
-  HighsDebug.cpp
   HighsIis.cpp
-  Создание кода...
+  rboxlib_r.c
   HighsInfo.cpp
+  userprintf_rbox_r.c
+  Создание кода...
   HighsInfoDebug.cpp
   HighsDeprecated.cpp
   HighsInterface.cpp
@@ -59,35 +59,32 @@
   HighsCutGeneration.cpp
   HighsCutPool.cpp
   HighsDebugSol.cpp
-  csl_qhull_r.vcxproj -> BUILD_ROOT\csl-source\Release\csl_qhull_r.lib
   HighsDomain.cpp
   HighsDynamicRowMatrix.cpp
   HighsFeasibilityJump.cpp
   HighsGFkSolve.cpp
+  csl_qhull_r.vcxproj -> BUILD_ROOT\csl-source\Release\csl_qhull_r.lib
   HighsImplications.cpp
   HighsLpAggregator.cpp
   HighsLpRelaxation.cpp
   HighsMipAnalysis.cpp
-  csl_contracts.vcxproj -> BUILD_ROOT\csl-source\Release\csl_contracts.lib
   HighsMipSolver.cpp
   HighsMipSolverData.cpp
   HighsModkSeparator.cpp
   HighsNodeQueue.cpp
   HighsObjectiveFunction.cpp
   HighsPathSeparator.cpp
-  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   HighsPrimalHeuristics.cpp
   HighsPseudocost.cpp
   HighsRedcostFixing.cpp
+  csl_contracts.vcxproj -> BUILD_ROOT\csl-source\Release\csl_contracts.lib
   HighsSearch.cpp
-  Проверка источников на наличие зависимостей модуля…
   HighsSeparation.cpp
   HighsSeparator.cpp
-  data.cpp
   HighsTableauSeparator.cpp
-  Компиляция…
   HighsTransformedLp.cpp
   HighsHessian.cpp
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   HighsHessianUtils.cpp
   HighsModel.cpp
   HighsTaskExecutor.cpp
@@ -95,15 +92,18 @@
   HighsPostsolveStack.cpp
   HighsSymmetry.cpp
   HPresolve.cpp
-  data.cpp
+  Проверка источников на наличие зависимостей модуля…
   HPresolveAnalysis.cpp
   ICrash.cpp
   ICrashUtil.cpp
   ICrashX.cpp
+  data.cpp
   PresolveComponent.cpp
   a_asm.cpp
+  Компиляция…
   a_quass.cpp
   perturbation.cpp
+  data.cpp
   quass.cpp
   ratiotest.cpp
   scaling.cpp
@@ -131,19 +131,16 @@
   HFactorExtend.cpp
   HFactorRefactor.cpp
   HFactorUtils.cpp
-  csl_numeric.vcxproj -> BUILD_ROOT\csl-source\Release\csl_numeric.lib
   HighsHash.cpp
   HighsLinearSumBounds.cpp
   HighsMatrixPic.cpp
   HighsMatrixUtils.cpp
-  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
-  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   HighsSort.cpp
   HighsSparseMatrix.cpp
   HighsUtils.cpp
   HSet.cpp
-  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   HVectorBase.cpp
+  csl_numeric.vcxproj -> BUILD_ROOT\csl-source\Release\csl_numeric.lib
   stringutil.cpp
   basiclu_kernel.cc
   basiclu_wrapper.cc
@@ -153,48 +150,50 @@
   diagonal_precond.cc
   forrest_tomlin.cc
   guess_basis.cc
-  Проверка источников на наличие зависимостей модуля…
   indexed_vector.cc
-  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   info.cc
   ipm.cc
   ipx_c.cc
-  linear_system.cpp
-  Проверка источников на наличие зависимостей модуля…
   iterate.cc
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   kkt_solver_basis.cc
   kkt_solver_diag.cc
   kkt_solver.cc
   linear_operator.cc
-  Компиляция…
   lp_solver.cc
   lu_factorization.cc
-  linear_program.cpp
-  lp_backend.cpp
   maxvolume.cc
   model.cc
   normal_matrix.cc
-  linear_system.cpp
   sparse_matrix.cc
   sparse_utils.cc
   splitted_normal_matrix.cc
-  Проверка источников на наличие зависимостей модуля…
   starting_basis.cc
-  Проверка источников на наличие зависимостей модуля…
-  Компиляция…
   symbolic_invert.cc
   timer.cc
   utils.cc
-  lp_backend.cpp
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  linear_system.cpp
   data.cpp
+  lp_backend.cpp
   linear_program.cpp
   objective_reformulation.cpp
   Компиляция…
   Компиляция…
+  Компиляция…
   data.cpp
-  objective_reformulation.cpp
+  linear_system.cpp
+  lp_backend.cpp
+  linear_program.cpp
+  Компиляция…
   basis.cpp
-  csl_model.vcxproj -> BUILD_ROOT\csl-source\Release\csl_model.lib
+  objective_reformulation.cpp
   cupdlp_cs.c
   cupdlp_linalg.c
   cupdlp_proj.c
@@ -208,8 +207,8 @@
   basiclu_initialize.c
   basiclu_object.c
   basiclu_solve_dense.c
-  basiclu_solve_for_update.c
   basiclu_solve_sparse.c
+  basiclu_solve_for_update.c
   basiclu_update.c
   lu_build_factors.c
   lu_condest.c
@@ -230,36 +229,37 @@
   lu_solve_sparse.c
   lu_solve_symbolic.c
   lu_solve_triangular.c
-  csl_optimization.vcxproj -> BUILD_ROOT\csl-source\Release\csl_optimization.lib
   basis.cc
+  csl_optimization.vcxproj -> BUILD_ROOT\csl-source\Release\csl_optimization.lib
+  csl_sets.vcxproj -> BUILD_ROOT\csl-source\Release\csl_sets.lib
+  csl_model.vcxproj -> BUILD_ROOT\csl-source\Release\csl_model.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  initial_information.cpp
+  domains.cpp
+  constraints.cpp
+  Компиляция…
+  constraints.cpp
+  domains.cpp
+  initial_information.cpp
   lu_update.cc
   lu_update.c
   highs.vcxproj -> BUILD_ROOT\Release\bin\highs.lib
-  csl_sets.vcxproj -> BUILD_ROOT\csl-source\Release\csl_sets.lib
+  csl_problem.vcxproj -> BUILD_ROOT\csl-source\Release\csl_problem.lib
   csl_objectives.vcxproj -> BUILD_ROOT\csl-source\Release\csl_objectives.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
-  Проверка источников на наличие зависимостей модуля…
-  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
-  constraints.cpp
-  domains.cpp
-  initial_information.cpp
-  Проверка источников на наличие зависимостей модуля…
-  convex_backend.cpp
-  Компиляция…
-  initial_information.cpp
-  domains.cpp
-  constraints.cpp
-  Компиляция…
-  convex_backend.cpp
-  csl_problem.vcxproj -> BUILD_ROOT\csl-source\Release\csl_problem.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  identity.cpp
+  resolved.cpp
+  convex_backend.cpp
+  Компиляция…
   resolved.cpp
   identity.cpp
+  Компиляция…
+  convex_backend.cpp
   csl_convex.vcxproj -> BUILD_ROOT\csl-source\Release\csl_convex.lib
-  Компиляция…
-  resolved.cpp
-  identity.cpp
   csl_resolved_core.vcxproj -> BUILD_ROOT\csl-source\Release\csl_resolved_core.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Проверка источников на наличие зависимостей модуля…
@@ -277,81 +277,81 @@
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  program.cpp
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
-  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
-  Проверка источников на наличие зависимостей модуля…
-  Проверка источников на наличие зависимостей модуля…
-  Проверка источников на наличие зависимостей модуля…
-  Проверка источников на наличие зависимостей модуля…
+  simplex.cpp
+  validator.cpp
+  terminal_minimizers.cpp
   Проверка источников на наличие зависимостей модуля…
   highs.cpp
-  validator.cpp
-  intersection.cpp
-  nominal_predecessor.cpp
-  halfspace_reducer.cpp
-  projection.cpp
-  program.cpp
-  simplex.cpp
-  terminal_minimizers.cpp
-  Компиляция…
   Компиляция…
   Компиляция…
   validator.cpp
-  Компиляция…
-  highs.cpp
-  nominal_predecessor.cpp
-  halfspace_reducer.cpp
-  projection.cpp
-  intersection.cpp
   terminal_minimizers.cpp
   Компиляция…
-  simplex.cpp
+  Компиляция…
   program.cpp
+  simplex.cpp
+  highs.cpp
+  Проверка источников на наличие зависимостей модуля…
+  intersection.cpp
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  halfspace_reducer.cpp
+  projection.cpp
+  nominal_predecessor.cpp
   Проверка источников на наличие зависимостей модуля…
   highs.cpp
+  Компиляция…
+  projection.cpp
+  halfspace_reducer.cpp
+  nominal_predecessor.cpp
+  intersection.cpp
   Компиляция…
   highs.cpp
   csl_resolved_problem.vcxproj -> BUILD_ROOT\csl-source\Release\csl_resolved_problem.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Проверка источников на наличие зависимостей модуля…
   control_recovery.cpp
+  csl_terminal_minimizers.vcxproj -> BUILD_ROOT\csl-source\Release\csl_terminal_minimizers.lib
   Компиляция…
   control_recovery.cpp
+  csl_highs_convex.vcxproj -> BUILD_ROOT\csl-source\Release\csl_highs_convex.lib
   csl_highs_lp.vcxproj -> BUILD_ROOT\csl-source\Release\csl_highs_lp.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Проверка источников на наличие зависимостей модуля…
-  qhull.cpp
   affine_coordinates.cpp
-  csl_terminal_minimizers.vcxproj -> BUILD_ROOT\csl-source\Release\csl_terminal_minimizers.lib
+  qhull.cpp
   Компиляция…
-  qhull.cpp
   affine_coordinates.cpp
+  qhull.cpp
   csl_polyhedral.vcxproj -> BUILD_ROOT\csl-source\Release\csl_polyhedral.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Проверка источников на наличие зависимостей модуля…
   nominal_forward.cpp
-  csl_highs_convex.vcxproj -> BUILD_ROOT\csl-source\Release\csl_highs_convex.lib
   Компиляция…
   nominal_forward.cpp
   csl_control_recovery.vcxproj -> BUILD_ROOT\csl-source\Release\csl_control_recovery.lib
   csl_phase_one.vcxproj -> BUILD_ROOT\csl-source\Release\csl_phase_one.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
   Проверка источников на наличие зависимостей модуля…
-  hull_reducer.cpp
   basis_reuse_reducer.cpp
+  hull_reducer.cpp
   Компиляция…
   basis_reuse_reducer.cpp
   hull_reducer.cpp
+  csl_nominal_forward.vcxproj -> BUILD_ROOT\csl-source\Release\csl_nominal_forward.lib
   csl_hull.vcxproj -> BUILD_ROOT\csl-source\Release\csl_hull.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
-  Проверка источников на наличие зависимостей модуля…
-  affine_sum.cpp
-  csl_nominal_forward.vcxproj -> BUILD_ROOT\csl-source\Release\csl_nominal_forward.lib
   Building Custom Rule SOURCE_ROOT/CMakeLists.txt
-  Компиляция…
+  Проверка источников на наличие зависимостей модуля…
   Проверка источников на наличие зависимостей модуля…
   affine_sum.cpp
   strategy.cpp
+  Компиляция…
+  affine_sum.cpp
   Компиляция…
   strategy.cpp
   csl_affine_sum.vcxproj -> BUILD_ROOT\csl-source\Release\csl_affine_sum.lib
