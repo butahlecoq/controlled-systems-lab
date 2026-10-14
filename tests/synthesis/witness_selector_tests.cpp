@@ -5,6 +5,7 @@
 #include <csl/problem/validator.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <limits>
+#include <thread>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/geometry/affine_sum.hpp>
@@ -115,7 +116,9 @@ TEST_CASE("reject malformed direction before provider creation and honor cancell
     auto cancelled=take(workspace->select(query.family,query.selection,context));
     CHECK(cancelled.termination==Termination::cancelled); CHECK(cancelled.batch.witnesses.empty()); CHECK(*creations==0);
     context=make_execution_context(); context.deadline=std::chrono::steady_clock::now();
-    CHECK(take(workspace->select(query.family,query.selection,context)).termination==Termination::resource_limit);
+    auto expired=take(workspace->select(query.family,query.selection,context));
+    CHECK(expired.termination==Termination::cancelled);
+    CHECK(expired.diagnostics.find("deadline")!=std::string::npos);
     CHECK(*creations==0);
     auto valid=take(workspace->select(query.family,query.selection,make_execution_context()));
     REQUIRE(valid.batch.witnesses.size()==2); CHECK(*creations==2);
@@ -249,4 +252,36 @@ TEST_CASE("mid-query cancellation retains earlier histories and forwards the imm
     CHECK(selected.termination==Termination::cancelled);REQUIRE(selected.batch.returned_count()==1);
     CHECK(selected.batch.witnesses[0].states==std::vector<Vector>{{0},{0},{1}});
     CHECK(selected.batch.source_family==query.family.identity());CHECK(query.family.target()==FamilyTarget::exact_optimal_relation);
+}
+
+namespace {
+class DeadlineOrCapacity final : public LPWorkspace {
+    std::unique_ptr<LPWorkspace> inner_;bool deadline_;std::shared_ptr<int> calls_;
+protected:
+    ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext& c) override {
+        if(++*calls_==2)return ProgramResult{Termination::resource_limit,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},"provider capacity exhausted",{}};
+        auto result=inner_->solve(p,c);
+        if(deadline_)std::this_thread::sleep_until(*c.deadline);
+        return result;
+    }
+public:
+    DeadlineOrCapacity(std::unique_ptr<LPWorkspace> inner,bool deadline,std::shared_ptr<int> calls):inner_(std::move(inner)),deadline_(deadline),calls_(std::move(calls)){}
+};
+}
+TEST_CASE("deadline and provider capacity remain distinct and retain earlier observations") {
+    auto synthesis=run(request(resolve(source())));REQUIRE(synthesis.family);
+    for(bool deadline:{true,false}) {
+        auto backend=take(adapters::lp::make_highs_registration());auto factory=backend.factory;auto calls=std::make_shared<int>(0);
+        backend.factory=[factory,deadline,calls](const LinearProgram& p){return std::make_unique<DeadlineOrCapacity>(factory(p),deadline,calls);};
+        Registry<LPPort> lp;REQUIRE_FALSE(lp.add(std::move(backend)));Requirements req;req.output.representation={"csl.program-result.v1"};
+        auto provider=take(prepare_provider(select_provider(lp,Method{{"csl.lp.highs"},{}},req)));
+        auto registration=synthesis::witness_selector::make_registration(provider);SelectorRequest query{*synthesis.family,{2,0,{{1,-1},{-1,1}},0}};
+        auto workspace=registration.factory(query);auto context=make_execution_context();
+        if(deadline)context.deadline=std::chrono::steady_clock::now()+std::chrono::seconds(1);
+        auto selected=take(workspace->select(query.family,query.selection,context));
+        CHECK(selected.termination==(deadline?Termination::cancelled:Termination::resource_limit));
+        CHECK(selected.diagnostics.find(deadline?"deadline":"capacity")!=std::string::npos);
+        REQUIRE(selected.batch.returned_count()==1);CHECK(selected.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
+        CHECK(selected.batch.source_family==query.family.identity());
+    }
 }

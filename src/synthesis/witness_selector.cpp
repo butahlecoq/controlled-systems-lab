@@ -41,9 +41,9 @@ std::variant<LinearProgram,Diagnostics> program(const OptimalFamily& family,cons
     return optimization::make_linear_program({{family.identity().problem,{"ts01-selector-direction/"+std::to_string(index)+"/"+std::to_string(std::bit_cast<std::uint64_t>(direction[0]))+"/"+std::to_string(std::bit_cast<std::uint64_t>(direction[1]))}},
         {0,0,0,direction[0],direction[1]},0,std::move(matrix),std::vector<Interval>(5),std::move(rows)});
 }
-std::optional<Termination> stopped(const ExecutionContext& context) {
-    if(context.cancellation.stop_requested())return Termination::cancelled;
-    if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)return Termination::resource_limit;
+std::optional<OperationStopped> stopped(const ExecutionContext& context) {
+    if(context.cancellation.stop_requested())return OperationStopped{StopReason::cancelled,"Query cancelled; earlier observations retained."};
+    if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)return OperationStopped{StopReason::deadline_expired,"Query deadline expired; earlier observations retained."};
     return {};
 }
 class Workspace final : public WitnessSelectorWorkspace {
@@ -60,12 +60,12 @@ public:
             return Unsupported{reject("selector.numerical","Finite nonnegative numerical tolerances are required.")};
         WitnessSelection selected{{{},request.count,{selector_id},request.seed,family.identity(),request.directions,
             request.distinctness_tolerance},Termination::completed,{}};
-        if(const auto stop=stopped(context)) {selected.termination=*stop;selected.diagnostics="Query stopped before LP admission.";return selected;}
+        if(const auto stop=stopped(context)) {selected.termination=Termination::cancelled;selected.diagnostics=stop->diagnostics;return selected;}
         try {
             // Admit every generated direction before the first native solve.
             std::vector<LinearProgram> programs;
             for(std::size_t i=0;i<request.directions.size()&&request.count!=0;++i) {
-                if(const auto stop=stopped(context)) {selected.termination=*stop;selected.diagnostics="Query stopped during admission.";return selected;}
+                if(const auto stop=stopped(context)) {selected.termination=Termination::cancelled;selected.diagnostics=stop->diagnostics;return selected;}
                 auto generated=program(family,request.directions[i],i);
                 if(auto* errors=std::get_if<Diagnostics>(&generated))return Unsupported{std::move(*errors)};
                 auto lp=std::get<LinearProgram>(std::move(generated));
@@ -77,7 +77,7 @@ public:
             const auto* payload=dynamic_cast<const strategy_ts01::ExactJointRelation*>(std::get<CompleteOptimalFamily>(family.outcome()).relation.payload.get());
             for(const auto& lp:programs) {
                 if(selected.batch.distinct_count()>=request.count)break;
-                if(const auto stop=stopped(context)) {selected.termination=*stop;selected.diagnostics="Query stopped; earlier observations retained.";return selected;}
+                if(const auto stop=stopped(context)) {selected.termination=Termination::cancelled;selected.diagnostics=stop->diagnostics;return selected;}
                 auto outcome=runner.solve(lp,context);
                 if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
                     selected.termination=Termination::operation_rejected;
@@ -87,7 +87,14 @@ public:
                 }
                 const auto& result=std::get<ProgramResult>(outcome);
                 if(result.termination!=Termination::completed) {
-                    selected.termination=result.termination;selected.diagnostics=result.raw_diagnostics;return selected;
+                    selected.termination=result.termination;selected.diagnostics=result.raw_diagnostics;
+                    if(!runner.records().empty())
+                        if(const auto* not_run=std::get_if<registry::LPQueryNotRun>(&runner.records().back());
+                           not_run&&not_run->request==lp.identity()&&not_run->reason==registry::LPQueryNotRunReason::deadline) {
+                            selected.termination=Termination::cancelled;
+                            selected.diagnostics="Query deadline expired before provider execution; earlier observations retained.";
+                        }
+                    return selected;
                 }
                 if(result.outcome.subject!=lp.identity()||result.outcome.value!=MathematicalOutcome::optimal||
                    !result.primal||result.primal->size()!=5||!payload->contains(*result.primal)) {
