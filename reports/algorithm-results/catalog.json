@@ -190,16 +190,17 @@
       "zip_sha256": "b2d38a913d3addbee9ad1493f611bfb41abda921be7356dbb2a8b0c9859e6878"
     },
     {
-        "report_id": "syn03-strategy-a-ts02-d86cbd113c83a52d204db38af9edf90fcb5c1f5ba240898e1c6170a898c8e3c0",
+        "report_id": "syn03-strategy-a-ts02-05578ccde97ff8d44e504ca7c4ac56a44295bb2b4aa39ddc35dd296b06086f87",
         "report_kind": "syn03-strategy-a-ts02",
         "source_report_id": "syn03-strategy-a-ts02-20261014-272fb9a5",
         "payload_schema": "csl.syn03-strategy-a-ts02-report/1",
-        "payload_sha256": "20d3d76b76513320761cb5297ccd57492d0b7db4afb4f5078aa7acce8e8e34fc",
-        "native_payload_sha256": "20d3d76b76513320761cb5297ccd57492d0b7db4afb4f5078aa7acce8e8e34fc",
+        "payload_sha256": "9c0fd68114bad198a88d99921b86880929c2a9a2a60e57cd0b3084dcaf6b64fa",
+        "native_payload_sha256": "9c0fd68114bad198a88d99921b86880929c2a9a2a60e57cd0b3084dcaf6b64fa",
         "source_commit": "272fb9a51c40dedeb20dfcb1ea11dfc6b694edd7",
         "measured_scope": "Exact T-S02 profile; one registered Strategy A; seven validated measured trials; performance conclusion inconclusive",
-        "evidence_limits": "Completeness applies only to the exact admitted Strategy A T-S02 constant-integrator profile and csl.verifier.ts02-constant-integrator v1.; Assurance::numerical is reported; validated arithmetic is unavailable.; Seven observations of one tiny profile are exploratory evidence only; no comparator, speedup, general performance, application-scale, throughput or scalability claim.; This report does not cover T-S01, T-S03, singular A, other dynamics or objectives, or generic complete-family support; SYN-03 #66 remains open.; The Strategy A profile performs forward reachability, terminal optimization and joint-history recovery before exact T-S02 relation verification. Native LP/geometry provider activity may occur in that path; submodule call counts and timings are unavailable.; The separate diagnostic workload is excluded from the seven observations; no source-mapped unprofiled latency limiter is established.; Internal preparation, native LP/QP, relation construction, compiled verifier and export timings/counters are unavailable.",
-        "zip_sha256": "c01da15949cbf467fd1e55e43b9b46fc10beeba84292afbbb6e3b0513d04b8da"
+        "evidence_limits": "Completeness applies only to the exact admitted Strategy A T-S02 constant-integrator profile and csl.verifier.ts02-constant-integrator v1.; Assurance::numerical is reported; validated arithmetic is unavailable.; Seven observations of one tiny profile are exploratory evidence only; no comparator, speedup, general performance, application-scale, throughput or scalability claim.; This report does not cover T-S01, T-S03, singular A, other dynamics or objectives, or generic complete-family support; SYN-03 #66 remains open.; Strategy A performs forward reachability and terminal optimization, invoking the registered HiGHS LP provider for terminal anchoring, then recovers the full history relation and verifies the exact T-S02 profile. Internal solver counters and subphase timings are unavailable.; The separate diagnostic workload is excluded from the seven observations; no source-mapped unprofiled latency limiter is established.; Internal preparation, native LP, relation construction, compiled verifier and export timings/counters are unavailable.",
+        "zip_sha256": "71d433c5c709bfd04ae3984076112b549095dc9856aab228db4f28336196c7c7"
     }
+
   ]
 }

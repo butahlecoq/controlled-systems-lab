@@ -12,7 +12,6 @@ class StrategyATs02ReportTests(unittest.TestCase):
         record=json.loads((ROOT/"reports/algorithm-results"/report.REPORT_ID/"records.json").read_text(encoding="utf-8"))
         self.assertEqual(report.validate(record),[])
         self.assertEqual(record["canonical_relation"]["objective_minimum"],3)
-        self.assertEqual(record["canonical_relation"]["objective_minimum"],3)
         self.assertEqual({(event["objective_lower"],event["objective_upper"]) for event in record["measurement"]["events"]},{(3,3)})
         for event in record["measurement"]["events"]:
             self.assertTrue(event["four_box_corners_checked"])
@@ -24,7 +23,8 @@ class StrategyATs02ReportTests(unittest.TestCase):
         record=json.loads((ROOT/"reports/algorithm-results"/report.REPORT_ID/"records.json").read_text(encoding="utf-8"))
         page=report.render_html(record)
         self.assertIn("Strategy A",page)
-        self.assertIn("analytical relation recovery",page.lower())
+        self.assertIn("registered highs lp provider",page.lower())
+        self.assertIn("history relation analytically",page.lower())
         self.assertIn("speedup claim",page.lower())
 
     def test_event_identity_and_schema_three_offline_publication(self):

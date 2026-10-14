@@ -145,7 +145,7 @@
     "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
     "logical_cpu_count": 12,
     "memory_total_bytes": 34189107200,
-    "native_provider_thread_configuration": "No native solver call is part of this exact Strategy A T-S02 profile; requested resource policy is one thread, and actual OS thread count per trial is unavailable",
+    "native_provider_thread_configuration": "The public profile invokes the registered HiGHS LP provider during terminal optimization. ResourcePolicy requests one thread; actual native provider thread count is unavailable",
     "os": "Windows-11-10.0.22631-SP0",
     "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
     "python": "3.13.5",
@@ -579,7 +579,7 @@
   "harness_commit": "2474dc69758ff2f990630300ce54eca0afc827d5",
   "limiter": {
     "available": false,
-    "reason": "The separate diagnostic workload and process counters do not establish a source-mapped limiter on the unprofiled tiny analytic T-S02 path. Performance remains inconclusive; no latency limiter is claimed."
+    "reason": "The separate diagnostic workload and process counters do not establish a source-mapped limiter on the unprofiled tiny T-S02 public path. Performance remains inconclusive; no latency limiter is claimed."
   },
   "order": "One excluded warmup followed by seven measured repetitions in one process; one strategy only, so side alternation is inapplicable.",
   "performance_conclusion": "inconclusive",
@@ -591,7 +591,7 @@
     "unavailable": [
       "provider selection and preparation subphase durations",
       "forward reachability, terminal optimization and history recovery subphase durations",
-      "native LP/QP call counts and timings",
+      "HiGHS internal iteration/numerical counters and native LP phase timing",
       "compiled verifier duration",
       "relation serialization/export"
     ]
@@ -783,7 +783,7 @@
     "registry_verified": true,
     "termination": "completed"
   },
-  "scope": "Fresh problem construction and resolution, registered Strategy A and production geometry/conversion/HiGHS provider creation/selection, StrategyRegistry preparation, exclusive public StrategyPort workspace creation and run, compiled T-S02 verifier acceptance, objective bounds [3,3], literal canonical full joint-history H-relation and membership checks including all four control-box corners and two distinct histories with equal terminal state. Includes local owner destruction before one_run returns. Excludes process startup, JSON serialization, build, file persistence and rendering.",
+  "scope": "Fresh problem construction and resolution, registered Strategy A and production geometry/conversion/HiGHS provider creation/selection, StrategyRegistry preparation, exclusive public StrategyPort workspace creation and run including the registered HiGHS LP terminal-optimization call, compiled T-S02 verifier acceptance, objective bounds [3,3], literal canonical full joint-history H-relation and membership checks including all four control-box corners and two distinct histories with equal terminal state. Includes local owner destruction before one_run returns. Excludes process startup, JSON serialization, build, file persistence and rendering.",
   "source": {
     "clean_after_build": true,
     "clean_after_run": true,
