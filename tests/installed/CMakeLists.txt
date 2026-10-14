@@ -216,3 +216,8 @@ if(NOT ts01_relation_factory_forge_output MATCHES "(error C[0-9]+|error:|fatal e
   message(FATAL_ERROR "Installed T-S01 API relation-factory probe failed for an unrelated reason:\n${ts01_relation_factory_forge_output}")
 endif()
 message(STATUS "Installed downstream relation factory definition was rejected by the compiler")
+
+add_executable(installed_witness_selector_client witness_selector_client.cpp)
+target_link_libraries(installed_witness_selector_client PRIVATE CSL::witness_selector CSL::highs_lp)
+set_target_properties(installed_witness_selector_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_witness_selector_client COMMAND installed_witness_selector_client)

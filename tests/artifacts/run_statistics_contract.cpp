@@ -160,7 +160,7 @@ TEST_CASE("portable run codec owns actual problem binding and disabled skipped o
     ar::RunRecord record{z.identity(),{0,0,0},0,config,{"disabled-run"},ar::SkippedFinal{ar::SkippedReason::cancelled},statistics,
         {missing,missing,missing,missing,true,ar::MemoryAccounting::unlimited},{},{},ar::ProblemProvenance::problem_revalidated};
     auto owner=accepted(ar::publish_run({z,record}));
-    auto wire=accepted(ar::encode_run(owner));CHECK(wire.find("csl.run-statistics/3")!=std::string::npos);
+    auto wire=accepted(ar::encode_run(owner));CHECK(wire.find("csl.run-statistics/4")!=std::string::npos);
     const auto restored=accepted(ar::decode_run(wire));wire.assign("destroyed producer buffer");
     CHECK(restored.description().problem.value=="csl.problem.v1.sha256:2320a9f596bfa8f5bdd8aa6d272ca96fe5ff229411b65e1ab3e6f469a27f815e");
     CHECK(restored.description().provenance==ar::ProblemProvenance::identity_recorded);
@@ -251,7 +251,7 @@ TEST_CASE("historical v2 candidate remains unestablished under scoped feasibilit
     CHECK_FALSE(final.objective.upper.has_value());
     const auto& family=final.family->family;
     CHECK(std::holds_alternative<Unestablished>(std::get<CandidateFamily>(family.outcome()).feasibility));
-    CHECK(accepted(ar::encode_run(restored)).find("csl.run-statistics/3")!=std::string::npos);
+    CHECK(accepted(ar::encode_run(restored)).find("csl.run-statistics/4")!=std::string::npos);
 }
 TEST_CASE("historical v2 supported candidate is not promoted to scoped feasibility") {
     auto historical=fixture_v2_text();
@@ -941,4 +941,51 @@ TEST_CASE("review dormant zero caps do not admit hidden disabled metadata") {
     allocation_probe::max_size=0;allocation_probe::enabled=true;const auto result=ar::publish_collection(std::move(record));allocation_probe::enabled=false;
     CHECK(allocation_probe::max_size<=128);REQUIRE(std::holds_alternative<ar::ArtifactError>(result));
     CHECK(std::get<ar::ArtifactError>(result).path=="collection.disabled");
+}
+
+TEST_CASE("v4 selection preserves direction tolerance and raw distinct counts") {
+    auto record=accepted(ar::decode_run(fixture_text())).description();
+    auto config=record.configuration.description(); config.output.witnesses={2,0.25,{{1,-1},{-1,1},{1,-1}},17};
+    record.configuration=accepted(ar::resolve_configuration(config));
+    auto& batch=record.selection->batch; batch.requested=2; batch.seed=17;
+    batch.directions=config.output.witnesses.directions; batch.distinctness_tolerance=0.25;
+    auto first=batch.witnesses.front(); auto second=first;
+    second.states[1][0]+=1; second.controls[0][0]+=1;
+    batch.witnesses={first,second,first};
+    auto collection=record.statistics.description(); collection.configuration=record.configuration.identity();
+    record.statistics=accepted(ar::publish_collection(collection));
+    auto published=accepted(ar::publish_run({integrator_problem(),record}));
+    auto encoded=accepted(ar::encode_run(published));
+    CHECK(encoded.find("csl.run-statistics/4")!=std::string::npos);
+    auto decoded=accepted(ar::decode_run(encoded)); const auto& restored=decoded.description().selection->batch;
+    CHECK(restored.directions==std::vector<Vector>{{1,-1},{-1,1},{1,-1}});
+    CHECK(restored.distinctness_tolerance==0.25); CHECK(restored.returned_count()==3); CHECK(restored.distinct_count()==2);
+}
+
+TEST_CASE("historical v2 and v3 migrate nondefault recorded query facts and source identity") {
+    for(const bool v2:{true,false}) {
+        // Alter owning copies only; the archival fixture bytes remain unchanged.
+        auto legacy=nlohmann::json::parse(v2?fixture_v2_text():fixture_text());
+        const auto original=accepted(ar::decode_run(legacy.dump()));
+        auto config=original.description().configuration.description();
+        config.output.witnesses.directions={{1,-1},{-1,1}};
+        config.output.witnesses.distinctness_tolerance=0.125;
+        const auto resolved=accepted(ar::resolve_configuration(config));
+        legacy["configuration"]["id"]=resolved.identity().value;
+        legacy["configuration"]["value"]["output"]["directions"]=nlohmann::json::array({nlohmann::json::array({"3ff0000000000000","bff0000000000000"}),nlohmann::json::array({"bff0000000000000","3ff0000000000000"})});
+        legacy["configuration"]["value"]["output"]["distinctness_bits"]="3fc0000000000000";
+        legacy["statistics"]["configuration"]=resolved.identity().value;
+        legacy["selection"]["batch"]["source_family"]=legacy["final"]["value"]["family"]["family"]["identity"];
+        const auto expected_source=std::get<ar::SynthesisFinal>(original.description().final).family->family.identity();
+        const auto migrated=accepted(ar::decode_run(legacy.dump()));
+        const auto& batch=migrated.description().selection->batch;
+        CHECK(batch.directions==std::vector<Vector>{{1,-1},{-1,1}});
+        CHECK(batch.distinctness_tolerance==0.125);CHECK(batch.source_family==expected_source);
+        CHECK(batch.returned_count()==1);CHECK(batch.distinct_count()==1);
+        const auto encoded=accepted(ar::encode_run(migrated));
+        CHECK(encoded.find("csl.run-statistics/4")!=std::string::npos);
+        const auto restored=accepted(ar::decode_run(encoded));const auto& restored_batch=restored.description().selection->batch;
+        CHECK(restored_batch.directions==batch.directions);CHECK(restored_batch.distinctness_tolerance==0.125);
+        CHECK(restored_batch.source_family==expected_source);CHECK(restored_batch.returned_count()==1);
+    }
 }

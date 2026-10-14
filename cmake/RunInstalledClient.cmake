@@ -1,6 +1,8 @@
 # Copy only consumer inputs into a separate source tree. Its sole product
 # dependency is find_package(CSL CONFIG), resolved from the installed prefix.
 set(work "${CSL_BUILD_DIR}/installed-consumer")
+file(MAKE_DIRECTORY "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/witness_selector_client.cpp" DESTINATION "${work}/source")
 set(prefix "${work}/prefix")
 file(MAKE_DIRECTORY "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/CMakeLists.txt" DESTINATION "${work}/source")

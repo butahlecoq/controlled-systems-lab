@@ -242,3 +242,34 @@ configuration identity and closed portable scenario wire format. Public source
 revision 1.5 and canonical mathematical DTO authority remain unchanged. Artifact
 publication validates ownership and data consistency; it grants no solver or
 checked-verifier authority.
+
+### T-S01 oriented witness queries (SYN-05 scoped slice)
+
+`CSL::witness_selector` registers `csl.selector.ts01-directions` through the existing
+`SelectorPort`, with a frozen injected `PreparedProvider<LPPort>`. It accepts only
+registry-verified complete T-S01 `ExactJointRelation` payloads in the H representation,
+including those produced by Strategy A or B. Each finite two-coordinate direction
+is **minimized** in control order `(u0,u1)`; `(1,-1)` returns `(0,1)` and `(-1,1)`
+returns `(1,0)`. State histories are retained in canonical order and original cost
+is zero. This is a numerical query of the existing complete relation, not new
+completeness evidence or independent trajectory verification.
+
+`WitnessBatch` retains requested directions, distinctness tolerance, seed, selector
+identity and source family identity. `requested` asks for distinct histories;
+`returned_count()` is the raw successful observation cardinality (repeats retained).
+`distinct_count()` scans observations in order, accepting a representative only
+when no earlier accepted representative has matching state/control time and coordinate
+shapes and maximum absolute difference over the full joint history at most the
+specified tolerance. This closeness relation is nontransitive and the greedy count
+can depend on order. State-only changes and differing shapes remain distinct.
+Directions are attempted in request order until enough distinct histories are found
+or directions are exhausted. Exhaustion is a search shortfall and never proves
+uniqueness; seed is provenance only and no random or uniform sampling claim is made.
+
+Cancellation/deadlines are checked before admission and each LP query; the immutable
+resource/numerical policy is forwarded to the injected provider. Native stops retain
+earlier observations and leave family target/evidence unchanged. Memory policy retains
+the existing accounting-only contract; allocation failure returns a query resource
+limit. Unsupported families/directions and known provider capabilities reject before
+solving. Generic representations, singleton proofs and validated queries are outside
+this slice.
