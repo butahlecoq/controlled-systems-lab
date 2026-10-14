@@ -67,6 +67,16 @@ SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::Resolved
             return reject({{DiagnosticCode::evidence_mismatch,"family.runtime_receipt",
                 "Complete Strategy B T-S01 publication requires fresh runtime evidence for the executed build and extraction sequence"}});
     }
+    const bool strategy_a_ts01=request_->family.target==FamilyTarget::exact_optimal_relation&&
+        detail::strategy_a_ts01_profile_valid(request_->problem,*request_);
+    if(strategy_a_ts01) {
+        auto* source=dynamic_cast<detail::StrategyARuntimeReceiptSource*>(workspace_.get());
+        auto receipt=source?source->take_strategy_a_runtime_receipt():std::nullopt;
+        const StrategyRegistration::CompleteFamilyVerifierKey selected_verifier{verifier_->id(),verifier_->version()};
+        if(!receipt||!receipt->matches(*request_,identity,selected_verifier))
+            return reject({{DiagnosticCode::evidence_mismatch,"family.runtime_receipt",
+                "Complete Strategy A T-S01 publication requires fresh runtime evidence for the executed forward, terminal, and recovery sequence"}});
+    }
     const auto* registered=std::get_if<RegisteredCompletenessEvidence>(&proposal.family.completeness.support);
     if(!registered||registered->verifier!=verifier_->id()||
         registered->verifier_version!=verifier_->version()||registered->proof.empty())
