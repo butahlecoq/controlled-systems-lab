@@ -26,10 +26,6 @@ REDUCTION_FIELDS = ("generated_candidate_count", "materialized_output_point_coun
 LEGACY_PUBLICATION_IDS = {
     "geo02-20261012T235755Z-6b1f504ad3db":
         "geo02-20261012T235755Z-7275580339899c6ac27496fc2b05cb040d9fec14f8ec7f8bf219cc299c55eefc",
-    # Keep the already-published URL stable even though current publisher
-    # identity inputs now derive a different digest for the unchanged source.
-    "geo02-20261013T061151Z-338ff7d1d63c":
-        "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754",
 }
 PINNED_PUBLICATION_ZIP_SHA256 = {
     "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754":

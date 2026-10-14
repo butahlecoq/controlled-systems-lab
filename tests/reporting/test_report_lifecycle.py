@@ -77,6 +77,9 @@ class CaptureTests(unittest.TestCase):
                 shutil.copytree(source, bundle)
                 archive_path = bundle.with_suffix(".zip")
                 shutil.copyfile(source.with_suffix(".zip"), archive_path)
+                publication_zip = publications._HISTORICAL_PUBLICATIONS[source_id]["report_id"] + ".zip"
+                if (source.parent / publication_zip).is_file():
+                    shutil.copyfile(source.parent / publication_zip, bundle.parent / publication_zip)
                 historical = adapter.adapt(bundle)
                 self.assertEqual(historical.report_id, publications._HISTORICAL_PUBLICATIONS[source_id]["report_id"])
                 before = archive_path.read_bytes()
