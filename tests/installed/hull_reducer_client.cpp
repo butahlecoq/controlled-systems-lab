@@ -1,5 +1,6 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/geometry/hull_reducer.hpp>
+#include <csl/geometry/basis_reuse_reducer.hpp>
 #include <csl/registry/provider.hpp>
 #include <iostream>
 
@@ -40,5 +41,22 @@ int main() {
         const auto* executed = std::get_if<registry::LPQueryCompleted>(&query);
         if (!executed || executed->provider.actual->id.value != "csl.lp.highs") return 7;
     }
+
+    // Exercise the installed OPT-06 public header and its phase-one dependency
+    // through the exported CSL::hull target. The same registered LP workspace
+    // remains available for the reducer's conservative fallback path.
+    registry::Registry<registry::HullReducerPort> basis_registry;
+    if (basis_registry.add(geometry::make_basis_reuse_hull_reducer_registration())) return 8;
+    auto basis_prepared_result = registry::prepare_pipeline(registry::select(basis_registry,
+        registry::Method{{"csl.hull.phase-one-basis-bulk"}, std::nullopt}, cloud));
+    if (!std::holds_alternative<registry::PreparedPipeline<registry::HullReducerPort>>(basis_prepared_result)) return 9;
+    auto basis_prepared = std::get<registry::PreparedPipeline<registry::HullReducerPort>>(std::move(basis_prepared_result));
+    auto basis_workspaces = basis_prepared.create();
+    auto basis_result = std::get<0>(basis_workspaces)->run_with(ExecutionContext{}, lp);
+    if (!std::holds_alternative<geometry::HullReduction>(basis_result)) return 10;
+    const auto& basis_reduction = std::get<geometry::HullReduction>(basis_result);
+    if (basis_reduction.status != geometry::ReductionStatus::complete ||
+        !basis_reduction.basis_reuse || basis_reduction.basis_reuse->basis_solves != 1 ||
+        basis_reduction.retained.size() != 4) return 11;
     std::cout << "Installed hull client: each membership LP passed registered-provider admission\n";
 }

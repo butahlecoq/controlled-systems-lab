@@ -28,6 +28,15 @@ struct MembershipAttempt {
     MembershipOutcome outcome;
 };
 
+struct BasisReuseMetrics {
+    std::size_t basis_solves{};
+    std::uint64_t pivots{};
+    std::uint64_t degenerate_pivots{};
+    std::size_t bulk_candidates{};
+    std::size_t bulk_removals{};
+    bool fell_back_to_lp_baseline{};
+};
+
 struct ConvexCombination {
     std::size_t point;
     double weight;
@@ -53,6 +62,8 @@ struct HullReduction {
     std::vector<RemovalCertificate> removed;
     std::size_t lp_calls;
     std::vector<MembershipAttempt> attempts;
+    // Present only for a reducer that performs within-solve basis reuse.
+    std::optional<BasisReuseMetrics> basis_reuse{};
 };
 
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;

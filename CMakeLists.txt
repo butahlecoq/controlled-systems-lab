@@ -51,10 +51,10 @@ set_target_properties(csl_phase_one PROPERTIES EXPORT_NAME phase_one CXX_EXTENSI
 target_link_libraries(csl_phase_one PUBLIC CSL::optimization CSL::registry)
 target_include_directories(csl_phase_one SYSTEM PRIVATE ${csl_objectives_eigen_SOURCE_DIR})
 target_compile_definitions(csl_phase_one PRIVATE EIGEN_MPL2_ONLY EIGEN_DONT_PARALLELIZE)
-add_library(csl_hull STATIC src/geometry/hull_reducer.cpp)
+add_library(csl_hull STATIC src/geometry/hull_reducer.cpp src/geometry/basis_reuse_reducer.cpp)
 add_library(CSL::hull ALIAS csl_hull)
 set_target_properties(csl_hull PROPERTIES EXPORT_NAME hull CXX_EXTENSIONS OFF)
-target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry)
+target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry PRIVATE CSL::phase_one)
 add_library(csl_polyhedral STATIC
   src/geometry/polyhedral/intersection.cpp
   src/geometry/polyhedral/halfspace_reducer.cpp
@@ -304,6 +304,7 @@ install(FILES include/csl/adapters/polyhedral/qhull.hpp DESTINATION ${CMAKE_INST
 install(FILES include/csl/optimization/convex_backend.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/optimization)
 install(FILES include/csl/optimization/phase_one.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/optimization)
 install(FILES include/csl/geometry/hull_reducer.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
+install(FILES include/csl/geometry/basis_reuse_reducer.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
 install(FILES include/csl/geometry/polyhedral_intersection.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
 install(FILES include/csl/geometry/polyhedral_projection.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
 install(FILES include/csl/reachability/nominal_predecessor.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/reachability)
