@@ -104,12 +104,12 @@ public:
                 const auto& z=*result.primal;
                 selected.batch.witnesses.push_back({family.identity().problem,{{z[0]},{z[1]},{z[2]}},{{z[3]},{z[4]}},0});
             }
+            selected.diagnostics=selected.batch.distinct_count()<request.count?
+                "Search shortfall: directions exhausted; fewer distinct histories do not prove uniqueness.":
+                "Requested distinct histories found; no uniform sampling or uniqueness guarantee.";
         } catch(const std::bad_alloc&) {
             selected.termination=Termination::resource_limit;selected.diagnostics="Query allocation failed; earlier observations retained.";return selected;
         }
-        selected.diagnostics=selected.batch.distinct_count()<request.count?
-            "Search shortfall: directions exhausted; fewer distinct histories do not prove uniqueness.":
-            "Requested distinct histories found; no uniform sampling or uniqueness guarantee.";
         return selected;
     }
 };

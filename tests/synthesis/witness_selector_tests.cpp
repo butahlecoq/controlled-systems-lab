@@ -6,11 +6,36 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <limits>
 #include <thread>
+#include <cstdlib>
+#include <new>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
+namespace selector_allocation_probe {
+thread_local std::size_t fail_small_allocation=0;
+thread_local bool injected=false;
+}
+#if defined(_MSC_VER)
+#define CSL_SELECTOR_NOINLINE __declspec(noinline)
+#else
+#define CSL_SELECTOR_NOINLINE __attribute__((noinline))
+#endif
+CSL_SELECTOR_NOINLINE void* operator new(std::size_t size) {
+    if(size==sizeof(std::size_t)&&selector_allocation_probe::fail_small_allocation&&
+       --selector_allocation_probe::fail_small_allocation==0) {
+        selector_allocation_probe::injected=true;throw std::bad_alloc{};
+    }
+    if(auto* result=std::malloc(size?size:1))return result;
+    throw std::bad_alloc{};
+}
+CSL_SELECTOR_NOINLINE void* operator new[](std::size_t size){return ::operator new(size);}
+CSL_SELECTOR_NOINLINE void operator delete(void* p)noexcept{std::free(p);}
+CSL_SELECTOR_NOINLINE void operator delete[](void* p)noexcept{std::free(p);}
+CSL_SELECTOR_NOINLINE void operator delete(void* p,std::size_t)noexcept{std::free(p);}
+CSL_SELECTOR_NOINLINE void operator delete[](void* p,std::size_t)noexcept{std::free(p);}
+#undef CSL_SELECTOR_NOINLINE
 using namespace csl;
 using namespace csl::registry;
 namespace {
@@ -284,4 +309,41 @@ TEST_CASE("deadline and provider capacity remain distinct and retain earlier obs
         REQUIRE(selected.batch.returned_count()==1);CHECK(selected.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
         CHECK(selected.batch.source_family==query.family.identity());
     }
+}
+
+namespace {
+class ArmAllocationFailure final : public LPWorkspace {
+    std::unique_ptr<LPWorkspace> inner_;std::size_t nth_;
+protected:
+    ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext& c) override {
+        auto result=inner_->solve(p,c);selector_allocation_probe::fail_small_allocation=nth_;return result;
+    }
+public:
+    ArmAllocationFailure(std::unique_ptr<LPWorkspace> inner,std::size_t nth):inner_(std::move(inner)),nth_(nth){}
+};
+}
+TEST_CASE("post-solve allocation failure returns a resource stop and retains collected observations") {
+    auto synthesis=run(request(resolve(source())));REQUIRE(synthesis.family);bool retained_failure=false;
+    // Probe allocation positions rather than assuming an STL allocation sequence.
+    for(std::size_t nth=1;nth<=32;++nth) {
+        auto backend=take(adapters::lp::make_highs_registration());auto factory=backend.factory;
+        backend.factory=[factory,nth](const LinearProgram& p){return std::make_unique<ArmAllocationFailure>(factory(p),nth);};
+        Registry<LPPort> lp;REQUIRE_FALSE(lp.add(std::move(backend)));Requirements req;req.output.representation={"csl.program-result.v1"};
+        auto provider=take(prepare_provider(select_provider(lp,Method{{"csl.lp.highs"},{}},req)));
+        auto registration=synthesis::witness_selector::make_registration(provider);SelectorRequest query{*synthesis.family,{1,0,{{1,-1}},0}};
+        auto workspace=registration.factory(query);selector_allocation_probe::injected=false;
+        std::optional<WitnessSelection> selected;bool escaped=false;
+        try {selected=take(workspace->select(query.family,query.selection,make_execution_context()));}
+        catch(const std::bad_alloc&){escaped=true;}
+        selector_allocation_probe::fail_small_allocation=0;
+        CHECK_FALSE(escaped);
+        if(selected&&selector_allocation_probe::injected) {
+            CHECK(selected->termination==Termination::resource_limit);
+            if(selected->batch.returned_count()==1) {
+                retained_failure=true;CHECK(selected->batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
+                CHECK(selected->batch.source_family==query.family.identity());
+            }
+        }
+    }
+    CHECK(retained_failure);
 }
