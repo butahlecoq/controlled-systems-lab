@@ -65,3 +65,18 @@ observations are exploratory single-profile evidence with an inconclusive
 performance conclusion and no speedup claim. Existing T-S01 bytes are unchanged.
 Main-only deployment and live URL verification remain separate gates; #67 stays
 open. See the [reproduction notes](../../reports/algorithm-results/tooling/syn04_ts02/README.md).
+
+## SYN-03 registered Strategy A T-S02 report
+
+Issue #240 records the separate registered Strategy A T-S02 profile from exact
+solver source `272fb9a51c40dedeb20dfcb1ea11dfc6b694edd7` (PR #239). Its public
+StrategyRegistry harness uses Strategy A and the production projection,
+affine-sum, Qhull conversion, HiGHS LP/convex and hull-membership providers.
+Every execution checks the registry-verified complete family, literal canonical
+five-coordinate feasible-history H-relation, objective bounds `[3,3]`, all four
+control-box corners, and distinct histories with the same terminal state. The
+single-profile observations are exploratory, with no comparator or speedup
+claim. Native submodule counters and timings are retained as unavailable where
+the runtime does not expose them. See the [reproduction notes](../../reports/algorithm-results/tooling/syn03_ts02/README.md).
+Publication through main-only Pages and live URL verification remain separate
+gates; SYN-03 #66 remains open.

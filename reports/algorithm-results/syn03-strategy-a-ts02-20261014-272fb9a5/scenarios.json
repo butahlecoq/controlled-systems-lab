@@ -1,0 +1,83 @@
+{
+  "sha256": "b080fb248768be037f35e1128a6533a89e2f3b1695292ff2b839c89f4829b9a3",
+  "value": {
+    "controls": [
+      {
+        "lower": [
+          0
+        ],
+        "upper": [
+          1
+        ]
+      },
+      {
+        "lower": [
+          0
+        ],
+        "upper": [
+          1
+        ]
+      }
+    ],
+    "dynamics": [
+      {
+        "A": [
+          [
+            1
+          ]
+        ],
+        "B": [
+          [
+            1
+          ]
+        ],
+        "offset": [
+          0
+        ]
+      },
+      {
+        "A": [
+          [
+            1
+          ]
+        ],
+        "B": [
+          [
+            1
+          ]
+        ],
+        "offset": [
+          0
+        ]
+      }
+    ],
+    "effective_request": {
+      "assurance": "numerical",
+      "materialization_limit": null,
+      "representation": "csl.polyhedron.h",
+      "target": "exact_optimal_relation"
+    },
+    "external_channels": 0,
+    "information": "nominal_open_loop",
+    "initial_state": [
+      0
+    ],
+    "observations": [],
+    "profile": "ts02_constant_integrator",
+    "state_constraints": "universal at all stages",
+    "temporal_constraints": [],
+    "terminal_objective": {
+      "kind": "linear",
+      "linear": [
+        0
+      ],
+      "offset": 3
+    },
+    "time_domain": "discrete",
+    "times": [
+      0,
+      1,
+      2
+    ]
+  }
+}
