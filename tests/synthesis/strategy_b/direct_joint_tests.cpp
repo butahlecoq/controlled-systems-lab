@@ -606,6 +606,48 @@ TEST_CASE("unsupported assurance targets and policy mismatch fail before solving
     q=request(p);ExecutionContext context;context.numerical={1e-3,1e-3};r=workspace.solve(p,q,context);
     CHECK(r.termination==Termination::contract_rejected);CHECK_FALSE(r.family);
 }
+TEST_CASE("registered Strategy B rejects partial-family preparation before creating solver workspaces") {
+    const auto p=resolve(integrator());auto q=request(p);q.target=FamilyTarget::partial_relation;
+    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
+    registry::StrategyRegistry strategies;
+    auto linear=accepted(adapters::lp::make_highs_registration());
+    auto convex=accepted(adapters::convex::make_highs_registration());
+    const auto lp_id=linear.identity.id,convex_id=convex.identity.id;
+    std::size_t lp_factory_calls=0,convex_factory_calls=0;
+    const auto lp_factory=linear.factory;
+    linear.factory=[&lp_factory_calls,lp_factory](const LinearProgram& program) {
+        ++lp_factory_calls;return lp_factory(program);
+    };
+    const auto convex_factory=convex.factory;
+    convex.factory=[&convex_factory_calls,convex_factory](const ConvexProgram& program) {
+        ++convex_factory_calls;return convex_factory(program);
+    };
+    REQUIRE_FALSE(lp.add(std::move(linear)));REQUIRE_FALSE(qp.add(std::move(convex)));
+    REQUIRE_FALSE(strategies.add(make_registration(lp,qp)));
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
+    configuration.lp=lp_id;configuration.convex=convex_id;configuration.representation=q.representation;
+    registry::Requirements requirements;requirements.output.representation=q.representation;
+    requirements.output.assurance=q.assurance;requirements.output.family=q.target;
+    requirements.output.completeness=registry::Completeness::unestablished;
+
+    const auto prepared=strategies.prepare({p,configuration,q,"1"},requirements);
+    REQUIRE(std::holds_alternative<registry::Rejection>(prepared));
+    const auto& rejection=std::get<registry::Rejection>(prepared);
+    CHECK(rejection.provenance.port=="strategy");
+    CHECK(rejection.provenance.requested.id==ModuleId{"csl.synthesis.strategy-b"});
+    REQUIRE(rejection.provenance.requested.version);
+    CHECK(*rejection.provenance.requested.version=="1");
+    REQUIRE(rejection.provenance.actual);
+    CHECK(rejection.provenance.actual->id==ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(rejection.provenance.actual->version=="1");
+    REQUIRE(rejection.diagnostics.size()==1);
+    CHECK(rejection.diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics.front().field=="joint.coverage");
+    CHECK(rejection.diagnostics.front().explanation==
+        "Only the exact reviewed T-S01/T-S02 profiles have registered complete-family verifiers; other requests remain candidates.");
+    CHECK(lp_factory_calls==0);
+    CHECK(convex_factory_calls==0);
+}
 TEST_CASE("existing StrategyRegistry snapshots admitted native providers and returns the constant-objective relation") {
     const auto p=resolve(integrator(LinearTerminal{{0},3}));
     const auto prepared=registered_prepared(p,request(p));CHECK(prepared.provenance().size()==3);
