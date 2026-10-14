@@ -6,6 +6,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
 #include "compiled_verifiers.hpp"
+#include "strategy_b_lineage.hpp"
 #include <algorithm>
 #include <cmath>
 using namespace csl;
@@ -13,6 +14,32 @@ using namespace csl::synthesis::strategy_b;
 namespace {
 bool feasible(const JointProgram&,const Vector&);
 bool feasible_without_temporal_rows(const JointProgram&,const Vector&);
+class ProposalOnlyWorkspace final:public SynthesisWorkspace {
+    CompleteFamilyProposal proposal_;
+public:
+    explicit ProposalOnlyWorkspace(CompleteFamilyProposal proposal):proposal_(std::move(proposal)){}
+    SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override {
+        SynthesisResult result;result.termination=Termination::completed;result.complete_proposal=proposal_;return result;
+    }
+};
+registry::StrategyRegistration proposal_only_strategy(CompleteFamilyProposal proposal) {
+    registry::StrategyRegistration registration;
+    registration.identity={{"csl.synthesis.strategy-b"},"1"};
+    registration.capabilities=[](const registry::StrategyRequest&,const registry::Requirements& requirements)->registry::Capability {
+        return registry::Offer{requirements.output};
+    };
+    registration.planner=[proposal=std::move(proposal)](const registry::StrategyRequest&,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
+        auto checked=registry::check_pipeline();
+        return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(checked)),[proposal](auto,const registry::StrategyRequest&,const registry::Requirements&) {
+            return std::make_unique<ProposalOnlyWorkspace>(proposal);
+        });
+    };
+    registration.complete_family_verifier={{"csl.verifier.ts01-analytic"},"1"};
+    registration.expected_lineage=[](const registry::StrategyRequest& request) {
+        return detail::expected_ts01_lineage(request.problem.identity());
+    };
+    return registration;
+}
 template<class T, class... R> T accepted(std::variant<T,R...> value) {
     REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
 }
@@ -37,6 +64,21 @@ problem::ResolvedProblem resolve(const Problem& p) {
 FamilyRequest request(const problem::ResolvedProblem& p) {
     FamilyRequest r; r.objective=p.identity(); r.profile="nominal_open_loop";
     r.representation={"csl.polyhedron.h"}; return r;
+}
+CompleteFamilyProposal exact_ts01_proposal(const problem::ResolvedProblem& problem,const FamilyRequest& family) {
+    const auto coordinates=problem.constraints().coordinates();
+    const auto lineage=detail::expected_ts01_lineage(problem.identity());
+    const FamilyIdentity identity{problem.identity(),family,coordinates,{"csl.synthesis.strategy-b"},"1",lineage};
+    auto payload=accepted(synthesis::strategy_ts01::ExactJointRelation::canonical());
+    const SymbolicArgument derivation{"T-S01 exact analytic derivation",
+        "x2=u0+u1 and (x2-1)^2>=0; zero is attained exactly when u0+u1=1. With u0,u1 in [0,1], the full canonical optimal history relation is the segment (0,s,1,s,1-s), s in [0,1]."};
+    const ClaimEvidence claim{problem.identity(),derivation};
+    const ObjectiveBound bound{0,claim};
+    CompleteOptimalFamily complete{{coordinates,family.representation,payload},
+        {claim,{bound,bound}},
+        {identity,RegisteredCompletenessEvidence{{"csl.verifier.ts01-analytic"},"1","TS01-analytic-v1"}},
+        Assurance::numerical};
+    return {identity,std::move(complete)};
 }
 TEST_CASE("initial intermediate and terminal constraints survive the sparse lift") {
     auto input=integrator(); input.states={Singleton{{0}},interval(0.5).as_handle(),Singleton{{1}}};
@@ -333,6 +375,48 @@ TEST_CASE("registered Strategy B publishes complete T-S01 evidence only through 
     auto unsupported=request(neighboring);unsupported.profile=synthesis::strategy_ts01::profile_id;
     unsupported.target=FamilyTarget::exact_optimal_relation;
     CHECK(std::holds_alternative<registry::Rejection>(strategies.prepare({neighboring,configuration,unsupported,"1"},requirements)));
+}
+TEST_CASE("Strategy B T-S01 rejects a matching self-reported lineage without runtime evidence") {
+    const auto p=resolve(integrator());
+    auto exact=request(p);exact.profile=synthesis::strategy_ts01::profile_id;exact.target=FamilyTarget::exact_optimal_relation;
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
+    configuration.representation={"csl.polyhedron.h"};
+    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.assurance=Assurance::numerical;requirements.output.family=FamilyTarget::exact_optimal_relation;
+    requirements.output.completeness=registry::Completeness::established;
+    const auto proposal=exact_ts01_proposal(p,exact);
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    registry::StrategyRegistry forged_strategies;
+    REQUIRE_FALSE(forged_strategies.add(proposal_only_strategy(proposal)));
+    auto forged=forged_strategies.prepare({p,configuration,exact,"1"},requirements);
+    REQUIRE(std::holds_alternative<registry::PreparedStrategy>(forged));
+    auto forged_workspace=std::get<registry::PreparedStrategy>(std::move(forged)).create();
+    const auto rejected=accepted(forged_workspace->run(context));
+    CHECK(rejected.termination==Termination::contract_rejected);
+    CHECK_FALSE(rejected.family);
+    CHECK_FALSE(rejected.complete_proposal);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(rejected.stop));
+    CHECK(std::any_of(std::get<ContractValidationFailure>(rejected.stop).diagnostics.begin(),
+        std::get<ContractValidationFailure>(rejected.stop).diagnostics.end(),[](const Diagnostic& diagnostic) {
+            return diagnostic.code==DiagnosticCode::evidence_mismatch&&diagnostic.field=="family.runtime_receipt";
+        }));
+
+    auto reordered=proposal;
+    std::reverse(reordered.identity.lineage.begin(),reordered.identity.lineage.end());
+    reordered.family.completeness.binding=reordered.identity;
+    registry::StrategyRegistry reordered_strategies;
+    REQUIRE_FALSE(reordered_strategies.add(proposal_only_strategy(std::move(reordered))));
+    auto reordered_prepared=reordered_strategies.prepare({p,configuration,exact,"1"},requirements);
+    REQUIRE(std::holds_alternative<registry::PreparedStrategy>(reordered_prepared));
+    auto reordered_workspace=std::get<registry::PreparedStrategy>(std::move(reordered_prepared)).create();
+    const auto reordered_result=accepted(reordered_workspace->run(context));
+    CHECK(reordered_result.termination==Termination::contract_rejected);
+    CHECK_FALSE(reordered_result.family);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(reordered_result.stop));
+    CHECK(std::any_of(std::get<ContractValidationFailure>(reordered_result.stop).diagnostics.begin(),
+        std::get<ContractValidationFailure>(reordered_result.stop).diagnostics.end(),[](const Diagnostic& diagnostic) {
+            return diagnostic.code==DiagnosticCode::evidence_mismatch&&diagnostic.field=="family.proposal.binding";
+        }));
 }
 TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and executed lineage") {
     const auto p=resolve(integrator());

@@ -31,6 +31,15 @@ SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::Resolved
         registered->verifier_version!=verifier_->version()||registered->proof.empty())
         return reject({{DiagnosticCode::evidence_mismatch,"family.proposal.verifier",
             "Proposal proof payload does not match the frozen strategy registration"}});
+    const bool strategy_b_ts01=request_->family.target==FamilyTarget::exact_optimal_relation&&
+        detail::strategy_b_ts01_profile_valid(request_->problem,*request_);
+    if(strategy_b_ts01) {
+        auto* source=dynamic_cast<detail::RuntimeReceiptSource*>(workspace_.get());
+        auto receipt=source?source->take_runtime_receipt():std::nullopt;
+        if(!receipt||!receipt->matches(*request_,identity))
+            return reject({{DiagnosticCode::evidence_mismatch,"family.runtime_receipt",
+                "Complete Strategy B T-S01 publication requires fresh runtime evidence for the executed build and extraction sequence"}});
+    }
     // The registry owns identity/context binding; the compiled verifier
     // validate theorem content against that already-frozen authoritative input.
     auto diagnostics=verifier_->verify(*request_,proposal);

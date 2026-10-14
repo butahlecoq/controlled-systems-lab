@@ -1,13 +1,58 @@
 #include "compiled_verifiers.hpp"
 #include "strategy_b_lineage.hpp"
 #include "strategy_a_lineage.hpp"
+#include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include <csl/sets/data.hpp>
 #include <algorithm>
 #include <array>
 #include <bit>
 #include <cmath>
 
 namespace csl::registry::detail {
+namespace {
+bool same_configuration(const StrategyConfiguration& left,const StrategyConfiguration& right) noexcept {
+    return left.strategy==right.strategy&&left.lp==right.lp&&left.convex==right.convex&&
+        left.hull==right.hull&&left.geometry==right.geometry&&left.converter==right.converter&&
+        left.approximation==right.approximation&&left.selector==right.selector&&
+        left.representation==right.representation;
+}
+}
+StrategyBRuntimeLineageReceipt::StrategyBRuntimeLineageReceipt(const StrategyRequest& binding,
+    std::shared_ptr<const synthesis::strategy_b::JointProgram> build_output,
+    std::shared_ptr<const ::csl::sets::SetData> feasible_output,
+    std::shared_ptr<const ::csl::sets::SetData> extraction_input,
+    std::shared_ptr<const ::csl::sets::SetData> extracted_output,std::uint64_t attempt_id)
+    :binding_(binding),build_output_(std::move(build_output)),feasible_output_(std::move(feasible_output)),
+     extraction_input_(std::move(extraction_input)),extracted_output_(std::move(extracted_output)),attempt_id_(attempt_id) {}
+
+bool StrategyBRuntimeLineageReceipt::matches(const StrategyRequest& request,const FamilyIdentity& identity) const {
+    if(attempt_id_==0||!build_output_||!feasible_output_||!extraction_input_||!extracted_output_)return false;
+    const auto feasible_metadata=feasible_output_->metadata();
+    const auto extraction_input_metadata=extraction_input_->metadata();
+    const auto extracted_metadata=extracted_output_->metadata();
+    if(!feasible_metadata||!extraction_input_metadata||!extracted_metadata||
+        feasible_output_.get()!=extraction_input_.get()||
+        feasible_metadata->id!=extraction_input_metadata->id)return false;
+    const auto& prepared=binding_;
+    // ResolvedProblem::identity() is the canonical content-derived problem ID.
+    if(request.problem.identity()!=prepared.problem.identity()||request.family!=prepared.family||
+        !same_configuration(request.configuration,prepared.configuration)||
+        request.strategy_version!=prepared.strategy_version||request.lineage!=prepared.lineage||
+        identity.problem!=prepared.problem.identity()||identity.request!=prepared.family||
+        identity.coordinates!=build_output_->coordinates||
+        identity.coordinates!=prepared.problem.constraints().coordinates()||
+        identity.strategy!=ModuleId{"csl.synthesis.strategy-b"}||identity.strategy_version!="1"||
+        prepared.configuration.strategy!=identity.strategy||prepared.strategy_version!=identity.strategy_version)
+        return false;
+
+    const auto problem_id=prepared.problem.identity().value;
+    const std::vector<TransformStepIdentity> observed_lineage{
+        {{"syn04-build:"+problem_id},{problem_id},feasible_metadata->id,{"csl.synthesis.strategy-b"},"1"},
+        {{"syn04-extract:"+problem_id},feasible_metadata->id,extracted_metadata->id,{"csl.synthesis.strategy-b"},"1"}};
+    return prepared.lineage==observed_lineage&&identity.lineage==observed_lineage;
+}
+
 const RepresentationId h_polyhedron{"csl.polyhedron.h"};
 struct Dyadic {
     std::uint64_t significand{};

@@ -1,6 +1,7 @@
 #pragma once
 #include <csl/registry/registry.hpp>
 #include <memory>
+#include "runtime_lineage.hpp"
 
 namespace csl::synthesis::strategy_ts01 { class ExactJointRelation; }
 
