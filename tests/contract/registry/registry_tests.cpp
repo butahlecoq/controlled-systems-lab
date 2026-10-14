@@ -11,6 +11,114 @@ static_assert(!std::is_default_constructible_v<PreparedPipeline<LPPort>>);
 static_assert(!std::is_default_constructible_v<PreparedStrategy>);
 static_assert(!std::is_copy_constructible_v<BoundWorkspace<LPPort>>);
 
+namespace {
+// A plugin may omit provenance, misreport it, or return a foreign witness.
+// These tests exercise the public boundary, not a concrete selection algorithm.
+class AdversarialSelectorWorkspace final : public WitnessSelectorWorkspace {
+public:
+    std::optional<FamilyIdentity> reported_source;
+    ProblemId witness_problem{"problem"};
+    std::variant<WitnessSelection,Unsupported> select(const OptimalFamily&,
+        const WitnessRequest& request,const ExecutionContext&) override {
+        return WitnessSelection{{{{witness_problem,{{0},{1}},{{1}},5}},
+            request.count,{"adversarial-selector"},request.seed,reported_source},
+            Termination::resource_limit,"selection search budget exhausted"};
+    }
+};
+}
+
+TEST_CASE("public selector binds omitted provenance without promoting a candidate family") {
+    AdversarialSelectorWorkspace workspace;
+    const auto original=candidate_family();
+    auto identity=original.identity();
+    identity.lineage={{{"transform/1"},{"source"},{"joint"},{"converter"},"1"}};
+    auto published=FamilyPublisher::publish(identity,original.outcome());
+    REQUIRE(std::holds_alternative<OptimalFamily>(published));
+    const SelectorRequest request{std::get<OptimalFamily>(std::move(published)),{3,0.001,{{1}},29}};
+    const auto answer=SelectorPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<WitnessSelection>(answer));
+    const auto& selection=std::get<WitnessSelection>(answer);
+    REQUIRE(selection.batch.source_family.has_value());
+    CHECK(*selection.batch.source_family==request.family.identity());
+    CHECK(selection.batch.source_family->problem.value=="problem");
+    CHECK(selection.batch.source_family->request.profile=="nominal_open_loop");
+    CHECK(selection.batch.source_family->request.target==FamilyTarget::candidate_relaxation);
+    CHECK(selection.batch.source_family->coordinates==JointCoordinates{{1,1,0},1});
+    CHECK(selection.batch.source_family->strategy.value=="strategy");
+    CHECK(selection.batch.source_family->strategy_version=="1");
+    REQUIRE(selection.batch.source_family->lineage.size()==1);
+    CHECK(selection.batch.source_family->lineage[0].request.value=="transform/1");
+    CHECK(selection.batch.source_family->lineage[0].input.value=="source");
+    CHECK(selection.batch.source_family->lineage[0].output.value=="joint");
+    CHECK(selection.batch.source_family->lineage[0].module.value=="converter");
+    CHECK(selection.batch.source_family->lineage[0].version=="1");
+    CHECK(selection.batch.requested==3);
+    CHECK(selection.batch.seed==std::optional<std::size_t>{29});
+    CHECK(selection.batch.selector.value=="adversarial-selector");
+    REQUIRE(selection.batch.witnesses.size()==1);
+    const auto& witness=selection.batch.witnesses[0];
+    CHECK(witness.problem.value=="problem");
+    CHECK(witness.states==std::vector<Vector>{{0},{1}});
+    CHECK(witness.controls==std::vector<Vector>{{1}});
+    CHECK(witness.original_objective==5);
+    CHECK(selection.termination==Termination::resource_limit);
+    CHECK(selection.diagnostics=="selection search budget exhausted");
+    CHECK(request.family.target()==FamilyTarget::candidate_relaxation);
+    REQUIRE(std::holds_alternative<CandidateFamily>(request.family.outcome()));
+    const auto& candidate=std::get<CandidateFamily>(request.family.outcome());
+    CHECK(candidate.relation.coordinates==JointCoordinates{{1,1,0},1});
+    CHECK(candidate.relation.representation.value=="joint");
+    REQUIRE(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
+    CHECK(std::get<HeuristicRelationEvidence>(candidate.relation_to_target).method=="fixture");
+    CHECK(std::holds_alternative<Unestablished>(candidate.feasibility));
+    CHECK_FALSE(request.family.registry_verified());
+}
+
+TEST_CASE("public selector rejects conflicting source identity even for the same problem") {
+    AdversarialSelectorWorkspace workspace;
+    const SelectorRequest request{candidate_family(),{3,0.001,{{1}},29}};
+    // Establish successful selection before trying independent identity conflicts.
+    workspace.reported_source=request.family.identity();
+    const auto accepted=SelectorPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<WitnessSelection>(accepted));
+    REQUIRE(std::get<WitnessSelection>(accepted).batch.witnesses.size()==1);
+    CHECK(std::get<WitnessSelection>(accepted).batch.witnesses[0].original_objective==5);
+    std::vector<FamilyIdentity> conflicts;
+    auto add=[&](auto mutation){auto id=request.family.identity();mutation(id);conflicts.push_back(std::move(id));};
+    add([](auto& id){id.problem={"foreign-problem"};});
+    add([](auto& id){id.request.profile="foreign-profile";});
+    add([](auto& id){id.request.target=FamilyTarget::partial_relation;});
+    add([](auto& id){id.coordinates.horizon=2;});
+    add([](auto& id){id.strategy={"foreign-strategy"};});
+    add([](auto& id){id.strategy_version="2";});
+    add([](auto& id){id.lineage={{{"transform/1"},{"source"},{"target"},{"converter"},"1"}};});
+    for (const auto& conflict:conflicts) {
+        workspace.reported_source=conflict;
+        const auto rejected=SelectorPort::run(workspace,request,context());
+        REQUIRE(std::holds_alternative<Unsupported>(rejected));
+        const auto& diagnostics=std::get<Unsupported>(rejected).diagnostics;
+        REQUIRE(diagnostics.size()==1);
+        CHECK(diagnostics[0].code==DiagnosticCode::evidence_mismatch);
+        CHECK(diagnostics[0].field=="selection.source_family");
+    }
+}
+
+TEST_CASE("public selector rejects a witness from another problem") {
+    AdversarialSelectorWorkspace workspace;
+    const SelectorRequest request{candidate_family(),{3,0.001,{{1}},29}};
+    const auto accepted=SelectorPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<WitnessSelection>(accepted));
+    REQUIRE(std::get<WitnessSelection>(accepted).batch.witnesses.size()==1);
+    CHECK(std::get<WitnessSelection>(accepted).batch.witnesses[0].states==std::vector<Vector>{{0},{1}});
+    workspace.witness_problem={"foreign-problem"};
+    const auto rejected=SelectorPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    const auto& diagnostics=std::get<Unsupported>(rejected).diagnostics;
+    REQUIRE(diagnostics.size()==1);
+    CHECK(diagnostics[0].code==DiagnosticCode::evidence_mismatch);
+    CHECK(diagnostics[0].field=="selection.witness.problem");
+}
+
 TEST_CASE("direct family publication rejects malformed effective numerical policies") {
     const auto original=candidate_family();
     for (const auto policy:std::vector<NumericalPolicy>{{-1,0},{0,-1},
