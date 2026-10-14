@@ -22,6 +22,7 @@ TEST_CASE("nine registered convex report fixtures retain literal original and so
             REQUIRE(result.result->residuals.dual); REQUIRE(result.result->residuals.dual->complementarity);
         } else CHECK(result.result->outcome.value==(i==7?MathematicalOutcome::infeasible:MathematicalOutcome::unbounded));
         REQUIRE(result.attempt); CHECK(result.attempt->stamp.attempt()==1);
+        CHECK(result.result->raw_diagnostics.find(std::string("native.downstream.hvectorbase_sha256=")+CSL_HIGHS_PATCHED_SOURCE_SHA256)!=std::string::npos);
     }
 }
 TEST_CASE("convex reporter keeps failure timings and pre-cancelled result without optimal claim") {

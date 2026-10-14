@@ -10,12 +10,19 @@ Every concrete generated operation or optimization request is admitted by its
 selected provider before a request-specific workspace is created.
 
 The strategy implements the existing `StrategyPort` / `SynthesisWorkspace`
-contract. It admits only `nominal_open_loop`, numerical, `candidate_relaxation`
-requests with `csl.polyhedron.h` joint output. It rejects exact and partial
-optimal-family requests before execution because neither reviewed numerical
-coverage nor a whole-relation optimal-subset verifier is available. A supplied
-family materialization limit is rejected rather than assigned invented semantics.
-Operation-provider limits remain independently enforced by those providers.
+contract. Its general path admits `nominal_open_loop`, numerical,
+`candidate_relaxation` requests with `csl.polyhedron.h` joint output. The only
+complete-family exception is the strict reviewed `ts01_exact_integrator`
+profile: the scalar two-step integrator, exact objective, universal state
+factors, and exact strategy/version binding checked by the compiled T-S01
+verifier. The registration freezes a deterministic six-step lineage and the
+workspace proposes the analytic relation only after all six transformations
+execute in order and the terminal optimizer reports optimal. The registry then
+checks the input, effective request, coordinates, strategy/version, executed
+lineage, theorem, bounds, and canonical relation. Every other exact or partial
+request remains rejected. A supplied family materialization limit is rejected
+rather than assigned invented semantics. Operation-provider limits remain
+independently enforced by those providers.
 
 ## Derivation and scope
 
@@ -84,5 +91,10 @@ parameter interval `[0,1]`. Constant T-S02 tests preserve multiple terminal poin
 and all four corner histories. T-S01 evaluates the retained primal with the
 original resolved objective and asserts literal cost zero. HiGHS withholds
 optional program bounds; their absence is checked before any value access.
-These finite analytic fixtures do not establish
-global numerical family coverage. Issue #66 must remain open.
+For strict T-S01, the registered Strategy A path is also exercised end-to-end;
+the pre-verification recovered H relation is checked independently to be exactly
+the five-coordinate canonical segment under an independent equality-rank and
+interval-substitution oracle before the compiled verifier accepts the complete
+proposal. The Strategy A exact-family delivery is limited to this one
+analytic profile. It does not establish general numerical family coverage or
+transfer completeness to another source profile. Issue #66 must remain open.

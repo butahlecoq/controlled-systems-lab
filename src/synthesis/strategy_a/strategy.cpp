@@ -1,4 +1,7 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
+#include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include "../../registry/compiled_verifiers.hpp"
+#include "../../registry/strategy_a_lineage.hpp"
 #include <algorithm>
 #include <new>
 
@@ -13,8 +16,9 @@ Diagnostics unsupported(std::string field,std::string reason) {
 }
 Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyRequest& family) {
     if(auto errors=check_family_request(family,problem.identity());!errors.empty())return errors;
-    if(family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop is supported.");
-    if(family.target!=FamilyTarget::candidate_relaxation)
+    const bool exact_ts01=registry::detail::ts01_case_valid(problem,family,family.representation);
+    if(!exact_ts01&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and the exact reviewed T-S01 profile are supported.");
+    if(!exact_ts01&&family.target!=FamilyTarget::candidate_relaxation)
         return unsupported("strategy_a.coverage","No reviewed coverage procedure or optimal-subset verifier; request a candidate relation.");
     if(family.assurance!=Assurance::numerical)
         return unsupported("strategy_a.assurance","Only unestablished binary64 candidate construction is supported.");
@@ -101,10 +105,12 @@ bool publish(SynthesisResult& result,const problem::ResolvedProblem& problem,con
 class Workspace final : public SynthesisWorkspace {
     reachability::ForwardDependencies forward_;
     TerminalOptimizer terminal_;
+    std::vector<TransformStepIdentity> expected_lineage_;
 public:
     Workspace(reachability::ForwardDependencies forward,registry::PreparedProvider<registry::LPPort> lp,
-        registry::PreparedProvider<registry::ConvexPort> convex)
-        :forward_(std::move(forward)),terminal_(std::move(lp),std::move(convex)){}
+        registry::PreparedProvider<registry::ConvexPort> convex,std::vector<TransformStepIdentity> expected_lineage)
+        :forward_(std::move(forward)),terminal_(std::move(lp),std::move(convex)),
+         expected_lineage_(std::move(expected_lineage)){}
     SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& request,
         const ExecutionContext& context) override {
         SynthesisResult result{Termination::completed,{problem.identity(),MathematicalOutcome::undetermined,
@@ -179,8 +185,31 @@ public:
             auto history=std::get<JointHistoryRelation>(std::move(recovered));
             lineage.push_back({{"strategy-a/terminal-preimage"},minimized.relation->metadata()->id,
                 history.relation.metadata()->id,{"csl.synthesis.control-recovery"},"1"});
+            const bool exact_ts01=registry::detail::ts01_case_valid(problem,request,request.representation)&&
+                lineage==expected_lineage_&&minimized.optimization&&
+                minimized.optimization->outcome.value==MathematicalOutcome::optimal;
+            const auto proposal_identity=FamilyIdentity{problem.identity(),request,history.coordinates,
+                strategy,version,lineage};
             publish(result,problem,request,std::move(history),tube,std::move(minimized),std::move(lineage),
                 PreimageTarget::terminal_candidate);
+            if(exact_ts01&&result.termination==Termination::completed) {
+                auto canonical=registry::detail::make_ts01_relation();
+                if(const auto* errors=std::get_if<Diagnostics>(&canonical)) {
+                    contract_failure(result,*errors);return result;
+                }
+                const SymbolicArgument derivation{"T-S01 exact analytic derivation",
+                    "x2=u0+u1 and (x2-1)^2>=0; zero is attained exactly when u0+u1=1. With u0,u1 in [0,1], the full canonical optimal history relation is the segment (0,s,1,s,1-s), s in [0,1]."};
+                const ClaimEvidence claim{problem.identity(),derivation};
+                const ObjectiveBound zero{0,{problem.identity(),derivation}};
+                const OptimumEvidence optimum{claim,{zero,zero}};
+                auto payload=std::get<std::shared_ptr<const synthesis::strategy_ts01::ExactJointRelation>>(std::move(canonical));
+                CompleteOptimalFamily family{{proposal_identity.coordinates,request.representation,payload},optimum,
+                    {proposal_identity,RegisteredCompletenessEvidence{{"csl.verifier.ts01-analytic"},"1","TS01-analytic-v1"}},
+                    Assurance::numerical};
+                result.outcome={problem.identity(),MathematicalOutcome::optimal,derivation,{}};
+                result.objective=optimum.bounds;
+                result.complete_proposal=CompleteFamilyProposal{proposal_identity,std::move(family)};
+            }
             return result;
         } catch(const std::bad_alloc&) {
             stop(result,local({"strategy-a/storage"}),{StopReason::resource_limit,"Strategy A allocation failed; previously published evidence retained."});
@@ -196,18 +225,26 @@ registry::StrategyRegistration make_registration(Providers providers) {
         [](const registry::StrategyRequest& request,const registry::Requirements&)->registry::Capability {
             if(auto errors=capabilities(request.problem,request.family);!errors.empty())return errors;
             registry::Output output;output.representation=request.family.representation;
-            output.family=FamilyTarget::candidate_relaxation;output.completeness=registry::Completeness::unestablished;
+            output.family=request.family.target;
+            output.completeness=request.family.target==FamilyTarget::exact_optimal_relation?
+                registry::Completeness::established:registry::Completeness::unestablished;
             return registry::Offer{std::move(output)};
         },[providers=std::move(providers)](const registry::StrategyRequest&,const registry::Requirements&)
             ->std::variant<registry::StrategyPlan,registry::Rejection> {
             auto fixed=std::get<registry::CheckedPipeline<>>(registry::check_pipeline());
             return registry::compose_strategy(std::move(fixed),providers,
-                [](auto,const auto& generated,const registry::StrategyRequest&,const registry::Requirements&)
+                [](auto,const auto& generated,const registry::StrategyRequest& request,const registry::Requirements&)
                     ->std::unique_ptr<SynthesisWorkspace> {
                     return std::make_unique<Workspace>(reachability::ForwardDependencies{
                         std::get<0>(generated),std::get<1>(generated),std::get<2>(generated)},
-                        std::get<3>(generated),std::get<4>(generated));
+                        std::get<3>(generated),std::get<4>(generated),request.lineage);
                 });
+        },registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"},
+        [](const registry::StrategyRequest& request) {
+            if(request.strategy_version==version&&request.configuration.strategy==strategy&&
+                registry::detail::ts01_case_valid(request.problem,request.family,request.configuration.representation))
+                return detail::expected_ts01_lineage(request.problem.identity());
+            return std::vector<TransformStepIdentity>{};
         }};
 }
 }

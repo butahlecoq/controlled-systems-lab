@@ -7,6 +7,36 @@ function(csl_add_private_highs)
     URL_HASH SHA256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
     SOURCE_SUBDIR csl-no-build)
   FetchContent_MakeAvailable(csl_highs)
+  # Keep the upstream archive/hash pinned and apply this narrowly scoped
+  # downstream initialization fix to the fetched source before compiling it.
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}"
+      "-DSOURCE_FILE=${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h"
+      -P "${PROJECT_SOURCE_DIR}/cmake/ApplyPinnedHighsPatch.cmake"
+    RESULT_VARIABLE patch_result
+    OUTPUT_VARIABLE patch_output
+    ERROR_VARIABLE patch_error)
+  if(NOT patch_result EQUAL 0)
+    message(FATAL_ERROR "Failed to apply pinned HiGHS downstream patch: ${patch_output}${patch_error}")
+  endif()
+  file(SHA256 "${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h" patched_source_sha256)
+  if(WIN32)
+    set(expected_source_sha256 "f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3")
+  else()
+    set(expected_source_sha256 "8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b")
+  endif()
+  if(NOT patched_source_sha256 STREQUAL expected_source_sha256)
+    message(FATAL_ERROR "Configured HiGHS patch hash is not the verified platform postimage: ${patched_source_sha256}")
+  endif()
+  set(CSL_HIGHS_PATCHED_SOURCE_SHA256 "${patched_source_sha256}" PARENT_SCOPE)
+  target_compile_definitions(csl_highs_lp PRIVATE
+    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${patched_source_sha256}\"")
+  add_test(NAME pinned_highs_patch_contract
+    COMMAND "${CMAKE_COMMAND}"
+      "-DUPSTREAM_HEADER=${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h"
+      "-DPATCH_SCRIPT=${PROJECT_SOURCE_DIR}/cmake/ApplyPinnedHighsPatch.cmake"
+      "-DWORK_DIR=${PROJECT_BINARY_DIR}/pinned-highs-patch-test"
+      -P "${PROJECT_SOURCE_DIR}/tests/cmake/pinned_highs_patch_contract.cmake")
   set(FAST_BUILD ON)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_CXX ON)
