@@ -1,0 +1,7 @@
+rank,symbol,inclusive_hits,share_of_target_stack_hits_percent,source
+1,`anonymous namespace`::one_run,126542,96.74,reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp:60
+2,csl::registry::StrategyPort::run,118950,90.93,src/registry/registry.cpp:65
+3,csl::synthesis::strategy_b::DirectJointWorkspace::solve,116354,88.95,src/synthesis/strategy_b/direct_joint.cpp:218
+4,csl::adapters::convex::Workspace::solve_native,104178,79.64,src/adapters/convex/highs.cpp:320
+5,Highs::optimizeModel,60301,46.1,HiGHS 1.11.0 highs/lp_data/Highs.cpp:958
+6,Highs::callSolveQp,47804,36.54,HiGHS 1.11.0 highs/lp_data/Highs.cpp:3837

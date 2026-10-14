@@ -1,0 +1,11 @@
+diff --git a/reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp b/reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp
+--- a/reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp
++++ b/reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp
+@@ -162,6 +162,6 @@
+     std::cout<<std::setprecision(17);
+     constexpr int warmups=1;
+-    constexpr int repetitions=7;
++    constexpr int repetitions=30000;
+     int failures=0;
+     for(int repetition=-warmups;repetition<repetitions;++repetition) {
+         const bool warmup=repetition<0;
