@@ -1,0 +1,208 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 31,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "displayName": "Native development (Ninja, Release)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/dev",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": true,
+        "CSL_DEPENDENCY_PROBES": false
+      },
+      "environment": {
+        "VSLANG": "1033"
+      }
+    },
+    {
+      "name": "dev-windows",
+      "displayName": "Windows Visual Studio 2022 x64",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/dev-windows",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "BUILD_TESTING": true,
+        "CSL_DEPENDENCY_PROBES": false
+      },
+      "environment": {
+        "VSLANG": "1033"
+      }
+    },
+    {
+      "name": "core",
+      "inherits": "dev",
+      "binaryDir": "${sourceDir}/build/core",
+      "cacheVariables": {
+        "CSL_ENABLE_HIGHS": false,
+        "CSL_ENABLE_QHULL": false
+      }
+    },
+    {
+      "name": "highs",
+      "inherits": "dev",
+      "binaryDir": "${sourceDir}/build/highs",
+      "cacheVariables": {
+        "CSL_ENABLE_HIGHS": true,
+        "CSL_ENABLE_QHULL": false
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Release",
+      "jobs": 4
+    },
+    {
+      "name": "dev-windows",
+      "configurePreset": "dev-windows",
+      "configuration": "Release",
+      "jobs": 4
+    },
+    {
+      "name": "core",
+      "configurePreset": "core",
+      "configuration": "Release",
+      "jobs": 4
+    },
+    {
+      "name": "highs",
+      "configurePreset": "highs",
+      "configuration": "Release",
+      "jobs": 4
+    },
+    {
+      "name": "numeric",
+      "configurePreset": "dev",
+      "configuration": "Release",
+      "targets": [
+        "csl_numeric_checks"
+      ],
+      "jobs": 4
+    },
+    {
+      "name": "geometry",
+      "configurePreset": "dev",
+      "configuration": "Release",
+      "targets": [
+        "csl_geometry_checks"
+      ],
+      "jobs": 4
+    },
+    {
+      "name": "reporting",
+      "configurePreset": "dev",
+      "configuration": "Release",
+      "targets": [
+        "csl_reporting_checks"
+      ],
+      "jobs": 4
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "dev-windows",
+      "configurePreset": "dev-windows",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "core",
+      "configurePreset": "core",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "highs",
+      "configurePreset": "highs",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "numeric",
+      "configurePreset": "dev",
+      "configuration": "Release",
+      "filter": {
+        "include": {
+          "label": "^numeric$"
+        }
+      },
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "geometry",
+      "configurePreset": "dev",
+      "configuration": "Release",
+      "filter": {
+        "include": {
+          "label": "^geometry$"
+        }
+      },
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "reporting",
+      "configurePreset": "dev",
+      "configuration": "Release",
+      "filter": {
+        "include": {
+          "label": "^reporting$"
+        }
+      },
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    }
+  ]
+}

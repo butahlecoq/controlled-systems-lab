@@ -1,0 +1,13 @@
+if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
+  add_executable(hv_conversion_tests tests/contract/geometry/hv_conversion_tests.cpp)
+  target_link_libraries(hv_conversion_tests PRIVATE CSL::qhull_conversion CSL::highs_lp doctest::doctest Threads::Threads)
+  add_test(NAME hv_conversion_tests COMMAND hv_conversion_tests)
+  csl_test_target(hv_conversion_tests geometry)
+endif()
+
+if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
+  add_executable(conversion_public_client tests/installed/conversion_client.cpp)
+  target_link_libraries(conversion_public_client PRIVATE CSL::qhull_conversion CSL::highs_lp)
+  add_test(NAME conversion_public_client COMMAND conversion_public_client)
+  csl_test_target(conversion_public_client geometry)
+endif()

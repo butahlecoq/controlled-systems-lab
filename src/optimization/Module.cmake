@@ -1,0 +1,25 @@
+# Target and installation ownership for optimization. Included from the project root.
+
+csl_add_library(csl_objectives STATIC src/optimization/objective_reformulation.cpp)
+
+target_link_libraries(csl_objectives PUBLIC CSL::numeric)
+
+include(cmake/ObjectivesDependencies.cmake)
+
+csl_add_library(csl_optimization STATIC src/optimization/linear_program.cpp src/optimization/lp_backend.cpp)
+
+target_link_libraries(csl_optimization PUBLIC CSL::numeric)
+
+csl_add_library(csl_phase_one STATIC src/optimization/phase_one/program.cpp src/optimization/phase_one/simplex.cpp)
+
+target_link_libraries(csl_phase_one PUBLIC CSL::optimization CSL::registry)
+
+target_include_directories(csl_phase_one SYSTEM PRIVATE ${csl_objectives_eigen_SOURCE_DIR})
+
+target_compile_definitions(csl_phase_one PRIVATE EIGEN_MPL2_ONLY EIGEN_DONT_PARALLELIZE)
+
+csl_add_library(csl_convex STATIC src/optimization/convex_backend.cpp)
+
+target_link_libraries(csl_convex PUBLIC CSL::objectives CSL::optimization)
+
+csl_install_headers(optimization)
