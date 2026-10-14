@@ -257,7 +257,6 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
     auto data=std::make_shared<DirectJointPayload>(std::move(construction),std::get<sets::SetData>(std::move(initial)));
     std::vector<TransformStepIdentity> lineage{{{"syn04-build:"+p.identity().value},{p.identity().value},feasible_id,{strategy_id},strategy_version}};
     auto publish=[&] {
-        if(reviewed_ts01)return;
         FamilyIdentity identity{p.identity(),request,data->construction.coordinates,{strategy_id},strategy_version,lineage};
         CandidateFeasibility feasibility=Unestablished{};
         if(!result.incumbents.empty()) feasibility=WitnessFeasibilityEvidence{result.incumbents.front().witness,result.incumbents.front().feasibility};
