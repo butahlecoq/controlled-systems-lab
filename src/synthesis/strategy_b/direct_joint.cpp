@@ -434,8 +434,7 @@ SynthesisResult detail::Ts01ExecutionRunner::solve(const problem::ResolvedProble
                 prepared_request_->strategy_version==strategy_version&&
                 registry::detail::strategy_b_ts01_profile_valid(p,*prepared_request_)) {
                 receipt_=registry::detail::StrategyBRuntimeLineageReceipt{*prepared_request_,build_artifact,
-                    feasible_artifact,feasible_artifact,std::move(extracted_artifact),verifier_binding_->id,
-                    verifier_binding_->version,next_attempt_id()};
+                    feasible_artifact,feasible_artifact,std::move(extracted_artifact),*verifier_binding_,next_attempt_id()};
             }
             result.outcome={p.identity(),MathematicalOutcome::optimal,derivation,{}};
             result.objective=optimum_evidence.bounds;

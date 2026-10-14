@@ -31,7 +31,8 @@ SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::Resolved
     if(strategy_b_ts01) {
         auto* source=dynamic_cast<detail::RuntimeReceiptSource*>(workspace_.get());
         auto receipt=source?source->take_runtime_receipt():std::nullopt;
-        if(!receipt||!receipt->matches(*request_,identity,verifier_->id(),verifier_->version()))
+        const StrategyRegistration::CompleteFamilyVerifierKey selected_verifier{verifier_->id(),verifier_->version()};
+        if(!receipt||!receipt->matches(*request_,identity,selected_verifier))
             return reject({{DiagnosticCode::evidence_mismatch,"family.runtime_receipt",
                 "Complete Strategy B T-S01 publication requires fresh runtime evidence for the executed build and extraction sequence"}});
     }

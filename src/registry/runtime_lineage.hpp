@@ -17,14 +17,13 @@ class StrategyBRuntimeLineageReceipt {
     std::shared_ptr<const sets::SetData> feasible_output_;
     std::shared_ptr<const sets::SetData> extraction_input_;
     std::shared_ptr<const sets::SetData> extracted_output_;
-    ModuleId verifier_id_;
-    std::string verifier_version_;
+    StrategyRegistration::CompleteFamilyVerifierKey verifier_binding_;
     std::uint64_t attempt_id_{};
 
     StrategyBRuntimeLineageReceipt(const StrategyRequest&,
         std::shared_ptr<const synthesis::strategy_b::JointProgram>,
         std::shared_ptr<const sets::SetData>,std::shared_ptr<const sets::SetData>,
-        std::shared_ptr<const sets::SetData>,ModuleId,std::string,std::uint64_t);
+        std::shared_ptr<const sets::SetData>,StrategyRegistration::CompleteFamilyVerifierKey,std::uint64_t);
     friend class ::csl::synthesis::strategy_b::detail::Ts01ExecutionRunner;
 public:
     StrategyBRuntimeLineageReceipt(const StrategyBRuntimeLineageReceipt&)=delete;
@@ -33,7 +32,8 @@ public:
     StrategyBRuntimeLineageReceipt& operator=(StrategyBRuntimeLineageReceipt&&) noexcept=default;
     ~StrategyBRuntimeLineageReceipt()=default;
 
-    bool matches(const StrategyRequest&,const FamilyIdentity&,const ModuleId&,const std::string&) const;
+    bool matches(const StrategyRequest&,const FamilyIdentity&,
+        const StrategyRegistration::CompleteFamilyVerifierKey&) const;
 };
 
 // Implemented only by the private compiled Strategy B execution workspace.
