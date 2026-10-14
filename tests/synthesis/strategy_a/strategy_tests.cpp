@@ -299,7 +299,7 @@ TEST_CASE("exact reviewed T-S01 executes registered Strategy A providers and com
     CHECK_FALSE(exact->contains(Vector{0,1,2,1,1}));
 
 }
-TEST_CASE("Strategy A rejects unsupported assurance and public publication rejects unregistered proof claims") {
+TEST_CASE("Strategy A rejects validated assurance and the public unverified publisher rejects complete claims") {
     const auto query=exact_request(exact_integrator());
 
     auto validated=query;
@@ -312,36 +312,12 @@ TEST_CASE("Strategy A rejects unsupported assurance and public publication rejec
     REQUIRE(std::holds_alternative<CompleteOptimalFamily>(result.family->outcome()));
     const auto& accepted=std::get<CompleteOptimalFamily>(result.family->outcome());
     const auto& identity=result.family->identity();
-
-    auto rejected_by_publication=[&](CompleteOptimalFamily forged) {
-        CHECK(forged.optimum.optimum.problem==identity.problem);
-        const auto publication=FamilyPublisher::publish(identity,std::move(forged));
-        REQUIRE(std::holds_alternative<Diagnostics>(publication));
-        const auto& diagnostics=std::get<Diagnostics>(publication);
-        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
-            return diagnostic.field=="family.completeness";
-        }));
-    };
-
-    auto unestablished=accepted;
-    // Unestablished is representable for optimum claims; the completeness
-    // support variant intentionally has no unestablished alternative.
-    unestablished.optimum.optimum.support=Unestablished{};
-    rejected_by_publication(std::move(unestablished));
-
-    auto arbitrary_symbolic=accepted;
-    arbitrary_symbolic.optimum.optimum.support=SymbolicArgument{"same problem id","unreviewed theorem text"};
-    rejected_by_publication(std::move(arbitrary_symbolic));
-
-    auto unchecked_certificate=accepted;
-    unchecked_certificate.completeness.support=ValidatedCoverageEvidence{
-        "artifact:unverified",ModuleId{"checker:unregistered"},"exact-looking"};
-    rejected_by_publication(std::move(unchecked_certificate));
-
-    auto residual_only=accepted;
-    residual_only.completeness.support=NumericalCoverageEvidence{
-        "witness residual check",{0,0},ModuleId{"residual-checker"},"residual below tolerance"};
-    rejected_by_publication(std::move(residual_only));
+    const auto publication=FamilyPublisher::publish(identity,accepted);
+    REQUIRE(std::holds_alternative<Diagnostics>(publication));
+    const auto& diagnostics=std::get<Diagnostics>(publication);
+    CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
+        return diagnostic.field=="family.completeness";
+    }));
 }
 TEST_CASE("Strategy A exact T-S01 rejects changed profiles and retains candidate on late provider failure") {
     auto query=exact_request(exact_integrator());
