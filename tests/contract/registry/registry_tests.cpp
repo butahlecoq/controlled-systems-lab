@@ -1424,6 +1424,70 @@ TEST_CASE("public strategy accepts an unbounded outcome without a supported lowe
     CHECK(std::holds_alternative<std::monostate>(result.stop));
 }
 
+TEST_CASE("public strategy passes through a supported infeasible outcome") {
+    class InfeasibleOutcome final : public SynthesisWorkspace {
+    public:
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+            const ExecutionContext&) override {
+            return {Termination::completed,
+                {problem.identity(),MathematicalOutcome::infeasible,
+                    SymbolicArgument{"synthetic infeasibility claim","contract pass-through fixture only"},{}},
+                {},{},{},{}};
+        }
+    } workspace;
+
+    auto request=strategy_request();
+    request.configuration.strategy={"infeasible-outcome-pass-through-fixture"};
+    request.strategy_version="1";
+    const auto answer=StrategyPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto& result=std::get<SynthesisResult>(answer);
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==request.problem.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::infeasible);
+    REQUIRE(std::holds_alternative<SymbolicArgument>(result.outcome.support));
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).reference=="synthetic infeasibility claim");
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).assumptions=="contract pass-through fixture only");
+    CHECK(result.outcome.assumptions.empty());
+    CHECK_FALSE(result.objective.lower.has_value());
+    CHECK_FALSE(result.objective.upper.has_value());
+    CHECK_FALSE(result.family.has_value());
+    CHECK(result.incumbents.empty());
+    CHECK(std::holds_alternative<std::monostate>(result.stop));
+}
+
+TEST_CASE("public strategy passes through a supported infimum-not-attained outcome") {
+    class InfimumNotAttainedOutcome final : public SynthesisWorkspace {
+    public:
+        SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+            const ExecutionContext&) override {
+            return {Termination::completed,
+                {problem.identity(),MathematicalOutcome::infimum_not_attained,
+                    SymbolicArgument{"synthetic unattained-infimum claim","contract pass-through fixture only"},{}},
+                {},{},{},{}};
+        }
+    } workspace;
+
+    auto request=strategy_request();
+    request.configuration.strategy={"infimum-not-attained-outcome-pass-through-fixture"};
+    request.strategy_version="1";
+    const auto answer=StrategyPort::run(workspace,request,context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto& result=std::get<SynthesisResult>(answer);
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==request.problem.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::infimum_not_attained);
+    REQUIRE(std::holds_alternative<SymbolicArgument>(result.outcome.support));
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).reference=="synthetic unattained-infimum claim");
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).assumptions=="contract pass-through fixture only");
+    CHECK(result.outcome.assumptions.empty());
+    CHECK_FALSE(result.objective.lower.has_value());
+    CHECK_FALSE(result.objective.upper.has_value());
+    CHECK_FALSE(result.family.has_value());
+    CHECK(result.incumbents.empty());
+    CHECK(std::holds_alternative<std::monostate>(result.stop));
+}
+
 TEST_CASE("public strategy removes an unsupported lower bound without discarding supported unbounded evidence") {
     class UnsupportedLowerBound final : public SynthesisWorkspace {
     public:
