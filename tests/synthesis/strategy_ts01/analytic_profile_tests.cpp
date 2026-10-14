@@ -4,6 +4,7 @@
 #include <csl/problem/validator.hpp>
 #include <csl/sets/data.hpp>
 #include "compiled_verifiers.hpp"
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -190,19 +191,26 @@ TEST_CASE("compiled T-S01 verifier rejects independently tampered proposal claim
     const CompleteFamilyProposal original{result.family->identity(),
         std::get<CompleteOptimalFamily>(result.family->outcome())};
     CHECK(verifier->verify(original_request,original).empty());
-    auto rejects=[&](auto mutate) {
+    auto rejects_with=[&](auto mutate,const std::string& expected_field) {
         auto proposal=original;mutate(proposal);
-        CHECK_FALSE(verifier->verify(original_request,proposal).empty());
+        const auto diagnostics=verifier->verify(original_request,proposal);
+        REQUIRE_FALSE(diagnostics.empty());
+        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[&](const Diagnostic& diagnostic) {
+            return diagnostic.code==DiagnosticCode::evidence_mismatch&&diagnostic.field==expected_field;
+        }));
     };
-    rejects([](auto& proposal){proposal.family.relation.payload=std::make_shared<const JointRelationPayload>();});
-    rejects([](auto& proposal){proposal.family.optimum.optimum.support=SymbolicArgument{"forged","changed theorem"};});
-    rejects([](auto& proposal){proposal.family.optimum.bounds.lower->value=-1;});
-    rejects([](auto& proposal){proposal.family.optimum.bounds.upper->value=1;});
-    rejects([](auto& proposal){proposal.identity.request.profile="different";proposal.family.completeness.binding=proposal.identity;});
-    rejects([](auto& proposal){proposal.identity.coordinates.horizon=3;proposal.family.completeness.binding=proposal.identity;});
-    rejects([](auto& proposal){proposal.identity.lineage.push_back({{"transform"},{"input"},{"output"},{"module"},"1"});proposal.family.completeness.binding=proposal.identity;});
-    rejects([](auto& proposal){std::get<RegisteredCompletenessEvidence>(proposal.family.completeness.support).verifier={"unknown"};});
-    rejects([](auto& proposal){std::get<RegisteredCompletenessEvidence>(proposal.family.completeness.support).verifier_version="2";});
+    rejects_with([](auto& proposal){proposal.family.relation.payload=std::make_shared<const JointRelationPayload>();},"ts01.verifier.relation");
+    rejects_with([](auto& proposal){proposal.family.optimum.optimum.support=Unestablished{};},"ts01.verifier.optimum");
+    rejects_with([](auto& proposal){proposal.family.optimum.optimum.support=SymbolicArgument{"forged","changed theorem"};},"ts01.verifier.optimum");
+    rejects_with([](auto& proposal){proposal.family.optimum.bounds.lower->value=-1;},"ts01.verifier.optimum");
+    rejects_with([](auto& proposal){proposal.family.optimum.bounds.upper->value=1;},"ts01.verifier.optimum");
+    rejects_with([](auto& proposal){proposal.identity.request.profile="different";proposal.family.completeness.binding=proposal.identity;},"ts01.verifier.binding");
+    rejects_with([](auto& proposal){proposal.identity.coordinates.horizon=3;proposal.family.completeness.binding=proposal.identity;},"ts01.verifier.binding");
+    rejects_with([](auto& proposal){proposal.identity.lineage.push_back({{"transform"},{"input"},{"output"},{"module"},"1"});proposal.family.completeness.binding=proposal.identity;},"ts01.verifier.binding");
+    rejects_with([](auto& proposal){std::get<RegisteredCompletenessEvidence>(proposal.family.completeness.support).verifier={"unknown"};},"ts01.verifier.support");
+    rejects_with([](auto& proposal){std::get<RegisteredCompletenessEvidence>(proposal.family.completeness.support).verifier_version="2";},"ts01.verifier.support");
+    rejects_with([](auto& proposal){proposal.family.completeness.support=ValidatedCoverageEvidence{"artifact:unchecked",ModuleId{"unregistered.checker"},"exact-looking"};},"ts01.verifier.support");
+    rejects_with([](auto& proposal){proposal.family.completeness.support=NumericalCoverageEvidence{"residual-only",{1e-8,1e-8},ModuleId{"unregistered.residual-checker"},"residual below tolerance"};},"ts01.verifier.support");
     auto changed_request=original_request;changed_request.family.profile="tampered";
     CHECK_FALSE(verifier->verify(changed_request,original).empty());
 }
