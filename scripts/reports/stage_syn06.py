@@ -383,9 +383,12 @@ def validate(bundle: Path) -> registered.PublicationRecord:
                 "files": {name: digest_bytes(local(bundle, name).read_bytes()) for name in sorted(SOURCE_INVENTORY)},
                 "publisher": publisher}
     report_id = bundle.name.rsplit("-", 1)[0] + "-" + digest(identity)
-    return registered.PublicationRecord("syn06-verifier", report_id, digest(payload), source, SCOPE, LIMITS,
+    publication = registered.PublicationRecord("syn06-verifier", report_id, digest(payload), source, SCOPE, LIMITS,
                                         tuple(sorted(SOURCE_INVENTORY)), payload["schema"],
                                         source_report_id=bundle.name)
+    return registered.preserve_historical_publication(bundle, publication,
+        lambda source, item: registered.publication_zip(item.report_id,
+            registered.publication_artifacts(source, item, local(source, "index.html").read_bytes())))
 
 
 def catalogue_entry(bundle: Path) -> dict:

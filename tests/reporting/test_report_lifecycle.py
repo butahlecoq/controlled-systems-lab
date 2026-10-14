@@ -65,5 +65,46 @@ class CaptureTests(unittest.TestCase):
             archive_builder.assert_not_called()
 
 
+class GeometryCollectionTests(unittest.TestCase):
+    def test_geo04_malformed_and_timeout_keep_raw_and_reached_attempts(self):
+        tooling = ROOT / "scripts" / "reports" / "geo04"
+        with patch.object(sys, "path", [str(tooling), *sys.path]):
+            spec = importlib.util.spec_from_file_location("geo04_capture_fixture", tooling / "collect.py")
+            collector = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(collector)
+        source = next((ROOT / "reports" / "algorithm-results").glob("geo04-*/raw-driver-output.csv"))
+        lines = source.read_text(encoding="utf-8").splitlines()
+        prefix = "\n".join(lines[:2]) + "\n"
+        for name, stdout, code, timeout in (("malformed", prefix + "malformed\n", 0, False),
+                                            ("timeout", prefix, 124, True)):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                exe, note, profile = root / "driver.exe", root / "note", root / "profile"
+                exe.write_bytes(b"test-only executable identity")
+                note.write_text("test collection; no numerical work")
+                profile.write_text("no profiling in this test")
+                out = root / "out"
+                args = ["collect.py", "--exe", str(exe), "--build-dir", str(root),
+                        "--source-commit", "source", "--harness-commit", "harness",
+                        "--concurrent-work", str(note), "--profile-evidence", str(profile), "--out", str(out)]
+                provenance = {"fresh_build": {"command": ["fixture-build"], "stdout": "fixture", "stderr": ""}}
+                with patch.object(sys, "argv", args), patch.object(collector, "build_provenance", return_value=provenance), \
+                     patch.object(collector, "git", return_value=str(ROOT)), patch.object(collector, "clean_tracked"), \
+                     patch.object(lifecycle, "capture_process", return_value=(stdout, "partial diagnostic", code, timeout)), \
+                     patch.object(lifecycle, "machine_snapshot", return_value={}), patch.object(lifecycle, "public_load", return_value={}):
+                    self.assertEqual(collector.main(), 2)
+                record = json.loads((out / "records.json").read_text())
+                self.assertEqual(record["algorithm"]["source_commit"], "source")
+                self.assertEqual(record["collection"]["state"], "failed")
+                self.assertEqual(record["collection"]["aborted_or_timed_out"], timeout)
+                self.assertEqual(len(record["trials"]), 1)
+                self.assertEqual(record["trials"][0]["status"], "passed")
+                self.assertEqual((out / "raw-driver-output.csv").read_text(), stdout)
+                self.assertEqual((out / "process-stderr.txt").read_text(), "partial diagnostic")
+                self.assertEqual(json.loads((out / "process-capture.json").read_text())["process_return_code"], code)
+                if name == "malformed":
+                    self.assertTrue((out / "validation-error.json").is_file())
+
+
 if __name__ == "__main__":
     unittest.main()

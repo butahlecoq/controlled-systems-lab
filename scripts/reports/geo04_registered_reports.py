@@ -17,7 +17,7 @@ SCHEMA = "csl.geo04-polyhedral-report/1"
 
 
 def _renderer():
-    path = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "geo04" / "render.py"
+    path = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "geo04" / "render.py"
     spec = importlib.util.spec_from_file_location("csl_geo04_publication_renderer", path)
     if spec is None or spec.loader is None:
         raise ValueError("GEO-04 renderer is unavailable")

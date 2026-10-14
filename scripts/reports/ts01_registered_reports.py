@@ -24,11 +24,12 @@ def _module(name, path):
 
 
 def _tools():
-    root = Path(__file__).resolve().parents[2] / "reports" / "algorithm-results" / "tooling" / "ts01"
+    root = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "ts01"
     return (_module("csl_syn07_ts01_report", root / "report.py"),
             _module("csl_syn07_ts01_map", root / "publication_map.py"))
 
 
+@common.preserve_publication
 def adapt(bundle):
     bundle = Path(bundle)
     if bundle.is_symlink():

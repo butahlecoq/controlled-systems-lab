@@ -405,10 +405,14 @@ def main(profile=LP):
     return collect(args,profile)
 
 
-if __name__=="__main__": raise SystemExit(main())
 
 
 # Filesystem/process lifecycle shared by the standalone geometry collectors.
+def git_paths(*args: str) -> list[str]:
+    output = subprocess.check_output(["git", *args])
+    return [path.decode("utf-8", errors="surrogateescape") for path in output.split(b"\0") if path]
+
+
 def capture_process(command: list[str], timeout_seconds: int = 600) -> tuple[str, str, int, bool]:
     try:
         completed = subprocess.run(command, text=True, capture_output=True, timeout=timeout_seconds)
@@ -520,17 +524,33 @@ def write_validation_error(out, error, *, schema):
         "schema": schema, "error_type": type(error).__name__, "error": str(error)}, indent=2)+"\n")
 
 
+def validate_build_log(build_log, build, exe, source_root, *, tracked_paths=None):
+    build_log, build, exe = Path(build_log).resolve(), Path(build).resolve(), Path(exe).resolve()
+    if build_log == build or not build_log.is_relative_to(build):
+        raise ValueError("build log must resolve inside the configured build directory")
+    def aliases(path):
+        return build_log == path.resolve() or (build_log.is_file() and path.is_file() and build_log.samefile(path))
+    if aliases(exe):
+        raise ValueError("build log must not alias the executable")
+    if tracked_paths is None:
+        names = subprocess.check_output(["git", "-C", str(source_root), "ls-files", "-z"])
+        tracked_paths = [name.decode("utf-8", errors="surrogateescape") for name in names.split(b"\0") if name]
+    if any(aliases(Path(source_root) / name) for name in tracked_paths):
+        raise ValueError("build log must not alias a tracked source file")
+
+
 def fresh_release_build(build, target_name, build_log, source_root, *, source_commit,
-                        harness_commit, run=capture_process, validate_log=None):
+                        harness_commit, run=capture_process, validate_log):
     """Keep failed/timeout rebuild evidence before rejecting collection."""
     command = ["cmake", "--build", str(build), "--config", "Release", "--target",
                target_name, "--clean-first", "--verbose"]
+    check_log = validate_log
+    check_log()
     stdout, stderr, return_code, timed_out = run(command)
     result = redact_paths({"command": command, "source_commit": source_commit,
                            "harness_commit": harness_commit, "stdout": stdout, "stderr": stderr,
                            "return_code": return_code, "timed_out": timed_out}, source_root, build)
-    if validate_log:
-        validate_log()
+    check_log()
     build_log.parent.mkdir(parents=True, exist_ok=True)
     durable_text(build_log, json.dumps(result, indent=2, allow_nan=False)+"\n")
     if return_code or timed_out:
@@ -538,3 +558,7 @@ def fresh_release_build(build, target_name, build_log, source_root, *, source_co
         raise ValueError(f"fresh Release rebuild {reason} (exit {return_code}); diagnostics saved to "
                          f"{redact_paths(str(build_log), source_root, build)}")
     return result
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
