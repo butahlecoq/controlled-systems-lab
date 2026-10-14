@@ -10,6 +10,11 @@ SCHEMA = "csl.syn04-strategy-b-ts01-report/1"
 SOURCE_COMMIT = "2a5ab835295dfd22f02b19d440bb8158267d985a"
 REPORT_ID = "syn04-strategy-b-ts01-20261014-2a5ab835"
 EVENT_SCHEMA = "csl.syn04-strategy-b-ts01-measurement-event/1"
+EXPECTED_SCENARIO = {"profile":"ts01_exact_integrator","time_domain":"discrete","times":[0,1,2],"initial_state":[0],"dynamics":[{"A":[[1]],"B":[[1]],"offset":[0]},{"A":[[1]],"B":[[1]],"offset":[0]}],"controls":[{"lower":[0],"upper":[1]},{"lower":[0],"upper":[1]}],"state_constraints":"universal at all stages","external_channels":0,"information":"nominal_open_loop","terminal_objective":{"Q":[[2]],"linear":[-2],"offset":1},"effective_request":{"target":"exact_optimal_relation","representation":"csl.polyhedron.h","assurance":"numerical","materialization_limit":None}}
+EXPECTED_ASSUMPTIONS = ["Discrete two-step scalar integrator at times 0, 1, 2.","Known initial state x0=0; all state constraints are universal.","Both transitions are x[t+1]=x[t]+u[t] with zero affine offsets and no external channels.","Continuous controls independently constrained to [0,1].","Nominal open-loop information; no observations or temporal constraints.","Terminal quadratic objective J(x2)=x2^2-2*x2+1=(x2-1)^2.","Effective request asks for exact_optimal_relation in H-representation under Assurance::numerical and no materialization limit."]
+EXPECTED_EVIDENCE_LIMITS = ["Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.","The result reports Assurance::numerical; validated arithmetic assurance is unavailable.","This is one Strategy B measurement, not a comparison, speedup, application-scale, throughput, or scalability claim.","All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.","No source-mapped performance limiter was identified because WPR CPU stack profiling was denied by Windows policy.","Internal preparation, LP, QP, extraction, verifier and export timing counters are unavailable."]
+EXPECTED_SCOPE = "Fresh problem construction and resolution, registered Strategy B and HiGHS LP/convex provider creation/selection, StrategyRegistry preparation, exclusive public StrategyPort workspace creation and run, compiled T-S01 verifier acceptance, and exact canonical H-relation plus exact-membership validation. Excludes process startup, JSON serialization, build, file persistence, and rendering."
+EXPECTED_LIMITER = {"available":False,"reason":"WPR CPU sampled-stack profile could not start: Windows denied enabling system-performance profiling policy (0xc5585011). Separate workload ran and process counters were collected, but they cannot attribute a hot source path; no limiter is claimed."}
 
 def canonical(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
@@ -25,8 +30,11 @@ def validate(record):
     if record.get("algorithm") != {"strategy_id":"csl.synthesis.strategy-b","strategy_version":"1","profile_id":"ts01_exact_integrator","lp_provider":"csl.lp.highs@1.0.0+highs.1.11.0","convex_provider":"csl.convex.highs@1.0.0+highs.1.11.0"}:
         errors.append("algorithm")
     scenario=record.get("scenario",{})
-    if not isinstance(scenario.get("value"),dict) or scenario.get("sha256")!=digest(scenario.get("value")):
+    if scenario.get("value")!=EXPECTED_SCENARIO:
+        errors.append("scenario_contract")
+    if scenario.get("sha256")!=digest(scenario.get("value")):
         errors.append("scenario_hash")
+    if record.get("assumptions")!=EXPECTED_ASSUMPTIONS: errors.append("assumptions")
     relation=record.get("canonical_relation",{})
     if relation != {"coordinates":["x0","x1","x2","u0","u1"],"inequalities":[[0,0,0,1,0],[0,0,0,-1,0],[0,0,0,0,1],[0,0,0,0,-1]],"inequality_rhs":[1,0,1,0],"equalities":[[1,0,0,0,0],[0,1,0,-1,0],[0,0,1,0,0],[0,0,0,1,1]],"equality_rhs":[0,0,1,1],"parametric_form":"(0,s,1,s,1-s), 0<=s<=1","objective_minimum":0}:
         errors.append("canonical_relation")
@@ -46,15 +54,15 @@ def validate(record):
     if counts!={"warmup":1,"measured":7,"passed":7,"failed":0,"all_outputs_consumed_and_validated":True}:
         errors.append("counts")
     if measurement.get("performance_conclusion")!="inconclusive": errors.append("performance_conclusion")
-    if not measurement.get("limiter",{}).get("reason"): errors.append("limiter_gap")
+    if measurement.get("limiter")!=EXPECTED_LIMITER: errors.append("limiter")
     observation=measurement.get("result_observation",{})
     if observation!={"termination":"completed","outcome":"optimal","disposition":"complete_optimal_family","registry_verified":True,"assurance":"numerical","objective_lower":0,"objective_upper":0,"canonical_relation_checked_each_trial":True}:
         errors.append("result_observation")
     if measurement.get("trajectory_checks")!={"original_objectives":[e.get("trajectory_objective") for e in events],"maximum_residuals":[e.get("trajectory_max_residual") for e in events],"tolerances":{"absolute":1e-8,"relative":1e-8},"verifiers":sorted({e.get("residual_verifier") for e in events})}:
         errors.append("trajectory_checks")
-    if measurement.get("scope") is None or "exact canonical H-relation" not in measurement.get("scope",""):
+    if measurement.get("scope")!=EXPECTED_SCOPE:
         errors.append("timing_scope")
-    if record.get("evidence_limits") is None or not isinstance(record.get("evidence_limits"),list): errors.append("evidence_limits")
+    if record.get("evidence_limits")!=EXPECTED_EVIDENCE_LIMITS: errors.append("evidence_limits")
     return errors
 
 def render_html(record):

@@ -17,6 +17,42 @@ def checked(command,**kwargs):
     result=run(command,**kwargs)
     if result.returncode: raise SystemExit(f"command failed ({result.returncode}): {command!r}\n"+result.stderr.decode(errors="replace")[-5000:])
     return result
+def record_failed_collection(out,process,reason,events):
+    failures=[{"repetition":event.get("repetition"),"warmup":event.get("warmup"),"status":event.get("status"),
+        "result_disposition":event.get("result_disposition"),"error":event.get("error")} for event in events
+        if not isinstance(event,dict) or event.get("status")!="passed" or
+        event.get("result_disposition")!="complete_optimal_family" or event.get("error")]
+    emitted_line_count=len([line for line in process.stdout.splitlines() if line.strip()])
+    metadata={"schema":"csl.syn04-strategy-b-failed-collection/1","process_return_code":process.returncode,
+        "reason":reason,"emitted_line_count":emitted_line_count,"event_count":len(events),"failed_event_count":len(failures),"failed_events":failures,
+        "raw_stdout_sha256":hashlib.sha256(process.stdout).hexdigest(),
+        "raw_stderr_sha256":hashlib.sha256(process.stderr).hexdigest(),"raw_events_file":"events.jsonl",
+        "stderr_file":"process-stderr.txt","successful_report_generated":False}
+    (out/"failed-run.json").write_text(json.dumps(metadata,sort_keys=True,indent=2)+"\n",encoding="utf-8")
+def persist_measurement_process(out,process):
+    """Persist exact driver output before interpreting exit status or event success."""
+    out=Path(out);out.mkdir(parents=True,exist_ok=False)
+    (out/"events.jsonl").write_bytes(process.stdout)
+    (out/"process-stderr.txt").write_bytes(process.stderr)
+    parse_errors=[];events=[]
+    try: lines=process.stdout.decode("utf-8",errors="strict").splitlines()
+    except UnicodeError as error:
+        lines=[];parse_errors.append(f"measurement executable returned invalid UTF-8 JSONL: {error}")
+    for number,line in enumerate(lines,1):
+        if not line.strip(): continue
+        try: event=json.loads(line)
+        except json.JSONDecodeError as error:
+            parse_errors.append(f"invalid JSONL record at line {number}: {error}");continue
+        if not isinstance(event,dict):
+            parse_errors.append(f"non-object JSONL record at line {number}");continue
+        events.append(event)
+    reasons=[]
+    if process.returncode: reasons.append(f"measurement executable exited with status {process.returncode}")
+    reasons.extend(parse_errors)
+    if reasons:
+        record_failed_collection(out,process,"; ".join(reasons),events)
+        return events,"; ".join(reasons)
+    return events,None
 def profiled_workload(executable):
     started=time.perf_counter_ns();samples=[]
     process=subprocess.Popen([str(executable)],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -115,23 +151,31 @@ def main():
         profile_file=str(profile_path) if stopped.returncode==0 and profile_path.exists() else None
     if profile_proc["return_code"] or profile_proc["timed_out"]:
         raise SystemExit("separate profile workload failed; refusing to measure")
-    measured_proc=run([exe],timeout=300)
+    try: measured_proc=run([exe],timeout=300)
+    except subprocess.TimeoutExpired as error:
+        measured_proc=subprocess.CompletedProcess(error.cmd,124,error.stdout or b"",error.stderr or b"")
+        retained,reason=persist_measurement_process(out,measured_proc)
+        record_failed_collection(out,measured_proc,"measurement timed out; "+str(error),retained)
+        raise SystemExit(f"measurement timed out; raw event JSONL retained at {out}") from error
     post_cpu=psutil.cpu_percent(interval=1.0) if psutil else None
-    if measured_proc.returncode:
-        raise SystemExit("accepted measurement executable failed; failed records are not silently summarized")
+    events,process_error=persist_measurement_process(out,measured_proc)
+    if process_error:
+        raise SystemExit(process_error+f"; raw event JSONL retained at {out}")
+    def reject_collection(reason):
+        record_failed_collection(out,measured_proc,reason,events)
+        raise SystemExit(reason+f"; raw event JSONL retained at {out}")
     if git(source,"rev-parse","HEAD")!=report.SOURCE_COMMIT or git(source,"status","--porcelain"):
-        raise SystemExit("pinned source changed during run")
+        reject_collection("pinned source changed during run")
     if git(root,"status","--porcelain") or git(root,"rev-parse","HEAD")!=harness_commit:
-        raise SystemExit("harness checkout changed during collection")
-    try:
-        events=[json.loads(line) for line in measured_proc.stdout.decode("utf-8",errors="strict").splitlines()]
-    except (UnicodeError,json.JSONDecodeError) as error: raise SystemExit("measurement executable returned invalid JSONL") from error
-    if len(events)!=8 or any(e.get("schema")!=report.EVENT_SCHEMA for e in events): raise SystemExit("wrong event schema or trial count")
+        reject_collection("harness checkout changed during collection")
+    if len(events)!=8 or any(e.get("schema")!=report.EVENT_SCHEMA for e in events): reject_collection("wrong event schema or trial count")
     if [(e.get("repetition"),e.get("warmup")) for e in events]!=[(0,True),*[(i,False) for i in range(1,8)]]:
-        raise SystemExit("warmup/trial order differs from the admitted profile")
+        reject_collection("warmup/trial order differs from the admitted profile")
     if any(e.get("status")!="passed" or e.get("result_disposition")!="complete_optimal_family" for e in events):
-        raise SystemExit("failed, malformed, or downgraded trial; no success-only summary will be generated")
-    if len({e["consumed_result_marker"] for e in events})!=1: raise SystemExit("result marker differs unexpectedly between identical canonical requests")
+        reject_collection("failed, malformed, or downgraded trial; no successful summary will be generated")
+    markers=[e.get("consumed_result_marker") for e in events]
+    if any(type(marker) is not int for marker in markers) or len(set(markers))!=1:
+        reject_collection("result marker differs unexpectedly between identical canonical requests")
     build_text=(build/"CMakeCache.txt").read_text(encoding="utf-8",errors="replace")
     compiler_text=compiler_config.read_text(encoding="utf-8",errors="replace")
     version_line=next((line for line in compiler_text.splitlines() if line.startswith('set(CMAKE_CXX_COMPILER_VERSION "')),"unavailable")
@@ -149,9 +193,6 @@ def main():
       "build":{"cmake":str(cmake),"cmake_version":checked([cmake,"--version"]).stdout.decode(errors="replace").splitlines()[0],"generator":"Visual Studio 17 2022 x64","compiler":"MSVC","compiler_version":version_line,"configuration":"Release","cxx_standard":"C++20","ndebug":True,"release_properties":props,"dependencies":{"highs":{"pinned_sha256":"2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275","adapter_version":"1.0.0+highs.1.11.0"},"objectives_eigen":{"pinned_sha256":"8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"},"qhull":{"pinned_sha256":"8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"},"json":{"pinned_sha256":"0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406"},"resolved_sources":dependency_state},"cache_sha256":hashlib.sha256((build/"CMakeCache.txt").read_bytes()).hexdigest(),"project_sha256":sha(target),"compiler_config_sha256":sha(compiler_config),"configure_log_sha256":sha(build_root/"configure.log"),"build_log_sha256":sha(build_root/"build.log"),"executable_sha256":sha(exe),"executable_bytes":exe.stat().st_size,"report_driver_sha256":sha(root/"reports/algorithm-results/tooling/syn04/strategy_b_measure.cpp"),"runner_cmake_sha256":sha(root/"reports/algorithm-results/tooling/syn04/runner/CMakeLists.txt"),"configure_command":[str(x) for x in cmake_args],"build_command":[str(x) for x in build_command]},
       "source":{"head":git(source,"rev-parse","HEAD"),"tree":git(source,"rev-parse",f"{report.SOURCE_COMMIT}^{{tree}}"),"clean_before_build":True,"clean_after_run":True,"strategy_source_sha256":hashlib.sha256(run(["git","-C",source,"show",f"{report.SOURCE_COMMIT}:src/synthesis/strategy_b/direct_joint.cpp"]).stdout).hexdigest(),"strategy_header_sha256":hashlib.sha256(run(["git","-C",source,"show",f"{report.SOURCE_COMMIT}:include/csl/synthesis/strategy_b/direct_joint.hpp"]).stdout).hexdigest()},
       "raw_stdout_sha256":hashlib.sha256(measured_proc.stdout).hexdigest(),"raw_stderr_sha256":hashlib.sha256(measured_proc.stderr).hexdigest()}
-    out.mkdir(parents=True,exist_ok=False)
-    (out/"events.jsonl").write_bytes(measured_proc.stdout)
-    (out/"process-stderr.txt").write_bytes(measured_proc.stderr)
     (out/"collection.json").write_text(json.dumps(measurement,sort_keys=True,indent=2)+"\n",encoding="utf-8")
     (out/"profile.json").write_text(json.dumps(measurement["profile_attempt"],sort_keys=True,indent=2)+"\n",encoding="utf-8")
     (out/"build-provenance.json").write_text(json.dumps(measurement["build"],sort_keys=True,indent=2)+"\n",encoding="utf-8")
