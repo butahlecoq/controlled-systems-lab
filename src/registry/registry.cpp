@@ -3,27 +3,58 @@
 #include <algorithm>
 
 namespace csl::registry {
+namespace {
+bool matches_prepared_identity(const FamilyIdentity& actual,
+    const problem::ResolvedProblem& problem,const FamilyRequest& family,
+    const StrategyRequest& request) {
+    const FamilyIdentity expected{problem.identity(),family,problem.constraints().coordinates(),
+        request.configuration.strategy,request.strategy_version,request.lineage};
+    return actual==expected;
+}
+}
+
 SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::ResolvedProblem& problem,
     const FamilyRequest& family,const ExecutionContext& context) {
     auto result=workspace_->solve(problem,family,context);
-    if(!result.complete_proposal)return result;
     auto reject=[&](Diagnostics diagnostics) {
         result.family.reset();
         result.complete_proposal.reset();
+        result.partial_proposal.reset();
         result.outcome={problem.identity(),MathematicalOutcome::undetermined,Unestablished{}, {}};
         result.objective={};
         result.termination=Termination::contract_rejected;
         result.stop=ContractValidationFailure{std::move(diagnostics),{false,false,result.incumbents.size(),false},{}};
         return result;
     };
+    if(result.complete_proposal&&result.partial_proposal)
+        return reject({{DiagnosticCode::invalid_claim,"family.proposal.ambiguous",
+            "A strategy cannot submit complete-family and partial-family proposals in one result"}});
+    if(result.partial_proposal) {
+        if(!partial_verifier_||!partial_authority_)
+            return reject({{DiagnosticCode::unsupported,"family.partial.verifier",
+                "Selected strategy has no registered partial-family verifier"}});
+        const auto& proposal=*result.partial_proposal;
+        const auto& identity=proposal.identity;
+        if(family.target!=FamilyTarget::partial_relation||
+            !matches_prepared_identity(identity,problem,family,*request_))
+            return reject({{DiagnosticCode::evidence_mismatch,"family.partial.binding",
+                "Partial-family proposal differs from the prepared problem, effective request, coordinates, strategy or lineage"}});
+        auto diagnostics=partial_verifier_->verify(*request_,proposal);
+        if(!diagnostics.empty())return reject(std::move(diagnostics));
+        const auto published=FamilyPublisher::publish_verified_partial(identity,proposal.family,*partial_authority_,
+            partial_verifier_->id(),partial_verifier_->version());
+        if(const auto* errors=std::get_if<Diagnostics>(&published))return reject(*errors);
+        result.family=std::get<OptimalFamily>(published);
+        result.partial_proposal.reset();
+        return result;
+    }
+    if(!result.complete_proposal)return result;
     if(!verifier_)
         return reject({{DiagnosticCode::unsupported,"family.verifier","Selected strategy has no complete-family verifier"}});
     const auto& proposal=*result.complete_proposal;
     const auto& identity=proposal.identity;
-    if(identity.problem!=problem.identity()||identity.request!=family||
-        identity.coordinates!=problem.constraints().coordinates()||
-        identity.strategy!=request_->configuration.strategy||identity.strategy_version!=request_->strategy_version||
-        identity.lineage!=request_->lineage||proposal.family.completeness.binding!=identity)
+    if(!matches_prepared_identity(identity,problem,family,*request_)||
+        proposal.family.completeness.binding!=identity)
         return reject({{DiagnosticCode::evidence_mismatch,"family.proposal.binding",
             "Complete-family proposal differs from the prepared problem, effective request or selected registration"}});
     const bool strategy_b_ts01=request_->family.target==FamilyTarget::exact_optimal_relation&&
@@ -179,6 +210,8 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
         detail::find_compiled_verifier(entry.complete_family_verifier.id,entry.complete_family_verifier.version);
     if(requirements.output.completeness==Completeness::established&&!verifier)
         return detail::reject(provenance,"family.verifier","Complete-family output requires a verifier in the compiled library catalog");
+    auto partial_verifier=entry.partial_family_verifier.id.value.empty()?nullptr:
+        detail::find_compiled_partial_verifier(entry.partial_family_verifier.id,entry.partial_family_verifier.version);
     auto planned = entry.planner(request,requirements);
     if (const auto* rejection = std::get_if<Rejection>(&planned)) return *rejection;
     auto& plan = std::get<StrategyPlan>(planned);
@@ -191,10 +224,14 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
     auto snapshot = std::make_shared<const StrategyRequest>(std::move(frozen));
     auto factory = plan.snapshot_();
     std::optional<detail::VerifiedFamilyAuthority> authority;
-    if(verifier)
+    if(verifier||partial_verifier)
         authority=detail::VerifiedFamilyAuthority(entry.identity.id,entry.identity.version);
+    std::optional<detail::VerifiedPartialFamilyAuthority> partial_authority;
+    if(partial_verifier)
+        partial_authority=detail::VerifiedPartialFamilyAuthority(entry.identity.id,entry.identity.version,
+            partial_verifier->id(),partial_verifier->version());
     return PreparedStrategy{std::move(snapshot),requirements,std::move(factory),std::move(verifier),
-        std::move(authority),std::move(records)};
+        std::move(authority),std::move(partial_verifier),std::move(partial_authority),std::move(records)};
 }
 namespace detail {
 namespace {

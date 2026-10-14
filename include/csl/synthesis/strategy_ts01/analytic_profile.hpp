@@ -20,6 +20,15 @@ public:
     bool contains(std::span<const double> canonical_history) const noexcept;
 };
 
+// Exact singleton inner subset at s=1/2 in canonical joint coordinates.
+class MidpointJointRelation final : public JointRelationPayload {
+    sets::SetData h_polyhedron_;
+    explicit MidpointJointRelation(sets::SetData);
+public:
+    static std::variant<std::shared_ptr<const MidpointJointRelation>,Diagnostics> canonical();
+    const sets::SetData& h_polyhedron() const noexcept { return h_polyhedron_; }
+};
+
 registry::StrategyRegistration make_registration();
 
 } // namespace csl::synthesis::strategy_ts01

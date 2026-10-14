@@ -63,18 +63,22 @@ evidence survive. Ordinarily `project_final` drops the live payload. For the
 T-S01 profile it retains the exact relation object in the in-memory owner
 because the typed capability binds that object; `encode_run` then refuses the
 record under the v4 wire contract.
-Generic complete- and partial-family publication are refused until reviewed
-coverage and every-history optimality procedures are implemented. The dedicated
-T-S01 analytic profile is a narrow live exception for the exact two-step scalar
-integrator, exact known initial state 0, A=B=1, zero offsets/external map,
-independent closed controls `[0,1]`, no extra restrictions, and exact squared
-objective `(x2-1)^2`. Its typed capability is bound to the resolved problem,
-effective request, coordinates, strategy/version and exact relation; it is
-numerically assured and does not create a generic coverage verifier. The v4
-schema has no T-S01 support tag, so `encode_run` returns `unsupported` for such
-a live family. This is a wire-contract limitation, not a mathematical
-rejection. The decoder never reconstructs trusted proof capability from text;
-the future generic versioned verifier seam remains tracked in
+Generic complete- and partial-family publication remain fail-closed unless the
+selected compiled verifier recognizes an exact profile. The dedicated T-S01
+analytic complete-family profile remains a narrow live exception for the exact
+two-step scalar integrator, exact known initial state 0, A=B=1, zero
+offsets/external map, independent closed controls `[0,1]`, no extra
+restrictions, and exact squared objective `(x2-1)^2`. A separate T-S01 partial
+profile may publish only the singleton history `(0,1/2,1,1/2,1/2)` with scope
+`s=1/2`; its independent partial-family verifier checks the exact resolved
+objective/request, singleton H-representation and every-history optimality
+evidence. It makes no complete-coverage claim and does not enable other partial
+profiles. Both live capabilities are bound to the resolved problem, effective
+request, coordinates, strategy/version and lineage. The v4 schema has no
+T-S01 support tag, so `encode_run` returns `unsupported` for such a live family.
+This is a wire-contract limitation, not a mathematical rejection. The decoder
+never reconstructs trusted proof capability from text; the future generic
+versioned verifier seam remains tracked in
 [issue #202](https://github.com/butahlecoq/controlled-systems-lab/issues/202).
 Candidate feasibility is scoped to the whole relation, a named full-history
 witness, or unknown; an outer enclosure with one feasible witness does not

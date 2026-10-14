@@ -68,7 +68,8 @@ SynthesisResult run(StrategyRequest request_) {
     REQUIRE_FALSE(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
     Requirements requirements;requirements.output.representation=request_.family.representation;
     requirements.output.family=request_.family.target;
-    requirements.output.completeness=Completeness::established;
+    requirements.output.completeness=request_.family.target==FamilyTarget::exact_optimal_relation?
+        Completeness::established:Completeness::unestablished;
     auto prepared=take(strategies.prepare(request_,requirements));
     auto workspace=prepared.create();
     return take(workspace->run(make_execution_context()));
@@ -123,6 +124,149 @@ TEST_CASE("registered T-S01 exact profile publishes its canonical complete famil
     CHECK_FALSE(relation->contains(Vector{0,0,0,0,0}));
     CHECK_FALSE(relation->contains(Vector{0,1,2,1,1}));
     CHECK_FALSE(relation->contains(Vector{0,1,1,1,std::numeric_limits<double>::denorm_min()}));
+}
+
+TEST_CASE("registered T-S01 admits an explicitly scoped partial-family request") {
+    auto partial=request(resolve(source()));
+    partial.family.target=FamilyTarget::partial_relation;
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
+    Requirements requirements;
+    requirements.output.representation=partial.family.representation;
+    requirements.output.family=FamilyTarget::partial_relation;
+    requirements.output.completeness=Completeness::unestablished;
+    auto prepared_result=strategies.prepare(partial,requirements);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared_result));
+    auto prepared=std::get<PreparedStrategy>(std::move(prepared_result));
+    auto workspace=prepared.create();
+    auto outcome=workspace->run(make_execution_context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(outcome));
+    const auto result=std::get<SynthesisResult>(std::move(outcome));
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::partial_relation);
+    CHECK_FALSE(result.family->registry_verified());
+    CHECK(result.family->partial_registry_verified());
+    CHECK_FALSE(result.partial_proposal);
+    CHECK(result.family->identity().problem==partial.problem.identity());
+    CHECK(result.family->identity().request==partial.family);
+    CHECK(result.family->identity().coordinates==JointCoordinates{{1,1,0},2});
+    CHECK(result.family->identity().strategy==ModuleId{"csl.synthesis.ts01-analytic"});
+    CHECK(result.family->identity().strategy_version=="1");
+    CHECK(result.family->identity().lineage.empty());
+    const auto& family=std::get<PartialOptimalFamily>(result.family->outcome());
+    CHECK(family.known_scope.description=="s=1/2");
+    CHECK(family.optimal_subset.procedure=="T-S01 exact midpoint singleton");
+    REQUIRE(family.optimum.bounds.lower);
+    REQUIRE(family.optimum.bounds.upper);
+    CHECK(family.optimum.bounds.lower->value==0);
+    CHECK(family.optimum.bounds.upper->value==0);
+    const auto* relation=dynamic_cast<const synthesis::strategy_ts01::MidpointJointRelation*>(family.relation.payload.get());
+    REQUIRE(relation);
+    const auto h=relation->h_polyhedron().representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(h));
+    const auto& singleton=std::get<sets::HRepresentation>(h);
+    CHECK(singleton.inequalities.rows()==0);
+    CHECK(singleton.equalities.rows()==5);
+    CHECK(singleton.equality_values[1]==0.5);
+    CHECK(singleton.equality_values[2]==1);
+    CHECK(singleton.equality_values[3]==0.5);
+    CHECK(singleton.equality_values[4]==0.5);
+    CHECK(check_synthesis_result(result,result.family->identity()).empty());
+    CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(result.family->identity(),family)));
+}
+
+TEST_CASE("T-S01 partial verifier rejects changed objective request lineage and singleton proof") {
+    auto partial=request(resolve(source()));
+    partial.family.target=FamilyTarget::partial_relation;
+    partial.strategy_version="1";
+    const auto result=run(partial);
+    REQUIRE(result.family);
+    const PartialFamilyProposal proposal{result.family->identity(),
+        std::get<PartialOptimalFamily>(result.family->outcome())};
+    const auto verifier=detail::find_compiled_partial_verifier({"csl.verifier.ts01-midpoint"},"1");
+    REQUIRE(verifier);
+    CHECK(verifier->verify(partial,proposal).empty());
+
+    auto changed=partial;
+    changed.family.profile="different-profile";
+    CHECK_FALSE(verifier->verify(changed,proposal).empty());
+
+    auto changed_objective_problem=source();
+    set_quadratic_objective(changed_objective_problem,2,-2,2);
+    changed=partial;
+    changed.problem=resolve(std::move(changed_objective_problem));
+    changed.family.objective=changed.problem.identity();
+    CHECK_FALSE(verifier->verify(changed,proposal).empty());
+
+    changed=partial;
+    changed.configuration.strategy={"csl.synthesis.unregistered"};
+    CHECK_FALSE(verifier->verify(changed,proposal).empty());
+
+    changed=partial;
+    changed.lineage.push_back({{"forged/step"},{"input"},{"output"},{"untrusted"},"1"});
+    CHECK_FALSE(verifier->verify(changed,proposal).empty());
+
+    auto forged=proposal;
+    forged.family.relation.payload=std::make_shared<const JointRelationPayload>();
+    CHECK_FALSE(verifier->verify(partial,forged).empty());
+
+    forged=proposal;
+    forged.family.known_scope.description="s in [0,1]";
+    CHECK_FALSE(verifier->verify(partial,forged).empty());
+
+    forged=proposal;
+    forged.family.optimal_subset.every_history_optimal.support=NumericalCheck{0,0,0,{"fake.residual"}};
+    CHECK_FALSE(verifier->verify(partial,forged).empty());
+}
+
+TEST_CASE("registry rejects ambiguous simultaneous complete and partial proposals") {
+    class AmbiguousWorkspace final : public SynthesisWorkspace {
+        SynthesisResult result_;
+    public:
+        explicit AmbiguousWorkspace(SynthesisResult result):result_(std::move(result)) {}
+        SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override {
+            return result_;
+        }
+    };
+    auto partial=request(resolve(source()));
+    partial.family.target=FamilyTarget::partial_relation;
+    partial.strategy_version="1";
+    auto genuine_partial=run(partial);
+    REQUIRE(genuine_partial.family);
+    auto complete_request=request(resolve(source()));
+    complete_request.strategy_version="1";
+    auto genuine_complete=run(complete_request);
+    REQUIRE(genuine_complete.family);
+    const auto& complete=std::get<CompleteOptimalFamily>(genuine_complete.family->outcome());
+    SynthesisResult ambiguous=genuine_partial;
+    ambiguous.complete_proposal=CompleteFamilyProposal{genuine_complete.family->identity(),complete};
+    ambiguous.partial_proposal=PartialFamilyProposal{genuine_partial.family->identity(),
+        std::get<PartialOptimalFamily>(genuine_partial.family->outcome())};
+
+    auto registration=synthesis::strategy_ts01::make_registration();
+    registration.planner=[ambiguous=std::move(ambiguous)](const StrategyRequest&,const Requirements&)
+        ->std::variant<StrategyPlan,Rejection> {
+        auto fixed=std::get<CheckedPipeline<>>(check_pipeline());
+        return compose_strategy(std::move(fixed),[ambiguous](auto,const StrategyRequest&,const Requirements&)
+            ->std::unique_ptr<SynthesisWorkspace> {
+            return std::make_unique<AmbiguousWorkspace>(ambiguous);
+        });
+    };
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(std::move(registration)).has_value());
+    Requirements requirements;requirements.output.representation=partial.family.representation;
+    requirements.output.family=partial.family.target;requirements.output.completeness=Completeness::unestablished;
+    auto prepared=take(strategies.prepare(partial,requirements));
+    auto workspace=prepared.create();
+    const auto result=take(workspace->run(make_execution_context()));
+    CHECK(result.termination==Termination::contract_rejected);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+    const auto& diagnostics=std::get<ContractValidationFailure>(result.stop).diagnostics;
+    CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
+        return diagnostic.field=="family.proposal.ambiguous";
+    }));
 }
 
 TEST_CASE("registry fails closed for verifier keys absent from the compiled catalog") {

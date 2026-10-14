@@ -112,9 +112,9 @@ bool control_interval(const AdmissibleSet& set) {
 }
 
 bool ts01_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
-    const RepresentationId& representation) {
+    const RepresentationId& representation,FamilyTarget target) {
     if(family.profile!=synthesis::strategy_ts01::profile_id||family.objective!=problem.identity()||
-        family.target!=FamilyTarget::exact_optimal_relation||family.assurance!=Assurance::numerical||
+        family.target!=target||family.assurance!=Assurance::numerical||
         family.representation!=h_polyhedron||family.materialization_limit||representation!=h_polyhedron)
         return false;
     const auto source=problem.description();
@@ -154,6 +154,12 @@ bool ts01_case_valid(const ::csl::problem::ResolvedProblem& problem,const Family
 bool ts01_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
     return ts01_case_valid(problem,request.family,request.configuration.representation)&&
         request.configuration.strategy.value==synthesis::strategy_ts01::strategy_id;
+}
+bool ts01_partial_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
+    return ts01_case_valid(problem,request.family,request.configuration.representation,FamilyTarget::partial_relation)&&
+        request.configuration.strategy.value==synthesis::strategy_ts01::strategy_id&&
+        (request.strategy_version.empty()||request.strategy_version==synthesis::strategy_ts01::strategy_version)&&
+        request.lineage.empty();
 }
 bool strategy_b_ts01_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
     return ts01_case_valid(problem,request.family,request.configuration.representation)&&
@@ -244,6 +250,62 @@ public:
         return diagnostics;
     }
 };
+class Ts01MidpointVerifier final : public CompiledPartialFamilyVerifier {
+public:
+    const ModuleId& id() const noexcept override { static const ModuleId value{"csl.verifier.ts01-midpoint"}; return value; }
+    const std::string& version() const noexcept override { static const std::string value{"1"}; return value; }
+    Diagnostics verify(const StrategyRequest& request,const PartialFamilyProposal& proposal) const override {
+        Diagnostics diagnostics;
+        if(!ts01_partial_profile_valid(request.problem,request))
+            return {{DiagnosticCode::unsupported,"ts01.partial.profile","Verifier only admits the exact nominal T-S01 partial profile"}};
+        const auto& identity=proposal.identity;
+        const auto& partial=proposal.family;
+        if(identity.problem!=request.problem.identity()||identity.request!=request.family||
+            identity.coordinates!=request.problem.constraints().coordinates()||
+            identity.strategy!=request.configuration.strategy||identity.strategy_version!=request.strategy_version||
+            identity.lineage!=request.lineage||identity.strategy!=ModuleId{synthesis::strategy_ts01::strategy_id}||
+            identity.strategy_version!=synthesis::strategy_ts01::strategy_version||
+            identity.request.target!=FamilyTarget::partial_relation||
+            partial.relation.coordinates!=identity.coordinates||
+            partial.relation.representation!=request.family.representation)
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.partial.binding",
+                "Midpoint proof must bind the prepared problem, partial request, joint coordinates, analytic strategy and ordered lineage"});
+        const auto* midpoint=dynamic_cast<const synthesis::strategy_ts01::MidpointJointRelation*>(partial.relation.payload.get());
+        bool exact_relation=false;
+        if(midpoint) {
+            const auto metadata=midpoint->h_polyhedron().metadata();
+            const auto representation=midpoint->h_polyhedron().representation();
+            const auto* h=std::get_if<::csl::sets::HRepresentation>(&representation);
+            exact_relation=metadata&&metadata->id==SetId{"ts01-midpoint-history"}&&
+                metadata->coordinate_labels==std::vector<std::string>{"x0","x1","x2","u0","u1"}&&h&&
+                h->inequalities.rows()==0&&h->inequalities.cols()==5&&h->upper_bounds.size()==0&&
+                matrix_is(h->equalities,5,5,{1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1})&&
+                vector_is(h->equality_values,{0,0.5,1,0.5,0.5});
+        }
+        if(!exact_relation)
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.partial.relation",
+                "Partial T-S01 payload must be exactly the singleton (0,1/2,1,1/2,1/2) in canonical coordinates"});
+        const SymbolicArgument optimum{"T-S01 exact midpoint optimality",
+            "The resolved objective is (x2-1)^2, so it is nonnegative for every feasible history. At the feasible midpoint history x2=1, hence the objective equals zero and the global optimum is zero."};
+        const SymbolicArgument membership{"T-S01 exact midpoint singleton",
+            "At s=1/2, (x0,x1,x2,u0,u1)=(0,1/2,1,1/2,1/2) satisfies both dynamics equations and both control bounds. Its exact objective is (1-1)^2=0, while the objective is nonnegative for every feasible history."};
+        const auto same_claim=[&](const ClaimEvidence& claim,const SymbolicArgument& proof) {
+            const auto* actual=std::get_if<SymbolicArgument>(&claim.support);
+            return claim.problem==request.problem.identity()&&actual&&
+                actual->reference==proof.reference&&actual->assumptions==proof.assumptions;
+        };
+        if(!same_claim(partial.optimum.optimum,optimum)||!partial.optimum.bounds.lower||!partial.optimum.bounds.upper||
+            partial.optimum.bounds.lower->value!=0||partial.optimum.bounds.upper->value!=0||
+            !same_claim(partial.optimum.bounds.lower->evidence,optimum)||
+            !same_claim(partial.optimum.bounds.upper->evidence,optimum)||
+            !same_claim(partial.optimal_subset.every_history_optimal,membership)||
+            partial.optimal_subset.procedure!="T-S01 exact midpoint singleton"||
+            partial.known_scope.description!="s=1/2")
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts01.partial.optimality",
+                "Partial claim must bind the exact zero optimum, singleton membership proof and explicit scope s=1/2"});
+        return diagnostics;
+    }
+};
 #ifdef CSL_TEST_VERIFIER_CATALOG
 class TestCatalogVerifier final : public CompiledCompleteFamilyVerifier {
 public:
@@ -276,6 +338,11 @@ std::shared_ptr<const CompiledCompleteFamilyVerifier> find_compiled_verifier(con
     static const auto second=std::make_shared<const TestCatalogVerifier>();
     if(id==second->id()&&version==second->version())return second;
 #endif
+    return {};
+}
+std::shared_ptr<const CompiledPartialFamilyVerifier> find_compiled_partial_verifier(const ModuleId& id,const std::string& version) {
+    static const auto ts01=std::make_shared<const Ts01MidpointVerifier>();
+    if(id==ts01->id()&&version==ts01->version())return ts01;
     return {};
 }
 std::variant<std::shared_ptr<const synthesis::strategy_ts01::ExactJointRelation>,Diagnostics> make_ts01_relation() {
