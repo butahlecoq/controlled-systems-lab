@@ -152,6 +152,8 @@ DirectJointWorkspace::DirectJointWorkspace(registry::PreparedProvider<registry::
 namespace {
 constexpr const char* strategy_id="csl.synthesis.strategy-b";
 constexpr const char* strategy_version="1";
+constexpr const char* complete_verifier_id="csl.verifier.ts01-analytic";
+constexpr const char* complete_verifier_version="1";
 Termination stopped_termination(StopReason reason) {
     switch(reason) {
     case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
@@ -246,12 +248,15 @@ class Ts01ExecutionRunner final : public SynthesisWorkspace, public registry::de
     registry::PreparedProvider<registry::LPPort> lp_;
     registry::PreparedProvider<registry::ConvexPort> convex_;
     std::optional<registry::StrategyRequest> prepared_request_;
+    std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding_;
     std::optional<registry::detail::StrategyBRuntimeLineageReceipt> receipt_;
 public:
     Ts01ExecutionRunner(registry::PreparedProvider<registry::LPPort> lp,
         registry::PreparedProvider<registry::ConvexPort> convex,
-        std::optional<registry::StrategyRequest> prepared_request={})
-        :lp_(std::move(lp)),convex_(std::move(convex)),prepared_request_(std::move(prepared_request)){}
+        std::optional<registry::StrategyRequest> prepared_request={},
+        std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding={})
+        :lp_(std::move(lp)),convex_(std::move(convex)),prepared_request_(std::move(prepared_request)),
+         verifier_binding_(std::move(verifier_binding)){}
     SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override;
     std::optional<registry::detail::StrategyBRuntimeLineageReceipt> take_runtime_receipt() noexcept override {
         return std::exchange(receipt_,std::nullopt);
@@ -424,12 +429,13 @@ SynthesisResult detail::Ts01ExecutionRunner::solve(const problem::ResolvedProble
             const OptimumEvidence optimum_evidence{optimum,{bound,bound}};
             CompleteOptimalFamily complete{{build_artifact->coordinates,request.representation,payload},optimum_evidence,
                 {identity,RegisteredCompletenessEvidence{{"csl.verifier.ts01-analytic"},"1","TS01-analytic-v1"}},Assurance::numerical};
-            if(prepared_request_&&extracted_artifact&&prepared_request_->problem.identity()==p.identity()&&
+            if(prepared_request_&&verifier_binding_&&extracted_artifact&&prepared_request_->problem.identity()==p.identity()&&
                 prepared_request_->family==request&&prepared_request_->configuration.strategy.value==strategy_id&&
                 prepared_request_->strategy_version==strategy_version&&
                 registry::detail::strategy_b_ts01_profile_valid(p,*prepared_request_)) {
                 receipt_=registry::detail::StrategyBRuntimeLineageReceipt{*prepared_request_,build_artifact,
-                    feasible_artifact,feasible_artifact,std::move(extracted_artifact),next_attempt_id()};
+                    feasible_artifact,feasible_artifact,std::move(extracted_artifact),verifier_binding_->id,
+                    verifier_binding_->version,next_attempt_id()};
             }
             result.outcome={p.identity(),MathematicalOutcome::optimal,derivation,{}};
             result.objective=optimum_evidence.bounds;
@@ -445,6 +451,7 @@ SynthesisResult detail::Ts01ExecutionRunner::solve(const problem::ResolvedProble
     return result;
 }
 registry::StrategyRegistration make_registration(const registry::Registry<registry::LPPort>& lp,const registry::Registry<registry::ConvexPort>& convex) {
+    const registry::StrategyRegistration::CompleteFamilyVerifierKey verifier_binding{{complete_verifier_id},complete_verifier_version};
     registry::StrategyRegistration registration{{{strategy_id},strategy_version},[](const registry::StrategyRequest& request,const registry::Requirements& requirements)->registry::Capability {
         auto d=capabilities(request.problem,request.family);
         if(request.configuration.representation!=request.family.representation)
@@ -455,7 +462,7 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
         return registry::Offer{{request.family.representation,Assurance::numerical,
             complete?SetRelation::equivalent:SetRelation::heuristic,request.family.target,
             complete?registry::Completeness::established:registry::Completeness::unestablished}};
-    },[&lp,&convex](const registry::StrategyRequest& request,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
+    },[&lp,&convex,verifier_binding](const registry::StrategyRequest& request,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
         registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
         program_requirements.output.assurance=request.family.assurance;
         auto generated=registry::check_providers(registry::select_provider(lp,registry::Method{request.configuration.lp,{}},program_requirements),
@@ -464,11 +471,11 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
         auto fixed=registry::check_pipeline();
         return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(fixed)),
             std::get<registry::CheckedProviders<registry::LPPort,registry::ConvexPort>>(std::move(generated)),
-            [](auto,auto providers,const registry::StrategyRequest& prepared,const registry::Requirements&)->std::unique_ptr<SynthesisWorkspace> {
+            [verifier_binding](auto,auto providers,const registry::StrategyRequest& prepared,const registry::Requirements&)->std::unique_ptr<SynthesisWorkspace> {
                 return std::make_unique<detail::Ts01ExecutionRunner>(std::get<0>(std::move(providers)),
-                    std::get<1>(std::move(providers)),prepared);
+                    std::get<1>(std::move(providers)),prepared,verifier_binding);
             });
-    },{{"csl.verifier.ts01-analytic"},"1"}};
+    },verifier_binding};
     registration.expected_lineage=[](const registry::StrategyRequest& request) {
         if(request.configuration.strategy.value==strategy_id&&
             registry::detail::ts01_case_valid(request.problem,request.family,request.configuration.representation))
