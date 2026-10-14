@@ -43,6 +43,53 @@ TEST_CASE("wrong problem and evidence never pass binding") {
     r=verify_trajectory(p,q);CHECK(r.bindings==CheckStatus::invalid_input);REQUIRE(r.input.bounds.lower);
     CHECK(r.input.bounds.lower->evidence.problem.value=="wrong");
 }
+TEST_CASE("mismatched outcome and objective-bound identities are rejected with evidence retained") {
+    const auto p=resolve(scalar());
+    const auto retained=CertificateReference{"retained-certificate","external-reference-only"};
+    {
+        auto q=request(p);
+        q.outcome=SynthesisOutcomeClaim{{"other-problem"},MathematicalOutcome::optimal,retained,{"caller assumption"}};
+        const auto r=verify_trajectory(p,q);
+        CHECK(r.bindings==CheckStatus::invalid_input);
+        CHECK(r.feasibility==CheckStatus::not_checked);
+        REQUIRE(r.input.outcome);
+        CHECK(r.input.outcome->subject.value=="other-problem");
+        CHECK(r.input.outcome->value==MathematicalOutcome::optimal);
+        REQUIRE(std::holds_alternative<CertificateReference>(r.input.outcome->support));
+        CHECK(std::get<CertificateReference>(r.input.outcome->support).artifact==retained.artifact);
+        CHECK(std::get<CertificateReference>(r.input.outcome->support).verifier==retained.verifier);
+        CHECK(r.input.outcome->assumptions==std::vector<std::string>{"caller assumption"});
+    }
+    {
+        auto q=request(p);
+        q.bounds.lower=ObjectiveBound{2,{{"other-problem"},retained}};
+        const auto r=verify_trajectory(p,q);
+        CHECK(r.bindings==CheckStatus::invalid_input);
+        CHECK(r.feasibility==CheckStatus::not_checked);
+        REQUIRE(r.input.bounds.lower);
+        CHECK(r.input.bounds.lower->value==2);
+        CHECK(r.input.bounds.lower->evidence.problem.value=="other-problem");
+        REQUIRE(std::holds_alternative<CertificateReference>(r.input.bounds.lower->evidence.support));
+        CHECK(std::get<CertificateReference>(r.input.bounds.lower->evidence.support).artifact==retained.artifact);
+        CHECK(std::get<CertificateReference>(r.input.bounds.lower->evidence.support).verifier==retained.verifier);
+    }
+    {
+        auto q=request(p);
+        const ProgramIdentity subject{{"other-problem"},{"reported-backend-program"}};
+        q.backend_bounds.push_back({ProgramObjectiveBound{2,{subject,retained,{"backend assumption"}}},std::nullopt});
+        const auto r=verify_trajectory(p,q);
+        CHECK(r.bindings==CheckStatus::invalid_input);
+        CHECK(r.feasibility==CheckStatus::not_checked);
+        REQUIRE(r.input.backend_bounds.size()==1);
+        REQUIRE(r.input.backend_bounds[0].lower);
+        CHECK(r.input.backend_bounds[0].lower->value==2);
+        CHECK(r.input.backend_bounds[0].lower->evidence.subject==subject);
+        REQUIRE(std::holds_alternative<CertificateReference>(r.input.backend_bounds[0].lower->evidence.support));
+        CHECK(std::get<CertificateReference>(r.input.backend_bounds[0].lower->evidence.support).artifact==retained.artifact);
+        CHECK(std::get<CertificateReference>(r.input.backend_bounds[0].lower->evidence.support).verifier==retained.verifier);
+        CHECK(r.input.backend_bounds[0].lower->evidence.assumptions==std::vector<std::string>{"backend assumption"});
+    }
+}
 TEST_CASE("two-control unit-box oracle checks each original history without claiming family coverage") {
     auto input=scalar();
     input.times={0,1,2};input.initial=KnownInitial{{0}};
