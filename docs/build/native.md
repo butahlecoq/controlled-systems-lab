@@ -54,28 +54,44 @@ The [development guide](development.md) describes the installed-package checks.
 
 ## Installed consumer
 
-The `installed_public_client` CTest installs the public library/header/config,
-copies only the standalone consumer CMake file and backend-neutral client into
-`tmp/native/installed-consumer/source`, configures/builds a separate project and
-runs its own CTest. Its package dependency is `find_package(CSL 0.1 CONFIG REQUIRED)`;
-it links `CSL::contracts`. No repository include path or backend/test header is
-provided. Product version 0.1 denotes the package, independently of interface
-document revision 1.1. The imported target propagates C++20.
+The `installed_public_client` CTest installs the configured package into
+`<build>/installed-consumer/prefix`, copies the standalone consumer CMake project
+and its module clients into `<build>/installed-consumer/source`, and builds/tests
+that separate project. It also copies the public examples and scenario template
+into `examples-source` and builds/tests them separately. The authoritative copy
+list is [RunInstalledClient.cmake](../../cmake/RunInstalledClient.cmake).
 
-To repeat that consumer manually after installation (the two input files may be
-copied anywhere):
+Both projects resolve `find_package(CSL CONFIG)` from the installed prefix without
+repository include paths. Clients link the relevant installed `CSL::` module
+targets, including `CSL::contracts`; the package propagates C++20. The consumer
+checks enabled/disabled adapter expectations. Optional clients and examples follow
+package capabilities: core examples cover scenario construction/intake; HiGHS adds
+LP/convex and backend substitution; the full package adds the synthesis comparison.
+Product version 0.1 is independent of interface document revision 1.1.
+
+After running that gate for the `dev` preset, repeat its copied module-client
+project in a fresh build directory with:
 
 ```sh
-cmake -S tmp/native/installed-consumer/source -B tmp/manual-consumer -DCMAKE_PREFIX_PATH=/absolute/path/to/install -DCMAKE_BUILD_TYPE=Release
-cmake --build tmp/manual-consumer --config Release --parallel 4
-ctest --test-dir tmp/manual-consumer -C Release --output-on-failure --no-tests=error
+cmake -S build/dev/installed-consumer/source -B build/manual-consumer -DCMAKE_PREFIX_PATH="$PWD/build/dev/installed-consumer/prefix" -DCMAKE_BUILD_TYPE=Release -DCSL_EXPECT_HIGHS=ON -DCSL_EXPECT_QHULL=ON
+cmake --build build/manual-consumer --config Release --parallel 4
+ctest --test-dir build/manual-consumer -C Release --output-on-failure --no-tests=error
 ```
 
-On Windows add `-G "Visual Studio 17 2022" -A x64`. Installed files contain no
-vendored source or third-party libraries; the contracts use only the standard
-library. Test/dependency tools remain in the ignored build tree. Any later binary
-distribution including native backends must collect actual bundled notices and
-meet the [ADR 0002 restrictions](../architecture/decisions/0002-native-integrations.md).
+For `core`, substitute `build/core` in source/prefix paths and set both expectations
+to `OFF`; for `highs`, substitute `build/highs` and set only Qhull to `OFF`. Use a
+fresh manual-consumer directory per configuration. For `dev-windows`, substitute
+`build/dev-windows` and add `-G "Visual Studio 17 2022" -A x64` at configure. For
+Windows Ninja, apply the UTF-8 shell step above. These commands require the gate's
+complete copied source set, not just the original contracts client.
+
+Public headers hide native dependency types. Full installations nevertheless
+include private static native archives and bundled dependency notices needed by
+the exported static targets; contents depend on enabled adapters. JSON notices are
+also installed. This is not a dependency-free package. Inspect the actual install
+manifest and `share/CSL/notices` before distribution and meet the
+[ADR 0002 restrictions](../architecture/decisions/0002-native-integrations.md).
+Test/dependency build tools remain in the ignored build tree.
 
 ## Historical CORE-02 evidence and limits
 
