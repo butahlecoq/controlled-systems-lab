@@ -635,8 +635,7 @@ TEST_CASE("registered Strategy B rejects partial-family preparation before creat
     const auto& rejection=std::get<registry::Rejection>(prepared);
     CHECK(rejection.provenance.port=="strategy");
     CHECK(rejection.provenance.requested.id==ModuleId{"csl.synthesis.strategy-b"});
-    REQUIRE(rejection.provenance.requested.version);
-    CHECK(*rejection.provenance.requested.version=="1");
+    CHECK_FALSE(rejection.provenance.requested.version);
     REQUIRE(rejection.provenance.actual);
     CHECK(rejection.provenance.actual->id==ModuleId{"csl.synthesis.strategy-b"});
     CHECK(rejection.provenance.actual->version=="1");
