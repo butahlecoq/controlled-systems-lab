@@ -193,7 +193,7 @@ const DirectJointPayload& payload(const SynthesisResult& r) {
     const auto cast=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);REQUIRE(cast);return *cast;
 }
 registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
-    bool foreign_provider=false,Termination solver_termination=Termination::completed) {
+    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
     auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
     if(foreign_provider) {
@@ -201,11 +201,11 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
         linear={{{"oracle-lp"},"1"},offer,[](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
         convex={{{"oracle-qp"},"1"},offer,[](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
-    } else if(solver_termination!=Termination::completed) {
+    } else if(solver_termination!=Termination::completed || stop) {
         registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
-        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,nullptr);}};
-        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,nullptr);}};
+        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop);}};
+        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop);}};
     }
     const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
     CHECK_FALSE(strategies.add(make_registration(lp,qp)));
@@ -312,6 +312,38 @@ TEST_CASE("numerical failure preserves the caller-visible incumbent bound and ca
     CHECK(std::holds_alternative<NumericalCheck>(result.objective.upper->evidence.support));
     CHECK(stop.retained.upper_bound);
     CHECK(stop.retained.incumbents==1);
+    CHECK(stop.retained.partial_or_candidate_family);
+}
+TEST_CASE("registered cancellation after optimization retains candidate and scoped objective evidence") {
+    const auto p=resolve(integrator());const auto q=request(p);std::stop_source source;
+    const auto prepared=registered_prepared(p,q,false,Termination::completed,&source);
+    auto workspace=prepared.create();ExecutionContext context;context.cancellation=source.get_token();
+    const auto result=accepted(workspace->run(context));
+    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason==StopReason::cancelled);
+    CHECK(stop.stop.diagnostics=="Original-problem anchor verification stopped; program evidence and feasible candidate retained.");
+    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
+    CHECK(stop.request.port=="convex");
+    CHECK(result.spans.empty()); // Strategy B emits no timing spans on this path; instrumentation is tracked in #89.
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& data=payload(result);REQUIRE(data.optimization);
+    CHECK(data.optimization->termination==Termination::completed);
+    CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
+    REQUIRE(data.optimization->objective.lower);CHECK(data.optimization->objective.lower->value==0);
+    CHECK(data.optimization->objective.lower->evidence.subject==data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.lower->evidence.support));
+    REQUIRE(data.optimization->objective.upper);CHECK(data.optimization->objective.upper->value==0);
+    CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.upper->evidence.support));
+    CHECK(result.incumbents.empty());
+    CHECK_FALSE(stop.retained.lower_bound);
+    CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==0);
     CHECK(stop.retained.partial_or_candidate_family);
 }
 
