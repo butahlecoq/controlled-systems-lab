@@ -1,5 +1,6 @@
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/optimization/linear_program.hpp>
+#include <csl/registry/provider.hpp>
 #include <csl/sets/data.hpp>
 #include "../../geometry/conversion/affine_coordinates.hpp"
 #include <Eigen/Core>
@@ -130,13 +131,29 @@ Facets hull_facets(const Eigen::MatrixXd& points) {
 
 struct LpAnswer { std::optional<ProgramResult> result; std::string error; std::optional<StopReason> stopped; };
 class LpRunner {
-    const registry::Registration<registry::LPPort>& registration_;
+    std::optional<registry::RegisteredLPQueryRunner> runner_;
+    std::string preparation_error_;
     const ExecutionContext& context_;
     const ConversionRequest& request_;
     std::size_t sequence_{};
 public:
     LpRunner(const registry::Registration<registry::LPPort>& r,const ExecutionContext& c,const ConversionRequest& q)
-        : registration_(r),context_(c),request_(q) {}
+        : context_(c),request_(q) {
+        registry::Registry<registry::LPPort> backends;
+        if (auto rejected=backends.add(r)) {
+            preparation_error_=rejected->diagnostics.front().explanation; return;
+        }
+        registry::Requirements required;
+        required.output.representation={"csl.program-result.v1"};
+        required.output.assurance=Assurance::numerical;
+        auto provider=registry::prepare_provider(registry::select_provider(backends,
+            {r.identity.id,r.identity.version},required));
+        if (const auto* rejected=std::get_if<registry::Rejection>(&provider)) {
+            preparation_error_=rejected->diagnostics.empty()?"Selected LP provider rejected.":rejected->diagnostics.front().explanation;
+            return;
+        }
+        runner_.emplace(std::get<registry::PreparedProvider<registry::LPPort>>(std::move(provider)));
+    }
     LpAnswer solve(const Eigen::MatrixXd& a,const Eigen::VectorXd& lower,const Eigen::VectorXd& upper,
                    const Eigen::VectorXd& objective) {
         StopReason stop{};
@@ -159,15 +176,8 @@ public:
         auto made=optimization::make_linear_program({{request_.identity.problem,{request_.identity.request.value+":qhull-"+std::to_string(sequence_++)}},
             std::move(c),0.0,std::move(csr),std::move(variables),std::move(rows)});
         if (auto* errors=std::get_if<Diagnostics>(&made)) return {{},errors->empty()?"Generated LP construction failed.":errors->front().explanation,{}};
-        registry::Registry<registry::LPPort> backends;
-        if (auto rejected=backends.add(registration_)) return {{},rejected->diagnostics.front().explanation,{}};
-        registry::Requirements required; required.output.representation={"csl.program-result.v1"}; required.output.assurance=Assurance::numerical;
-        auto prepared=registry::prepare_pipeline(registry::select(backends,{registration_.identity.id,registration_.identity.version},
-            std::get<LinearProgram>(made),required));
-        if (auto* rejection=std::get_if<registry::Rejection>(&prepared))
-            return {{},rejection->diagnostics.empty()?"Selected LP implementation rejected a generated query.":rejection->diagnostics.front().explanation,{}};
-        auto [worker]=std::get<registry::PreparedPipeline<registry::LPPort>>(std::move(prepared)).create();
-        auto outcome=worker->run(context_);
+        if (!runner_) return {{},preparation_error_,{}};
+        auto outcome=runner_->solve(std::get<LinearProgram>(made),context_);
         if (stopped(context_,stop)) return {{},"Stop observed after generated LP query.",stop};
         if (auto* rejection=std::get_if<Unsupported>(&outcome)) return {{},rejection->diagnostics.empty()?"LP query unsupported.":rejection->diagnostics.front().explanation,{}};
         return {std::get<ProgramResult>(std::move(outcome)),{}, {}};
