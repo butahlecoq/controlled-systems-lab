@@ -3,6 +3,16 @@
 #include <algorithm>
 
 namespace csl::registry {
+namespace {
+bool matches_prepared_identity(const FamilyIdentity& actual,
+    const problem::ResolvedProblem& problem,const FamilyRequest& family,
+    const StrategyRequest& request) {
+    const FamilyIdentity expected{problem.identity(),family,problem.constraints().coordinates(),
+        request.configuration.strategy,request.strategy_version,request.lineage};
+    return actual==expected;
+}
+}
+
 SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::ResolvedProblem& problem,
     const FamilyRequest& family,const ExecutionContext& context) {
     auto result=workspace_->solve(problem,family,context);
@@ -25,10 +35,8 @@ SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::Resolved
                 "Selected strategy has no registered partial-family verifier"}});
         const auto& proposal=*result.partial_proposal;
         const auto& identity=proposal.identity;
-        if(family.target!=FamilyTarget::partial_relation||identity.problem!=problem.identity()||
-            identity.request!=family||identity.coordinates!=problem.constraints().coordinates()||
-            identity.strategy!=request_->configuration.strategy||identity.strategy_version!=request_->strategy_version||
-            identity.lineage!=request_->lineage)
+        if(family.target!=FamilyTarget::partial_relation||
+            !matches_prepared_identity(identity,problem,family,*request_))
             return reject({{DiagnosticCode::evidence_mismatch,"family.partial.binding",
                 "Partial-family proposal differs from the prepared problem, effective request, coordinates, strategy or lineage"}});
         auto diagnostics=partial_verifier_->verify(*request_,proposal);
@@ -45,10 +53,8 @@ SynthesisResult detail::VerifiedStrategyWorkspace::solve(const problem::Resolved
         return reject({{DiagnosticCode::unsupported,"family.verifier","Selected strategy has no complete-family verifier"}});
     const auto& proposal=*result.complete_proposal;
     const auto& identity=proposal.identity;
-    if(identity.problem!=problem.identity()||identity.request!=family||
-        identity.coordinates!=problem.constraints().coordinates()||
-        identity.strategy!=request_->configuration.strategy||identity.strategy_version!=request_->strategy_version||
-        identity.lineage!=request_->lineage||proposal.family.completeness.binding!=identity)
+    if(!matches_prepared_identity(identity,problem,family,*request_)||
+        proposal.family.completeness.binding!=identity)
         return reject({{DiagnosticCode::evidence_mismatch,"family.proposal.binding",
             "Complete-family proposal differs from the prepared problem, effective request or selected registration"}});
     const bool strategy_b_ts01=request_->family.target==FamilyTarget::exact_optimal_relation&&
