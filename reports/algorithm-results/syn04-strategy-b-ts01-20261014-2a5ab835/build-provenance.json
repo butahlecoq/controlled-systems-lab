@@ -1,0 +1,105 @@
+{
+  "build_command": [
+    "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "--build",
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-report-rebuild-4fc8e28\\release-build",
+    "--config",
+    "Release",
+    "--target",
+    "csl_syn04_strategy_b_report",
+    "--parallel",
+    "4"
+  ],
+  "build_log_sha256": "df30e86e28262bec4564de74b766a29810a885036046fe5a4674e1a4ea4a7bf8",
+  "cache_sha256": "a0dbd08c2ffd92f6e32e4a64401ba5406326cd14d4d991c273bf38b46046ae3d",
+  "cmake": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+  "cmake_version": "cmake version 3.31.6-msvc6",
+  "compiler": "MSVC",
+  "compiler_config_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+  "compiler_version": "set(CMAKE_CXX_COMPILER_VERSION \"19.44.35215.0\")",
+  "configuration": "Release",
+  "configure_command": [
+    "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "-S",
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-b\\reports\\algorithm-results\\tooling\\syn04\\runner",
+    "-B",
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-report-rebuild-4fc8e28\\release-build",
+    "-G",
+    "Visual Studio 17 2022",
+    "-A",
+    "x64",
+    "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-report-rebuild-4fc8e28\\solver-source",
+    "-DBUILD_TESTING=OFF",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_qhull-src",
+    "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
+  ],
+  "configure_log_sha256": "7ba4c816177d9e6cbbf3d423a5f8a5c374c346432263c6e5c54537ec4dc3f709",
+  "cxx_standard": "C++20",
+  "dependencies": {
+    "highs": {
+      "adapter_version": "1.0.0+highs.1.11.0",
+      "pinned_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
+    },
+    "json": {
+      "pinned_sha256": "0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406"
+    },
+    "objectives_eigen": {
+      "pinned_sha256": "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+    },
+    "qhull": {
+      "pinned_sha256": "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"
+    },
+    "resolved_sources": {
+      "CSL_HIGHS": {
+        "commit": "source-archive-no-git-metadata",
+        "directory_sha256": "e675df3215c0e94b237f4add1f33159e6566f0928b50e7ca9ce3f1e46696f2aa",
+        "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src"
+      },
+      "CSL_JSON": {
+        "commit": "source-archive-no-git-metadata",
+        "directory_sha256": "1e4e4c85a0b46c29a341514681d4e6189fd0b5fb60e94b77075540ecf17c318a",
+        "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
+      },
+      "CSL_OBJECTIVES_EIGEN": {
+        "commit": "source-archive-no-git-metadata",
+        "directory_sha256": "f062692628c933e5fe7cb6c725fc179e6073197245861e098d69516df1d2fdf4",
+        "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src"
+      },
+      "CSL_QHULL": {
+        "commit": "source-archive-no-git-metadata",
+        "directory_sha256": "d34a90ce3602cfd6685ee0de08a4852496fdadc01025214fafdd68ca5e786dae",
+        "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_qhull-src"
+      }
+    }
+  },
+  "executable_bytes": 4089344,
+  "executable_sha256": "445d58cde496aef5ae5588f9b4e500ecf12c3b7cdb8dd81b217202ae4a762075",
+  "generator": "Visual Studio 17 2022 x64",
+  "ndebug": true,
+  "project_sha256": "da345979d8b7e4491fa1025ba23d0e08e977ecd945385a3f2900273146f0c479",
+  "release_properties": {
+    "AdditionalIncludeDirectories": "D:\\work\\PhD\\worktrees\\syn04-ts01-report-rebuild-4fc8e28\\solver-source\\include;%(AdditionalIncludeDirectories)",
+    "AssemblerListingLocation": "$(IntDir)",
+    "BasicRuntimeChecks": "Default",
+    "ConformanceMode": "true",
+    "DebugInformationFormat": "\n      ",
+    "ExceptionHandling": "Sync",
+    "InlineFunctionExpansion": "AnySuitable",
+    "LanguageStandard": "stdcpp20",
+    "MinimalRebuild": "",
+    "ObjectFileName": "$(IntDir)",
+    "Optimization": "MaxSpeed",
+    "PrecompiledHeader": "NotUsing",
+    "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+    "RuntimeLibrary": "MultiThreadedDLL",
+    "ScanSourceForModuleDependencies": "true",
+    "SupportJustMyCode": "",
+    "TreatWarningAsError": "true",
+    "UseFullPaths": "false",
+    "WarningLevel": "Level4"
+  },
+  "report_driver_sha256": "ede47392e0c17c1a537251c2f1da9989bc13d998f3459021dc5e05ab7ac399da",
+  "runner_cmake_sha256": "005ed635bca46a1448b024765d5d052f80416c46865f8a9014da4fb41e8f97c1"
+}

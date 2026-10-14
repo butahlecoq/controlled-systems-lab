@@ -25,3 +25,25 @@ Independent review checks mathematical/evidence labels, measurement validity and
 The [report-record contract](../contracts/algorithm-report-records.md) specifies the executable, saved schemas, exact timing scopes, independent literals, build/environment provenance, commands and OBS migration. `csl_lp_report --smoke` is a bounded functional test. Accepted seven-trial measurements and the separate counter profile follow review of a fixed clean Release code commit; their source identity is distinct from the later artifact commit.
 
 Collection, plotting, rendering and static staging are separate commands under `scripts/reports`. Regenerate a reviewed bundle from saved `records.json` without rerunning the solver. Keep all failures and unavailable fields, inspect actual figures/pages, and retain raw JSONL, JSON/CSV, profile/build evidence and exact-byte manifests. Bundles live under `reports/algorithm-results/<report-id>/`, with a catalogue/index and adjacent offline ZIP. Destinations are immutable, and only allowlisted reviewed files enter the main-only Pages deployment workflow. The actual deployed versioned URL and downloads must be verified before algorithm-report completion is claimed.
+
+## SYN-04 registered Strategy B T-S01 report
+
+`SYN-04 #213` is a separate result bundle for the integrated public StrategyPort
+path `csl.synthesis.strategy-b` on the exact T-S01 profile. It builds the pinned
+clean algorithm commit and executes through `StrategyRegistry` with the
+registered production HiGHS LP and convex providers. A successful trial must
+return a registry-verified `CompleteOptimalFamily` accepted by the registered
+`csl.verifier.ts01-analytic` verifier, and check the canonical T-S01
+H-relation and exact membership examples inside the timed interval. The request
+declares `Assurance::numerical`; completeness applies only to the exact profile
+and does not imply generic strategy coverage or validated arithmetic.
+
+Use `reports/algorithm-results/tooling/syn04/collect.py` and
+`build_bundle.py`, then register the typed report with
+`syn04_strategy_b_registered_reports.py` in the schema-3 catalogue/site flow.
+Retain JSONL/CSV observations, scenario, host/build/profile evidence and all
+unavailable submodule counters. The profile is a separate non-reported run.
+Without an observed, source-mapped limiter, report exploratory observations
+with an inconclusive performance conclusion. This report is one strategy only,
+has no comparator or speedup claim, and does not close SYN-04 issue #67. It does
+not replace the distinct `csl.synthesis.ts01-analytic` measurement in SYN-07.
