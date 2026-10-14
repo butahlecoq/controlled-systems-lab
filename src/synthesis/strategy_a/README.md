@@ -16,7 +16,9 @@ complete-family exceptions are registered analytic profiles. The strict
 `ts01_exact_integrator` profile is checked by the compiled T-S01 verifier. The
 `ts02_constant_integrator` profile is the scalar two-step unit integrator with
 controls in `[0,1]`, universal state factors, and constant terminal objective
-`3`; it is checked by the shared compiled T-S02 verifier. Each uses a
+`3` in linear, zero-quadratic, or zero-map residual-norm form; it is checked by
+the shared compiled T-S02 verifier. Admission uses the verifier's strict
+model/objective predicate. Each uses a
 request-dependent verifier key while preserving the T-S01 mapping. The
 registration freezes the deterministic six-step lineage, and a proposal is
 emitted only after the transformations execute in order and the terminal
@@ -58,7 +60,7 @@ forward recurrence and terminal construction support remain `Unestablished`.
 The synthesis outcome stays `undetermined`, including compiled-empty forward
 cases whose authored infeasibility has not been independently established.
 
-Published products use `HeuristicRelationEvidence` and `Unestablished`
+General-path published products use `HeuristicRelationEvidence` and `Unestablished`
 feasibility. They are candidate relations, never complete or partial optimal
 families. Ordered `FamilyIdentity` lineage records completed aggregate forward
 stages, the fallback preimage, terminal construction when present, and final
@@ -100,8 +102,13 @@ For strict T-S01 and T-S02, the registered Strategy A paths are exercised
 end-to-end. T-S02 checks all four box corners and an interior history, rejects
 an inconsistent transition point, verifies equality rank and literal control
 bounds, and binds the shared canonical H payload and constant objective bound
-through the T-S02 verifier. These narrow analytic profiles do not establish
-general numerical family coverage. For T-S01, the pre-verification recovered
+through the T-S02 verifier. Its recovered preimage independently retains the
+whole control box: all four affine corner histories are feasible, the three
+literal dynamics equalities have rank three, and the literal control bounds
+exclude every history outside the box. Adversarial tests reject unreviewed
+model/objective inputs at admission and altered lineage, relation bindings,
+objective bounds, and enlarged or unrelated payloads at verification. For
+T-S01, the pre-verification recovered
 H relation is checked independently to be exactly
 the five-coordinate canonical segment under an independent equality-rank and
 interval-substitution oracle before the compiled verifier accepts the complete

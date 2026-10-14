@@ -8,6 +8,7 @@
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include "../../../src/registry/compiled_verifiers.hpp"
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -61,12 +62,12 @@ problem::ResolvedProblem exact_integrator() {
         std::move(objective)};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
-problem::ResolvedProblem exact_ts02_integrator() {
+problem::ResolvedProblem exact_ts02_integrator(TerminalObjective objective=LinearTerminal{{0},3},double a=1) {
     Problem source{{"strategy-a-ts02"},std::make_shared<const SystemModel>(SystemModel{
-        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{a}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
         {0,1,2},KnownInitial{{0}},ContinuousDomain{{interval("u0",0,1,"u"),interval("u1",0,1,"u")}},
         {UniversalSet{1},UniversalSet{1},UniversalSet{1}}, {},{},InformationPattern::nominal_open_loop,
-        LinearTerminal{{0},3}};
+        std::move(objective)};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
 StrategyRequest request(problem::ResolvedProblem problem) {
@@ -475,7 +476,11 @@ TEST_CASE("exact T-S02 selects its analytic verifier and publishes every feasibl
     CHECK(contains(canonical,{0,1,1,1,0}));
     CHECK(contains(canonical,{0,0,1,0,1}));
     CHECK(contains(canonical,{0,.2,.9,.2,.7}));
+    CHECK(contains(canonical,{0,.4,.9,.4,.5}));
     CHECK_FALSE(contains(canonical,{0,0,2,0,1}));
+    CHECK_FALSE(contains(canonical,{1,1,1,0,0}));
+    CHECK_FALSE(contains(canonical,{0,-.1,.9,-.1,1}));
+    CHECK_FALSE(contains(canonical,{0,1.1,1.1,1.1,0}));
     const auto h=std::get<sets::HRepresentation>(canonical.representation());
     CHECK(equality_rank(h)==3);
     CHECK(has_inequality(h,{0,0,0,1,0},1));CHECK(has_inequality(h,{0,0,0,-1,0},0));
@@ -488,6 +493,94 @@ TEST_CASE("exact T-S02 selects its analytic verifier and publishes every feasibl
     CHECK(proof->verifier==ModuleId{synthesis::ts02_constant_integrator_verifier});
     CHECK(proof->verifier_version=="1");
     CHECK(proof->proof==synthesis::ts02_constant_integrator_proof);
+}
+TEST_CASE("exact T-S02 recovered preimage contains the entire feasible control box") {
+    const auto query=exact_ts02_request(exact_ts02_integrator());
+    auto workspace=take(admit(query,false,{},true)).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=take(workspace->run(context));
+    const auto& history=payload(result);
+    CHECK(history.target==synthesis::strategy_a::PreimageTarget::terminal_candidate);
+    REQUIRE(result.complete_proposal);
+    const auto h=std::get<sets::HRepresentation>(history.history.relation.representation());
+    CHECK(equality_rank(h)==3);
+    // Affine rows attaining their maximum on these four vertices admit every
+    // point (0,s,s+t,s,t), s,t in [0,1], by convexity. The three dynamics
+    // equalities and literal control bounds exclude every other history.
+    for(const Vector point:std::vector<Vector>{{0,0,0,0,0},{0,1,1,1,0},{0,0,1,0,1},{0,1,2,1,1}})
+        CHECK(contains(history.history.relation,point));
+    CHECK(has_equality(h,{1,0,0,0,0},0));
+    CHECK(has_equality(h,{-1,1,0,-1,0},0));
+    CHECK(has_equality(h,{0,-1,1,0,-1},0));
+    CHECK(has_inequality(h,{0,0,0,1,0},1));CHECK(has_inequality(h,{0,0,0,-1,0},0));
+    CHECK(has_inequality(h,{0,0,0,0,1},1));CHECK(has_inequality(h,{0,0,0,0,-1},0));
+}
+TEST_CASE("exact T-S02 rejects requests outside its reviewed model and objective at admission") {
+    for(const auto& problem:std::vector<problem::ResolvedProblem>{
+        exact_ts02_integrator(LinearTerminal{{0},7}),
+        exact_ts02_integrator(LinearTerminal{{1},3}),
+        exact_ts02_integrator(LinearTerminal{{0},3},0)}) {
+        const auto admitted=admit(exact_ts02_request(problem));
+        REQUIRE(std::holds_alternative<Rejection>(admitted));
+        CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
+    }
+}
+TEST_CASE("exact T-S02 verifier rejects altered Strategy A bindings and payloads") {
+    const auto query=exact_ts02_request(exact_ts02_integrator());
+    const auto result=run(query);
+    REQUIRE(result.family);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const CompleteFamilyProposal proposal{result.family->identity(),complete};
+    auto frozen=query;frozen.lineage=result.family->identity().lineage;
+    const auto verifier=registry::detail::find_compiled_verifier({synthesis::ts02_constant_integrator_verifier},"1");
+    REQUIRE(verifier);
+    CHECK(verifier->verify(frozen,proposal).empty());
+    const auto rejected=[&](const StrategyRequest& request,const CompleteFamilyProposal& altered,std::string field) {
+        const auto diagnostics=verifier->verify(request,altered);
+        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[&](const Diagnostic& diagnostic) {
+            return diagnostic.field==field;
+        }));
+    };
+    auto wrong_lineage=frozen;wrong_lineage.lineage.pop_back();
+    rejected(wrong_lineage,proposal,"ts02.verifier.profile");
+    auto wrong_model=frozen;wrong_model.problem=exact_ts02_integrator(LinearTerminal{{0},3},0);
+    rejected(wrong_model,proposal,"ts02.verifier.profile");
+    auto wrong_objective=frozen;wrong_objective.problem=exact_ts02_integrator(LinearTerminal{{0},4});
+    rejected(wrong_objective,proposal,"ts02.verifier.profile");
+    auto wrong_binding=proposal;wrong_binding.identity.lineage.front().output={"foreign-output"};
+    rejected(frozen,wrong_binding,"ts02.verifier.binding");
+    auto wrong_bounds=proposal;wrong_bounds.family.optimum.bounds.upper->value=4;
+    rejected(frozen,wrong_bounds,"ts02.verifier.optimum");
+    auto wrong_payload=proposal;wrong_payload.family.relation.payload=std::make_shared<const JointRelationPayload>();
+    rejected(frozen,wrong_payload,"ts02.verifier.relation");
+    const auto* exact=dynamic_cast<const synthesis::Ts02ConstantIntegratorRelation*>(complete.relation.payload.get());
+    REQUIRE(exact);
+    auto h=std::get<sets::HRepresentation>(exact->h_polyhedron().representation());
+    h.upper_bounds=take(numeric::snapshot_vector(Vector{2,0,1,0}));
+    auto enlarged=take(sets::make_h({{"ts02-optimal-histories"},5,{"x0","x1","x2","u0","u1"}},h));
+    wrong_payload.family.relation.payload=std::make_shared<const synthesis::Ts02ConstantIntegratorRelation>(std::move(enlarged));
+    rejected(frozen,wrong_payload,"ts02.verifier.relation");
+}
+TEST_CASE("exact T-S02 preserves the reviewed constant quadratic and residual norm objectives") {
+    for(const auto& objective:std::vector<TerminalObjective>{
+        QuadraticTerminal{{1,1,{0}},{0},3},ResidualNormTerminal{{1,1,{0}},{3}}}) {
+        const auto result=run(exact_ts02_request(exact_ts02_integrator(objective)));
+        REQUIRE(result.termination==Termination::completed);
+        REQUIRE(result.family);
+        CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+        CHECK(result.family->registry_verified());
+        REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+        CHECK(result.objective.lower->value==3);CHECK(result.objective.upper->value==3);
+    }
+}
+TEST_CASE("exact T-S02 freezes the selected registration version during preparation") {
+    auto query=exact_ts02_request(exact_ts02_integrator());query.strategy_version.clear();
+    const auto result=run(query);
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->registry_verified());
+    CHECK(result.family->identity().strategy_version=="1");
 }
 TEST_CASE("T-S03 singular A keeps free earlier controls with a unique terminal minimizer") {
     // Reproduce an ordinary preceding Strategy A call that exits at the late

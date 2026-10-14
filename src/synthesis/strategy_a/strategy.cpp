@@ -18,8 +18,7 @@ Diagnostics unsupported(std::string field,std::string reason) {
 Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyRequest& family) {
     if(auto errors=check_family_request(family,problem.identity());!errors.empty())return errors;
     const bool exact_ts01=registry::detail::ts01_case_valid(problem,family,family.representation);
-    const bool exact_ts02=family.profile==::csl::synthesis::ts02_constant_integrator_profile&&
-        family.target==FamilyTarget::exact_optimal_relation;
+    const bool exact_ts02=registry::detail::ts02_case_valid(problem,family,family.representation);
     if(!exact_ts01&&!exact_ts02&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and the reviewed T-S01/T-S02 exact profiles are supported.");
     if(!exact_ts01&&!exact_ts02&&family.target!=FamilyTarget::candidate_relaxation)
         return unsupported("strategy_a.coverage","No reviewed coverage procedure or optimal-subset verifier; request a candidate relation.");
@@ -212,8 +211,7 @@ public:
             const bool exact_ts01=registry::detail::ts01_case_valid(problem,request,request.representation)&&
                 lineage==expected_lineage_&&minimized.optimization&&
                 minimized.optimization->outcome.value==MathematicalOutcome::optimal;
-            const bool exact_ts02=request.profile==::csl::synthesis::ts02_constant_integrator_profile&&
-                request.target==FamilyTarget::exact_optimal_relation&&lineage==expected_lineage_&&
+            const bool exact_ts02=registry::detail::ts02_case_valid(problem,request,request.representation)&&lineage==expected_lineage_&&
                 minimized.optimization&&minimized.optimization->outcome.value==MathematicalOutcome::optimal;
             const auto proposal_identity=FamilyIdentity{problem.identity(),request,history.coordinates,
                 strategy,version,lineage};
@@ -289,21 +287,18 @@ registry::StrategyRegistration make_registration(Providers providers) {
                 registry::detail::ts01_case_valid(request.problem,request.family,request.configuration.representation))
                 return detail::expected_ts01_lineage(request.problem.identity());
             if(request.strategy_version==version&&request.configuration.strategy==strategy&&
-                request.family.profile==::csl::synthesis::ts02_constant_integrator_profile&&
-                request.family.target==FamilyTarget::exact_optimal_relation)
-                return detail::expected_ts01_lineage(request.problem.identity());
+                registry::detail::ts02_case_valid(request.problem,request.family,request.configuration.representation))
+                return detail::expected_ts02_lineage(request.problem.identity());
             return std::vector<TransformStepIdentity>{};
         }};
     registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
         ->std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> {
-        if(request.strategy_version==version&&request.configuration.strategy==strategy&&
-            registry::detail::ts01_case_valid(request.problem,request.family,request.configuration.representation))
-            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};
-        if(request.strategy_version==version&&request.configuration.strategy==strategy&&
-            request.family.profile==::csl::synthesis::ts02_constant_integrator_profile&&
-            request.family.target==FamilyTarget::exact_optimal_relation)
+        if(request.configuration.strategy==strategy&&
+            registry::detail::ts02_case_valid(request.problem,request.family,request.configuration.representation))
             return registry::StrategyRegistration::CompleteFamilyVerifierKey{{::csl::synthesis::ts02_constant_integrator_verifier},"1"};
-        return {};
+        // Retain the original T-S01 binding for all other requests; capabilities
+        // still reject unsupported coverage/profile requests with scoped diagnostics.
+        return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};
     };
     return registration;
 }
