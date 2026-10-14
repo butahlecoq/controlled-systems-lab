@@ -1,4 +1,4 @@
-"""Typed publication adapter for registered SYN-04 Strategy A records."""
+"""Typed publication adapter for registered SYN-03 Strategy A records."""
 from __future__ import annotations
 import csv,hashlib,importlib.util,io,json
 from html import escape
@@ -7,46 +7,49 @@ import sys
 
 import registered_reports as common
 ROOT=Path(__file__).resolve().parents[2]
-REPORT_SPEC=importlib.util.spec_from_file_location("csl_syn04_strategy_a_report_contract",ROOT/"reports/algorithm-results/tooling/syn04/strategy_a_report.py")
+REPORT_SPEC=importlib.util.spec_from_file_location("csl_syn03_strategy_a_report_contract",ROOT/"reports/algorithm-results/tooling/syn03/strategy_a_report.py")
 report=importlib.util.module_from_spec(REPORT_SPEC);sys.modules[REPORT_SPEC.name]=report;REPORT_SPEC.loader.exec_module(report)
 
-KIND="syn04-strategy-a-ts01"
+KIND="syn03-strategy-a-ts01"
 FILES={"README.md","build-provenance.json","commands.json","environment.json","index.html","measurement-events.jsonl","measurement.json","process-stderr.txt","profile.json","records.json","scenarios.json","trials.csv"}
 
 def _json(path): return json.loads(Path(path).read_text(encoding="utf-8"))
 def _canonical(value): return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(",",":"),allow_nan=False).encode("utf-8")
 def _pretty(value): return (json.dumps(value,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False)+"\n").encode("utf-8")
 
+def public_report_id(identity):
+    return "syn03-strategy-a-ts01-"+hashlib.sha256(_canonical(identity)).hexdigest()
+
 def adapt(bundle):
     bundle=Path(bundle)
-    if bundle.is_symlink(): raise ValueError("SYN-04 report directory cannot be a symlink")
+    if bundle.is_symlink(): raise ValueError("SYN-03 report directory cannot be a symlink")
     record=_json(bundle/"records.json")
     errors=report.validate(record)
-    if errors: raise ValueError("invalid SYN-04 Strategy A record: "+", ".join(errors))
-    if bundle.name!=record["report_id"]: raise ValueError("SYN-04 source identity differs from directory")
+    if errors: raise ValueError("invalid SYN-03 Strategy A record: "+", ".join(errors))
+    if bundle.name!=record["report_id"]: raise ValueError("SYN-03 source identity differs from directory")
     manifest=_json(bundle/"manifest.json")
-    if manifest.get("schema")!="csl.syn04-strategy-a-ts01-manifest/1" or manifest.get("report_id")!=bundle.name or manifest.get("source_commit")!=record["source_commit"] or manifest.get("harness_commit")!=record["harness_commit"]:
-        raise ValueError("SYN-04 manifest identity mismatch")
+    if manifest.get("schema")!="csl.syn03-strategy-a-ts01-manifest/1" or manifest.get("report_id")!=bundle.name or manifest.get("source_commit")!=record["source_commit"] or manifest.get("harness_commit")!=record["harness_commit"]:
+        raise ValueError("SYN-03 manifest identity mismatch")
     actual={p.relative_to(bundle).as_posix() for p in bundle.rglob("*") if p.is_file() and not p.is_symlink()}
-    if actual!=FILES|{"manifest.json"} or set(manifest.get("files",{}))!=FILES: raise ValueError("SYN-04 bundle inventory mismatch")
+    if actual!=FILES|{"manifest.json"} or set(manifest.get("files",{}))!=FILES: raise ValueError("SYN-03 bundle inventory mismatch")
     for name,expected in manifest["files"].items():
-        if hashlib.sha256((bundle/name).read_bytes()).hexdigest()!=expected: raise ValueError("SYN-04 bundle hash mismatch: "+name)
-    if (bundle/"index.html").read_text(encoding="utf-8")!=report.render_html(record): raise ValueError("SYN-04 HTML differs from typed record")
-    if _json(bundle/"measurement.json")!=record["measurement"]: raise ValueError("SYN-04 measurement sidecar differs from typed record")
-    if _json(bundle/"scenarios.json")!=record["scenario"]: raise ValueError("SYN-04 scenario sidecar differs from typed record")
-    if _json(bundle/"environment.json")!=record["environment"] or _json(bundle/"build-provenance.json")!=record["build"]: raise ValueError("SYN-04 environment/build sidecar differs")
-    if _json(bundle/"profile.json")!=record["measurement"]["profile_attempt"]: raise ValueError("SYN-04 separate profile sidecar differs")
+        if hashlib.sha256((bundle/name).read_bytes()).hexdigest()!=expected: raise ValueError("SYN-03 bundle hash mismatch: "+name)
+    if (bundle/"index.html").read_text(encoding="utf-8")!=report.render_html(record): raise ValueError("SYN-03 HTML differs from typed record")
+    if _json(bundle/"measurement.json")!=record["measurement"]: raise ValueError("SYN-03 measurement sidecar differs from typed record")
+    if _json(bundle/"scenarios.json")!=record["scenario"]: raise ValueError("SYN-03 scenario sidecar differs from typed record")
+    if _json(bundle/"environment.json")!=record["environment"] or _json(bundle/"build-provenance.json")!=record["build"]: raise ValueError("SYN-03 environment/build sidecar differs")
+    if _json(bundle/"profile.json")!=record["measurement"]["profile_attempt"]: raise ValueError("SYN-03 separate profile sidecar differs")
     try: raw_events=[json.loads(line) for line in (bundle/"measurement-events.jsonl").read_text(encoding="utf-8").splitlines()]
-    except (UnicodeError,json.JSONDecodeError) as error: raise ValueError("SYN-04 raw event file is malformed") from error
-    if raw_events!=record["measurement"]["events"]: raise ValueError("SYN-04 raw event file differs")
+    except (UnicodeError,json.JSONDecodeError) as error: raise ValueError("SYN-03 raw event file is malformed") from error
+    if raw_events!=record["measurement"]["events"]: raise ValueError("SYN-03 raw event file differs")
     stream=io.StringIO(newline="");fields=("repetition","warmup","elapsed_ns","termination","outcome","result_disposition","registry_verified","assurance","canonical_relation_checked","completeness_verifier","completeness_verifier_version","status","consumed_result_marker","providers","lineage","representative_coordinates","trajectory_objective","trajectory_max_residual","absolute_tolerance","relative_tolerance","residual_verifier","error")
     writer=csv.DictWriter(stream,fieldnames=fields,lineterminator="\n");writer.writeheader()
     for event in record["measurement"]["events"]: writer.writerow({key:event[key] for key in fields})
-    if (bundle/"trials.csv").read_bytes()!=stream.getvalue().encode("utf-8"): raise ValueError("SYN-04 CSV differs from typed timing events")
+    if (bundle/"trials.csv").read_bytes()!=stream.getvalue().encode("utf-8"): raise ValueError("SYN-03 CSV differs from typed timing events")
     source_hashes={name:hashlib.sha256((bundle/name).read_bytes()).hexdigest() for name in sorted(actual)}
     identity={"schema":"csl.registered-publication-identity/1","source_report_id":bundle.name,"source_files":source_hashes,
         "publisher_sha256":hashlib.sha256(Path(__file__).read_bytes().replace(b"\r\n",b"\n")).hexdigest()}
-    public_id="syn04-strategy-a-ts01-"+hashlib.sha256(_canonical(identity)).hexdigest()
+    public_id=public_report_id(identity)
     payload_hash=hashlib.sha256(_canonical(record)).hexdigest()
     limits="; ".join(record["evidence_limits"])
     scope="Exact T-S01 profile; one registered Strategy A; seven validated measured trials; performance conclusion inconclusive"

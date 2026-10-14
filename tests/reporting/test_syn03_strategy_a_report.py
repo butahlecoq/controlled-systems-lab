@@ -11,14 +11,17 @@ ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/"scripts/reports"))
 import report_data
 
-TOOL=ROOT/"reports/algorithm-results/tooling/syn04/strategy_a_report.py"
-spec=importlib.util.spec_from_file_location("csl_test_syn04_strategy_a_report",TOOL)
+TOOL=ROOT/"reports/algorithm-results/tooling/syn03/strategy_a_report.py"
+spec=importlib.util.spec_from_file_location("csl_test_syn03_strategy_a_report",TOOL)
 report=importlib.util.module_from_spec(spec);sys.modules[spec.name]=report;spec.loader.exec_module(report)
-COLLECT_TOOL=ROOT/"reports/algorithm-results/tooling/syn04/strategy_a_collect.py"
+COLLECT_TOOL=ROOT/"reports/algorithm-results/tooling/syn03/strategy_a_collect.py"
 sys.path.insert(0,str(COLLECT_TOOL.parent));sys.modules.pop("report",None)
-collect_spec=importlib.util.spec_from_file_location("csl_test_syn04_strategy_a_collect",COLLECT_TOOL)
+collect_spec=importlib.util.spec_from_file_location("csl_test_syn03_strategy_a_collect",COLLECT_TOOL)
 collect=importlib.util.module_from_spec(collect_spec);sys.modules[collect_spec.name]=collect;collect_spec.loader.exec_module(collect)
 sys.modules.pop("report",None);sys.path.remove(str(COLLECT_TOOL.parent))
+ADAPTER_TOOL=ROOT/"scripts/reports/syn03_strategy_a_registered_reports.py"
+adapter_spec=importlib.util.spec_from_file_location("csl_test_syn03_strategy_a_publisher",ADAPTER_TOOL)
+adapter=importlib.util.module_from_spec(adapter_spec);sys.modules[adapter_spec.name]=adapter;adapter_spec.loader.exec_module(adapter)
 
 def scenario_fixture():
     return {"profile":"ts01_exact_integrator","time_domain":"discrete","times":[0,1,2],"initial_state":[0],"dynamics":[{"A":[[1]],"B":[[1]],"offset":[0]},{"A":[[1]],"B":[[1]],"offset":[0]}],"controls":[{"lower":[0],"upper":[1]},{"lower":[0],"upper":[1]}],"state_constraints":"universal at all stages","external_channels":0,"information":"nominal_open_loop","terminal_objective":{"Q":[[2]],"linear":[-2],"offset":1},"effective_request":{"target":"exact_optimal_relation","representation":"csl.polyhedron.h","assurance":"numerical","materialization_limit":None}}
@@ -29,15 +32,29 @@ EVIDENCE_LIMITS=report.EXPECTED_EVIDENCE_LIMITS
 def valid_record():
     times=[100,110,90,120,105,95,115]
     providers=["csl.conversion.qhull@1.0.0+qhull.8.0.2","csl.convex.highs@1.0.0+highs.1.11.0","csl.geometry.affine-sum@1.0.0","csl.geometry.polyhedral-projection@1.0.0","csl.hull.lp-membership@1.0.0","csl.lp.highs@1.0.0+highs.1.11.0"]
-    base={"schema":report.EVENT_SCHEMA,"status":"passed","termination":"completed","outcome":"optimal","result_disposition":"complete_optimal_family","registry_verified":True,"assurance":"numerical","canonical_relation_checked":True,"completeness_verifier":"csl.verifier.ts01-analytic","completeness_verifier_version":"1","consumed_result_marker":1,"lp_provider":"csl.lp.highs@1.0.0+highs.1.11.0","convex_provider":"csl.convex.highs@1.0.0+highs.1.11.0","providers":providers,"lineage":report.EXPECTED_LINEAGE,"representative_coordinates":[0,0.25,1,0.25,0.75],"trajectory_objective":0,"trajectory_max_residual":0,"absolute_tolerance":1e-8,"relative_tolerance":1e-8,"residual_verifier":"syn04-strategy-a-independent-original-check/1","error":""}
+    base={"schema":report.EVENT_SCHEMA,"status":"passed","termination":"completed","outcome":"optimal","result_disposition":"complete_optimal_family","registry_verified":True,"assurance":"numerical","canonical_relation_checked":True,"completeness_verifier":"csl.verifier.ts01-analytic","completeness_verifier_version":"1","consumed_result_marker":1,"lp_provider":"csl.lp.highs@1.0.0+highs.1.11.0","convex_provider":"csl.convex.highs@1.0.0+highs.1.11.0","providers":providers,"lineage":report.EXPECTED_LINEAGE,"representative_coordinates":[0,0.25,1,0.25,0.75],"trajectory_objective":0,"trajectory_max_residual":0,"absolute_tolerance":1e-8,"relative_tolerance":1e-8,"residual_verifier":"syn03-strategy-a-independent-original-check/1","error":""}
     events=[{**base,"repetition":0,"warmup":True,"elapsed_ns":80}]
     events += [{**base,"repetition":i,"warmup":False,"elapsed_ns":value} for i,value in enumerate(times,1)]
     relation={"coordinates":["x0","x1","x2","u0","u1"],"inequalities":[[0,0,0,1,0],[0,0,0,-1,0],[0,0,0,0,1],[0,0,0,0,-1]],"inequality_rhs":[1,0,1,0],"equalities":[[1,0,0,0,0],[0,1,0,-1,0],[0,0,1,0,0],[0,0,0,1,1]],"equality_rhs":[0,0,1,1],"parametric_form":"(0,s,1,s,1-s), 0<=s<=1","objective_minimum":0}
     return {"schema":report.SCHEMA,"report_id":report.REPORT_ID,"source_commit":report.SOURCE_COMMIT,"harness_commit":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "algorithm":{"strategy_id":"csl.synthesis.reach-back","strategy_version":"1","profile_id":"ts01_exact_integrator","lp_provider":"csl.lp.highs@1.0.0+highs.1.11.0","convex_provider":"csl.convex.highs@1.0.0+highs.1.11.0","registered_providers":providers},
-      "scenario":{"value":scenario_fixture(),"sha256":report.digest(scenario_fixture())},"assumptions":ASSUMPTIONS,"canonical_relation":relation,"evidence_limits":EVIDENCE_LIMITS,"measurement":{"scope":report.EXPECTED_SCOPE,"events":events,"timing_ns":{"observations":times,"median":105,"min":90,"max":120,"range":30},"counts":{"warmup":1,"measured":7,"passed":7,"failed":0,"all_outputs_consumed_and_validated":True},"result_observation":{"termination":"completed","outcome":"optimal","disposition":"complete_optimal_family","registry_verified":True,"assurance":"numerical","objective_lower":0,"objective_upper":0,"canonical_relation_checked_each_trial":True},"trajectory_checks":{"representative_coordinates":[[0,0.25,1,0.25,0.75]]*8,"original_objectives":[0]*8,"maximum_residuals":[0]*8,"equations_checked":["x0=0","x1=x0+u0","x2=x1+u1","0<=u0<=1","0<=u1<=1","J(x2)=(x2-1)^2=0"],"tolerances":{"absolute":1e-8,"relative":1e-8},"verifiers":["syn04-strategy-a-independent-original-check/1"]},"phase_counters":report.EXPECTED_PHASE_COUNTERS,"performance_conclusion":"inconclusive","limiter":report.EXPECTED_LIMITER}}
+      "scenario":{"value":scenario_fixture(),"sha256":report.digest(scenario_fixture())},"assumptions":ASSUMPTIONS,"canonical_relation":relation,"evidence_limits":EVIDENCE_LIMITS,"measurement":{"scope":report.EXPECTED_SCOPE,"events":events,"timing_ns":{"observations":times,"median":105,"min":90,"max":120,"range":30},"counts":{"warmup":1,"measured":7,"passed":7,"failed":0,"all_outputs_consumed_and_validated":True},"result_observation":{"termination":"completed","outcome":"optimal","disposition":"complete_optimal_family","registry_verified":True,"assurance":"numerical","objective_lower":0,"objective_upper":0,"canonical_relation_checked_each_trial":True},"trajectory_checks":{"representative_coordinates":[[0,0.25,1,0.25,0.75]]*8,"original_objectives":[0]*8,"maximum_residuals":[0]*8,"equations_checked":["x0=0","x1=x0+u0","x2=x1+u1","0<=u0<=1","0<=u1<=1","J(x2)=(x2-1)^2=0"],"tolerances":{"absolute":1e-8,"relative":1e-8},"verifiers":["syn03-strategy-a-independent-original-check/1"]},"phase_counters":report.EXPECTED_PHASE_COUNTERS,"performance_conclusion":"inconclusive","limiter":report.EXPECTED_LIMITER}}
 
 class StrategyAReportContractTests(unittest.TestCase):
+    def test_report_identity_is_syn03_strategy_a(self):
+        self.assertEqual(report.SCHEMA,"csl.syn03-strategy-a-ts01-report/1")
+        self.assertTrue(report.REPORT_ID.startswith("syn03-strategy-a-ts01-"))
+        self.assertTrue(report.EVENT_SCHEMA.startswith("csl.syn03-strategy-a-ts01-"))
+        self.assertEqual(adapter.KIND,"syn03-strategy-a-ts01")
+        identity={"schema":"csl.registered-publication-identity/1","source_report_id":report.REPORT_ID,"source_files":{"records.json":"a"*64},"publisher_sha256":"b"*64}
+        report_id=adapter.public_report_id(identity)
+        self.assertEqual(report_id,adapter.public_report_id(identity))
+        self.assertTrue(report_id.startswith("syn03-strategy-a-ts01-"))
+        self.assertNotIn("syn04-strategy-a",report_id)
+        catalogue_row={"report_id":report_id,"report_kind":adapter.KIND,"source_report_id":report.REPORT_ID}
+        self.assertEqual(catalogue_row["report_kind"],"syn03-strategy-a-ts01")
+        self.assertNotIn("syn04-strategy-a",json.dumps(catalogue_row))
+
     def test_accepts_only_complete_validated_trials_with_recomputed_summary(self):
         self.assertEqual(report.validate(valid_record()),[])
 

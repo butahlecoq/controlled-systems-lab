@@ -1,4 +1,4 @@
-"""Typed saved-data report for registered SYN-04 Strategy A on T-S01."""
+"""Typed saved-data report for registered SYN-03 Strategy A on T-S01."""
 from __future__ import annotations
 import hashlib
 import html
@@ -6,10 +6,10 @@ import json
 import math
 import statistics
 
-SCHEMA = "csl.syn04-strategy-a-ts01-report/1"
+SCHEMA = "csl.syn03-strategy-a-ts01-report/1"
 SOURCE_COMMIT = "451d0f7553cd0ab606c4ed07ae142310cb897eb4"
-REPORT_ID = "syn04-strategy-a-ts01-20261014-451d0f75"
-EVENT_SCHEMA = "csl.syn04-strategy-a-ts01-measurement-event/1"
+REPORT_ID = "syn03-strategy-a-ts01-20261014-451d0f75"
+EVENT_SCHEMA = "csl.syn03-strategy-a-ts01-measurement-event/1"
 EXPECTED_SCENARIO = {"profile":"ts01_exact_integrator","time_domain":"discrete","times":[0,1,2],"initial_state":[0],"dynamics":[{"A":[[1]],"B":[[1]],"offset":[0]},{"A":[[1]],"B":[[1]],"offset":[0]}],"controls":[{"lower":[0],"upper":[1]},{"lower":[0],"upper":[1]}],"state_constraints":"universal at all stages","external_channels":0,"information":"nominal_open_loop","terminal_objective":{"Q":[[2]],"linear":[-2],"offset":1},"effective_request":{"target":"exact_optimal_relation","representation":"csl.polyhedron.h","assurance":"numerical","materialization_limit":None}}
 EXPECTED_ASSUMPTIONS = ["Discrete two-step scalar integrator at times 0, 1, 2.","Known initial state x0=0; all state constraints are universal.","Both transitions are x[t+1]=x[t]+u[t] with zero affine offsets and no external channels.","Continuous controls independently constrained to [0,1].","Nominal open-loop information; no observations or temporal constraints.","Terminal quadratic objective J(x2)=x2^2-2*x2+1=(x2-1)^2.","Effective request asks for exact_optimal_relation in H-representation under Assurance::numerical and no materialization limit."]
 EXPECTED_EVIDENCE_LIMITS = ["Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.","The result reports Assurance::numerical; validated arithmetic assurance is unavailable.","This is one Strategy A measurement, not a Strategy A versus Strategy B comparison, speedup, application-scale, throughput, or scalability claim.","All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.","No source-mapped performance limiter was identified because WPR CPU stack profiling was denied by Windows policy.","Strategy A stage and submodule timing counters are unavailable; only whole end-to-end StrategyPort duration is measured."]
@@ -45,7 +45,7 @@ def validate(record):
     if len(events)!=8 or [(x.get("repetition"),x.get("warmup")) for x in events] != [(0,True),*[(n,False) for n in range(1,8)]]:
         errors.append("event_matrix")
     required_providers={"csl.conversion.qhull@1.0.0+qhull.8.0.2","csl.convex.highs@1.0.0+highs.1.11.0","csl.geometry.affine-sum@1.0.0","csl.geometry.polyhedral-projection@1.0.0","csl.hull.lp-membership@1.0.0","csl.lp.highs@1.0.0+highs.1.11.0"}
-    if any(e.get("schema")!=EVENT_SCHEMA or e.get("status")!="passed" or e.get("result_disposition")!="complete_optimal_family" or e.get("termination")!="completed" or e.get("outcome")!="optimal" or e.get("registry_verified") is not True or e.get("assurance")!="numerical" or e.get("canonical_relation_checked") is not True or e.get("completeness_verifier")!="csl.verifier.ts01-analytic" or e.get("completeness_verifier_version")!="1" or type(e.get("elapsed_ns")) is not int or e["elapsed_ns"]<0 or not e.get("consumed_result_marker") or e.get("lp_provider")!="csl.lp.highs@1.0.0+highs.1.11.0" or e.get("convex_provider")!="csl.convex.highs@1.0.0+highs.1.11.0" or not required_providers.issubset(set(e.get("providers",[]))) or e.get("lineage")!=EXPECTED_LINEAGE or e.get("representative_coordinates")!=[0,0.25,1,0.25,0.75] or type(e.get("trajectory_objective")) not in (int,float) or e.get("trajectory_objective")!=0 or type(e.get("trajectory_max_residual")) not in (int,float) or not math.isfinite(e["trajectory_max_residual"]) or e["trajectory_max_residual"]<0 or e.get("absolute_tolerance")!=1e-8 or e.get("relative_tolerance")!=1e-8 or e.get("residual_verifier")!="syn04-strategy-a-independent-original-check/1" for e in events):
+    if any(e.get("schema")!=EVENT_SCHEMA or e.get("status")!="passed" or e.get("result_disposition")!="complete_optimal_family" or e.get("termination")!="completed" or e.get("outcome")!="optimal" or e.get("registry_verified") is not True or e.get("assurance")!="numerical" or e.get("canonical_relation_checked") is not True or e.get("completeness_verifier")!="csl.verifier.ts01-analytic" or e.get("completeness_verifier_version")!="1" or type(e.get("elapsed_ns")) is not int or e["elapsed_ns"]<0 or not e.get("consumed_result_marker") or e.get("lp_provider")!="csl.lp.highs@1.0.0+highs.1.11.0" or e.get("convex_provider")!="csl.convex.highs@1.0.0+highs.1.11.0" or not required_providers.issubset(set(e.get("providers",[]))) or e.get("lineage")!=EXPECTED_LINEAGE or e.get("representative_coordinates")!=[0,0.25,1,0.25,0.75] or type(e.get("trajectory_objective")) not in (int,float) or e.get("trajectory_objective")!=0 or type(e.get("trajectory_max_residual")) not in (int,float) or not math.isfinite(e["trajectory_max_residual"]) or e["trajectory_max_residual"]<0 or e.get("absolute_tolerance")!=1e-8 or e.get("relative_tolerance")!=1e-8 or e.get("residual_verifier")!="syn03-strategy-a-independent-original-check/1" for e in events):
         errors.append("event_invalid")
     measured=[e["elapsed_ns"] for e in events[1:] if type(e.get("elapsed_ns")) is int]
     summary=measurement.get("timing_ns",{})
@@ -72,7 +72,7 @@ def validate(record):
 
 def render_html(record):
     errors=validate(record)
-    if errors: raise ValueError("invalid SYN-04 report: "+", ".join(errors))
+    if errors: raise ValueError("invalid SYN-03 report: "+", ".join(errors))
     esc=lambda value: html.escape(str(value))
     measurement=record["measurement"]
     timing=measurement["timing_ns"]
@@ -82,7 +82,7 @@ def render_html(record):
     assumptions="".join("<li>"+esc(x)+"</li>" for x in record["assumptions"])
     limits="".join("<li>"+esc(x)+"</li>" for x in record["evidence_limits"])
     return ''.join([
-        '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SYN-04 Strategy A T-S01 report</title><style>body{font:16px system-ui,sans-serif;max-width:1000px;margin:2rem auto;padding:0 1rem;color:#18232d}table{border-collapse:collapse}td,th{border:1px solid #bac6cc;padding:.45rem .7rem;text-align:left}pre{overflow:auto;background:#f4f7f8;padding:1rem}.note{background:#fff4d6;padding:1rem}</style></head><body>',
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SYN-03 Strategy A T-S01 report</title><style>body{font:16px system-ui,sans-serif;max-width:1000px;margin:2rem auto;padding:0 1rem;color:#18232d}table{border-collapse:collapse}td,th{border:1px solid #bac6cc;padding:.45rem .7rem;text-align:left}pre{overflow:auto;background:#f4f7f8;padding:1rem}.note{background:#fff4d6;padding:1rem}</style></head><body>',
         '<h1>Registered Strategy A on the T-S01 profile</h1>',
         '<p>This is one exploratory measurement of the registered public StrategyPort path through Strategy A, its reachability, terminal minimization, recovery, geometry/conversion providers, and HiGHS LP/convex providers. It is not a Strategy A versus Strategy B comparison, speedup, application-scale result, or scalability claim.</p>',
         '<p>Algorithm source commit: <code>'+esc(record['source_commit'])+'</code>; harness: <code>'+esc(record['harness_commit'])+'</code>. Profile: <code>ts01_exact_integrator</code>. Assumptions:</p><ul>'+assumptions+'</ul>',
@@ -96,7 +96,7 @@ def render_html(record):
         '<h2>Evidence limits</h2><ul>'+limits+'</ul>',
         '<h2>Environment and reproduction evidence</h2><p>Machine, operating system, compiler, Release configuration, dependency pins, provider identity, system load observations, profiling attempt and all unavailable phase counters are retained in the machine-readable sidecars.</p>',
         '<p><a href="records.json">Typed report</a> · <a href="measurement-events.jsonl">Raw timing events</a> · <a href="trials.csv">Timing CSV</a> · <a href="measurement.json">Measurement and host evidence</a> · <a href="build-provenance.json">Build provenance</a> · <a href="scenarios.json">Scenario</a> · <a href="profile.json">Separate profile attempt</a></p>',
-        '<p>No Strategy A versus Strategy B comparison or performance ranking is made. This result is partial SYN-04 evidence and does not close issue <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/67">#67</a>.</p></body></html>'
+        '<p>No Strategy A versus Strategy B comparison or performance ranking is made. This result is partial SYN-03 evidence and does not close issue <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/67">#67</a>.</p></body></html>'
     ])
 
 if __name__=="__main__":
@@ -105,4 +105,4 @@ if __name__=="__main__":
     parser=argparse.ArgumentParser();parser.add_argument("--check",action="store_true");parser.add_argument("records")
     args=parser.parse_args();saved=json.loads(Path(args.records).read_text(encoding="utf-8"));errors=validate(saved)
     if errors: raise SystemExit("invalid report: "+", ".join(errors))
-    print("SYN-04 Strategy A report valid" if args.check else render_html(saved))
+    print("SYN-03 Strategy A report valid" if args.check else render_html(saved))

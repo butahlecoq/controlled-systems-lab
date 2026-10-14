@@ -216,7 +216,7 @@ RunObservation one_run() {
     token^=static_cast<std::uint64_t>(h->inequalities.rows()+h->equalities.rows());
     require(independent_residual>=0,"independent original trajectory check did not run");
     return {token,lp_identity,convex_identity,providers_json,lineage_json,registered_completeness->verifier.value,registered_completeness->verifier_version,0,independent_residual,
-        1e-8,1e-8,"syn04-strategy-a-independent-original-check/1"};
+        1e-8,1e-8,"syn03-strategy-a-independent-original-check/1"};
 }
 }
 int main() {
@@ -232,7 +232,7 @@ int main() {
         catch(const std::exception& exception) { passed=false;error=exception.what(); }
         const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now()-start).count();
         if(!passed) ++failures;
-        std::cout<<"{\"schema\":\"csl.syn04-strategy-a-ts01-measurement-event/1\",\"repetition\":"
+        std::cout<<"{\"schema\":\"csl.syn03-strategy-a-ts01-measurement-event/1\",\"repetition\":"
             <<(warmup?0:repetition+1)<<",\"warmup\":"<<(warmup?"true":"false")
             <<",\"elapsed_ns\":"<<elapsed<<",\"status\":\""<<(passed?"passed":"failed")
             <<"\",\"consumed_result_marker\":"<<observation.token<<",\"result_disposition\":\""

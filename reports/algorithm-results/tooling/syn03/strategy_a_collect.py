@@ -1,4 +1,4 @@
-"""Build the pinned SYN-04 source and collect validated Strategy A T-S01 trials."""
+"""Build the pinned SYN-03 source and collect validated Strategy A T-S01 trials."""
 from __future__ import annotations
 import argparse, hashlib, json, os, platform, shutil, statistics, subprocess, sys, threading, time, xml.etree.ElementTree as ET
 from pathlib import Path
@@ -23,7 +23,7 @@ def record_failed_collection(out,process,reason,events):
         if not isinstance(event,dict) or event.get("status")!="passed" or
         event.get("result_disposition")!="complete_optimal_family" or event.get("error")]
     emitted_line_count=len([line for line in process.stdout.splitlines() if line.strip()])
-    metadata={"schema":"csl.syn04-strategy-a-failed-collection/1","process_return_code":process.returncode,
+    metadata={"schema":"csl.syn03-strategy-a-failed-collection/1","process_return_code":process.returncode,
         "reason":reason,"emitted_line_count":emitted_line_count,"event_count":len(events),"failed_event_count":len(failures),"failed_events":failures,
         "raw_stdout_sha256":hashlib.sha256(process.stdout).hexdigest(),
         "raw_stderr_sha256":hashlib.sha256(process.stderr).hexdigest(),"raw_events_file":"events.jsonl",
@@ -99,7 +99,7 @@ def main():
     if git(source,"rev-parse","HEAD")!=report.SOURCE_COMMIT or git(source,"status","--porcelain"):
         raise SystemExit("algorithm source worktree is not clean at the pinned commit")
     deps={"CSL_HIGHS":"csl_highs-src","CSL_OBJECTIVES_EIGEN":"csl_objectives_eigen-src","CSL_QHULL":"csl_qhull-src","CSL_JSON":"csl_json-src"}
-    cmake_args=[cmake,"-S",root/"reports/algorithm-results/tooling/syn04/runner-a","-B",build,
+    cmake_args=[cmake,"-S",root/"reports/algorithm-results/tooling/syn03/runner-a","-B",build,
         "-G","Visual Studio 17 2022","-A","x64",f"-DCSL_SOURCE_ROOT={source}","-DBUILD_TESTING=OFF"]
     for name,directory in deps.items():
         path=cache/directory
@@ -107,14 +107,14 @@ def main():
         cmake_args.append(f"-DFETCHCONTENT_SOURCE_DIR_{name}={path}")
     configured=checked(cmake_args)
     (build_root/"configure.log").write_bytes(configured.stdout+configured.stderr)
-    build_command=[cmake,"--build",build,"--config","Release","--target","csl_syn04_strategy_a_report","--parallel","4"]
+    build_command=[cmake,"--build",build,"--config","Release","--target","csl_syn03_strategy_a_report","--parallel","4"]
     built=checked(build_command,timeout=2400)
     (build_root/"build.log").write_bytes(built.stdout+built.stderr)
     if git(source,"rev-parse","HEAD")!=report.SOURCE_COMMIT or git(source,"status","--porcelain"):
         raise SystemExit("pinned source changed during build")
-    exe=build/"Release/csl_syn04_strategy_a_report.exe"
+    exe=build/"Release/csl_syn03_strategy_a_report.exe"
     if not exe.is_file(): raise SystemExit("configured Release executable is missing")
-    target=build/"csl_syn04_strategy_a_report.vcxproj"
+    target=build/"csl_syn03_strategy_a_report.vcxproj"
     cache_file=build/"CMakeCache.txt"
     project_root=ET.parse(target).getroot()
     namespace=project_root.tag.partition("}")[0].removeprefix("{")
@@ -180,7 +180,7 @@ def main():
     compiler_text=compiler_config.read_text(encoding="utf-8",errors="replace")
     version_line=next((line for line in compiler_text.splitlines() if line.startswith('set(CMAKE_CXX_COMPILER_VERSION "')),"unavailable")
     observations=[e["elapsed_ns"] for e in events[1:]]
-    measurement={"schema":"csl.syn04-strategy-a-measurement/1","algorithm_source_commit":report.SOURCE_COMMIT,"harness_commit":harness_commit,
+    measurement={"schema":"csl.syn03-strategy-a-measurement/1","algorithm_source_commit":report.SOURCE_COMMIT,"harness_commit":harness_commit,
       "scope":"Fresh problem construction and resolution, registered Strategy A provider selection, StrategyRegistry preparation, exclusive public StrategyPort workspace creation and run through forward reachability, terminal minimization, recovery and registered HiGHS LP/convex execution, compiled T-S01 verifier acceptance, independent original-trajectory residual checking, and exact canonical H-relation membership/nonmembership validation. Excludes process startup, JSON serialization, build, file persistence, and rendering.",
       "order":"One excluded warmup followed by seven measured repetitions in one process; one strategy only, so side alternation is inapplicable.",
       "counts":{"warmup":1,"measured":7,"passed":7,"failed":0,"all_outputs_consumed_and_validated":True},
@@ -190,7 +190,7 @@ def main():
       "performance_conclusion":"inconclusive","limiter":{"available":False,"reason":"WPR CPU sampled-stack profile could not start: Windows denied enabling system-performance profiling policy (0xc5585011). Separate workload ran and process counters were collected, but they cannot attribute a hot source path; no limiter is claimed."},
       "profile_attempt":{"wpr":profile_start,"separate_workload_return_code":profile_proc["return_code"],"separate_workload_timed_out":profile_proc["timed_out"],"separate_wall_ns":profile_proc["wall_ns"],"sampled_process_cpu_user_seconds_max":profile_proc["sampled_cpu_user_seconds_max"],"sampled_process_cpu_system_seconds_max":profile_proc["sampled_cpu_system_seconds_max"],"sampled_process_peak_rss_bytes":profile_proc["sampled_rss_bytes_max"],"process_samples":profile_proc["samples"],"separate_stdout_sha256":hashlib.sha256(profile_proc["stdout"]).hexdigest(),"separate_stderr_sha256":hashlib.sha256(profile_proc["stderr"]).hexdigest(),"etl_path":profile_file},
       "environment":{"os":platform.platform(),"processor":platform.processor() or "unavailable","logical_cpu_count":os.cpu_count(),"cpu_count_physical":psutil.cpu_count(logical=False) if psutil else None,"memory_total_bytes":psutil.virtual_memory().total if psutil else None,"cpu_percent_before":pre_cpu,"cpu_percent_after":post_cpu,"python":platform.python_version(),"clock":"std::chrono::steady_clock, integer nanoseconds","assurance":"numerical","absolute_tolerance":1e-8,"relative_tolerance":1e-8,"requested_resources":{"total_threads":1,"outer_workers":1,"threads_per_worker":1,"memory_bytes":None},"native_provider_thread_configuration":"HiGHS adapter reports threads=1 and parallel=off for the native phase; OS thread count per trial was not observed","seed":"No seed option is exposed/configured by this StrategyPort/HiGHS registration path","cache_policy":"One excluded in-process warmup; each repetition constructs a fresh problem, registries, provider selections, prepared strategy and exclusive workspace. Process/runtime may be warm; no cold-cache claim.","load_note":"All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee."},
-      "build":{"cmake":str(cmake),"cmake_version":checked([cmake,"--version"]).stdout.decode(errors="replace").splitlines()[0],"generator":"Visual Studio 17 2022 x64","compiler":"MSVC","compiler_version":version_line,"configuration":"Release","cxx_standard":"C++20","ndebug":True,"release_properties":props,"dependencies":{"highs":{"pinned_sha256":"2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275","adapter_version":"1.0.0+highs.1.11.0"},"objectives_eigen":{"pinned_sha256":"8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"},"qhull":{"pinned_sha256":"8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"},"json":{"pinned_sha256":"0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406"},"resolved_sources":dependency_state},"cache_sha256":hashlib.sha256((build/"CMakeCache.txt").read_bytes()).hexdigest(),"project_sha256":sha(target),"compiler_config_sha256":sha(compiler_config),"configure_log_sha256":sha(build_root/"configure.log"),"build_log_sha256":sha(build_root/"build.log"),"executable_sha256":sha(exe),"executable_bytes":exe.stat().st_size,"report_driver_sha256":sha(root/"reports/algorithm-results/tooling/syn04/strategy_a_measure.cpp"),"runner_cmake_sha256":sha(root/"reports/algorithm-results/tooling/syn04/runner-a/CMakeLists.txt"),"configure_command":[str(x) for x in cmake_args],"build_command":[str(x) for x in build_command]},
+      "build":{"cmake":str(cmake),"cmake_version":checked([cmake,"--version"]).stdout.decode(errors="replace").splitlines()[0],"generator":"Visual Studio 17 2022 x64","compiler":"MSVC","compiler_version":version_line,"configuration":"Release","cxx_standard":"C++20","ndebug":True,"release_properties":props,"dependencies":{"highs":{"pinned_sha256":"2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275","adapter_version":"1.0.0+highs.1.11.0"},"objectives_eigen":{"pinned_sha256":"8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"},"qhull":{"pinned_sha256":"8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"},"json":{"pinned_sha256":"0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406"},"resolved_sources":dependency_state},"cache_sha256":hashlib.sha256((build/"CMakeCache.txt").read_bytes()).hexdigest(),"project_sha256":sha(target),"compiler_config_sha256":sha(compiler_config),"configure_log_sha256":sha(build_root/"configure.log"),"build_log_sha256":sha(build_root/"build.log"),"executable_sha256":sha(exe),"executable_bytes":exe.stat().st_size,"report_driver_sha256":sha(root/"reports/algorithm-results/tooling/syn03/strategy_a_measure.cpp"),"runner_cmake_sha256":sha(root/"reports/algorithm-results/tooling/syn03/runner-a/CMakeLists.txt"),"configure_command":[str(x) for x in cmake_args],"build_command":[str(x) for x in build_command]},
       "source":{"head":git(source,"rev-parse","HEAD"),"tree":git(source,"rev-parse",f"{report.SOURCE_COMMIT}^{{tree}}"),"clean_before_build":True,"clean_after_run":True,"strategy_source_sha256":hashlib.sha256(run(["git","-C",source,"show",f"{report.SOURCE_COMMIT}:src/synthesis/strategy_a/strategy.cpp"]).stdout).hexdigest(),"strategy_header_sha256":hashlib.sha256(run(["git","-C",source,"show",f"{report.SOURCE_COMMIT}:include/csl/synthesis/strategy_a/strategy.hpp"]).stdout).hexdigest()},
       "raw_stdout_sha256":hashlib.sha256(measured_proc.stdout).hexdigest(),"raw_stderr_sha256":hashlib.sha256(measured_proc.stderr).hexdigest()}
     (out/"collection.json").write_text(json.dumps(measurement,sort_keys=True,indent=2)+"\n",encoding="utf-8")
