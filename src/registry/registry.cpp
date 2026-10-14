@@ -202,12 +202,20 @@ std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const Strateg
         return detail::reject(provenance,"family","Registry requirements differ from the immutable effective family request");
     if (request.family.assurance==Assurance::validated)
         return detail::reject(provenance,"family.assurance","Validated family evidence is not implemented");
+    auto verifier_key=entry.complete_family_verifier;
+    if(requirements.output.completeness==Completeness::established&&entry.complete_family_verifier_selector) {
+        const auto selected=entry.complete_family_verifier_selector(request);
+        if(!selected)
+            return detail::reject(provenance,"family.verifier.profile",
+                "No compiled complete-family verifier is registered for this request profile");
+        verifier_key=*selected;
+    }
     const auto capability = entry.capabilities(request,requirements);
     if (const auto* diagnostics = std::get_if<Diagnostics>(&capability)) return detail::capability_rejection(provenance,*diagnostics);
     auto diagnostics = detail::check_offer(std::get<Offer>(capability),requirements,false);
     if (!diagnostics.empty()) return Rejection{provenance,std::move(diagnostics)};
-    auto verifier=entry.complete_family_verifier.id.value.empty()?nullptr:
-        detail::find_compiled_verifier(entry.complete_family_verifier.id,entry.complete_family_verifier.version);
+    auto verifier=verifier_key.id.value.empty()?nullptr:
+        detail::find_compiled_verifier(verifier_key.id,verifier_key.version);
     if(requirements.output.completeness==Completeness::established&&!verifier)
         return detail::reject(provenance,"family.verifier","Complete-family output requires a verifier in the compiled library catalog");
     auto partial_verifier=entry.partial_family_verifier.id.value.empty()?nullptr:

@@ -329,6 +329,18 @@ public:
         return {};
     }
 };
+class ThirdTestCatalogVerifier final : public CompiledCompleteFamilyVerifier {
+public:
+    const ModuleId& id() const noexcept override { static const ModuleId value{"test.verifier.third"}; return value; }
+    const std::string& version() const noexcept override { static const std::string value{"8"}; return value; }
+    Diagnostics verify(const StrategyRequest& request,const CompleteFamilyProposal& proposal) const override {
+        const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&proposal.family.completeness.support);
+        if(request.family.profile!="profile-b"||!proof||proof->verifier!=id()||
+            proof->verifier_version!=version()||proof->proof!="third-verifier-proof")
+            return {{DiagnosticCode::evidence_mismatch,"test.verifier.third","Compiled third verifier rejected the proposal"}};
+        return {};
+    }
+};
 #endif
 }
 std::shared_ptr<const CompiledCompleteFamilyVerifier> find_compiled_verifier(const ModuleId& id,const std::string& version) {
@@ -337,6 +349,8 @@ std::shared_ptr<const CompiledCompleteFamilyVerifier> find_compiled_verifier(con
 #ifdef CSL_TEST_VERIFIER_CATALOG
     static const auto second=std::make_shared<const TestCatalogVerifier>();
     if(id==second->id()&&version==second->version())return second;
+    static const auto third=std::make_shared<const ThirdTestCatalogVerifier>();
+    if(id==third->id()&&version==third->version())return third;
 #endif
     return {};
 }
