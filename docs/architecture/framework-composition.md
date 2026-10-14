@@ -109,7 +109,7 @@ oracle; it is not an implemented general family algorithm. Its control marginals
 are each `[0,1]`, whose Cartesian product would wrongly admit `(0,0)` and `(1,1)`.
 
 The general workflow milestone must exercise and extend both approaches on the
-same immutable problem and request. A planned [registered synthesis comparison
+same immutable problem and request. The [registered synthesis comparison
 example](../../examples/registered_synthesis_comparison.cpp) is a functional
 integration example bounded to the two-stage integrator and exact T-S01 request:
 it runs both registered strategies on one immutable problem, selects witness
@@ -117,9 +117,10 @@ histories, and verifies them against the original problem data. Its comparison
 records identify the shared problem/request and each strategy, outcome, selected
 witnesses, and original-data verification status/residuals; the example does not
 serialize the live optimal-family relation or proof payload. It demonstrates
-that fixture path, not general profile support, artifact publication, or
-comparative performance. CTest/example wall time is not benchmark evidence;
-paired measured results and HTML publication remain under [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83)
+that fixture path, not general profile support or paired performance evidence.
+Its JSON summary is not the required standalone HTML report. CTest/example wall
+time is not benchmark evidence; paired measured results and HTML publication
+remain under [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83)
 and the [published-results policy](published-algorithm-results.md).
 
 The required general methods remain:
