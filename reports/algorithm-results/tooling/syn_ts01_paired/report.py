@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 import html
+import csv
+import hashlib
+import io
 import json
 import statistics
+from pathlib import Path
 
 SCHEMA = "csl.syn-ts01-paired-comparison-report/1"
 EVENT_SCHEMA = "csl.synthesis.paired-ts01-event/1"
@@ -37,6 +41,12 @@ EXPECTED_SCENARIO = {
     "controls": {"kind": "box", "lower": [0], "upper": [1]},
     "objective": {"kind": "quadratic", "Q": [[2]], "linear": [-2], "offset": 1},
 }
+BUNDLE_FILES = frozenset({
+    "README.md", "build-provenance.json", "commands.json", "environment.json", "index.html",
+    "limiter-profile.json", "manifest.json", "measurement-events.jsonl", "performance.svg",
+    "process-run.json", "process-stderr.bin", "process-stdout.bin", "records.json", "scenario.json",
+    "trials.csv", "validation.json",
+})
 
 
 def canonical(value):
@@ -44,8 +54,84 @@ def canonical(value):
 
 
 def sha256_bytes(value):
-    import hashlib
     return hashlib.sha256(value).hexdigest()
+
+
+def trials_csv_bytes(record):
+    fields = ["repetition", "warmup", "order_position", "strategy", "status", *PHASES]
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
+    writer.writeheader()
+    for event in record["measurement"]["events"][1:]:
+        row = {key: event[key] for key in fields if key in event}
+        for phase in PHASES:
+            row[phase] = event["timings_ns"][phase]["value"]
+        writer.writerow(row)
+    return stream.getvalue().encode("utf-8")
+
+
+def bundle_manifest_bytes(record, files):
+    manifest = {
+        "schema": "csl.paired-ts01-bundle-manifest/1",
+        "report_id": record["report_id"],
+        "files": {name: sha256_bytes(files[name]) for name in sorted(BUNDLE_FILES - {"manifest.json"})},
+    }
+    return (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n").encode("utf-8")
+
+
+def validate_bundle(bundle):
+    """Validate all saved inputs and derived projections in one immutable bundle."""
+    bundle = Path(bundle)
+    if not bundle.is_dir() or bundle.is_symlink():
+        raise ValueError("paired T-S01 source bundle must be a regular directory")
+    actual = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*") if path.is_file()}
+    if any(path.is_symlink() for path in bundle.rglob("*")) or actual != BUNDLE_FILES:
+        raise ValueError("paired T-S01 bundle inventory differs")
+    record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))
+    errors = validate(record)
+    if errors:
+        raise ValueError("invalid paired T-S01 record: " + ", ".join(errors))
+    manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+    if manifest.get("schema") != "csl.paired-ts01-bundle-manifest/1" or manifest.get("report_id") != record["report_id"]:
+        raise ValueError("paired T-S01 manifest identity differs")
+    if set(manifest.get("files", {})) != BUNDLE_FILES - {"manifest.json"}:
+        raise ValueError("paired T-S01 manifest inventory differs")
+    for name, expected in manifest["files"].items():
+        if sha256_bytes((bundle / name).read_bytes()) != expected:
+            raise ValueError("paired T-S01 bundle hash mismatch: " + name)
+    if bundle.name != record["report_id"] or record["report_id"] != REPORT_ID:
+        raise ValueError("paired T-S01 source identity differs")
+    for name, expected in (
+        ("environment.json", record["environment"]),
+        ("build-provenance.json", record["build"]),
+        ("process-run.json", record["process"]),
+        ("limiter-profile.json", record["measurement"]["limiter_profile"]),
+    ):
+        if json.loads((bundle / name).read_text(encoding="utf-8")) != expected:
+            raise ValueError("paired T-S01 sidecar differs from typed record: " + name)
+    if json.loads((bundle / "scenario.json").read_text(encoding="utf-8")) != record["scenario"]["value"]:
+        raise ValueError("paired T-S01 scenario sidecar differs")
+    if (bundle / "performance.svg").read_text(encoding="utf-8") != render_svg(record):
+        raise ValueError("paired T-S01 SVG differs from typed record")
+    if (bundle / "index.html").read_text(encoding="utf-8") != render_html(record):
+        raise ValueError("paired T-S01 HTML differs from typed record")
+
+    raw_events = (bundle / "measurement-events.jsonl").read_bytes()
+    try:
+        events = [json.loads(line) for line in raw_events.decode("utf-8", errors="strict").splitlines() if line]
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError("paired T-S01 raw event stream is malformed") from error
+    if events != record["measurement"]["events"] or sha256_bytes(raw_events) != record["measurement"]["events_sha256"]:
+        raise ValueError("paired T-S01 raw events differ from typed record")
+    stdout = (bundle / "process-stdout.bin").read_bytes()
+    stderr = (bundle / "process-stderr.bin").read_bytes()
+    if (stdout.replace(b"\r\n", b"\n") != raw_events
+            or sha256_bytes(stdout) != record["measurement"]["stdout_sha256"]
+            or sha256_bytes(stderr) != record["measurement"]["stderr_sha256"]):
+        raise ValueError("paired T-S01 retained process streams differ from report hashes")
+    if (bundle / "trials.csv").read_bytes() != trials_csv_bytes(record):
+        raise ValueError("paired T-S01 trial CSV differs from typed/raw events")
+    return record
 
 
 def timing_summary(events):

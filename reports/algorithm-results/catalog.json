@@ -200,6 +200,18 @@
       "measured_scope": "Exact T-S02 profile; one registered Strategy A; seven validated measured trials; performance conclusion inconclusive",
       "evidence_limits": "Completeness applies only to the exact admitted Strategy A T-S02 constant-integrator profile and csl.verifier.ts02-constant-integrator v1.; Assurance::numerical is reported; validated arithmetic is unavailable.; Seven observations of one tiny profile are exploratory evidence only; no comparator, speedup, general performance, application-scale, throughput or scalability claim.; This report does not cover T-S01, T-S03, singular A, other dynamics or objectives, or generic complete-family support; SYN-03 #66 remains open.; Strategy A performs forward reachability and terminal optimization, invoking the registered HiGHS LP provider for terminal anchoring, then recovers the full history relation and verifies the exact T-S02 profile. Internal solver counters and subphase timings are unavailable.; The separate diagnostic workload is excluded from the seven observations; no source-mapped unprofiled latency limiter is established.; Internal preparation, native LP, relation construction, compiled verifier and export timings/counters are unavailable.",
       "zip_sha256": "ad676698868382c2a3b76288d47a18bb9289f0e4c2a003d9a8175e54a6e1ee96"
+    },
+    {
+      "report_id": "syn-ts01-paired-86194f8e43a62472a60d5775da0e2cf10cba6f433f60841be7813e7278029675",
+      "report_kind": "syn-ts01-paired-comparison",
+      "source_report_id": "syn-ts01-paired-20261014-b7f1ac0",
+      "payload_schema": "csl.syn-ts01-paired-comparison-report/1",
+      "payload_sha256": "ef05e8f74f72b54bfe1244d4fcdb781af617108814412907dfcca9c0a0d5882c",
+      "native_payload_sha256": "ef05e8f74f72b54bfe1244d4fcdb781af617108814412907dfcca9c0a0d5882c",
+      "source_commit": "b7f1ac0a9800326c825b6d8e35a8f23656496682",
+      "measured_scope": "One exact T-S01 paired experiment; one excluded warmup and seven alternating measured pairs; performance conclusion inconclusive",
+      "evidence_limits": "Complete-family status is exact-profile and registered-verifier evidence for this admitted T-S01 fixture under Assurance::numerical; validated arithmetic is unavailable.; This is one tiny scalar two-stage integrator fixture; the observed timing distributions do not establish an application-scale or general strategy performance ranking.; No separate limiter profile was performed. The source-level latency limiter is unknown; the result is explicitly inconclusive and claims no winner.; The live complete-family proof payload is not serialized. Original-data witness checks establish bindings, feasibility, and objective only; independent optimality and completeness statuses remain unsupported.; Internal LP/convex, projection, affine-sum, conversion, hull-membership, verifier subphase durations/call counts, CPU time, and per-call peak memory are unavailable.; The collector launcher exited 1 on an overly strict stdout byte comparison; algorithm return code was 0 and retained stdout matches the raw event file after CRLF-to-LF normalization.",
+      "zip_sha256": "edbdde7d35932f25774423ef474c1144404236d2dc09e78fd6d1ecd477d4d442"
     }
   ]
 }

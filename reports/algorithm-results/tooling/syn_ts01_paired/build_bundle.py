@@ -2,23 +2,15 @@
 from __future__ import annotations
 
 import argparse
-import csv
 import hashlib
-import importlib.util
 import json
-import shutil
 import subprocess
-import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import report
 
-FILES = {
-    "README.md", "build-provenance.json", "commands.json", "environment.json", "index.html",
-    "limiter-profile.json", "measurement-events.jsonl", "process-run.json", "process-stderr.bin",
-    "process-stdout.bin", "records.json", "scenario.json", "performance.svg", "trials.csv", "validation.json",
-}
+FILES = report.BUNDLE_FILES
 
 
 def sha_bytes(value): return hashlib.sha256(value).hexdigest()
@@ -236,8 +228,9 @@ def write_bundle(args):
         "configuration": ["cmake -S <source>/examples -B <build> -G \"Visual Studio 17 2022\" -A x64 -DCMAKE_PREFIX_PATH=<installed-prefix>", "cmake --build <build> --config Release --target registered_synthesis_comparison --parallel 4"],
         "measurement": ["registered_synthesis_comparison.exe --measure examples/scenarios/two-stage-integrator.json <new-output>/measurement-events.jsonl"],
         "collection_policy": "Preserve stdout, stderr, JSONL, process exit status and failures before validating. On Windows compare stdout with JSONL after explicit CRLF-to-LF normalization; never discard failed trial events.",
-        "report_regeneration": ["python reports/algorithm-results/tooling/syn_ts01_paired/build_bundle.py --run-root <saved-run> --source-root <clean-source> --build-root <release-build> --dependency-source-root <linked-library-source> --library-prefix <installed-prefix> --out reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0"],
-        "saved_record_only": True,
+        "report_regeneration": ["python reports/algorithm-results/tooling/syn_ts01_paired/regenerate_bundle.py --source reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0 --out <fresh-report-output>"],
+        "saved_bundle_is_complete_regeneration_source": True,
+        "regeneration_runs_solver": False,
     })
     files["README.md"] = ("# Paired registered synthesis T-S01 report\n\n"
         "This report preserves one exact T-S01 paired experiment on the two-stage scalar integrator. It records one excluded A/B warmup and seven measured alternating pairs. Both strategies use the same resolved problem, family request, selector request, provider registrations, and requested resource policy.\n\n"
@@ -248,26 +241,15 @@ def write_bundle(args):
     # The renderer uses the saved typed record only; it never launches an algorithm.
     files["performance.svg"] = report.render_svg(record).encode("utf-8")
     files["index.html"] = report.render_html(record).encode("utf-8")
-    trial_fields = ["repetition", "warmup", "order_position", "strategy", "status", *report.PHASES]
-    import io
-    stream = io.StringIO(newline="")
-    writer = csv.DictWriter(stream, fieldnames=trial_fields, lineterminator="\n")
-    writer.writeheader()
-    for event in record["measurement"]["events"][1:]:
-        row = {key: event[key] for key in trial_fields if key in event}
-        for phase in report.PHASES:
-            row[phase] = event["timings_ns"][phase]["value"]
-        writer.writerow(row)
-    files["trials.csv"] = stream.getvalue().encode("utf-8")
+    files["trials.csv"] = report.trials_csv_bytes(record)
     for name, content in files.items():
         destination = output / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(content)
-    manifest = {"schema": "csl.paired-ts01-bundle-manifest/1", "report_id": report.REPORT_ID,
-        "files": {name: sha_bytes(content) for name, content in sorted(files.items())}}
-    (output / "manifest.json").write_bytes(pretty(manifest))
+    (output / "manifest.json").write_bytes(report.bundle_manifest_bytes(record, files))
     actual = {item.name for item in output.iterdir() if item.is_file()}
     if actual != FILES | {"manifest.json"}: raise ValueError("generated bundle inventory differs")
+    report.validate_bundle(output)
     print(json.dumps({"report_id": report.REPORT_ID, "out": str(output), "files": len(files),
         "report_errors": report.validate(record), "events_sha256": sha_bytes(raw), "stdout_sha256": sha_bytes(stdout)}, sort_keys=True, indent=2))
 

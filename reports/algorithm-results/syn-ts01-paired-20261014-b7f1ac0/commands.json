@@ -8,9 +8,10 @@
   "measurement": [
     "registered_synthesis_comparison.exe --measure examples/scenarios/two-stage-integrator.json <new-output>/measurement-events.jsonl"
   ],
+  "regeneration_runs_solver": false,
   "report_regeneration": [
-    "python reports/algorithm-results/tooling/syn_ts01_paired/build_bundle.py --run-root <saved-run> --source-root <clean-source> --build-root <release-build> --dependency-source-root <linked-library-source> --library-prefix <installed-prefix> --out reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0"
+    "python reports/algorithm-results/tooling/syn_ts01_paired/regenerate_bundle.py --source reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0 --out <fresh-report-output>"
   ],
-  "saved_record_only": true,
+  "saved_bundle_is_complete_regeneration_source": true,
   "schema": "csl.paired-ts01-reproduction-commands/1"
 }
