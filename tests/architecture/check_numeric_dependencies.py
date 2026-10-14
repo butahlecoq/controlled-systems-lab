@@ -13,8 +13,9 @@ while pending:
     seen.add(name)
     text = (root / name).read_text(encoding="utf-8")
     pending.extend(re.findall(r"#include\s*[<\"](csl/[^>\"]+)[>\"]", text))
-forbidden = sorted(name for name in seen if name == "csl/contracts.hpp" or
-                   name.startswith(("csl/synthesis/", "csl/registry/", "csl/geometry/", "csl/problem/")))
+allowed_values = {"csl/core/values.hpp", "csl/core/diagnostics.hpp"}
+forbidden = sorted(name for name in seen
+                   if name not in allowed_values and not name.startswith("csl/numeric/"))
 if forbidden:
     sys.exit("numeric headers import higher-level contracts: " + ", ".join(forbidden))
 print("numeric headers depend only on foundational value contracts")
