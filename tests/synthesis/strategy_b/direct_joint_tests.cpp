@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
@@ -216,7 +217,9 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};configuration.lp=lid;configuration.convex=qid;
     configuration.representation={"csl.polyhedron.h"};
     registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
-    requirements.output.family=FamilyTarget::candidate_relaxation;requirements.output.completeness=registry::Completeness::unestablished;
+    requirements.output.family=q.target;
+    requirements.output.completeness=q.target==FamilyTarget::exact_optimal_relation?
+        registry::Completeness::established:registry::Completeness::unestablished;
     return accepted(strategies.prepare({p,configuration,q,"1"},requirements));
 }
 }
@@ -612,6 +615,100 @@ TEST_CASE("existing StrategyRegistry snapshots admitted native providers and ret
     REQUIRE(data.provider);CHECK(data.provider->actual->id.value!="oracle-lp");
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);CHECK(result.family->identity().request==request(p));
     CHECK(result.family->identity().lineage.size()==2);REQUIRE(result.objective.upper);CHECK(result.objective.upper->value==3);
+}
+TEST_CASE("Strategy B registers the exact T-S02 constant-objective history family") {
+    const auto p=resolve(integrator(LinearTerminal{{0},3}));
+    auto exact=request(p);exact.profile="ts02_constant_integrator";
+    exact.target=FamilyTarget::exact_optimal_relation;
+    registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
+    registry::StrategyRegistry strategies;
+    auto linear=accepted(adapters::lp::make_highs_registration());
+    auto convex=accepted(adapters::convex::make_highs_registration());
+    const auto lp_id=linear.identity.id,convex_id=convex.identity.id;
+    REQUIRE_FALSE(lp.add(std::move(linear)));REQUIRE_FALSE(qp.add(std::move(convex)));
+    REQUIRE_FALSE(strategies.add(make_registration(lp,qp)));
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
+    configuration.lp=lp_id;configuration.convex=convex_id;configuration.representation={"csl.polyhedron.h"};
+    registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.assurance=Assurance::numerical;
+    requirements.output.family=FamilyTarget::exact_optimal_relation;
+    requirements.output.completeness=registry::Completeness::established;
+    auto prepared=strategies.prepare({p,configuration,exact,"1"},requirements);
+    REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
+    auto workspace=std::get<registry::PreparedStrategy>(std::move(prepared)).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.numerical=exact.numerical;
+    const auto result=accepted(workspace->run(context));
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->registry_verified());
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.family->identity().lineage.size()==1);
+    CHECK(result.family->identity().lineage.front().request==RequestId{"syn04-build:"+p.identity().value});
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+    REQUIRE(proof);
+    CHECK(proof->verifier==ModuleId{"csl.verifier.ts02-constant-integrator"});
+    CHECK(proof->verifier_version=="1");
+    CHECK(proof->proof=="TS02-constant-integrator-v1");
+    const auto payload=std::dynamic_pointer_cast<const synthesis::Ts02ConstantIntegratorRelation>(complete.relation.payload);
+    REQUIRE(payload);
+    CHECK(contains(payload->h_polyhedron(),{0,0,0,0,0}));
+    CHECK(contains(payload->h_polyhedron(),{0,1,2,1,1}));
+    const Vector first_same_terminal_history{0,0.3,1.1,0.3,0.8};
+    const Vector second_same_terminal_history{0,0.5,1.1,0.5,0.6};
+    CHECK(contains(payload->h_polyhedron(),first_same_terminal_history));
+    CHECK(contains(payload->h_polyhedron(),second_same_terminal_history));
+    CHECK(first_same_terminal_history[2]==second_same_terminal_history[2]);
+    CHECK_FALSE(contains(payload->h_polyhedron(),{0,0,1,1,0}));
+    REQUIRE(complete.optimum.bounds.lower);REQUIRE(complete.optimum.bounds.upper);
+    CHECK(complete.optimum.bounds.lower->value==3);
+    CHECK(complete.optimum.bounds.upper->value==3);
+    const registry::StrategyRequest frozen{p,configuration,exact,"1",result.family->identity().lineage};
+    CompleteFamilyProposal proposal{result.family->identity(),complete};
+    const auto verifier=registry::detail::find_compiled_verifier({synthesis::ts02_constant_integrator_verifier},"1");
+    REQUIRE(verifier);
+    CHECK(verifier->verify(frozen,proposal).empty());
+    auto candidate_request=frozen;candidate_request.family.target=FamilyTarget::candidate_relaxation;
+    CHECK_FALSE(verifier->verify(candidate_request,proposal).empty());
+    auto wrong_objective=resolve(integrator(LinearTerminal{{0},4}));
+    auto wrong_request=frozen;wrong_request.problem=wrong_objective;wrong_request.family.objective=wrong_objective.identity();
+    wrong_request.lineage=detail::expected_ts02_lineage(wrong_objective.identity());
+    CHECK_FALSE(verifier->verify(wrong_request,proposal).empty());
+    auto forged_relation=proposal;
+    const auto inequalities=accepted(numeric::snapshot(Matrix{4,5,{0,0,0,1,0, 0,0,0,-1,0, 0,0,0,0,1, 0,0,0,0,-1}}));
+    const auto upper=accepted(numeric::snapshot_vector(Vector{2,0,1,0}));
+    const auto equalities=accepted(numeric::snapshot(Matrix{3,5,{1,0,0,0,0, -1,1,0,-1,0, 0,-1,1,0,-1}}));
+    const auto values=accepted(numeric::snapshot_vector(Vector{0,0,0}));
+    auto enlarged=accepted(sets::make_h({{"ts02-optimal-histories"},5,{"x0","x1","x2","u0","u1"}},
+        {inequalities,upper,equalities,values}));
+    forged_relation.family.relation.payload=std::make_shared<const synthesis::Ts02ConstantIntegratorRelation>(std::move(enlarged));
+    CHECK_FALSE(verifier->verify(frozen,forged_relation).empty());
+    auto candidate_profile=exact;candidate_profile.target=FamilyTarget::candidate_relaxation;
+    registry::Requirements candidate_requirements;candidate_requirements.output.representation={"csl.polyhedron.h"};
+    candidate_requirements.output.assurance=Assurance::numerical;
+    candidate_requirements.output.family=FamilyTarget::candidate_relaxation;
+    candidate_requirements.output.completeness=registry::Completeness::unestablished;
+    CHECK(std::holds_alternative<registry::Rejection>(strategies.prepare({p,configuration,candidate_profile,"1"},candidate_requirements)));
+}
+TEST_CASE("T-S02 verifier admits constant linear quadratic and residual norm objectives") {
+    const std::vector<TerminalObjective> objectives{
+        QuadraticTerminal{{1,1,{0}},{0},3},ResidualNormTerminal{{1,1,{0}},{3}}};
+    for(const auto& objective:objectives) {
+        const auto p=resolve(integrator(objective));auto exact=request(p);
+        exact.profile=synthesis::ts02_constant_integrator_profile;
+        exact.target=FamilyTarget::exact_optimal_relation;
+        const auto prepared=registered_prepared(p,exact);auto workspace=prepared.create();
+        ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+        context.numerical=exact.numerical;
+        const auto result=accepted(workspace->run(context));
+        REQUIRE(result.termination==Termination::completed);
+        REQUIRE(result.family);CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+        CHECK(result.family->registry_verified());CHECK(result.outcome.value==MathematicalOutcome::optimal);
+        REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+        CHECK(result.objective.lower->value==3);CHECK(result.objective.upper->value==3);
+    }
 }
 TEST_CASE("registered Strategy B candidate identity mismatches are rejected by the caller boundary") {
     const auto p=resolve(integrator(LinearTerminal{{0},3}));

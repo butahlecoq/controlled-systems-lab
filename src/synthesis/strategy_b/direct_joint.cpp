@@ -1,5 +1,6 @@
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/verification/trajectory.hpp>
 #include "../../registry/compiled_verifiers.hpp"
@@ -21,12 +22,13 @@ Diagnostics capabilities(const problem::ResolvedProblem& p,const FamilyRequest& 
     auto d=check_family_request(request,p.identity());
     const auto source=p.description();
     const bool reviewed_ts01=registry::detail::ts01_case_valid(p,request,h_polyhedron);
+    const bool reviewed_ts02=registry::detail::ts02_case_valid(p,request,h_polyhedron);
     if(request.profile!="nominal_open_loop"&&!reviewed_ts01)
-        d.push_back(unsupported("joint.profile","Supported profiles are nominal_open_loop and the exact reviewed T-S01 case."));
+        if(!reviewed_ts02)d.push_back(unsupported("joint.profile","Supported profiles are nominal_open_loop and the exact reviewed T-S01/T-S02 cases."));
     if(request.representation.value!="csl.polyhedron.h") d.push_back(unsupported("joint.representation","Native joint H relation is required."));
     if(request.assurance!=Assurance::numerical) d.push_back(unsupported("joint.assurance","Validated construction is unavailable."));
-    if(request.target!=FamilyTarget::candidate_relaxation&&!reviewed_ts01)
-        d.push_back(unsupported("joint.coverage","Only the exact reviewed T-S01 profile has a registered complete-family verifier; other requests remain candidates."));
+    if(request.target!=FamilyTarget::candidate_relaxation&&!reviewed_ts01&&!reviewed_ts02)
+        d.push_back(unsupported("joint.coverage","Only the exact reviewed T-S01/T-S02 profiles have registered complete-family verifiers; other requests remain candidates."));
     if(source->information!=InformationPattern::nominal_open_loop || source->model->dynamics.time_domain!=TimeDomain::discrete)
         d.push_back(unsupported("joint.dynamics","Discrete nominal open-loop dynamics are required."));
     if(source->external || p.model().dimensions().external!=0) d.push_back(unsupported("joint.external","External inputs require a different profile."));
@@ -171,12 +173,12 @@ struct RelationRows {
     void inequality(const Vector& row,double rhs) {
         inequalities.values.insert(inequalities.values.end(),row.begin(),row.end());++inequalities.rows;upper.push_back(rhs);
     }
-    std::variant<sets::SetData,Diagnostics> finish(SetId id) const {
+    std::variant<sets::SetData,Diagnostics> finish(SetId id,std::vector<std::string> labels={}) const {
         const auto A=numeric::snapshot(inequalities),E=numeric::snapshot(equalities);
         const auto b=numeric::snapshot_vector(upper),e=numeric::snapshot_vector(values);
         for(const auto* matrix:{&A,&E})if(const auto* d=std::get_if<Diagnostic>(matrix))return Diagnostics{*d};
         for(const auto* vector:{&b,&e})if(const auto* d=std::get_if<Diagnostic>(vector))return Diagnostics{*d};
-        auto r=sets::make_h({std::move(id),inequalities.cols,{}},{std::get<numeric::MatrixView>(A),std::get<numeric::VectorView>(b),std::get<numeric::MatrixView>(E),std::get<numeric::VectorView>(e)});
+        auto r=sets::make_h({std::move(id),inequalities.cols,std::move(labels)},{std::get<numeric::MatrixView>(A),std::get<numeric::VectorView>(b),std::get<numeric::MatrixView>(E),std::get<numeric::VectorView>(e)});
         if(const auto* d=std::get_if<Diagnostic>(&r))return Diagnostics{*d};
         return std::get<sets::SetData>(std::move(r));
     }
@@ -237,14 +239,14 @@ RetainedEvidenceScope retained(const SynthesisResult& r) {
 }
 }
 namespace detail {
-class Ts01ExecutionRunner final : public SynthesisWorkspace, public registry::detail::RuntimeReceiptSource {
+class DirectJointExecutionRunner final : public SynthesisWorkspace, public registry::detail::RuntimeReceiptSource {
     registry::PreparedProvider<registry::LPPort> lp_;
     registry::PreparedProvider<registry::ConvexPort> convex_;
     std::optional<registry::StrategyRequest> prepared_request_;
     std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding_;
     std::optional<registry::detail::StrategyBRuntimeLineageReceipt> receipt_;
 public:
-    Ts01ExecutionRunner(registry::PreparedProvider<registry::LPPort> lp,
+    DirectJointExecutionRunner(registry::PreparedProvider<registry::LPPort> lp,
         registry::PreparedProvider<registry::ConvexPort> convex,
         std::optional<registry::StrategyRequest> prepared_request={},
         std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding={})
@@ -257,10 +259,10 @@ public:
 };
 }
 SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
-    detail::Ts01ExecutionRunner runner{lp_,convex_};
+    detail::DirectJointExecutionRunner runner{lp_,convex_};
     return runner.solve(p,request,context);
 }
-SynthesisResult detail::Ts01ExecutionRunner::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
+SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
     receipt_.reset();
     SynthesisResult result{Termination::completed,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{},{}};
     auto reject=[&](Diagnostics diagnostics,Termination termination) {
@@ -304,6 +306,31 @@ SynthesisResult detail::Ts01ExecutionRunner::solve(const problem::ResolvedProble
     auto feasible_artifact=std::make_shared<const sets::SetData>(std::get<sets::SetData>(std::move(initial)));
     auto data=std::make_shared<DirectJointPayload>(*build_artifact,*feasible_artifact);
     std::vector<TransformStepIdentity> lineage{{{"syn04-build:"+p.identity().value},{p.identity().value},feasible_id,{strategy_id},strategy_version}};
+    const bool reviewed_ts02=registry::detail::ts02_case_valid(p,request,h_polyhedron);
+    if(reviewed_ts02&&request.target==FamilyTarget::exact_optimal_relation) {
+        auto canonical=rows.finish({"ts02-optimal-histories"},{"x0","x1","x2","u0","u1"});
+        if(const auto* errors=std::get_if<Diagnostics>(&canonical)) {reject(*errors,Termination::contract_rejected);return result;}
+        auto relation=std::make_shared<const synthesis::Ts02ConstantIntegratorRelation>(
+            std::get<sets::SetData>(std::move(canonical)));
+        const FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,lineage};
+        const SymbolicArgument derivation{"T-S02 exact constant-objective derivation",
+            "For x0=0, x1=x0+u0, x2=x1+u1 and u0,u1 in [0,1], every feasible history has terminal objective 3. Therefore the argmin relation is exactly the full feasible joint-history polyhedron."};
+        const ClaimEvidence claim{p.identity(),derivation};const ObjectiveBound bound{3,claim};
+        CompleteOptimalFamily complete{{build_artifact->coordinates,request.representation,relation},
+            {claim,{bound,bound}},
+            {identity,RegisteredCompletenessEvidence{{synthesis::ts02_constant_integrator_verifier},"1",
+                synthesis::ts02_constant_integrator_proof}},Assurance::numerical};
+        result.outcome={p.identity(),MathematicalOutcome::optimal,derivation,{}};
+        result.objective={bound,bound};result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
+        if(prepared_request_&&verifier_binding_&&prepared_request_->problem.identity()==p.identity()&&
+            prepared_request_->family==request&&prepared_request_->configuration.strategy.value==strategy_id&&
+            prepared_request_->strategy_version==strategy_version&&
+            registry::detail::strategy_b_ts02_profile_valid(p,*prepared_request_)) {
+            receipt_=registry::detail::StrategyBRuntimeLineageReceipt{*prepared_request_,build_artifact,
+                feasible_artifact,feasible_artifact,feasible_artifact,*verifier_binding_};
+        }
+        return result;
+    }
     auto publish=[&] {
         FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,lineage};
         CandidateFeasibility feasibility=Unestablished{};
@@ -455,6 +482,10 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
             complete?SetRelation::equivalent:SetRelation::heuristic,request.family.target,
             complete?registry::Completeness::established:registry::Completeness::unestablished}};
     },[&lp,&convex,verifier_binding](const registry::StrategyRequest& request,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
+        auto selected_verifier=verifier_binding;
+        if(request.family.profile==synthesis::ts02_constant_integrator_profile&&
+            request.family.target==FamilyTarget::exact_optimal_relation)
+            selected_verifier={{synthesis::ts02_constant_integrator_verifier},"1"};
         registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
         program_requirements.output.assurance=request.family.assurance;
         auto generated=registry::check_providers(registry::select_provider(lp,registry::Method{request.configuration.lp,{}},program_requirements),
@@ -463,15 +494,27 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
         auto fixed=registry::check_pipeline();
         return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(fixed)),
             std::get<registry::CheckedProviders<registry::LPPort,registry::ConvexPort>>(std::move(generated)),
-            [verifier_binding](auto,auto providers,const registry::StrategyRequest& prepared,const registry::Requirements&)->std::unique_ptr<SynthesisWorkspace> {
-                return std::make_unique<detail::Ts01ExecutionRunner>(std::get<0>(std::move(providers)),
-                    std::get<1>(std::move(providers)),prepared,verifier_binding);
+            [selected_verifier](auto,auto providers,const registry::StrategyRequest& prepared,const registry::Requirements&)->std::unique_ptr<SynthesisWorkspace> {
+                return std::make_unique<detail::DirectJointExecutionRunner>(std::get<0>(std::move(providers)),
+                    std::get<1>(std::move(providers)),prepared,selected_verifier);
             });
     },verifier_binding};
+    registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
+        ->std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> {
+        if(request.family.target!=FamilyTarget::exact_optimal_relation)return std::nullopt;
+        if(request.family.profile==synthesis::strategy_ts01::profile_id)
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};
+        if(request.family.profile==synthesis::ts02_constant_integrator_profile)
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{synthesis::ts02_constant_integrator_verifier},"1"};
+        return std::nullopt;
+    };
     registration.expected_lineage=[](const registry::StrategyRequest& request) {
         if(request.configuration.strategy.value==strategy_id&&
             registry::detail::ts01_case_valid(request.problem,request.family,request.configuration.representation))
             return detail::expected_ts01_lineage(request.problem.identity());
+        if(request.configuration.strategy.value==strategy_id&&
+            registry::detail::ts02_case_valid(request.problem,request.family,request.configuration.representation))
+            return detail::expected_ts02_lineage(request.problem.identity());
         return std::vector<TransformStepIdentity>{};
     };
     return registration;

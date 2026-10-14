@@ -36,5 +36,11 @@ inline std::vector<TransformStepIdentity> expected_ts01_lineage(const ProblemId&
     lineage.push_back({{"strategy-a/terminal-preimage"},terminal_relation,optimal_history,{"csl.synthesis.control-recovery"},"1"});
     return lineage;
 }
+inline std::vector<TransformStepIdentity> expected_ts02_lineage(const ProblemId& problem) {
+    // T-S02 currently executes the same six deterministic reach-back steps as
+    // T-S01. The immutable FamilyRequest profile/objective distinguishes the
+    // proof authority; only this expected-lineage name is profile-specific.
+    return expected_ts01_lineage(problem);
+}
 
 } // namespace csl::synthesis::strategy_a::detail
