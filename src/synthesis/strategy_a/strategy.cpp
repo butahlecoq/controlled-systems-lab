@@ -1,5 +1,6 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include <csl/synthesis/ts02_constant_integrator.hpp>
 #include "../../registry/compiled_verifiers.hpp"
 #include "../../registry/strategy_a_lineage.hpp"
 #include <algorithm>
@@ -17,8 +18,10 @@ Diagnostics unsupported(std::string field,std::string reason) {
 Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyRequest& family) {
     if(auto errors=check_family_request(family,problem.identity());!errors.empty())return errors;
     const bool exact_ts01=registry::detail::ts01_case_valid(problem,family,family.representation);
-    if(!exact_ts01&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and the exact reviewed T-S01 profile are supported.");
-    if(!exact_ts01&&family.target!=FamilyTarget::candidate_relaxation)
+    const bool exact_ts02=family.profile==::csl::synthesis::ts02_constant_integrator_profile&&
+        family.target==FamilyTarget::exact_optimal_relation;
+    if(!exact_ts01&&!exact_ts02&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and the reviewed T-S01/T-S02 exact profiles are supported.");
+    if(!exact_ts01&&!exact_ts02&&family.target!=FamilyTarget::candidate_relaxation)
         return unsupported("strategy_a.coverage","No reviewed coverage procedure or optimal-subset verifier; request a candidate relation.");
     if(family.assurance!=Assurance::numerical)
         return unsupported("strategy_a.assurance","Only unestablished binary64 candidate construction is supported.");
@@ -61,6 +64,27 @@ std::vector<TransformStepIdentity> forward_lineage(const reachability::ForwardTu
             stage.marginal.output.id,strategy,version});
     }
     return result;
+}
+std::variant<std::shared_ptr<const ::csl::synthesis::Ts02ConstantIntegratorRelation>,Diagnostics>
+canonical_ts02_relation() {
+    auto inequalities=numeric::snapshot(Matrix{4,5,{0,0,0,1,0, 0,0,0,-1,0,
+        0,0,0,0,1, 0,0,0,0,-1}});
+    auto upper=numeric::snapshot_vector(Vector{1,0,1,0});
+    auto equalities=numeric::snapshot(Matrix{3,5,{1,0,0,0,0, -1,1,0,-1,0,
+        0,-1,1,0,-1}});
+    auto equality_values=numeric::snapshot_vector(Vector{0,0,0});
+    if(!std::holds_alternative<numeric::MatrixView>(inequalities)||
+        !std::holds_alternative<numeric::VectorView>(upper)||
+        !std::holds_alternative<numeric::MatrixView>(equalities)||
+        !std::holds_alternative<numeric::VectorView>(equality_values))
+        return Diagnostics{{DiagnosticCode::invalid_input,"strategy_a.ts02.relation","Could not construct exact canonical H-relation buffers."}};
+    auto data=sets::make_h({{"ts02-optimal-histories"},5,{"x0","x1","x2","u0","u1"}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(equality_values)});
+    if(!std::holds_alternative<sets::SetData>(data))
+        return Diagnostics{{DiagnosticCode::invalid_input,"strategy_a.ts02.relation","Canonical T-S02 H-relation is not a valid polyhedron."}};
+    return std::make_shared<const ::csl::synthesis::Ts02ConstantIntegratorRelation>(
+        std::get<sets::SetData>(std::move(data)));
 }
 void reject(SynthesisResult& result,RequestProvenance request,Diagnostics diagnostics,
     const std::vector<TransformStepIdentity>& lineage) {
@@ -188,6 +212,9 @@ public:
             const bool exact_ts01=registry::detail::ts01_case_valid(problem,request,request.representation)&&
                 lineage==expected_lineage_&&minimized.optimization&&
                 minimized.optimization->outcome.value==MathematicalOutcome::optimal;
+            const bool exact_ts02=request.profile==::csl::synthesis::ts02_constant_integrator_profile&&
+                request.target==FamilyTarget::exact_optimal_relation&&lineage==expected_lineage_&&
+                minimized.optimization&&minimized.optimization->outcome.value==MathematicalOutcome::optimal;
             const auto proposal_identity=FamilyIdentity{problem.identity(),request,history.coordinates,
                 strategy,version,lineage};
             publish(result,problem,request,std::move(history),tube,std::move(minimized),std::move(lineage),
@@ -210,6 +237,23 @@ public:
                 result.objective=optimum.bounds;
                 result.complete_proposal=CompleteFamilyProposal{proposal_identity,std::move(family)};
             }
+            if(exact_ts02&&result.termination==Termination::completed) {
+                const SymbolicArgument derivation{"T-S02 exact constant-objective derivation",
+                    "For x0=0, x1=x0+u0, x2=x1+u1 and u0,u1 in [0,1], every feasible history has terminal objective 3. Therefore the argmin relation is exactly the full feasible joint-history polyhedron."};
+                const ClaimEvidence claim{problem.identity(),derivation};
+                const ObjectiveBound constant{3,{problem.identity(),derivation}};
+                const OptimumEvidence optimum{claim,{constant,constant}};
+                auto canonical=canonical_ts02_relation();
+                if(const auto* errors=std::get_if<Diagnostics>(&canonical)){contract_failure(result,*errors);return result;}
+                CompleteOptimalFamily family{{proposal_identity.coordinates,request.representation,
+                        std::get<std::shared_ptr<const ::csl::synthesis::Ts02ConstantIntegratorRelation>>(std::move(canonical))},optimum,
+                    {proposal_identity,RegisteredCompletenessEvidence{{::csl::synthesis::ts02_constant_integrator_verifier},"1",
+                        ::csl::synthesis::ts02_constant_integrator_proof}},
+                    Assurance::numerical};
+                result.outcome={problem.identity(),MathematicalOutcome::optimal,derivation,{}};
+                result.objective=optimum.bounds;
+                result.complete_proposal=CompleteFamilyProposal{proposal_identity,std::move(family)};
+            }
             return result;
         } catch(const std::bad_alloc&) {
             stop(result,local({"strategy-a/storage"}),{StopReason::resource_limit,"Strategy A allocation failed; previously published evidence retained."});
@@ -221,7 +265,7 @@ public:
 };
 }
 registry::StrategyRegistration make_registration(Providers providers) {
-    return {{strategy,version},
+    registry::StrategyRegistration registration{{strategy,version},
         [](const registry::StrategyRequest& request,const registry::Requirements&)->registry::Capability {
             if(auto errors=capabilities(request.problem,request.family);!errors.empty())return errors;
             registry::Output output;output.representation=request.family.representation;
@@ -244,7 +288,23 @@ registry::StrategyRegistration make_registration(Providers providers) {
             if(request.strategy_version==version&&request.configuration.strategy==strategy&&
                 registry::detail::ts01_case_valid(request.problem,request.family,request.configuration.representation))
                 return detail::expected_ts01_lineage(request.problem.identity());
+            if(request.strategy_version==version&&request.configuration.strategy==strategy&&
+                request.family.profile==::csl::synthesis::ts02_constant_integrator_profile&&
+                request.family.target==FamilyTarget::exact_optimal_relation)
+                return detail::expected_ts01_lineage(request.problem.identity());
             return std::vector<TransformStepIdentity>{};
         }};
+    registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
+        ->std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> {
+        if(request.strategy_version==version&&request.configuration.strategy==strategy&&
+            registry::detail::ts01_case_valid(request.problem,request.family,request.configuration.representation))
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};
+        if(request.strategy_version==version&&request.configuration.strategy==strategy&&
+            request.family.profile==::csl::synthesis::ts02_constant_integrator_profile&&
+            request.family.target==FamilyTarget::exact_optimal_relation)
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{::csl::synthesis::ts02_constant_integrator_verifier},"1"};
+        return {};
+    };
+    return registration;
 }
 }

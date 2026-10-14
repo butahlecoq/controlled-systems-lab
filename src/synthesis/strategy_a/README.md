@@ -11,17 +11,22 @@ selected provider before a request-specific workspace is created.
 
 The strategy implements the existing `StrategyPort` / `SynthesisWorkspace`
 contract. Its general path admits `nominal_open_loop`, numerical,
-`candidate_relaxation` requests with `csl.polyhedron.h` joint output. The only
-complete-family exception is the strict reviewed `ts01_exact_integrator`
-profile: the scalar two-step integrator, exact objective, universal state
-factors, and exact strategy/version binding checked by the compiled T-S01
-verifier. The registration freezes a deterministic six-step lineage and the
-workspace proposes the analytic relation only after all six transformations
-execute in order and the terminal optimizer reports optimal. The registry then
-checks the input, effective request, coordinates, strategy/version, executed
-lineage, theorem, bounds, and canonical relation. Every other exact or partial
-request remains rejected. A supplied family materialization limit is rejected
-rather than assigned invented semantics. Operation-provider limits remain
+`candidate_relaxation` requests with `csl.polyhedron.h` joint output. Two
+complete-family exceptions are registered analytic profiles. The strict
+`ts01_exact_integrator` profile is checked by the compiled T-S01 verifier. The
+`ts02_constant_integrator` profile is the scalar two-step unit integrator with
+controls in `[0,1]`, universal state factors, and constant terminal objective
+`3`; it is checked by the shared compiled T-S02 verifier. Each uses a
+request-dependent verifier key while preserving the T-S01 mapping. The
+registration freezes the deterministic six-step lineage, and a proposal is
+emitted only after the transformations execute in order and the terminal
+optimizer reports optimal. T-S01 publishes its analytic segment; T-S02
+publishes the shared canonical H-relation for every feasible history, avoiding
+dependence on floating-point H-row ordering. The registry checks the input,
+effective request, coordinates, strategy/version, executed lineage, theorem,
+bounds, proof identity, and canonical relation. Other exact or partial requests
+remain rejected. A supplied family materialization limit is rejected rather
+than assigned invented semantics. Operation-provider limits remain
 independently enforced by those providers.
 
 ## Derivation and scope
@@ -91,10 +96,15 @@ parameter interval `[0,1]`. Constant T-S02 tests preserve multiple terminal poin
 and all four corner histories. T-S01 evaluates the retained primal with the
 original resolved objective and asserts literal cost zero. HiGHS withholds
 optional program bounds; their absence is checked before any value access.
-For strict T-S01, the registered Strategy A path is also exercised end-to-end;
-the pre-verification recovered H relation is checked independently to be exactly
+For strict T-S01 and T-S02, the registered Strategy A paths are exercised
+end-to-end. T-S02 checks all four box corners and an interior history, rejects
+an inconsistent transition point, verifies equality rank and literal control
+bounds, and binds the shared canonical H payload and constant objective bound
+through the T-S02 verifier. These narrow analytic profiles do not establish
+general numerical family coverage. For T-S01, the pre-verification recovered
+H relation is checked independently to be exactly
 the five-coordinate canonical segment under an independent equality-rank and
 interval-substitution oracle before the compiled verifier accepts the complete
-proposal. The Strategy A exact-family delivery is limited to this one
-analytic profile. It does not establish general numerical family coverage or
-transfer completeness to another source profile. Issue #66 must remain open.
+proposal. These two exact analytic profiles do not establish general numerical
+family coverage or transfer completeness to another source profile. Issue #66
+must remain open.

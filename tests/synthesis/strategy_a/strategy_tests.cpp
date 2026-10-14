@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/contracts.hpp>
+#include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
@@ -60,6 +61,14 @@ problem::ResolvedProblem exact_integrator() {
         std::move(objective)};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
+problem::ResolvedProblem exact_ts02_integrator() {
+    Problem source{{"strategy-a-ts02"},std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
+        {0,1,2},KnownInitial{{0}},ContinuousDomain{{interval("u0",0,1,"u"),interval("u1",0,1,"u")}},
+        {UniversalSet{1},UniversalSet{1},UniversalSet{1}}, {},{},InformationPattern::nominal_open_loop,
+        LinearTerminal{{0},3}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
 StrategyRequest request(problem::ResolvedProblem problem) {
     FamilyRequest family;family.objective=problem.identity();family.profile="nominal_open_loop";
     family.representation={"csl.polyhedron.h"};
@@ -68,6 +77,14 @@ StrategyRequest request(problem::ResolvedProblem problem) {
 }
 StrategyRequest exact_request(problem::ResolvedProblem problem) {
     FamilyRequest family;family.objective=problem.identity();family.profile=synthesis::strategy_ts01::profile_id;
+    family.target=FamilyTarget::exact_optimal_relation;family.assurance=Assurance::numerical;
+    family.representation={"csl.polyhedron.h"};
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.reach-back"};
+    configuration.representation={"csl.polyhedron.h"};
+    return {std::move(problem),configuration,family,"1",{}};
+}
+StrategyRequest exact_ts02_request(problem::ResolvedProblem problem) {
+    FamilyRequest family;family.objective=problem.identity();family.profile=synthesis::ts02_constant_integrator_profile;
     family.target=FamilyTarget::exact_optimal_relation;family.assurance=Assurance::numerical;
     family.representation={"csl.polyhedron.h"};
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.reach-back"};
@@ -199,6 +216,15 @@ bool has_inequality(const sets::HRepresentation& h,const Vector& coefficients,do
         if(factor<=0 || std::abs(h.upper_bounds[r]-factor*bound)>1e-8)continue;
         bool same=true;for(std::size_t c=0;c<5;++c)if(std::abs(h.inequalities(r,c)-factor*coefficients[c])>1e-8)same=false;
         if(same)return true;
+    }
+    return false;
+}
+bool has_equality(const sets::HRepresentation& h,const Vector& coefficients,double value) {
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        bool match=std::abs(h.equality_values[row]-value)<1e-8;
+        for(std::size_t col=0;col<h.equalities.cols();++col)
+            match=match&&std::abs(h.equalities(row,col)-coefficients[col])<1e-8;
+        if(match)return true;
     }
     return false;
 }
@@ -419,6 +445,49 @@ TEST_CASE("T-S02 constant objective preserves histories at different terminal po
     CHECK_FALSE(history.terminal->optimization->objective.upper);
     REQUIRE(history.terminal->optimization->primal);
     CHECK(take(optimization::evaluate(query.problem.objective(),*history.terminal->optimization->primal))==7);
+}
+TEST_CASE("exact T-S02 selects its analytic verifier and publishes every feasible history") {
+    const auto query=exact_ts02_request(exact_ts02_integrator());
+    const auto prepared=admit(query);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+    auto workspace=std::get<PreparedStrategy>(prepared).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=take(workspace->run(context));
+    CHECK(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->registry_verified());
+    CHECK(result.family->identity().request==query.family);
+    CHECK(result.family->identity().coordinates==JointCoordinates{{1,1,0},2});
+    CHECK(result.family->identity().strategy==query.configuration.strategy);
+    CHECK(result.family->identity().lineage.size()==6);
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==3);CHECK(result.objective.upper->value==3);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto* exact=dynamic_cast<const synthesis::Ts02ConstantIntegratorRelation*>(complete.relation.payload.get());
+    REQUIRE(exact);
+    const auto& canonical=exact->h_polyhedron();
+    CHECK(canonical.metadata()->id==SetId{"ts02-optimal-histories"});
+    CHECK(canonical.metadata()->coordinate_labels==std::vector<std::string>{"x0","x1","x2","u0","u1"});
+    CHECK(contains(canonical,{0,0,0,0,0}));
+    CHECK(contains(canonical,{0,1,2,1,1}));
+    CHECK(contains(canonical,{0,1,1,1,0}));
+    CHECK(contains(canonical,{0,0,1,0,1}));
+    CHECK(contains(canonical,{0,.2,.9,.2,.7}));
+    CHECK_FALSE(contains(canonical,{0,0,2,0,1}));
+    const auto h=std::get<sets::HRepresentation>(canonical.representation());
+    CHECK(equality_rank(h)==3);
+    CHECK(has_inequality(h,{0,0,0,1,0},1));CHECK(has_inequality(h,{0,0,0,-1,0},0));
+    CHECK(has_inequality(h,{0,0,0,0,1},1));CHECK(has_inequality(h,{0,0,0,0,-1},0));
+    CHECK(has_equality(h,{1,0,0,0,0},0));
+    CHECK(has_equality(h,{-1,1,0,-1,0},0));
+    CHECK(has_equality(h,{0,-1,1,0,-1},0));
+    const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+    REQUIRE(proof);
+    CHECK(proof->verifier==ModuleId{synthesis::ts02_constant_integrator_verifier});
+    CHECK(proof->verifier_version=="1");
+    CHECK(proof->proof==synthesis::ts02_constant_integrator_proof);
 }
 TEST_CASE("T-S03 singular A keeps free earlier controls with a unique terminal minimizer") {
     // Reproduce an ordinary preceding Strategy A call that exits at the late
