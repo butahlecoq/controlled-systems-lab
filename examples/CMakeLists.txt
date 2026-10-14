@@ -86,8 +86,15 @@ project(CSLExamples LANGUAGES CXX)
 find_package(CSL 0.1 CONFIG REQUIRED)
 enable_testing()
 
-foreach(example registered_lp registered_convex resolved_scenario scenario_file backend_substitution registered_synthesis_comparison)
+# Partial packages run every example whose required public targets are present.
+function(csl_example example)
+  foreach(dependency IN LISTS ARGN)
+    if(NOT TARGET ${dependency})
+      return()
+    endif()
+  endforeach()
   add_executable(${example} ${example}.cpp)
+  target_link_libraries(${example} PRIVATE ${ARGN})
   target_compile_features(${example} PRIVATE cxx_std_20)
   set_target_properties(${example} PROPERTIES CXX_EXTENSIONS OFF)
   if(MSVC)
@@ -95,16 +102,20 @@ foreach(example registered_lp registered_convex resolved_scenario scenario_file 
   else()
     target_compile_options(${example} PRIVATE -Wall -Wextra -Wpedantic -Werror)
   endif()
-endforeach()
-target_link_libraries(registered_lp PRIVATE CSL::highs_lp)
-target_link_libraries(registered_convex PRIVATE CSL::highs_convex)
-target_link_libraries(resolved_scenario PRIVATE CSL::resolved_problem)
-target_link_libraries(scenario_file PRIVATE CSL::input)
-target_link_libraries(backend_substitution PRIVATE CSL::highs_lp CSL::phase_one)
-target_link_libraries(registered_synthesis_comparison PRIVATE CSL::input CSL::strategy_a CSL::strategy_b
+endfunction()
+
+csl_example(registered_lp CSL::highs_lp)
+csl_example(registered_convex CSL::highs_convex)
+csl_example(resolved_scenario CSL::resolved_problem)
+csl_example(scenario_file CSL::input)
+csl_example(backend_substitution CSL::highs_lp CSL::phase_one)
+csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::strategy_b
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
 
 function(example_check name executable argument status output)
+  if(NOT TARGET ${executable})
+    return()
+  endif()
   add_test(NAME ${name} COMMAND "${CMAKE_COMMAND}"
     "-DEXAMPLE_EXE=$<TARGET_FILE:${executable}>" "-DEXAMPLE_ARGUMENT=${argument}"
     "-DEXPECTED_STATUS=${status}" "-DEXPECTED_OUTPUT=${output}"
@@ -126,6 +137,7 @@ example_check(file_missing scenario_file "${CMAKE_CURRENT_BINARY_DIR}/no-such-sc
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/malformed.json" "{ invalid JSON")
 example_check(file_malformed scenario_file "${CMAKE_CURRENT_BINARY_DIR}/malformed.json" 2 "Input rejected.*expected")
 example_check(file_no_argument scenario_file "" 2 "Usage: scenario_file")
+if(TARGET registered_synthesis_comparison)
 example_check(synthesis_comparison registered_synthesis_comparison "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "schema.*csl.example.synthesis-comparison/1.*csl.synthesis.reach-back.*csl.synthesis.strategy-b")
 add_test(NAME synthesis_comparison_export COMMAND "${CMAKE_COMMAND}"
@@ -146,3 +158,4 @@ example_check(synthesis_unsupported_profile registered_synthesis_comparison "${C
 string(JSON overridden_scenario SET "${teaching_scenario}" run "{\"seed\":42}")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/overridden-synthesis.json" "${overridden_scenario}")
 example_check(synthesis_run_override registered_synthesis_comparison "${CMAKE_CURRENT_BINARY_DIR}/overridden-synthesis.json" 2 "Input rejected.*does not accept run overrides")
+endif()

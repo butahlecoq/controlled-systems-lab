@@ -60,7 +60,8 @@ Problem source() {
             {1,0,{}},{0}}},{}}),{0,1,2},KnownInitial{{0}},
         ContinuousDomain{{interval("u0",0,1),interval("u1",0,1)}},
         {UniversalSet{1},UniversalSet{1},UniversalSet{1}},{},{},
-        InformationPattern::nominal_open_loop,QuadraticTerminal{{1,1,{2}},{-2},1}};
+        InformationPattern::nominal_open_loop,
+        TerminalObjective{std::in_place_type<QuadraticTerminal>, Matrix{1,1,{2}}, Vector{-2}, 1.0}};
 }
 
 SynthesisResult one_run(std::uint64_t& token) {
