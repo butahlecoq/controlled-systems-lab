@@ -212,6 +212,63 @@ TEST_CASE("changed scalar dynamics has an independently fixed digest and termina
     const auto terminal=accepted(p.model().step({0},Vector{2},Vector{3},{}));CHECK(terminal==Vector{5});
     CHECK(accepted(optimization::evaluate(p.objective(),terminal))==5);
 }
+TEST_CASE("one immutable dynamics model serves distinct constrained objective requests") {
+    const auto shared_model = std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
+        LinearStage{{1,1,{2}},{1,1,{1}},{1,0,{}},{0}}},{}});
+    Problem first{{"first-request"},shared_model,{0,1},KnownInitial{{1}},
+        ContinuousDomain{{Singleton{{2}}}},{UniversalSet{1},Singleton{{4}}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
+    Problem second{{"second-request"},shared_model,{0,1},KnownInitial{{1}},
+        ContinuousDomain{{Singleton{{5}}}},{UniversalSet{1},Singleton{{7}}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{-2},20}};
+
+    auto first_context=context();
+    first_context.objective_policy.numerical={1e-4,2e-4};
+    auto second_context=context();
+    second_context.objective_policy.numerical={1e-9,3e-9};
+    const auto first_resolved=accepted(resolve(first,first_context));
+    const auto second_resolved=accepted(resolve(second,second_context));
+
+    CHECK(first.model==shared_model);
+    CHECK(second.model==shared_model);
+    CHECK((first_resolved.model().dimensions()==Dimensions{1,1,0}));
+    CHECK((second_resolved.model().dimensions()==Dimensions{1,1,0}));
+    CHECK(first_resolved.identity()!=second_resolved.identity());
+    CHECK(first_resolved.objective().policy().numerical.absolute_tolerance==1e-4);
+    CHECK(first_resolved.objective().policy().numerical.relative_tolerance==2e-4);
+    CHECK(second_resolved.objective().policy().numerical.absolute_tolerance==1e-9);
+    CHECK(second_resolved.objective().policy().numerical.relative_tolerance==3e-9);
+
+    // x[1] = 2*x[0] + u[0]: the two requests define distinct feasible
+    // singleton terminal sections in the joint (state, control) coordinates.
+    const auto first_terminal=accepted(first_resolved.model().step({0},Vector{1},Vector{2},{}));
+    const auto second_terminal=accepted(second_resolved.model().step({0},Vector{1},Vector{5},{}));
+    CHECK(first_terminal==Vector{4});
+    CHECK(second_terminal==Vector{7});
+    CHECK(std::get<Singleton>(first_resolved.constraints().states()->at(1)).point==Vector{4});
+    CHECK(std::get<Singleton>(second_resolved.constraints().states()->at(1)).point==Vector{7});
+    CHECK(std::get<Singleton>(std::get<ContinuousDomain>(*first_resolved.controls().description()).stages[0]).point==Vector{2});
+    CHECK(std::get<Singleton>(std::get<ContinuousDomain>(*second_resolved.controls().description()).stages[0]).point==Vector{5});
+    CHECK(accepted(optimization::evaluate(first_resolved.objective(),first_terminal))==4);
+    CHECK(accepted(optimization::evaluate(second_resolved.objective(),second_terminal))==6);
+    CHECK_FALSE(first_terminal==std::get<Singleton>(second_resolved.constraints().states()->at(1)).point);
+    CHECK_FALSE(second_terminal==std::get<Singleton>(first_resolved.constraints().states()->at(1)).point);
+
+    // Resolving under per-request settings must leave both authored requests
+    // and the shared immutable dynamics payload untouched.
+    CHECK(first.model==shared_model);
+    CHECK(second.model==shared_model);
+    CHECK(std::get<LinearStage>(shared_model->dynamics.stages).A.values==Vector{2});
+    CHECK(std::get<LinearStage>(shared_model->dynamics.stages).B.values==Vector{1});
+    CHECK(std::get<Singleton>(first.states[1]).point==Vector{4});
+    CHECK(std::get<Singleton>(second.states[1]).point==Vector{7});
+    CHECK(std::get<Singleton>(std::get<ContinuousDomain>(first.controls).stages[0]).point==Vector{2});
+    CHECK(std::get<Singleton>(std::get<ContinuousDomain>(second.controls).stages[0]).point==Vector{5});
+    CHECK(std::get<LinearTerminal>(first.objective).coefficients==Vector{1});
+    CHECK(std::get<LinearTerminal>(second.objective).coefficients==Vector{-2});
+    CHECK(std::get<LinearTerminal>(first.objective).offset==0);
+    CHECK(std::get<LinearTerminal>(second.objective).offset==20);
+}
 TEST_CASE("content roots match literals and distinguish bytes from display paths") {
     auto bytes=unhex("31");auto content=accepted(snapshot_content(bytes));bytes[0]=std::byte{0x32};
     CHECK(hex(content.digest())=="6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b");
