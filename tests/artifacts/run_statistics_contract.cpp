@@ -961,3 +961,31 @@ TEST_CASE("v4 selection preserves direction tolerance and raw distinct counts") 
     CHECK(restored.directions==std::vector<Vector>{{1,-1},{-1,1},{1,-1}});
     CHECK(restored.distinctness_tolerance==0.25); CHECK(restored.returned_count()==3); CHECK(restored.distinct_count()==2);
 }
+
+TEST_CASE("historical v2 and v3 migrate nondefault recorded query facts and source identity") {
+    for(const bool v2:{true,false}) {
+        // Alter owning copies only; the archival fixture bytes remain unchanged.
+        auto legacy=nlohmann::json::parse(v2?fixture_v2_text():fixture_text());
+        const auto original=accepted(ar::decode_run(legacy.dump()));
+        auto config=original.description().configuration.description();
+        config.output.witnesses.directions={{1,-1},{-1,1}};
+        config.output.witnesses.distinctness_tolerance=0.125;
+        const auto resolved=accepted(ar::resolve_configuration(config));
+        legacy["configuration"]["id"]=resolved.identity().value;
+        legacy["configuration"]["value"]["output"]["directions"]=nlohmann::json::array({nlohmann::json::array({"3ff0000000000000","bff0000000000000"}),nlohmann::json::array({"bff0000000000000","3ff0000000000000"})});
+        legacy["configuration"]["value"]["output"]["distinctness_bits"]="3fc0000000000000";
+        legacy["statistics"]["configuration"]=resolved.identity().value;
+        legacy["selection"]["batch"]["source_family"]=legacy["final"]["value"]["family"]["family"]["identity"];
+        const auto expected_source=std::get<ar::SynthesisFinal>(original.description().final).family->family.identity();
+        const auto migrated=accepted(ar::decode_run(legacy.dump()));
+        const auto& batch=migrated.description().selection->batch;
+        CHECK(batch.directions==std::vector<Vector>{{1,-1},{-1,1}});
+        CHECK(batch.distinctness_tolerance==0.125);CHECK(batch.source_family==expected_source);
+        CHECK(batch.returned_count()==1);CHECK(batch.distinct_count()==1);
+        const auto encoded=accepted(ar::encode_run(migrated));
+        CHECK(encoded.find("csl.run-statistics/4")!=std::string::npos);
+        const auto restored=accepted(ar::decode_run(encoded));const auto& restored_batch=restored.description().selection->batch;
+        CHECK(restored_batch.directions==batch.directions);CHECK(restored_batch.distinctness_tolerance==0.125);
+        CHECK(restored_batch.source_family==expected_source);CHECK(restored_batch.returned_count()==1);
+    }
+}
