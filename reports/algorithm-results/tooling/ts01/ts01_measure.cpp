@@ -60,7 +60,8 @@ Problem source() {
             {1,0,{}},{0}}},{}}),{0,1,2},KnownInitial{{0}},
         ContinuousDomain{{interval("u0",0,1),interval("u1",0,1)}},
         {UniversalSet{1},UniversalSet{1},UniversalSet{1}},{},{},
-        InformationPattern::nominal_open_loop,QuadraticTerminal{{1,1,{2}},{-2},1}};
+        InformationPattern::nominal_open_loop,
+        TerminalObjective{std::in_place_type<QuadraticTerminal>, Matrix{1,1,{2}}, Vector{-2}, 1.0}};
 }
 
 SynthesisResult one_run(std::uint64_t& token) {
@@ -74,7 +75,7 @@ SynthesisResult one_run(std::uint64_t& token) {
     StrategyConfiguration configuration;
     configuration.strategy={"csl.synthesis.ts01-analytic"};
     configuration.representation=family.representation;
-    StrategyRequest request{std::move(problem),configuration,family,{}};
+    StrategyRequest request{std::move(problem),configuration,family,{},{}};
 
     StrategyRegistry strategies;
     if (strategies.add(synthesis::strategy_ts01::make_registration())) throw std::runtime_error("T-S01 registration was rejected");

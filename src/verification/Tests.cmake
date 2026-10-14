@@ -1,0 +1,9 @@
+add_executable(trajectory_verification_tests tests/unit/verification/trajectory_tests.cpp)
+target_link_libraries(trajectory_verification_tests PRIVATE CSL::verification CSL::phase_one doctest::doctest Threads::Threads)
+add_test(NAME trajectory_verification_tests COMMAND trajectory_verification_tests)
+csl_test_target(trajectory_verification_tests verification)
+
+add_executable(verification_public_client tests/installed/verification_client.cpp)
+target_link_libraries(verification_public_client PRIVATE CSL::verification)
+add_test(NAME verification_public_client COMMAND verification_public_client)
+csl_test_target(verification_public_client verification)
