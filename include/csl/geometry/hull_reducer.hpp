@@ -1,5 +1,7 @@
 #pragma once
 
+#include <csl/geometry/contracts.hpp>
+
 #include <csl/optimization/lp_backend.hpp>
 #include <csl/registry/registry.hpp>
 

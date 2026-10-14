@@ -20,3 +20,8 @@ target_compile_definitions(public_headers_lp_first_client PRIVATE CSL_PUBLIC_HEA
 set_target_properties(public_headers_lp_first_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME public_headers_lp_first_client COMMAND public_headers_lp_first_client)
 csl_test_target(public_headers_lp_first_client numeric)
+
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME numeric_dependency_direction
+  COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/architecture/check_numeric_dependencies.py)
+set_tests_properties(numeric_dependency_direction PROPERTIES LABELS numeric)

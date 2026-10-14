@@ -1,6 +1,6 @@
 #pragma once
 
-#include <csl/contracts.hpp>
+#include <csl/synthesis/contracts.hpp>
 #include <csl/sets/data.hpp>
 #include <utility>
 

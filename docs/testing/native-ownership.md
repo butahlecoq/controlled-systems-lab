@@ -112,20 +112,26 @@ mkdir -p build/test01/wsl
 g++ -std=c++20 -g -O1 -pthread -Wall -Wextra -Wpedantic -Werror \
   -fsanitize=address,undefined -fno-omit-frame-pointer \
   -Iinclude -Ibuild/test01/msvc/_deps/doctest-src \
-  tests/unit/numeric/buffer_views_test.cpp src/numeric/data.cpp src/contracts.cpp \
+  tests/unit/numeric/buffer_views_test.cpp src/numeric/data.cpp \
+  src/contracts/model.cpp src/contracts/problem.cpp src/contracts/geometry.cpp \
+  src/contracts/outcomes.cpp src/contracts/execution.cpp src/contracts/synthesis.cpp \
   -o build/test01/wsl/numeric_buffer_views_tests
 ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 \
   build/test01/wsl/numeric_buffer_views_tests
 g++ -std=c++20 -g -O1 -pthread -Wall -Wextra -Wpedantic -Werror \
   -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude \
-  tests/contract/public_headers_client.cpp src/numeric/data.cpp src/contracts.cpp \
+  tests/contract/public_headers_client.cpp src/numeric/data.cpp \
+  src/contracts/model.cpp src/contracts/problem.cpp src/contracts/geometry.cpp \
+  src/contracts/outcomes.cpp src/contracts/execution.cpp src/contracts/synthesis.cpp \
   -o build/test01/wsl/public_headers_client
 ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 \
   build/test01/wsl/public_headers_client
 g++ -std=c++20 -g -O1 -pthread -Wall -Wextra -Wpedantic -Werror \
   -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude \
   -DCSL_PUBLIC_HEADERS_LP_FIRST=1 \
-  tests/contract/public_headers_client.cpp src/numeric/data.cpp src/contracts.cpp \
+  tests/contract/public_headers_client.cpp src/numeric/data.cpp \
+  src/contracts/model.cpp src/contracts/problem.cpp src/contracts/geometry.cpp \
+  src/contracts/outcomes.cpp src/contracts/execution.cpp src/contracts/synthesis.cpp \
   -o build/test01/wsl/public_headers_lp_first_client
 ASAN_OPTIONS=detect_leaks=1 UBSAN_OPTIONS=halt_on_error=1 \
   build/test01/wsl/public_headers_lp_first_client

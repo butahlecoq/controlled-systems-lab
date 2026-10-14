@@ -1,5 +1,8 @@
 #pragma once
 
+#include <csl/optimization/contracts.hpp>
+#include <csl/optimization/objective_contracts.hpp>
+
 #include <csl/numeric/data.hpp>
 
 namespace csl::optimization {

@@ -1,4 +1,6 @@
 #pragma once
+
+#include <csl/synthesis/contracts.hpp>
 #include <csl/registry/provider.hpp>
 namespace csl::synthesis::witness_selector {
 inline constexpr const char* selector_id="csl.selector.ts01-directions";

@@ -1,6 +1,9 @@
 #pragma once
 
-#include <csl/contracts.hpp>
+#include <csl/core/values.hpp>
+#include <csl/core/diagnostics.hpp>
+#include <memory>
+#include <variant>
 #include <span>
 
 namespace csl::numeric {

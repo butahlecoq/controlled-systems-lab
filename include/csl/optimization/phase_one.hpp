@@ -1,4 +1,6 @@
 #pragma once
+
+#include <csl/optimization/contracts.hpp>
 #include <csl/optimization/lp_backend.hpp>
 #include <csl/registry/registry.hpp>
 

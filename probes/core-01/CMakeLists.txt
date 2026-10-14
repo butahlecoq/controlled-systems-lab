@@ -18,7 +18,13 @@ FetchContent_Declare(doctest URL https://codeload.github.com/doctest/doctest/tar
 FetchContent_MakeAvailable(doctest)
 enable_testing()
 
-add_library(csl_contracts STATIC ../../src/contracts.cpp)
+add_library(csl_contracts STATIC
+  ../../src/contracts/model.cpp
+  ../../src/contracts/problem.cpp
+  ../../src/contracts/geometry.cpp
+  ../../src/contracts/outcomes.cpp
+  ../../src/contracts/execution.cpp
+  ../../src/contracts/synthesis.cpp)
 target_include_directories(csl_contracts PUBLIC ../../include)
 target_compile_features(csl_contracts PUBLIC cxx_std_20)
 set_target_properties(csl_contracts PROPERTIES CXX_EXTENSIONS OFF)

@@ -1,4 +1,6 @@
 #pragma once
+
+#include <csl/problem/contracts.hpp>
 #include <csl/problem/resolved_problem.hpp>
 #include <csl/registry/registry.hpp>
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <csl/problem/contracts.hpp>
+
 #include <csl/problem/constraints.hpp>
 #include <csl/problem/initial_information.hpp>
 #include <csl/optimization/objectives.hpp>

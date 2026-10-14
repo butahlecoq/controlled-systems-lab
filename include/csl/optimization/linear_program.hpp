@@ -1,4 +1,6 @@
 #pragma once
+
+#include <csl/optimization/contracts.hpp>
 #include <csl/numeric/data.hpp>
 namespace csl::optimization {
 template<class T> using LPDataResult = std::variant<T, Diagnostics>;

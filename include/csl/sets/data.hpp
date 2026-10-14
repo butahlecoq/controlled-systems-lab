@@ -1,5 +1,9 @@
 #pragma once
 
+#include <csl/evidence/contracts.hpp>
+
+#include <csl/sets/contracts.hpp>
+
 #include <csl/numeric/data.hpp>
 
 namespace csl::sets {

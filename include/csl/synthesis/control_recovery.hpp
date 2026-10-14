@@ -1,5 +1,7 @@
 #pragma once
 
+#include <csl/synthesis/contracts.hpp>
+
 #include <csl/problem/resolved_problem.hpp>
 
 namespace csl::synthesis {

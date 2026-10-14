@@ -1,4 +1,6 @@
 #pragma once
+
+#include <csl/optimization/contracts.hpp>
 #include <csl/optimization/linear_program.hpp>
 namespace csl::optimization {
 Diagnostics check_program_result(const ProgramResult&, const LinearProgram&, Assurance);
