@@ -1,5 +1,6 @@
 from __future__ import annotations
-import importlib.util, json, unittest, sys, zipfile, re, tempfile, csv
+import importlib.util, json, unittest, sys, zipfile, re, tempfile, csv, shutil
+from unittest import mock
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -65,7 +66,19 @@ class StrategyATs02ReportTests(unittest.TestCase):
         site_spec=importlib.util.spec_from_file_location("csl_syn03_ts02_test_site",ROOT/"scripts/reports/site.py")
         site=importlib.util.module_from_spec(site_spec);site_spec.loader.exec_module(site)
         with tempfile.TemporaryDirectory() as temporary:
-            staged=site.stage(ROOT/"reports/algorithm-results/catalog.json",Path(temporary)/"site",check=True)
+            stage_root=Path(temporary)
+            catalogue=json.loads((ROOT/"reports/algorithm-results/catalog.json").read_text(encoding="utf-8"))
+            isolated={key:value for key,value in catalogue.items() if key!="reports"}
+            isolated["reports"]=[next(row for row in catalogue["reports"] if row["report_kind"]==item.kind)]
+            shutil.copytree(bundle,stage_root/item.source_report_id)
+            empty_pins={"schema":"csl.legacy-report-pins/1","reports":{}}
+            (stage_root/"legacy-publications.json").write_text(json.dumps(empty_pins),encoding="utf-8")
+            isolated_catalog=stage_root/"catalog.json"
+            isolated_catalog.write_text(json.dumps(isolated,ensure_ascii=False,indent=2)+"\n",encoding="utf-8",newline="\n")
+            (stage_root/"index.html").write_text(site.catalogue_index(isolated),encoding="utf-8",newline="\n")
+            # This one-entry catalogue deliberately excludes legacy publications unrelated to this report.
+            with mock.patch.object(site,"LEGACY_PINS_SHA256",site.registered._digest(empty_pins)):
+                staged=site.stage(isolated_catalog,stage_root/"site",check=True)
             published=staged/item.report_id
             envelope=json.loads((published/"report-envelope.json").read_text(encoding="utf-8"))
             self.assertEqual(envelope["payload"]["measurement"]["events"],record["measurement"]["events"])
