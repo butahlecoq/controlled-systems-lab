@@ -1,0 +1,5 @@
+# SYN-03 registered Strategy A T-S01 result
+
+This measured bundle pins algorithm source `451d0f7553cd0ab606c4ed07ae142310cb897eb4` and harness `8a116f37e5ffe037e6ec9db6a0387fd481c6863f`. It contains one warmup and seven measured public StrategyPort executions; all results passed the compiled T-S01 verifier, canonical relation checks, and independent original-system checks on the constructed representative `(0, 0.25, 1, 0.25, 0.75)`. That representative is not an optimizer-returned witness and is not used to infer completeness. Performance conclusion: inconclusive because Windows denied sampled CPU stack profiling (0xc5585011), so no source-mapped limiter is known. This is not a Strategy A versus Strategy B comparison or speedup claim and does not close #67.
+
+Reproduce from a clean checkout with the exact dependency archive hashes in `build-provenance.json`: run `tooling/syn03/strategy_a_collect.py`, then `tooling/syn03/strategy_a_build_bundle.py`. The report page is generated from validated typed records.

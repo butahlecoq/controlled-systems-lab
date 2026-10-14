@@ -5,6 +5,8 @@ from pathlib import Path
 import sys
 import tempfile
 import hashlib
+import csv
+import io
 import subprocess
 import unittest
 ROOT=Path(__file__).resolve().parents[2]
@@ -38,7 +40,7 @@ def valid_record():
     relation={"coordinates":["x0","x1","x2","u0","u1"],"inequalities":[[0,0,0,1,0],[0,0,0,-1,0],[0,0,0,0,1],[0,0,0,0,-1]],"inequality_rhs":[1,0,1,0],"equalities":[[1,0,0,0,0],[0,1,0,-1,0],[0,0,1,0,0],[0,0,0,1,1]],"equality_rhs":[0,0,1,1],"parametric_form":"(0,s,1,s,1-s), 0<=s<=1","objective_minimum":0}
     return {"schema":report.SCHEMA,"report_id":report.REPORT_ID,"source_commit":report.SOURCE_COMMIT,"harness_commit":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "algorithm":{"strategy_id":"csl.synthesis.reach-back","strategy_version":"1","profile_id":"ts01_exact_integrator","lp_provider":"csl.lp.highs@1.0.0+highs.1.11.0","convex_provider":"csl.convex.highs@1.0.0+highs.1.11.0","registered_providers":providers},
-      "scenario":{"value":scenario_fixture(),"sha256":report.digest(scenario_fixture())},"assumptions":ASSUMPTIONS,"canonical_relation":relation,"evidence_limits":EVIDENCE_LIMITS,"measurement":{"scope":report.EXPECTED_SCOPE,"events":events,"timing_ns":{"observations":times,"median":105,"min":90,"max":120,"range":30},"counts":{"warmup":1,"measured":7,"passed":7,"failed":0,"all_outputs_consumed_and_validated":True},"result_observation":{"termination":"completed","outcome":"optimal","disposition":"complete_optimal_family","registry_verified":True,"assurance":"numerical","objective_lower":0,"objective_upper":0,"canonical_relation_checked_each_trial":True},"trajectory_checks":{"representative_coordinates":[[0,0.25,1,0.25,0.75]]*8,"original_objectives":[0]*8,"maximum_residuals":[0]*8,"equations_checked":["x0=0","x1=x0+u0","x2=x1+u1","0<=u0<=1","0<=u1<=1","J(x2)=(x2-1)^2=0"],"tolerances":{"absolute":1e-8,"relative":1e-8},"verifiers":["syn03-strategy-a-independent-original-check/1"]},"phase_counters":report.EXPECTED_PHASE_COUNTERS,"performance_conclusion":"inconclusive","limiter":report.EXPECTED_LIMITER}}
+      "scenario":{"value":scenario_fixture(),"sha256":report.digest(scenario_fixture())},"assumptions":ASSUMPTIONS,"canonical_relation":relation,"evidence_limits":EVIDENCE_LIMITS,"measurement":{"scope":report.EXPECTED_SCOPE,"events":events,"timing_ns":{"observations":times,"median":105,"min":90,"max":120,"range":30},"counts":{"warmup":1,"measured":7,"passed":7,"failed":0,"all_outputs_consumed_and_validated":True},"result_observation":{"termination":"completed","outcome":"optimal","disposition":"complete_optimal_family","registry_verified":True,"assurance":"numerical","objective_lower":0,"objective_upper":0,"canonical_relation_checked_each_trial":True},"trajectory_checks":{"representative_coordinates":[[0,0.25,1,0.25,0.75]]*8,"original_objectives":[0]*8,"maximum_residuals":[0]*8,"equations_checked":["x0=0","x1=x0+u0","x2=x1+u1","0<=u0<=1","0<=u1<=1","J(x2)=(x2-1)^2=0"],"tolerances":{"absolute":1e-8,"relative":1e-8},"verifiers":["syn03-strategy-a-independent-original-check/1"]},"phase_counters":report.EXPECTED_PHASE_COUNTERS,"performance_conclusion":"inconclusive","limiter":report.EXPECTED_LIMITER,"profile_attempt":{}} ,"environment":{},"build":{}}
 
 class StrategyAReportContractTests(unittest.TestCase):
     def test_report_identity_is_syn03_strategy_a(self):
@@ -54,6 +56,39 @@ class StrategyAReportContractTests(unittest.TestCase):
         catalogue_row={"report_id":report_id,"report_kind":adapter.KIND,"source_report_id":report.REPORT_ID}
         self.assertEqual(catalogue_row["report_kind"],"syn03-strategy-a-ts01")
         self.assertNotIn("syn04-strategy-a",json.dumps(catalogue_row))
+
+    def test_publication_bundle_catalogue_identity_is_stable_and_syn03(self):
+        record=valid_record()
+        with tempfile.TemporaryDirectory() as temporary:
+            bundle=Path(temporary)/report.REPORT_ID
+            bundle.mkdir()
+            def write_json(path,value):
+                path.write_text(json.dumps(value,ensure_ascii=False,sort_keys=True,indent=2,allow_nan=False)+"\n",encoding="utf-8",newline="\n")
+            write_json(bundle/"records.json",record)
+            write_json(bundle/"scenarios.json",record["scenario"])
+            write_json(bundle/"measurement.json",record["measurement"])
+            write_json(bundle/"environment.json",record["environment"])
+            write_json(bundle/"build-provenance.json",record["build"])
+            write_json(bundle/"profile.json",record["measurement"]["profile_attempt"])
+            (bundle/"index.html").write_text(report.render_html(record),encoding="utf-8",newline="\n")
+            (bundle/"measurement-events.jsonl").write_text("".join(json.dumps(event,ensure_ascii=False,sort_keys=True,separators=(",",":"))+"\n" for event in record["measurement"]["events"]),encoding="utf-8",newline="\n")
+            (bundle/"process-stderr.txt").write_bytes(b"")
+            (bundle/"README.md").write_text("SYN-03 test publication\n",encoding="utf-8",newline="\n")
+            (bundle/"commands.json").write_text("{}\n",encoding="utf-8",newline="\n")
+            stream=io.StringIO(newline="")
+            fields=("repetition","warmup","elapsed_ns","termination","outcome","result_disposition","registry_verified","assurance","canonical_relation_checked","completeness_verifier","completeness_verifier_version","status","consumed_result_marker","providers","lineage","representative_coordinates","trajectory_objective","trajectory_max_residual","absolute_tolerance","relative_tolerance","residual_verifier","error")
+            writer=csv.DictWriter(stream,fieldnames=fields,lineterminator="\n");writer.writeheader()
+            for event in record["measurement"]["events"]: writer.writerow({key:event[key] for key in fields})
+            (bundle/"trials.csv").write_bytes(stream.getvalue().encode("utf-8"))
+            files={name:hashlib.sha256((bundle/name).read_bytes()).hexdigest() for name in sorted(adapter.FILES)}
+            write_json(bundle/"manifest.json",{"schema":"csl.syn03-strategy-a-ts01-manifest/1","report_id":report.REPORT_ID,"source_commit":record["source_commit"],"harness_commit":record["harness_commit"],"files":files})
+            publication=adapter.adapt(bundle)
+            repeated=adapter.adapt(bundle)
+            catalogue_row={"report_id":publication.report_id,"report_kind":publication.kind,"source_report_id":publication.source_report_id}
+            self.assertEqual(catalogue_row["report_kind"],"syn03-strategy-a-ts01")
+            self.assertTrue(catalogue_row["report_id"].startswith("syn03-strategy-a-ts01-"))
+            self.assertEqual(publication.report_id,repeated.report_id)
+            self.assertNotIn("syn04-strategy-a",json.dumps(catalogue_row))
 
     def test_accepts_only_complete_validated_trials_with_recomputed_summary(self):
         self.assertEqual(report.validate(valid_record()),[])

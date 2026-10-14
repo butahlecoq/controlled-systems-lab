@@ -1,0 +1,20 @@
+{
+  "files": {
+    "README.md": "1077a441186702090268296eb0d65335d7b3575ee251963bf0eb6cd62fa39472",
+    "build-provenance.json": "fe79b4843adc1702416cedcedcb2a5529de9d9bfb232d5e82fd9c0f36f166202",
+    "commands.json": "4eeb38567dff75a0c73dd830bec4ac68923fb45db8c46e3f06831712a7357ed3",
+    "environment.json": "f0a138ec34b6a2bf3fba534b336fee0ef99378e866ea3fe9c9204ee0fdc35f70",
+    "index.html": "d020ca32a8ba3be0a65dcf2f7f4915b766c9386e7c90465c68ced8852ef747f5",
+    "measurement-events.jsonl": "77d5b743b250eb5e920d20ef72726efcf8a4bf3e06f024a08131022c6b6e2fa0",
+    "measurement.json": "99023a85af820e239c2b50ec0e4c7201c734e768f8f35a050f4caa6c9353d8e6",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile.json": "4e6fb527a80129d648d049c790c83a79546de29204923d578e07ba35493e15d4",
+    "records.json": "6cbe8a122f0b9f6e7e2ab3a41a4d19153455557525479c65301d2a217887adbc",
+    "scenarios.json": "b5ae6f768232bdeb2b74b6618457eab797b474cebbebca657c19f062278d6c12",
+    "trials.csv": "43ebc13f1a284e289bff9b31528aaf3445d6e30bc906c6b379c35e3304ea6a8f"
+  },
+  "harness_commit": "8a116f37e5ffe037e6ec9db6a0387fd481c6863f",
+  "report_id": "syn03-strategy-a-ts01-20261014-451d0f75",
+  "schema": "csl.syn03-strategy-a-ts01-manifest/1",
+  "source_commit": "451d0f7553cd0ab606c4ed07ae142310cb897eb4"
+}
