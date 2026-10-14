@@ -87,6 +87,71 @@ The strategy must emit those same identities at runtime, and any complete-family
 verifier still checks the proposed mathematical evidence against the frozen
 problem, request, strategy and lineage.
 
+### Request-dependent complete-family verifier selection
+
+`StrategyRegistration` may provide a pure request-dependent resolver for the
+complete-family verifier key. The resolver receives the complete immutable
+`StrategyRequest` and returns either one `(ModuleId, version)` key or no key.
+The static `complete_family_verifier` key remains the exact compatibility path
+when no resolver is registered. When a resolver is present, it owns selection
+for every request: an empty result rejects preparation and never falls back to
+the static key. A resolver result that does not identify a registered compiled
+verifier also rejects preparation. The static key may be left empty when a
+resolver is installed; if it is populated, it is not a fallback.
+
+Selection and verifier lookup occur synchronously during `StrategyRegistry::prepare`,
+before the strategy planner can snapshot dependencies, before any workspace
+factory is invoked, and before native solver/backend creation. The selected key
+and resolved verifier binding are frozen into `PreparedStrategy`; later mutation
+or destruction of the registration/registry cannot change them. The compiled
+verifier identity is carried with the prepared complete-family authority and is
+bound into result evidence alongside the problem/request/profile, strategy
+identity/version, canonical coordinates and ordered transformation lineage.
+Evidence from another verifier key, even one registered for the same strategy,
+must fail the binding check. The selected key identifies the checker; it is not
+itself proof of completeness.
+
+The resolver is deterministic for an equal immutable request and has no
+observable effects. It must not inspect mutable external state, allocate or
+create native resources, call a solver/provider, or depend on call order. Any
+configuration it needs is immutable and owned by the callback value without
+mutable transitive aliases. Concurrent preparation of different request
+profiles must not leak verifier identity between prepared values. The resolver
+must be total for valid `StrategyRequest` values: unsupported profiles return
+no key. If it throws, the exception follows the existing callback exception
+policy and propagates; it is not converted to a mathematical outcome or to a
+static-key fallback. An empty selection or unknown key is a scoped admission
+rejection with requested strategy identity and verifier-selection diagnostics,
+and creates no workspace.
+
+Contract examples:
+
+| Registration/request | Expected preparation result |
+|---|---|
+| Static key `csl.verifier.ts01-analytic@1`, no resolver, T-S01 | Same verifier selected as before this extension. |
+| Static T-S01 key plus resolver; T-S01 request | Resolver explicitly selects `csl.verifier.ts01-analytic@1`. |
+| Same registration; T-S02 constant-objective request | Resolver selects its distinct T-S02 verifier key and that identity remains bound in the prepared authority/evidence. |
+| Resolver installed, request profile unsupported | Reject before planner snapshot/workspace/native creation; do not use the static T-S01 key. |
+| Resolver selects an unregistered key or T-S01 evidence is presented under the T-S02 prepared value | Reject admission or evidence binding respectively. |
+
+The registry contract tests must exercise the public preparation/result path:
+static-key compatibility; two requests selecting distinct keys from one
+strategy registration; empty resolver result despite a populated static key;
+unknown-key rejection; proof/evidence rejection when verifier identity is
+crossed; and concurrent preparation of T-S01/T-S02 with no identity leakage.
+Use observable callback, planner, factory and native-backend counters to prove
+that missing/unknown selection rejects before planning or workspace creation.
+Doctest/contract assertions must include literal expected verifier IDs and
+versions, not just callback invocation counts. T-S01 retains its analytic
+verifier identity. T-S02's constant-objective profile must use its own verifier
+identity because its full feasible-history relation is a different proof
+obligation; neither profile may authorize the other's completeness evidence.
+
+A resolver's key-selection callback does not replace the existing
+claim-specific evidence checks or establish the scientific numerical-coverage
+policy. T-V02 and the evidence migration gate remain authoritative for what
+counts as complete-family support.
+
 A new interface supplies `Request`, `Workspace`, `name`, a `snapshot` function
 and a typed `run` function, then instantiates `Registry<NewPort>`. No central
 variant or dispatch switch changes. A new strategy can hide a different tuple
