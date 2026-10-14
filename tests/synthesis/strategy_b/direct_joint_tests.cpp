@@ -12,6 +12,7 @@ using namespace csl;
 using namespace csl::synthesis::strategy_b;
 namespace {
 bool feasible(const JointProgram&,const Vector&);
+bool feasible_without_temporal_rows(const JointProgram&,const Vector&);
 template<class T, class... R> T accepted(std::variant<T,R...> value) {
     REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
 }
@@ -62,8 +63,53 @@ TEST_CASE("temporal rows keep their authored joint coordinates and row lineage")
     REQUIRE_FALSE(q.rows.empty());CHECK(q.rows.back().source==RowSource::temporal);
     CHECK(q.rows.back().source_row==0);
 }
+TEST_CASE("authored cross-time control equation excludes a stagewise-admissible history") {
+    auto input=integrator(LinearTerminal{{0},0});
+    input.temporal=TemporalConstraints{
+        {1,5,{0,2},{3,4},{1,-1}},{{0.5,0.5}}};
+    const auto p=resolve(input);
+    const auto q=accepted(build_joint_program(p,request(p)));
+
+    // Canonical joint order is [x0, x1, x2, u0, u1]. Both histories satisfy
+    // x1=x0+u0, x2=x1+u1 and the stagewise control boxes [0,1]. The authored
+    // temporal row adds u0-u1=0.5: it retains the first history and rejects
+    // the second, which a stagewise/Cartesian relaxation would retain.
+    const Vector accepted_history{0,0.75,1,0.75,0.25};
+    const Vector stagewise_only_history{0,0.25,1,0.25,0.75};
+    CHECK(feasible_without_temporal_rows(q,accepted_history));
+    CHECK(feasible(q,accepted_history));
+    CHECK(feasible_without_temporal_rows(q,stagewise_only_history));
+    CHECK_FALSE(feasible(q,stagewise_only_history));
+
+    REQUIRE(q.rows.size()==8);
+    const auto& temporal=q.rows.back();
+    CHECK(temporal.source==RowSource::temporal);
+    CHECK(temporal.stage==0);
+    CHECK(temporal.source_row==0);
+    CHECK(temporal.program_row==7);
+    REQUIRE(q.constraints.row_offsets[7]==11);
+    REQUIRE(q.constraints.row_offsets[8]==13);
+    CHECK(q.constraints.column_indices[11]==3);
+    CHECK(q.constraints.values[11]==1);
+    CHECK(q.constraints.column_indices[12]==4);
+    CHECK(q.constraints.values[12]==-1);
+    REQUIRE(q.bounds.size()==8);
+    CHECK(q.bounds[7].lower==0.5);
+    CHECK(q.bounds[7].upper==0.5);
+    // This only verifies the generated candidate joint relation. It establishes
+    // no all-history optimal-family coverage or completeness guarantee.
+}
 bool feasible(const JointProgram& p,const Vector& x) {
     for(std::size_t i=0;i<p.constraints.rows;++i) {
+        double v=0;for(auto j=p.constraints.row_offsets[i];j<p.constraints.row_offsets[i+1];++j)
+            v+=p.constraints.values[j]*x[p.constraints.column_indices[j]];
+        if(p.bounds[i].lower&&v<*p.bounds[i].lower-1e-10)return false;
+        if(p.bounds[i].upper&&v>*p.bounds[i].upper+1e-10)return false;
+    }return true;
+}
+bool feasible_without_temporal_rows(const JointProgram& p,const Vector& x) {
+    for(std::size_t i=0;i<p.constraints.rows;++i) {
+        if(p.rows[i].source==RowSource::temporal) continue;
         double v=0;for(auto j=p.constraints.row_offsets[i];j<p.constraints.row_offsets[i+1];++j)
             v+=p.constraints.values[j]*x[p.constraints.column_indices[j]];
         if(p.bounds[i].lower&&v<*p.bounds[i].lower-1e-10)return false;
