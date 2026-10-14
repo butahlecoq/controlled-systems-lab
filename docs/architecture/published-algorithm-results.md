@@ -47,3 +47,21 @@ Without an observed, source-mapped limiter, report exploratory observations
 with an inconclusive performance conclusion. This report is one strategy only,
 has no comparator or speedup claim, and does not close SYN-04 issue #67. It does
 not replace the distinct `csl.synthesis.ts01-analytic` measurement in SYN-07.
+
+## SYN-04 registered Strategy B T-S02 report
+
+Issue #238 adds separate evidence for PR #237's merged exact constant-objective
+profile. Its clean solver source is `e7f66a9ee698d05ed8779621116319158fa70158`;
+its standalone harness uses StrategyRegistry with registered production providers.
+Every warmup/trial checks the registry-verified exact H-relation, [3,3] bounds,
+and two distinct feasible histories with equal terminal state. The production
+T-S02 branch constructs the full feasible relation analytically and invokes no
+native LP/QP solve; the report describes the whole public path explicitly.
+
+The additive `tooling/syn04_ts02` collection/bundle commands and
+`syn04_ts02_registered_reports.py` adapter retain schema-3 publication envelopes,
+exact-byte raw/build/profile evidence and deterministic offline ZIPs. The seven
+observations are exploratory single-profile evidence with an inconclusive
+performance conclusion and no speedup claim. Existing T-S01 bytes are unchanged.
+Main-only deployment and live URL verification remain separate gates; #67 stays
+open. See the [reproduction notes](../../reports/algorithm-results/tooling/syn04_ts02/README.md).

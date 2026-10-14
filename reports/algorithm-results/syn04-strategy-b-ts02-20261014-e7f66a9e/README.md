@@ -1,0 +1,5 @@
+# SYN-04 Strategy B T-S02
+
+Measured solver source `e7f66a9ee698d05ed8779621116319158fa70158`; harness `cabd2f37199e2f8412d75328cf7b881e590a468e`. One excluded warmup and seven successful complete-family observations. Objective identically 3; canonical full joint-history relation and two distinct histories sharing terminal state 1 checked each time. Single-profile exploratory evidence; no speedup or native solver latency claim; #67 remains open.
+
+The separately profiled workload is excluded. No source-mapped limiter is established. Commands and compiler/build evidence use portable root placeholders. Build provenance preserves original evidence hashes separately from sanitized-file hashes; source, executable, harness and dependency hashes are unchanged. Reproduce with tooling/syn04_ts02/collect.py then build_bundle.py; schema-3 publication uses syn04_ts02_registered_reports.py. Rendering and staging use saved records only. Publication/live verification remain pending until main-only deployment.
