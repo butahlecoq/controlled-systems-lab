@@ -5,6 +5,7 @@
 #include "../../registry/strategy_a_lineage.hpp"
 #include <algorithm>
 #include <new>
+#include <utility>
 
 namespace csl::synthesis::strategy_a {
 CandidateHistory::CandidateHistory(PreimageTarget scope,JointHistoryRelation h,reachability::ForwardTube f,
@@ -125,17 +126,28 @@ bool publish(SynthesisResult& result,const problem::ResolvedProblem& problem,con
     if(auto* errors=std::get_if<Diagnostics>(&outcome)){contract_failure(result,*errors);return false;}
     result.family=std::get<OptimalFamily>(std::move(outcome));return true;
 }
-class Workspace final : public SynthesisWorkspace {
+} // namespace
+namespace detail {
+class StrategyAExecutionRunner final : public SynthesisWorkspace, public registry::detail::StrategyARuntimeReceiptSource {
     reachability::ForwardDependencies forward_;
     TerminalOptimizer terminal_;
-    std::vector<TransformStepIdentity> expected_lineage_;
+    registry::StrategyRequest prepared_request_;
+    registry::StrategyRegistration::CompleteFamilyVerifierKey verifier_binding_;
+    std::optional<registry::detail::StrategyARuntimeLineageReceipt> receipt_;
 public:
-    Workspace(reachability::ForwardDependencies forward,registry::PreparedProvider<registry::LPPort> lp,
-        registry::PreparedProvider<registry::ConvexPort> convex,std::vector<TransformStepIdentity> expected_lineage)
+    StrategyAExecutionRunner(reachability::ForwardDependencies forward,registry::PreparedProvider<registry::LPPort> lp,
+        registry::PreparedProvider<registry::ConvexPort> convex,registry::StrategyRequest prepared_request,
+        registry::StrategyRegistration::CompleteFamilyVerifierKey verifier_binding)
         :forward_(std::move(forward)),terminal_(std::move(lp),std::move(convex)),
-         expected_lineage_(std::move(expected_lineage)){}
+         prepared_request_(std::move(prepared_request)),verifier_binding_(std::move(verifier_binding)){}
+
+    std::optional<registry::detail::StrategyARuntimeLineageReceipt> take_strategy_a_runtime_receipt() noexcept override {
+        return std::exchange(receipt_,std::nullopt);
+    }
+
     SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& request,
         const ExecutionContext& context) override {
+        receipt_.reset();
         SynthesisResult result{Termination::completed,{problem.identity(),MathematicalOutcome::undetermined,
             Unestablished{},{"forward recurrence, terminal construction and joint-history coverage remain unestablished"}},
             {},{},{},{},{}};
@@ -209,12 +221,20 @@ public:
             lineage.push_back({{"strategy-a/terminal-preimage"},minimized.relation->metadata()->id,
                 history.relation.metadata()->id,{"csl.synthesis.control-recovery"},"1"});
             const bool exact_ts01=registry::detail::ts01_case_valid(problem,request,request.representation)&&
-                lineage==expected_lineage_&&minimized.optimization&&
+                lineage==prepared_request_.lineage&&minimized.optimization&&
                 minimized.optimization->outcome.value==MathematicalOutcome::optimal;
-            const bool exact_ts02=registry::detail::ts02_case_valid(problem,request,request.representation)&&lineage==expected_lineage_&&
+            const bool exact_ts02=registry::detail::ts02_case_valid(problem,request,request.representation)&&lineage==prepared_request_.lineage&&
                 minimized.optimization&&minimized.optimization->outcome.value==MathematicalOutcome::optimal;
             const auto proposal_identity=FamilyIdentity{problem.identity(),request,history.coordinates,
                 strategy,version,lineage};
+            if(exact_ts01&&result.termination==Termination::completed) {
+                receipt_=registry::detail::StrategyARuntimeLineageReceipt{prepared_request_,
+                    std::make_shared<const reachability::ForwardTube>(tube),
+                    std::make_shared<const sets::SetData>(slice.feasible),
+                    std::make_shared<const JointHistoryRelation>(feasible_history),
+                    std::make_shared<const TerminalMinimizers>(minimized),
+                    std::make_shared<const JointHistoryRelation>(history),verifier_binding_};
+            }
             publish(result,problem,request,std::move(history),tube,std::move(minimized),std::move(lineage),
                 PreimageTarget::terminal_candidate);
             if(exact_ts01&&result.termination==Termination::completed) {
@@ -275,11 +295,15 @@ registry::StrategyRegistration make_registration(Providers providers) {
             ->std::variant<registry::StrategyPlan,registry::Rejection> {
             auto fixed=std::get<registry::CheckedPipeline<>>(registry::check_pipeline());
             return registry::compose_strategy(std::move(fixed),providers,
-                [](auto,const auto& generated,const registry::StrategyRequest& request,const registry::Requirements&)
+                [](auto,const auto& generated,const registry::StrategyRequest& prepared,const registry::Requirements&)
                     ->std::unique_ptr<SynthesisWorkspace> {
-                    return std::make_unique<Workspace>(reachability::ForwardDependencies{
+                    auto selected_verifier=registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};
+                    if(prepared.family.profile==::csl::synthesis::ts02_constant_integrator_profile&&
+                        prepared.family.target==FamilyTarget::exact_optimal_relation)
+                        selected_verifier={{::csl::synthesis::ts02_constant_integrator_verifier},"1"};
+                    return std::make_unique<detail::StrategyAExecutionRunner>(reachability::ForwardDependencies{
                         std::get<0>(generated),std::get<1>(generated),std::get<2>(generated)},
-                        std::get<3>(generated),std::get<4>(generated),request.lineage);
+                        std::get<3>(generated),std::get<4>(generated),prepared,std::move(selected_verifier));
                 });
         },registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"},
         [](const registry::StrategyRequest& request) {

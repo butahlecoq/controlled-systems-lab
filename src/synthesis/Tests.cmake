@@ -18,6 +18,14 @@ if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::qhull_conve
   add_test(NAME strategy_a_tests COMMAND strategy_a_tests)
   csl_strict_warnings(strategy_a_tests)
   csl_test_target(strategy_a_tests synthesis)
+
+  add_executable(strategy_a_runtime_receipt_tests tests/synthesis/strategy_a/runtime_receipt_tests.cpp)
+  target_link_libraries(strategy_a_runtime_receipt_tests PRIVATE CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex doctest::doctest)
+  target_include_directories(strategy_a_runtime_receipt_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/registry)
+  target_compile_features(strategy_a_runtime_receipt_tests PRIVATE cxx_std_20)
+  add_test(NAME strategy_a_runtime_receipt_tests COMMAND strategy_a_runtime_receipt_tests)
+  csl_strict_warnings(strategy_a_runtime_receipt_tests)
+  csl_test_target(strategy_a_runtime_receipt_tests synthesis)
 endif()
 
 add_executable(strategy_a_public_client tests/synthesis/strategy_a/public_client.cpp)

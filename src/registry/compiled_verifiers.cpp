@@ -1,6 +1,9 @@
 #include "compiled_verifiers.hpp"
 #include "strategy_b_lineage.hpp"
 #include "strategy_a_lineage.hpp"
+#include <csl/reachability/nominal_forward.hpp>
+#include <csl/synthesis/control_recovery.hpp>
+#include <csl/synthesis/terminal_minimizers.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
@@ -62,6 +65,62 @@ bool StrategyBRuntimeLineageReceipt::matches(const StrategyRequest& request,cons
         {{"syn04-build:"+problem_id},{problem_id},feasible_metadata->id,{"csl.synthesis.strategy-b"},"1"},
         {{"syn04-extract:"+problem_id},feasible_metadata->id,extracted_metadata->id,{"csl.synthesis.strategy-b"},"1"}};
     return prepared.lineage==observed_lineage&&identity.lineage==observed_lineage;
+}
+
+StrategyARuntimeLineageReceipt::StrategyARuntimeLineageReceipt(const StrategyRequest& binding,
+    std::shared_ptr<const reachability::ForwardTube> forward,
+    std::shared_ptr<const ::csl::sets::SetData> feasible_terminal,
+    std::shared_ptr<const synthesis::JointHistoryRelation> feasible_recovery,
+    std::shared_ptr<const synthesis::TerminalMinimizers> terminal,
+    std::shared_ptr<const synthesis::JointHistoryRelation> optimal_recovery,
+    StrategyRegistration::CompleteFamilyVerifierKey verifier_binding)
+    :binding_(binding),forward_(std::move(forward)),feasible_terminal_(std::move(feasible_terminal)),
+     feasible_recovery_(std::move(feasible_recovery)),terminal_(std::move(terminal)),
+     optimal_recovery_(std::move(optimal_recovery)),verifier_binding_(std::move(verifier_binding)) {}
+
+bool StrategyARuntimeLineageReceipt::matches(const StrategyRequest& request,const FamilyIdentity& identity,
+    const StrategyRegistration::CompleteFamilyVerifierKey& verifier_binding) const {
+    if(verifier_binding_.id.value.empty()||verifier_binding_.version.empty()||
+        verifier_binding_.id!=verifier_binding.id||verifier_binding_.version!=verifier_binding.version||
+        !forward_||!feasible_terminal_||!feasible_recovery_||!terminal_||!optimal_recovery_)return false;
+    const auto feasible_terminal_metadata=feasible_terminal_->metadata();
+    const auto feasible_recovery_metadata=feasible_recovery_->relation.metadata();
+    const auto optimal_recovery_metadata=optimal_recovery_->relation.metadata();
+    const auto& prepared=binding_;
+    if(request.problem.identity()!=prepared.problem.identity()||request.family!=prepared.family||
+        !same_configuration(request.configuration,prepared.configuration)||
+        request.strategy_version!=prepared.strategy_version||request.lineage!=prepared.lineage||
+        identity.problem!=prepared.problem.identity()||identity.request!=prepared.family||
+        identity.coordinates!=prepared.problem.constraints().coordinates()||
+        identity.strategy!=ModuleId{"csl.synthesis.reach-back"}||identity.strategy_version!="1"||
+        prepared.configuration.strategy!=identity.strategy||prepared.strategy_version!=identity.strategy_version||
+        !strategy_a_ts01_profile_valid(prepared.problem,prepared)||
+        prepared.lineage!=synthesis::strategy_a::detail::expected_ts01_lineage(prepared.problem.identity())||
+        identity.lineage!=prepared.lineage)
+        return false;
+
+    if(forward_->problem!=prepared.problem.identity()||forward_->request!=RequestId{"strategy-a/forward"}||
+        forward_->stages.size()!=3||!feasible_terminal_metadata||!feasible_recovery_metadata||
+        !optimal_recovery_metadata||feasible_terminal_metadata->id!=forward_->stages.back().marginal.output.id||
+        feasible_recovery_->coordinates!=identity.coordinates||optimal_recovery_->coordinates!=identity.coordinates)
+        return false;
+    const auto expected=prepared.lineage;
+    for(std::size_t stage=0;stage<forward_->stages.size();++stage) {
+        const auto& actual=forward_->stages[stage];
+        const auto& step=expected[stage];
+        if(actual.marginal.evidence.reference.identity.request!=step.request||
+            actual.source_factors.empty()||actual.source_factors.front()!=step.input||
+            actual.marginal.output.id!=step.output)return false;
+    }
+    if(feasible_recovery_metadata->id!=expected[3].output||
+        terminal_->construction.feasible_slice!=feasible_terminal_metadata->id||
+        terminal_->termination!=Termination::completed||terminal_->outcome!=MathematicalOutcome::optimal||
+        !terminal_->relation||!terminal_->optimization||
+        terminal_->relation->metadata()->id!=expected[4].output||
+        terminal_->optimization->outcome.value!=MathematicalOutcome::optimal||
+        optimal_recovery_metadata->id!=expected[5].output)
+        return false;
+    return identity.lineage==expected;
 }
 
 const RepresentationId h_polyhedron{"csl.polyhedron.h"};
