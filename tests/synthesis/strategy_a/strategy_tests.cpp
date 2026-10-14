@@ -104,10 +104,10 @@ public:
 };
 class NumericalFailureAfterTerminal final : public ConvexWorkspace {
     std::unique_ptr<ConvexWorkspace> inner_;
-    optimization::ProgramOutcome do_solve(const optimization::ConvexProgram& program,
+    ProgramOutcome do_solve(const ConvexProgram& program,
         const ExecutionContext& context) override {
         auto outcome=inner_->solve(program,context);
-        if(auto* solved=std::get_if<optimization::ProgramResult>(&outcome)) {
+        if(auto* solved=std::get_if<ProgramResult>(&outcome)) {
             solved->termination=Termination::numerical_failure;
             solved->raw_diagnostics+="\ninjected terminal numerical failure after real optimizer result";
         }
