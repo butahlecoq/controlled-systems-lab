@@ -166,16 +166,16 @@
       "zip_sha256": "1b53f05e717999b7752151d3b68842978503ba577eddbafca3a3f620ddc56e97"
     },
     {
-      "report_id": "syn03-strategy-a-ts01-d135251715f696ffba347761b8cb620af4aea6ce2cbb9f196c01aadcab1f9249",
+      "report_id": "syn03-strategy-a-ts01-77f669553a7c803b4f061401d5c1f7ffb22ef7f973368cd1b7c3494686fa8e2a",
       "report_kind": "syn03-strategy-a-ts01",
       "source_report_id": "syn03-strategy-a-ts01-20261014-451d0f75",
       "payload_schema": "csl.syn03-strategy-a-ts01-report/1",
-      "payload_sha256": "7c286cd68bdf18f435941e064355dd5962b318e9c547c3f41c5d1b69141a85b6",
-      "native_payload_sha256": "7c286cd68bdf18f435941e064355dd5962b318e9c547c3f41c5d1b69141a85b6",
+      "payload_sha256": "fd048f370c8e9667a09dd1298c07862ab94f664012db7149472da567642c288f",
+      "native_payload_sha256": "fd048f370c8e9667a09dd1298c07862ab94f664012db7149472da567642c288f",
       "source_commit": "451d0f7553cd0ab606c4ed07ae142310cb897eb4",
       "measured_scope": "Exact T-S01 profile; one registered Strategy A; seven validated measured trials; performance conclusion inconclusive",
       "evidence_limits": "Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.; The result reports Assurance::numerical; validated arithmetic assurance is unavailable.; This is one Strategy A measurement, not a Strategy A versus Strategy B comparison, speedup, application-scale, throughput, or scalability claim.; All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.; No source-mapped performance limiter was identified because WPR CPU stack profiling was denied by Windows policy.; Strategy A stage and submodule timing counters are unavailable; only whole end-to-end StrategyPort duration is measured.",
-      "zip_sha256": "1d91ec2e9e209667d77d516a872997ba48f75bea34ba812869b00e99f8e4c2cc"
+      "zip_sha256": "9ff4f8abe7f89ecbbfd154995cf6778a09106eea482b239f6a06a0904a902739"
     }
   ]
 }

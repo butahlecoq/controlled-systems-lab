@@ -4,7 +4,7 @@
     "build_command": [
       "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
       "--build",
-      "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\release-build",
+      "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
       "--config",
       "Release",
       "--target",
@@ -12,8 +12,8 @@
       "--parallel",
       "4"
     ],
-    "build_log_sha256": "e0474f6314fb1d756e5ac3cdc007817cd2044a6a10c00907585854e0af36f0cd",
-    "cache_sha256": "6b3e04065c8cc7c538022d943f87ed99a4f4cdfdebbf4a8c083ab0520375afac",
+    "build_log_sha256": "f3e281f46091ea0fe10fd8049ed5d1a8fd86bc536baed1f5ef942b8fe1fa1df6",
+    "cache_sha256": "6426d650183a5b5a8694c1388ff166aae8bff5f01cd142ecbd480fcecc2ff3d6",
     "cmake": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
     "cmake_version": "cmake version 3.31.6-msvc6",
     "compiler": "MSVC",
@@ -25,19 +25,19 @@
       "-S",
       "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-current\\reports\\algorithm-results\\tooling\\syn03\\runner-a",
       "-B",
-      "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\release-build",
+      "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
       "-G",
       "Visual Studio 17 2022",
       "-A",
       "x64",
-      "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\solver-source",
+      "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source",
       "-DBUILD_TESTING=OFF",
       "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src",
       "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src",
       "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_qhull-src",
       "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
     ],
-    "configure_log_sha256": "e8a3a5f536ca00715c1f7029fab8ba8ae6e8cc57d865cc21c71e5158cc407e0f",
+    "configure_log_sha256": "e0f0ebdffe66b65fa30e5fadd23bd3c925a448e9017e922ed5976b9094aed6f6",
     "cxx_standard": "C++20",
     "dependencies": {
       "highs": {
@@ -77,12 +77,12 @@
       }
     },
     "executable_bytes": 4841984,
-    "executable_sha256": "63947b9dd26c28171644a7e4e6a5e09701a99d0d88d130e061ff20b7b1ed312d",
+    "executable_sha256": "12e4f73acfa1d80e387dd0a8266451848bfce6d42b525e583675a90151052c2f",
     "generator": "Visual Studio 17 2022 x64",
     "ndebug": true,
-    "project_sha256": "b09e52912f379f2a8f5294a449bafe9c0021b60fe3d9c2b1fa41a89e871a274b",
+    "project_sha256": "d5d55ba056ff14e0f6ba9ba9a86d99f103de61e3ee68562db1f7ba24287e9f44",
     "release_properties": {
-      "AdditionalIncludeDirectories": "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\solver-source\\include;%(AdditionalIncludeDirectories)",
+      "AdditionalIncludeDirectories": "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source\\include;%(AdditionalIncludeDirectories)",
       "AssemblerListingLocation": "$(IntDir)",
       "BasicRuntimeChecks": "Default",
       "ConformanceMode": "true",
@@ -119,7 +119,7 @@
     "clock": "std::chrono::steady_clock, integer nanoseconds",
     "cpu_count_physical": 6,
     "cpu_percent_after": 0.3,
-    "cpu_percent_before": 1.2,
+    "cpu_percent_before": 0.1,
     "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
     "logical_cpu_count": 12,
     "memory_total_bytes": 34189107200,
@@ -145,7 +145,7 @@
       "completeness_verifier_version": "1",
       "consumed_result_marker": 1805158144890476961,
       "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-      "elapsed_ns": 6380800,
+      "elapsed_ns": 6518600,
       "error": "",
       "lineage": [
         "csl.synthesis.reach-back@1",
@@ -193,7 +193,7 @@
       "completeness_verifier_version": "1",
       "consumed_result_marker": 1805158144890476961,
       "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-      "elapsed_ns": 5662400,
+      "elapsed_ns": 5543600,
       "error": "",
       "lineage": [
         "csl.synthesis.reach-back@1",
@@ -241,7 +241,7 @@
       "completeness_verifier_version": "1",
       "consumed_result_marker": 1805158144890476961,
       "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-      "elapsed_ns": 5266300,
+      "elapsed_ns": 4977700,
       "error": "",
       "lineage": [
         "csl.synthesis.reach-back@1",
@@ -289,7 +289,7 @@
       "completeness_verifier_version": "1",
       "consumed_result_marker": 1805158144890476961,
       "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-      "elapsed_ns": 5051200,
+      "elapsed_ns": 4934500,
       "error": "",
       "lineage": [
         "csl.synthesis.reach-back@1",
@@ -337,7 +337,7 @@
       "completeness_verifier_version": "1",
       "consumed_result_marker": 1805158144890476961,
       "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-      "elapsed_ns": 5129800,
+      "elapsed_ns": 4904700,
       "error": "",
       "lineage": [
         "csl.synthesis.reach-back@1",
@@ -385,7 +385,7 @@
       "completeness_verifier_version": "1",
       "consumed_result_marker": 1805158144890476961,
       "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-      "elapsed_ns": 4869800,
+      "elapsed_ns": 4526600,
       "error": "",
       "lineage": [
         "csl.synthesis.reach-back@1",
@@ -433,7 +433,7 @@
       "completeness_verifier_version": "1",
       "consumed_result_marker": 1805158144890476961,
       "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-      "elapsed_ns": 4970200,
+      "elapsed_ns": 4425000,
       "error": "",
       "lineage": [
         "csl.synthesis.reach-back@1",
@@ -481,7 +481,7 @@
       "completeness_verifier_version": "1",
       "consumed_result_marker": 1805158144890476961,
       "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
-      "elapsed_ns": 5150200,
+      "elapsed_ns": 4512600,
       "error": "",
       "lineage": [
         "csl.synthesis.reach-back@1",
@@ -522,7 +522,7 @@
       "warmup": false
     }
   ],
-  "harness_commit": "8a116f37e5ffe037e6ec9db6a0387fd481c6863f",
+  "harness_commit": "4a3556ba65a75716c00a9ac24f01e04648be5ea5",
   "limiter": {
     "available": false,
     "reason": "WPR CPU sampled-stack profile could not start: Windows denied enabling system-performance profiling policy (0xc5585011). Separate workload ran and process counters were collected, but they cannot attribute a hot source path; no limiter is claimed."
@@ -550,160 +550,156 @@
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.0,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148674395200,
-        "rss_bytes": 1835008
+        "monotonic_ns": 697467066077400,
+        "rss_bytes": 1830912
       },
       {
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.0,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148676662800,
-        "rss_bytes": 3141632
+        "monotonic_ns": 697467068320200,
+        "rss_bytes": 3125248
       },
       {
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.0,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148679025000,
-        "rss_bytes": 6148096
+        "monotonic_ns": 697467070587100,
+        "rss_bytes": 6504448
       },
       {
         "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.015625,
-        "host_cpu_percent": 50.0,
-        "monotonic_ns": 697148681172400,
-        "rss_bytes": 6938624
-      },
-      {
-        "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.015625,
+        "cpu_user_seconds": 0.0,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148683314700,
-        "rss_bytes": 6987776
+        "monotonic_ns": 697467072767000,
+        "rss_bytes": 6811648
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 697467074949600,
+        "rss_bytes": 6881280
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 697467077107800,
+        "rss_bytes": 7135232
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 697467079266700,
+        "rss_bytes": 7147520
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 697467081468100,
+        "rss_bytes": 7274496
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 697467084076200,
+        "rss_bytes": 7098368
       },
       {
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.015625,
-        "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148685460500,
-        "rss_bytes": 7028736
-      },
-      {
-        "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.015625,
-        "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148687985700,
-        "rss_bytes": 7061504
-      },
-      {
-        "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.015625,
-        "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148690510100,
-        "rss_bytes": 7057408
-      },
-      {
-        "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.015625,
-        "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148692672600,
-        "rss_bytes": 7196672
-      },
-      {
-        "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.015625,
-        "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148694975500,
-        "rss_bytes": 7110656
-      },
-      {
-        "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.015625,
-        "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148697199800,
-        "rss_bytes": 7057408
+        "host_cpu_percent": 33.3,
+        "monotonic_ns": 697467086628100,
+        "rss_bytes": 7254016
       },
       {
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148699479200,
-        "rss_bytes": 7163904
+        "monotonic_ns": 697467088805200,
+        "rss_bytes": 7147520
       },
       {
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148701698100,
-        "rss_bytes": 7262208
+        "monotonic_ns": 697467090966700,
+        "rss_bytes": 7135232
       },
       {
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148704058800,
-        "rss_bytes": 7262208
+        "monotonic_ns": 697467093119400,
+        "rss_bytes": 7225344
       },
       {
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148706323300,
-        "rss_bytes": 7200768
+        "monotonic_ns": 697467095275900,
+        "rss_bytes": 7307264
       },
       {
         "cpu_system_seconds": 0.0,
         "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148708878600,
-        "rss_bytes": 7417856
+        "monotonic_ns": 697467097522800,
+        "rss_bytes": 7229440
       },
       {
         "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.03125,
-        "host_cpu_percent": 16.7,
-        "monotonic_ns": 697148710992100,
-        "rss_bytes": 7184384
+        "cpu_user_seconds": 0.015625,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 697467099776100,
+        "rss_bytes": 7286784
       },
       {
         "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.03125,
+        "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148713333000,
-        "rss_bytes": 7208960
+        "monotonic_ns": 697467102014500,
+        "rss_bytes": 7131136
       },
       {
         "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.03125,
+        "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148715440600,
-        "rss_bytes": 7421952
+        "monotonic_ns": 697467104248500,
+        "rss_bytes": 7319552
       },
       {
         "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.03125,
+        "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148717815100,
-        "rss_bytes": 7335936
+        "monotonic_ns": 697467106480200,
+        "rss_bytes": 7319552
       },
       {
         "cpu_system_seconds": 0.0,
-        "cpu_user_seconds": 0.03125,
+        "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148720347400,
-        "rss_bytes": 7270400
+        "monotonic_ns": 697467109088000,
+        "rss_bytes": 7323648
       },
       {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.015625,
         "host_cpu_percent": 0.0,
-        "monotonic_ns": 697148722443100
+        "monotonic_ns": 697467111328600,
+        "rss_bytes": 6864896
       }
     ],
     "sampled_process_cpu_system_seconds_max": 0.0,
-    "sampled_process_cpu_user_seconds_max": 0.03125,
-    "sampled_process_peak_rss_bytes": 7421952,
+    "sampled_process_cpu_user_seconds_max": 0.015625,
+    "sampled_process_peak_rss_bytes": 7323648,
     "separate_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "separate_stdout_sha256": "c80510e4187ae4dabb970772ffd6452bcd582103cd4782325ecc3e64fd68dc15",
-    "separate_wall_ns": 58090300,
+    "separate_stdout_sha256": "4b9b349975be32385ecbdb7eb298be5280ab8691f767b731e2879f1405d51b4a",
+    "separate_wall_ns": 51388800,
     "separate_workload_return_code": 0,
     "separate_workload_timed_out": false,
     "wpr": {
@@ -738,19 +734,19 @@
     "tree": "1f659a8611609c5557e06c324c4aa447254ae58d"
   },
   "timing_ns": {
-    "max": 5662400,
-    "median": 5129800,
-    "min": 4869800,
+    "max": 5543600,
+    "median": 4904700,
+    "min": 4425000,
     "observations": [
-      5662400,
-      5266300,
-      5051200,
-      5129800,
-      4869800,
-      4970200,
-      5150200
+      5543600,
+      4977700,
+      4934500,
+      4904700,
+      4526600,
+      4425000,
+      4512600
     ],
-    "range": 792600
+    "range": 1118600
   },
   "trajectory_checks": {
     "equations_checked": [

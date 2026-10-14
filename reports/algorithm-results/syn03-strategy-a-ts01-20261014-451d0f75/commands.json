@@ -2,7 +2,7 @@
   "build": [
     "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
     "--build",
-    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\release-build",
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
     "--config",
     "Release",
     "--target",
@@ -15,12 +15,12 @@
     "-S",
     "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-current\\reports\\algorithm-results\\tooling\\syn03\\runner-a",
     "-B",
-    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\release-build",
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
     "-G",
     "Visual Studio 17 2022",
     "-A",
     "x64",
-    "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\solver-source",
+    "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source",
     "-DBUILD_TESTING=OFF",
     "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src",
     "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src",
@@ -28,13 +28,13 @@
     "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
   ],
   "measure": [
-    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\release-build\\Release\\csl_syn03_strategy_a_report.exe"
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build\\Release\\csl_syn03_strategy_a_report.exe"
   ],
   "profile": [
     "wpr",
     "-start",
     "CPU",
     "-filemode",
-    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\release-build\\Release\\csl_syn03_strategy_a_report.exe"
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build\\Release\\csl_syn03_strategy_a_report.exe"
   ]
 }

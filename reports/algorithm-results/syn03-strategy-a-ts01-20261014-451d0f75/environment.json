@@ -5,7 +5,7 @@
   "clock": "std::chrono::steady_clock, integer nanoseconds",
   "cpu_count_physical": 6,
   "cpu_percent_after": 0.3,
-  "cpu_percent_before": 1.2,
+  "cpu_percent_before": 0.1,
   "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
   "logical_cpu_count": 12,
   "memory_total_bytes": 34189107200,

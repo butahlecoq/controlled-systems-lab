@@ -2,7 +2,7 @@
   "build_command": [
     "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
     "--build",
-    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\release-build",
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
     "--config",
     "Release",
     "--target",
@@ -10,8 +10,8 @@
     "--parallel",
     "4"
   ],
-  "build_log_sha256": "e0474f6314fb1d756e5ac3cdc007817cd2044a6a10c00907585854e0af36f0cd",
-  "cache_sha256": "6b3e04065c8cc7c538022d943f87ed99a4f4cdfdebbf4a8c083ab0520375afac",
+  "build_log_sha256": "f3e281f46091ea0fe10fd8049ed5d1a8fd86bc536baed1f5ef942b8fe1fa1df6",
+  "cache_sha256": "6426d650183a5b5a8694c1388ff166aae8bff5f01cd142ecbd480fcecc2ff3d6",
   "cmake": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
   "cmake_version": "cmake version 3.31.6-msvc6",
   "compiler": "MSVC",
@@ -23,19 +23,19 @@
     "-S",
     "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-current\\reports\\algorithm-results\\tooling\\syn03\\runner-a",
     "-B",
-    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\release-build",
+    "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
     "-G",
     "Visual Studio 17 2022",
     "-A",
     "x64",
-    "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\solver-source",
+    "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source",
     "-DBUILD_TESTING=OFF",
     "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src",
     "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src",
     "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_qhull-src",
     "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
   ],
-  "configure_log_sha256": "e8a3a5f536ca00715c1f7029fab8ba8ae6e8cc57d865cc21c71e5158cc407e0f",
+  "configure_log_sha256": "e0f0ebdffe66b65fa30e5fadd23bd3c925a448e9017e922ed5976b9094aed6f6",
   "cxx_standard": "C++20",
   "dependencies": {
     "highs": {
@@ -75,12 +75,12 @@
     }
   },
   "executable_bytes": 4841984,
-  "executable_sha256": "63947b9dd26c28171644a7e4e6a5e09701a99d0d88d130e061ff20b7b1ed312d",
+  "executable_sha256": "12e4f73acfa1d80e387dd0a8266451848bfce6d42b525e583675a90151052c2f",
   "generator": "Visual Studio 17 2022 x64",
   "ndebug": true,
-  "project_sha256": "b09e52912f379f2a8f5294a449bafe9c0021b60fe3d9c2b1fa41a89e871a274b",
+  "project_sha256": "d5d55ba056ff14e0f6ba9ba9a86d99f103de61e3ee68562db1f7ba24287e9f44",
   "release_properties": {
-    "AdditionalIncludeDirectories": "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03\\solver-source\\include;%(AdditionalIncludeDirectories)",
+    "AdditionalIncludeDirectories": "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source\\include;%(AdditionalIncludeDirectories)",
     "AssemblerListingLocation": "$(IntDir)",
     "BasicRuntimeChecks": "Default",
     "ConformanceMode": "true",
