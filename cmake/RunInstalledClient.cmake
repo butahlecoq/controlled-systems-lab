@@ -83,7 +83,7 @@ if(CSL_NATIVE_EXAMPLES)
 set(example_source "${work}/examples-source")
 file(MAKE_DIRECTORY "${example_source}/scenarios")
 foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
-    resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp)
+    resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp registered_synthesis_comparison.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()
 file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
