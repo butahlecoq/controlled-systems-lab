@@ -546,6 +546,11 @@ _HISTORICAL_PUBLICATIONS = {
         "report_id": "opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d",
         "zip_sha256": "165fe50a882e37334e30e3bd04f613b261fb801c540fe806304942ac146c361f"
     },
+    "syn-ts01-paired-20261014-b7f1ac0": {
+        "inventory_sha256": "c41cd22f7248369b9d7f11831ceb8c9fd6e4cfab7bfa666c9e2e45dfd55752c4",
+        "report_id": "syn-ts01-paired-411d200c8ca76b1aee772297aaf6ed97738b72f2c2cb2a6035e1002a4a57ad22",
+        "zip_sha256": "c75227f9fcdb0bb90b724d698a170306662562e79ef4835589be26b0b0c5da11"
+    },
     "syn01-nominal-20261013-f7ba310d-48a679cfc0d4": {
         "inventory_sha256": "f977f289ac3942098140373435e7322dae5f43eb030239952c25a3ac29c47aa3",
         "report_id": "syn01-6e207b2ee1f300929f054e679c8cd5707f979c02b173292660520e403ebf2852",

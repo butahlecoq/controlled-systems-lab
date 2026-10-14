@@ -12,7 +12,7 @@ import registered_reports as common
 ROOT = Path(__file__).resolve().parents[2]
 REPORT_SPEC = importlib.util.spec_from_file_location(
     "csl_syn_ts01_paired_report_contract",
-    ROOT / "reports/algorithm-results/tooling/syn_ts01_paired/report.py",
+    ROOT / "scripts/reports/syn_ts01_paired/report.py",
 )
 report = importlib.util.module_from_spec(REPORT_SPEC)
 sys.modules[REPORT_SPEC.name] = report
@@ -43,6 +43,7 @@ def _validate_bundle(bundle, record):
     report.validate_bundle(bundle)
 
 
+@common.preserve_publication
 def adapt(bundle):
     bundle = Path(bundle)
     record = _json(bundle / "records.json")

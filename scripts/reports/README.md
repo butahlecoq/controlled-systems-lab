@@ -5,7 +5,7 @@ Native drivers and native report tests live in `benchmarks/reporting/<kind>`.
 `reports/algorithm-results` contains immutable scientific bundles and catalogues;
 its `tooling/<kind>` files are compatibility entry points to maintained code.
 The kinds are geo02, geo03, geo04, geo05, opt04, syn01, syn02, syn03,
-syn03_ts02, syn04, syn04_ts02, syn06 and ts01. Their READMEs and schema files
+syn03_ts02, syn04, syn04_ts02, syn06, syn_ts01_paired and ts01. Their READMEs and schema files
 are maintained alongside the Python code. Historical paths inside saved evidence,
 source delta policies and pinned CMake insertions describe the original source;
 they are retained literally and do not claim to describe today's layout.
