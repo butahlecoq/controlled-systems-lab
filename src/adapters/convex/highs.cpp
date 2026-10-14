@@ -379,6 +379,20 @@ class Workspace final : public ConvexWorkspace {
                 else raw<<"\nphase.qp.info=unavailable";
                 classify(result,api,qp_status);
                 if(api!=HighsStatus::kError) candidate(result,p,c,h.getSolution(),raw,true,private_free_row);
+                if(result.outcome.value==MathematicalOutcome::optimal && !passes(result,c.numerical)) {
+                    raw<<"\nphase.qp.attempt1=optimal_but_original_checks_rejected";
+                    result=result_for(p);
+                    Highs retry; configure(retry,c,options_,true); Callbacks retry_callbacks(retry,capture);
+                    require(retry.passModel(model)); require(retry.setOptionValue("use_warm_start",false));
+                    bool retry_warm=true; require(retry.getOptionValue("use_warm_start",retry_warm));
+                    if(retry_warm) {raw<<"\nphase.qp.retry=false\nretry.error=warm_start_not_disabled"; return finish();}
+                    raw<<"\nphase.qp.retry=cold_fresh_model\nphase.qp.retry.time_limit="<<deadline(retry,c);
+                    capture.poll(); if(capture.stop) return finish();
+                    const auto retry_api=retry.run(); const auto retry_status=retry.getModelStatus();
+                    raw<<"\nphase.qp.retry.api_status="<<static_cast<int>(retry_api)<<"\nphase.qp.retry.model_status="<<static_cast<int>(retry_status);
+                    classify(result,retry_api,retry_status);
+                    if(retry_api!=HighsStatus::kError) candidate(result,p,c,retry.getSolution(),raw,true,private_free_row);
+                }
             } else {
                 if(!solver_) solver_=std::make_unique<Highs>();
                 auto& h=*solver_; configure(h,c,options_,false); Callbacks callbacks(h,capture);

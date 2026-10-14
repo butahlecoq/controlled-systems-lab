@@ -57,6 +57,29 @@ TEST_CASE("registered quadratic interior and boundary optima retain original num
         CHECK(worker->last_attempt()->stamp.attempt()==1);
     }
 }
+TEST_CASE("registered convex adapter solves the minimal five-variable lifted integrator equality QP") {
+    // Coordinates are (x0,x1,x2,u0,u1), with x0=0, x1=x0+u0,
+    // x2=x1+u1, and 0<=u0,u1<=1. The hand solution has x2=1,
+    // terminal cost (x2-1)^2=0, and a continuum of feasible controls.
+    const auto p=accepted(make_convex_program({{{"minimal-lift"},{"minimal-lift-terminal"}},
+        QuadraticTerminal{{5,5,{0,0,0,0,0, 0,0,0,0,0, 0,0,2,0,0, 0,0,0,0,0, 0,0,0,0,0}},
+            {0,0,-2,0,0},1},
+        {7,5,{0,1,2,3,4,5,8,11},{3,3,4,4,0,0,1,3,1,2,4},
+            {1,-1,1,-1,1,-1,1,-1,-1,1,-1}},
+        {Interval{},Interval{},Interval{},Interval{},Interval{}},
+        {{{},1},{{},0},{{},1},{{},0},{0,0},{0,0},{0,0}}, {}}));
+    auto [worker]=prepare(p).create();
+    const auto result=accepted(worker->run(context()));
+    INFO(result.raw_diagnostics);
+    optimum(result,p,0);
+    CHECK(result.raw_diagnostics.find("phase.qp.attempt1=optimal_but_original_checks_rejected")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.retry=cold_fresh_model")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.retry.model_status=7")!=std::string::npos);
+    CHECK(result.primal->at(0)==doctest::Approx(0));
+    CHECK(result.primal->at(1)==doctest::Approx(result.primal->at(3)));
+    CHECK(result.primal->at(2)==doctest::Approx(1));
+    CHECK(result.primal->at(2)==doctest::Approx(result.primal->at(1)+result.primal->at(4)));
+}
 TEST_CASE("native norm zero residual and constant norm preserve original rather than squared costs") {
     for(int fixture=0;fixture<3;++fixture) {
         auto input=parabola(fixture==1?5:2);
@@ -125,7 +148,8 @@ TEST_CASE("controlled feasibility retains tiny row and large finite fixed bound"
     auto tiny=parabola(); tiny.identity.program={"tiny-row"}; tiny.variables={{{},{}}};
     tiny.constraints={1,1,{0,1},{0},{1e-10}}; tiny.rows={{1e-4,1e-4}};
     const auto p=accepted(make_convex_program(tiny)); auto [worker]=prepare(p).create();
-    const auto r=accepted(worker->run(context())); optimum(r,p,999994000009.0);
+    const auto r=accepted(worker->run(context())); INFO(r.raw_diagnostics); optimum(r,p,999994000009.0);
+    CHECK(r.raw_diagnostics.find("phase.qp.attempt1=")==std::string::npos);
     CHECK((*r.primal)[0]==doctest::Approx(1e6));
     auto large=parabola(); large.identity.program={"large-bound"}; large.objective=QuadraticTerminal{{1,1,{2}},{0},0}; large.variables={{1e21,1e21}};
     const auto q=accepted(make_convex_program(large)); auto [other]=prepare(q).create();
