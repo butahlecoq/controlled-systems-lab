@@ -1,0 +1,22 @@
+add_executable(compiled_verifier_catalog_tests tests/synthesis/compiled_verifier_catalog_tests.cpp)
+target_link_libraries(compiled_verifier_catalog_tests PRIVATE csl_resolved_problem_test doctest::doctest)
+target_compile_features(compiled_verifier_catalog_tests PRIVATE cxx_std_20)
+
+add_test(NAME compiled_verifier_catalog_tests COMMAND compiled_verifier_catalog_tests)
+csl_strict_warnings(compiled_verifier_catalog_tests)
+csl_test_target(compiled_verifier_catalog_tests registry)
+
+add_executable(registry_tests tests/contract/registry/registry_tests.cpp)
+target_link_libraries(registry_tests PRIVATE CSL::registry CSL::optimization CSL::convex doctest::doctest)
+add_test(NAME registry_tests COMMAND registry_tests)
+csl_test_target(registry_tests registry)
+
+add_executable(provider_tests tests/contract/registry/provider_tests.cpp)
+target_link_libraries(provider_tests PRIVATE CSL::registry CSL::optimization CSL::convex doctest::doctest)
+add_test(NAME provider_tests COMMAND provider_tests)
+csl_test_target(provider_tests registry)
+
+add_executable(registry_public_client tests/installed/registry_client.cpp)
+target_link_libraries(registry_public_client PRIVATE CSL::registry)
+add_test(NAME registry_public_client COMMAND registry_public_client)
+csl_test_target(registry_public_client registry)

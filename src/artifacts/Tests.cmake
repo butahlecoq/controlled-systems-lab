@@ -1,0 +1,13 @@
+add_executable(timing_collector_tests tests/execution/timing_collector.cpp)
+target_link_libraries(timing_collector_tests PRIVATE CSL::artifacts doctest::doctest Threads::Threads)
+add_test(NAME timing_collector_tests COMMAND timing_collector_tests)
+csl_test_target(timing_collector_tests artifacts)
+
+add_executable(run_statistics_contract tests/artifacts/run_statistics_contract.cpp)
+target_link_libraries(run_statistics_contract PRIVATE CSL::artifacts CSL::registry doctest::doctest Threads::Threads)
+target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v3.json")
+target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_V2_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v2.json")
+target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_V1_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v1.json")
+target_include_directories(run_statistics_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+add_test(NAME run_statistics_contract COMMAND run_statistics_contract)
+csl_test_target(run_statistics_contract artifacts)

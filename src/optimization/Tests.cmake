@@ -1,0 +1,57 @@
+if(TARGET CSL::highs_lp)
+  add_executable(phase_one_tests tests/contract/phase_one/simplex_tests.cpp)
+  target_link_libraries(phase_one_tests PRIVATE CSL::phase_one CSL::highs_lp doctest::doctest Threads::Threads)
+  target_compile_definitions(phase_one_tests PRIVATE CSL_PHASE_ONE_REFERENCE=1)
+  add_test(NAME phase_one_tests COMMAND phase_one_tests)
+  csl_test_target(phase_one_tests optimization)
+endif()
+
+add_executable(phase_one_public_client tests/installed/phase_one_client.cpp)
+target_link_libraries(phase_one_public_client PRIVATE CSL::phase_one)
+add_test(NAME phase_one_public_client COMMAND phase_one_public_client)
+csl_test_target(phase_one_public_client optimization)
+
+add_executable(convex_program_tests tests/unit/optimization/convex_program_tests.cpp)
+target_link_libraries(convex_program_tests PRIVATE CSL::convex doctest::doctest)
+add_test(NAME convex_program_tests COMMAND convex_program_tests)
+csl_test_target(convex_program_tests optimization)
+
+add_executable(convex_backend_tests tests/contract/optimization/convex_backend_tests.cpp)
+target_link_libraries(convex_backend_tests PRIVATE CSL::convex CSL::registry doctest::doctest)
+add_test(NAME convex_backend_tests COMMAND convex_backend_tests)
+csl_test_target(convex_backend_tests optimization)
+
+add_executable(optimization_public_client tests/installed/optimization_client.cpp)
+target_link_libraries(optimization_public_client PRIVATE CSL::optimization CSL::registry)
+add_test(NAME optimization_public_client COMMAND optimization_public_client)
+csl_test_target(optimization_public_client optimization)
+
+add_executable(lp_backend_tests tests/contract/optimization/lp_backend_tests.cpp)
+target_link_libraries(lp_backend_tests PRIVATE CSL::optimization CSL::registry doctest::doctest)
+add_test(NAME lp_backend_tests COMMAND lp_backend_tests)
+csl_test_target(lp_backend_tests optimization)
+
+add_executable(linear_program_tests tests/unit/optimization/linear_program_tests.cpp)
+target_link_libraries(linear_program_tests PRIVATE CSL::optimization doctest::doctest Threads::Threads)
+add_test(NAME linear_program_tests COMMAND linear_program_tests)
+csl_test_target(linear_program_tests optimization)
+
+add_executable(objectives_tests tests/unit/objectives/objectives_tests.cpp)
+target_link_libraries(objectives_tests PRIVATE CSL::objectives doctest::doctest)
+add_test(NAME objectives_tests COMMAND objectives_tests)
+csl_test_target(objectives_tests optimization)
+
+add_executable(objective_evaluator_tests tests/unit/objectives/evaluator_test.cpp)
+target_link_libraries(objective_evaluator_tests PRIVATE CSL::objectives doctest::doctest)
+add_test(NAME objective_evaluator_tests COMMAND objective_evaluator_tests)
+csl_test_target(objective_evaluator_tests optimization)
+
+add_executable(objective_reformulation_tests tests/unit/objectives/reformulation_test.cpp)
+target_link_libraries(objective_reformulation_tests PRIVATE CSL::objectives doctest::doctest)
+add_test(NAME objective_reformulation_tests COMMAND objective_reformulation_tests)
+csl_test_target(objective_reformulation_tests optimization)
+
+add_executable(objectives_public_client tests/installed/objectives_client.cpp)
+target_link_libraries(objectives_public_client PRIVATE CSL::objectives)
+add_test(NAME objectives_public_client COMMAND objectives_public_client)
+csl_test_target(objectives_public_client optimization)

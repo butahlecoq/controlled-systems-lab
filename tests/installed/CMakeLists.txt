@@ -6,24 +6,30 @@ target_link_libraries(installed_input_client PRIVATE CSL::input)
 set_target_properties(installed_input_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_input_client COMMAND installed_input_client)
 
+if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
 add_executable(installed_conversion_client conversion_client.cpp)
 target_link_libraries(installed_conversion_client PRIVATE CSL::qhull_conversion CSL::highs_lp)
 set_target_properties(installed_conversion_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_conversion_client COMMAND installed_conversion_client)
 set_tests_properties(installed_conversion_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed Qhull conversion client: registered square conversion and literal vertices passed")
+
+endif()
 add_executable(installed_polyhedral_intersection_client polyhedral_intersection_client.cpp)
 target_link_libraries(installed_polyhedral_intersection_client PRIVATE CSL::polyhedral)
 set_target_properties(installed_polyhedral_intersection_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_polyhedral_intersection_client COMMAND installed_polyhedral_intersection_client)
 set_tests_properties(installed_input_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed input client: owning scenario, literal identity and original cost passed")
+if(TARGET CSL::highs_convex)
 add_executable(installed_convex_client convex_client.cpp)
 target_link_libraries(installed_convex_client PRIVATE CSL::highs_convex)
 set_target_properties(installed_convex_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_convex_client COMMAND installed_convex_client)
 set_tests_properties(installed_convex_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed convex client: original norm, squared provenance and numerical KKT passed")
+
+endif()
 add_executable(installed_resolved_problem_client resolved_problem_client.cpp)
 target_link_libraries(installed_resolved_problem_client PRIVATE CSL::resolved_problem)
 set_target_properties(installed_resolved_problem_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -105,6 +111,7 @@ add_test(NAME installed_optimization_client COMMAND installed_optimization_clien
 set_tests_properties(installed_optimization_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed optimization client: immutable program, literal checks and exclusive attempts passed")
 
+if(TARGET CSL::highs_lp)
 add_executable(installed_highs_client highs_client.cpp)
 target_link_libraries(installed_highs_client PRIVATE CSL::highs_lp)
 set_target_properties(installed_highs_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -112,6 +119,8 @@ add_test(NAME installed_highs_client COMMAND installed_highs_client)
 set_tests_properties(installed_highs_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed HiGHS client: registered offset optimum and neutral evidence passed")
 
+
+endif()
 add_executable(installed_problem_client problem_client.cpp)
 target_link_libraries(installed_problem_client PRIVATE CSL::problem)
 set_target_properties(installed_problem_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -132,6 +141,7 @@ add_test(NAME installed_run_statistics_client COMMAND installed_run_statistics_c
 set_tests_properties(installed_run_statistics_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed statistics client: immutable identities and portable lifetime round trip passed")
 
+if(TARGET CSL::highs_lp)
 add_executable(installed_hull_reducer_client hull_reducer_client.cpp)
 target_link_libraries(installed_hull_reducer_client PRIVATE CSL::hull CSL::highs_lp)
 set_target_properties(installed_hull_reducer_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -139,6 +149,9 @@ add_test(NAME installed_hull_reducer_client COMMAND installed_hull_reducer_clien
 set_tests_properties(installed_hull_reducer_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed hull client: each membership LP passed registered-provider admission")
 
+
+endif()
+if(TARGET CSL::highs_lp)
 add_executable(installed_affine_sum_client affine_sum_client.cpp)
 target_link_libraries(installed_affine_sum_client PRIVATE CSL::affine_sum CSL::highs_lp)
 set_target_properties(installed_affine_sum_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -146,6 +159,8 @@ add_test(NAME installed_affine_sum_client COMMAND installed_affine_sum_client)
 set_tests_properties(installed_affine_sum_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed affine/sum client: selected LP and hull providers produced a numerical set result")
 
+
+endif()
 add_executable(installed_terminal_minimizers_client terminal_minimizers_client.cpp)
 target_link_libraries(installed_terminal_minimizers_client PRIVATE CSL::terminal_minimizers)
 set_target_properties(installed_terminal_minimizers_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -160,6 +175,7 @@ add_test(NAME installed_projection_predecessor_client COMMAND installed_projecti
 set_tests_properties(installed_projection_predecessor_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed predecessor client: existential integrator interval and unestablished support passed")
 
+if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
 add_executable(installed_nominal_forward_client nominal_forward_client.cpp)
 target_link_libraries(installed_nominal_forward_client PRIVATE CSL::nominal_forward CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
 set_target_properties(installed_nominal_forward_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -167,6 +183,8 @@ add_test(NAME installed_nominal_forward_client COMMAND installed_nominal_forward
 set_tests_properties(installed_nominal_forward_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed nominal-forward client: provider-backed integrator tube and authored labels passed")
 
+
+endif()
 add_executable(installed_ts01_evidence_client ts01_evidence_client.cpp)
 target_link_libraries(installed_ts01_evidence_client PRIVATE CSL::strategy_ts01)
 set_target_properties(installed_ts01_evidence_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -217,7 +235,10 @@ if(NOT ts01_relation_factory_forge_output MATCHES "(error C[0-9]+|error:|fatal e
 endif()
 message(STATUS "Installed downstream relation factory definition was rejected by the compiler")
 
+if(TARGET CSL::highs_lp)
 add_executable(installed_witness_selector_client witness_selector_client.cpp)
 target_link_libraries(installed_witness_selector_client PRIVATE CSL::witness_selector CSL::highs_lp)
 set_target_properties(installed_witness_selector_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_witness_selector_client COMMAND installed_witness_selector_client)
+
+endif()

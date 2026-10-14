@@ -1,0 +1,22 @@
+add_executable(numeric_tests tests/unit/numeric/data_tests.cpp)
+target_link_libraries(numeric_tests PRIVATE CSL::numeric doctest::doctest Threads::Threads)
+add_test(NAME numeric_tests COMMAND numeric_tests)
+csl_test_target(numeric_tests numeric)
+
+add_executable(numeric_buffer_views_tests tests/unit/numeric/buffer_views_test.cpp)
+target_link_libraries(numeric_buffer_views_tests PRIVATE CSL::numeric doctest::doctest Threads::Threads)
+add_test(NAME numeric_buffer_views_tests COMMAND numeric_buffer_views_tests)
+csl_test_target(numeric_buffer_views_tests numeric)
+
+add_executable(public_headers_client tests/contract/public_headers_client.cpp)
+target_link_libraries(public_headers_client PRIVATE CSL::numeric)
+set_target_properties(public_headers_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME public_headers_client COMMAND public_headers_client)
+csl_test_target(public_headers_client numeric)
+
+add_executable(public_headers_lp_first_client tests/contract/public_headers_client.cpp)
+target_link_libraries(public_headers_lp_first_client PRIVATE CSL::numeric)
+target_compile_definitions(public_headers_lp_first_client PRIVATE CSL_PUBLIC_HEADERS_LP_FIRST=1)
+set_target_properties(public_headers_lp_first_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME public_headers_lp_first_client COMMAND public_headers_lp_first_client)
+csl_test_target(public_headers_lp_first_client numeric)
