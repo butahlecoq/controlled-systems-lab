@@ -218,6 +218,36 @@ TEST_CASE("square Minkowski support identities survive actual LP backend substit
     }
 }
 
+TEST_CASE("unavailable typed geometry operations are rejected at public admission") {
+    const auto segment = vertices("operation-admission-segment", 2, {0, 0, 1, 1}, 2, {"x", "y"});
+    const auto req = request(Projection{segment, {1}}, "unsupported-projection");
+
+    CHECK(check_operation_shape(req).empty());
+    std::size_t workspace_factory_calls = 0;
+    auto registration = geometry::make_affine_sum_registration(dependencies());
+    auto factory = std::move(registration.factory);
+    registration.factory = [&workspace_factory_calls, factory = std::move(factory)](
+                                const OperationRequest& operation) mutable {
+        ++workspace_factory_calls;
+        return factory(operation);
+    };
+    Registry<GeometryPort> registry;
+    REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+    Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.v"};
+    requirements.output.relation = SetRelation::equivalent;
+
+    const auto prepared = prepare_pipeline(select(registry, {{"csl.geometry.affine-sum"}, {}}, req, requirements));
+
+    REQUIRE(std::holds_alternative<Rejection>(prepared));
+    const auto& diagnostics = std::get<Rejection>(prepared).diagnostics;
+    REQUIRE(diagnostics.size() == 1);
+    CHECK(diagnostics.front().code == DiagnosticCode::unsupported);
+    CHECK(diagnostics.front().field == "geometry.operation");
+    CHECK(diagnostics.front().explanation.find("affine images and Minkowski sums") != std::string::npos);
+    CHECK(workspace_factory_calls == 0);
+}
+
 TEST_CASE("affine and sum operations use the selected hull reducer") {
     auto selected=dependencies();
     selected.hull=provider(make_keep_all_hull_registration());
