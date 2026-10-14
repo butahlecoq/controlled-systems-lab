@@ -12,7 +12,6 @@ function(csl_add_private_highs)
   execute_process(
     COMMAND "${CMAKE_COMMAND}"
       "-DSOURCE_FILE=${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h"
-      "-DPATCH_FILE=${PROJECT_SOURCE_DIR}/patches/highs-v1.11.0-hvectorbase-initialization.patch"
       -P "${PROJECT_SOURCE_DIR}/cmake/ApplyPinnedHighsPatch.cmake"
     RESULT_VARIABLE patch_result
     OUTPUT_VARIABLE patch_output
@@ -20,6 +19,12 @@ function(csl_add_private_highs)
   if(NOT patch_result EQUAL 0)
     message(FATAL_ERROR "Failed to apply pinned HiGHS downstream patch: ${patch_output}${patch_error}")
   endif()
+  add_test(NAME pinned_highs_patch_contract
+    COMMAND "${CMAKE_COMMAND}"
+      "-DUPSTREAM_HEADER=${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h"
+      "-DPATCH_SCRIPT=${PROJECT_SOURCE_DIR}/cmake/ApplyPinnedHighsPatch.cmake"
+      "-DWORK_DIR=${PROJECT_BINARY_DIR}/pinned-highs-patch-test"
+      -P "${PROJECT_SOURCE_DIR}/tests/cmake/pinned_highs_patch_contract.cmake")
   set(FAST_BUILD ON)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_CXX ON)

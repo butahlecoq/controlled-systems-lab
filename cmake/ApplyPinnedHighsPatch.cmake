@@ -1,30 +1,6 @@
 if(NOT DEFINED SOURCE_FILE OR NOT EXISTS "${SOURCE_FILE}")
   message(FATAL_ERROR "Pinned HiGHS patch source file is missing")
 endif()
-if(NOT DEFINED PATCH_FILE OR NOT EXISTS "${PATCH_FILE}")
-  message(FATAL_ERROR "Pinned HiGHS patch record is missing")
-endif()
-
-file(READ "${PATCH_FILE}" patch_record)
-foreach(required_line
-    "HighsInt size;"
-    "HighsInt size = 0;"
-    "HighsInt count;"
-    "HighsInt count = 0;"
-    "double synthetic_tick;"
-    "double synthetic_tick = 0;"
-    "HVectorBase<Real>* next;"
-    "HVectorBase<Real>* next = nullptr;"
-    "bool packFlag;"
-    "bool packFlag = false;"
-    "HighsInt packCount;"
-    "HighsInt packCount = 0;")
-  string(FIND "${patch_record}" "${required_line}" patch_line)
-  if(patch_line EQUAL -1)
-    message(FATAL_ERROR "Pinned HiGHS patch record is incomplete: ${required_line}")
-  endif()
-endforeach()
-
 file(READ "${SOURCE_FILE}" source)
 file(SHA256 "${SOURCE_FILE}" source_sha256)
 if(source_sha256 STREQUAL "b45e2dc39671f42f772d742d5d287668d59a22c53f94b409402c1d4816a33aa3")
@@ -53,6 +29,10 @@ if(source_sha256 STREQUAL "b45e2dc39671f42f772d742d5d287668d59a22c53f94b409402c1
     endif()
   endforeach()
   file(WRITE "${SOURCE_FILE}" "${source}")
+  file(SHA256 "${SOURCE_FILE}" postimage_sha256)
+  if(NOT postimage_sha256 STREQUAL "8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b")
+    message(FATAL_ERROR "Pinned HiGHS patch produced an unexpected postimage: ${postimage_sha256}")
+  endif()
 elseif(source_sha256 STREQUAL "8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b")
   foreach(required_line
       "HighsInt size = 0;"
