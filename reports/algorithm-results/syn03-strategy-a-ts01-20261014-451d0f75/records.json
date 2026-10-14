@@ -1,0 +1,1181 @@
+{
+  "algorithm": {
+    "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+    "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+    "profile_id": "ts01_exact_integrator",
+    "registered_providers": [
+      "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+      "csl.convex.highs@1.0.0+highs.1.11.0",
+      "csl.geometry.affine-sum@1.0.0",
+      "csl.geometry.polyhedral-projection@1.0.0",
+      "csl.hull.lp-membership@1.0.0",
+      "csl.lp.highs@1.0.0+highs.1.11.0"
+    ],
+    "strategy_id": "csl.synthesis.reach-back",
+    "strategy_version": "1"
+  },
+  "assumptions": [
+    "Discrete two-step scalar integrator at times 0, 1, 2.",
+    "Known initial state x0=0; all state constraints are universal.",
+    "Both transitions are x[t+1]=x[t]+u[t] with zero affine offsets and no external channels.",
+    "Continuous controls independently constrained to [0,1].",
+    "Nominal open-loop information; no observations or temporal constraints.",
+    "Terminal quadratic objective J(x2)=x2^2-2*x2+1=(x2-1)^2.",
+    "Effective request asks for exact_optimal_relation in H-representation under Assurance::numerical and no materialization limit."
+  ],
+  "build": {
+    "build_command": [
+      "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "--build",
+      "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
+      "--config",
+      "Release",
+      "--target",
+      "csl_syn03_strategy_a_report",
+      "--parallel",
+      "4"
+    ],
+    "build_log_sha256": "f3e281f46091ea0fe10fd8049ed5d1a8fd86bc536baed1f5ef942b8fe1fa1df6",
+    "cache_sha256": "6426d650183a5b5a8694c1388ff166aae8bff5f01cd142ecbd480fcecc2ff3d6",
+    "cmake": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "cmake_version": "cmake version 3.31.6-msvc6",
+    "compiler": "MSVC",
+    "compiler_config_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "compiler_version": "set(CMAKE_CXX_COMPILER_VERSION \"19.44.35215.0\")",
+    "configuration": "Release",
+    "configure_command": [
+      "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "-S",
+      "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-current\\reports\\algorithm-results\\tooling\\syn03\\runner-a",
+      "-B",
+      "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
+      "-G",
+      "Visual Studio 17 2022",
+      "-A",
+      "x64",
+      "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source",
+      "-DBUILD_TESTING=OFF",
+      "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src",
+      "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src",
+      "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_qhull-src",
+      "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
+    ],
+    "configure_log_sha256": "e0f0ebdffe66b65fa30e5fadd23bd3c925a448e9017e922ed5976b9094aed6f6",
+    "cxx_standard": "C++20",
+    "dependencies": {
+      "highs": {
+        "adapter_version": "1.0.0+highs.1.11.0",
+        "pinned_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
+      },
+      "json": {
+        "pinned_sha256": "0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406"
+      },
+      "objectives_eigen": {
+        "pinned_sha256": "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+      },
+      "qhull": {
+        "pinned_sha256": "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"
+      },
+      "resolved_sources": {
+        "CSL_HIGHS": {
+          "commit": "source-archive-no-git-metadata",
+          "directory_sha256": "ffdc2fef01c491ca5bb83b501e2d349fc07e5cca385e8bee4eaa0eeb6e5e75ec",
+          "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src"
+        },
+        "CSL_JSON": {
+          "commit": "source-archive-no-git-metadata",
+          "directory_sha256": "1e4e4c85a0b46c29a341514681d4e6189fd0b5fb60e94b77075540ecf17c318a",
+          "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
+        },
+        "CSL_OBJECTIVES_EIGEN": {
+          "commit": "source-archive-no-git-metadata",
+          "directory_sha256": "f062692628c933e5fe7cb6c725fc179e6073197245861e098d69516df1d2fdf4",
+          "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src"
+        },
+        "CSL_QHULL": {
+          "commit": "source-archive-no-git-metadata",
+          "directory_sha256": "d34a90ce3602cfd6685ee0de08a4852496fdadc01025214fafdd68ca5e786dae",
+          "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_qhull-src"
+        }
+      }
+    },
+    "executable_bytes": 4841984,
+    "executable_sha256": "12e4f73acfa1d80e387dd0a8266451848bfce6d42b525e583675a90151052c2f",
+    "generator": "Visual Studio 17 2022 x64",
+    "ndebug": true,
+    "project_sha256": "d5d55ba056ff14e0f6ba9ba9a86d99f103de61e3ee68562db1f7ba24287e9f44",
+    "release_properties": {
+      "AdditionalIncludeDirectories": "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source\\include;%(AdditionalIncludeDirectories)",
+      "AssemblerListingLocation": "$(IntDir)",
+      "BasicRuntimeChecks": "Default",
+      "ConformanceMode": "true",
+      "DebugInformationFormat": "\n      ",
+      "ExceptionHandling": "Sync",
+      "InlineFunctionExpansion": "AnySuitable",
+      "LanguageStandard": "stdcpp20",
+      "MinimalRebuild": "",
+      "ObjectFileName": "$(IntDir)",
+      "Optimization": "MaxSpeed",
+      "PrecompiledHeader": "NotUsing",
+      "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+      "RuntimeLibrary": "MultiThreadedDLL",
+      "ScanSourceForModuleDependencies": "true",
+      "SupportJustMyCode": "",
+      "TreatWarningAsError": "true",
+      "UseFullPaths": "false",
+      "WarningLevel": "Level4"
+    },
+    "report_driver_sha256": "86b51f59f4426a2c1bb6d907fb3163e74ae52ee4067c498d81a2011270ce243e",
+    "runner_cmake_sha256": "96c249dd0039fd031725930b76b2ff403c03f87962685ea843c91dbf828322db"
+  },
+  "canonical_relation": {
+    "coordinates": [
+      "x0",
+      "x1",
+      "x2",
+      "u0",
+      "u1"
+    ],
+    "equalities": [
+      [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        -1,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        1
+      ]
+    ],
+    "equality_rhs": [
+      0,
+      0,
+      1,
+      1
+    ],
+    "inequalities": [
+      [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        -1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        -1
+      ]
+    ],
+    "inequality_rhs": [
+      1,
+      0,
+      1,
+      0
+    ],
+    "objective_minimum": 0,
+    "parametric_form": "(0,s,1,s,1-s), 0<=s<=1"
+  },
+  "environment": {
+    "absolute_tolerance": 1e-08,
+    "assurance": "numerical",
+    "cache_policy": "One excluded in-process warmup; each repetition constructs a fresh problem, registries, provider selections, prepared strategy and exclusive workspace. Process/runtime may be warm; no cold-cache claim.",
+    "clock": "std::chrono::steady_clock, integer nanoseconds",
+    "cpu_count_physical": 6,
+    "cpu_percent_after": 0.3,
+    "cpu_percent_before": 0.1,
+    "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
+    "logical_cpu_count": 12,
+    "memory_total_bytes": 34189107200,
+    "native_provider_thread_configuration": "HiGHS adapter reports threads=1 and parallel=off for the native phase; OS thread count per trial was not observed",
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "relative_tolerance": 1e-08,
+    "requested_resources": {
+      "memory_bytes": null,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "total_threads": 1
+    },
+    "seed": "No seed option is exposed/configured by this StrategyPort/HiGHS registration path"
+  },
+  "evidence_limits": [
+    "Complete-family verification applies only to the exact admitted T-S01 profile and registered csl.verifier.ts01-analytic v1.",
+    "The result reports Assurance::numerical; validated arithmetic assurance is unavailable.",
+    "This is one Strategy A measurement, not a Strategy A versus Strategy B comparison, speedup, application-scale, throughput, or scalability claim.",
+    "All seven trials are tiny analytic T-S01 fixtures; no general performance inference follows.",
+    "No source-mapped performance limiter was identified because WPR CPU stack profiling was denied by Windows policy.",
+    "Strategy A stage and submodule timing counters are unavailable; only whole end-to-end StrategyPort duration is measured."
+  ],
+  "harness_commit": "4a3556ba65a75716c00a9ac24f01e04648be5ea5",
+  "measurement": {
+    "algorithm_source_commit": "451d0f7553cd0ab606c4ed07ae142310cb897eb4",
+    "build": {
+      "build_command": [
+        "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+        "--build",
+        "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
+        "--config",
+        "Release",
+        "--target",
+        "csl_syn03_strategy_a_report",
+        "--parallel",
+        "4"
+      ],
+      "build_log_sha256": "f3e281f46091ea0fe10fd8049ed5d1a8fd86bc536baed1f5ef942b8fe1fa1df6",
+      "cache_sha256": "6426d650183a5b5a8694c1388ff166aae8bff5f01cd142ecbd480fcecc2ff3d6",
+      "cmake": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "cmake_version": "cmake version 3.31.6-msvc6",
+      "compiler": "MSVC",
+      "compiler_config_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+      "compiler_version": "set(CMAKE_CXX_COMPILER_VERSION \"19.44.35215.0\")",
+      "configuration": "Release",
+      "configure_command": [
+        "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+        "-S",
+        "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-current\\reports\\algorithm-results\\tooling\\syn03\\runner-a",
+        "-B",
+        "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\release-build",
+        "-G",
+        "Visual Studio 17 2022",
+        "-A",
+        "x64",
+        "-DCSL_SOURCE_ROOT=D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source",
+        "-DBUILD_TESTING=OFF",
+        "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src",
+        "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src",
+        "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_qhull-src",
+        "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
+      ],
+      "configure_log_sha256": "e0f0ebdffe66b65fa30e5fadd23bd3c925a448e9017e922ed5976b9094aed6f6",
+      "cxx_standard": "C++20",
+      "dependencies": {
+        "highs": {
+          "adapter_version": "1.0.0+highs.1.11.0",
+          "pinned_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
+        },
+        "json": {
+          "pinned_sha256": "0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406"
+        },
+        "objectives_eigen": {
+          "pinned_sha256": "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+        },
+        "qhull": {
+          "pinned_sha256": "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"
+        },
+        "resolved_sources": {
+          "CSL_HIGHS": {
+            "commit": "source-archive-no-git-metadata",
+            "directory_sha256": "ffdc2fef01c491ca5bb83b501e2d349fc07e5cca385e8bee4eaa0eeb6e5e75ec",
+            "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_highs-src"
+          },
+          "CSL_JSON": {
+            "commit": "source-archive-no-git-metadata",
+            "directory_sha256": "1e4e4c85a0b46c29a341514681d4e6189fd0b5fb60e94b77075540ecf17c318a",
+            "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_json-src"
+          },
+          "CSL_OBJECTIVES_EIGEN": {
+            "commit": "source-archive-no-git-metadata",
+            "directory_sha256": "f062692628c933e5fe7cb6c725fc179e6073197245861e098d69516df1d2fdf4",
+            "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_objectives_eigen-src"
+          },
+          "CSL_QHULL": {
+            "commit": "source-archive-no-git-metadata",
+            "directory_sha256": "d34a90ce3602cfd6685ee0de08a4852496fdadc01025214fafdd68ca5e786dae",
+            "source": "D:\\work\\PhD\\agent-work\\syn53-syn61\\syn02-build\\_deps\\csl_qhull-src"
+          }
+        }
+      },
+      "executable_bytes": 4841984,
+      "executable_sha256": "12e4f73acfa1d80e387dd0a8266451848bfce6d42b525e583675a90151052c2f",
+      "generator": "Visual Studio 17 2022 x64",
+      "ndebug": true,
+      "project_sha256": "d5d55ba056ff14e0f6ba9ba9a86d99f103de61e3ee68562db1f7ba24287e9f44",
+      "release_properties": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\worktrees\\syn04-ts01-strategy-a-run1\\clean-release-syn03-final\\solver-source\\include;%(AdditionalIncludeDirectories)",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "report_driver_sha256": "86b51f59f4426a2c1bb6d907fb3163e74ae52ee4067c498d81a2011270ce243e",
+      "runner_cmake_sha256": "96c249dd0039fd031725930b76b2ff403c03f87962685ea843c91dbf828322db"
+    },
+    "counts": {
+      "all_outputs_consumed_and_validated": true,
+      "failed": 0,
+      "measured": 7,
+      "passed": 7,
+      "warmup": 1
+    },
+    "environment": {
+      "absolute_tolerance": 1e-08,
+      "assurance": "numerical",
+      "cache_policy": "One excluded in-process warmup; each repetition constructs a fresh problem, registries, provider selections, prepared strategy and exclusive workspace. Process/runtime may be warm; no cold-cache claim.",
+      "clock": "std::chrono::steady_clock, integer nanoseconds",
+      "cpu_count_physical": 6,
+      "cpu_percent_after": 0.3,
+      "cpu_percent_before": 0.1,
+      "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
+      "logical_cpu_count": 12,
+      "memory_total_bytes": 34189107200,
+      "native_provider_thread_configuration": "HiGHS adapter reports threads=1 and parallel=off for the native phase; OS thread count per trial was not observed",
+      "os": "Windows-11-10.0.22631-SP0",
+      "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+      "python": "3.13.5",
+      "relative_tolerance": 1e-08,
+      "requested_resources": {
+        "memory_bytes": null,
+        "outer_workers": 1,
+        "threads_per_worker": 1,
+        "total_threads": 1
+      },
+      "seed": "No seed option is exposed/configured by this StrategyPort/HiGHS registration path"
+    },
+    "events": [
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "canonical_relation_checked": true,
+        "completeness_verifier": "csl.verifier.ts01-analytic",
+        "completeness_verifier_version": "1",
+        "consumed_result_marker": 1805158144890476961,
+        "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+        "elapsed_ns": 6518600,
+        "error": "",
+        "lineage": [
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.control-recovery@1",
+          "csl.synthesis.terminal-minimizers@1",
+          "csl.synthesis.control-recovery@1"
+        ],
+        "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+        "outcome": "optimal",
+        "providers": [
+          "csl.synthesis.reach-back@1",
+          "csl.geometry.polyhedral-projection@1.0.0",
+          "csl.geometry.affine-sum@1.0.0",
+          "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+          "csl.lp.highs@1.0.0+highs.1.11.0",
+          "csl.convex.highs@1.0.0+highs.1.11.0",
+          "csl.hull.lp-membership@1.0.0"
+        ],
+        "registry_verified": true,
+        "relative_tolerance": 1e-08,
+        "repetition": 0,
+        "representative_coordinates": [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
+        "result_disposition": "complete_optimal_family",
+        "schema": "csl.syn03-strategy-a-ts01-measurement-event/1",
+        "status": "passed",
+        "termination": "completed",
+        "trajectory_max_residual": 0,
+        "trajectory_objective": 0,
+        "warmup": true
+      },
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "canonical_relation_checked": true,
+        "completeness_verifier": "csl.verifier.ts01-analytic",
+        "completeness_verifier_version": "1",
+        "consumed_result_marker": 1805158144890476961,
+        "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+        "elapsed_ns": 5543600,
+        "error": "",
+        "lineage": [
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.control-recovery@1",
+          "csl.synthesis.terminal-minimizers@1",
+          "csl.synthesis.control-recovery@1"
+        ],
+        "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+        "outcome": "optimal",
+        "providers": [
+          "csl.synthesis.reach-back@1",
+          "csl.geometry.polyhedral-projection@1.0.0",
+          "csl.geometry.affine-sum@1.0.0",
+          "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+          "csl.lp.highs@1.0.0+highs.1.11.0",
+          "csl.convex.highs@1.0.0+highs.1.11.0",
+          "csl.hull.lp-membership@1.0.0"
+        ],
+        "registry_verified": true,
+        "relative_tolerance": 1e-08,
+        "repetition": 1,
+        "representative_coordinates": [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
+        "result_disposition": "complete_optimal_family",
+        "schema": "csl.syn03-strategy-a-ts01-measurement-event/1",
+        "status": "passed",
+        "termination": "completed",
+        "trajectory_max_residual": 0,
+        "trajectory_objective": 0,
+        "warmup": false
+      },
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "canonical_relation_checked": true,
+        "completeness_verifier": "csl.verifier.ts01-analytic",
+        "completeness_verifier_version": "1",
+        "consumed_result_marker": 1805158144890476961,
+        "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+        "elapsed_ns": 4977700,
+        "error": "",
+        "lineage": [
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.control-recovery@1",
+          "csl.synthesis.terminal-minimizers@1",
+          "csl.synthesis.control-recovery@1"
+        ],
+        "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+        "outcome": "optimal",
+        "providers": [
+          "csl.synthesis.reach-back@1",
+          "csl.geometry.polyhedral-projection@1.0.0",
+          "csl.geometry.affine-sum@1.0.0",
+          "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+          "csl.lp.highs@1.0.0+highs.1.11.0",
+          "csl.convex.highs@1.0.0+highs.1.11.0",
+          "csl.hull.lp-membership@1.0.0"
+        ],
+        "registry_verified": true,
+        "relative_tolerance": 1e-08,
+        "repetition": 2,
+        "representative_coordinates": [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
+        "result_disposition": "complete_optimal_family",
+        "schema": "csl.syn03-strategy-a-ts01-measurement-event/1",
+        "status": "passed",
+        "termination": "completed",
+        "trajectory_max_residual": 0,
+        "trajectory_objective": 0,
+        "warmup": false
+      },
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "canonical_relation_checked": true,
+        "completeness_verifier": "csl.verifier.ts01-analytic",
+        "completeness_verifier_version": "1",
+        "consumed_result_marker": 1805158144890476961,
+        "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+        "elapsed_ns": 4934500,
+        "error": "",
+        "lineage": [
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.control-recovery@1",
+          "csl.synthesis.terminal-minimizers@1",
+          "csl.synthesis.control-recovery@1"
+        ],
+        "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+        "outcome": "optimal",
+        "providers": [
+          "csl.synthesis.reach-back@1",
+          "csl.geometry.polyhedral-projection@1.0.0",
+          "csl.geometry.affine-sum@1.0.0",
+          "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+          "csl.lp.highs@1.0.0+highs.1.11.0",
+          "csl.convex.highs@1.0.0+highs.1.11.0",
+          "csl.hull.lp-membership@1.0.0"
+        ],
+        "registry_verified": true,
+        "relative_tolerance": 1e-08,
+        "repetition": 3,
+        "representative_coordinates": [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
+        "result_disposition": "complete_optimal_family",
+        "schema": "csl.syn03-strategy-a-ts01-measurement-event/1",
+        "status": "passed",
+        "termination": "completed",
+        "trajectory_max_residual": 0,
+        "trajectory_objective": 0,
+        "warmup": false
+      },
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "canonical_relation_checked": true,
+        "completeness_verifier": "csl.verifier.ts01-analytic",
+        "completeness_verifier_version": "1",
+        "consumed_result_marker": 1805158144890476961,
+        "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+        "elapsed_ns": 4904700,
+        "error": "",
+        "lineage": [
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.control-recovery@1",
+          "csl.synthesis.terminal-minimizers@1",
+          "csl.synthesis.control-recovery@1"
+        ],
+        "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+        "outcome": "optimal",
+        "providers": [
+          "csl.synthesis.reach-back@1",
+          "csl.geometry.polyhedral-projection@1.0.0",
+          "csl.geometry.affine-sum@1.0.0",
+          "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+          "csl.lp.highs@1.0.0+highs.1.11.0",
+          "csl.convex.highs@1.0.0+highs.1.11.0",
+          "csl.hull.lp-membership@1.0.0"
+        ],
+        "registry_verified": true,
+        "relative_tolerance": 1e-08,
+        "repetition": 4,
+        "representative_coordinates": [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
+        "result_disposition": "complete_optimal_family",
+        "schema": "csl.syn03-strategy-a-ts01-measurement-event/1",
+        "status": "passed",
+        "termination": "completed",
+        "trajectory_max_residual": 0,
+        "trajectory_objective": 0,
+        "warmup": false
+      },
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "canonical_relation_checked": true,
+        "completeness_verifier": "csl.verifier.ts01-analytic",
+        "completeness_verifier_version": "1",
+        "consumed_result_marker": 1805158144890476961,
+        "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+        "elapsed_ns": 4526600,
+        "error": "",
+        "lineage": [
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.control-recovery@1",
+          "csl.synthesis.terminal-minimizers@1",
+          "csl.synthesis.control-recovery@1"
+        ],
+        "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+        "outcome": "optimal",
+        "providers": [
+          "csl.synthesis.reach-back@1",
+          "csl.geometry.polyhedral-projection@1.0.0",
+          "csl.geometry.affine-sum@1.0.0",
+          "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+          "csl.lp.highs@1.0.0+highs.1.11.0",
+          "csl.convex.highs@1.0.0+highs.1.11.0",
+          "csl.hull.lp-membership@1.0.0"
+        ],
+        "registry_verified": true,
+        "relative_tolerance": 1e-08,
+        "repetition": 5,
+        "representative_coordinates": [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
+        "result_disposition": "complete_optimal_family",
+        "schema": "csl.syn03-strategy-a-ts01-measurement-event/1",
+        "status": "passed",
+        "termination": "completed",
+        "trajectory_max_residual": 0,
+        "trajectory_objective": 0,
+        "warmup": false
+      },
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "canonical_relation_checked": true,
+        "completeness_verifier": "csl.verifier.ts01-analytic",
+        "completeness_verifier_version": "1",
+        "consumed_result_marker": 1805158144890476961,
+        "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+        "elapsed_ns": 4425000,
+        "error": "",
+        "lineage": [
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.control-recovery@1",
+          "csl.synthesis.terminal-minimizers@1",
+          "csl.synthesis.control-recovery@1"
+        ],
+        "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+        "outcome": "optimal",
+        "providers": [
+          "csl.synthesis.reach-back@1",
+          "csl.geometry.polyhedral-projection@1.0.0",
+          "csl.geometry.affine-sum@1.0.0",
+          "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+          "csl.lp.highs@1.0.0+highs.1.11.0",
+          "csl.convex.highs@1.0.0+highs.1.11.0",
+          "csl.hull.lp-membership@1.0.0"
+        ],
+        "registry_verified": true,
+        "relative_tolerance": 1e-08,
+        "repetition": 6,
+        "representative_coordinates": [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
+        "result_disposition": "complete_optimal_family",
+        "schema": "csl.syn03-strategy-a-ts01-measurement-event/1",
+        "status": "passed",
+        "termination": "completed",
+        "trajectory_max_residual": 0,
+        "trajectory_objective": 0,
+        "warmup": false
+      },
+      {
+        "absolute_tolerance": 1e-08,
+        "assurance": "numerical",
+        "canonical_relation_checked": true,
+        "completeness_verifier": "csl.verifier.ts01-analytic",
+        "completeness_verifier_version": "1",
+        "consumed_result_marker": 1805158144890476961,
+        "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+        "elapsed_ns": 4512600,
+        "error": "",
+        "lineage": [
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.reach-back@1",
+          "csl.synthesis.control-recovery@1",
+          "csl.synthesis.terminal-minimizers@1",
+          "csl.synthesis.control-recovery@1"
+        ],
+        "lp_provider": "csl.lp.highs@1.0.0+highs.1.11.0",
+        "outcome": "optimal",
+        "providers": [
+          "csl.synthesis.reach-back@1",
+          "csl.geometry.polyhedral-projection@1.0.0",
+          "csl.geometry.affine-sum@1.0.0",
+          "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+          "csl.lp.highs@1.0.0+highs.1.11.0",
+          "csl.convex.highs@1.0.0+highs.1.11.0",
+          "csl.hull.lp-membership@1.0.0"
+        ],
+        "registry_verified": true,
+        "relative_tolerance": 1e-08,
+        "repetition": 7,
+        "representative_coordinates": [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        "residual_verifier": "syn03-strategy-a-independent-original-check/1",
+        "result_disposition": "complete_optimal_family",
+        "schema": "csl.syn03-strategy-a-ts01-measurement-event/1",
+        "status": "passed",
+        "termination": "completed",
+        "trajectory_max_residual": 0,
+        "trajectory_objective": 0,
+        "warmup": false
+      }
+    ],
+    "harness_commit": "4a3556ba65a75716c00a9ac24f01e04648be5ea5",
+    "limiter": {
+      "available": false,
+      "reason": "WPR CPU sampled-stack profile could not start: Windows denied enabling system-performance profiling policy (0xc5585011). Separate workload ran and process counters were collected, but they cannot attribute a hot source path; no limiter is claimed."
+    },
+    "order": "One excluded warmup followed by seven measured repetitions in one process; one strategy only, so side alternation is inapplicable.",
+    "performance_conclusion": "inconclusive",
+    "phase_counters": {
+      "available": {
+        "end_to_end": "The one timed interval described above",
+        "lineage_steps": "Six identity-bound transformations per result: three forward stages, feasible-history recovery, terminal minimization, terminal-preimage recovery",
+        "registered_provider_identities": "Per-trial actual registry provenance, including projection, affine/sum, Qhull conversion, LP and convex providers"
+      },
+      "not_invoked": [],
+      "unavailable": [
+        "durations for forward projection and affine/sum operations",
+        "durations and LP call counts for hull reduction/Qhull conversion",
+        "terminal LP/QP subphase durations",
+        "provider selection/preparation, workspace creation, extraction, compiled verifier, original-trajectory check, relation membership checks and export durations"
+      ]
+    },
+    "profile_attempt": {
+      "etl_path": null,
+      "process_samples": [
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467066077400,
+          "rss_bytes": 1830912
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467068320200,
+          "rss_bytes": 3125248
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467070587100,
+          "rss_bytes": 6504448
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467072767000,
+          "rss_bytes": 6811648
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467074949600,
+          "rss_bytes": 6881280
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467077107800,
+          "rss_bytes": 7135232
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467079266700,
+          "rss_bytes": 7147520
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467081468100,
+          "rss_bytes": 7274496
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.0,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467084076200,
+          "rss_bytes": 7098368
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 33.3,
+          "monotonic_ns": 697467086628100,
+          "rss_bytes": 7254016
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467088805200,
+          "rss_bytes": 7147520
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467090966700,
+          "rss_bytes": 7135232
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467093119400,
+          "rss_bytes": 7225344
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467095275900,
+          "rss_bytes": 7307264
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467097522800,
+          "rss_bytes": 7229440
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467099776100,
+          "rss_bytes": 7286784
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467102014500,
+          "rss_bytes": 7131136
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467104248500,
+          "rss_bytes": 7319552
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467106480200,
+          "rss_bytes": 7319552
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467109088000,
+          "rss_bytes": 7323648
+        },
+        {
+          "cpu_system_seconds": 0.0,
+          "cpu_user_seconds": 0.015625,
+          "host_cpu_percent": 0.0,
+          "monotonic_ns": 697467111328600,
+          "rss_bytes": 6864896
+        }
+      ],
+      "sampled_process_cpu_system_seconds_max": 0.0,
+      "sampled_process_cpu_user_seconds_max": 0.015625,
+      "sampled_process_peak_rss_bytes": 7323648,
+      "separate_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "separate_stdout_sha256": "4b9b349975be32385ecbdb7eb298be5280ab8691f767b731e2879f1405d51b4a",
+      "separate_wall_ns": 51388800,
+      "separate_workload_return_code": 0,
+      "separate_workload_timed_out": false,
+      "wpr": {
+        "command": [
+          "wpr",
+          "-start",
+          "CPU",
+          "-filemode"
+        ],
+        "return_code": 3310899217,
+        "stderr": "\r\n\tFailed to enable the policy to profile system performance.\r\r\n\r\n\tProfile Id: CPU.Verbose.File\r\n\t\r\n\tError code: 0xc5585011\r\n\t\r\n\tFailed to enable the policy to profile system performance.\r\r\n\t\r\n\t\r\n",
+        "stdout": ""
+      }
+    },
+    "result_observation": {
+      "assurance": "numerical",
+      "canonical_relation_checked_each_trial": true,
+      "disposition": "complete_optimal_family",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "termination": "completed"
+    },
+    "scope": "Fresh problem construction and resolution, registered Strategy A provider selection, StrategyRegistry preparation, exclusive public StrategyPort workspace creation and run through forward reachability, terminal minimization, recovery and registered HiGHS LP/convex execution, compiled T-S01 verifier acceptance, independent original-trajectory residual checking, and exact canonical H-relation membership/nonmembership validation. Excludes process startup, JSON serialization, build, file persistence, and rendering.",
+    "source": {
+      "clean_after_run": true,
+      "clean_before_build": true,
+      "head": "451d0f7553cd0ab606c4ed07ae142310cb897eb4",
+      "strategy_header_sha256": "edf0e359f9d676d708df66e54dbae48f777b6a45d9abc69729135846101d7453",
+      "strategy_source_sha256": "777149765d0791d509cb9859d975819dc9e5cbe3191f8e23f055880fa66a823a",
+      "tree": "1f659a8611609c5557e06c324c4aa447254ae58d"
+    },
+    "timing_ns": {
+      "max": 5543600,
+      "median": 4904700,
+      "min": 4425000,
+      "observations": [
+        5543600,
+        4977700,
+        4934500,
+        4904700,
+        4526600,
+        4425000,
+        4512600
+      ],
+      "range": 1118600
+    },
+    "trajectory_checks": {
+      "equations_checked": [
+        "x0=0",
+        "x1=x0+u0",
+        "x2=x1+u1",
+        "0<=u0<=1",
+        "0<=u1<=1",
+        "J(x2)=(x2-1)^2=0"
+      ],
+      "maximum_residuals": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "original_objectives": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "representative_coordinates": [
+        [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ],
+        [
+          0,
+          0.25,
+          1,
+          0.25,
+          0.75
+        ]
+      ],
+      "tolerances": {
+        "absolute": 1e-08,
+        "relative": 1e-08
+      },
+      "verifiers": [
+        "syn03-strategy-a-independent-original-check/1"
+      ]
+    }
+  },
+  "report_id": "syn03-strategy-a-ts01-20261014-451d0f75",
+  "scenario": {
+    "sha256": "b645f234ca97d1cadceaee1979f19073bf849137e8a256d60e97e7089bac34fd",
+    "value": {
+      "controls": [
+        {
+          "lower": [
+            0
+          ],
+          "upper": [
+            1
+          ]
+        },
+        {
+          "lower": [
+            0
+          ],
+          "upper": [
+            1
+          ]
+        }
+      ],
+      "dynamics": [
+        {
+          "A": [
+            [
+              1
+            ]
+          ],
+          "B": [
+            [
+              1
+            ]
+          ],
+          "offset": [
+            0
+          ]
+        },
+        {
+          "A": [
+            [
+              1
+            ]
+          ],
+          "B": [
+            [
+              1
+            ]
+          ],
+          "offset": [
+            0
+          ]
+        }
+      ],
+      "effective_request": {
+        "assurance": "numerical",
+        "materialization_limit": null,
+        "representation": "csl.polyhedron.h",
+        "target": "exact_optimal_relation"
+      },
+      "external_channels": 0,
+      "information": "nominal_open_loop",
+      "initial_state": [
+        0
+      ],
+      "profile": "ts01_exact_integrator",
+      "state_constraints": "universal at all stages",
+      "terminal_objective": {
+        "Q": [
+          [
+            2
+          ]
+        ],
+        "linear": [
+          -2
+        ],
+        "offset": 1
+      },
+      "time_domain": "discrete",
+      "times": [
+        0,
+        1,
+        2
+      ]
+    }
+  },
+  "schema": "csl.syn03-strategy-a-ts01-report/1",
+  "source_commit": "451d0f7553cd0ab606c4ed07ae142310cb897eb4"
+}
