@@ -52,7 +52,7 @@ template<class Port> registry::PreparedProvider<Port> selected(registry::Registr
     return take(registry::prepare_provider(registry::select_provider(provider_registry,method,requirements)));
 }
 
-sets::SetHandle interval(std::string id,double lower,double upper) {
+SetHandle interval(std::string id,double lower,double upper) {
     auto inequalities=numeric::snapshot(Matrix{2,1,{1,-1}});
     auto bounds=numeric::snapshot_vector(Vector{upper,-lower});
     auto equalities=numeric::snapshot(Matrix{0,1,{}});
