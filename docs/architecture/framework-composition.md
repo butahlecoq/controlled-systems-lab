@@ -20,6 +20,7 @@ full mathematical requirements.
 | Numerical program contracts | `CSL::optimization`, `CSL::convex` | Canonical LP/convex programs, original-coordinate residual evaluation and scoped evidence. |
 | Real LP implementations | `CSL::highs_lp`, `CSL::phase_one` | Registered HiGHS optimizer; `phase-one-bland` for zero-objective equality/nonnegative feasibility with basis diagnostics. |
 | Real convex implementation | `CSL::highs_convex` | Registered HiGHS convex adapter with declared numerical admission; original norm and squared solver cost remain separate. |
+| Registered synthesis strategies | `CSL::strategy_a`, `CSL::strategy_b`, `StrategyPort` | Each can publish a complete optimal-family result for the exact guarded analytic T-S01 and T-S02 profiles through their compiled profile verifier. This does not establish general numerical coverage or support arbitrary profiles/constraints; numerical operations outside these analytic gates carry numerical or unestablished evidence, not validated proof. |
 | H/V representation conversion | `CSL::qhull_conversion`, `ConversionPort` | Qhull 8.0.2 bounded-polyhedron conversion; feasibility/boundedness/interior LP queries use the caller-selected registered LP provider; binary64 numerical evidence only. See the [conversion contract](../contracts/polyhedral-conversion.md) for supported cases and limits. |
 | Task execution | `CSL::execution`, `make_task`, `Executor::run` | Sequential/bounded-parallel retained tasks and actual execution provenance; resource declarations are not hard OS enforcement. |
 | Portable run records and collection | `CSL::artifacts`, `artifacts::RunStatistics`, `resolve_configuration`, `encode_run` / `decode_run`, `execution::observability` | Immutable run records, separate configuration identity, closed JSON codec and bounded collection/RUN01 projection; no automatic timer instrumentation or synthesis report exporter. |
@@ -47,13 +48,19 @@ flowchart TD
 ```
 
 The data, backend, registry, execution and nominal trajectory-verification
-components exist. Production control synthesis, full relation construction,
-effective-request/strategy/lineage claim binding and completeness verification
-remain open under [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43)
+components exist. Registered Strategy A and Strategy B now construct and publish
+complete joint-history relations for the exact guarded analytic T-S01 and T-S02
+profiles; the compiled profile verifiers bind the prescribed problem, request,
+strategy, lineage and canonical relation. These narrowly admitted paths are
+production registered strategies, but they do not supply general family
+coverage or extend to neighboring models by numerical tolerance. General
+profile/constraint support, independently reusable completeness verification,
+and the shared effective-request/strategy/lineage comparison path remain open
+under [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43)
 and [SYN-07 #155](https://github.com/butahlecoq/controlled-systems-lab/issues/155).
-The synthesis-to-report adapter is also missing glue. Existing program-level
-reports do not fill that gap. No test-local strategy is presented as a production
-planner in the examples.
+The synthesis-to-report adapter is still missing: existing program-level reports
+do not provide paired synthesis records or export the live optimal-family proof
+payload.
 
 The eventual application composes `prepare_strategy(resolved, registry,
 configuration, requirements)`, `make_task` and `Executor::run`. It retains the
@@ -101,8 +108,21 @@ For this scenario, direct arithmetic gives the complete optimal relation
 oracle; it is not an implemented general family algorithm. Its control marginals
 are each `[0,1]`, whose Cartesian product would wrongly admit `(0,0)` and `(1,1)`.
 
-The next complete milestone must implement both approaches on the same immutable
-problem and request:
+The general workflow milestone must exercise and extend both approaches on the
+same immutable problem and request. A planned [registered synthesis comparison
+example](../../examples/registered_synthesis_comparison.cpp) is a functional
+integration example bounded to the two-stage integrator and exact T-S01 request:
+it runs both registered strategies on one immutable problem, selects witness
+histories, and verifies them against the original problem data. Its comparison
+records identify the shared problem/request and each strategy, outcome, selected
+witnesses, and original-data verification status/residuals; the example does not
+serialize the live optimal-family relation or proof payload. It demonstrates
+that fixture path, not general profile support, artifact publication, or
+comparative performance. CTest/example wall time is not benchmark evidence;
+paired measured results and HTML publication remain under [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83)
+and the [published-results policy](published-algorithm-results.md).
+
+The required general methods remain:
 
 1. Reachability, terminal minimization and backward recovery, retaining the joint
    relation rather than discarding history dependence.
@@ -120,5 +140,6 @@ unsupported evidence and unchecked certificate references cannot become proofs.
 
 Historical fuel-model restoration remains unresolved. Future numerical algorithms
 still require the [published-results process](published-algorithm-results.md).
-The current example tests make no speedup, validated-certificate or family-completeness
-claim and do not close the end-to-end framework milestone.
+The example tests make no speedup or validated-arithmetic claim, and do not
+establish completeness outside the registered exact profiles or close the
+general end-to-end framework milestone.
