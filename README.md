@@ -2,7 +2,9 @@
 
 C++20 library and research repository for constrained discrete-time control. The library currently provides immutable affine models and problem data, JSON scenario intake, registered LP/convex backends, phase-I feasibility, execution and numerical reporting. Start with the installed-package examples below.
 
-The complete control-planning workflow is still pending: two synthesis approaches on the same problem, a full optimal trajectory relation, independent verification and saved export. The examples show implemented components; they do not claim that workflow is complete. See the [current framework composition](docs/architecture/framework-composition.md) for the module map, public interfaces and missing glue.
+Strategy A (reachability, terminal minimization and backward recovery), Strategy B (direct joint optimization), witness selection and independent trajectory verification are implemented. Complete optimal families are supported only for the reviewed T-S01/T-S02 profiles; general family coverage and trusted proof serialization remain pending. See the [current framework composition](docs/architecture/framework-composition.md) for the module map, public interfaces and missing glue.
+
+Start development with the [task-to-module guide and focused commands](docs/build/development.md). Use the canonical [glossary](docs/research/glossary.md) for mathematical and software terms.
 
 ## Quick start
 
@@ -19,7 +21,7 @@ cmake --build build/examples --config Release --parallel 4
 ctest --test-dir build/examples -C Release --output-on-failure --no-tests=error
 ```
 
-Expected: **12/12 example tests pass**, including both real feasibility backends and rejected unknown backends/missing or malformed files. [The standalone CMake project](examples/CMakeLists.txt) uses only `find_package(CSL CONFIG)` and installed public targets. The existing installed-consumer CI gate copies and builds the same examples independently of repository headers.
+The example suite covers both real feasibility backends and rejected unknown backends/missing or malformed files. [The standalone CMake project](examples/CMakeLists.txt) uses only `find_package(CSL CONFIG)` and installed public targets. The existing installed-consumer CI gate copies and builds the same examples independently of repository headers.
 
 | Executable/source | What it actually does | Expected numerical output |
 | --- | --- | --- |
@@ -86,7 +88,7 @@ The archive's finite-action minimax solver enumerates control sequences; changin
 
 Published experiments are the starting baselines, as requested by the research owner. Their numbers are recorded as reported results, not new reproductions. Several source and implementation inconsistencies must be resolved before they become acceptance criteria.
 
-Owner decision: use C++ as the main implementation language, with C++20 as the working standard and Python for independent verification/reference computations. The first complete user workflow must return an optimal solution family for nominal planning with continuous actions and without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md) and [implementation backlog](docs/superpowers/plans/2026-10-11-controlled-systems-backlog.md). The required comparison is reachability/terminal minimization/backward recovery versus direct joint-trajectory optimization on the same immutable problem. Single witnesses, two backend calls or sampled endpoints do not fulfill the full-family requirement. The [composition map](docs/architecture/framework-composition.md) distinguishes delivered components from this pending workflow.
+Owner decision: use C++ as the main implementation language, with C++20 as the working standard and Python for independent verification/reference computations. The first complete user workflow must return an optimal solution family for nominal planning with continuous actions and without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md) and [implementation backlog](docs/superpowers/plans/2026-10-11-controlled-systems-backlog.md). The required comparison is reachability/terminal minimization/backward recovery versus direct joint-trajectory optimization on the same immutable problem. Single witnesses, two backend calls or sampled endpoints do not fulfill the full-family requirement. The [composition map](docs/architecture/framework-composition.md) distinguishes the delivered reviewed profiles from the pending general workflow.
 
 ## Evidence and preservation
 

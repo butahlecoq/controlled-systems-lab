@@ -1,11 +1,11 @@
 # Native C++20 build and public package
 
-CORE-02 builds the integrated [interface revision 1.1](../contracts/core-interfaces.md)
-and its guards as the static `CSL::contracts` target. This is a compatible-toolchain
-source contract, not a stable binary/plugin ABI. No numerical/model/synthesis
-adapter or scenario-file application is supplied by this ticket. Project licensing
-remains undecided; installation is a local development check, not an authorized
-binary release.
+The root build supplies the current library modules, installed public targets and
+optional native adapters. Start routine edits with the [development presets and
+module map](development.md); see [current composition](../architecture/framework-composition.md)
+for synthesis scope. Public interfaces require compatible C++20 toolchains; they
+are not a stable binary/plugin ABI. Installation is a local development check;
+project licensing remains an owner decision.
 
 ## Configure, build, test and install
 
@@ -35,12 +35,14 @@ cmake --install tmp/native --prefix install
 ```
 
 Set `CC`/`CXX` before a fresh configure to choose a compatible compiler pair.
-`BUILD_TESTING=OFF` builds/installs only the contracts, without downloading any
-dependency. With tests enabled, doctest is private. `CSL_DEPENDENCY_PROBES=OFF`
-(the default) omits Eigen/HiGHS/JSON. Turning it on builds the preserved
-[CORE-01 isolated project](../../probes/core-01/README.md) with its own build/cache
-tree and install rules; it never exports backend/test dependencies to the public
-package. The separate build always checks its source dependencies on rebuild.
+`BUILD_TESTING=OFF` disables tests; it does not select a contracts-only build or
+remove production dependencies. The default full configuration builds the real
+HiGHS and Qhull adapters and acquires their pinned vendors. JSON is also a
+production dependency. `CSL_DEPENDENCY_PROBES` controls the separate historical
+[CORE-01 probes](../../probes/core-01/README.md), not production adapter acquisition.
+Use the `core` preset to disable both optional native adapters; this remains a
+library build with production dependencies, rather than a dependency-free mode.
+The [development guide](development.md) describes the installed-package checks.
 
 ## Installed consumer
 
@@ -67,7 +69,12 @@ library. Test/dependency tools remain in the ignored build tree. Any later binar
 distribution including native backends must collect actual bundled notices and
 meet the [ADR 0002 restrictions](../architecture/decisions/0002-native-integrations.md).
 
-## Acceptance evidence and limits
+## Historical CORE-02 evidence and limits
+
+The following records the original CORE-02 checks and environment. It is retained
+as historical evidence, not the current module inventory, dependency inventory or
+a fresh verification of the commands above. Later modules have their own tests
+and reports.
 
 T-M01's master oracle is: **Reject wrong dimensions/stage counts; constant and
 stagewise providers produce the same model behavior.** The public client checks

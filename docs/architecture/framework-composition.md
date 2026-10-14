@@ -1,124 +1,90 @@
 # Current framework composition
 
-The [README quick start](../../README.md#quick-start) runs actual installed C++20
-components. It is the first entry point into the framework, not a completed
-control-planning application. This page is the current module map; the
-[optimal-family architecture](modular-algorithms-and-solution-sets.md) retains the
-full mathematical requirements.
+Start with the [development entry point](../build/development.md), the
+[installed-package examples](../../README.md#quick-start) and canonical
+[glossary](../research/glossary.md). This page describes current implementation;
+the [optimal-family architecture](modular-algorithms-and-solution-sets.md) retains
+the wider mathematical requirements.
 
 ## Modules and public seams
 
-| Responsibility | Available public target/interface | Scope |
+| Responsibility | Public targets / interface | Owning implementation |
 | --- | --- | --- |
-| Owning numerical data | `CSL::numeric`, `numeric/data.hpp` | Immutable dense/CSR snapshots; private native storage stays behind public types. |
-| Original dynamics and sets | `CSL::model`, `CSL::sets` | Affine discrete stages, observations and H/V/elementary set data; data support does not imply every set operation. |
-| Domains, constraints, original objectives | `CSL::problem`, `CSL::objectives` | Initial/external/control/state/history data; original linear, quadratic and residual-norm evaluation. |
-| Mathematical publication | `CSL::resolved_problem`, `problem::resolve` | Deep immutable `ResolvedProblem` and content-bound identity; no feasibility or synthesis inference. |
-| Independent trajectory checks | `CSL::verification`, `verification::verify_trajectory` | Original-data nominal discrete trajectories: named initial, dynamics, domain, history and objective residuals; explicit unsupported optimum, family-coverage and validated-proof claims. See the [verification contract](../contracts/trajectory-verification.md). |
-| File intake | `CSL::input`, `input::load_scenario_file` | [JSON v1](../contracts/scenario-input.md) to the same immutable problem; requested run intent remains distinct from effective selection. |
-| Selection and composition | `CSL::registry`, `Registry<LPPort>`, `Registry<ConvexPort>`, `StrategyRegistry` | Pure capability admission, retained preparations, actual ID/version provenance and exclusive workspace factories. |
-| Numerical program contracts | `CSL::optimization`, `CSL::convex` | Canonical LP/convex programs, original-coordinate residual evaluation and scoped evidence. |
-| Real LP implementations | `CSL::highs_lp`, `CSL::phase_one` | Registered HiGHS optimizer; `phase-one-bland` for zero-objective equality/nonnegative feasibility with basis diagnostics. |
-| Real convex implementation | `CSL::highs_convex` | Registered HiGHS convex adapter with declared numerical admission; original norm and squared solver cost remain separate. |
-| H/V representation conversion | `CSL::qhull_conversion`, `ConversionPort` | Qhull 8.0.2 bounded-polyhedron conversion; feasibility/boundedness/interior LP queries use the caller-selected registered LP provider; binary64 numerical evidence only. See the [conversion contract](../contracts/polyhedral-conversion.md) for supported cases and limits. |
-| Task execution | `CSL::execution`, `make_task`, `Executor::run` | Sequential/bounded-parallel retained tasks and actual execution provenance; resource declarations are not hard OS enforcement. |
-| Portable run records and collection | `CSL::artifacts`, `artifacts::RunStatistics`, `resolve_configuration`, `encode_run` / `decode_run`, `execution::observability` | Immutable run records, separate configuration identity, closed JSON codec and bounded collection/RUN01 projection; no automatic timer instrumentation or synthesis report exporter. |
-| Saved numerical reports | `benchmarks/reporting`, `scripts/reports` | Existing LP/convex drivers, saved-record validation, HTML/CSV/figures and published versioned artifacts. |
+| Immutable numeric/model/set data | `CSL::numeric`, `CSL::model`, `CSL::sets` | `src/numeric`, `src/model`, `src/sets` |
+| Domains, objectives, resolved identity | `CSL::problem`, `CSL::objectives`, `CSL::resolved_problem` | `src/problem`, `src/optimization` |
+| JSON scenario intake | `CSL::input`, `load_scenario_file` | `src/input` |
+| Capability selection and retained providers | `CSL::registry`, `StrategyRegistry` | `src/registry` |
+| LP / convex programs and native adapters | `CSL::optimization`, `CSL::convex`, `CSL::highs_lp`, `CSL::highs_convex`, `CSL::phase_one` | `src/optimization`, `src/adapters` |
+| Geometry and conversion | `CSL::hull`, `CSL::polyhedral`, `CSL::affine_sum`, `CSL::qhull_conversion` | `src/geometry`, `src/adapters/polyhedral` |
+| Forward reachability, terminal minimizers, recovery | `CSL::nominal_forward`, `CSL::terminal_minimizers`, `CSL::control_recovery` | `src/reachability`, `src/synthesis` |
+| Strategy A / B and analytic profile | `CSL::strategy_a`, `CSL::strategy_b`, `CSL::strategy_ts01` | `src/synthesis/strategy_a`, `strategy_b`, `strategy_ts01` |
+| Directional witness selection | `CSL::witness_selector`, registered `SelectorPort` | `src/synthesis/witness_selector.cpp` |
+| Original-problem trajectory checks | `CSL::verification`, `verify_trajectory` | `src/verification` |
+| Execution and portable records | `CSL::execution`, `CSL::artifacts` | `src/execution`, `src/artifacts` |
+| Numerical report tooling | saved record validation and rendering | `benchmarks/reporting`, `scripts/reports` |
 
-Public headers are under `include/csl`. See the authoritative
-[resolved-problem](../contracts/resolved-problems.md),
-[registry](../contracts/registry.md),
-[run-statistics](../contracts/run-statistics.md),
-[LP](../contracts/linear-programs.md) and
-[report-record](../contracts/algorithm-report-records.md) contracts for details.
+Headers live under `include/csl`. Authoritative contracts cover
+[resolved problems](../contracts/resolved-problems.md), [registry](../contracts/registry.md),
+[trajectory verification](../contracts/trajectory-verification.md),
+[run records](../contracts/run-statistics.md) and [reports](../contracts/algorithm-report-records.md).
+Native types stay behind adapters; mutable workspaces are exclusive per solve.
 
-## End-to-end destination
+## Supported synthesis profiles
 
-```mermaid
-flowchart TD
-    A[JSON scenario or C++ model] --> B[ResolvedProblem]
-    B --> C[StrategyRegistry preparation]
-    C --> D[Typed LP / convex / geometry dependencies]
-    D --> E[Executor and exclusive workspaces]
-    E --> F[Trajectories and optimal relation]
-    F --> G[Independent original-problem verification]
-    G --> H[Saved records and report export]
-    H --> I[HTML / CSV / figures / versioned public report]
-```
+Strategy A composes forward reachability, terminal minimization and backward
+joint-history recovery. Strategy B builds and optimizes a direct joint program.
+Their general `nominal_open_loop` paths produce numerical candidate relations;
+they do not establish general complete-family coverage. See the
+[Strategy A implementation scope](../../src/synthesis/strategy_a/README.md).
 
-The data, backend, registry, execution and nominal trajectory-verification
-components exist. Production control synthesis, full relation construction,
-effective-request/strategy/lineage claim binding and completeness verification
-remain open under [SYN-06 #43](https://github.com/butahlecoq/controlled-systems-lab/issues/43)
-and [SYN-07 #155](https://github.com/butahlecoq/controlled-systems-lab/issues/155).
-The synthesis-to-report adapter is also missing glue. Existing program-level
-reports do not fill that gap. No test-local strategy is presented as a production
-planner in the examples.
+Both strategies additionally admit the strictly checked `ts01_exact_integrator`
+and `ts02_constant_integrator` profiles with compiled complete-family verifiers:
 
-The eventual application composes `prepare_strategy(resolved, registry,
-configuration, requirements)`, `make_task` and `Executor::run`. It retains the
-resolved owner, each returned `SynthesisResult` and actual registry provenance.
-Verification consumes the original problem and witnesses, rather than trusting
-the synthesis success flag. Export consumes owning saved results and verification
-records; rendering never invokes a solver. The existing ports support this
-composition without another registry or a new orchestration framework.
+| Profile | Original problem and complete joint relation |
+| --- | --- |
+| T-S01 | Two-step scalar unit integrator, `x0=0`, independent `u0,u1` in `[0,1]`, unrestricted states, no external/history constraints, terminal cost `(x2-1)^2`. Optimum zero; all histories are `(x0,x1,x2,u0,u1)=(0,s,1,s,1-s)`, `s` in `[0,1]`. |
+| T-S02 | Same integrator and domains, constant terminal objective `3` in the admitted linear, zero-quadratic or zero-map residual-norm form. Every feasible joint history is optimal. |
 
-## Substitution that runs today
+Exact coverage applies only to these reviewed predicates and canonical relations.
+It is bound to the original problem, effective request, strategy/version and
+executed lineage. It does not extend to changed horizons, dynamics, constraints
+or objectives. Outer registry assurance remains numerical; generic validated
+numerics are unavailable. The separate `csl.synthesis.ts01-analytic` registration
+provides the narrow T-S01 analytic path; it is not a replacement for either
+composed strategy.
 
-[backend_substitution.cpp](../../examples/backend_substitution.cpp) registers two
-real `LPPort` implementations. Its unchanged program is `min 0`, `u0+u1=1`,
-`u0,u1>=0`. Only the selected ID changes between `csl.lp.highs` (adapter version
-`1.0.0+highs.1.11.0`) and `phase-one-bland` (version `1`). Both use the same
-selection, preparation, creation, execution and original-row checks. The output
-prints the actual resolved identity/version and accepts any feasible witness;
-the backend is not required to return a particular endpoint or basis.
+The implemented `csl.selector.ts01-directions` selector minimizes supplied
+`(u0,u1)` directions over its admitted T-S01 source family using a selected LP
+provider. It returns consistent witnesses with source bindings. A recorded seed
+is provenance, not a stochastic or uniform-sampling promise. Witnesses are not a
+substitute for the whole family.
 
-An unknown ID fails before workspace creation with the actual typed registry
-rejection, printed as `DiagnosticCode` plus field and explanation (`1` denotes
-`unsupported`). Both implementations retain unestablished outcome evidence in
-this example. Phase I does not become a general nonzero-objective optimizer, and
-this backend substitution is distinct from the agreed two synthesis strategies.
-Optional basis capability is not requested because HiGHS does not supply it.
+Independent trajectory verification recomputes original initial, dynamics,
+domain, temporal and objective checks, with explicit binding expectations for
+family claims. Witness feasibility, optimality, whole-family coverage and
+validated assurance remain distinct. Compiled profile-specific family authority
+does not make every numerical trajectory report a completeness proof.
 
-Each preparation owns its program and creates an exclusive workspace. A future
-backend implements the existing registration/port contract and declares its
-support, without rewriting scenario data or a compatible strategy. A future
-strategy makes its own mathematical assumptions explicit and composes typed
-dependencies. Unsupported transformations and domains cannot silently disappear.
+## Runnable entry points and remaining work
 
-## Teaching scenario and the next full workflow
+The current [installed examples](../../README.md#quick-start) execute component
+workflows, including real LP backend substitution; the two LP providers are not
+two synthesis strategies. The scenario examples evaluate supplied controls.
+[PR #250](https://github.com/butahlecoq/controlled-systems-lab/pull/250), open at
+this baseline, owns the guarded installed T-S01 A/B comparison. It must be
+integrated before describing that comparison as a main-branch executable.
 
-The [file template](../../examples/scenarios/two-stage-integrator.json) describes
-`x0=0`, `x(k+1)=x(k)+u(k)`, two stages, `0<=u0,u1<=1`, with original cost
-`(x2-1)^2`. The C++ scenario example constructs the same mathematical problem.
-Both evaluate the specified history `(u0,u1)=(0.25,0.75)`, giving states
-`(0,0.25,1)` and cost zero. They do not select these controls or independently
-verify all constraint memberships. File source bytes/digest, mathematical identity
-and requested run settings have separate roles.
+A general scenario-to-family-to-export application remains pending. General
+family proofs, broader selector profiles, CLI behavior and trusted proof
+serialization/replay retain their feature-ticket ownership. JSON run records
+preserve metadata; decoding does not mint trusted complete-family authority.
+The synthesis-to-report adapter remains missing glue. Existing saved LP/convex
+reports do not supply a general synthesis comparison.
 
-For this scenario, direct arithmetic gives the complete optimal relation
-`x0=0, x1=u0, x2=1, u1=1-u0, 0<=u0<=1`. This segment is an independent teaching
-oracle; it is not an implemented general family algorithm. Its control marginals
-are each `[0,1]`, whose Cartesian product would wrongly admit `(0,0)` and `(1,1)`.
-
-The next complete milestone must implement both approaches on the same immutable
-problem and request:
-
-1. Reachability, terminal minimization and backward recovery, retaining the joint
-   relation rather than discarding history dependence.
-2. Direct joint-trajectory optimization, translating admitted original affine
-   stages/constraints/objectives into selected backend programs and retaining
-   the relationship between program and problem evidence.
-
-Both need full optimal-family semantics and independent original-problem checks;
-an optimizer point, sampled endpoints or two HiGHS calls cannot substitute for
-that output. The general implementations must support their declared dimensions,
-providers and constraints, rather than hardcode this scalar oracle. SYN06 must
-recompute initial/dynamics/control/state/objective checks and keep feasibility,
-optimality, completeness and validated assurance separate. Foreign identities,
-unsupported evidence and unchecked certificate references cannot become proofs.
-
-Historical fuel-model restoration remains unresolved. Future numerical algorithms
-still require the [published-results process](published-algorithm-results.md).
-The current example tests make no speedup, validated-certificate or family-completeness
-claim and do not close the end-to-end framework milestone.
+Applications compose existing strategy preparation, `make_task` and
+`Executor::run`, retain immutable resolved owners and actual provider provenance,
+and pass original problems and witnesses to independent verification. Export
+must consume saved owning results and verification records; rendering must not
+invoke solvers. Future numerical algorithms follow the
+[published-results process](published-algorithm-results.md). Historical fuel-model
+restoration remains unresolved.
