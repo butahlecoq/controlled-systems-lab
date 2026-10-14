@@ -111,4 +111,3 @@ def project(record):
             "blocking_reason": "The publisher adapter is registered; captured measurements must be regenerated under the reviewed harness, pass schema-3 staging, and complete independent report review before publication.",
         },
     }
-

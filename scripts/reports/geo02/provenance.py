@@ -29,15 +29,17 @@ HARNESS_PATHS |= {
     "benchmarks/reporting/geo02/affine_sum_driver.cpp",
 }
 
-CMAKE_CONFLICT = """<<<<<<< HEAD
-install(FILES include/csl/geometry/polyhedral_intersection.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
-install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/polyhedral-intersection.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-=======
-install(FILES include/csl/geometry/affine_sum.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
-install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
->>>>>>> e4d6c1e (feat(geometry): implement affine images and Minkowski sums)"""
+CMAKE_CONFLICT = (
+    '<<<<<<< HEAD\n'
+    'install(FILES include/csl/geometry/polyhedral_intersection.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)\n'
+    'install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)\n'
+    'install(FILES docs/contracts/polyhedral-intersection.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)\n'
+    '=======\n'
+    'install(FILES include/csl/geometry/affine_sum.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)\n'
+    'install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)\n'
+    'install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)\n'
+    '>>>>>>> e4d6c1e (feat(geometry): implement affine images and Minkowski sums)'
+)
 CMAKE_RESOLVED = """install(FILES include/csl/geometry/polyhedral_intersection.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
 install(FILES docs/contracts/polyhedral-intersection.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES include/csl/geometry/affine_sum.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/csl/geometry)
