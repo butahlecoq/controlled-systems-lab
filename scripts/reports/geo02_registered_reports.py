@@ -26,6 +26,14 @@ REDUCTION_FIELDS = ("generated_candidate_count", "materialized_output_point_coun
 LEGACY_PUBLICATION_IDS = {
     "geo02-20261012T235755Z-6b1f504ad3db":
         "geo02-20261012T235755Z-7275580339899c6ac27496fc2b05cb040d9fec14f8ec7f8bf219cc299c55eefc",
+    # Keep the already-published URL stable even though current publisher
+    # identity inputs now derive a different digest for the unchanged source.
+    "geo02-20261013T061151Z-338ff7d1d63c":
+        "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754",
+}
+PINNED_PUBLICATION_ZIP_SHA256 = {
+    "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754":
+        "e9068d76389a5a5d66a4f73ca49e259edae618faad99c1b8b7a41f05df92669a",
 }
 
 
@@ -290,7 +298,29 @@ def publication_artifacts(bundle, publication):
 
 
 def offline_zip(bundle, publication):
-    return common.publication_zip(publication.report_id, publication_artifacts(bundle, publication))
+    bundle = Path(bundle)
+    pinned_digest = PINNED_PUBLICATION_ZIP_SHA256.get(publication.report_id)
+    if pinned_digest is None:
+        return common.publication_zip(publication.report_id, publication_artifacts(bundle, publication))
+
+    archive_path = bundle.parent / (publication.report_id + ".zip")
+    archive_bytes = archive_path.read_bytes()
+    if hashlib.sha256(archive_bytes).hexdigest() != pinned_digest:
+        raise ValueError("pinned GEO-02 publication archive digest mismatch")
+    expected_artifacts = publication_artifacts(bundle, publication)
+    try:
+        with zipfile.ZipFile(archive_path) as archive:
+            names = archive.namelist()
+            expected_names = {"index.html"} | {publication.report_id + "/" + name for name in expected_artifacts}
+            if (len(names) != len(set(names)) or set(names) != expected_names or archive.testzip() is not None
+                    or any((entry.external_attr >> 16) & 0o170000 == 0o120000 for entry in archive.infolist())):
+                raise ValueError("pinned GEO-02 publication archive inventory mismatch")
+            for name, content in expected_artifacts.items():
+                if archive.read(publication.report_id + "/" + name) != content:
+                    raise ValueError("pinned GEO-02 publication archive differs from current saved bundle")
+    except (OSError, zipfile.BadZipFile, KeyError, RuntimeError) as error:
+        raise ValueError("invalid pinned GEO-02 publication archive") from error
+    return archive_bytes
 
 
 def validate_publication_manifest(report_dir, expected):
