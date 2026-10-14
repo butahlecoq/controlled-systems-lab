@@ -330,3 +330,75 @@ TEST_CASE("nonempty ray descriptions reject bounded V to H conversion") {
     auto outcome = worker->run(context());
     REQUIRE(std::holds_alternative<Unsupported>(outcome));
 }
+
+TEST_CASE("Qhull generated LPs retain the selected owning provider and query identities") {
+    std::vector<ProgramIdentity> admitted;
+    std::size_t factories=0;
+    auto native=take(make_highs_registration());
+    auto capability=native.capabilities;
+    auto factory=native.factory;
+    native.identity={{"test.lp.alternate"},"7"};
+    native.capabilities=[&](const LinearProgram& lp,const Requirements& requirements)->Capability {
+        admitted.push_back(lp.identity());
+        CHECK(requirements.output.representation.value=="csl.program-result.v1");
+        CHECK(requirements.output.assurance==Assurance::numerical);
+        CHECK_FALSE(requirements.basis_diagnostics);
+        return capability(lp,requirements);
+    };
+    native.factory=[&](const LinearProgram& lp) { ++factories; return factory(lp); };
+    auto req=request(square_h(),"csl.polyhedron.v","alternate-provider");
+    auto prepared=[&] {
+        Registry<ConversionPort> conversions;
+        REQUIRE_FALSE(conversions.add(take(make_qhull_registration(std::move(native)))).has_value());
+        return take(prepare_pipeline(select(conversions,{{"csl.conversion.qhull"},{}},req,
+            conversion_requirements(req.output.value))));
+    }(); // Both registration sources are gone before generated LP execution.
+    auto [worker]=prepared.create();
+    auto outcome=worker->run(context());
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    const auto& result=std::get<OperationResult>(outcome);
+    CHECK(result.evidence.reference.identity==req.identity);
+    CHECK(result.evidence.scope==GeometryClaimScope::set_relation);
+    REQUIRE(admitted.size()>1);
+    CHECK(factories==admitted.size());
+    for (std::size_t i=0;i<admitted.size();++i) {
+        CHECK(admitted[i].problem.value=="geo03-tests");
+        CHECK(admitted[i].program.value=="alternate-provider:qhull-"+std::to_string(i));
+    }
+}
+
+TEST_CASE("Qhull generated LP provider rejection and late stops publish no geometry") {
+    bool reject=false,cancel=false;
+    SUBCASE("capability rejection") { reject=true; }
+    SUBCASE("cancellation during provider admission") { cancel=true; }
+    SUBCASE("deadline during provider admission") {}
+    std::stop_source stop;
+    auto execution=context();
+    execution.cancellation=stop.get_token();
+    // Mutate the live execution deadline in admission to exercise the stop
+    // between provider admission and native workspace creation deterministically.
+    auto native=take(make_highs_registration());
+    auto capability=native.capabilities;
+    std::size_t factories=0;
+    native.capabilities=[&](const LinearProgram& lp,const Requirements& r)->Capability {
+        if(reject) return Diagnostics{{DiagnosticCode::unsupported,"test.lp","deliberately rejected"}};
+        if(cancel) stop.request_stop();
+        else execution.deadline=std::chrono::steady_clock::now();
+        return capability(lp,r);
+    };
+    auto factory=native.factory;
+    native.factory=[&](const LinearProgram& lp) { ++factories; return factory(lp); };
+    Registry<ConversionPort> conversions;
+    REQUIRE_FALSE(conversions.add(take(make_qhull_registration(std::move(native)))).has_value());
+    auto req=request(square_h(),"csl.polyhedron.v","provider-stop");
+    auto prepared=take(prepare_pipeline(select(conversions,{{"csl.conversion.qhull"},{}},req,
+        conversion_requirements(req.output.value))));
+    auto [worker]=prepared.create();
+    const auto outcome=worker->run(execution);
+    CHECK(factories==0);
+    if(reject) CHECK(std::holds_alternative<Unsupported>(outcome));
+    else {
+        REQUIRE(std::holds_alternative<OperationStopped>(outcome));
+        CHECK(std::get<OperationStopped>(outcome).reason==(cancel?StopReason::cancelled:StopReason::resource_limit));
+    }
+}
