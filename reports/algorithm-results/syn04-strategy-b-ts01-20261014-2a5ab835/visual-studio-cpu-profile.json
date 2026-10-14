@@ -1,0 +1,125 @@
+{
+  "artifacts_local_only": {
+    "etl": "%TEMP%\\perf03-vsdiag-pdb-sequential\\ts01-20-sequential\\bf499d0b-2952-4bb0-93f5-7fb23550e28b\\sc.user_aux.etl",
+    "session": "%TEMP%\\perf03-vsdiag-pdb-sequential\\ts01-20-sequential.diagsession",
+    "stack_report": "%TEMP%\\perf03-vsdiag-pdb-sequential\\stack.txt"
+  },
+  "build": {
+    "codeview_guid": "50179387-FE44-4B7F-BA34-A5E02A14E487",
+    "configuration": "Release, /O2 MaxSpeed, /MD, NDEBUG, /Zi, /DEBUG",
+    "exe_sha256": "78B0F3C8532B90210BE397AF98F12931F0F595C515A3AC1AB161A7F43F1996ED",
+    "harness_commit": "4fc8e28587a7fe0e4130f1cb435cf6502ba0e4e2",
+    "pdb_sha256": "8104E26D5BAA19F593DEF482DBF530EB81783F8EE6D7C1951B4755964B6E99D6",
+    "source_commit": "2a5ab835295dfd22f02b19d440bb8158267d985a",
+    "symbol_resolution": "matching PDB loaded; stack report resolved executable symbols"
+  },
+  "collection": {
+    "buffers_processed": 605,
+    "etl_bytes": 39649280,
+    "etl_sha256": "28A67A5AB78381B9816ED16F7255A7750887FC9ABAE44FB8D59FF7A53B809D30",
+    "lost_events": 0,
+    "nonzero_or_failed_launches": 0,
+    "profiled_pids_with_samples": 19,
+    "profiled_stack_sample_denominator": 1337,
+    "sampleprof_events": 106849,
+    "target_exe_module_exclusive_hits": 222,
+    "target_exe_module_inclusive_hits": 954,
+    "target_processes_ended": 20,
+    "target_processes_started": 20,
+    "total_events": 376764,
+    "trace_elapsed_seconds": 42
+  },
+  "collector": "Visual Studio DiagnosticsHub VSDiagnostics 17.14.36412.1 CPU Usage agent",
+  "commands": [
+    "VSDiagnostics.exe start 117 /loadConfig:AgentConfigs\\CpuUsageHigh.json /scratchLocation:<scratch> /package:opt",
+    "VSDiagnostics.exe update 117 /attach:<20 target process IDs>",
+    "VSDiagnostics.exe stop 117 /output:ts01-20-sequential.diagsession",
+    "VSDiagnostics.exe expandDiagSession ts01-20-sequential.diagsession",
+    "tracerpt sc.user_aux.etl -o events.csv -of CSV -summary tracerpt-summary.txt -y",
+    "xperf.exe -i sc.user_aux.etl -o symbols.txt -symbols -a profile -detail",
+    "xperf.exe -i sc.user_aux.etl -symbols -o stack.txt -a stack -process csl_syn04_strategy_b_report\\.exe -butterfly 1"
+  ],
+  "concurrency_profile": "A prior 20-process concurrent profile is exploratory corroboration only and is excluded from the primary sequential attribution.",
+  "host": {
+    "boot_time_local": "2026-10-06T07:17:18",
+    "load_window": "43 one-second per-CPU intervals including target workload; utility is host CPU utilization, not a pre-run idle baseline",
+    "logical_processors": 12,
+    "os": "Windows 11 Home 10.0.22631",
+    "physical_cores": 6,
+    "processor": "12th Gen Intel Core i5-12400F",
+    "trace_time_local": "2026-10-14 11:26",
+    "uptime_at_trace_approx": "8 days 4 hours",
+    "xperf_per_logical_cpu_utilization_max_percent": 50.39,
+    "xperf_per_logical_cpu_utilization_mean_percent": 5.11,
+    "xperf_per_logical_cpu_utilization_min_percent": 0.03
+  },
+  "interpretation": "Sequential samples independently support that the observed CPU stack path traverses StrategyPort -> DirectJointWorkspace -> convex Highs QP solve; this is a sampled CPU hotspot in a diagnostic process workload, not proof that this path limits the unprofiled single-process latency. No timing or speedup attribution is made.",
+  "limitations": [
+    "The diagnostic build adds PDB generation while preserving /O2 Release semantics; it is not the exact no-PDB benchmark binary.",
+    "The 20-process sequential profile aggregates repeated tiny workloads and includes process startup and teardown.",
+    "Samples are statistical CPU samples, not elapsed-time phase counters; profile instrumentation overhead is excluded from timing results.",
+    "A 42-second capture produced useful stacks, but no precise phase-counter breakdown or representative single-run unprofiled latency correlation."
+  ],
+  "mode": "separate diagnostic run, 20 sequential process launches; each process ran the exact registered Strategy B T-S01 harness workload from the PDB-enabled Release build; excluded from all latency statistics",
+  "privilege_boundary": {
+    "SeSystemProfilePrivilege_present": false,
+    "result": "collection succeeded with process-scoped collector; WPR remains denied with 0xc5585011"
+  },
+  "sampled_cpu_attribution": [
+    {
+      "inclusive_hits": 953,
+      "share_percent": 71.28,
+      "symbol": "__scrt_common_main_seh"
+    },
+    {
+      "inclusive_hits": 861,
+      "share_percent": 64.4,
+      "symbol": "main"
+    },
+    {
+      "inclusive_hits": 826,
+      "share_percent": 61.78,
+      "symbol": "one_run"
+    },
+    {
+      "inclusive_hits": 777,
+      "share_percent": 58.12,
+      "symbol": "csl::registry::StrategyPort::run"
+    },
+    {
+      "inclusive_hits": 777,
+      "share_percent": 58.12,
+      "symbol": "csl::registry::detail::VerifiedStrategyWorkspace::solve"
+    },
+    {
+      "inclusive_hits": 758,
+      "share_percent": 56.69,
+      "symbol": "csl::synthesis::strategy_b::DirectJointWorkspace::solve"
+    },
+    {
+      "inclusive_hits": 665,
+      "share_percent": 49.74,
+      "symbol": "csl::adapters::convex::Workspace::solve_native"
+    },
+    {
+      "inclusive_hits": 421,
+      "share_percent": 31.49,
+      "symbol": "Highs::run"
+    },
+    {
+      "inclusive_hits": 414,
+      "share_percent": 30.96,
+      "symbol": "Highs::optimizeModel"
+    },
+    {
+      "inclusive_hits": 331,
+      "share_percent": 24.76,
+      "symbol": "Highs::callSolveQp"
+    },
+    {
+      "inclusive_hits": 342,
+      "share_percent": 25.58,
+      "symbol": "operator new"
+    }
+  ]
+}

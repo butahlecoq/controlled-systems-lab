@@ -11,7 +11,7 @@ REPORT_SPEC=importlib.util.spec_from_file_location("csl_syn04_strategy_b_report_
 report=importlib.util.module_from_spec(REPORT_SPEC);sys.modules[REPORT_SPEC.name]=report;REPORT_SPEC.loader.exec_module(report)
 
 KIND="syn04-strategy-b-ts01"
-FILES={"README.md","build-provenance.json","commands.json","environment.json","index.html","measurement-events.jsonl","measurement.json","process-stderr.txt","profile.json","records.json","scenarios.json","trials.csv"}
+FILES={"README.md","build-provenance.json","commands.json","environment.json","index.html","measurement-events.jsonl","measurement.json","process-stderr.txt","profile.json","records.json","visual-studio-cpu-profile.json","visual-studio-cpu-profile.json","scenarios.json","trials.csv"}
 
 def _json(path): return json.loads(Path(path).read_text(encoding="utf-8"))
 def _canonical(value): return json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(",",":"),allow_nan=False).encode("utf-8")
