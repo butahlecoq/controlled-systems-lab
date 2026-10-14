@@ -272,7 +272,7 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
         const auto claim=[&](const ClaimEvidence& e){return e.problem==input.problem&&support_valid(e.support);};
         if(input.selection){
             const auto& batch=input.selection->batch;const auto& config=input.configuration.description();
-            if(batch.selector.value!=config.selector.id.value||batch.requested!=config.output.witnesses.count||batch.seed!=config.output.witnesses.seed||batch.witnesses.size()>batch.requested)return reject("run.selection","Selection disagrees with the resolved request");
+            if(batch.selector.value!=config.selector.id.value||batch.requested!=config.output.witnesses.count||batch.seed!=config.output.witnesses.seed||batch.distinct_count()>batch.requested||batch.directions!=config.output.witnesses.directions||batch.distinctness_tolerance!=config.output.witnesses.distinctness_tolerance)return reject("run.selection","Selection disagrees with the resolved request");
             if(batch.source_family){
                 const auto* synthesis=std::get_if<SynthesisFinal>(&input.final);
                 if(!synthesis||!synthesis->family||*batch.source_family!=synthesis->family->family.identity())return reject("run.selection.source_family","Selection refers to a different family");

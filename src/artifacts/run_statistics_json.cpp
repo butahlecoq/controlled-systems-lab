@@ -323,7 +323,7 @@ ST(PrimalResiduals,F(context),F(rows),F(variables)) ST(DualResiduals,F(context),
 ST(ProgramResult,F(termination),F(outcome),F(primal),F(objective),F(raw_diagnostics),F(residuals))
 ST(Dimensions,F(state),F(control),F(external)) ST(JointCoordinates,F(dimensions),F(horizon)) ST(Witness,F(problem),F(states),F(controls),F(original_objective))
 ST(FeasibleIncumbent,F(witness),F(feasibility))
-ST(WitnessBatch,F(witnesses),F(requested),F(selector),F(seed),F(source_family)) ST(WitnessSelection,F(batch),F(termination),F(diagnostics))
+ST(WitnessBatch,F(witnesses),F(requested),F(selector),F(seed),F(source_family),F(directions),F(distinctness_tolerance)) ST(WitnessSelection,F(batch),F(termination),F(diagnostics))
 ST(ExternalFamilyPayload,F(attachment)) EMPTY(FamilyWithoutExporter)
 TAG(ExternalFamilyPayload,"external_reference") TAG(FamilyWithoutExporter,"unavailable_no_exporter")
 template<>struct Codec<FamilyRecord>{
@@ -435,7 +435,7 @@ Json parse_document(std::string_view text,const DecodeLimits& limits) {
     });
 }
 Json run_json(const RunRecord& r) {
-    return {{"schema","csl.run-statistics/3"},{"problem",put(r.problem)},{"dimensions",put(r.dimensions)},
+    return {{"schema","csl.run-statistics/4"},{"problem",put(r.problem)},{"dimensions",put(r.dimensions)},
         {"horizon",put(r.horizon)},{"configuration",{{"id",put(r.configuration.identity())},{"value",configuration_record(r.configuration.description(),false)}}},
         {"run",put(r.run)},{"final",put(r.final)},{"statistics",put(r.statistics.description())},{"resources",put(r.resources)},
         {"execution",put(r.execution)},{"attachments",put(r.attachments)},{"provenance",put(r.provenance)},{"selection",put(r.selection)}};
@@ -443,7 +443,7 @@ Json run_json(const RunRecord& r) {
 ArtifactResult<RunStatistics> read_run(const Json& j) {
     closed(j,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection"});
     const auto version=get<std::string>(j.at("schema"));
-    require(version=="csl.run-statistics/2"||version=="csl.run-statistics/3","schema","Unsupported run statistics version");
+    require(version=="csl.run-statistics/2"||version=="csl.run-statistics/3"||version=="csl.run-statistics/4","schema","Unsupported run statistics version");
     Json current=j;
     if(version=="csl.run-statistics/2") {
         // V2 did not say whether a feasibility claim covered the relation or a witness.
@@ -479,6 +479,14 @@ ArtifactResult<RunStatistics> read_run(const Json& j) {
     const auto& config=current.at("configuration");closed(config,{"id","value"});auto resolved=resolve_configuration(parse_configuration(config.at("value")));
     if(const auto* error=std::get_if<ArtifactError>(&resolved))return *error;
     const auto configuration=std::get<ResolvedConfiguration>(resolved);
+    if(version!="csl.run-statistics/4"&&!current.at("selection").is_null()) {
+        auto& batch=current.at("selection").at("batch");
+        closed(batch,{"witnesses","requested","selector","seed","source_family"});
+        // Older closed formats stored the request facts in configuration only.
+        const auto& query=configuration.description().output.witnesses;
+        batch["directions"]=put(query.directions);
+        batch["distinctness_tolerance"]=put(query.distinctness_tolerance);
+    }
     if(configuration.identity()!=get<ConfigId>(config.at("id")))return ArtifactError{ArtifactErrorCode::identity,"configuration.id","Configuration digest mismatch"};
     auto collection=publish_collection(get<CollectionRecord>(current.at("statistics")));if(const auto* error=std::get_if<ArtifactError>(&collection))return *error;
     (void)get<ProblemProvenance>(current.at("provenance"));

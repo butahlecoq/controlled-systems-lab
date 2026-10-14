@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <span>
@@ -541,7 +542,37 @@ struct FeasibleIncumbent {
     Witness witness;
     ClaimEvidence feasibility;
 };
-struct WitnessBatch { std::vector<Witness> witnesses; std::size_t requested; ModuleId selector; std::optional<std::size_t> seed; std::optional<FamilyIdentity> source_family{}; };
+struct WitnessBatch { std::vector<Witness> witnesses; std::size_t requested; ModuleId selector; std::optional<std::size_t> seed; std::optional<FamilyIdentity> source_family{};
+    std::vector<Vector> directions{};
+    double distinctness_tolerance{};
+    // Raw successful query observations, including repeats. Distinctness uses
+    // ordered greedy representatives and max-absolute joint-history distance.
+    // Shapes must match. The <= tolerance relation is not transitive, so the
+    // representative count can depend on observation order.
+    std::size_t returned_count() const noexcept { return witnesses.size(); }
+    std::size_t distinct_count() const {
+        std::vector<std::size_t> representatives;
+        const auto close=[&](const Witness& a,const Witness& b) {
+            const auto histories_close=[&](const auto& left,const auto& right) {
+                if(left.size()!=right.size())return false;
+                for(std::size_t t=0;t<left.size();++t) {
+                    if(left[t].size()!=right[t].size())return false;
+                    for(std::size_t j=0;j<left[t].size();++j)
+                        if(!(std::abs(left[t][j]-right[t][j])<=distinctness_tolerance))return false;
+                }
+                return true;
+            };
+            return histories_close(a.states,b.states)&&histories_close(a.controls,b.controls);
+        };
+        for(std::size_t i=0;i<witnesses.size();++i) {
+            bool duplicate=false;
+            for(const auto representative:representatives)
+                if(close(witnesses[i],witnesses[representative])) { duplicate=true; break; }
+            if(!duplicate)representatives.push_back(i);
+        }
+        return representatives.size();
+    }
+};
 struct WitnessRequest { std::size_t count; double distinctness_tolerance; std::vector<Vector> directions; std::optional<std::size_t> seed; };
 struct WitnessSelection { WitnessBatch batch; Termination termination; std::string diagnostics; }; // fewer witnesses is not a uniqueness proof
 class WitnessSelectorWorkspace : public ExclusiveWorkspace {

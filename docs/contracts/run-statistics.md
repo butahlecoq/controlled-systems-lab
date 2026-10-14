@@ -1,7 +1,7 @@
 # Portable run statistics
 
 `CSL::artifacts` publishes immutable scenario records and reads/writes the closed
-`csl.run-statistics/3` JSON format. Include `csl/artifacts/run_statistics.hpp` for
+`csl.run-statistics/4` JSON format. Include `csl/artifacts/run_statistics.hpp` for
 records and `csl/execution/observability.hpp` for bounded collection and RUN01
 projection. These additions preserve source contract 1.5 and mathematical identity
 version 1. No solver, estimator, mathematical verifier, family exporter, timer
@@ -62,7 +62,7 @@ family attachment is `unavailable_no_exporter`, while relation metadata and
 evidence survive. Ordinarily `project_final` drops the live payload. For the
 T-S01 profile it retains the exact relation object in the in-memory owner
 because the typed capability binds that object; `encode_run` then refuses the
-record under the v3 wire contract.
+record under the v4 wire contract.
 Generic complete- and partial-family publication are refused until reviewed
 coverage and every-history optimality procedures are implemented. The dedicated
 T-S01 analytic profile is a narrow live exception for the exact two-step scalar
@@ -70,7 +70,7 @@ integrator, exact known initial state 0, A=B=1, zero offsets/external map,
 independent closed controls `[0,1]`, no extra restrictions, and exact squared
 objective `(x2-1)^2`. Its typed capability is bound to the resolved problem,
 effective request, coordinates, strategy/version and exact relation; it is
-numerically assured and does not create a generic coverage verifier. The v3
+numerically assured and does not create a generic coverage verifier. The v4
 schema has no T-S01 support tag, so `encode_run` returns `unsupported` for such
 a live family. This is a wire-contract limitation, not a mathematical
 rejection. The decoder never reconstructs trusted proof capability from text;
@@ -247,7 +247,7 @@ to a diagnostics-role attachment. A missing attachment remains explicit null.
 
 ## Wire format and compatibility
 
-The [v3 schema](../artifacts/schemas/run-statistics-v3.schema.json) describes closed
+The [v4 schema](../artifacts/schemas/run-statistics-v4.schema.json) describes closed
 objects and variants. The checked codec additionally enforces integer width,
 UTF-8 byte limits, finite values, content digests, recomputed configuration ID,
 problem/config/run bindings, parent DAGs, capacities and reference semantics.
@@ -255,11 +255,11 @@ Input byte, string, node and depth limits are checked before unrestricted DOM
 growth; duplicate keys are rejected before overwrite. Unknown fields/tags/versions,
 noncanonical integers, invalid UTF-8, trailing input and contradictory metric
 variants are errors. New fields or variants require a new wire version and
-explicit reader policy. This reader accepts v3 and historical v2. A v2 candidate
+explicit reader policy. This reader accepts v4, v3 and historical v2. A v2 candidate
 with unestablished feasibility maps to v3 `Unestablished`; supported v2
 candidate feasibility is rejected because its unscoped claim cannot be assigned
 relation or witness scope without inventing evidence. Decoding a v2 record and
-encoding it again emits v3; the historical fixture and schema remain unchanged.
+encoding it again emits v4; the historical fixture and schema remain unchanged.
 The [v1 schema](../artifacts/schemas/run-statistics-v1.schema.json)
 and the [v1 fixture](../../tests/artifacts/fixtures/run-statistics-v1.json) remain
 historical evidence. V1 synthesis records are explicitly rejected with a schema
@@ -281,3 +281,14 @@ parallel intervals, resources, configuration and stop observations. It is a data
 contract fixture, not an algorithm publication or benchmark. Scientific HTML
 publication still requires the separate reviewed measurement/profiler/provenance
 gates.
+
+Wire v4 adds required selection-batch `directions` and `distinctness_tolerance`.
+Returned observations (including duplicates) are preserved; counts derive from
+those observations using the full joint-history, ordered greedy metric documented
+in the core contract and schema. The publisher checks request provenance against
+resolved configuration and bounds the distinct count, not raw cardinality, by the
+requested count. V2/v3 decoding recovers the request facts from their existing
+resolved configuration without adding observations or evidence; re-encoding emits
+v4. Historical schemas and fixtures remain unchanged. Unknown fields still reject.
+The live registered T-S01 completeness capability remains unencodable; v4 does not
+introduce a portable completeness proof or change that refusal.
