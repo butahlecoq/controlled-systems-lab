@@ -97,6 +97,40 @@ TEST_CASE("native norm zero residual and constant norm preserve original rather 
         if(fixture==1) CHECK(r.raw_diagnostics.find("checked-componentwise-zero")!=std::string::npos);
     }
 }
+TEST_CASE("registered rectangular rank-deficient residual reaches its nondifferentiable zero minimum") {
+    // L has rank one (its second row is twice its first), while the residual
+    // has two coordinates. The target is attained on x0+2*x1=3, a segment
+    // inside [0,3]^2. The Euclidean norm is nondifferentiable where L*x=r.
+    ConvexProgramInput input{{{"native-convex"},{"rank-deficient-residual"}},
+        ResidualNormTerminal{{2,2,{1,2,2,4}},{3,6}},
+        {0,2,{0},{},{}},{{0,3},{0,3}},{},{}};
+    input.squared_program=ProgramId{"rank-deficient-residual-squared"};
+    const auto p=accepted(make_convex_program(input));
+    auto [worker]=prepare(p).create();
+    const auto r=accepted(worker->run(context()));
+    INFO(r.raw_diagnostics);
+
+    // The two rows are proportional, so det(L)=0; the target is nevertheless
+    // attainable. This explicitly checks the authored, unsquared objective.
+    CHECK(1.0*4.0-2.0*2.0==0.0);
+    REQUIRE(p.reformulation());
+    CHECK(p.reformulation()->transformation()==ObjectiveTransformation::residual_norm_squared);
+    optimum(r,p,0);
+    REQUIRE(r.primal); REQUIRE(r.residuals.primal);
+    const double x0=r.primal->at(0), x1=r.primal->at(1);
+    const double residual0=x0+2.0*x1-3.0;
+    const double residual1=2.0*x0+4.0*x1-6.0;
+    CHECK(std::hypot(residual0,residual1)==doctest::Approx(0).epsilon(1e-8));
+    const auto independently_evaluated=accepted(evaluate(p.original_objective(),*r.primal));
+    CHECK(independently_evaluated==doctest::Approx(std::hypot(residual0,residual1)));
+    CHECK(r.residuals.primal->context.subject==p.identity());
+    CHECK(r.residuals.primal->rows.violation<=1e-8);
+    CHECK(r.residuals.primal->variables.violation<=1e-8);
+    CHECK(x0>=-1e-8); CHECK(x0<=3.0+1e-8);
+    CHECK(x1>=-1e-8); CHECK(x1<=3.0+1e-8);
+    CHECK(x0+2.0*x1==doctest::Approx(3.0).epsilon(1e-8));
+    CHECK(r.raw_diagnostics.find("norm.subgradient=checked-componentwise-zero")!=std::string::npos);
+}
 TEST_CASE("native zero geometry preserves authored rows and the original optimum") {
     // Positive authored row counts must exercise the same empty-effective-A boundary.
     for(int fixture:{1,2,3,0}) {
