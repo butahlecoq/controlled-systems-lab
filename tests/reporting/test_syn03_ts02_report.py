@@ -80,6 +80,9 @@ class StrategyATs02ReportTests(unittest.TestCase):
             with mock.patch.object(site,"LEGACY_PINS_SHA256",site.registered._digest(empty_pins)):
                 staged=site.stage(isolated_catalog,stage_root/"site",check=True)
             published=staged/item.report_id
+            for root_page in (staged/"catalog.json",staged/"index.html"):
+                content=root_page.read_bytes().lower()
+                self.assertFalse(any(token in content for token in forbidden),root_page.name)
             envelope=json.loads((published/"report-envelope.json").read_text(encoding="utf-8"))
             self.assertEqual(envelope["payload"]["measurement"]["events"],record["measurement"]["events"])
             text_files=[p for p in published.rglob("*") if p.is_file()]
