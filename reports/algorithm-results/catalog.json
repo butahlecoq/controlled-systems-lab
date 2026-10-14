@@ -141,6 +141,17 @@
       "payload_schema": "csl.syn07-ts01-analytic-report/2",
       "native_payload_sha256": "d2fd1191931a3f857950ba2e19ca176d3e388b89bf60a64caa439e5086ae9fa1",
       "source_report_id": "syn07-ts01-20261014-e22d9c2aeb05"
+    },
+    {
+      "report_id": "opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d",
+      "report_kind": "opt06-basis-reuse",
+      "source_report_id": "opt06-basis-reuse-20261014-ef70e8c5-r2",
+      "payload_schema": "csl.hull-benchmark-records/1",
+      "payload_sha256": "54a771aa701b74863cead29791c6ee9ed12d63e2b2b0b0b33497a1a0b0fada9e",
+      "source_commit": "ef70e8c580a9556b0f5d96e49070d33221bf5b64",
+      "measured_scope": "42 verified measured trials across three small two-dimensional point clouds",
+      "evidence_limits": "Descriptive paired timings only; no speedup claim or limiter profile; input-containment oracle uses numerical HiGHS LP checks",
+      "zip_sha256": "165fe50a882e37334e30e3bd04f613b261fb801c540fe806304942ac146c361f"
     }
   ]
 }

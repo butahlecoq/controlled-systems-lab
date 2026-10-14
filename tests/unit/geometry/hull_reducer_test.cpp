@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/geometry/hull_reducer.hpp>
+#include <csl/geometry/basis_reuse_reducer.hpp>
 #include "../../../src/geometry/exact_convex_combination.hpp"
 #include <array>
 #include <cmath>
@@ -458,6 +459,143 @@ TEST_CASE("LP hull reduction removes a point only with a barycentric certificate
     auto oracle = highs_workspace();
     for (std::size_t point = 0; point < cloud.points.size(); ++point)
         CHECK(independent_membership(*oracle, cloud, reduction.retained, point));
+}
+
+TEST_CASE("basis reuse bulk removes only exactly certified nonbasis points and preserves hull") {
+    auto lp = highs_workspace();
+    REQUIRE(lp != nullptr);
+    using Port = registry::HullReducerPort;
+    registry::Registry<Port> reducers;
+    REQUIRE_FALSE(reducers.add(geometry::make_lp_hull_reducer_registration()));
+    REQUIRE_FALSE(reducers.add(geometry::make_basis_reuse_hull_reducer_registration()));
+    const geometry::PointCloud cloud{{"basis-bulk-permuted"}, {
+        {0,0}, {1,1}, {2,0}, {0,2}, {2,2}, {1,0}, {1,2}, {0,1}, {2,1}, {1,1.5}
+    }};
+    const auto prepared_result = registry::prepare_pipeline(registry::select(reducers,
+        registry::Method{{"csl.hull.phase-one-basis-bulk"}, std::nullopt}, cloud));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<Port>>(prepared_result));
+    auto workspaces = std::get<registry::PreparedPipeline<Port>>(prepared_result).create();
+    auto& bulk_reducer = *std::get<0>(workspaces);
+    const auto result = bulk_reducer.run_with(ExecutionContext{}, *lp);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& bulk = std::get<geometry::HullReduction>(result);
+    REQUIRE(bulk.basis_reuse.has_value());
+    CHECK(bulk.basis_reuse->basis_solves == 1);
+    CHECK(bulk.basis_reuse->bulk_candidates > 0);
+    CHECK(bulk.basis_reuse->bulk_removals > 0);
+    CHECK_FALSE(bulk.basis_reuse->fell_back_to_lp_baseline);
+    CHECK(bulk.basis_reuse->pivots > 0);
+    CHECK(bulk.basis_reuse->bulk_removals == bulk.removed.size());
+    CHECK(bulk.lp_calls == 0);
+    CHECK(bulk.retained.size() < cloud.points.size());
+    std::vector<unsigned char> seen(cloud.points.size(), 0);
+    for (const auto point : bulk.retained) {
+        REQUIRE(point < cloud.points.size());
+        CHECK(seen[point] == 0);
+        seen[point] = 1;
+    }
+    for (const auto& certificate : bulk.removed)
+    {
+        REQUIRE(certificate.removed < cloud.points.size());
+        CHECK(seen[certificate.removed] == 0);
+        seen[certificate.removed] = 1;
+        CHECK(geometry::detail::exact_convex_combination(cloud, certificate.removed, certificate.combination));
+        for (const auto& term : certificate.combination) CHECK(term.point < cloud.points.size());
+    }
+    CHECK(std::all_of(seen.begin(), seen.end(), [](unsigned char present) { return present != 0; }));
+
+    auto baseline_lp = highs_workspace();
+    REQUIRE(baseline_lp != nullptr);
+    const auto baseline_result = geometry::reduce_hull(cloud, *baseline_lp, {});
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(baseline_result));
+    const auto& baseline = std::get<geometry::HullReduction>(baseline_result);
+    CHECK(baseline.lp_calls > bulk.lp_calls);
+    for (const auto point : bulk.retained)
+        CHECK(independent_membership(*baseline_lp, cloud, baseline.retained, point));
+    for (const auto point : baseline.retained)
+        CHECK(independent_membership(*lp, cloud, bulk.retained, point));
+
+    const geometry::PointCloud degenerate{{"basis-bulk-degenerate"}, {
+        {0,0}, {1,0}, {2,0}, {1,0}, {3,0}, {0,0}
+    }};
+    const auto degenerate_prepared = registry::prepare_pipeline(registry::select(reducers,
+        registry::Method{{"csl.hull.phase-one-basis-bulk"}, std::nullopt}, degenerate));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<Port>>(degenerate_prepared));
+    auto degenerate_workspaces = std::get<registry::PreparedPipeline<Port>>(degenerate_prepared).create();
+    const auto degenerate_result = std::get<0>(degenerate_workspaces)->run_with(ExecutionContext{}, *lp);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(degenerate_result));
+    const auto& degenerate_bulk = std::get<geometry::HullReduction>(degenerate_result);
+    REQUIRE(degenerate_bulk.basis_reuse.has_value());
+    CHECK(degenerate_bulk.basis_reuse->basis_solves == 1);
+    for (const auto& certificate : degenerate_bulk.removed)
+        CHECK(geometry::detail::exact_convex_combination(
+            degenerate, certificate.removed, certificate.combination));
+    auto degenerate_baseline_lp = highs_workspace();
+    REQUIRE(degenerate_baseline_lp != nullptr);
+    const auto degenerate_baseline_result = geometry::reduce_hull(
+        degenerate, *degenerate_baseline_lp, {});
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(degenerate_baseline_result));
+    const auto& degenerate_baseline = std::get<geometry::HullReduction>(degenerate_baseline_result);
+    for (const auto point : degenerate_bulk.retained)
+        CHECK(independent_membership(*degenerate_baseline_lp, degenerate,
+            degenerate_baseline.retained, point));
+    for (const auto point : degenerate_baseline.retained)
+        CHECK(independent_membership(*lp, degenerate, degenerate_bulk.retained, point));
+
+    auto generic_provider_result = adapters::lp::make_highs_registration();
+    REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(generic_provider_result));
+    auto generic_provider = std::get<registry::Registration<registry::LPPort>>(
+        std::move(generic_provider_result));
+    generic_provider.basis_factory = {}; // simulate a valid solver without optional basis diagnostics
+    registry::Registry<Port> fallback_reducers;
+    REQUIRE_FALSE(fallback_reducers.add(geometry::make_basis_reuse_hull_reducer_registration(
+        std::move(generic_provider))));
+    const auto fallback_prepared = registry::prepare_pipeline(registry::select(fallback_reducers,
+        registry::Method{{"csl.hull.phase-one-basis-bulk"}, std::nullopt}, cloud));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<Port>>(fallback_prepared));
+    auto fallback_workspaces = std::get<registry::PreparedPipeline<Port>>(fallback_prepared).create();
+    const auto fallback_result = std::get<0>(fallback_workspaces)->run_with(ExecutionContext{}, *lp);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(fallback_result));
+    const auto& fallback_reduction = std::get<geometry::HullReduction>(fallback_result);
+    REQUIRE(fallback_reduction.basis_reuse.has_value());
+    CHECK(fallback_reduction.basis_reuse->fell_back_to_lp_baseline);
+    CHECK(fallback_reduction.lp_calls > 0);
+}
+
+TEST_CASE("basis reuse verifies hull when a structural interior point is in the phase-one basis") {
+    auto lp = highs_workspace();
+    REQUIRE(lp != nullptr);
+    using Port = registry::HullReducerPort;
+    registry::Registry<Port> reducers;
+    REQUIRE_FALSE(reducers.add(geometry::make_basis_reuse_hull_reducer_registration()));
+    // The center is deliberately the first structural column. The fixed Bland
+    // phase-I provider deterministically returns it as a basic structural point.
+    const geometry::PointCloud cloud{{"basis-interior-point"}, {
+        {1,1}, {0,0}, {2,0}, {2,2}, {0,2}
+    }};
+    const auto prepared_result = registry::prepare_pipeline(registry::select(reducers,
+        registry::Method{{"csl.hull.phase-one-basis-bulk"}, std::nullopt}, cloud));
+    REQUIRE(std::holds_alternative<registry::PreparedPipeline<Port>>(prepared_result));
+    auto workspaces = std::get<registry::PreparedPipeline<Port>>(prepared_result).create();
+    const auto result = std::get<0>(workspaces)->run_with(ExecutionContext{}, *lp);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& bulk = std::get<geometry::HullReduction>(result);
+    REQUIRE(bulk.basis_reuse.has_value());
+    CHECK(std::find(bulk.basis_reuse->structural_basis_points.begin(),
+        bulk.basis_reuse->structural_basis_points.end(), 0) !=
+        bulk.basis_reuse->structural_basis_points.end());
+    CHECK(std::find(bulk.retained.begin(), bulk.retained.end(), 0) != bulk.retained.end());
+
+    auto baseline_lp = highs_workspace();
+    REQUIRE(baseline_lp != nullptr);
+    const auto baseline_result = geometry::reduce_hull(cloud, *baseline_lp, {});
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(baseline_result));
+    const auto& baseline = std::get<geometry::HullReduction>(baseline_result);
+    REQUIRE(baseline.status == geometry::ReductionStatus::complete);
+    for (const auto point : bulk.retained)
+        CHECK(independent_membership(*baseline_lp, cloud, baseline.retained, point));
+    for (const auto point : baseline.retained)
+        CHECK(independent_membership(*lp, cloud, bulk.retained, point));
 }
 
 TEST_CASE("LP hull reduction handles empty, singleton, duplicate and flat clouds") {

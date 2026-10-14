@@ -1,0 +1,132 @@
+{
+  "schema": "csl.hull-benchmark-records/1",
+  "report_id": "opt06-basis-reuse-20261014-05e8fe00",
+  "created_utc": "2026-10-14T00:48:38Z",
+  "code_commit": "05e8fe00c8459e30fad67e6b05d9d32d5e7a3626",
+  "source_worktree_head": "05e8fe00c8459e30fad67e6b05d9d32d5e7a3626",
+  "algorithm": {
+    "name": "within-solve phase-I basis-reuse hull classification",
+    "implementation": "CSL::geometry::reduce_hull_basis_reuse",
+    "source": "src/geometry/basis_reuse_reducer.cpp"
+  },
+  "backend": {
+    "name": "HiGHS LP adapter",
+    "version": "1.11.0",
+    "configured_threads": 1,
+    "presolve": "off",
+    "parallel": "off"
+  },
+  "build": {
+    "source_code_commit": "05e8fe00c8459e30fad67e6b05d9d32d5e7a3626",
+    "source_identity_scope": "tracked algorithm sources at code_commit; harness is separately hashed",
+    "build_generator": "Visual Studio 17 2022",
+    "build_platform": "x64",
+    "configuration": "Release",
+    "compiler": null,
+    "compiler_id": null,
+    "compiler_version": null,
+    "release_flags": "/O2 /Ob2 /DNDEBUG",
+    "cxx_standard": "20",
+    "configured_dependency_highs": "1.11.0",
+    "executable_sha256": "bd306598178519f7292ddcf66e2ae29604b13a58e206adc943b24a85b724a7a5",
+    "build_log_sha256": "6f16e27e686c83c373a4a559bc7b6eb3d54d77637bc00cae3583fc15cd042f8d",
+    "cmake_cache_sha256": "a71c036e03d8a161f54f2b63db0fb0fb168d7e534d9e26e12d51e047a4e72988",
+    "algorithm_source_sha256": {
+      "src/geometry/basis_reuse_reducer.cpp": "71ae697f0beea2338792573213f56d475cb251b4d4ba87d17212c92a873e8e08",
+      "src/geometry/hull_reducer.cpp": "a0dab69a6e598f4f9c49108b8c54315dbdeed488082ae791fda22521961d8161",
+      "include/csl/geometry/basis_reuse_reducer.hpp": "f4c3d05c7fc31dc655f37231e0eeef970e96f569d2652fa643315e537e0eb1ce",
+      "include/csl/geometry/hull_reducer.hpp": "4d7a96872d01bbbb12989b28323b5868908ca6c4582635a89a871b56ac321e5c"
+    },
+    "harness_sha256": "a214f89cab865861c293f477e944e45b47ff6b5289b8e38b57c427b51cfec53d",
+    "build_command": "cmake --build opt06-report-build --config Release --target csl_opt06_measure --parallel 4 --verbose"
+  },
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "machine": "AMD64",
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "host_before": {
+      "cpu_load_percent": 4,
+      "logical_processors": 12,
+      "visible_ram_kib": 33387800,
+      "free_ram_kib": 10669680
+    },
+    "host_after": {
+      "cpu_load_percent": 15,
+      "logical_processors": 12,
+      "visible_ram_kib": 33387800,
+      "free_ram_kib": 10672580
+    },
+    "concurrent_work_note": "Immediately before collection: Win32 processor LoadPercentage was 11%, then 6% after a 5-second observation; 12 logical processors. Three residual MSBuild processes were present with unchanged CPU-time counters across 5 seconds; no cl.exe process was present. No active build was observed during collection setup. Other background activity cannot be excluded.",
+    "trial_policy": "one warmup per case and method; seven measured repetitions per case; baseline and basis-reuse order alternated each round; fresh workspace per invocation",
+    "timing_scope": "steady_clock around reduce_hull or reduce_hull_basis_reuse only; point cloud setup, HiGHS LP workspace creation, and independent hull-equivalence verification excluded",
+    "comparison_status": "descriptive paired timings; no speedup/winner claim; no separate limiter profile"
+  },
+  "fixtures": [
+    {
+      "case_id": "permuted",
+      "points": 10,
+      "description": "permuted square corners, edge points and interior points"
+    },
+    {
+      "case_id": "degenerate",
+      "points": 6,
+      "description": "collinear points with duplicates"
+    },
+    {
+      "case_id": "interior-basis",
+      "points": 9,
+      "description": "center geometric interior point at ID 0 plus square boundary; reducer metrics record structural basis IDs"
+    }
+  ],
+  "oracle": "Every trial is complete; every timed pair is followed by untimed mutual LP-membership checks of both retained hulls against each other. The unit test separately asserts the structural interior point ID 0 is in the validated phase-I basis.",
+  "process": {
+    "exit_code": 1,
+    "invalid_stdout_lines": [],
+    "rows": 2,
+    "measured_rows": 0,
+    "warmup_rows": 2,
+    "failures": 1,
+    "stderr_sha256": "06c50125cff84345a01d5c072188b695abc7d04ceaf74116c0da7cd3b06618f9"
+  },
+  "trials": [
+    {
+      "round": 0,
+      "case_id": "permuted",
+      "method": "baseline",
+      "warmup": true,
+      "elapsed_ns": 2827700,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 10,
+      "pivots": 0,
+      "degenerate_pivots": 0,
+      "bulk_candidates": 0,
+      "bulk_removals": 6,
+      "retained": 4,
+      "fallback": false,
+      "basis_points": []
+    },
+    {
+      "round": 0,
+      "case_id": "permuted",
+      "method": "basis-reuse",
+      "warmup": true,
+      "elapsed_ns": 138500,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 0,
+      "pivots": 4,
+      "degenerate_pivots": 0,
+      "bulk_candidates": 7,
+      "bulk_removals": 2,
+      "retained": 8,
+      "fallback": false,
+      "basis_points": [
+        4,
+        3,
+        1
+      ]
+    }
+  ],
+  "summary": []
+}

@@ -1,0 +1,169 @@
+{
+  "schema": "csl.hull-benchmark-records/1",
+  "report_id": "opt06-basis-reuse-20261014-05e8fe00",
+  "created_utc": "2026-10-14T00:49:02Z",
+  "code_commit": "05e8fe00c8459e30fad67e6b05d9d32d5e7a3626",
+  "source_worktree_head": "05e8fe00c8459e30fad67e6b05d9d32d5e7a3626",
+  "algorithm": {
+    "name": "within-solve phase-I basis-reuse hull classification",
+    "implementation": "CSL::geometry::reduce_hull_basis_reuse",
+    "source": "src/geometry/basis_reuse_reducer.cpp"
+  },
+  "backend": {
+    "name": "HiGHS LP adapter",
+    "version": "1.11.0",
+    "configured_threads": 1,
+    "presolve": "off",
+    "parallel": "off"
+  },
+  "build": {
+    "source_code_commit": "05e8fe00c8459e30fad67e6b05d9d32d5e7a3626",
+    "source_identity_scope": "tracked algorithm sources at code_commit; harness is separately hashed",
+    "build_generator": "Visual Studio 17 2022",
+    "build_platform": "x64",
+    "configuration": "Release",
+    "compiler": null,
+    "compiler_id": null,
+    "compiler_version": null,
+    "release_flags": "/O2 /Ob2 /DNDEBUG",
+    "cxx_standard": "20",
+    "configured_dependency_highs": "1.11.0",
+    "executable_sha256": "3fd5ed540ea5b288f559a20e66452ec227604a1a2e74e82affe489bb8b50b76e",
+    "build_log_sha256": "fbebb3d005aa83d7b3ed5180dd47841be456a57dbbe6c7f7492824f7a53da83d",
+    "cmake_cache_sha256": "a71c036e03d8a161f54f2b63db0fb0fb168d7e534d9e26e12d51e047a4e72988",
+    "algorithm_source_sha256": {
+      "src/geometry/basis_reuse_reducer.cpp": "71ae697f0beea2338792573213f56d475cb251b4d4ba87d17212c92a873e8e08",
+      "src/geometry/hull_reducer.cpp": "a0dab69a6e598f4f9c49108b8c54315dbdeed488082ae791fda22521961d8161",
+      "include/csl/geometry/basis_reuse_reducer.hpp": "f4c3d05c7fc31dc655f37231e0eeef970e96f569d2652fa643315e537e0eb1ce",
+      "include/csl/geometry/hull_reducer.hpp": "4d7a96872d01bbbb12989b28323b5868908ca6c4582635a89a871b56ac321e5c"
+    },
+    "harness_sha256": "01d52bc36c0049946ccb165ba2bcd5c44f78e9ada72e3eb60a7645d55f201377",
+    "build_command": "cmake --build opt06-report-build --config Release --target csl_opt06_measure --parallel 4 --verbose"
+  },
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "machine": "AMD64",
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "host_before": {
+      "cpu_load_percent": 0,
+      "logical_processors": 12,
+      "visible_ram_kib": 33387800,
+      "free_ram_kib": 11651164
+    },
+    "host_after": {
+      "cpu_load_percent": 0,
+      "logical_processors": 12,
+      "visible_ram_kib": 33387800,
+      "free_ram_kib": 11647792
+    },
+    "concurrent_work_note": "Host observations before/after collection are recorded in records.json. Before measurement, processor LoadPercentage was 11%, then 6% after a five-second check; 12 logical processors. Three residual MSBuild processes were present with unchanged CPU-time counters across five seconds; no cl.exe process was present. No active build was observed during collection setup. Other background activity cannot be excluded.",
+    "trial_policy": "one warmup per case and method; seven measured repetitions per case; baseline and basis-reuse order alternated each round; fresh workspace per invocation",
+    "timing_scope": "steady_clock around reduce_hull or reduce_hull_basis_reuse only; point cloud setup, HiGHS LP workspace creation, and independent hull-equivalence verification excluded",
+    "comparison_status": "descriptive paired timings; no speedup/winner claim; no separate limiter profile"
+  },
+  "fixtures": [
+    {
+      "case_id": "permuted",
+      "points": 10,
+      "description": "permuted square corners, edge points and interior points"
+    },
+    {
+      "case_id": "degenerate",
+      "points": 6,
+      "description": "collinear points with duplicates"
+    },
+    {
+      "case_id": "interior-basis",
+      "points": 9,
+      "description": "center geometric interior point at ID 0 plus square boundary; reducer metrics record structural basis IDs"
+    }
+  ],
+  "oracle": "Every trial is complete; every timed pair is followed by untimed mutual LP-membership checks of both retained hulls against each other. The unit test separately asserts the structural interior point ID 0 is in the validated phase-I basis.",
+  "process": {
+    "exit_code": 1,
+    "invalid_stdout_lines": [],
+    "rows": 4,
+    "measured_rows": 0,
+    "warmup_rows": 4,
+    "failures": 1,
+    "stderr_sha256": "2eeefaef2e943d012a17b002a472aa4f206a2406a73df181c93facd779b77773"
+  },
+  "trials": [
+    {
+      "round": 0,
+      "case_id": "permuted",
+      "method": "baseline",
+      "warmup": true,
+      "elapsed_ns": 1712500,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 10,
+      "pivots": 0,
+      "degenerate_pivots": 0,
+      "bulk_candidates": 0,
+      "bulk_removals": 6,
+      "retained": 4,
+      "fallback": false,
+      "basis_points": []
+    },
+    {
+      "round": 0,
+      "case_id": "permuted",
+      "method": "basis-reuse",
+      "warmup": true,
+      "elapsed_ns": 93100,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 0,
+      "pivots": 4,
+      "degenerate_pivots": 0,
+      "bulk_candidates": 7,
+      "bulk_removals": 2,
+      "retained": 8,
+      "fallback": false,
+      "basis_points": [
+        4,
+        3,
+        1
+      ]
+    },
+    {
+      "round": 0,
+      "case_id": "degenerate",
+      "method": "baseline",
+      "warmup": true,
+      "elapsed_ns": 623400,
+      "status": "failed",
+      "verified": false,
+      "lp_calls": 6,
+      "pivots": 0,
+      "degenerate_pivots": 0,
+      "bulk_candidates": 0,
+      "bulk_removals": 3,
+      "retained": 3,
+      "fallback": false,
+      "basis_points": []
+    },
+    {
+      "round": 0,
+      "case_id": "degenerate",
+      "method": "basis-reuse",
+      "warmup": true,
+      "elapsed_ns": 40000,
+      "status": "complete",
+      "verified": true,
+      "lp_calls": 0,
+      "pivots": 3,
+      "degenerate_pivots": 0,
+      "bulk_candidates": 4,
+      "bulk_removals": 1,
+      "retained": 5,
+      "fallback": false,
+      "basis_points": [
+        2,
+        1
+      ]
+    }
+  ],
+  "summary": []
+}

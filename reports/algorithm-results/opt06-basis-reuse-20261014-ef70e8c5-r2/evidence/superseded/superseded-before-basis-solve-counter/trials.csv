@@ -1,0 +1,49 @@
+round,case_id,method,warmup,elapsed_ns,status,verified,lp_calls,pivots,degenerate_pivots,bulk_candidates,bulk_removals,retained,fallback,retained_points,basis_points
+0,permuted,baseline,True,1565500,complete,True,10,0,0,0,6,4,False,"[0, 2, 3, 4]",[]
+0,permuted,basis-reuse,True,90900,complete,True,0,4,0,7,2,8,False,"[0, 1, 2, 3, 4, 5, 7, 8]","[4, 3, 1]"
+0,degenerate,baseline,True,770600,complete,True,7,0,0,0,3,4,False,"[1, 2, 3, 4]",[]
+0,degenerate,basis-reuse,True,46600,complete,True,0,4,0,4,2,5,False,"[0, 1, 2, 3, 5]","[2, 3, 0]"
+0,interior-basis,baseline,True,472000,complete,True,5,0,0,0,1,4,False,"[1, 2, 3, 4]",[]
+0,interior-basis,basis-reuse,True,42100,complete,True,0,4,2,2,0,5,False,"[0, 1, 2, 3, 4]","[0, 3, 4]"
+1,permuted,baseline,False,916900,complete,True,10,0,0,0,6,4,False,"[0, 2, 3, 4]",[]
+1,permuted,basis-reuse,False,53400,complete,True,0,4,0,7,2,8,False,"[0, 1, 2, 3, 4, 5, 7, 8]","[4, 3, 1]"
+1,degenerate,baseline,False,630700,complete,True,7,0,0,0,3,4,False,"[1, 2, 3, 4]",[]
+1,degenerate,basis-reuse,False,48800,complete,True,0,4,0,4,2,5,False,"[0, 1, 2, 3, 5]","[2, 3, 0]"
+1,interior-basis,baseline,False,478700,complete,True,5,0,0,0,1,4,False,"[1, 2, 3, 4]",[]
+1,interior-basis,basis-reuse,False,43300,complete,True,0,4,2,2,0,5,False,"[0, 1, 2, 3, 4]","[0, 3, 4]"
+2,permuted,basis-reuse,False,51700,complete,True,0,4,0,7,2,8,False,"[0, 1, 2, 3, 4, 5, 7, 8]","[4, 3, 1]"
+2,permuted,baseline,False,936700,complete,True,10,0,0,0,6,4,False,"[0, 2, 3, 4]",[]
+2,degenerate,basis-reuse,False,50400,complete,True,0,4,0,4,2,5,False,"[0, 1, 2, 3, 5]","[2, 3, 0]"
+2,degenerate,baseline,False,656100,complete,True,7,0,0,0,3,4,False,"[1, 2, 3, 4]",[]
+2,interior-basis,basis-reuse,False,46900,complete,True,0,4,2,2,0,5,False,"[0, 1, 2, 3, 4]","[0, 3, 4]"
+2,interior-basis,baseline,False,471200,complete,True,5,0,0,0,1,4,False,"[1, 2, 3, 4]",[]
+3,permuted,baseline,False,890100,complete,True,10,0,0,0,6,4,False,"[0, 2, 3, 4]",[]
+3,permuted,basis-reuse,False,54800,complete,True,0,4,0,7,2,8,False,"[0, 1, 2, 3, 4, 5, 7, 8]","[4, 3, 1]"
+3,degenerate,baseline,False,633400,complete,True,7,0,0,0,3,4,False,"[1, 2, 3, 4]",[]
+3,degenerate,basis-reuse,False,53100,complete,True,0,4,0,4,2,5,False,"[0, 1, 2, 3, 5]","[2, 3, 0]"
+3,interior-basis,baseline,False,463500,complete,True,5,0,0,0,1,4,False,"[1, 2, 3, 4]",[]
+3,interior-basis,basis-reuse,False,45600,complete,True,0,4,2,2,0,5,False,"[0, 1, 2, 3, 4]","[0, 3, 4]"
+4,permuted,basis-reuse,False,51300,complete,True,0,4,0,7,2,8,False,"[0, 1, 2, 3, 4, 5, 7, 8]","[4, 3, 1]"
+4,permuted,baseline,False,893200,complete,True,10,0,0,0,6,4,False,"[0, 2, 3, 4]",[]
+4,degenerate,basis-reuse,False,51200,complete,True,0,4,0,4,2,5,False,"[0, 1, 2, 3, 5]","[2, 3, 0]"
+4,degenerate,baseline,False,638400,complete,True,7,0,0,0,3,4,False,"[1, 2, 3, 4]",[]
+4,interior-basis,basis-reuse,False,44400,complete,True,0,4,2,2,0,5,False,"[0, 1, 2, 3, 4]","[0, 3, 4]"
+4,interior-basis,baseline,False,461900,complete,True,5,0,0,0,1,4,False,"[1, 2, 3, 4]",[]
+5,permuted,baseline,False,909700,complete,True,10,0,0,0,6,4,False,"[0, 2, 3, 4]",[]
+5,permuted,basis-reuse,False,55500,complete,True,0,4,0,7,2,8,False,"[0, 1, 2, 3, 4, 5, 7, 8]","[4, 3, 1]"
+5,degenerate,baseline,False,623800,complete,True,7,0,0,0,3,4,False,"[1, 2, 3, 4]",[]
+5,degenerate,basis-reuse,False,51100,complete,True,0,4,0,4,2,5,False,"[0, 1, 2, 3, 5]","[2, 3, 0]"
+5,interior-basis,baseline,False,664300,complete,True,5,0,0,0,1,4,False,"[1, 2, 3, 4]",[]
+5,interior-basis,basis-reuse,False,51500,complete,True,0,4,2,2,0,5,False,"[0, 1, 2, 3, 4]","[0, 3, 4]"
+6,permuted,basis-reuse,False,49400,complete,True,0,4,0,7,2,8,False,"[0, 1, 2, 3, 4, 5, 7, 8]","[4, 3, 1]"
+6,permuted,baseline,False,901200,complete,True,10,0,0,0,6,4,False,"[0, 2, 3, 4]",[]
+6,degenerate,basis-reuse,False,52300,complete,True,0,4,0,4,2,5,False,"[0, 1, 2, 3, 5]","[2, 3, 0]"
+6,degenerate,baseline,False,654900,complete,True,7,0,0,0,3,4,False,"[1, 2, 3, 4]",[]
+6,interior-basis,basis-reuse,False,42800,complete,True,0,4,2,2,0,5,False,"[0, 1, 2, 3, 4]","[0, 3, 4]"
+6,interior-basis,baseline,False,472900,complete,True,5,0,0,0,1,4,False,"[1, 2, 3, 4]",[]
+7,permuted,baseline,False,901000,complete,True,10,0,0,0,6,4,False,"[0, 2, 3, 4]",[]
+7,permuted,basis-reuse,False,52200,complete,True,0,4,0,7,2,8,False,"[0, 1, 2, 3, 4, 5, 7, 8]","[4, 3, 1]"
+7,degenerate,baseline,False,626500,complete,True,7,0,0,0,3,4,False,"[1, 2, 3, 4]",[]
+7,degenerate,basis-reuse,False,53600,complete,True,0,4,0,4,2,5,False,"[0, 1, 2, 3, 5]","[2, 3, 0]"
+7,interior-basis,baseline,False,456100,complete,True,5,0,0,0,1,4,False,"[1, 2, 3, 4]",[]
+7,interior-basis,basis-reuse,False,44300,complete,True,0,4,2,2,0,5,False,"[0, 1, 2, 3, 4]","[0, 3, 4]"

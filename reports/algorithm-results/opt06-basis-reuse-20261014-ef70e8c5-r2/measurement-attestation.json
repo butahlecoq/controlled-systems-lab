@@ -1,0 +1,29 @@
+{
+  "schema": "csl.opt06-measurement-attestation/1",
+  "measured_source_commit": "ef70e8c580a9556b0f5d96e49070d33221bf5b64",
+  "source_worktree_head": "ef70e8c580a9556b0f5d96e49070d33221bf5b64",
+  "source_clean_before_build": true,
+  "report_artifact_commit": "created after measurement; see enclosing Git history",
+  "report_id": "opt06-basis-reuse-20261014-ef70e8c5",
+  "configuration": "Release",
+  "executable_sha256": "df785f054c7a0d80500e935f5c483eac774e13e406711c4aecabae9054bfb920",
+  "build_log_sha256": "4c7971ec165f1885dd35eb29c3595d47aea88abc95e05b4466e7f9482a980c20",
+  "cmake_cache_sha256": "a71c036e03d8a161f54f2b63db0fb0fb168d7e534d9e26e12d51e047a4e72988",
+  "harness_sha256": "fd5d9fab5a081aed1007c82b0fd49f1a806625f69452d8e6bba6f9824382f240",
+  "collector_command": "python collect.py --exe <clean Release executable> --code-commit ef70e8c580a9556b0f5d96e49070d33221bf5b64 --build-log <verbose Release log> --concurrent-work <captured note> --out accepted-004",
+  "clean_build_command": "cmake --build opt06-report-build --config Release --target csl_opt06_measure --clean-first --parallel 4 --verbose",
+  "accepted_trials": 42,
+  "failed_trials": 0,
+  "host_before": {
+    "cpu_load_percent": 21,
+    "logical_processors": 12,
+    "visible_ram_kib": 33387800,
+    "free_ram_kib": 13027308
+  },
+  "host_after": {
+    "cpu_load_percent": 13,
+    "logical_processors": 12,
+    "visible_ram_kib": 33387800,
+    "free_ram_kib": 13298868
+  }
+}
