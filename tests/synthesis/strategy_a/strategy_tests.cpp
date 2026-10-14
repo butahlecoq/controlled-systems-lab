@@ -657,10 +657,19 @@ TEST_CASE("registered terminal numerical failure retains the feasible candidate 
     REQUIRE(result.family);
     CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
     REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    CHECK(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
+    CHECK(std::holds_alternative<Unestablished>(candidate.feasibility));
     const auto& history=payload(result);
     CHECK(history.target==synthesis::strategy_a::PreimageTarget::forward_terminal_slice);
     CHECK(contains(history.history.relation,{0,1,2,1,1}));
-    REQUIRE(history.terminal);CHECK_FALSE(history.terminal->relation);
+    REQUIRE(history.terminal);REQUIRE(history.terminal->relation);
+    CHECK(history.terminal->relation->metadata()->id.value==
+        history.terminal->construction.feasible_slice.value+":terminal-candidate");
+    CHECK(std::holds_alternative<Unestablished>(history.terminal->construction.support));
+    CHECK(contains(*history.terminal->relation,{1.0}));
+    CHECK_FALSE(contains(*history.terminal->relation,{0.0}));
+    CHECK_FALSE(contains(*history.terminal->relation,{2.0}));
     REQUIRE(history.terminal->optimization);
     CHECK(history.terminal->optimization->termination==Termination::numerical_failure);
     CHECK(history.terminal->optimization->raw_diagnostics.find(
