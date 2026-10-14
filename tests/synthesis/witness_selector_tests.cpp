@@ -200,6 +200,69 @@ TEST_CASE("unsupported family and late direction capability reject before any LP
     CHECK(*creations==0);
 }
 
+TEST_CASE("rejected witness query preserves a published outer candidate claim and identity") {
+    auto synthesis=run(request(resolve(source()))); REQUIRE(synthesis.family);
+    auto identity=synthesis.family->identity();
+    identity.request.target=FamilyTarget::candidate_relaxation;
+    const auto relation=std::get<CompleteOptimalFamily>(synthesis.family->outcome()).relation;
+    const ClaimEvidence enclosure{identity.problem,SymbolicArgument{
+        "T-S01 outer candidate enclosure",
+        "The published relation encloses the target optimal relation."}};
+    auto family=take(FamilyPublisher::publish(identity,CandidateFamily{
+        relation,OuterCandidateEvidence{enclosure},Unestablished{}}));
+    const auto source_identity=family.identity();
+    const auto query_claim=std::get<OuterCandidateEvidence>(
+        std::get<CandidateFamily>(family.outcome()).relation_to_target).enclosure;
+
+    Registry<LPPort> lp;
+    auto backend=take(adapters::lp::make_highs_registration());
+    auto factory=backend.factory;
+    auto lp_creations=std::make_shared<int>(0);
+    backend.factory=[factory,lp_creations](const LinearProgram& program) {
+        ++*lp_creations;
+        return factory(program);
+    };
+    REQUIRE_FALSE(lp.add(std::move(backend)).has_value());
+    Requirements program_output;
+    program_output.output.representation={"csl.program-result.v1"};
+    auto provider=take(prepare_provider(select_provider(
+        lp,Method{{"csl.lp.highs"},{}},program_output)));
+    auto selector=synthesis::witness_selector::make_registration(provider);
+    auto selector_factory=selector.factory;
+    auto selector_creations=std::make_shared<int>(0);
+    selector.factory=[selector_factory,selector_creations](const SelectorRequest& request) {
+        ++*selector_creations;
+        return selector_factory(request);
+    };
+    REQUIRE_FALSE(selector.identity.id.value.empty());
+    Registry<SelectorPort> selectors;
+    REQUIRE_FALSE(selectors.add(std::move(selector)).has_value());
+    SelectorRequest query{family,{2,0,{{1,-1},{-1,1}},23}};
+    Requirements witness_output;
+    witness_output.output.representation={"csl.witness-batch.v1"};
+    const auto rejected=prepare_pipeline(select(selectors,
+        Method{{synthesis::witness_selector::selector_id},{}},query,witness_output));
+
+    REQUIRE(std::holds_alternative<Rejection>(rejected));
+    CHECK(std::get<Rejection>(rejected).diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(*selector_creations==0);
+    CHECK(*lp_creations==0);
+    CHECK(query.family.identity()==source_identity);
+    CHECK(query.family.target()==FamilyTarget::candidate_relaxation);
+    REQUIRE(std::holds_alternative<CandidateFamily>(query.family.outcome()));
+    const auto& candidate=std::get<CandidateFamily>(query.family.outcome());
+    REQUIRE(std::holds_alternative<OuterCandidateEvidence>(candidate.relation_to_target));
+    const auto& retained_enclosure=std::get<OuterCandidateEvidence>(candidate.relation_to_target).enclosure;
+    CHECK(retained_enclosure.problem==query_claim.problem);
+    REQUIRE(std::holds_alternative<SymbolicArgument>(retained_enclosure.support));
+    CHECK(std::get<SymbolicArgument>(retained_enclosure.support).reference==
+        "T-S01 outer candidate enclosure");
+    CHECK(std::get<SymbolicArgument>(retained_enclosure.support).assumptions==
+        "The published relation encloses the target optimal relation.");
+    CHECK_FALSE(std::holds_alternative<PartialOptimalFamily>(query.family.outcome()));
+    CHECK_FALSE(std::holds_alternative<CompleteOptimalFamily>(query.family.outcome()));
+}
+
 TEST_CASE("real T-S01 partial family is rejected by selector admission without LP creation or witnesses") {
     auto partial_request=request(resolve(source()));
     partial_request.family.target=FamilyTarget::partial_relation;
