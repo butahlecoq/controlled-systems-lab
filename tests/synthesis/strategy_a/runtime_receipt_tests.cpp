@@ -69,12 +69,16 @@ SetHandle interval(std::string id,double lower,double upper) {
 }
 
 problem::ResolvedProblem exact_problem() {
+    QuadraticTerminal objective{};
+    objective.Q={1,1,{2}};
+    objective.linear={-2};
+    objective.offset=1;
     Problem source{{"strategy-a-runtime-receipt"},
         std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
             LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}},{}}),
         {0,1,2},KnownInitial{{0}},ContinuousDomain{{interval("u0",0,1),interval("u1",0,1)}},
         {UniversalSet{1},UniversalSet{1},UniversalSet{1}},{},{},InformationPattern::nominal_open_loop,
-        QuadraticTerminal{{1,1,{2}},{-2},1}};
+        objective};
     auto resolved=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
     return std::get<problem::ResolvedProblem>(std::move(resolved));
