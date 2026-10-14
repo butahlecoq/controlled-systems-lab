@@ -239,14 +239,14 @@ RetainedEvidenceScope retained(const SynthesisResult& r) {
 }
 }
 namespace detail {
-class Ts01ExecutionRunner final : public SynthesisWorkspace, public registry::detail::RuntimeReceiptSource {
+class DirectJointExecutionRunner final : public SynthesisWorkspace, public registry::detail::RuntimeReceiptSource {
     registry::PreparedProvider<registry::LPPort> lp_;
     registry::PreparedProvider<registry::ConvexPort> convex_;
     std::optional<registry::StrategyRequest> prepared_request_;
     std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding_;
     std::optional<registry::detail::StrategyBRuntimeLineageReceipt> receipt_;
 public:
-    Ts01ExecutionRunner(registry::PreparedProvider<registry::LPPort> lp,
+    DirectJointExecutionRunner(registry::PreparedProvider<registry::LPPort> lp,
         registry::PreparedProvider<registry::ConvexPort> convex,
         std::optional<registry::StrategyRequest> prepared_request={},
         std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding={})
@@ -259,10 +259,10 @@ public:
 };
 }
 SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
-    detail::Ts01ExecutionRunner runner{lp_,convex_};
+    detail::DirectJointExecutionRunner runner{lp_,convex_};
     return runner.solve(p,request,context);
 }
-SynthesisResult detail::Ts01ExecutionRunner::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
+SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
     receipt_.reset();
     SynthesisResult result{Termination::completed,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{},{}};
     auto reject=[&](Diagnostics diagnostics,Termination termination) {
@@ -495,7 +495,7 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
         return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(fixed)),
             std::get<registry::CheckedProviders<registry::LPPort,registry::ConvexPort>>(std::move(generated)),
             [selected_verifier](auto,auto providers,const registry::StrategyRequest& prepared,const registry::Requirements&)->std::unique_ptr<SynthesisWorkspace> {
-                return std::make_unique<detail::Ts01ExecutionRunner>(std::get<0>(std::move(providers)),
+                return std::make_unique<detail::DirectJointExecutionRunner>(std::get<0>(std::move(providers)),
                     std::get<1>(std::move(providers)),prepared,selected_verifier);
             });
     },verifier_binding};

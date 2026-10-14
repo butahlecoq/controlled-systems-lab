@@ -202,7 +202,7 @@ bool strategy_b_ts02_profile_valid(const ::csl::problem::ResolvedProblem& proble
 bool strategy_a_ts02_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
     return ts02_case_valid(problem,request.family,request.configuration.representation)&&request.configuration.strategy.value=="csl.synthesis.reach-back"&&
         request.strategy_version=="1"&&
-        request.lineage==synthesis::strategy_a::detail::expected_ts01_lineage(problem.identity());
+        request.lineage==synthesis::strategy_a::detail::expected_ts02_lineage(problem.identity());
 }
 
 bool ts02_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
@@ -334,6 +334,8 @@ public:
         if(!exact_relation)
             diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts02.verifier.relation",
                 "T-S02 relation must be the exact canonical feasible joint-history H-polyhedron."});
+        // Keep this canonical verifier statement independent from the producer's
+        // separately authored claim so their agreement is still checked.
         const SymbolicArgument derivation{"T-S02 exact constant-objective derivation",
             "For x0=0, x1=x0+u0, x2=x1+u1 and u0,u1 in [0,1], every feasible history has terminal objective 3. Therefore the argmin relation is exactly the full feasible joint-history polyhedron."};
         const auto same_claim=[&](const ClaimEvidence& claim) {
