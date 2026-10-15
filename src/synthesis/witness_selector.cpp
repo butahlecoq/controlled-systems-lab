@@ -1,7 +1,9 @@
 #include <csl/synthesis/witness_selector.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <cmath>
+#include <algorithm>
 #include <bit>
 
 namespace csl::synthesis::witness_selector {
@@ -9,12 +11,54 @@ namespace {
 Diagnostics reject(std::string field,std::string reason) {
     return {{DiagnosticCode::unsupported,std::move(field),std::move(reason)}};
 }
+const sets::SetData* relation_set(const OptimalFamily& family) {
+    const auto* complete=std::get_if<CompleteOptimalFamily>(&family.outcome());
+    if(!complete)return nullptr;
+    const auto& profile=family.identity().request.profile;
+    if(profile==strategy_ts01::profile_id) {
+        const auto* relation=dynamic_cast<const strategy_ts01::ExactJointRelation*>(complete->relation.payload.get());
+        return relation?&relation->h_polyhedron():nullptr;
+    }
+    if(profile==ts02_constant_integrator_profile) {
+        const auto* relation=dynamic_cast<const Ts02ConstantIntegratorRelation*>(complete->relation.payload.get());
+        return relation?&relation->h_polyhedron():nullptr;
+    }
+    return nullptr;
+}
+bool contains_h(const sets::HRepresentation& h,std::span<const double> point,const NumericalPolicy& numerical) {
+    if(h.inequalities.cols()!=point.size()||h.equalities.cols()!=point.size())return false;
+    const auto tolerance=[&](double lhs,double rhs) {
+        return numerical.absolute_tolerance+numerical.relative_tolerance*
+            std::max(std::abs(lhs),std::abs(rhs));
+    };
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        double lhs=0;
+        for(std::size_t column=0;column<point.size();++column)lhs+=h.inequalities(row,column)*point[column];
+        const double upper=h.upper_bounds[row];
+        if(!std::isfinite(lhs)||!std::isfinite(upper)||lhs>upper+tolerance(lhs,upper))return false;
+    }
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        double lhs=0;
+        for(std::size_t column=0;column<point.size();++column)lhs+=h.equalities(row,column)*point[column];
+        const double expected=h.equality_values[row];
+        if(!std::isfinite(lhs)||!std::isfinite(expected)||std::abs(lhs-expected)>tolerance(lhs,expected))return false;
+    }
+    return std::all_of(point.begin(),point.end(),[](double value){return std::isfinite(value);});
+}
 Diagnostics admission(const OptimalFamily& family,const WitnessRequest& request) {
     const auto* complete=std::get_if<CompleteOptimalFamily>(&family.outcome());
+    const auto* relation=relation_set(family);
+    bool h_representation=false;
+    if(relation) {
+        const auto representation=relation->representation();
+        if(const auto* h=std::get_if<sets::HRepresentation>(&representation))
+            h_representation=h->inequalities.cols()==5&&h->equalities.cols()==5;
+    }
     if(!family.registry_verified()||!complete||complete->relation.representation.value!="csl.polyhedron.h"||
-       complete->relation.coordinates!=JointCoordinates{{1,1,0},2}||
-       !dynamic_cast<const strategy_ts01::ExactJointRelation*>(complete->relation.payload.get()))
-        return reject("selector.family","Only the registered complete exact T-S01 H relation is supported.");
+       complete->relation.coordinates!=JointCoordinates{{1,1,0},2}||!h_representation||
+       !complete->optimum.bounds.lower||!complete->optimum.bounds.upper||
+       complete->optimum.bounds.lower->value!=complete->optimum.bounds.upper->value)
+        return reject("selector.family","Only registered complete T-S01/T-S02 H relations with matching optimum bounds are supported.");
     if(!std::isfinite(request.distinctness_tolerance)||request.distinctness_tolerance<0)
         return reject("selector.tolerance","Distinctness tolerance must be finite and nonnegative.");
     for(const auto& direction:request.directions)
@@ -23,10 +67,13 @@ Diagnostics admission(const OptimalFamily& family,const WitnessRequest& request)
     return {};
 }
 std::variant<LinearProgram,Diagnostics> program(const OptimalFamily& family,const Vector& direction,std::size_t index) {
-    const auto& complete=std::get<CompleteOptimalFamily>(family.outcome());
-    const auto* payload=dynamic_cast<const strategy_ts01::ExactJointRelation*>(complete.relation.payload.get());
-    const auto h=std::get<sets::HRepresentation>(payload->h_polyhedron().representation());
-    SparseMatrix matrix{h.inequalities.rows()+h.equalities.rows(),5,{0},{},{}};
+    const auto* relation=relation_set(family);
+    if(!relation)return reject("selector.family","Selected complete-family relation is unsupported.");
+    const auto representation=relation->representation();
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if(!h||h->inequalities.cols()!=5||h->equalities.cols()!=5)
+        return reject("selector.family","Selected complete-family relation must provide a five-coordinate H representation.");
+    SparseMatrix matrix{h->inequalities.rows()+h->equalities.rows(),5,{0},{},{}};
     std::vector<Interval> rows;
     const auto append=[&](const numeric::MatrixView& source,const numeric::VectorView& rhs,bool equality) {
         for(std::size_t r=0;r<source.rows();++r) {
@@ -37,8 +84,8 @@ std::variant<LinearProgram,Diagnostics> program(const OptimalFamily& family,cons
             rows.push_back({equality?std::optional<double>{rhs[r]}:std::nullopt,rhs[r]});
         }
     };
-    append(h.inequalities,h.upper_bounds,false);append(h.equalities,h.equality_values,true);
-    return optimization::make_linear_program({{family.identity().problem,{"ts01-selector-direction/"+std::to_string(index)+"/"+std::to_string(std::bit_cast<std::uint64_t>(direction[0]))+"/"+std::to_string(std::bit_cast<std::uint64_t>(direction[1]))}},
+    append(h->inequalities,h->upper_bounds,false);append(h->equalities,h->equality_values,true);
+    return optimization::make_linear_program({{family.identity().problem,{"witness-selector-direction/"+std::to_string(index)+"/"+std::to_string(std::bit_cast<std::uint64_t>(direction[0]))+"/"+std::to_string(std::bit_cast<std::uint64_t>(direction[1]))}},
         {0,0,0,direction[0],direction[1]},0,std::move(matrix),std::vector<Interval>(5),std::move(rows)});
 }
 std::optional<OperationStopped> stopped(const ExecutionContext& context) {
@@ -74,7 +121,12 @@ public:
                 programs.push_back(std::move(lp));
             }
             registry::RegisteredLPQueryRunner runner{provider_};
-            const auto* payload=dynamic_cast<const strategy_ts01::ExactJointRelation*>(std::get<CompleteOptimalFamily>(family.outcome()).relation.payload.get());
+            const auto& complete=std::get<CompleteOptimalFamily>(family.outcome());
+            const auto* relation=relation_set(family);
+            const auto representation=relation->representation();
+            const auto* h=std::get_if<sets::HRepresentation>(&representation);
+            const auto* ts01=dynamic_cast<const strategy_ts01::ExactJointRelation*>(complete.relation.payload.get());
+            const double original_objective=complete.optimum.bounds.lower->value;
             for(const auto& lp:programs) {
                 if(selected.batch.distinct_count()>=request.count)break;
                 if(const auto stop=stopped(context)) {selected.termination=Termination::cancelled;selected.diagnostics=stop->diagnostics;return selected;}
@@ -96,13 +148,14 @@ public:
                         }
                     return selected;
                 }
-                if(result.outcome.subject!=lp.identity()||result.outcome.value!=MathematicalOutcome::optimal||
-                   !result.primal||result.primal->size()!=5||!payload->contains(*result.primal)) {
+                const bool member=result.primal&&result.primal->size()==5&&
+                    (ts01?ts01->contains(*result.primal):contains_h(*h,*result.primal,context.numerical));
+                if(result.outcome.subject!=lp.identity()||result.outcome.value!=MathematicalOutcome::optimal||!member) {
                     selected.termination=Termination::numerical_failure;
-                    selected.diagnostics="Direction query did not return a consistent exact T-S01 family history.";return selected;
+                    selected.diagnostics="Direction query did not return a consistent registered complete-family history.";return selected;
                 }
                 const auto& z=*result.primal;
-                selected.batch.witnesses.push_back({family.identity().problem,{{z[0]},{z[1]},{z[2]}},{{z[3]},{z[4]}},0});
+                selected.batch.witnesses.push_back({family.identity().problem,{{z[0]},{z[1]},{z[2]}},{{z[3]},{z[4]}},original_objective});
             }
             selected.diagnostics=selected.batch.distinct_count()<request.count?
                 "Search shortfall: directions exhausted; fewer distinct histories do not prove uniqueness.":
