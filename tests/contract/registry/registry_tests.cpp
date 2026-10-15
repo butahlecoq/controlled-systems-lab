@@ -59,6 +59,66 @@ public:
         return result;
     }
 };
+
+LinearProgram generated_interval_lp(std::string id) {
+    return publish({{{"problem"},{std::move(id)}},{3},2,{0,1,{0},{},{}},{{0,1}}, {}});
+}
+
+class RetainEvidenceThenRejectWorkspace final : public SynthesisWorkspace {
+    PreparedProvider<LPPort> provider_;
+    std::vector<TransformStepIdentity> lineage_;
+public:
+    RetainEvidenceThenRejectWorkspace(PreparedProvider<LPPort> provider,
+        std::vector<TransformStepIdentity> lineage)
+        :provider_(std::move(provider)),lineage_(std::move(lineage)) {}
+
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
+        const ExecutionContext& execution) override {
+        const auto id=problem.identity();
+        auto accepted_request=generated_interval_lp("generated/accepted/lp/1");
+        auto accepted_preparation=provider_.prepare(accepted_request);
+        if(const auto* rejected=std::get_if<Rejection>(&accepted_preparation))
+            throw std::logic_error("accepted LP request rejected: "+rejected->diagnostics.front().field);
+        auto accepted_pipeline=std::get<PreparedPipeline<LPPort>>(std::move(accepted_preparation));
+        auto accepted_workspaces=accepted_pipeline.create();
+        const auto accepted_answer=std::get<ProgramResult>(std::get<0>(accepted_workspaces)->run(execution));
+        if(accepted_answer.termination!=Termination::completed||!accepted_answer.objective.lower||
+            !accepted_answer.objective.upper||!accepted_answer.primal)
+            throw std::logic_error("accepted LP fixture did not produce an optimum and primal");
+
+        const ClaimEvidence support{id,SymbolicArgument{"generated/accepted/lp/1 endpoint enumeration",
+            "u in [0,1]; objective 3u+2; the accepted finite-interval LP returns u=0 and value 2"}};
+        const double bound=accepted_answer.objective.lower->value;
+        const Witness witness{id,{{0},{accepted_answer.primal->at(0)}},*accepted_answer.primal,bound};
+        const FamilyIdentity identity{id,request,problem.constraints().coordinates(),{"retained-provider"},"1",lineage_};
+        const JointRelation relation{identity.coordinates,request.representation,
+            std::make_shared<const JointRelationPayload>()};
+        auto published=FamilyPublisher::publish(identity,CandidateFamily{relation,
+            HeuristicRelationEvidence{"fixture retains the computed candidate relation"},
+            WitnessFeasibilityEvidence{witness,support}});
+        if(const auto* diagnostics=std::get_if<Diagnostics>(&published))
+            throw std::logic_error("candidate fixture publication failed: "+diagnostics->front().field);
+
+        auto rejected_request=generated_interval_lp("generated/rejected/lp/2");
+        auto rejected_preparation=provider_.prepare(rejected_request);
+        if(const auto* rejection=std::get_if<Rejection>(&rejected_preparation)) {
+            RequestProvenance provenance{{rejected_request.identity().program.value},rejection->provenance.port,
+                rejection->provenance.requested.id,rejection->provenance.requested.version,{}, {}};
+            if(rejection->provenance.actual) {
+                provenance.actual_module=rejection->provenance.actual->id;
+                provenance.actual_version=rejection->provenance.actual->version;
+            }
+            SynthesisResult result{Termination::operation_rejected,
+                {id,MathematicalOutcome::undetermined,Unestablished{},{}},
+                {ObjectiveBound{bound,support},ObjectiveBound{bound,support}},
+                std::get<OptimalFamily>(std::move(published)),{{witness,support}},
+                {{0,{},ModuleId{"accepted-lp"},0,1}}};
+            result.stop=ScopedRequestRejection{std::move(provenance),rejection->diagnostics,lineage_,{true,true,1,true}};
+            return result;
+        }
+        throw std::logic_error("later generated LP request unexpectedly accepted");
+    }
+};
 }
 
 TEST_CASE("public selector binds omitted provenance without promoting a candidate family") {
@@ -380,6 +440,129 @@ TEST_CASE("scoped provider provenance is checked without erasing retained eviden
     }
     CHECK(original.termination==Termination::operation_rejected);
     CHECK(original.family->identity()==saved_identity);
+}
+
+TEST_CASE("public prepared strategy retains bound and incumbent when a later generated provider request is rejected") {
+    StrategyRegistry strategies;
+    Registry<LPPort> lp;
+    std::size_t factory_calls=0;
+    auto registration=endpoint_registration();
+    registration.identity={{"conditional-endpoint"},"4"};
+    registration.capabilities=[](const LinearProgram& program,const Requirements&) -> Capability {
+        if(program.identity().program.value=="generated/rejected/lp/2")
+            return Diagnostics{{DiagnosticCode::unsupported,"lp.generated.late",
+                "The second generated LP request is outside this provider's admitted program set."}};
+        return interval_capability(program,{});
+    };
+    registration.factory=[&](const LinearProgram&) {
+        ++factory_calls;
+        return std::make_unique<EndpointWorkspace>();
+    };
+    REQUIRE_FALSE(lp.add(std::move(registration)));
+
+    const TransformStepIdentity transform{{"accepted-lp-step"},{"source-control-set"},
+        {"candidate-relation"},{"retained-provider"},"1"};
+    StrategyRegistration strategy{{{"retained-provider"},"1"},
+        [](const StrategyRequest&,const Requirements&) -> Capability { return Offer{}; },
+        [&lp](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+            auto checked=check_providers(select_provider(lp,Method{{"conditional-endpoint"},std::string{"4"}}));
+            if(const auto* rejection=std::get_if<Rejection>(&checked))return *rejection;
+            return compose_strategy(std::get<CheckedPipeline<>>(check_pipeline()),
+                std::get<CheckedProviders<LPPort>>(std::move(checked)),
+                [](auto,auto providers,const StrategyRequest& request,const Requirements&) {
+                    return std::make_unique<RetainEvidenceThenRejectWorkspace>(
+                        std::get<0>(std::move(providers)),request.lineage);
+                });
+        }};
+    strategy.expected_lineage=[transform](const StrategyRequest&) { return std::vector{transform}; };
+    REQUIRE_FALSE(strategies.add(std::move(strategy)));
+
+    auto request=strategy_request();
+    auto bounded_problem=*request.problem.description();
+    const auto unit_control=std::get<sets::SetData>(sets::make_h({{"unit-control-retention"},1,{"u"}},
+        {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2,1,{1,-1}})),
+         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{1,0})),
+         std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0,1,{}})),
+         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{}))})).as_handle();
+    bounded_problem.controls=ContinuousDomain{{unit_control}};
+    request.problem=std::get<csl::problem::ResolvedProblem>(csl::problem::resolve(bounded_problem,
+        {csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    request.family.objective=request.problem.identity();
+    request.configuration.strategy={"retained-provider"};
+    request.family.target=FamilyTarget::candidate_relaxation;
+    Requirements requirements;
+    requirements.output.family=FamilyTarget::candidate_relaxation;
+    requirements.output.assurance=Assurance::numerical;
+    const auto prepared=strategies.prepare(request,requirements);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+    auto workspace=std::get<PreparedStrategy>(prepared).create();
+    const auto answer=workspace->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto& result=std::get<SynthesisResult>(answer);
+    CHECK(result.termination==Termination::operation_rejected);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());
+    const auto& identity=result.family->identity();
+    CHECK(identity.problem==request.problem.identity());
+    CHECK(identity.request==request.family);
+    CHECK(identity.strategy==ModuleId{"retained-provider"});
+    CHECK(identity.strategy_version=="1");
+    REQUIRE(identity.lineage.size()==1);
+    CHECK(identity.lineage[0]==transform);
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    REQUIRE(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
+    CHECK(std::get<HeuristicRelationEvidence>(candidate.relation_to_target).method==
+        "fixture retains the computed candidate relation");
+    REQUIRE(std::holds_alternative<WitnessFeasibilityEvidence>(candidate.feasibility));
+    CHECK(std::get<WitnessFeasibilityEvidence>(candidate.feasibility).witness.original_objective==2);
+    CHECK(std::get<WitnessFeasibilityEvidence>(candidate.feasibility).support.problem==identity.problem);
+
+    REQUIRE(result.objective.lower);
+    REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==2);
+    CHECK(result.objective.upper->value==2);
+    const auto* lower_support=std::get_if<SymbolicArgument>(&result.objective.lower->evidence.support);
+    REQUIRE(lower_support);
+    CHECK(lower_support->reference=="generated/accepted/lp/1 endpoint enumeration");
+    REQUIRE(result.incumbents.size()==1);
+    CHECK(result.incumbents[0].witness.problem==identity.problem);
+    CHECK(result.incumbents[0].witness.states==std::vector<Vector>{{0},{0}});
+    CHECK(result.incumbents[0].witness.controls==std::vector<Vector>{{0}});
+    CHECK(result.incumbents[0].witness.original_objective==2);
+    CHECK(std::get<SymbolicArgument>(result.incumbents[0].feasibility.support).reference==
+        "generated/accepted/lp/1 endpoint enumeration");
+    REQUIRE(result.spans.size()==1);
+    CHECK(result.spans[0].module==ModuleId{"accepted-lp"});
+    CHECK(result.spans[0].start_seconds==0);
+    CHECK(result.spans[0].end_seconds==1);
+
+    REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
+    const auto& stop=std::get<ScopedRequestRejection>(result.stop);
+    CHECK(stop.request.request==RequestId{"generated/rejected/lp/2"});
+    CHECK(stop.request.port=="lp");
+    CHECK(stop.request.requested_module==ModuleId{"conditional-endpoint"});
+    REQUIRE(stop.request.requested_version);
+    CHECK(*stop.request.requested_version=="4");
+    REQUIRE(stop.request.actual_module);
+    CHECK(*stop.request.actual_module==ModuleId{"conditional-endpoint"});
+    REQUIRE(stop.request.actual_version);
+    CHECK(*stop.request.actual_version=="4");
+    REQUIRE(stop.diagnostics.size()==1);
+    CHECK(stop.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(stop.diagnostics[0].field=="lp.generated.late");
+    CHECK(stop.diagnostics[0].explanation==
+        "The second generated LP request is outside this provider's admitted program set.");
+    CHECK(stop.completed_lineage==std::vector<TransformStepIdentity>{transform});
+    CHECK(stop.retained.lower_bound);
+    CHECK(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==1);
+    CHECK(stop.retained.partial_or_candidate_family);
+    CHECK(factory_calls==1);
 }
 
 TEST_CASE("configuration selects two working bounded LP algorithms") {
