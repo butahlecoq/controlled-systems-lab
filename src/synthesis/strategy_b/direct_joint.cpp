@@ -4,6 +4,7 @@
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <csl/verification/trajectory.hpp>
+#include <csl/execution/timing_collector.hpp>
 #include "../../registry/compiled_verifiers.hpp"
 #include "../../registry/runtime_lineage.hpp"
 #include "../../registry/strategy_b_lineage.hpp"
@@ -15,7 +16,55 @@
 
 namespace csl::synthesis::strategy_b {
 namespace {
+namespace ar=csl::artifacts;
+namespace ob=csl::execution::observability;
 const RepresentationId h_polyhedron{"csl.polyhedron.h"};
+std::optional<ob::TimingScope> start_planned_run_scope(const ExecutionContext& context) noexcept {
+    if(!context.timing||!context.timing->enabled())return {};
+    try {
+        auto snapshot=context.timing->snapshot();
+        const auto* report=std::get_if<ob::TimingReport>(&snapshot);if(!report)return {};
+        const auto& spans=report->observations.description().spans;
+        const ar::SpanDescriptor* root=nullptr;
+        for(const auto& span:spans)if(!span.descriptor.parent) {
+            if(root)return {};
+            root=&span.descriptor;
+        }
+        if(!root)return {};
+        auto started=ob::start_timing(context,root->id);
+        if(auto* scope=std::get_if<ob::TimingScope>(&started))return std::move(*scope);
+    } catch(...) {
+        // Instrumentation failure cannot change the mathematical result.
+    }
+    return {};
+}
+bool same_module(const ar::ModuleIdentity& planned,const registry::Identity& actual) noexcept {
+    return planned.id==actual.id&&planned.version==actual.version;
+}
+std::optional<ob::TimingScope> start_planned_program_scope(const ExecutionContext& context,
+    const ProgramIdentity& program,const registry::Provenance& provider) noexcept {
+    if(!context.timing||!context.timing->enabled()||!provider.actual)return {};
+    try {
+        auto snapshot=context.timing->snapshot();
+        const auto* report=std::get_if<ob::TimingReport>(&snapshot);if(!report)return {};
+        const auto& spans=report->observations.description().spans;
+        const ar::SpanDescriptor* match=nullptr;
+        for(const auto& span:spans) {
+            const auto& descriptor=span.descriptor;
+            const bool module_matches=same_module(descriptor.module,*provider.actual)||
+                (descriptor.backend&&same_module(*descriptor.backend,*provider.actual));
+            if(!descriptor.program||*descriptor.program!=program||!module_matches)continue;
+            if(match)return {};
+            match=&descriptor;
+        }
+        if(!match)return {};
+        auto started=ob::start_timing(context,match->id);
+        if(auto* scope=std::get_if<ob::TimingScope>(&started))return std::move(*scope);
+    } catch(...) {
+        // Instrumentation failure cannot change the mathematical result.
+    }
+    return {};
+}
 Diagnostic unsupported(std::string field, std::string text) {
     return {DiagnosticCode::unsupported,std::move(field),std::move(text)};
 }
@@ -246,6 +295,7 @@ class DirectJointExecutionRunner final : public SynthesisWorkspace, public regis
     std::optional<registry::StrategyRequest> prepared_request_;
     std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> verifier_binding_;
     std::optional<registry::detail::StrategyBRuntimeLineageReceipt> receipt_;
+    SynthesisResult solve_impl(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&);
 public:
     DirectJointExecutionRunner(registry::PreparedProvider<registry::LPPort> lp,
         registry::PreparedProvider<registry::ConvexPort> convex,
@@ -264,6 +314,12 @@ SynthesisResult DirectJointWorkspace::solve(const problem::ResolvedProblem& p,co
     return runner.solve(p,request,context);
 }
 SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
+    auto run_scope=start_planned_run_scope(context);
+    auto result=solve_impl(p,request,context);
+    if(run_scope)run_scope->close(result.termination);
+    return result;
+}
+SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::ResolvedProblem& p,const FamilyRequest& request,const ExecutionContext& context) {
     receipt_.reset();
     SynthesisResult result{Termination::completed,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{},{}};
     auto reject=[&](Diagnostics diagnostics,Termination termination) {
@@ -370,7 +426,13 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
             result.termination=stopped_termination(reason);result.stop=ScopedOperationStopped{{reason,"Stopped before admitted generated program execution."},provenance,retained(result)};return;
         }
         auto workers=std::get<registry::PreparedPipeline<Port>>(std::move(preparation)).create();
+        auto program_scope=start_planned_program_scope(context,program.identity(),provider.provenance());
         auto outcome=std::get<0>(workers)->run(context);
+        if(program_scope) {
+            const auto termination=std::holds_alternative<Unsupported>(outcome)?Termination::operation_rejected:
+                std::get<ProgramResult>(outcome).termination;
+            program_scope->close(termination);
+        }
         if(const auto* unsupported_result=std::get_if<Unsupported>(&outcome)) {
             result.termination=Termination::operation_rejected;data->diagnostics=unsupported_result->diagnostics;
             result.stop=ScopedRequestRejection{provenance,data->diagnostics,lineage,retained(result)};return;
