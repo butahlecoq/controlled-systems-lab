@@ -11,3 +11,8 @@ target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_V1_FIX
 target_include_directories(run_statistics_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 add_test(NAME run_statistics_contract COMMAND run_statistics_contract)
 csl_test_target(run_statistics_contract artifacts)
+
+add_executable(h_relation_attachment_contract tests/artifacts/h_relation_attachment_contract.cpp)
+target_link_libraries(h_relation_attachment_contract PRIVATE CSL::artifacts doctest::doctest)
+add_test(NAME h_relation_attachment_contract COMMAND h_relation_attachment_contract)
+csl_test_target(h_relation_attachment_contract artifacts)
