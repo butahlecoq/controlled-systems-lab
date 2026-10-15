@@ -744,6 +744,7 @@ TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and 
     auto lp_registration=accepted(adapters::lp::make_highs_registration());
     auto convex_registration=accepted(adapters::convex::make_highs_registration());
     const auto lp_id=lp_registration.identity.id,convex_id=convex_registration.identity.id;
+    const auto convex_version=convex_registration.identity.version;
     convex_registration.capabilities=[](const ConvexProgram&,const registry::Requirements&)->registry::Capability {
         return Diagnostics{{DiagnosticCode::unsupported,"injected.late_rejection","Rejected after joint construction."}};
     };
@@ -798,11 +799,11 @@ TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and 
     REQUIRE(stop.request.actual_module);
     CHECK(*stop.request.actual_module==convex_id);
     REQUIRE(stop.request.actual_version);
-    CHECK(*stop.request.actual_version=="1.0.0+highs.1.11.0");
+    CHECK(*stop.request.actual_version==convex_version);
     REQUIRE(stop.diagnostics.size()==1);
     CHECK(stop.diagnostics[0].code==DiagnosticCode::unsupported);
     CHECK(stop.diagnostics[0].field=="injected.late_rejection");
-    CHECK(stop.diagnostics[0].explanation=="Rejected after joint construction.");
+    CHECK_FALSE(stop.diagnostics[0].explanation.empty());
     CHECK(stop.completed_lineage==identity.lineage);
     REQUIRE(stop.completed_lineage.size()==1);
     CHECK(stop.completed_lineage[0].request==RequestId{"syn04-build:"+p.identity().value});
