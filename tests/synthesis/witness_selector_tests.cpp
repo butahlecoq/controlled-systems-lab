@@ -407,6 +407,45 @@ TEST_CASE("one selector queries complete registered families from both strategie
     }
 }
 
+TEST_CASE("one selector queries the verified constant-objective family from both strategies") {
+    Registry<LPPort> lp;REQUIRE_FALSE(lp.add(take(adapters::lp::make_highs_registration())));
+    Registry<ConvexPort> convex;REQUIRE_FALSE(convex.add(take(adapters::convex::make_highs_registration())));
+    Requirements program;program.output.representation={"csl.program-result.v1"};
+    auto provider=take(prepare_provider(select_provider(lp,Method{{"csl.lp.highs"},{}},program)));
+    auto selector=synthesis::witness_selector::make_registration(provider);
+    for(const bool use_a:{true,false}) {
+        auto problem=source();set_quadratic_objective(problem,0,0,3);
+        auto synthesis_request=request(resolve(std::move(problem)));
+        synthesis_request.family.profile="ts02_constant_integrator";
+        synthesis_request.configuration.strategy={use_a?"csl.synthesis.reach-back":"csl.synthesis.strategy-b"};
+        synthesis_request.configuration.lp={"csl.lp.highs"};
+        synthesis_request.configuration.convex={"csl.convex.highs"};
+        auto prepared=[&]() {
+            if(use_a)return strategy_a(synthesis_request);
+            StrategyRegistry registry;REQUIRE_FALSE(registry.add(synthesis::strategy_b::make_registration(lp,convex)));
+            Requirements output;output.output.representation=synthesis_request.family.representation;
+            output.output.family=synthesis_request.family.target;output.output.completeness=Completeness::established;
+            return take(registry.prepare(synthesis_request,output));
+        }();
+        auto synthesis_workspace=prepared.create();auto result=take(synthesis_workspace->run(make_execution_context()));
+        REQUIRE(result.family);CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+        const auto family_identity=result.family->identity();
+        SelectorRequest query{*result.family,{2,0,{{1,-1},{-1,1}},47}};
+        auto workspace=selector.factory(query);
+        auto answer=take(SelectorPort::run(*workspace,query,make_execution_context()));
+        REQUIRE(answer.termination==Termination::completed);
+        REQUIRE(answer.batch.returned_count()==2);CHECK(answer.batch.distinct_count()==2);
+        CHECK(answer.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
+        CHECK(answer.batch.witnesses[1].controls==std::vector<Vector>{{1},{0}});
+        CHECK(answer.batch.witnesses[0].states==std::vector<Vector>{{0},{0},{1}});
+        CHECK(answer.batch.witnesses[1].states==std::vector<Vector>{{0},{1},{1}});
+        CHECK(answer.batch.witnesses[0].original_objective==3);
+        CHECK(answer.batch.witnesses[1].original_objective==3);
+        CHECK(answer.batch.source_family==family_identity);
+        CHECK(result.family->identity()==family_identity);
+        CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    }
+}
 namespace {
 class StopAfterQuery final : public LPWorkspace {
     std::unique_ptr<LPWorkspace> inner_;std::stop_source stop_;std::shared_ptr<const ResourcePolicy> expected_;
