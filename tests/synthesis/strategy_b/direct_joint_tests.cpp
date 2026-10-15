@@ -803,7 +803,8 @@ TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and 
     REQUIRE(stop.diagnostics.size()==1);
     CHECK(stop.diagnostics[0].code==DiagnosticCode::unsupported);
     CHECK(stop.diagnostics[0].field=="injected.late_rejection");
-    CHECK_FALSE(stop.diagnostics[0].explanation.empty());
+    // This caller-injected text is an end-to-end preservation oracle, not a library-owned diagnostic sentence.
+    CHECK(stop.diagnostics[0].explanation=="Rejected after joint construction.");
     CHECK(stop.completed_lineage==identity.lineage);
     REQUIRE(stop.completed_lineage.size()==1);
     CHECK(stop.completed_lineage[0].request==RequestId{"syn04-build:"+p.identity().value});
