@@ -90,7 +90,7 @@ public:
         const ClaimEvidence support{id,SymbolicArgument{"generated/accepted/lp/1 endpoint enumeration",
             "u in [0,1]; objective 3u+2; the accepted finite-interval LP returns u=0 and value 2"}};
         const double bound=accepted_answer.objective.lower->value;
-        const Witness witness{id,{{0},{accepted_answer.primal->at(0)}},*accepted_answer.primal,bound};
+        const Witness witness{id,{{0},{accepted_answer.primal->at(0)}},{*accepted_answer.primal},bound};
         const FamilyIdentity identity{id,request,problem.constraints().coordinates(),{"retained-provider"},"1",lineage_};
         const JointRelation relation{identity.coordinates,request.representation,
             std::make_shared<const JointRelationPayload>()};
