@@ -137,7 +137,8 @@ file(READ "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" vali
 string(JSON unsupported_validation_scenario SET "${validation_scenario}" temporal "{}")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unsupported-validation.json" "${unsupported_validation_scenario}")
 example_check(scenario_cli_unsupported scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/unsupported-validation.json" 2
-  "Input unsupported: path=/temporal feature=temporal")example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
+  "Input unsupported: path=/temporal feature=temporal")
+example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.0.0.highs.1.11.0")
 example_check(substitution_phase_one backend_substitution phase-one-bland 0 "backend=phase-one-bland version=1")
