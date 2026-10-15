@@ -931,6 +931,32 @@ TEST_CASE("Strategy B registers the exact T-S02 constant-objective history famil
     candidate_requirements.output.completeness=registry::Completeness::unestablished;
     CHECK(std::holds_alternative<registry::Rejection>(strategies.prepare({p,configuration,candidate_profile,"1"},candidate_requirements)));
 }
+TEST_CASE("registered Strategy B reports a completed unbounded objective without a finite lower bound") {
+    auto input=integrator(LinearTerminal{{-1},0});
+    input.controls=ContinuousDomain{{UniversalSet{1},UniversalSet{1}}};
+    input.states={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    const auto p=resolve(input);
+    const auto q=request(p);
+    const auto prepared=registered_prepared(p,q);
+    auto workspace=prepared.create();
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+
+    const auto result=accepted(workspace->run(context));
+
+    // Independent ray oracle: x0=0, u0=u1=t, x1=t, x2=2t is feasible
+    // for every t>=0 and the authored objective is -x2=-2t, so its infimum
+    // is -infinity. Solver termination is successful even though no optimum
+    // or complete optimal-history family exists.
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::unbounded);
+    CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    CHECK_FALSE(result.family);
+}
 TEST_CASE("T-S02 verifier admits constant linear quadratic and residual norm objectives") {
     const std::vector<TerminalObjective> objectives{
         QuadraticTerminal{{1,1,{0}},{0},3},ResidualNormTerminal{{1,1,{0}},{3}}};
