@@ -1028,7 +1028,7 @@ TEST_CASE("unsupported authored finite controls and declared temporal coupling r
     auto source=*integrator().description();source.controls=FiniteDomain{1,{{0},{1}}};
     auto problem=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     CHECK(alternative<Rejection>(admit(request(problem))).diagnostics[0].field=="controls");
-    source=*integrator().description();source.temporal=TemporalConstraints{{0,5,{0},{},{}},{}};
+    source=*integrator().description();source.temporal=TemporalConstraints{{1,5,{0,1},{0},{1}},{{0,0}}};
     problem=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     CHECK(alternative<Rejection>(admit(request(problem))).diagnostics[0].field=="strategy_a.temporal");
 }
