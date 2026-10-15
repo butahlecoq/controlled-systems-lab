@@ -557,6 +557,42 @@ TEST_CASE("exact T-S02 selects its analytic verifier and publishes every feasibl
     CHECK(proof->verifier_version=="1");
     CHECK(proof->proof==synthesis::ts02_constant_integrator_proof);
 }
+TEST_CASE("public Strategy A exact T-S02 family equals the analytic feasible-history relation") {
+    const auto query=exact_ts02_request(exact_ts02_integrator());
+    auto workspace=take(admit(query)).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=take(workspace->run(context));
+
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto* relation=dynamic_cast<const synthesis::Ts02ConstantIntegratorRelation*>(
+        complete.relation.payload.get());
+    REQUIRE(relation);
+
+    // Independently, the model defines every feasible history by x0=0,
+    // x1=u0, x2=x1+u1 and the two control bounds. The objective is the
+    // constant 3, so every point in this relation is optimal. These seven
+    // rows are the whole relation, rather than a finite set of witnesses.
+    const auto polyhedron=relation->h_polyhedron();
+    const auto representation=polyhedron.representation();
+    const auto& actual=std::get<sets::HRepresentation>(representation);
+    REQUIRE(actual.inequalities.rows()==4);
+    REQUIRE(actual.equalities.rows()==3);
+    CHECK(actual.inequalities.cols()==5);
+    CHECK(actual.equalities.cols()==5);
+    CHECK(has_inequality(actual,{0,0,0,1,0},1));
+    CHECK(has_inequality(actual,{0,0,0,-1,0},0));
+    CHECK(has_inequality(actual,{0,0,0,0,1},1));
+    CHECK(has_inequality(actual,{0,0,0,0,-1},0));
+    CHECK(has_equality(actual,{1,0,0,0,0},0));
+    CHECK(has_equality(actual,{-1,1,0,-1,0},0));
+    CHECK(has_equality(actual,{0,-1,1,0,-1},0));
+    REQUIRE(result.objective.lower);
+    REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==3);
+    CHECK(result.objective.upper->value==3);
+}
 TEST_CASE("exact T-S02 recovered preimage contains the entire feasible control box") {
     const auto query=exact_ts02_request(exact_ts02_integrator());
     auto workspace=take(admit(query,false,{},true)).create();
