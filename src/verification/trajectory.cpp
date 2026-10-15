@@ -278,6 +278,10 @@ public:
             report_.feasibility=CheckStatus::invalid_input;report_.objective=CheckStatus::invalid_input;
             diagnose(DiagnosticCode::invalid_input,"numerical","tolerances must be finite and nonnegative");return;
         }
+        if(report_.input.assurance!=Assurance::numerical&&report_.input.assurance!=Assurance::validated) {
+            report_.feasibility=CheckStatus::invalid_input;report_.objective=CheckStatus::invalid_input;
+            diagnose(DiagnosticCode::invalid_input,"assurance","unknown trajectory verification assurance");return;
+        }
         if(report_.input.assurance==Assurance::validated) {
             report_.feasibility=CheckStatus::unsupported;report_.objective=CheckStatus::unsupported;
             diagnose(DiagnosticCode::unsupported,"assurance","validated trajectory verification is not implemented");return;
