@@ -939,7 +939,7 @@ TEST_CASE("Strategy B registers the exact T-S02 constant-objective history famil
                     if(sign<0 && !allow_sign_reversal)continue;
                     bool equal=actual_bounds[i]==sign*expected_bounds[k];
                     for(std::size_t j=0;j<actual_matrix.cols() && equal;++j)
-                        equal=actual_matrix(i,j)==sign*expected_matrix(k,j);
+                        equal=actual_matrix(i,j)==sign*expected_matrix.values[k*expected_matrix.cols+j];
                     if(equal) {matched[k]=true;found=true;break;}
                 }
             }
