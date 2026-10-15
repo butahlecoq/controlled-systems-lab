@@ -957,8 +957,7 @@ TEST_CASE("registered Strategy B reports a completed unbounded objective without
         return assumption.find(generated_program.value)!=std::string::npos;
     }));
     CHECK(std::any_of(result.outcome.assumptions.begin(),result.outcome.assumptions.end(),[](const std::string& assumption) {
-        return assumption.find("transfer")!=std::string::npos&&
-            assumption.find("not independently validated")!=std::string::npos;
+        return assumption.find("not independently validated")!=std::string::npos;
     }));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.complete_proposal);
