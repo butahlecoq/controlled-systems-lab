@@ -407,6 +407,52 @@ TEST_CASE("one selector queries complete registered families from both strategie
     }
 }
 
+
+namespace {
+class CorruptT02PrimalWorkspace final : public LPWorkspace {
+    std::unique_ptr<LPWorkspace> inner_;
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext& context) override {
+        auto result=inner_->solve(program,context);
+        if(auto* solved=std::get_if<ProgramResult>(&result);solved&&solved->termination==Termination::completed&&
+           solved->outcome.value==MathematicalOutcome::optimal)
+            solved->primal=Vector{0,0,0,0,1};
+        return result;
+    }
+public:
+    explicit CorruptT02PrimalWorkspace(std::unique_ptr<LPWorkspace> inner):inner_(std::move(inner)){}
+};
+}
+TEST_CASE("T-S02 selector rejects a backend primal outside the exact family despite loose query tolerance") {
+    auto problem=source();set_quadratic_objective(problem,0,0,3);
+    auto synthesis_request=request(resolve(std::move(problem)));
+    synthesis_request.family.profile="ts02_constant_integrator";
+    synthesis_request.configuration.strategy={"csl.synthesis.reach-back"};
+    synthesis_request.configuration.lp={"csl.lp.highs"};
+    auto prepared=strategy_a(synthesis_request);
+    auto synthesis_workspace=prepared.create();auto synthesized=take(synthesis_workspace->run(make_execution_context()));
+    REQUIRE(synthesized.family);
+
+    auto backend=take(adapters::lp::make_highs_registration());
+    auto factory=backend.factory;
+    backend.factory=[factory](const LinearProgram& program) {
+        return std::make_unique<CorruptT02PrimalWorkspace>(factory(program));
+    };
+    Registry<LPPort> lp;REQUIRE_FALSE(lp.add(std::move(backend)));
+    Requirements program_output;program_output.output.representation={"csl.program-result.v1"};
+    auto provider=take(prepare_provider(select_provider(lp,Method{{"csl.lp.highs"},{}},program_output)));
+    auto selector=synthesis::witness_selector::make_registration(provider);
+    SelectorRequest query{*synthesized.family,{1,0,{{1,-1}},73}};
+    auto workspace=selector.factory(query);auto context=make_execution_context();
+    context.numerical.absolute_tolerance=1;context.numerical.relative_tolerance=0;
+    auto answer=take(SelectorPort::run(*workspace,query,context));
+
+    CHECK(answer.termination==Termination::numerical_failure);
+    CHECK(answer.batch.returned_count()==0);
+    CHECK(answer.batch.source_family==synthesized.family->identity());
+    CHECK(answer.diagnostics.find("consistent")!=std::string::npos);
+    CHECK(synthesized.family->target()==FamilyTarget::exact_optimal_relation);
+}
 TEST_CASE("one selector queries the verified constant-objective family from both strategies") {
     Registry<LPPort> lp;REQUIRE_FALSE(lp.add(take(adapters::lp::make_highs_registration())));
     Registry<ConvexPort> convex;REQUIRE_FALSE(convex.add(take(adapters::convex::make_highs_registration())));
