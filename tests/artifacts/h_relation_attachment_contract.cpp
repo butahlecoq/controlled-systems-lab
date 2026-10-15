@@ -41,7 +41,14 @@ TEST_CASE("verified Farkas metadata round trips only as untrusted recorded certi
  CHECK(recorded->certificate.subject==proof.subject());CHECK(recorded->certificate.row_lower==proof.certificate().row_lower);CHECK(recorded->certificate.row_upper==proof.certificate().row_upper);CHECK(recorded->certificate.variable_lower==proof.certificate().variable_lower);CHECK(recorded->certificate.variable_upper==proof.certificate().variable_upper);
  static_assert(!std::is_same_v<ar::RecordedExactFarkasEvidence,ExactFarkasEvidence>);
 }
-TEST_CASE("H attachment rejects digest mismatch, malformed bytes, unknown version, and resource excess"){
+TEST_CASE("other affine evidence variants remain recorded data"){
+ const auto numerical=take(ar::encode_h_relation_attachment(source(EvidenceSupport{NumericalCheck{-0.0,0.25,1e-9,ModuleId{"numeric-checker"}}}),limits()));
+ const auto numeric_record=take(ar::decode_h_relation_attachment(numerical.bytes(),limits()));const auto& n=std::get<ar::RecordedNumericalCheck>(numeric_record.affine_dimension->support);
+ CHECK(std::bit_cast<std::uint64_t>(n.absolute_tolerance)==std::bit_cast<std::uint64_t>(-0.0));CHECK(std::bit_cast<std::uint64_t>(n.relative_tolerance)==std::bit_cast<std::uint64_t>(0.25));CHECK(std::bit_cast<std::uint64_t>(n.max_residual)==std::bit_cast<std::uint64_t>(1e-9));CHECK(n.verifier.value=="numeric-checker");
+ const auto certificate=take(ar::encode_h_relation_attachment(source(EvidenceSupport{CertificateReference{"proof.bin","untrusted-ref"}}),limits()));
+ const auto cert_record=take(ar::decode_h_relation_attachment(certificate.bytes(),limits()));const auto& c=std::get<ar::RecordedCertificateReference>(cert_record.affine_dimension->support);CHECK(c.artifact=="proof.bin");CHECK(c.verifier=="untrusted-ref");
+ const auto absent=take(ar::encode_h_relation_attachment(source(EvidenceSupport{Unestablished{}}),limits()));const auto absent_record=take(ar::decode_h_relation_attachment(absent.bytes(),limits()));CHECK(std::holds_alternative<Unestablished>(absent_record.affine_dimension->support));
+}TEST_CASE("H attachment rejects digest mismatch, malformed bytes, unknown version, and resource excess"){
  const auto encoded=take(ar::encode_h_relation_attachment(source(),limits()));std::array<std::byte,3> bad{std::byte{'b'},std::byte{'a'},std::byte{'d'}};
  CHECK(std::get<ar::ArtifactError>(ar::decode_h_relation_attachment(bad,limits(),encoded.digest())).code==ar::ArtifactErrorCode::identity);
  CHECK(std::get<ar::ArtifactError>(ar::decode_h_relation_attachment(encoded.bytes(),ar::HRelationAttachmentLimits{2,16,64,4096})).code==ar::ArtifactErrorCode::limit);
