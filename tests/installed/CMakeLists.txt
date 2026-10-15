@@ -254,6 +254,23 @@ if(NOT ts01_relation_factory_forge_output MATCHES "(error C[0-9]+|error:|fatal e
 endif()
 message(STATUS "Installed downstream relation factory definition was rejected by the compiler")
 
+unset(farkas_factory_forge_compiled CACHE)
+try_compile(farkas_factory_forge_compiled
+  "${CMAKE_CURRENT_BINARY_DIR}/farkas-factory-forge-compile"
+  SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/farkas_factory_forge_client.cpp"
+  LINK_LIBRARIES CSL::optimization
+  OUTPUT_VARIABLE farkas_factory_forge_output)
+if(farkas_factory_forge_compiled)
+  message(FATAL_ERROR "Installed optimization API accepted downstream ExactFarkasEvidence construction:\n${farkas_factory_forge_output}")
+endif()
+if(NOT farkas_factory_forge_output MATCHES "(error C[0-9]+|error:|fatal error:)")
+  message(FATAL_ERROR "Installed optimization API Farkas construction probe failed for an unrelated reason:\n${farkas_factory_forge_output}")
+endif()
+if(NOT farkas_factory_forge_output MATCHES "(C2248|private|inaccessible)")
+  message(FATAL_ERROR "Installed optimization API rejected the Farkas probe for a reason other than inaccessible evidence construction:\n${farkas_factory_forge_output}")
+endif()
+message(STATUS "Installed downstream ExactFarkasEvidence construction was rejected by the compiler")
+
 if(TARGET CSL::highs_lp)
 add_executable(installed_witness_selector_client witness_selector_client.cpp)
 target_link_libraries(installed_witness_selector_client PRIVATE CSL::witness_selector CSL::highs_lp)

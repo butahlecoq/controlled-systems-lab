@@ -5,16 +5,10 @@
 #include <cstdint>
 #include <vector>
 
-namespace csl::optimization::detail {
-class FarkasEvidenceFactory {
-public:
-    static ExactFarkasEvidence create(LinearInfeasibilityCertificate certificate) {
-        return ExactFarkasEvidence(std::move(certificate));
-    }
-};
-}
-
 namespace csl::optimization {
+ExactFarkasEvidence FarkasEvidenceFactory::create(LinearInfeasibilityCertificate certificate) {
+    return ExactFarkasEvidence(std::move(certificate));
+}
 namespace {
 Diagnostics failure(DiagnosticCode code,std::string field,std::string explanation) {
     return {{code,std::move(field),std::move(explanation)}};
@@ -167,6 +161,6 @@ std::variant<ExactFarkasEvidence,Diagnostics> verify_linear_infeasibility_certif
     }
     if(!contradiction.positive())
         return invalid("lp.infeasibility.contradiction","Exact dyadic contradiction constant must be strictly positive.");
-    return detail::FarkasEvidenceFactory::create(certificate);
+    return FarkasEvidenceFactory::create(certificate);
 }
 } // namespace csl::optimization
