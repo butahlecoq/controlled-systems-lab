@@ -744,6 +744,7 @@ TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and 
     auto lp_registration=accepted(adapters::lp::make_highs_registration());
     auto convex_registration=accepted(adapters::convex::make_highs_registration());
     const auto lp_id=lp_registration.identity.id,convex_id=convex_registration.identity.id;
+    const auto convex_version=convex_registration.identity.version;
     convex_registration.capabilities=[](const ConvexProgram&,const registry::Requirements&)->registry::Capability {
         return Diagnostics{{DiagnosticCode::unsupported,"injected.late_rejection","Rejected after joint construction."}};
     };
@@ -764,6 +765,8 @@ TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and 
     const auto result=accepted(workspace->run(context));
     CHECK(result.termination==Termination::operation_rejected);
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
     REQUIRE(result.family);
     CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
     CHECK_FALSE(result.family->registry_verified());
@@ -789,7 +792,22 @@ TEST_CASE("late T-S01 provider rejection retains a typed candidate relation and 
     CHECK(result.incumbents.empty());
     REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
     const auto& stop=std::get<ScopedRequestRejection>(result.stop);
+    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
+    CHECK(stop.request.port=="convex");
+    CHECK(stop.request.requested_module==convex_id);
+    CHECK_FALSE(stop.request.requested_version);
+    REQUIRE(stop.request.actual_module);
+    CHECK(*stop.request.actual_module==convex_id);
+    REQUIRE(stop.request.actual_version);
+    CHECK(*stop.request.actual_version==convex_version);
+    REQUIRE(stop.diagnostics.size()==1);
+    CHECK(stop.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(stop.diagnostics[0].field=="injected.late_rejection");
+    // This caller-injected text is an end-to-end preservation oracle, not a library-owned diagnostic sentence.
+    CHECK(stop.diagnostics[0].explanation=="Rejected after joint construction.");
     CHECK(stop.completed_lineage==identity.lineage);
+    REQUIRE(stop.completed_lineage.size()==1);
+    CHECK(stop.completed_lineage[0].request==RequestId{"syn04-build:"+p.identity().value});
     CHECK(stop.retained.partial_or_candidate_family);
     CHECK_FALSE(stop.retained.lower_bound);
     CHECK_FALSE(stop.retained.upper_bound);
