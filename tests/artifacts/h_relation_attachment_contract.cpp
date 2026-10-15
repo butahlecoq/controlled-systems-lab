@@ -3,6 +3,8 @@
 #include <csl/artifacts/h_relation_attachment.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <bit>
+#include <array>
+#include <string>
 #include <type_traits>
 using namespace csl;
 namespace ar=csl::artifacts;
@@ -44,6 +46,8 @@ TEST_CASE("H attachment rejects digest mismatch, malformed bytes, unknown versio
  CHECK(std::get<ar::ArtifactError>(ar::decode_h_relation_attachment(bad,limits(),encoded.digest())).code==ar::ArtifactErrorCode::identity);
  CHECK(std::get<ar::ArtifactError>(ar::decode_h_relation_attachment(encoded.bytes(),ar::HRelationAttachmentLimits{2,16,64,4096})).code==ar::ArtifactErrorCode::limit);
  auto corrupt=std::vector<std::byte>(encoded.bytes().begin(),encoded.bytes().end());corrupt.back()=std::byte{'x'};CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_h_relation_attachment(corrupt,limits())));
+ auto truncated=std::vector<std::byte>(encoded.bytes().begin(),encoded.bytes().end()-1);CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_h_relation_attachment(truncated,limits())));
+ std::string nonfinite;for(auto b:encoded.bytes())nonfinite.push_back(static_cast<char>(std::to_integer<unsigned char>(b)));const auto coefficient=nonfinite.find("3ff0000000000000");REQUIRE(coefficient!=std::string::npos);nonfinite.replace(coefficient,16,"7ff0000000000000");std::vector<std::byte> nonfinite_bytes;for(unsigned char c:nonfinite)nonfinite_bytes.push_back(static_cast<std::byte>(c));CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_h_relation_attachment(nonfinite_bytes,limits())));
  auto unknown=std::vector<std::byte>(encoded.bytes().begin(),encoded.bytes().end());for(std::size_t i=0;i+1<unknown.size();++i)if(unknown[i]==std::byte{'/'}&&unknown[i+1]==std::byte{'1'})unknown[i+1]=std::byte{'9'};
  const auto unsupported=ar::decode_h_relation_attachment(unknown,limits());REQUIRE(std::holds_alternative<ar::ArtifactError>(unsupported));CHECK(std::get<ar::ArtifactError>(unsupported).code==ar::ArtifactErrorCode::unsupported);
 }
