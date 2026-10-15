@@ -1,6 +1,8 @@
 #include <csl/input/scenario_loader.hpp>
 #include <iostream>
 #include <string_view>
+#include <variant>
+#include <vector>
 
 namespace {
 const char* category_name(csl::input::InputCategory category) {
