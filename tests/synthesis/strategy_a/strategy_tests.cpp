@@ -116,9 +116,22 @@ class NumericalFailureAfterTerminal final : public ConvexWorkspace {
 public:
     explicit NumericalFailureAfterTerminal(std::unique_ptr<ConvexWorkspace> inner):inner_(std::move(inner)){}
 };
+class ResourceLimitAfterTerminal final : public ConvexWorkspace {
+    std::unique_ptr<ConvexWorkspace> inner_;
+    ProgramOutcome do_solve(const ConvexProgram& program,const ExecutionContext& context) override {
+        auto outcome=inner_->solve(program,context);
+        if(auto* solved=std::get_if<ProgramResult>(&outcome)) {
+            solved->termination=Termination::resource_limit;
+            solved->raw_diagnostics+="\ninjected terminal resource limit after real optimizer result";
+        }
+        return outcome;
+    }
+public:
+    explicit ResourceLimitAfterTerminal(std::unique_ptr<ConvexWorkspace> inner):inner_(std::move(inner)){}
+};
 std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,bool reject_terminal=false,
     std::optional<std::stop_source> stop_after_terminal={},bool omit_test_verifier=false,
-    bool fail_terminal_numerically=false) {
+    bool fail_terminal_numerically=false,bool limit_terminal_resources=false) {
     auto lp=take(adapters::lp::make_highs_registration());
     auto convex=take(adapters::convex::make_highs_registration());
     auto converter=take(adapters::polyhedral::make_qhull_registration(lp));
@@ -139,6 +152,12 @@ std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,b
         const auto factory=convex.factory;
         convex.factory=[factory](const ConvexProgram& program) {
             return std::make_unique<NumericalFailureAfterTerminal>(factory(program));
+        };
+    }
+    if(limit_terminal_resources) {
+        const auto factory=convex.factory;
+        convex.factory=[factory](const ConvexProgram& program) {
+            return std::make_unique<ResourceLimitAfterTerminal>(factory(program));
         };
     }
     Registry<GeometryPort> projections,affines;Registry<ConversionPort> conversions;
@@ -680,6 +699,56 @@ TEST_CASE("post-terminal cancellation keeps scoped optimizer and completed termi
     CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
     CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
     // Strategy A publishes no caller-visible timing spans on this stop; timing evidence remains a #89 dependency.
+    CHECK(result.spans.empty());
+}
+TEST_CASE("registered terminal resource limit retains only the unestablished feasible candidate") {
+    const auto query=request(integrator());
+    auto prepared=take(admit(query,false,{},false,false,true));auto workspace=prepared.create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=take(workspace->run(context));
+    CHECK(result.termination==Termination::resource_limit);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
+    CHECK(result.incumbents.empty());CHECK_FALSE(result.complete_proposal);CHECK_FALSE(result.partial_proposal);
+    REQUIRE(result.family);CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());CHECK_FALSE(result.family->partial_registry_verified());
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    REQUIRE(std::holds_alternative<HeuristicRelationEvidence>(candidate.relation_to_target));
+    CHECK(std::get<HeuristicRelationEvidence>(candidate.relation_to_target).method==
+        "binary64 feasible-history preimage of forward terminal slice; objective has not restricted this candidate");
+    CHECK(std::holds_alternative<Unestablished>(candidate.feasibility));
+    const auto& history=payload(result);
+    CHECK(history.target==synthesis::strategy_a::PreimageTarget::forward_terminal_slice);
+    CHECK(contains(history.history.relation,{0,1,2,1,1}));
+    REQUIRE(history.terminal);REQUIRE(history.terminal->relation);
+    CHECK(contains(*history.terminal->relation,{1.0}));
+    CHECK_FALSE(contains(*history.terminal->relation,{0.0}));
+    CHECK_FALSE(contains(*history.terminal->relation,{2.0}));
+    CHECK(std::holds_alternative<Unestablished>(history.terminal->construction.support));
+    REQUIRE(history.terminal->optimum);
+    CHECK(std::holds_alternative<Unestablished>(history.terminal->optimum->optimum.support));
+    CHECK_FALSE(history.terminal->optimum->bounds.lower);CHECK_FALSE(history.terminal->optimum->bounds.upper);
+    REQUIRE(history.terminal->optimization);
+    CHECK(history.terminal->termination==Termination::resource_limit);
+    CHECK(history.terminal->optimization->termination==Termination::resource_limit);
+    CHECK(history.terminal->optimization->outcome.value==MathematicalOutcome::optimal);
+    CHECK(history.terminal->optimization->raw_diagnostics.find(
+        "injected terminal resource limit after real optimizer result")!=std::string::npos);
+    CHECK_FALSE(history.terminal->optimization->objective.lower);
+    CHECK_FALSE(history.terminal->optimization->objective.upper);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason==StopReason::resource_limit);
+    CHECK(stop.stop.diagnostics=="Terminal optimization stopped; slice-scoped evidence retained.");
+    CHECK(stop.request.port=="convex");
+    CHECK(stop.request.request==RequestId{"syn02-terminal:"+history.terminal->construction.feasible_slice.value});
+    CHECK(stop.request.requested_module==ModuleId{"csl.convex.highs"});
+    CHECK(stop.request.actual_module==ModuleId{"csl.convex.highs"});
+    CHECK(stop.request.actual_version==std::optional<std::string>{"1.0.0+highs.1.11.0"});
+    CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
+    // Strategy A emits no caller-visible timing spans on this stop; timing coverage remains a #89 dependency.
     CHECK(result.spans.empty());
 }
 TEST_CASE("registered terminal numerical failure retains the feasible candidate and scoped optimizer evidence") {
