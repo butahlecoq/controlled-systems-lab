@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/registry/registry.hpp>
 #include <limits>
+#include <functional>
 #include "fixtures.hpp"
 
 using namespace csl;
@@ -30,21 +31,26 @@ using CompletenessSupport = decltype(CompletenessEvidence{}.support);
 
 class MalformedCompletenessProposal final : public SynthesisWorkspace {
     CompletenessSupport support_;
+    std::function<void(FamilyIdentity&)> mutate_binding_;
 public:
-    explicit MalformedCompletenessProposal(CompletenessSupport support) : support_(std::move(support)) {}
+    explicit MalformedCompletenessProposal(CompletenessSupport support,
+        std::function<void(FamilyIdentity&)> mutate_binding={})
+        : support_(std::move(support)),mutate_binding_(std::move(mutate_binding)) {}
 
     SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
         const ExecutionContext&) override {
         const auto id=problem.identity();
         const ModuleId strategy{"synthetic-completeness-guard"};
         const std::string version{"1"};
-        const FamilyIdentity identity{id,request,problem.constraints().coordinates(),strategy,version,{}};
+        const FamilyIdentity identity{id,request,problem.constraints().coordinates(),strategy,version,request.lineage};
         const JointRelation relation{identity.coordinates,request.representation,
             std::make_shared<const JointRelationPayload>()};
         const ClaimEvidence optimum{id,SymbolicArgument{"synthetic optimum","fixture objective"}};
         const ObjectiveBound bound{0,optimum};
+        auto binding=identity;
+        if(mutate_binding_)mutate_binding_(binding);
         CompleteOptimalFamily complete{relation,{optimum,{bound,bound}},
-            {identity,std::move(support_)},Assurance::numerical};
+            {std::move(binding),std::move(support_)},Assurance::numerical};
         SynthesisResult result{Termination::completed,
             {id,MathematicalOutcome::optimal,optimum.support,{}},{bound,bound},{},{},{},{}};
         result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
@@ -1029,6 +1035,85 @@ TEST_CASE("public prepared strategy rejects completeness claims without the sele
         CHECK(diagnostics[0].field=="family.proposal.verifier");
         CHECK(diagnostics[0].explanation==
             "Proposal proof payload does not match the frozen strategy registration");
+    }
+}
+
+TEST_CASE("public prepared strategy rejects a complete-family proof bound to a different identity") {
+    using BindingMutation=std::pair<std::string,std::function<void(FamilyIdentity&)>>;
+    const std::vector<TransformStepIdentity> lineage{
+        {{"transform/1"},{"source/1"},{"joint/1"},{"converter/1"},"1"},
+        {{"transform/2"},{"joint/1"},{"joint/2"},{"projector/1"},"1"}};
+    const std::vector<BindingMutation> mismatches{
+        {"resolved problem",[](auto& binding){binding.problem={"foreign-problem"};}},
+        {"effective request",[](auto& binding){binding.request.profile="foreign-profile";}},
+        {"effective objective",[](auto& binding){binding.request.objective={"foreign-objective"};}},
+        {"joint-coordinate schema",[](auto& binding){binding.coordinates.dimensions.state+=1;}},
+        {"strategy",[](auto& binding){binding.strategy={"foreign-strategy"};}},
+        {"strategy version",[](auto& binding){binding.strategy_version="2";}},
+        {"ordered lineage",[](auto& binding){std::swap(binding.lineage[0],binding.lineage[1]);}}
+    };
+
+    for(const auto& [field,mutate_binding]:mismatches) {
+        CAPTURE(field);
+        auto request=strategy_request();
+        request.configuration.strategy={"synthetic-completeness-guard"};
+        request.strategy_version="1";
+        request.lineage=lineage;
+        request.family.target=FamilyTarget::exact_optimal_relation;
+        request.family.representation={"synthetic-joint-relation"};
+        Requirements requirements;
+        requirements.output.representation=request.family.representation;
+        requirements.output.family=FamilyTarget::exact_optimal_relation;
+        requirements.output.completeness=Completeness::established;
+
+        StrategyRegistry registry;
+        StrategyRegistration registration{
+            {{"synthetic-completeness-guard"},"1"},
+            [](const StrategyRequest& prepared,const Requirements&) -> Capability {
+                Output output;
+                output.representation=prepared.family.representation;
+                output.assurance=Assurance::numerical;
+                output.family=FamilyTarget::exact_optimal_relation;
+                output.completeness=Completeness::established;
+                return Offer{std::move(output)};
+            },
+            [mutate_binding](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+                auto checked=std::get<CheckedPipeline<>>(check_pipeline());
+                return compose_strategy(std::move(checked),[mutate_binding](auto,const StrategyRequest&,
+                    const Requirements&) {
+                    return std::make_unique<MalformedCompletenessProposal>(
+                        RegisteredCompletenessEvidence{{"csl.verifier.ts02-constant-integrator"},"1","opaque-proof"},
+                        mutate_binding);
+                });
+            },
+            StrategyRegistration::CompleteFamilyVerifierKey{
+                {"csl.verifier.ts02-constant-integrator"},"1"}
+        };
+        REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+
+        const auto prepared=registry.prepare(request,requirements);
+        REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+        auto execution=context();
+        execution.numerical=request.family.numerical;
+        const auto answer=std::get<PreparedStrategy>(prepared).create()->run(execution);
+        REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+        const auto& rejected=std::get<SynthesisResult>(answer);
+        CHECK(rejected.termination==Termination::contract_rejected);
+        CHECK(rejected.outcome.subject==request.problem.identity());
+        CHECK(rejected.outcome.value==MathematicalOutcome::undetermined);
+        CHECK(std::holds_alternative<Unestablished>(rejected.outcome.support));
+        CHECK_FALSE(rejected.family.has_value());
+        CHECK_FALSE(rejected.complete_proposal.has_value());
+        CHECK_FALSE(rejected.partial_proposal.has_value());
+        CHECK_FALSE(rejected.objective.lower.has_value());
+        CHECK_FALSE(rejected.objective.upper.has_value());
+        REQUIRE(std::holds_alternative<ContractValidationFailure>(rejected.stop));
+        const auto& diagnostics=std::get<ContractValidationFailure>(rejected.stop).diagnostics;
+        REQUIRE(diagnostics.size()==1);
+        CHECK(diagnostics[0].code==DiagnosticCode::evidence_mismatch);
+        CHECK(diagnostics[0].field=="family.proposal.binding");
+        CHECK(diagnostics[0].explanation==
+            "Complete-family proposal differs from the prepared problem, effective request or selected registration");
     }
 }
 
