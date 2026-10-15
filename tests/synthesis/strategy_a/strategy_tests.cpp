@@ -639,7 +639,6 @@ TEST_CASE("T-S03 singular A keeps free earlier controls with a unique terminal m
 }
 TEST_CASE("late terminal admission rejection retains a feasible candidate and scoped lineage") {
     auto result=run(request(integrator()),true);
-    INFO("resolved fixture problem ID: " << result.family->identity().problem.value);
     CHECK(result.termination==Termination::operation_rejected);
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
