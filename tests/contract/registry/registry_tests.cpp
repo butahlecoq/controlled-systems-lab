@@ -464,7 +464,7 @@ TEST_CASE("public prepared strategy retains bound and incumbent when a later gen
     const TransformStepIdentity transform{{"accepted-lp-step"},{"source-control-set"},
         {"candidate-relation"},{"retained-provider"},"1"};
     StrategyRegistration strategy{{{"retained-provider"},"1"},
-        [](const StrategyRequest&,const Requirements&) -> Capability { return Offer{}; },
+        [](const StrategyRequest&,const Requirements& requested) -> Capability { return Offer{requested.output}; },
         [&lp](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
             auto checked=check_providers(select_provider(lp,Method{{"conditional-endpoint"},std::string{"4"}}));
             if(const auto* rejection=std::get_if<Rejection>(&checked))return *rejection;
@@ -495,6 +495,11 @@ TEST_CASE("public prepared strategy retains bound and incumbent when a later gen
     requirements.output.family=FamilyTarget::candidate_relaxation;
     requirements.output.assurance=Assurance::numerical;
     const auto prepared=strategies.prepare(request,requirements);
+    const auto prepare_diagnostic=std::holds_alternative<Rejection>(prepared)&&
+        !std::get<Rejection>(prepared).diagnostics.empty()?
+        std::get<Rejection>(prepared).diagnostics[0].field+": "+
+            std::get<Rejection>(prepared).diagnostics[0].explanation:"no preparation diagnostic";
+    INFO("strategy preparation: " << prepare_diagnostic);
     REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
     auto workspace=std::get<PreparedStrategy>(prepared).create();
     const auto answer=workspace->run(context());
