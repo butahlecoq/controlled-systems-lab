@@ -21,6 +21,7 @@ the wider mathematical requirements.
 | Directional witness selection | `CSL::witness_selector`, registered `SelectorPort` | `src/synthesis/witness_selector.cpp` |
 | Original-problem trajectory checks | `CSL::verification`, `verify_trajectory` | `src/verification` |
 | Execution and portable records | `CSL::execution`, `CSL::artifacts` | `src/execution`, `src/artifacts` |
+| Guarded paired application flow | `CSL::application`, `prepare_comparison`, `run_comparison` | `src/application` |
 | Numerical report tooling | saved record validation and rendering | `benchmarks/reporting`, `scripts/reports` |
 
 Headers live under `include/csl`. Authoritative contracts cover
@@ -70,6 +71,21 @@ does not make every numerical trajectory report a completeness proof.
 The current [installed examples](../../README.md#quick-start) execute component
 workflows, including real LP backend substitution; the two LP providers are not
 two synthesis strategies. The scenario examples evaluate supplied controls.
+`CSL::application` provides a reusable guarded paired-strategy flow: both
+strategies are prepared against one immutable problem/request before either
+workspace is created. Preparation is sequential through the registry contract,
+so the first strategy planner may run before the second capability check; no
+solver workspace or strategy execution starts unless both preparations succeed.
+Complete families alone reach the selector, and selected witnesses are checked
+against the original problem. Candidate and partial outputs remain typed
+without selection if a strategy returns them; the current caller-visible
+integration fixtures cover only successful complete-family T-S01/T-S02 flows.
+Its result exposes the artifact layer's final
+projections and the original-problem verification reports as typed in-memory
+values. It does not claim to persist the paired comparison: run-statistics-v4
+has no paired-comparison record, and its encoder rejects registered-completeness
+payloads. Callers must use the artifact encoder and handle its actual typed
+result; this API does not emit substitute JSON.
 The delivered
 [registered synthesis comparison](../../examples/registered_synthesis_comparison.cpp)
 runs both strategies on the same immutable T-S01 problem, selects witness
