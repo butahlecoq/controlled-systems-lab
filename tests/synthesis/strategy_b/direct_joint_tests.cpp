@@ -1066,6 +1066,34 @@ TEST_CASE("registered early row-budget stop survives public result sanitization"
     CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason==StopReason::resource_limit);
     CHECK_FALSE(r.family);CHECK(r.incumbents.empty());CHECK(r.outcome.value==MathematicalOutcome::undetermined);
 }
+TEST_CASE("registered Strategy B preserves its prepared numerical policy in the public result") {
+    const auto p=resolve(integrator());auto q=request(p);
+    q.assurance=Assurance::numerical;q.numerical={1e-7,2e-7};
+    const auto prepared=registered_prepared(p,q);
+
+    auto matching_workspace=prepared.create();
+    ExecutionContext matching_context;
+    matching_context.numerical={1e-7,2e-7};
+    matching_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=accepted(matching_workspace->run(matching_context));
+    REQUIRE(result.family);
+    CHECK(result.family->identity().request.numerical.absolute_tolerance==1e-8);
+    CHECK(result.family->identity().request.numerical.relative_tolerance==2e-7);
+    CHECK(result.family->identity().request.numerical==(NumericalPolicy{1e-7,2e-7}));
+
+    auto mismatched_workspace=prepared.create();
+    ExecutionContext mismatched_context;
+    mismatched_context.numerical={1e-6,2e-7};
+    mismatched_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto unsupported=mismatched_workspace->run(mismatched_context);
+    REQUIRE(std::holds_alternative<Unsupported>(unsupported));
+    const auto& diagnostics=std::get<Unsupported>(unsupported).diagnostics;
+    REQUIRE(diagnostics.size()==1);
+    CHECK(diagnostics.front().code==DiagnosticCode::invalid_input);
+    CHECK(diagnostics.front().field=="family.numerical");
+    CHECK(diagnostics.front().explanation==
+        "ExecutionContext numerical policy differs from the prepared family request");
+}
 TEST_CASE("validation failure uses the contract product without a sanitizer replacement") {
     const auto p=resolve(integrator());const auto q=request(p);ExecutionContext context;context.numerical={1e-3,1e-3};
     const auto direct=oracle({0,0.25,1,0.25,0.75},0).solve(p,q,context);
