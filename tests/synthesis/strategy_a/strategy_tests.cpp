@@ -574,8 +574,9 @@ TEST_CASE("public Strategy A exact T-S02 family equals the analytic feasible-his
     // x1=u0, x2=x1+u1 and the two control bounds. The objective is the
     // constant 3, so every point in this relation is optimal. These seven
     // rows are the whole relation, rather than a finite set of witnesses.
-    const auto& actual=std::get<sets::HRepresentation>(
-        relation->h_polyhedron().representation());
+    const auto polyhedron=relation->h_polyhedron();
+    const auto representation=polyhedron.representation();
+    const auto& actual=std::get<sets::HRepresentation>(representation);
     REQUIRE(actual.inequalities.rows()==4);
     REQUIRE(actual.equalities.rows()==3);
     CHECK(actual.inequalities.cols()==5);
