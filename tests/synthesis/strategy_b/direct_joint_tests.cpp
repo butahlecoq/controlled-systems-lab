@@ -261,17 +261,22 @@ sets::HRepresentation midpoint_equality_parameter_interval() {
 }
 template<class Program,class Base> class OracleWorkspace final:public Base {
     Vector anchor_;double value_;bool wrong_;Termination termination_;std::stop_source* stop_;
+    MathematicalOutcome outcome_;
     std::function<void()> before_return_;
     ProgramOutcome do_solve(const Program& p,const ExecutionContext&) override {
         auto id=p.identity();if(wrong_)id.program={"foreign"};
         EvidenceSupport support=SymbolicArgument{"literal-joint-oracle","Hand-minimized objective on the authored joint relation."};
         ProgramObjectiveBound bound{value_,{id,support,{}}};
         if(stop_)stop_->request_stop();
-        ProgramResult result{termination_,{id,MathematicalOutcome::optimal,support,{}},anchor_,{bound,bound},"independent analytic oracle"};
+        const bool infeasible=outcome_==MathematicalOutcome::infeasible;
+        ProgramResult result{termination_,{id,outcome_,infeasible?EvidenceSupport{Unestablished{}}:support,{}},
+            infeasible?std::nullopt:std::optional<Vector>{anchor_},infeasible?ProgramObjectiveEvidence{}:ProgramObjectiveEvidence{bound,bound},
+            "independent analytic oracle"};
         if(before_return_)before_return_();
         return result;
     }
-public: OracleWorkspace(Vector a,double v,bool wrong,Termination term,std::stop_source* stop,std::function<void()> before_return={}):anchor_(std::move(a)),value_(v),wrong_(wrong),termination_(term),stop_(stop),before_return_(std::move(before_return)){}
+public: OracleWorkspace(Vector a,double v,bool wrong,Termination term,std::stop_source* stop,std::function<void()> before_return={},
+    MathematicalOutcome outcome=MathematicalOutcome::optimal):anchor_(std::move(a)),value_(v),wrong_(wrong),termination_(term),stop_(stop),outcome_(outcome),before_return_(std::move(before_return)){}
 };
 DirectJointWorkspace oracle(Vector anchor,double value,bool wrong=false,bool reject=false,Termination term=Termination::completed,std::stop_source* stop=nullptr) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;
@@ -345,7 +350,8 @@ const sets::SetData& strategy_a_relation(const SynthesisResult& result) {
     REQUIRE(data);return data->history.relation;
 }
 registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
-    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,std::function<void()> before_return={}) {
+    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,
+    std::function<void()> before_return={},MathematicalOutcome solver_outcome=MathematicalOutcome::optimal) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
     auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
     if(foreign_provider) {
@@ -353,11 +359,11 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
         linear={{{"oracle-lp"},"1"},offer,[](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
         convex={{{"oracle-qp"},"1"},offer,[](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,true,Termination::completed,nullptr);}};
-    } else if(solver_termination!=Termination::completed || stop || before_return) {
+    } else if(solver_termination!=Termination::completed || stop || before_return || solver_outcome!=MathematicalOutcome::optimal) {
         registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
         const auto offer=[=](const auto&,const registry::Requirements&)->registry::Capability{return registry::Offer{program_requirements.output};};
-        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return);}};
-        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return);}};
+        linear={{{"oracle-lp"},"1"},offer,[=](const LinearProgram&){return std::make_unique<OracleWorkspace<LinearProgram,LPWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return,solver_outcome);}};
+        convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return,solver_outcome);}};
     }
     const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
     CHECK_FALSE(strategies.add(make_registration(lp,qp)));
@@ -1092,6 +1098,36 @@ TEST_CASE("registered Strategy B reports a completed unbounded objective without
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
     CHECK_FALSE(result.family);
+}
+TEST_CASE("registered Strategy B retains infeasible program evidence while the public boundary rejects its source conflict") {
+    const auto p=resolve(integrator(LinearTerminal{{0},3}));
+    const auto q=request(p);
+    const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,{},MathematicalOutcome::infeasible);
+    auto workspace=prepared.create();
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+
+    const auto result=accepted(workspace->run(context));
+
+    // The source has a feasible history (x0,x1,x2,u0,u1)=(0,0.25,1,0.25,0.75),
+    // so completed infeasibility of its generated joint program conflicts with
+    // the candidate relation retained for the resolved problem.
+    CHECK(result.termination==Termination::contract_rejected);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.objective.upper);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    const auto retained=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
+    REQUIRE(retained);
+    REQUIRE(retained->optimization);
+    CHECK(retained->optimization->termination==Termination::completed);
+    CHECK(retained->optimization->outcome.value==MathematicalOutcome::infeasible);
 }
 TEST_CASE("T-S02 verifier admits constant linear quadratic and residual norm objectives") {
     const std::vector<TerminalObjective> objectives{
