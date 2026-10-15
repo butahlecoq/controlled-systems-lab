@@ -53,19 +53,18 @@ int main(int argc, char** argv) {
     const auto requested = scenario.requested_run();
     const auto dimensions = problem.model().dimensions();
 
-    std::cout << "validation=valid\n"
-              << "schema=" << source->schema << '\n'
-              << "problem=" << problem.identity().value << '\n'
-              << "source_sha256=" << csl::problem::hex(source->content.digest()) << '\n'
-              << "horizon=" << problem.model().horizon()
+    std::cout << "validation=valid schema=" << source->schema
+              << " problem=" << problem.identity().value
+              << " source_sha256=" << csl::problem::hex(source->content.digest())
+              << " horizon=" << problem.model().horizon()
               << " state_dimension=" << dimensions.state
-              << " control_dimension=" << dimensions.control << '\n';
+              << " control_dimension=" << dimensions.control
+              << " requested=";
     if (std::holds_alternative<csl::input::ComparisonRequest>(requested->selection)) {
-        std::cout << "requested=comparison\n";
+        std::cout << "comparison";
     } else {
-        std::cout << "requested=explicit_methods count="
-                  << std::get<std::vector<csl::input::ModuleRequest>>(requested->selection).size() << '\n';
+        std::cout << "explicit_methods count="
+                  << std::get<std::vector<csl::input::ModuleRequest>>(requested->selection).size();
     }
-    std::cout << "mode=validate_only solvers=not_invoked\n";
-    return 0;
+    std::cout << " mode=validate_only solvers=not_invoked\\n";    return 0;
 }
