@@ -1,16 +1,24 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
+#include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
+#include <csl/adapters/polyhedral/qhull.hpp>
+#include <csl/geometry/affine_sum.hpp>
+#include <csl/geometry/polyhedral_projection.hpp>
 #include "compiled_verifiers.hpp"
 #include "strategy_b_lineage.hpp"
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
+#include <string>
+#include <type_traits>
+#include <vector>
 using namespace csl;
 using namespace csl::synthesis::strategy_b;
 namespace {
@@ -160,11 +168,96 @@ bool feasible_without_temporal_rows(const JointProgram& p,const Vector& x) {
         if(p.bounds[i].upper&&v>*p.bounds[i].upper+1e-10)return false;
     }return true;
 }
-bool contains(const sets::SetData& set,const Vector& x) {
+bool contains(const sets::SetData& set,const Vector& x,double tolerance=1e-10) {
     const auto h=std::get<sets::HRepresentation>(set.representation());
-    for(std::size_t i=0;i<h.inequalities.rows();++i) {double v=0;for(std::size_t j=0;j<x.size();++j)v+=h.inequalities(i,j)*x[j];if(v>h.upper_bounds[i]+1e-10)return false;}
-    for(std::size_t i=0;i<h.equalities.rows();++i) {double v=0;for(std::size_t j=0;j<x.size();++j)v+=h.equalities(i,j)*x[j];if(std::abs(v-h.equality_values[i])>1e-10)return false;}
+    for(std::size_t i=0;i<h.inequalities.rows();++i) {double v=0;for(std::size_t j=0;j<x.size();++j)v+=h.inequalities(i,j)*x[j];if(v>h.upper_bounds[i]+tolerance)return false;}
+    for(std::size_t i=0;i<h.equalities.rows();++i) {double v=0;for(std::size_t j=0;j<x.size();++j)v+=h.equalities(i,j)*x[j];if(std::abs(v-h.equality_values[i])>tolerance)return false;}
     return true;
+}
+std::size_t equality_rank(const sets::HRepresentation& h) {
+    std::vector<Vector> rows(h.equalities.rows(),Vector(h.equalities.cols()));
+    for(std::size_t r=0;r<rows.size();++r) {
+        double scale=0;
+        for(std::size_t c=0;c<rows[r].size();++c)scale=std::max(scale,std::abs(h.equalities(r,c)));
+        if(scale>0)for(std::size_t c=0;c<rows[r].size();++c)rows[r][c]=h.equalities(r,c)/scale;
+    }
+    std::size_t rank=0;
+    for(std::size_t c=0;c<h.equalities.cols() && rank<rows.size();++c) {
+        auto pivot=rank;while(pivot<rows.size() && std::abs(rows[pivot][c])<1e-10)++pivot;
+        if(pivot==rows.size())continue;
+        std::swap(rows[rank],rows[pivot]);
+        const auto divisor=rows[rank][c];for(std::size_t j=c;j<rows[rank].size();++j)rows[rank][j]/=divisor;
+        for(std::size_t r=0;r<rows.size();++r)if(r!=rank) {
+            const auto factor=rows[r][c];for(std::size_t j=c;j<rows[r].size();++j)rows[r][j]-=factor*rows[rank][j];
+        }
+        ++rank;
+    }
+    return rank;
+}
+std::pair<double,double> parameter_interval(const sets::HRepresentation& h,
+    const Vector& origin,const Vector& direction,double tolerance=1e-7) {
+    auto lower=-std::numeric_limits<double>::infinity();
+    auto upper=std::numeric_limits<double>::infinity();
+    for(std::size_t i=0;i<h.equalities.rows();++i) {
+        long double row_scale=std::abs(static_cast<long double>(h.equality_values[i]));
+        for(std::size_t j=0;j<origin.size();++j) {
+            row_scale=std::max(row_scale,std::abs(static_cast<long double>(h.equalities(i,j))));
+        }
+        long double at_origin=0,slope=0;
+        const auto divisor=row_scale>0?row_scale:1.0L;
+        const auto value=static_cast<long double>(h.equality_values[i])/divisor;
+        for(std::size_t j=0;j<origin.size();++j) {
+            const auto coefficient=static_cast<long double>(h.equalities(i,j))/divisor;
+            at_origin+=coefficient*origin[j];slope+=coefficient*direction[j];
+        }
+        const auto residual=value-at_origin;
+        if(slope==0) {
+            CHECK(std::abs(residual)<=tolerance);
+            continue;
+        }
+        // Any nonzero equality slope restricts the line to one parameter
+        // value, however small that slope is. Do not use a residual tolerance
+        // to turn a midpoint-only intersection into a full segment.
+        const auto endpoint=residual/slope;
+        lower=std::max(lower,static_cast<double>(endpoint));
+        upper=std::min(upper,static_cast<double>(endpoint));
+    }
+    for(std::size_t i=0;i<h.inequalities.rows();++i) {
+        long double row_scale=std::abs(static_cast<long double>(h.upper_bounds[i]));
+        for(std::size_t j=0;j<origin.size();++j)
+            row_scale=std::max(row_scale,std::abs(static_cast<long double>(h.inequalities(i,j))));
+        const auto divisor=row_scale>0?row_scale:1.0L;
+        long double at_origin=0,slope=0;
+        for(std::size_t j=0;j<origin.size();++j) {
+            const auto coefficient=static_cast<long double>(h.inequalities(i,j))/divisor;
+            at_origin+=coefficient*origin[j];slope+=coefficient*direction[j];
+        }
+        const auto rhs=static_cast<long double>(h.upper_bounds[i])/divisor-at_origin;
+        if(slope==0) {
+            CHECK(rhs>=-tolerance);
+            continue;
+        }
+        const auto endpoint=rhs/slope;
+        if(slope>0)upper=std::min(upper,static_cast<double>(endpoint));
+        else lower=std::max(lower,static_cast<double>(endpoint));
+    }
+    return {lower,upper};
+}
+sets::HRepresentation scaled_parameter_interval(double row_scale) {
+    const Matrix inequalities{2,5,{0,row_scale,0,0,0,0,-row_scale,0,0,0}};
+    const Vector bounds{row_scale,0};
+    const auto set=accepted(sets::make_h({{"scaled-parameter-interval"},5,{"x0","x1","x2","u0","u1"}},
+        {accepted(numeric::snapshot(inequalities)),accepted(numeric::snapshot_vector(bounds)),
+         accepted(numeric::snapshot(Matrix{0,5,{}})),accepted(numeric::snapshot_vector(Vector{}))}));
+    return std::get<sets::HRepresentation>(set.representation());
+}
+sets::HRepresentation midpoint_equality_parameter_interval() {
+    const auto set=accepted(sets::make_h({{"midpoint-equality-interval"},5,{"x0","x1","x2","u0","u1"}},
+        {accepted(numeric::snapshot(Matrix{2,5,{0,1,0,0,0,0,-1,0,0,0}})),
+         accepted(numeric::snapshot_vector(Vector{1,0})),
+         accepted(numeric::snapshot(Matrix{1,5,{1,1e-11,0,0,0}})),
+         accepted(numeric::snapshot_vector(Vector{5e-12}))}));
+    return std::get<sets::HRepresentation>(set.representation());
 }
 template<class Program,class Base> class OracleWorkspace final:public Base {
     Vector anchor_;double value_;bool wrong_;Termination termination_;std::stop_source* stop_;
@@ -197,6 +290,60 @@ const DirectJointPayload& payload(const SynthesisResult& r) {
     const auto& candidate=std::get<CandidateFamily>(r.family->outcome());
     const auto cast=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);REQUIRE(cast);return *cast;
 }
+SynthesisResult run_strategy_a(const problem::ResolvedProblem& p,const FamilyRequest& family) {
+    auto lp=accepted(adapters::lp::make_highs_registration());
+    auto convex=accepted(adapters::convex::make_highs_registration());
+    auto converter=accepted(adapters::polyhedral::make_qhull_registration(lp));
+    auto projection=geometry::polyhedral::make_projection_registration();
+    auto selected=[]<class Port>(registry::Registration<Port> entry,std::string representation) {
+        registry::Registry<Port> providers;
+        const registry::Method method{entry.identity.id,entry.identity.version};
+        REQUIRE_FALSE(providers.add(std::move(entry)).has_value());
+        registry::Requirements required;required.output.representation={std::move(representation)};
+        if constexpr(std::is_same_v<Port,registry::GeometryPort> || std::is_same_v<Port,registry::ConversionPort>)
+            required.output.relation=SetRelation::equivalent;
+        return accepted(registry::prepare_provider(registry::select_provider(providers,method,required)));
+    };
+    auto affine=geometry::make_affine_sum_registration({
+        selected(geometry::make_lp_hull_reducer_registration(),""),
+        selected(lp,"csl.program-result.v1"),selected(converter,"csl.polyhedron.v")});
+    registry::Registry<registry::GeometryPort> projections,affines;
+    registry::Registry<registry::ConversionPort> conversions;
+    registry::Registry<registry::LPPort> lps;registry::Registry<registry::ConvexPort> convexes;
+    const registry::Method pm{projection.identity.id,projection.identity.version};
+    const registry::Method am{affine.identity.id,affine.identity.version};
+    const registry::Method cm{converter.identity.id,converter.identity.version};
+    const registry::Method lm{lp.identity.id,lp.identity.version};
+    const registry::Method qm{convex.identity.id,convex.identity.version};
+    REQUIRE_FALSE(projections.add(std::move(projection)).has_value());
+    REQUIRE_FALSE(affines.add(std::move(affine)).has_value());
+    REQUIRE_FALSE(conversions.add(std::move(converter)).has_value());
+    REQUIRE_FALSE(lps.add(std::move(lp)).has_value());
+    REQUIRE_FALSE(convexes.add(std::move(convex)).has_value());
+    registry::Requirements h,v,program;
+    h.output.representation={"csl.polyhedron.h"};h.output.relation=SetRelation::equivalent;
+    v.output.representation={"csl.polyhedron.v"};v.output.relation=SetRelation::equivalent;
+    program.output.representation={"csl.program-result.v1"};
+    auto providers=accepted(registry::check_providers(
+        registry::select_provider(projections,pm,h),registry::select_provider(affines,am,v),
+        registry::select_provider(conversions,cm,h),registry::select_provider(lps,lm,program),
+        registry::select_provider(convexes,qm,program)));
+    auto registration=synthesis::strategy_a::make_registration(std::move(providers));
+    registry::StrategyRegistry strategies;REQUIRE_FALSE(strategies.add(std::move(registration)).has_value());
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.reach-back"};
+    registry::StrategyRequest query{p,configuration,family,"1",{}};
+    registry::Requirements output;output.output.representation={"csl.polyhedron.h"};
+    output.output.family=family.target;output.output.completeness=registry::Completeness::unestablished;
+    auto prepared=accepted(strategies.prepare(query,output));auto workspace=prepared.create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    return accepted(workspace->run(context));
+}
+const sets::SetData& strategy_a_relation(const SynthesisResult& result) {
+    REQUIRE(result.family);REQUIRE(result.family->target()==FamilyTarget::candidate_relaxation);
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    const auto* data=dynamic_cast<const synthesis::strategy_a::CandidateHistory*>(candidate.relation.payload.get());
+    REQUIRE(data);return data->history.relation;
+}
 registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
     bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,std::function<void()> before_return={}) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
@@ -222,6 +369,20 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         registry::Completeness::established:registry::Completeness::unestablished;
     return accepted(strategies.prepare({p,configuration,q,"1"},requirements));
 }
+}
+TEST_CASE("row-derived intervals are invariant under positive H-row scaling") {
+    const Vector origin{0,0,0.5,0,0.5},direction{0,1,0,1,0};
+    for(const double scale:{1e-200,1.0,1e200}) {
+        const auto interval=parameter_interval(scaled_parameter_interval(scale),origin,direction);
+        CHECK(std::isfinite(interval.first));CHECK(std::isfinite(interval.second));
+        CHECK(std::abs(interval.first)<=1e-12);CHECK(std::abs(interval.second-1)<=1e-12);
+    }
+}
+TEST_CASE("a nearly parallel equality collapses the parameter interval") {
+    const auto interval=parameter_interval(midpoint_equality_parameter_interval(),
+        Vector{0,0,0,0,0},Vector{0,1,0,0,0});
+    CHECK(std::isfinite(interval.first));CHECK(std::isfinite(interval.second));
+    CHECK(std::abs(interval.first-0.5)<=1e-12);CHECK(std::abs(interval.second-0.5)<=1e-12);
 }
 TEST_CASE("joint program preserves the two-step integrator and original terminal objective") {
     const auto p=resolve(integrator()); const auto program=accepted(build_joint_program(p,request(p)));
@@ -252,9 +413,46 @@ TEST_CASE("T-S02 constant objective retains every feasible history and terminal 
 TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal optimum") {
     auto input=integrator(QuadraticTerminal{{1,1,{2}},{-1},0.25});
     auto model=*input.model;std::get<LinearStage>(model.dynamics.stages).A.values={0};input.model=std::make_shared<const SystemModel>(model);
-    const auto p=resolve(input);const auto r=oracle({0,0.25,0.5,0.25,0.5},0).solve(p,request(p),{});
-    const auto& data=payload(r);CHECK(contains(data.relation,{0,0,0.5,0,0.5}));CHECK(contains(data.relation,{0,1,0.5,1,0.5}));
-    CHECK_FALSE(contains(data.relation,{0,0,1,0,1}));
+    const auto p=resolve(input);const auto q=request(p);
+    // Independent full-history derivation: x0=0, x1=u0, x2=u1, and
+    // u0,u1 in [0,1]. The objective (x2-1/2)^2 has minimum zero exactly
+    // when x2=u1=1/2, leaving u0 free. Thus the full optimal relation is
+    // {(0,a,1/2,a,1/2) : 0 <= a <= 1} in (x0,x1,x2,u0,u1) order.
+    // Both A stages are zero, so the state matrix is singular.
+    auto b_workspace=registered_prepared(p,q).create();
+    ExecutionContext b_context;b_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=accepted(b_workspace->run(b_context));
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(result.family);CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());CHECK_FALSE(result.family->partial_registry_verified());
+    const auto& data=payload(result);const auto& relation=data.relation;
+    const Vector first{0,0,0.5,0,0.5},last{0,1,0.5,1,0.5};
+    for(double a:{0.0,0.125,0.25,0.5,0.875,1.0})
+        CHECK(contains(relation,{0,a,0.5,a,0.5}));
+    CHECK_FALSE(contains(relation,{0,0.25,0.6,0.25,0.5}));
+    CHECK_FALSE(contains(relation,{0,0.25,0.5,0.25,0.75}));
+    const auto b_h=std::get<sets::HRepresentation>(relation.representation());
+    CHECK(equality_rank(b_h)==4);
+
+    // Compare the same resolved profile through Strategy A. Rank four plus
+    // the shared endpoints confines each convex H set to the same line;
+    // intersecting every H-row with this line must yield the entire interval.
+    const auto a_result=run_strategy_a(p,q);const auto& a_relation=strategy_a_relation(a_result);
+    const auto a_h=std::get<sets::HRepresentation>(a_relation.representation());
+    CHECK(equality_rank(a_h)==4);
+    CHECK(contains(relation,first));CHECK(contains(relation,last));
+    CHECK(contains(a_relation,first,1e-7));CHECK(contains(a_relation,last,1e-7));
+    const Vector direction{0,1,0,1,0};
+    const auto b_interval=parameter_interval(b_h,first,direction);
+    const auto a_interval=parameter_interval(a_h,first,direction);
+    CHECK(std::isfinite(b_interval.first));CHECK(std::isfinite(b_interval.second));
+    CHECK(std::abs(b_interval.first)<=1e-7);CHECK(std::abs(b_interval.second-1)<=1e-7);
+    CHECK(std::isfinite(a_interval.first));CHECK(std::isfinite(a_interval.second));
+    CHECK(std::abs(a_interval.first)<=1e-7);CHECK(std::abs(a_interval.second-1)<=1e-7);
+    for(const auto& point:std::vector<Vector>{{0,0.25,0.6,0.25,0.5},{0,0.25,0.5,0.25,0.75}}) {
+        CHECK_FALSE(contains(relation,point));CHECK_FALSE(contains(a_relation,point,1e-7));
+    }
 }
 TEST_CASE("provider rejection retains the feasible candidate and scoped request provenance") {
     const auto p=resolve(integrator());const auto r=oracle({0,0.25,1,0.25,0.75},0,false,true).solve(p,request(p),{});
