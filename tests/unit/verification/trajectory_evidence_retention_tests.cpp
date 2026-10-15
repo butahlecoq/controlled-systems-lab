@@ -32,7 +32,7 @@ TrajectoryRequest request(const problem::ResolvedProblem& p) {
 class UnexpectedMembershipWorkspace final:public LPWorkspace {
 public:
     ProgramOutcome do_solve(const LinearProgram&,const ExecutionContext&) override {
-        return Unsupported{{{DiagnosticCode::unsupported,"unexpected","rejected provider factory must not run"}}};
+        return Unsupported{Diagnostics{{DiagnosticCode::unsupported,"unexpected","rejected provider factory must not run"}}};
     }
 };
 registry::PreparedProvider<registry::LPPort> rejecting_provider(int& factory_calls) {
