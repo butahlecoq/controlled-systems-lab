@@ -940,10 +940,33 @@ TEST_CASE("coverage and materialization requests fail closed at strategy prepara
     query.family.materialization_limit.reset();query.family.assurance=Assurance::validated;
     CHECK(alternative<Rejection>(admit(query)).diagnostics[0].field=="family");
 }
-TEST_CASE("prepared context numerical policy mismatch rejects without weakening request") {
-    auto query=request(integrator());auto prepared=prepare(query);auto workspace=prepared.create();
-    ExecutionContext context;context.numerical={1e-6,1e-6};
-    CHECK(alternative<Unsupported>(workspace->run(context)).diagnostics[0].field=="family.numerical");
+TEST_CASE("registered Strategy A preserves its prepared numerical policy in the public result") {
+    auto query=request(integrator());
+    query.family.assurance=Assurance::numerical;
+    query.family.numerical={1e-7,2e-7};
+    auto prepared=prepare(query);
+
+    auto matching_workspace=prepared.create();
+    ExecutionContext matching_context;
+    matching_context.numerical={1e-7,2e-7};
+    matching_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=take(matching_workspace->run(matching_context));
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(result.family->identity().request.numerical.absolute_tolerance==1e-7);
+    CHECK(result.family->identity().request.numerical.relative_tolerance==2e-7);
+    CHECK(result.family->identity().request.numerical==(NumericalPolicy{1e-7,2e-7}));
+
+    auto mismatched_workspace=prepared.create();
+    ExecutionContext mismatched_context;
+    mismatched_context.numerical={1e-6,2e-7};
+    mismatched_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto& unsupported=alternative<Unsupported>(mismatched_workspace->run(mismatched_context));
+    REQUIRE(unsupported.diagnostics.size()==1);
+    CHECK(unsupported.diagnostics.front().code==DiagnosticCode::invalid_input);
+    CHECK(unsupported.diagnostics.front().field=="family.numerical");
+    CHECK(unsupported.diagnostics.front().explanation==
+        "ExecutionContext numerical policy differs from the prepared family request");
 }
 TEST_CASE("stage constraints restrict the joint locus without separating histories") {
     auto source=*integrator().description();source.states[1]=interval("restricted-X1",0,.5);
