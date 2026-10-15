@@ -952,10 +952,16 @@ TEST_CASE("strategy registry rejects validated family assurance before planning"
 }
 
 TEST_CASE("public prepared strategy rejects completeness claims without the selected verifier proof") {
-    // CompletenessEvidence has its own three-alternative schema. Numerical residuals and
-    // unchecked certificates are representable as coverage claims, while only the selected
-    // compiled verifier's opaque proof may authorize publication.
+    // Matching family bindings cannot turn unsupported evidence into a completeness proof.
+    // Only the selected compiled verifier's opaque proof may authorize publication.
     const std::vector<std::pair<std::string,CompletenessSupport>> unsupported{
+        {"unestablished completeness",Unestablished{}},
+        {"symbolic argument alone",SymbolicArgument{
+            "synthetic completeness argument","fixture assumptions"}},
+        {"unchecked certificate reference",CertificateReference{
+            "unreviewed-certificate","unchecked-verifier"}},
+        {"residual-only numerical check",NumericalCheck{
+            1e-8,1e-8,1e-10,{"residual-check"}}},
         {"residual-only numerical coverage",NumericalCoverageEvidence{
             "binary64 residual observation",{1e-8,1e-8},{"residual-check"},
             "max residual was observed; no error bound or coverage proof"}},
