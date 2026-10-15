@@ -385,16 +385,11 @@ TEST_CASE("generic numerical and unchecked certificate strings cannot publish co
     const auto identity=result.family->identity();
     auto fake=std::make_shared<const JointRelationPayload>();
     const auto arbitrary=SymbolicArgument{"looks like a proof","not a trusted analytic capability"};
-    for(const auto& support:std::vector<std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>>{
-        std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>{
-            NumericalCoverageEvidence{"always-pass",{0,0},{"verifier"},"residual below invented tolerance"}},
-        std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence>{
-            ValidatedCoverageEvidence{"artifact:unverified",ModuleId{"checker:unregistered"},"exact-looking"}}}) {
-        const auto completeness_support=std::holds_alternative<NumericalCoverageEvidence>(support)?
-            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,RegisteredCompletenessEvidence>{std::get<NumericalCoverageEvidence>(support)}:
-            std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,RegisteredCompletenessEvidence>{std::get<ValidatedCoverageEvidence>(support)};
+    for(const auto& support:std::vector<CompletenessSupport>{
+        NumericalCoverageEvidence{"always-pass",{0,0},{"verifier"},"residual below invented tolerance"},
+        ValidatedCoverageEvidence{"artifact:unverified",ModuleId{"checker:unregistered"},"exact-looking"}}) {
         CompleteOptimalFamily untrusted{{complete.relation.coordinates,identity.request.representation,fake},
-            {{identity.problem,arbitrary},{}},{identity,completeness_support},Assurance::numerical};
+            {{identity.problem,arbitrary},{}},{identity,support},Assurance::numerical};
         CHECK(std::holds_alternative<Diagnostics>(FamilyPublisher::publish(identity,std::move(untrusted))));
     }
 }
