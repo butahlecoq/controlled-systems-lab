@@ -111,5 +111,5 @@ TEST_CASE("provider rejection retains backend bound provenance without promoting
     REQUIRE(rejected.rejection.diagnostics.size()==1);
     CHECK(rejected.rejection.diagnostics.front().code==DiagnosticCode::unsupported);
     CHECK(rejected.rejection.diagnostics.front().field=="membership");
-    CHECK(rejected.rejection.diagnostics.front().message=="literal operation rejection");
+    CHECK(rejected.rejection.diagnostics.front().explanation=="literal operation rejection");
 }
