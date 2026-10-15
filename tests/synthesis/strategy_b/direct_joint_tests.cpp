@@ -883,6 +883,12 @@ TEST_CASE("Strategy B registers the exact T-S02 constant-objective history famil
     CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
     CHECK(result.family->registry_verified());
     CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.family->identity().problem==p.identity());
+    CHECK(result.family->identity().request==exact);
+    CHECK(result.family->identity().coordinates==p.constraints().coordinates());
+    CHECK(result.family->identity().strategy==ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(result.family->identity().strategy_version=="1");
     REQUIRE(result.family->identity().lineage.size()==1);
     CHECK(result.family->identity().lineage.front().request==RequestId{"syn04-build:"+p.identity().value});
     const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
@@ -893,6 +899,43 @@ TEST_CASE("Strategy B registers the exact T-S02 constant-objective history famil
     CHECK(proof->proof=="TS02-constant-integrator-v1");
     const auto payload=std::dynamic_pointer_cast<const synthesis::Ts02ConstantIntegratorRelation>(complete.relation.payload);
     REQUIRE(payload);
+    const auto& metadata=*payload->h_polyhedron().metadata();
+    CHECK(metadata.id==SetId{"ts02-optimal-histories"});
+    CHECK(metadata.set.dimension==5);
+    CHECK(metadata.coordinate_labels==std::vector<std::string>{"x0","x1","x2","u0","u1"});
+    CHECK(complete.relation.coordinates==p.constraints().coordinates());
+    CHECK(complete.relation.representation==RepresentationId{"csl.polyhedron.h"});
+
+    // Independent public-result oracle: x0=0, x1=x0+u0, x2=x1+u1,
+    // 0<=u0,u1<=1. The objective is identically 3, so every point in this
+    // feasible H-relation and no other point is optimal. Check each literal
+    // row and bound in canonical order; the compiled verifier below is an
+    // additional admission check, not the mathematical oracle for this claim.
+    const auto representation=payload->h_polyhedron().representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    const Matrix expected_inequalities{4,5,{0,0,0,1,0, 0,0,0,-1,0,
+        0,0,0,0,1, 0,0,0,0,-1}};
+    const Vector expected_upper{1,0,1,0};
+    const Matrix expected_equalities{3,5,{1,0,0,0,0, -1,1,0,-1,0,
+        0,-1,1,0,-1}};
+    const Vector expected_values{0,0,0};
+    REQUIRE(h.inequalities.rows()==expected_inequalities.rows);
+    REQUIRE(h.inequalities.cols()==expected_inequalities.cols);
+    REQUIRE(h.upper_bounds.size()==expected_upper.size());
+    REQUIRE(h.equalities.rows()==expected_equalities.rows);
+    REQUIRE(h.equalities.cols()==expected_equalities.cols);
+    REQUIRE(h.equality_values.size()==expected_values.size());
+    for(std::size_t i=0;i<expected_inequalities.rows;++i) {
+        CHECK(h.upper_bounds[i]==expected_upper[i]);
+        for(std::size_t j=0;j<expected_inequalities.cols;++j)
+            CHECK(h.inequalities(i,j)==expected_inequalities(i,j));
+    }
+    for(std::size_t i=0;i<expected_equalities.rows;++i) {
+        CHECK(h.equality_values[i]==expected_values[i]);
+        for(std::size_t j=0;j<expected_equalities.cols;++j)
+            CHECK(h.equalities(i,j)==expected_equalities(i,j));
+    }
     CHECK(contains(payload->h_polyhedron(),{0,0,0,0,0}));
     CHECK(contains(payload->h_polyhedron(),{0,1,2,1,1}));
     const Vector first_same_terminal_history{0,0.3,1.1,0.3,0.8};
