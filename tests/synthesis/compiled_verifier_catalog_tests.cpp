@@ -67,6 +67,72 @@ StrategyRegistration second_verifier_registration(EvidenceSupport support=
         },
         StrategyRegistration::CompleteFamilyVerifierKey{ModuleId{"test.verifier.second"},"7"}};
 }
+class UnattainedInfimumWorkspace final:public SynthesisWorkspace {
+public:
+    SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext&) override {
+        const SymbolicArgument derivation{
+            "Synthetic test claim: infimum_not_attained",
+            "The registered test workspace supplies this outcome; it is not a theorem about the resolved fixture problem."};
+        return {Termination::completed,
+            {problem.identity(),MathematicalOutcome::infimum_not_attained,derivation,{}},
+            {},{},{},{},{},{}};
+    }
+};
+StrategyRegistration unattained_infimum_registration() {
+    return {{ModuleId{"test.strategy.unattained-infimum"},"1"},
+        [](const StrategyRequest&,const Requirements&)->Capability {
+            Output output;output.representation={"test.unattained-history"};
+            output.assurance=Assurance::numerical;
+            output.family=FamilyTarget::candidate_relaxation;
+            output.completeness=Completeness::unestablished;
+            return Offer{std::move(output)};
+        },
+        [](const StrategyRequest&,const Requirements&)->std::variant<StrategyPlan,Rejection> {
+            auto checked=std::get<CheckedPipeline<>>(check_pipeline());
+            return compose_strategy(std::move(checked),[](auto,const StrategyRequest&,const Requirements&) {
+                return std::make_unique<UnattainedInfimumWorkspace>();
+            });
+        }};
+}
+}
+TEST_CASE("public strategy result preserves a completed unattained-infimum outcome without a family") {
+    const auto problem=resolved_problem();
+    auto family=family_request(problem);
+    family.profile="test-open-domain-infimum";
+    family.target=FamilyTarget::candidate_relaxation;
+    family.representation={"test.unattained-history"};
+    StrategyRequest request{problem,
+        StrategyConfiguration{ModuleId{"test.strategy.unattained-infimum"},{},{},{},{},{},{},{},family.representation},
+        family,"",{}};
+    StrategyRegistry registry;
+    REQUIRE_FALSE(registry.add(unattained_infimum_registration()).has_value());
+    Requirements requirements;requirements.output.representation=family.representation;
+    requirements.output.family=family.target;
+    requirements.output.completeness=Completeness::unestablished;
+    const auto preparation=registry.prepare(request,requirements);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(preparation));
+    ExecutionContext context;context.numerical=family.numerical;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+
+    const auto observed=std::get<PreparedStrategy>(preparation).create()->run(context);
+    REQUIRE(std::holds_alternative<SynthesisResult>(observed));
+    const auto& result=std::get<SynthesisResult>(observed);
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==problem.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::infimum_not_attained);
+    REQUIRE(std::holds_alternative<SymbolicArgument>(result.outcome.support));
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).reference==
+        "Synthetic test claim: infimum_not_attained");
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).assumptions==
+        "The registered test workspace supplies this outcome; it is not a theorem about the resolved fixture problem.");
+    CHECK(result.outcome.assumptions.empty());
+    CHECK_FALSE(result.family);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    CHECK(result.incumbents.empty());
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.objective.upper);
+    CHECK(std::holds_alternative<std::monostate>(result.stop));
 }
 TEST_CASE("a second test-only compiled verifier uses the generic complete-family publication path") {
     const auto problem=resolved_problem();auto family=family_request(problem);
