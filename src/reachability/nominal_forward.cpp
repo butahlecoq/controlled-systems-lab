@@ -106,7 +106,8 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
     try {
     if(tube.request.value.empty())return failure(Unsupported{error("forward.request","Nonempty immutable request ID required.",DiagnosticCode::invalid_input)});
     const auto p=resolved.description();const auto system=resolved.model();const auto dims=system.dimensions();
-    if(p->temporal)return failure(Unsupported{error("forward.temporal","Declared temporal constraints require a coupled-history algorithm.")});
+    if(p->temporal && p->temporal->joint_map.rows!=0)
+        return failure(Unsupported{error("forward.temporal","Declared temporal constraints require a coupled-history algorithm.")});
     if(p->model->dynamics.time_domain!=TimeDomain::discrete || p->information!=InformationPattern::nominal_open_loop)
         return failure(Unsupported{error("forward.profile","Discrete nominal open-loop dynamics required.")});
     if(dims.external || p->external)return failure(Unsupported{error("forward.external","External inputs are outside this nominal profile.")});

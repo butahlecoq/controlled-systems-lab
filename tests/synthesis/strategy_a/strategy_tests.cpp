@@ -1045,6 +1045,9 @@ TEST_CASE("empty temporal constraints do not disable Strategy A capability") {
     CHECK(result.termination==Termination::completed);
     const auto& history=payload(result);
     CHECK(history.target==synthesis::strategy_a::PreimageTarget::terminal_candidate);
+    CHECK(history.history.coordinates==JointCoordinates{{1,1,0},2});
+    CHECK(contains(history.history.relation,{0,0,1,0,1}));
+    CHECK(contains(history.history.relation,{0,1,1,1,0}));
 }
 
 TEST_CASE("nonempty temporal coupling remains an unsupported Strategy A request") {
