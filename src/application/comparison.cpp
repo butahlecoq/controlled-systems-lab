@@ -133,4 +133,20 @@ ComparisonExecution run_comparison(const PreparedComparison& prepared,
     return execution;
 }
 
+artifacts::ArtifactResult<std::string> encode_strategy_run(
+    const problem::ResolvedProblem& problem, const StrategyExecution& execution,
+    artifacts::ResolvedConfiguration configuration, artifacts::RunId run,
+    artifacts::CollectedStatistics statistics, artifacts::ResourceObservation resources) {
+    const auto description = problem.description();
+    std::optional<WitnessSelection> selection;
+    if (const auto* selected = std::get_if<WitnessSelection>(&execution.selection))
+        selection = *selected;
+    artifacts::RunRecord record{problem.identity(), description->model->dynamics.dimensions,
+        static_cast<std::uint64_t>(description->times.size() - 1), std::move(configuration),
+        std::move(run), execution.final_projection, std::move(statistics), std::move(resources),
+        {}, {}, artifacts::ProblemProvenance::problem_revalidated, std::move(selection)};
+    auto published = artifacts::publish_run({problem, std::move(record)});
+    if (auto* error = std::get_if<artifacts::ArtifactError>(&published)) return *error;
+    return artifacts::encode_run(std::get<artifacts::RunStatistics>(published));
+}
 } // namespace csl::application

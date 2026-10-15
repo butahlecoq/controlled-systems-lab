@@ -85,4 +85,11 @@ ComparisonExecution run_comparison(const PreparedComparison&,
     const ExecutionContext&,
     std::optional<registry::PreparedProvider<registry::LPPort>> membership_provider = std::nullopt);
 
+// Encodes one strategy final through the versioned publisher and codec. Paired
+// comparison metadata and verifier reports remain in memory.
+artifacts::ArtifactResult<std::string> encode_strategy_run(
+    const problem::ResolvedProblem&, const StrategyExecution&,
+    artifacts::ResolvedConfiguration, artifacts::RunId,
+    artifacts::CollectedStatistics, artifacts::ResourceObservation);
+
 } // namespace csl::application

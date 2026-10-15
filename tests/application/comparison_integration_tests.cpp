@@ -173,14 +173,10 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
     const ar::RunId run{"application-comparison-encoder"};
     const auto statistics = take(ob::merge_observations(
         take(ob::make_collection_plan({problem, configuration, run, {}, {}, 0})), {}));
-    const ar::RunRecord record{problem.identity(), {1, 1, 0}, 2, configuration, run,
-        strategy_execution.final_projection, statistics,
+    const auto encoded = application::encode_strategy_run(problem, strategy_execution,
+        configuration, run, statistics,
         {uninstrumented, uninstrumented, uninstrumented, uninstrumented, true,
-            ar::MemoryAccounting::unlimited}, {}, {}, ar::ProblemProvenance::problem_revalidated,
-        std::get<WitnessSelection>(strategy_execution.selection)};
-    const auto published = ar::publish_run({problem, record});
-    REQUIRE(std::holds_alternative<ar::RunStatistics>(published));
-    const auto encoded = ar::encode_run(std::get<ar::RunStatistics>(published));
+            ar::MemoryAccounting::unlimited});
     REQUIRE(std::holds_alternative<ar::ArtifactError>(encoded));
     const auto& error = std::get<ar::ArtifactError>(encoded);
     CHECK(error.code == ar::ArtifactErrorCode::unsupported);
