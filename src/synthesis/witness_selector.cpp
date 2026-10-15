@@ -4,6 +4,8 @@
 #include <csl/optimization/linear_program.hpp>
 #include <cmath>
 #include <algorithm>
+#include <array>
+#include <cstdint>
 #include <bit>
 
 namespace csl::synthesis::witness_selector {
@@ -25,27 +27,43 @@ const sets::SetData* relation_set(const OptimalFamily& family) {
     }
     return nullptr;
 }
-bool contains_h(const sets::HRepresentation& h,std::span<const double> point,const NumericalPolicy& numerical) {
-    if(h.inequalities.cols()!=point.size()||h.equalities.cols()!=point.size())return false;
-    const auto tolerance=[&](double lhs,double rhs) {
-        return numerical.absolute_tolerance+numerical.relative_tolerance*
-            std::max(std::abs(lhs),std::abs(rhs));
+
+bool exact_nonnegative_sum_equals(double left,double right,double expected) noexcept {
+    if(left<0||right<0||expected<0)return false;
+    struct Dyadic {std::uint64_t significand;int exponent;};
+    const auto decompose=[](double value) noexcept {
+        const auto bits=std::bit_cast<std::uint64_t>(value);
+        const auto encoded=static_cast<unsigned>((bits>>52)&0x7ffu);
+        const auto fraction=bits&((std::uint64_t{1}<<52)-1);
+        if(encoded==0)return Dyadic{fraction,-1074};
+        return Dyadic{(std::uint64_t{1}<<52)|fraction,static_cast<int>(encoded)-1023-52};
     };
-    for(std::size_t row=0;row<h.inequalities.rows();++row) {
-        double lhs=0;
-        for(std::size_t column=0;column<point.size();++column)lhs+=h.inequalities(row,column)*point[column];
-        const double upper=h.upper_bounds[row];
-        if(!std::isfinite(lhs)||!std::isfinite(upper)||lhs>upper+tolerance(lhs,upper))return false;
-    }
-    for(std::size_t row=0;row<h.equalities.rows();++row) {
-        double lhs=0;
-        for(std::size_t column=0;column<point.size();++column)lhs+=h.equalities(row,column)*point[column];
-        const double expected=h.equality_values[row];
-        if(!std::isfinite(lhs)||!std::isfinite(expected)||std::abs(lhs-expected)>tolerance(lhs,expected))return false;
-    }
-    return std::all_of(point.begin(),point.end(),[](double value){return std::isfinite(value);});
+    const auto add_shifted=[](std::array<std::uint64_t,34>& value,std::uint64_t significand,unsigned shift) noexcept {
+        const auto index=shift/64u;const auto bits=shift%64u;
+        const auto low=significand<<bits;
+        const auto high=bits?significand>>(64u-bits):0;
+        const auto add_word=[&](std::size_t word,std::uint64_t term) {
+            while(term&&word<value.size()) {
+                const auto previous=value[word];value[word]+=term;
+                term=static_cast<std::uint64_t>(value[word]<previous);++word;
+            }
+        };
+        add_word(index,low);add_word(index+1,high);
+    };
+    const auto a=decompose(left),b=decompose(right),c=decompose(expected);
+    const auto minimum=std::min({a.exponent,b.exponent,c.exponent});
+    std::array<std::uint64_t,34> sum{},target{};
+    add_shifted(sum,a.significand,static_cast<unsigned>(a.exponent-minimum));
+    add_shifted(sum,b.significand,static_cast<unsigned>(b.exponent-minimum));
+    add_shifted(target,c.significand,static_cast<unsigned>(c.exponent-minimum));
+    return sum==target;
 }
-Diagnostics admission(const OptimalFamily& family,const WitnessRequest& request) {
+bool contains_ts02(std::span<const double> point) noexcept {
+    if(point.size()!=5||std::any_of(point.begin(),point.end(),[](double value){return !std::isfinite(value);}))return false;
+    const auto x0=point[0],x1=point[1],x2=point[2],u0=point[3],u1=point[4];
+    return x0==0&&x1==u0&&u0>=0&&u0<=1&&u1>=0&&u1<=1&&x2>=0&&
+        exact_nonnegative_sum_equals(x1,u1,x2);
+}Diagnostics admission(const OptimalFamily& family,const WitnessRequest& request) {
     const auto* complete=std::get_if<CompleteOptimalFamily>(&family.outcome());
     const auto* relation=relation_set(family);
     bool h_representation=false;
@@ -149,7 +167,7 @@ public:
                     return selected;
                 }
                 const bool member=result.primal&&result.primal->size()==5&&
-                    (ts01?ts01->contains(*result.primal):contains_h(*h,*result.primal,context.numerical));
+                    (ts01?ts01->contains(*result.primal):contains_ts02(*result.primal));
                 if(result.outcome.subject!=lp.identity()||result.outcome.value!=MathematicalOutcome::optimal||!member) {
                     selected.termination=Termination::numerical_failure;
                     selected.diagnostics="Direction query did not return a consistent registered complete-family history.";return selected;
