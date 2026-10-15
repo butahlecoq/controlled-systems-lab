@@ -1,6 +1,6 @@
 # Target and installation ownership for artifacts. Included from the project root.
 
-csl_add_library(csl_artifacts STATIC src/artifacts/run_statistics.cpp src/artifacts/run_statistics_json.cpp src/execution/observability.cpp src/execution/timing_collector.cpp)
+csl_add_library(csl_artifacts STATIC src/artifacts/run_statistics.cpp src/artifacts/run_statistics_json.cpp src/artifacts/h_relation_attachment.cpp src/execution/observability.cpp src/execution/timing_collector.cpp)
 
 target_link_libraries(csl_artifacts PUBLIC CSL::resolved_problem CSL::execution)
 
