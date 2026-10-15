@@ -519,6 +519,60 @@ TEST_CASE("numerical failure preserves the caller-visible incumbent bound and ca
     CHECK(stop.retained.incumbents==1);
     CHECK(stop.retained.partial_or_candidate_family);
 }
+TEST_CASE("registered resource limit preserves scoped solver evidence and feasible candidate") {
+    const auto p=resolve(integrator());
+    const auto q=request(p);
+    const auto prepared=registered_prepared(p,q,false,Termination::resource_limit);
+    auto workspace=prepared.create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::resource_limit);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    const auto& stop=std::get<ScopedOperationStopped>(result.stop);
+    CHECK(stop.stop.reason==StopReason::resource_limit);
+    CHECK(stop.stop.diagnostics=="independent analytic oracle");
+    CHECK(stop.request.request==RequestId{"syn04-joint:"+p.identity().value});
+    CHECK(stop.request.port=="convex");
+    CHECK(stop.request.requested_module==ModuleId{"oracle-qp"});
+    CHECK_FALSE(stop.request.requested_version);
+    CHECK(stop.request.actual_module==ModuleId{"oracle-qp"});
+    CHECK(stop.request.actual_version=="1");
+
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& data=payload(result);
+    CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
+    REQUIRE(data.optimization);
+    CHECK(data.optimization->termination==Termination::resource_limit);
+    CHECK(data.optimization->outcome.value==MathematicalOutcome::optimal);
+    CHECK(data.optimization->raw_diagnostics=="independent analytic oracle");
+    REQUIRE(data.optimization->objective.lower);
+    CHECK(data.optimization->objective.lower->value==0);
+    CHECK(data.optimization->objective.lower->evidence.subject==data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.lower->evidence.support));
+    REQUIRE(data.optimization->objective.upper);
+    CHECK(data.optimization->objective.upper->value==0);
+    CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
+    CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.upper->evidence.support));
+    REQUIRE(result.incumbents.size()==1);
+    CHECK(result.incumbents.front().feasibility.problem==p.identity());
+    CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility.support));
+    REQUIRE(result.objective.upper);
+    CHECK(result.objective.upper->value==0);
+    CHECK(result.objective.upper->evidence.problem==p.identity());
+    CHECK(std::holds_alternative<NumericalCheck>(result.objective.upper->evidence.support));
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(stop.retained.lower_bound);
+    CHECK(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==1);
+    CHECK(stop.retained.partial_or_candidate_family);
+}
 TEST_CASE("registered cancellation after optimization retains candidate and scoped objective evidence") {
     const auto p=resolve(integrator());const auto q=request(p);std::stop_source source;
     const auto prepared=registered_prepared(p,q,false,Termination::completed,&source);
