@@ -471,8 +471,11 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
         publish();
         if(evidence.termination!=Termination::completed && std::holds_alternative<std::monostate>(result.stop)) {
             StopReason reason=StopReason::numerical_failure;
-            if(evidence.termination==Termination::cancelled)reason=StopReason::cancelled;
-            if(evidence.termination==Termination::resource_limit)reason=StopReason::resource_limit;
+            if(context.cancellation.stop_requested())reason=StopReason::cancelled;
+            else if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)reason=StopReason::deadline_expired;
+            else if(evidence.termination==Termination::cancelled)reason=StopReason::cancelled;
+            else if(evidence.termination==Termination::resource_limit)reason=StopReason::resource_limit;
+            result.termination=stopped_termination(reason);
             result.stop=ScopedOperationStopped{{reason,evidence.raw_diagnostics},provenance,retained(result)};
         }
     };

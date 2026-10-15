@@ -582,6 +582,39 @@ TEST_CASE("registered resource limit preserves scoped solver evidence and feasib
     CHECK(stop.retained.incumbents==1);
     CHECK(stop.retained.partial_or_candidate_family);
 }
+TEST_CASE("registered deadline expiring as solver returns resource limit keeps deadline stop reason") {
+    const auto p=resolve(integrator());
+    const auto q=request(p);
+    ExecutionContext context;
+    const auto prepared=registered_prepared(p,q,false,Termination::resource_limit,nullptr,[&context] {
+        REQUIRE_FALSE(context.deadline);
+        context.deadline=std::chrono::steady_clock::now();
+    },MathematicalOutcome::infeasible);
+    auto workspace=prepared.create();
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
+}
+TEST_CASE("registered cancellation takes priority when deadline and resource limit coincide") {
+    const auto p=resolve(integrator());
+    const auto q=request(p);
+    ExecutionContext context;
+    std::stop_source cancellation;
+    context.cancellation=cancellation.get_token();
+    const auto prepared=registered_prepared(p,q,false,Termination::resource_limit,nullptr,[&context,&cancellation] {
+        context.deadline=std::chrono::steady_clock::now();
+        cancellation.request_stop();
+    },MathematicalOutcome::infeasible);
+    auto workspace=prepared.create();
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::cancelled);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::cancelled);
+}
 TEST_CASE("registered cancellation after optimization retains candidate and scoped objective evidence") {
     const auto p=resolve(integrator());const auto q=request(p);std::stop_source source;
     const auto prepared=registered_prepared(p,q,false,Termination::completed,&source);
