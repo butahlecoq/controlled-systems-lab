@@ -19,7 +19,7 @@ Json support(const EvidenceSupport& v){return std::visit([](const auto& x)->Json
  else if constexpr(std::is_same_v<T,NumericalCheck>)return {{"kind","numerical_check"},{"absolute_tolerance",bits(x.absolute_tolerance)},{"relative_tolerance",bits(x.relative_tolerance)},{"max_residual",bits(x.max_residual)},{"verifier",x.verifier.value}};
  else if constexpr(std::is_same_v<T,SymbolicArgument>)return {{"kind","symbolic_argument"},{"reference",x.reference},{"assumptions",x.assumptions}};
  else if constexpr(std::is_same_v<T,CertificateReference>)return {{"kind","certificate_reference"},{"artifact",x.artifact},{"verifier",x.verifier}};
- else {const auto& c=x.certificate();return {{"kind","exact_farkas_recorded"},{"subject",{{"problem",c.subject.problem.value},{"program",c.subject.program.value}}},{"row_lower",doubles(c.row_lower)},{"row_upper",doubles(c.row_upper)},{"variable_lower",doubles(c.variable_lower)},{"variable_upper",doubles(c.variable_upper)}};}
+ else if constexpr(std::is_same_v<T,ExactFarkasEvidence>){const auto& c=x.certificate();return {{"kind","exact_farkas_recorded"},{"subject",{{"problem",c.subject.problem.value},{"program",c.subject.program.value}}},{"row_lower",doubles(c.row_lower)},{"row_upper",doubles(c.row_upper)},{"variable_lower",doubles(c.variable_lower)},{"variable_upper",doubles(c.variable_upper)}};}
  },v);}
 RecordedEvidenceSupport support(const Json& j){const auto k=j.at("kind").get<std::string>();if(k=="unestablished")return Unestablished{};
  if(k=="numerical_check")return RecordedNumericalCheck{number(j.at("absolute_tolerance")),number(j.at("relative_tolerance")),number(j.at("max_residual")),ModuleId{j.at("verifier").get<std::string>()}};
