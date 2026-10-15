@@ -20,7 +20,9 @@ install(FILES docs/contracts/ts01-exact-analytic-profile.md DESTINATION ${CMAKE_
 
 csl_add_library(csl_strategy_b STATIC src/synthesis/strategy_b/direct_joint.cpp)
 
-target_link_libraries(csl_strategy_b PUBLIC CSL::resolved_problem CSL::sets CSL::registry CSL::convex CSL::verification CSL::strategy_ts01)
+target_link_libraries(csl_strategy_b PUBLIC
+  CSL::resolved_problem CSL::sets CSL::registry CSL::convex CSL::verification
+  CSL::strategy_ts01 CSL::artifacts)
 
 install(FILES docs/contracts/control-recovery.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
 
