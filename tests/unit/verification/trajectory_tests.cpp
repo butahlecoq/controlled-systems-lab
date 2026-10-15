@@ -110,14 +110,17 @@ TEST_CASE("two-control unit-box oracle checks each original history without clai
     input.states={Singleton{{0}},UniversalSet{1},Singleton{{1}}};
     auto p=resolve(input);TrajectoryRequest q;
     q.witness={p.identity(),{{0},{0.25},{1}},{{0.25},{0.75}},1};
-    auto result=verify_trajectory(p,q);
+    ExecutionContext c;c.numerical={0.125,0.03125};
+    auto result=verify_trajectory(p,q,c);
     CHECK(result.feasibility==CheckStatus::numerical_pass);
     CHECK(result.objective==CheckStatus::numerical_pass);
     CHECK(result.completeness==CheckStatus::unsupported);
     q.witness.controls[1][0]=1.25;
-    result=verify_trajectory(p,q);
+    result=verify_trajectory(p,q,c);
     CHECK(result.feasibility==CheckStatus::violation);
     CHECK_FALSE(residual(result,"controls[1].inequalities[0]").satisfied);
+    CHECK(residual(result,"controls[1].inequalities[0]").measure.scale==1.25);
+    CHECK(residual(result,"controls[1].inequalities[0]").tolerance==0.1640625);
     CHECK_FALSE(residual(result,"dynamics[1][0]").satisfied);
 }
 TEST_CASE("passive observation maps do not block nominal trajectory checks") {
