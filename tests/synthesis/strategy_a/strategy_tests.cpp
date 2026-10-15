@@ -745,7 +745,7 @@ TEST_CASE("registered terminal resource limit retains only the unestablished fea
     CHECK(stop.request.request==RequestId{"syn02-terminal:"+history.terminal->construction.feasible_slice.value});
     CHECK(stop.request.requested_module==ModuleId{"csl.convex.highs"});
     CHECK(stop.request.actual_module==ModuleId{"csl.convex.highs"});
-    CHECK(stop.request.actual_version=="1");
+    CHECK(stop.request.actual_version==std::optional<std::string>{"1"});
     CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
     CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
     // Strategy A emits no caller-visible timing spans on this stop; timing coverage remains a #89 dependency.
