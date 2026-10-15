@@ -435,6 +435,7 @@ TEST_CASE("Strategy B records planned run and actual generated-program solver sp
     REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
     auto clock=std::make_shared<StrategyTimingClock>();
     ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     context.timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
         ar::Unavailable{ar::MissingReason::not_instrumented,{}}},clock);
 
@@ -447,8 +448,9 @@ TEST_CASE("Strategy B records planned run and actual generated-program solver sp
     CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[0].inclusive_wall_ticks).value==30);
     CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks).value==10);
 }
-TEST_CASE("Strategy B closes the run span on stop and leaves an uncalled solver phase unavailable") {
-    const auto p=resolve(integrator());const auto q=request(p);const auto prepared=registered_prepared(p,q);
+TEST_CASE("Strategy B closes the run and solver spans when the solver stops") {
+    const auto p=resolve(integrator());const auto q=request(p);std::stop_source cancellation;
+    const auto prepared=registered_prepared(p,q,false,Termination::cancelled,&cancellation);
     const auto joint=accepted(build_joint_program(p,q));
     const auto program=std::visit([](const auto& value){return value.identity();},joint.program);
     const auto provenance=prepared.provenance();
@@ -459,19 +461,18 @@ TEST_CASE("Strategy B closes the run span on stop and leaves an uncalled solver 
     ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
     context.timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
         ar::Unavailable{ar::MissingReason::not_instrumented,{}}},clock);
-    std::stop_source cancellation;context.cancellation=cancellation.get_token();cancellation.request_stop();
+    context.cancellation=cancellation.get_token();
 
     const auto result=accepted(prepared.create()->run(context));
     CHECK(result.termination==Termination::cancelled);
     const auto report=accepted(context.timing->snapshot());
     REQUIRE(report.spans.size()==2);
-    CHECK(std::get<ar::Available<std::uint64_t>>(report.run_wall_ticks).value==10);
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.run_wall_ticks).value==30);
     const auto& records=report.observations.description().spans;REQUIRE(records.size()==2);
     CHECK(std::holds_alternative<ar::ReturnedSpan>(records[0].status));
     CHECK(std::get<ar::Available<Termination>>(records[0].termination).value==Termination::cancelled);
-    CHECK(std::holds_alternative<ar::IncompleteSpan>(records[1].status));
-    const auto& interval=std::get<ar::TickInterval>(records[1].interval);
-    CHECK(std::get<ar::Unavailable>(interval.start).reason==ar::MissingReason::incomplete_span);
+    CHECK(std::holds_alternative<ar::ReturnedSpan>(records[1].status));
+    CHECK(std::get<ar::Available<Termination>>(records[1].termination).value==Termination::cancelled);
 }
 TEST_CASE("row-derived intervals are invariant under positive H-row scaling") {
     const Vector origin{0,0,0.5,0,0.5},direction{0,1,0,1,0};
