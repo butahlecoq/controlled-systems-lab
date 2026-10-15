@@ -84,8 +84,9 @@ Its result exposes the artifact layer's final
 projections and the original-problem verification reports as typed in-memory
 values. It does not claim to persist the paired comparison: run-statistics-v4
 has no paired-comparison record, and its encoder rejects registered-completeness
-payloads. Callers must use the artifact encoder and handle its actual typed
-result; this API does not emit substitute JSON.
+payloads. The `encode_strategy_run` function routes an individual final
+projection through the existing publisher and encoder and returns their actual
+typed result. It does not serialize the paired comparison or trajectory reports.
 The delivered
 [registered synthesis comparison](../../examples/registered_synthesis_comparison.cpp)
 runs both strategies on the same immutable T-S01 problem, selects witness
