@@ -63,6 +63,36 @@ problem::ResolvedProblem singular_integrator() {
         {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 }
 
+problem::ResolvedProblem zero_state_integrator() {
+    const auto model = std::make_shared<const SystemModel>(SystemModel{
+        {{0, 1, 0}, TimeDomain::discrete,
+         LinearStage{{0, 0, {}}, {0, 1, {}}, {0, 0, {}}, {}}}, {}});
+    Problem source{{"control-recovery-zero-state"}, model, {0, 1, 2},
+        KnownInitial{{}}, ContinuousDomain{{
+            interval("zero-state-u0", -1, 1, "u0"),
+            interval("zero-state-u1", -1, 1, "u1")}},
+        {UniversalSet{0}, UniversalSet{0}, UniversalSet{0}}, {}, {},
+        InformationPattern::nominal_open_loop, LinearTerminal{{}, 0}};
+    return take(problem::resolve(source,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+}
+
+problem::ResolvedProblem two_state_two_stage_system() {
+    const auto model = std::make_shared<const SystemModel>(SystemModel{
+        {{2, 1, 0}, TimeDomain::discrete,
+         std::vector<LinearStage>{
+             {{2, 2, {1, 0, 0, 1}}, {2, 1, {1, 0}}, {2, 0, {}}, {0, 0}},
+             {{2, 2, {1, 0, 0, 1}}, {2, 1, {0, 1}}, {2, 0, {}}, {0, 0}}}}, {}});
+    Problem source{{"control-recovery-stage-map"}, model, {0, 1, 2},
+        KnownInitial{{1, -1}}, ContinuousDomain{{
+            interval("stage-map-u0", -1, 1, "u0"),
+            interval("stage-map-u1", -1, 1, "u1")}},
+        {UniversalSet{2}, UniversalSet{2}, UniversalSet{2}}, {}, {},
+        InformationPattern::nominal_open_loop, LinearTerminal{{0, 0}, 0}};
+    return take(problem::resolve(source,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+}
+
 bool contains(const sets::SetData& set, const Vector& point) {
     const auto representation = set.representation();
     if (const auto* h = std::get_if<sets::HRepresentation>(&representation)) {
@@ -169,4 +199,36 @@ TEST_CASE("joint history identity binds the supplied terminal relation identity"
     REQUIRE(std::holds_alternative<synthesis::JointHistoryRelation>(second));
     CHECK(std::get<synthesis::JointHistoryRelation>(first).relation.metadata()->id !=
         std::get<synthesis::JointHistoryRelation>(second).relation.metadata()->id);
+}
+
+TEST_CASE("zero-dimensional states preserve every staged control coordinate in canonical history order") {
+    const auto source = zero_state_integrator();
+    const auto terminal = take(sets::make_universal({{"zero-state-terminal"}, 0, {}}));
+    const auto outcome = synthesis::recover_joint_history(source, terminal);
+    const auto& relation = recovered(outcome);
+
+    // x0,x1,x2 have zero coordinates, leaving [u0,u1] as the entire joint vector.
+    CHECK(std::get<synthesis::JointHistoryRelation>(outcome).coordinates ==
+        (JointCoordinates{{0, 1, 0}, 2}));
+    CHECK(relation.metadata()->set.dimension == 2);
+    CHECK(contains(relation, {0.25, -0.75}));
+    CHECK(contains(relation, {-1, 1}));
+    CHECK_FALSE(contains(relation, {1.01, 0}));
+    CHECK_FALSE(contains(relation, {0.25}));
+}
+
+TEST_CASE("stage-labelled recovery preserves the coordinate map and complete multivariable history") {
+    const auto source = two_state_two_stage_system();
+    const auto terminal = take(sets::make_singleton({{"stage-map-terminal"}, 2, {}},
+        vector({1.5, -1.25})));
+    const auto outcome = synthesis::recover_joint_history(source, terminal);
+    const auto& joint = std::get<synthesis::JointHistoryRelation>(outcome);
+
+    // Hand-evaluated dynamics give x1=(1.5,-1), x2=(1.5,-1.25) for
+    // controls (0.5,-0.25); the public coordinate contract is [x0,x1,x2,u0,u1].
+    CHECK(joint.coordinates == (JointCoordinates{{2, 1, 0}, 2}));
+    CHECK(joint.coordinates == source.constraints().coordinates());
+    CHECK(contains(joint.relation, {1, -1, 1.5, -1, 1.5, -1.25, 0.5, -0.25}));
+    CHECK_FALSE(contains(joint.relation, {1, -1, 1.5, -1, 1.5, -1.25, -0.25, 0.5}));
+    CHECK_FALSE(contains(joint.relation, {1, -1, 1.5, -1, 1.5, -1.0, 0.5, -0.25}));
 }
