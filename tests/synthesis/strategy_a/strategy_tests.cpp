@@ -1082,9 +1082,36 @@ TEST_CASE("unsupported authored finite controls and declared temporal coupling r
     auto source=*integrator().description();source.controls=FiniteDomain{1,{{0},{1}}};
     auto problem=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     CHECK(alternative<Rejection>(admit(request(problem))).diagnostics[0].field=="controls");
-    source=*integrator().description();source.temporal=TemporalConstraints{{0,5,{0},{},{}},{}};
+    source=*integrator().description();source.temporal=TemporalConstraints{{1,5,{0,1},{0},{1}},{{0,0}}};
     problem=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     CHECK(alternative<Rejection>(admit(request(problem))).diagnostics[0].field=="strategy_a.temporal");
+}
+
+TEST_CASE("empty temporal constraints do not disable Strategy A capability") {
+    auto source=*integrator().description();
+    source.temporal=TemporalConstraints{{0,5,{0},{},{}},{}};
+    const auto empty=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+
+    auto prepared=admit(request(empty));
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+
+    const auto result=run(request(empty));
+    CHECK(result.termination==Termination::completed);
+    const auto& history=payload(result);
+    CHECK(history.target==synthesis::strategy_a::PreimageTarget::terminal_candidate);
+    CHECK(history.history.coordinates==JointCoordinates{{1,1,0},2});
+    CHECK(contains(history.history.relation,{0,0,1,0,1}));
+    CHECK(contains(history.history.relation,{0,1,1,1,0}));
+}
+
+TEST_CASE("nonempty temporal coupling remains an unsupported Strategy A request") {
+    auto source=*integrator().description();
+    source.temporal=TemporalConstraints{{1,5,{0,1},{0},{1}},{{0,0}}};
+    const auto coupled=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    const auto rejection=alternative<Rejection>(admit(request(coupled)));
+    REQUIRE(rejection.diagnostics.size()==1);
+    CHECK(rejection.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics[0].field=="strategy_a.temporal");
 }
 
 TEST_CASE("empty reachable stage stays undetermined without authored infeasibility evidence") {

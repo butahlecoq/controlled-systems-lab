@@ -141,7 +141,7 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
         return fail(unsupported("recovery.profile", "Discrete nominal open-loop dynamics are required."));
     if (dimensions.external != 0 || source->external)
         return fail(unsupported("recovery.external", "External inputs are outside this recovery profile."));
-    if (source->temporal)
+    if (source->temporal && source->temporal->joint_map.rows != 0)
         return fail(unsupported("recovery.temporal", "Temporal coupling is outside this first recovery profile."));
     const auto* initial = std::get_if<KnownInitial>(&source->initial);
     if (!initial)
