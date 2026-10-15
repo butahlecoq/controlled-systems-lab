@@ -638,7 +638,8 @@ TEST_CASE("T-S03 singular A keeps free earlier controls with a unique terminal m
     entire_segment(history.history.relation,{0,0,1,0,1},{0,1,0,1,0});
 }
 TEST_CASE("late terminal admission rejection retains a feasible candidate and scoped lineage") {
-    auto result=run(request(integrator()),true);
+    const auto query=request(integrator());
+    auto result=run(query,true);
     CHECK(result.termination==Termination::operation_rejected);
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
@@ -659,8 +660,24 @@ TEST_CASE("late terminal admission rejection retains a feasible candidate and sc
     CHECK(stop.request.actual_version==std::optional<std::string>{"1.0.0+highs.1.11.0"});
     CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
     CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
+    const auto identity_field=[](const std::string& value) { return std::to_string(value.size())+":"+std::string(value); };
+    const auto forward_child=[&](std::size_t stage,const std::string& suffix) {
+        return "nominal-forward/"+identity_field(query.problem.identity().value)+
+            identity_field("strategy-a/forward")+std::to_string(stage)+suffix;
+    };
+    const SetId initial{forward_child(0,"/initial")};
+    const SetId reachable0{forward_child(0,"/reachable")};
+    const SetId reachable1{forward_child(1,"/reachable")};
+    const SetId reachable2{forward_child(2,"/reachable")};
+    const SetId recovered{"recovery/joint-history/"+identity_field(query.problem.identity().value)+
+        identity_field(reachable2.value)};
+    const std::vector<TransformStepIdentity> expected_lineage{
+        {{forward_child(0,"/stage")},initial,reachable0,query.configuration.strategy,query.strategy_version},
+        {{forward_child(1,"/stage")},reachable0,reachable1,query.configuration.strategy,query.strategy_version},
+        {{forward_child(2,"/stage")},reachable1,reachable2,query.configuration.strategy,query.strategy_version},
+        {{"strategy-a/feasible-preimage"},reachable2,recovered,{"csl.synthesis.control-recovery"},"1"}};
+    CHECK(stop.completed_lineage==expected_lineage);
     CHECK(stop.completed_lineage==result.family->identity().lineage);
-    CHECK(stop.completed_lineage.size()==4);
     REQUIRE(stop.diagnostics.size()==1);
     CHECK(stop.diagnostics[0].code==DiagnosticCode::unsupported);
     CHECK(stop.diagnostics[0].field=="test.terminal");
