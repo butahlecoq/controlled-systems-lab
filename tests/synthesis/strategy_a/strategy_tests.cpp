@@ -1038,7 +1038,13 @@ TEST_CASE("empty temporal constraints do not disable Strategy A capability") {
     source.temporal=TemporalConstraints{{0,5,{0},{},{}},{}};
     const auto empty=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 
-    CHECK(std::holds_alternative<PreparedStrategy>(admit(request(empty))));
+    auto prepared=admit(request(empty));
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+
+    const auto result=run(request(empty));
+    CHECK(result.termination==Termination::completed);
+    const auto& history=payload(result);
+    CHECK(history.target==synthesis::strategy_a::PreimageTarget::terminal_candidate);
 }
 
 TEST_CASE("nonempty temporal coupling remains an unsupported Strategy A request") {
