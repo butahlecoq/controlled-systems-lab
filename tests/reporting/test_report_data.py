@@ -65,12 +65,41 @@ class RecordTests(unittest.TestCase):
             lambda v: v["payload"]["trials"][0]["timings"]["public_run"].update(duration_ns=-1),
             lambda v: v["payload"]["trials"][0]["timings"]["public_run"].update(unit="ms"),
             lambda v: v["payload"]["trials"][0]["result"].update(outcome="unbounded"),
+            lambda v: v["payload"]["trials"][0]["result"].update(support={"kind":"exact_farkas_verified"}),
+            lambda v: v["payload"]["trials"][3]["result"].update(support={"kind":"untrusted"}),
             lambda v: v["payload"]["trials"][0]["result"]["primal_residuals"]["context"]["subject"].update(program="wrong"),
         ):
             view = self.fixture()
             mutate(view)
             with self.subTest(mutate=mutate), self.assertRaises(ValueError):
                 # Reseal envelope: nested structural/oracle checks must still run.
+                self.data.validate_view(self.data.seal(view["payload"]))
+
+    def test_nonconvex_unestablished_record_without_assumptions_is_valid(self):
+        view = self.fixture()
+        result = view["payload"]["trials"][0]["result"]
+        self.assertEqual(result["support"], {"kind":"unestablished"})
+        result.pop("assumptions")
+        self.data.validate_view(self.data.seal(view["payload"]))
+
+    def test_exact_farkas_projection_requires_its_assumption_provenance(self):
+        view = self.fixture()
+        result = view["payload"]["trials"][3]["result"]
+        self.assertEqual(result["support"], {"kind":"exact_farkas_verified"})
+        result.pop("assumptions")
+        with self.assertRaises(ValueError):
+            self.data.validate_view(self.data.seal(view["payload"]))
+
+    def test_exact_farkas_projection_requires_completed_actual_highs_result(self):
+        for mutate in (
+            lambda trial: trial["registry"].update(actual=None),
+            lambda trial: trial["result"].update(termination="cancelled"),
+        ):
+            view = self.fixture()
+            trial = view["payload"]["trials"][3]
+            trial["validation"] = {"passed":False,"errors":["retained non-success result"]}
+            mutate(trial)
+            with self.subTest(mutate=mutate), self.assertRaises(ValueError):
                 self.data.validate_view(self.data.seal(view["payload"]))
 
     def test_failed_trial_retained_and_success_subset_not_summarized(self):

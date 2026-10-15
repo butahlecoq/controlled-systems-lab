@@ -5,6 +5,7 @@
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/optimization/convex_backend.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
@@ -581,6 +582,39 @@ TEST_CASE("registered resource limit preserves scoped solver evidence and feasib
     CHECK(stop.retained.incumbents==1);
     CHECK(stop.retained.partial_or_candidate_family);
 }
+TEST_CASE("registered deadline expiring as solver returns resource limit keeps deadline stop reason") {
+    const auto p=resolve(integrator());
+    const auto q=request(p);
+    ExecutionContext context;
+    const auto prepared=registered_prepared(p,q,false,Termination::resource_limit,nullptr,[&context] {
+        REQUIRE_FALSE(context.deadline);
+        context.deadline=std::chrono::steady_clock::now();
+    },MathematicalOutcome::infeasible);
+    auto workspace=prepared.create();
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
+}
+TEST_CASE("registered cancellation takes priority when deadline and resource limit coincide") {
+    const auto p=resolve(integrator());
+    const auto q=request(p);
+    ExecutionContext context;
+    std::stop_source cancellation;
+    context.cancellation=cancellation.get_token();
+    const auto prepared=registered_prepared(p,q,false,Termination::resource_limit,nullptr,[&context,&cancellation] {
+        context.deadline=std::chrono::steady_clock::now();
+        cancellation.request_stop();
+    },MathematicalOutcome::infeasible);
+    auto workspace=prepared.create();
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::cancelled);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::cancelled);
+}
 TEST_CASE("registered cancellation after optimization retains candidate and scoped objective evidence") {
     const auto p=resolve(integrator());const auto q=request(p);std::stop_source source;
     const auto prepared=registered_prepared(p,q,false,Termination::completed,&source);
@@ -1130,6 +1164,46 @@ TEST_CASE("registered Strategy B retains infeasible program evidence while the p
     REQUIRE(retained->optimization);
     CHECK(retained->optimization->termination==Termination::completed);
     CHECK(retained->optimization->outcome.value==MathematicalOutcome::infeasible);
+}
+TEST_CASE("registered Strategy B reports infeasibility for an independently contradictory state constraint") {
+    auto input=integrator(LinearTerminal{{1},0});
+    // The authored dynamics are x1=x0+u0 with x0=0 and 0<=u0<=1,
+    // while the stage-one state constraint requires x1=2. This is a direct
+    // mathematical contradiction, independent of any solver-injected result.
+    input.states={Singleton{{0}},Singleton{{2}},UniversalSet{1}};
+    const auto p=resolve(input);
+    const auto q=request(p);
+    const auto prepared=registered_prepared(p,q);
+    auto workspace=prepared.create();
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::infeasible);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(result.outcome.support));
+    const auto& proof=std::get<ExactFarkasEvidence>(result.outcome.support);
+    const ProgramIdentity generated_program{p.identity(),{"syn04-joint:"+p.identity().value}};
+    CHECK(proof.subject()==generated_program);
+    const auto generated=accepted(build_joint_program(p,q));
+    const auto& lp=std::get<LinearProgram>(generated.program);
+    CHECK(lp.identity()==generated_program);
+    const auto verified=optimization::verify_linear_infeasibility_certificate(lp,proof.certificate());
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
+    CHECK(std::get<ExactFarkasEvidence>(verified).certificate()==proof.certificate());
+    const std::vector<std::string> expected_assumptions{
+        "Generated program syn04-joint:"+p.identity().value+" has an exact verified Farkas infeasibility certificate.",
+        "Source-to-program equivalence is the direct H-row joint-history encoding with identity-ordered source-history coordinates."
+    };
+    CHECK(result.outcome.assumptions==expected_assumptions);
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.objective.upper);
+    CHECK_FALSE(result.family);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    CHECK(result.incumbents.empty());
 }
 TEST_CASE("registered Strategy B retains unattained-infimum program evidence while the public boundary rejects its source conflict") {
     const auto p=resolve(integrator(LinearTerminal{{0},3}));

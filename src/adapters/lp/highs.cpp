@@ -1,7 +1,10 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
+#include "../certificate_verification.hpp"
 #include "../highs_session.hpp"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <iomanip>
 #include <limits>
@@ -87,6 +90,38 @@ bool split(const std::vector<double>& signed_dual,std::span<const Interval> inte
         else { if (d != 0) return false; lower.push_back(0); upper.push_back(0); }
     }
     return true;
+}
+std::optional<ExactFarkasEvidence> exact_farkas_from_ray(const LinearProgram& p,
+    std::span<const double> signed_ray) {
+    const auto csr=std::get<numeric::CsrInput>(p.constraints().descriptor());
+    for(const bool reverse:{false,true}) {
+        std::vector<double> signed_dual(signed_ray.begin(),signed_ray.end());
+        if(reverse) for(auto& value:signed_dual)value=-value;
+        LinearInfeasibilityCertificate certificate{p.identity(),{},{},{},{}};
+        if(!split(signed_dual,p.rows(),certificate.row_lower,certificate.row_upper))continue;
+        const auto n=p.variables().size();certificate.variable_lower.assign(n,0);certificate.variable_upper.assign(n,0);
+        Vector residual(n,0);
+        for(std::size_t i=0;i<p.rows().size();++i)
+            for(auto k=csr.row_offsets[i];k<csr.row_offsets[i+1];++k) {
+                const auto j=csr.column_indices[k];
+                residual[j]+=csr.values[k]*(certificate.row_upper[i]-certificate.row_lower[i]);
+            }
+        bool representable=true;
+        for(std::size_t j=0;j<n;++j) {
+            if(!std::isfinite(residual[j])) {representable=false;break;}
+            if(residual[j]>0) {
+                if(!p.variables()[j].lower) {representable=false;break;}
+                certificate.variable_lower[j]=residual[j];
+            } else if(residual[j]<0) {
+                if(!p.variables()[j].upper) {representable=false;break;}
+                certificate.variable_upper[j]=-residual[j];
+            }
+        }
+        if(!representable)continue;
+        auto verified=verify_linear_infeasibility_certificate(p,certificate);
+        if(auto* evidence=std::get_if<ExactFarkasEvidence>(&verified))return *evidence;
+    }
+    return std::nullopt;
 }
 void classify(ProgramResult& r,HighsStatus api,HighsModelStatus model,const CallbackState& state) {
     // A recognized resource model status can accompany kError (notably memory
@@ -231,7 +266,46 @@ class HighsLPWorkspace final : public LPWorkspace {
                 else raw << "\ndual.unavailable=nonfinite neutral evaluation";
             } else raw << "\ndual.unavailable=invalid dimensions, nonfinite values or nonzero free-interval multiplier";
         }
-        raw << "\ncomplementarity=unavailable\ncertificates=unavailable\nbasis=unavailable\nnative.log:\n" << state.log;
+        raw << "\ncomplementarity=unavailable\nbasis=unavailable";
+        if(result.termination==Termination::completed&&result.outcome.value==MathematicalOutcome::infeasible) {
+            const auto extraction_start=std::chrono::steady_clock::now();
+            state.poll();
+            if(state.stop) {
+                result.termination=*state.stop;result.outcome.value=MathematicalOutcome::undetermined;
+                raw << "\ncertificate.extraction=stopped_before_ray";
+            } else {
+                const auto certificate_remaining=highs_detail::deadline(h,c,require_option);
+                if(certificate_remaining<=0)state.poll();
+                if(state.stop) {
+                    result.termination=*state.stop;result.outcome.value=MathematicalOutcome::undetermined;
+                    raw << "\ncertificate.extraction=stopped_before_ray";
+                } else {
+                    std::vector<double> ray(p.rows().size());bool has_ray=false;
+                    const auto ray_status=h.getDualRay(has_ray,ray.data());
+                    state.poll();
+                    if(state.stop) {
+                        result.termination=*state.stop;result.outcome.value=MathematicalOutcome::undetermined;
+                        raw << "\ncertificate.extraction=stopped_during_ray";
+                    } else if(ray_status==HighsStatus::kOk&&has_ray) {
+                        const auto verification=highs_detail::verify_then_poll(
+                            [&] { return exact_farkas_from_ray(p,ray); },
+                            [&] { state.poll();return state.stop; });
+                        if(verification.stop) {
+                            result.termination=*verification.stop;result.outcome.value=MathematicalOutcome::undetermined;
+                            result.outcome.support=Unestablished{};
+                            raw << "\ncertificate.extraction=stopped_during_verification";
+                        } else if(verification.evidence) {
+                            result.outcome.support=*verification.evidence;
+                            raw << "\ncertificate.extraction=exact_farkas_verified";
+                        } else raw << "\ncertificate.extraction=ray_rejected_by_exact_verifier";
+                    } else raw << "\ncertificate.extraction=ray_unavailable";
+                }
+            }
+            const auto elapsed=std::chrono::duration<double>(std::chrono::steady_clock::now()-extraction_start).count();
+            raw << "\ncertificate.extraction_seconds=" << std::setprecision(17) << elapsed;
+        } else raw << "\ncertificate.extraction=not_requested";
+        raw << "\ncertificates=" << (std::holds_alternative<ExactFarkasEvidence>(result.outcome.support)?"exact_farkas":"unavailable")
+            << "\nnative.log:\n" << state.log;
         result.raw_diagnostics = raw.str();
         return result;
     }

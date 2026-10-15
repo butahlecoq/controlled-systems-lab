@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
@@ -180,7 +181,14 @@ TEST_CASE("each selected registration satisfies the same eight neutral literal L
         INFO(result.raw_diagnostics);
         attempt(*worker,p,1);CHECK_FALSE(other->last_attempt());
         CHECK(result.termination==Termination::completed);CHECK(result.outcome.value==c.outcome);
-        CHECK(result.outcome.subject==p.identity());CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
+        CHECK(result.outcome.subject==p.identity());
+        if(a.method.id.value=="csl.lp.highs"&&c.outcome==MathematicalOutcome::infeasible) {
+            REQUIRE(std::holds_alternative<ExactFarkasEvidence>(result.outcome.support));
+            const auto& proof=std::get<ExactFarkasEvidence>(result.outcome.support);
+            const auto verified=verify_linear_infeasibility_certificate(p,proof.certificate());
+            REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
+            CHECK(std::get<ExactFarkasEvidence>(verified).certificate()==proof.certificate());
+        } else CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
         CHECK(check_program_result(result,p,Assurance::numerical).empty());check_candidate(p,result);
         // Necessary inequalities never replace a provider's independent proof.
         if(c.cost && result.objective.lower) CHECK(result.objective.lower->value<=*c.cost+1e-8);

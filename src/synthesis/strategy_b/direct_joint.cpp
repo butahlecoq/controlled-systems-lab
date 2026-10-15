@@ -2,6 +2,7 @@
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/optimization/convex_backend.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <csl/verification/trajectory.hpp>
 #include "../../registry/compiled_verifiers.hpp"
 #include "../../registry/runtime_lineage.hpp"
@@ -335,7 +336,9 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
         // An unbounded generated program has no optimal-history family to
         // publish. The mapped outcome is retained separately with an explicit
         // unvalidated transformation caveat below.
-        if(result.outcome.value==MathematicalOutcome::unbounded) {
+        const bool verified_linear_infeasibility=result.outcome.value==MathematicalOutcome::infeasible&&
+            std::holds_alternative<ExactFarkasEvidence>(result.outcome.support);
+        if(result.outcome.value==MathematicalOutcome::unbounded||verified_linear_infeasibility) {
             result.family.reset();
             result.complete_proposal.reset();
             result.partial_proposal.reset();
@@ -389,11 +392,25 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
             result.objective.lower.reset();
         }
         if(evidence.termination==Termination::completed&&evidence.outcome.value==MathematicalOutcome::infeasible) {
-            result.outcome={p.identity(),MathematicalOutcome::infeasible,Unestablished{}, {
-                "Source generated program: "+evidence.outcome.subject.program.value+".",
-                "Transfer from generated-program infeasibility to the resolved problem is not independently validated."
-            }};
-            result.objective={};
+            const ProgramIdentity expected_program{p.identity(),{"syn04-joint:"+p.identity().value}};
+            const auto* exact=std::get_if<ExactFarkasEvidence>(&evidence.outcome.support);
+            const bool exact_direct_h_encoding=exact&&exact->subject()==expected_program&&
+                evidence.outcome.subject==expected_program&&std::holds_alternative<LinearProgram>(build_artifact->program)&&
+                std::get<LinearProgram>(build_artifact->program).identity()==expected_program;
+            if(exact_direct_h_encoding) {
+                result.outcome={p.identity(),MathematicalOutcome::infeasible,*exact,{
+                    "Generated program "+expected_program.program.value+" has an exact verified Farkas infeasibility certificate.",
+                    "Source-to-program equivalence is the direct H-row joint-history encoding with identity-ordered source-history coordinates."
+                }};
+                result.family.reset();result.complete_proposal.reset();result.partial_proposal.reset();
+                result.objective={};result.incumbents.clear();
+            } else {
+                result.outcome={p.identity(),MathematicalOutcome::infeasible,Unestablished{}, {
+                    "Source generated program: "+evidence.outcome.subject.program.value+".",
+                    "Transfer from generated-program infeasibility to the resolved problem is not independently validated."
+                }};
+                result.objective={};
+            }
         }
         if(evidence.termination==Termination::completed&&evidence.outcome.value==MathematicalOutcome::infimum_not_attained) {
             result.outcome={p.identity(),MathematicalOutcome::infimum_not_attained,Unestablished{}, {
@@ -454,8 +471,11 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
         publish();
         if(evidence.termination!=Termination::completed && std::holds_alternative<std::monostate>(result.stop)) {
             StopReason reason=StopReason::numerical_failure;
-            if(evidence.termination==Termination::cancelled)reason=StopReason::cancelled;
-            if(evidence.termination==Termination::resource_limit)reason=StopReason::resource_limit;
+            if(context.cancellation.stop_requested())reason=StopReason::cancelled;
+            else if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)reason=StopReason::deadline_expired;
+            else if(evidence.termination==Termination::cancelled)reason=StopReason::cancelled;
+            else if(evidence.termination==Termination::resource_limit)reason=StopReason::resource_limit;
+            result.termination=stopped_termination(reason);
             result.stop=ScopedOperationStopped{{reason,evidence.raw_diagnostics},provenance,retained(result)};
         }
     };
