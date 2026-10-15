@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/registry/registry.hpp>
+#include <csl/registry/provider.hpp>
 #include <limits>
 #include <functional>
 #include "fixtures.hpp"
@@ -526,9 +527,14 @@ TEST_CASE("public prepared strategy retains bound and incumbent when a later gen
     REQUIRE(result.objective.upper);
     CHECK(result.objective.lower->value==2);
     CHECK(result.objective.upper->value==2);
+    CHECK(result.objective.lower->evidence.problem==identity.problem);
+    CHECK(result.objective.upper->evidence.problem==identity.problem);
     const auto* lower_support=std::get_if<SymbolicArgument>(&result.objective.lower->evidence.support);
     REQUIRE(lower_support);
     CHECK(lower_support->reference=="generated/accepted/lp/1 endpoint enumeration");
+    const auto* upper_support=std::get_if<SymbolicArgument>(&result.objective.upper->evidence.support);
+    REQUIRE(upper_support);
+    CHECK(upper_support->reference=="generated/accepted/lp/1 endpoint enumeration");
     REQUIRE(result.incumbents.size()==1);
     CHECK(result.incumbents[0].witness.problem==identity.problem);
     CHECK(result.incumbents[0].witness.states==std::vector<Vector>{{0},{0}});
