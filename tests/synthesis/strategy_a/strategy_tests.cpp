@@ -1033,6 +1033,21 @@ TEST_CASE("unsupported authored finite controls and declared temporal coupling r
     CHECK(alternative<Rejection>(admit(request(problem))).diagnostics[0].field=="strategy_a.temporal");
 }
 
+TEST_CASE("empty temporal constraints do not disable Strategy A capability") {
+    auto source=*integrator().description();
+    source.temporal=TemporalConstraints{{0,5,{0},{},{}},{}};
+    const auto empty=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+
+    CHECK(std::holds_alternative<PreparedStrategy>(admit(request(empty))));
+
+    source.temporal=TemporalConstraints{{1,5,{0},{0},{1}},{{0,0}}};
+    const auto coupled=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    const auto rejection=alternative<Rejection>(admit(request(coupled)));
+    REQUIRE(rejection.diagnostics.size()==1);
+    CHECK(rejection.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics[0].field=="strategy_a.temporal");
+}
+
 TEST_CASE("empty reachable stage stays undetermined without authored infeasibility evidence") {
     auto source=*integrator().description();
     source.states[2]=interval("impossible-X2",3,4);
