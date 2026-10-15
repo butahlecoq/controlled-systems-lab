@@ -31,10 +31,14 @@ TEST_CASE("literal original trajectory passes without a solver success flag") {
 }
 TEST_CASE("wrong original transition control and cost each have named residuals") {
     auto p=resolve(scalar());auto q=request(p);q.witness.states[1][0]=4;q.witness.controls[0][0]=5;q.witness.original_objective=9;
-    auto r=verify_trajectory(p,q);CHECK(r.feasibility==CheckStatus::violation);CHECK(r.objective==CheckStatus::violation);
+    ExecutionContext c;c.numerical={0.125,0.03125};
+    auto r=verify_trajectory(p,q,c);CHECK(r.feasibility==CheckStatus::violation);CHECK(r.objective==CheckStatus::violation);
     CHECK(residual(r,"dynamics[0][0]").measure.violation==1);
+    CHECK(residual(r,"dynamics[0][0]").tolerance==0.28125);
     CHECK(residual(r,"controls[0].singleton[0]").measure.violation==2);
+    CHECK(residual(r,"controls[0].singleton[0]").tolerance==0.28125);
     CHECK(residual(r,"objective").measure.violation==5);
+    CHECK(residual(r,"objective").tolerance==0.40625);
 }
 TEST_CASE("wrong problem and evidence never pass binding") {
     auto p=resolve(scalar());auto q=request(p);q.witness.problem={"wrong"};
