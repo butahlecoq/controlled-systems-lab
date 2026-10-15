@@ -1077,7 +1077,7 @@ TEST_CASE("registered Strategy B preserves its prepared numerical policy in the 
     matching_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     const auto result=accepted(matching_workspace->run(matching_context));
     REQUIRE(result.family);
-    CHECK(result.family->identity().request.numerical.absolute_tolerance==1e-8);
+    CHECK(result.family->identity().request.numerical.absolute_tolerance==1e-7);
     CHECK(result.family->identity().request.numerical.relative_tolerance==2e-7);
     CHECK(result.family->identity().request.numerical==(NumericalPolicy{1e-7,2e-7}));
 
