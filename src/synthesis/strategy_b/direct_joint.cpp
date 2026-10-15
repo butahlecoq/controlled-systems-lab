@@ -395,6 +395,16 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
             }};
             result.objective={};
         }
+        if(evidence.termination==Termination::completed&&evidence.outcome.value==MathematicalOutcome::infimum_not_attained) {
+            result.outcome={p.identity(),MathematicalOutcome::infimum_not_attained,Unestablished{}, {
+                "Source generated program: "+evidence.outcome.subject.program.value+".",
+                "Transfer from generated-program nonattainment to the resolved problem is not independently validated."
+            }};
+            // A finite lower bound combined with a feasible candidate at that
+            // value would contradict nonattainment; retain only witness-scoped
+            // upper bounds established independently for the source problem.
+            result.objective.lower.reset();
+        }
         if(evidence.primal) {
             const auto& anchor=*evidence.primal;const auto coordinates=build_artifact->coordinates;
             Witness witness{p.identity(),{},{},0};const auto n=coordinates.dimensions.state,m=coordinates.dimensions.control,T=coordinates.horizon;
