@@ -996,3 +996,26 @@ TEST_CASE("unsupported authored finite controls and declared temporal coupling r
     problem=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     CHECK(alternative<Rejection>(admit(request(problem))).diagnostics[0].field=="strategy_a.temporal");
 }
+
+TEST_CASE("empty reachable stage stays undetermined without authored infeasibility evidence") {
+    auto source=*integrator().description();
+    source.states[2]=interval("impossible-X2",3,4);
+    const auto problem=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+
+    const auto result=run(request(problem));
+
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==problem.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
+    REQUIRE(result.outcome.assumptions.size()==2);
+    CHECK(result.outcome.assumptions[0]==
+        "forward recurrence, terminal construction and joint-history coverage remain unestablished");
+    CHECK(result.outcome.assumptions[1]==
+        "forward stage 2 compiled empty; authored infeasibility is not independently established");
+    CHECK_FALSE(result.family);
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.objective.upper);
+    CHECK(result.incumbents.empty());
+    CHECK(std::holds_alternative<std::monostate>(result.stop));
+}
