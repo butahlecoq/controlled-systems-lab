@@ -31,9 +31,9 @@ Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyReq
     if(family.materialization_limit)
         return unsupported("strategy_a.capacity","Family materialization-limit semantics have not been reviewed; no limit is silently ignored.");
     const auto source=problem.description();
-    if(auto errors=check_nominal_profile(*source,false,family.assurance);!errors.empty())return errors;
     if(source->temporal && source->temporal->joint_map.rows!=0)
         return unsupported("strategy_a.temporal","Nonempty temporal constraints require a coupled-history implementation.");
+    if(auto errors=check_nominal_profile(*source,false,family.assurance);!errors.empty())return errors;
     const auto native=[](const AdmissibleSet& set) {
         const auto* handle=std::get_if<SetHandle>(&set);
         if(!handle)return true;
