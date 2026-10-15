@@ -952,6 +952,14 @@ TEST_CASE("registered Strategy B reports a completed unbounded objective without
     CHECK(result.outcome.subject==p.identity());
     CHECK(result.outcome.value==MathematicalOutcome::unbounded);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
+    const auto generated_program=ProgramId{"syn04-joint:"+p.identity().value};
+    CHECK(std::any_of(result.outcome.assumptions.begin(),result.outcome.assumptions.end(),[&](const std::string& assumption) {
+        return assumption.find(generated_program.value)!=std::string::npos;
+    }));
+    CHECK(std::any_of(result.outcome.assumptions.begin(),result.outcome.assumptions.end(),[](const std::string& assumption) {
+        return assumption.find("transfer")!=std::string::npos&&
+            assumption.find("not independently validated")!=std::string::npos;
+    }));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.complete_proposal);
     CHECK_FALSE(result.partial_proposal);
