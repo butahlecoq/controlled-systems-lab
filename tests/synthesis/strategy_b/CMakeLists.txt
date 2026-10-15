@@ -8,7 +8,9 @@ add_library(syn04_slice STATIC "${CSL_ROOT}/src/synthesis/strategy_b/direct_join
 target_link_libraries(syn04_slice PUBLIC CSL::resolved_problem CSL::sets CSL::registry CSL::convex CSL::verification)
 target_compile_features(syn04_slice PUBLIC cxx_std_20)
 add_executable(syn04_tests direct_joint_tests.cpp)
-target_link_libraries(syn04_tests PRIVATE syn04_slice doctest::doctest CSL::highs_lp CSL::highs_convex)
+target_include_directories(syn04_tests PRIVATE "${CSL_ROOT}/src/registry")
+target_link_libraries(syn04_tests PRIVATE syn04_slice doctest::doctest CSL::highs_lp CSL::highs_convex
+  CSL::artifacts CSL::strategy_a CSL::affine_sum CSL::qhull_conversion)
 if(MSVC)
   target_compile_options(syn04_slice PRIVATE /W4 /WX /permissive-)
   target_compile_options(syn04_tests PRIVATE /W4 /WX /permissive-)

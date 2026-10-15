@@ -6,6 +6,7 @@
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
+#include <csl/execution/timing_collector.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
@@ -20,11 +21,26 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <atomic>
 using namespace csl;
 using namespace csl::synthesis::strategy_b;
 namespace {
+namespace ar=csl::artifacts;
+namespace ob=csl::execution::observability;
 bool feasible(const JointProgram&,const Vector&);
 bool feasible_without_temporal_rows(const JointProgram&,const Vector&);
+ar::ClockDomain test_wall_domain() {
+    return {{"test-wall"},ar::ClockMetric::steady_wall,"run",1,1,
+        ar::Available<std::uint64_t>{1},"strategy-b-test"};
+}
+class StrategyTimingClock final:public ob::TimingClock {
+public:
+    std::atomic<std::int64_t> ticks{0};
+    ar::ClockDomain wall_domain() const override{return test_wall_domain();}
+    std::optional<ar::ClockDomain> cpu_domain() const override{return {};}
+    ar::Metric<std::int64_t> wall_now() noexcept override{return ar::Available<std::int64_t>{ticks.fetch_add(10)};}
+    ar::Metric<std::int64_t> cpu_now() noexcept override{return ar::Unavailable{ar::MissingReason::not_supported,{}};}
+};
 class ProposalOnlyWorkspace final:public SynthesisWorkspace {
     CompleteFamilyProposal proposal_;
 public:
@@ -378,6 +394,84 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         registry::Completeness::established:registry::Completeness::unestablished;
     return accepted(strategies.prepare({p,configuration,q,"1"},requirements));
 }
+std::shared_ptr<ob::TimingCollector> planned_strategy_timing(const problem::ResolvedProblem& p,
+    const FamilyRequest& q,const ProgramIdentity& program,const ar::ModuleIdentity& backend,
+    const std::shared_ptr<StrategyTimingClock>& clock) {
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    const ar::ModuleIdentity strategy{{"csl.synthesis.strategy-b"},"1",missing};
+    auto lp=ar::ModuleIdentity{{"csl.lp.highs"},"1",missing};
+    auto convex=ar::ModuleIdentity{{"csl.convex.highs"},"1",missing};
+    if(backend.id==lp.id)lp=backend;
+    if(backend.id==convex.id)convex=backend;
+    ar::ConfigurationInput configuration;
+    configuration.collection={true,ar::CollectionMode::detail,8,10000,8,1000};
+    configuration.modules={{"strategy",strategy,{}},{"lp",lp,{}},{"convex",convex,{}}};
+    configuration.resources={1,1,1,{}};configuration.numerical=q.numerical;
+    configuration.output={ar::OutputKind::synthesis,q.assurance,q.target,q.representation,{0,0,{},{}}};
+    configuration.selector={{"test.selector"},"1",{}};
+    configuration.strategy={{"csl.synthesis.strategy-b"},{"csl.lp.highs"},{"csl.convex.highs"},{},{},{},{},{"test.selector"},q.representation};
+    auto resolved=accepted(ar::resolve_configuration(configuration));
+    std::vector<ar::SpanDescriptor> spans(2);
+    spans[0].id={501};spans[0].shard=0;spans[0].bucket=0;spans[0].task="strategy";spans[0].operation="run";
+    spans[0].module=strategy;spans[0].clock=test_wall_domain().id;spans[0].requested_assurance=q.assurance;
+    spans[0].applied_assurance=ar::Available<Assurance>{q.assurance};
+    spans[1].id={502};spans[1].parent=ar::SpanParent{{501},ar::ParentKind::nested};spans[1].shard=0;spans[1].bucket=0;
+    spans[1].task="strategy";spans[1].operation="program.solve";spans[1].module=strategy;
+    spans[1].backend=std::make_shared<const ar::ModuleIdentity>(backend);
+    spans[1].program=std::make_shared<const ProgramIdentity>(program);spans[1].clock=test_wall_domain().id;
+    spans[1].requested_assurance=q.assurance;spans[1].applied_assurance=ar::Available<Assurance>{q.assurance};
+    const auto plan=accepted(ob::make_collection_plan({p,std::move(resolved),{"strategy-timing-run"},
+        {test_wall_domain()},std::move(spans),1,{"strategy"},{"run","program.solve"}}));
+    return accepted(ob::make_timing_collector(plan,clock,{501},{{502}}));
+}
+}
+TEST_CASE("Strategy B records planned run and actual generated-program solver spans") {
+    const auto p=resolve(integrator());const auto q=request(p);const auto prepared=registered_prepared(p,q);
+    const auto joint=accepted(build_joint_program(p,q));
+    const auto program=std::visit([](const auto& value){return value.identity();},joint.program);
+    const auto provenance=prepared.provenance();
+    const auto port=std::holds_alternative<LinearProgram>(joint.program)?"lp":"convex";
+    const auto provider=std::find_if(provenance.begin(),provenance.end(),[&](const auto& item){return item.port==port;});
+    REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
+    auto clock=std::make_shared<StrategyTimingClock>();
+    ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
+    context.timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
+        ar::Unavailable{ar::MissingReason::not_instrumented,{}}},clock);
+
+    const auto result=accepted(prepared.create()->run(context));
+    CHECK(result.termination==Termination::completed);
+    const auto report=accepted(context.timing->snapshot());
+    REQUIRE(report.spans.size()==2);
+    CHECK(report.spans[0].id==ar::SpanId{501});CHECK(report.spans[1].id==ar::SpanId{502});
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.run_wall_ticks).value==30);
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[0].inclusive_wall_ticks).value==30);
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks).value==10);
+}
+TEST_CASE("Strategy B closes the run span on stop and leaves an uncalled solver phase unavailable") {
+    const auto p=resolve(integrator());const auto q=request(p);const auto prepared=registered_prepared(p,q);
+    const auto joint=accepted(build_joint_program(p,q));
+    const auto program=std::visit([](const auto& value){return value.identity();},joint.program);
+    const auto provenance=prepared.provenance();
+    const auto port=std::holds_alternative<LinearProgram>(joint.program)?"lp":"convex";
+    const auto provider=std::find_if(provenance.begin(),provenance.end(),[&](const auto& item){return item.port==port;});
+    REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
+    auto clock=std::make_shared<StrategyTimingClock>();
+    ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
+    context.timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
+        ar::Unavailable{ar::MissingReason::not_instrumented,{}}},clock);
+    std::stop_source cancellation;context.cancellation=cancellation.get_token();cancellation.request_stop();
+
+    const auto result=accepted(prepared.create()->run(context));
+    CHECK(result.termination==Termination::cancelled);
+    const auto report=accepted(context.timing->snapshot());
+    REQUIRE(report.spans.size()==2);
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.run_wall_ticks).value==10);
+    const auto& records=report.observations.description().spans;REQUIRE(records.size()==2);
+    CHECK(std::holds_alternative<ar::ReturnedSpan>(records[0].status));
+    CHECK(std::get<ar::Available<Termination>>(records[0].termination).value==Termination::cancelled);
+    CHECK(std::holds_alternative<ar::IncompleteSpan>(records[1].status));
+    const auto& interval=std::get<ar::TickInterval>(records[1].interval);
+    CHECK(std::get<ar::Unavailable>(interval.start).reason==ar::MissingReason::incomplete_span);
 }
 TEST_CASE("row-derived intervals are invariant under positive H-row scaling") {
     const Vector origin{0,0,0.5,0,0.5},direction{0,1,0,1,0};
