@@ -66,5 +66,6 @@ int main(int argc, char** argv) {
         std::cout << "explicit_methods count="
                   << std::get<std::vector<csl::input::ModuleRequest>>(requested->selection).size();
     }
-    std::cout << " mode=validate_only solvers=not_invoked\\n";    return 0;
+    std::cout << " mode=validate_only solvers=not_invoked\n";
+    return 0;
 }
