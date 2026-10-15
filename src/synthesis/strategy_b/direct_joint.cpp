@@ -332,6 +332,15 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
         return result;
     }
     auto publish=[&] {
+        // An unbounded generated program has no optimal-history family to
+        // publish. The mapped outcome is retained separately with an explicit
+        // unvalidated transformation caveat below.
+        if(result.outcome.value==MathematicalOutcome::unbounded) {
+            result.family.reset();
+            result.complete_proposal.reset();
+            result.partial_proposal.reset();
+            return;
+        }
         FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,lineage};
         CandidateFeasibility feasibility=Unestablished{};
         if(!result.incumbents.empty()) feasibility=WitnessFeasibilityEvidence{result.incumbents.front().witness,result.incumbents.front().feasibility};
@@ -370,6 +379,15 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
         }
         result.termination=solved.termination;data->optimization=std::move(solved);
         const auto& evidence=*data->optimization;
+        if(evidence.termination==Termination::completed&&evidence.outcome.value==MathematicalOutcome::unbounded) {
+            result.outcome={p.identity(),MathematicalOutcome::unbounded,Unestablished{}, {
+                "Source generated program: "+evidence.outcome.subject.program.value+".",
+                "Transfer from generated-program unboundedness to the resolved problem is not independently validated."
+            }};
+            // A finite lower bound contradicts unboundedness. Any feasible
+            // incumbent found below may still provide a valid upper bound.
+            result.objective.lower.reset();
+        }
         if(evidence.primal) {
             const auto& anchor=*evidence.primal;const auto coordinates=build_artifact->coordinates;
             Witness witness{p.identity(),{},{},0};const auto n=coordinates.dimensions.state,m=coordinates.dimensions.control,T=coordinates.horizon;
