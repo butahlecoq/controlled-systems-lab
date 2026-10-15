@@ -3,6 +3,7 @@
 #include <csl/artifacts/run_statistics.hpp>
 #include <csl/registry/registry.hpp>
 #include <csl/execution/observability.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <nlohmann/json.hpp>
 #include <algorithm>
 #include <array>
@@ -764,6 +765,33 @@ TEST_CASE("derived program final and available pin content options survive an ow
     const auto& module=restored.description().configuration.description().modules[0];CHECK(std::get<ar::Available<ar::ModulePin>>(module.implementation.pin).value.sha256==std::string(64,'a'));
     const auto& option=std::get<ar::ContentOption>(std::get<ar::OptionScalar>(module.options[0].value));
     CHECK(option.schema=="fixture.option/1");CHECK(problem::hex(option.content.digest())=="ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");CHECK(option.content.bytes().size()==3);
+}
+TEST_CASE("serialized exact Farkas evidence is downgraded until reverified against an LP") {
+    const auto source=zero_problem();
+    const ProgramIdentity identity{source.identity(),{"constant-row-proof"}};
+    const auto program=std::get<LinearProgram>(optimization::make_linear_program({identity,{},0,
+        {1,0,{0,0},{},{}},{},{{1,{}}}}));
+    const LinearInfeasibilityCertificate certificate{identity,{1},{0},{},{}};
+    const auto verified=optimization::verify_linear_infeasibility_certificate(program,certificate);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
+
+    auto input=configuration();input.collection.enabled=false;input.output.kind=ar::OutputKind::program;
+    const auto config=accepted(ar::resolve_configuration(input));
+    const auto plan=accepted(ob::make_collection_plan({source,config,{"farkas-wire"},{},{},0}));
+    const auto statistics=accepted(ob::merge_observations(plan,{}));
+    ProgramResult result{Termination::completed,
+        {identity,MathematicalOutcome::infeasible,std::get<ExactFarkasEvidence>(verified),{}},
+        {},{},"exact certificate",{}};
+    const ar::Unavailable unknown{ar::MissingReason::not_instrumented,""};
+    ar::RunRecord record{source.identity(),{0,0,0},0,config,{"farkas-wire"},ar::project_final(result),statistics,
+        {unknown,unknown,unknown,unknown,true,ar::MemoryAccounting::unlimited},{},{},ar::ProblemProvenance::problem_revalidated};
+    const auto published=accepted(ar::publish_run({source,record}));
+    const auto encoded=accepted(ar::encode_run(published));
+    const auto restored=accepted(ar::decode_run(encoded,source));
+    const auto& support=std::get<ar::ProgramFinal>(restored.description().final).result.outcome.support;
+    REQUIRE(std::holds_alternative<CertificateReference>(support));
+    CHECK(std::get<CertificateReference>(support).verifier=="csl.optimization.farkas-exact.unverified/1");
+    CHECK(std::get<CertificateReference>(support).artifact.find("unverified-exact-farkas:")==0);
 }
 TEST_CASE("wire dictionary references and escaped UTF8 byte limits are checked independently") {
     const auto fixture=fixture_text();

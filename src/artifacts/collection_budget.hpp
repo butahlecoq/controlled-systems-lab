@@ -43,6 +43,13 @@ inline void geometry(Counter& c,const std::shared_ptr<const GeometryEvidence>& p
         if constexpr(std::is_same_v<T,NumericalCheck>){c.add(24);c.text(s.verifier.value);}
         else if constexpr(std::is_same_v<T,SymbolicArgument>){c.text(s.reference);c.text(s.assumptions);}
         else if constexpr(std::is_same_v<T,CertificateReference>){c.text(s.artifact);c.text(s.verifier);}
+        else if constexpr(std::is_same_v<T,ExactFarkasEvidence>){
+            c.text(s.subject().problem.value);c.text(s.subject().program.value);
+            const auto& proof=s.certificate();
+            for(const auto* multipliers:{&proof.row_lower,&proof.row_upper,&proof.variable_lower,&proof.variable_upper}) {
+                c.add(8);for(std::size_t i=0;i<multipliers->size();++i)c.add(sizeof(double));
+            }
+        }
     },e.support);
     c.add(8);for(const auto& a:e.assumptions)c.text(a);
     c.add(1);if(e.error_bound){c.text(e.error_bound->metric.value);c.add(8);c.text(e.error_bound->units);}

@@ -18,6 +18,7 @@ bool same_support(const EvidenceSupport& left,const EvidenceSupport& right) noex
             a.relative_tolerance==b.relative_tolerance&&a.max_residual==b.max_residual&&a.verifier.value==b.verifier.value;},
         [](const SymbolicArgument& a,const SymbolicArgument& b){return a.reference==b.reference&&a.assumptions==b.assumptions;},
         [](const CertificateReference& a,const CertificateReference& b){return a.artifact==b.artifact&&a.verifier==b.verifier;},
+        [](const ExactFarkasEvidence& a,const ExactFarkasEvidence& b){return a.subject()==b.subject()&&a.certificate()==b.certificate();},
         [](const auto&,const auto&){return false;}
     },left,right);
 }
@@ -87,6 +88,8 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.assurance","Claimed assurance differs from the request"});
             if (std::holds_alternative<Unestablished>(complete.optimum.optimum.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.optimum","Complete-family optimum needs supporting evidence"});
+            if (std::holds_alternative<ExactFarkasEvidence>(complete.optimum.optimum.support))
+                result.push_back({DiagnosticCode::invalid_claim,"family.optimum","An infeasibility proof cannot support an optimal-family claim"});
             if(const auto* registered=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
                 registered&&(registered->verifier.value.empty()||registered->verifier_version.empty()||registered->proof.empty()))
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.completeness.verifier",
@@ -102,7 +105,9 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 result.push_back({DiagnosticCode::evidence_mismatch,"family.partial","Partial-family evidence does not bind the joint relation and problem"});
             if (partial.known_scope.description.empty() || partial.optimal_subset.procedure.empty() ||
                 std::holds_alternative<Unestablished>(partial.optimum.optimum.support) ||
+                std::holds_alternative<ExactFarkasEvidence>(partial.optimum.optimum.support) ||
                 std::holds_alternative<Unestablished>(partial.optimal_subset.every_history_optimal.support) ||
+                std::holds_alternative<ExactFarkasEvidence>(partial.optimal_subset.every_history_optimal.support) ||
                 std::holds_alternative<NumericalCheck>(partial.optimal_subset.every_history_optimal.support))
                 result.push_back({DiagnosticCode::invalid_claim,"family.partial.optimality","An inner subset is not known optimal without scoped optimal-membership support"});
         },
@@ -113,13 +118,15 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
                 [&](const Unestablished&) {},
                 [&](const RelationFeasibilityEvidence& feasibility) {
                     if (feasibility.support.problem!=expected ||
-                        std::holds_alternative<Unestablished>(feasibility.support.support))
+                        std::holds_alternative<Unestablished>(feasibility.support.support) ||
+                        std::holds_alternative<ExactFarkasEvidence>(feasibility.support.support))
                         result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.feasibility.relation",
                             "Whole-relation feasibility needs supported evidence for this problem"});
                 },
                 [&](const WitnessFeasibilityEvidence& feasibility) {
                     if (feasibility.support.problem!=expected || feasibility.witness.problem!=expected ||
                         std::holds_alternative<Unestablished>(feasibility.support.support) ||
+                        std::holds_alternative<ExactFarkasEvidence>(feasibility.support.support) ||
                         !std::isfinite(feasibility.witness.original_objective) ||
                         identity.coordinates.horizon==std::numeric_limits<std::size_t>::max() ||
                         feasibility.witness.states.size()!=identity.coordinates.horizon+1 ||
@@ -137,11 +144,13 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
             std::visit(Overloaded{
                 [&](const OuterCandidateEvidence& relation) { if (relation.enclosure.problem != expected)
                     result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.outer","Outer evidence is bound to another problem"});
-                    else if (std::holds_alternative<Unestablished>(relation.enclosure.support))
+                    else if (std::holds_alternative<Unestablished>(relation.enclosure.support) ||
+                        std::holds_alternative<ExactFarkasEvidence>(relation.enclosure.support))
                     result.push_back({DiagnosticCode::invalid_claim,"family.candidate.outer","Outer enclosure needs supporting evidence"}); },
                 [&](const FeasibleCandidateEvidence& relation) { if (relation.feasibility.problem != expected)
                     result.push_back({DiagnosticCode::evidence_mismatch,"family.candidate.inner","Feasible-candidate evidence is bound to another problem"});
-                    else if (std::holds_alternative<Unestablished>(relation.feasibility.support))
+                    else if (std::holds_alternative<Unestablished>(relation.feasibility.support) ||
+                        std::holds_alternative<ExactFarkasEvidence>(relation.feasibility.support))
                     result.push_back({DiagnosticCode::invalid_claim,"family.candidate.inner","Inner feasibility needs supporting evidence"});
                     if (!std::holds_alternative<RelationFeasibilityEvidence>(candidate.feasibility))
                         result.push_back({DiagnosticCode::invalid_claim,"family.candidate.feasibility.relation",
@@ -159,13 +168,15 @@ Diagnostics check_family_evidence(const OptimalFamily& family, const ProblemId& 
 }
 bool supported_synthesis_bound(const ObjectiveBound& bound,const ProblemId& problem) {
     return bound.evidence.problem==problem && std::isfinite(bound.value) &&
-        !std::holds_alternative<Unestablished>(bound.evidence.support);
+        !std::holds_alternative<Unestablished>(bound.evidence.support) &&
+        !std::holds_alternative<ExactFarkasEvidence>(bound.evidence.support);
 }
 bool supported_feasible_incumbent(const FeasibleIncumbent& incumbent,const FamilyIdentity& expected) {
     const auto& witness=incumbent.witness;
     const auto& coordinates=expected.coordinates;
     if (witness.problem!=expected.problem || incumbent.feasibility.problem!=expected.problem ||
         std::holds_alternative<Unestablished>(incumbent.feasibility.support) ||
+        std::holds_alternative<ExactFarkasEvidence>(incumbent.feasibility.support) ||
         !std::isfinite(witness.original_objective) ||
         coordinates.horizon==std::numeric_limits<std::size_t>::max() ||
         witness.states.size()!=coordinates.horizon+1 || witness.controls.size()!=coordinates.horizon)
