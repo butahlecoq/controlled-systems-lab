@@ -90,6 +90,18 @@ class RecordTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.data.validate_view(self.data.seal(view["payload"]))
 
+    def test_exact_farkas_projection_requires_completed_actual_highs_result(self):
+        for mutate in (
+            lambda trial: trial["registry"].update(actual=None),
+            lambda trial: trial["result"].update(termination="cancelled"),
+        ):
+            view = self.fixture()
+            trial = view["payload"]["trials"][3]
+            trial["validation"] = {"passed":False,"errors":["retained non-success result"]}
+            mutate(trial)
+            with self.subTest(mutate=mutate), self.assertRaises(ValueError):
+                self.data.validate_view(self.data.seal(view["payload"]))
+
     def test_failed_trial_retained_and_success_subset_not_summarized(self):
         view = self.fixture()
         trial = view["payload"]["trials"][0]

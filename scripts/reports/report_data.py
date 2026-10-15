@@ -755,8 +755,11 @@ def _validate_trial_rows(trials,scenarios,provenance,clock,environment,convex,ba
             require(result["termination"] in TERMINATIONS and result["outcome"] in OUTCOMES, "unknown result status")
             support=result.get("support")
             assumptions=result.get("assumptions")
+            actual=trial["registry"].get("actual")
             exact_lp_support=(not convex and backend_id=="csl.lp.highs" and
+                              result["termination"]=="completed" and
                               result["outcome"]=="infeasible" and
+                              isinstance(actual,dict) and actual.get("id")=="csl.lp.highs" and
                               support=={"kind":"exact_farkas_verified"})
             if exact_lp_support:
                 require(assumptions==["binary64 numerical output; exact_farkas_verified"],
