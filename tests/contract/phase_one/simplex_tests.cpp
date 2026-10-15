@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/optimization/phase_one.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 #ifdef CSL_PHASE_ONE_REFERENCE
 #include <csl/adapters/lp/highs.hpp>
 #endif
@@ -370,7 +371,14 @@ TEST_CASE("same immutable request selects phase one or actual reference without 
             const auto r=accepted(w->run(context()));INFO(std::string(method));INFO(p.identity().program.value);INFO(r.raw_diagnostics);
             CHECK(r.termination==Termination::completed);
             CHECK(r.outcome.value==(feasible?MathematicalOutcome::optimal:MathematicalOutcome::infeasible));
-            CHECK(r.outcome.subject==p.identity());CHECK(std::holds_alternative<Unestablished>(r.outcome.support));
+            CHECK(r.outcome.subject==p.identity());
+            if(std::string(method)=="csl.lp.highs"&&!feasible) {
+                REQUIRE(std::holds_alternative<ExactFarkasEvidence>(r.outcome.support));
+                const auto& proof=std::get<ExactFarkasEvidence>(r.outcome.support);
+                const auto verified=verify_linear_infeasibility_certificate(p,proof.certificate());
+                REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
+                CHECK(std::get<ExactFarkasEvidence>(verified).certificate()==proof.certificate());
+            } else CHECK(std::holds_alternative<Unestablished>(r.outcome.support));
             CHECK_FALSE(r.objective.lower);CHECK_FALSE(r.objective.upper);CHECK(check_program_result(r,p,Assurance::numerical).empty());
             if(feasible) {
                 REQUIRE(r.primal);const auto independently=accepted(evaluate_primal(p,*r.primal,{1e-8,0},{{"reference-original"},"1"}));

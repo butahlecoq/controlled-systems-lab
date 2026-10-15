@@ -205,7 +205,8 @@ def reference_matches(trial, scenario):
     ref = scenario["reference"]
     if result is None or result["termination"] != "completed" or result["outcome"] != ref["outcome"]:
         return False
-    if result["support"] != {"kind": "unestablished"} or result["bounds"] != {"lower": None, "upper": None}:
+    expected_support={"kind":"exact_farkas_verified"} if ref["outcome"]=="infeasible" else {"kind":"unestablished"}
+    if result["support"] != expected_support or result["bounds"] != {"lower": None, "upper": None}:
         return False
     if ref["outcome"] != "optimal":
         return True
@@ -740,7 +741,11 @@ def _validate_trial_rows(trials,scenarios,provenance,clock,environment,convex,ba
         result = trial["result"]
         if result is not None:
             require(result["termination"] in TERMINATIONS and result["outcome"] in OUTCOMES, "unknown result status")
-            require(result["support"] == {"kind":"unestablished"}, "unsupported evidence projection")
+            expected_support={"kind":"exact_farkas_verified"} if not convex and result["outcome"]=="infeasible" else {"kind":"unestablished"}
+            require(result["support"] == expected_support, "unsupported evidence projection")
+            if not convex:
+                expected_assumptions=["binary64 numerical output; "+expected_support["kind"]]
+                require(result["assumptions"]==expected_assumptions,"support assumption disagrees with verified evidence")
             require(result["bounds"] == {"lower":None,"upper":None} and result["family"]["available"] is False, "unsupported bounds/family claim")
             if result["primal"] is not None:
                 require(len(result["primal"]) == (objective_dimension(scenarios[key]["input"]["objective"]) if convex else len(scenarios[key]["input"]["linear"])), "candidate dimension")

@@ -39,6 +39,19 @@ TEST_CASE("literal catalogue uses the actual registered LP and owns the returned
     }
 }
 
+TEST_CASE("infeasible LP report names independently verified Farkas support") {
+    const auto fixture=catalogue()[3];
+    const auto trial=run_trial(fixture,{});
+    INFO(trial.error);
+    for(const auto& error:trial.errors) INFO(error);
+    REQUIRE(trial.passed());
+    REQUIRE(trial.result);
+    const auto json=trial_json(fixture,trial,1,1,"test");
+    CHECK(json.find("\"support\":{\"kind\":\"exact_farkas_verified\"}")!=std::string::npos);
+    CHECK(json.find("\"assumptions\":[\"binary64 numerical output; exact_farkas_verified\"]")!=std::string::npos);
+    CHECK(catalogue_json().find("binary64 numerical output; exact_farkas_verified support required")!=std::string::npos);
+}
+
 TEST_CASE("pre-cancelled functional trial retains current result without passing oracle") {
     const auto fixtures = catalogue();
     REQUIRE(fixtures.size() == 5);

@@ -1,5 +1,6 @@
 #include "lp_report.hpp"
 #include <csl/adapters/lp/highs.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <algorithm>
 #include <bit>
 #include <cmath>
@@ -12,13 +13,29 @@
 namespace csl::reporting {
 namespace {
 void check(TrialRecord& r,bool condition,const char* error) { if(!condition) r.errors.emplace_back(error); }
+bool exact_farkas_verified(const TrialRecord& r) {
+    if(!r.program || !r.result || r.result->outcome.value!=MathematicalOutcome::infeasible) return false;
+    if(r.result->outcome.subject!=r.program->identity()) return false;
+    const auto* proof=std::get_if<ExactFarkasEvidence>(&r.result->outcome.support);
+    if(!proof || proof->subject()!=r.program->identity()) return false;
+    const auto verified=optimization::verify_linear_infeasibility_certificate(*r.program,proof->certificate());
+    const auto* exact=std::get_if<ExactFarkasEvidence>(&verified);
+    return exact && exact->certificate()==proof->certificate();
+}
+const char* outcome_support_kind(const TrialRecord& r) {
+    if(exact_farkas_verified(r)) return "exact_farkas_verified";
+    if(r.result && std::holds_alternative<Unestablished>(r.result->outcome.support)) return "unestablished";
+    return "unsupported-projection";
+}
 void verify(const Fixture& f, TrialRecord& r) {
     if (!r.result) { r.errors.emplace_back("no returned ProgramResult"); return; }
     const auto& result=*r.result;
     check(r,result.termination==Termination::completed,"termination differs from completed reference");
     check(r,result.outcome.value==f.expected,"outcome differs from analytic reference");
     check(r,result.outcome.subject==f.input.identity,"outcome subject mismatch");
-    check(r,std::holds_alternative<Unestablished>(result.outcome.support),"unexpected evidence support");
+    if(f.expected==MathematicalOutcome::infeasible)
+        check(r,exact_farkas_verified(r),"infeasibility support is not an independently verified exact Farkas certificate");
+    else check(r,std::holds_alternative<Unestablished>(result.outcome.support),"unexpected evidence support");
     check(r,!result.objective.lower && !result.objective.upper,"unexpected bound claim");
     check(r,optimization::check_program_result(result,*r.program,Assurance::numerical).empty(),"canonical result check failed");
     check(r,r.attempt && r.attempt->stamp.attempt()==1 && r.attempt->state==SolveAttemptState::returned_result && r.attempt->stamp.program().identity()==f.input.identity,"authoritative current attempt mismatch");
@@ -118,14 +135,14 @@ std::string catalogue_json() {
         const auto& a=f.input.constraints;
         const auto bounds=[](const auto& values){return array(values,[](const csl::Interval& x){return "["+optional_number(x.lower)+","+optional_number(x.upper)+"]";});};
         const auto indices=[](const auto& values){return array(values,[](auto x){return std::to_string(x);});};
-        return "{\"case_id\":"+json_string(f.id)+",\"identity\":"+identity_json(f.input.identity)+",\"input\":{\"linear\":"+numbers(f.input.objective)+",\"offset\":"+json_number(f.input.offset)+",\"constraints\":{\"rows\":"+std::to_string(a.rows)+",\"cols\":"+std::to_string(a.cols)+",\"starts\":"+indices(a.row_offsets)+",\"indices\":"+indices(a.column_indices)+",\"values\":"+numbers(a.values)+"},\"variables\":"+bounds(f.input.variables)+",\"rows\":"+bounds(f.input.rows)+"},\"reference\":{\"outcome\":"+json_string(outcome_name(f.expected))+",\"point\":"+(f.point?numbers(*f.point):"null")+",\"objective\":"+optional_number(f.objective)+",\"derivation\":"+json_string(f.derivation)+"},\"assumptions\":[\"continuous variables\",\"minimization\",\"binary64 numerical output; outcome support unestablished\"]}";
+        return "{\"case_id\":"+json_string(f.id)+",\"identity\":"+identity_json(f.input.identity)+",\"input\":{\"linear\":"+numbers(f.input.objective)+",\"offset\":"+json_number(f.input.offset)+",\"constraints\":{\"rows\":"+std::to_string(a.rows)+",\"cols\":"+std::to_string(a.cols)+",\"starts\":"+indices(a.row_offsets)+",\"indices\":"+indices(a.column_indices)+",\"values\":"+numbers(a.values)+"},\"variables\":"+bounds(f.input.variables)+",\"rows\":"+bounds(f.input.rows)+"},\"reference\":{\"outcome\":"+json_string(outcome_name(f.expected))+",\"point\":"+(f.point?numbers(*f.point):"null")+",\"objective\":"+optional_number(f.objective)+",\"derivation\":"+json_string(f.derivation)+"},\"assumptions\":[\"continuous variables\",\"minimization\","+json_string(f.expected==MathematicalOutcome::infeasible?"binary64 numerical output; exact_farkas_verified support required":"binary64 numerical output; outcome support unestablished")+"]}";
     });
 }
 std::string trial_json(const Fixture& f,const TrialRecord& r,std::size_t round,std::size_t sequence,const std::string& purpose) {
     std::string result="null";
     if (r.result) {
         const auto& value=*r.result;
-        result="{\"termination\":"+json_string(termination_name(value.termination))+",\"outcome\":"+json_string(outcome_name(value.outcome.value))+",\"support\":{\"kind\":"+json_string(std::holds_alternative<Unestablished>(value.outcome.support)?"unestablished":"unsupported-projection")+"},\"primal\":"+(value.primal?numbers(*value.primal):"null")+",\"original_objective\":"+optional_number(r.objective)+",\"objective_unavailable_reason\":"+(r.objective?"null":json_string("no finite evaluated objective"))+",\"bounds\":{\"lower\":null,\"upper\":null},\"family\":{\"available\":false,\"reason\":\"point only\"},\"primal_residuals\":"+primal_json(value.residuals.primal)+",\"dual_residuals\":"+dual_json(value.residuals.dual)+",\"raw_diagnostics\":"+json_string(value.raw_diagnostics)+"}";
+        result="{\"termination\":"+json_string(termination_name(value.termination))+",\"outcome\":"+json_string(outcome_name(value.outcome.value))+",\"support\":{\"kind\":"+json_string(outcome_support_kind(r))+"},\"assumptions\":["+json_string(std::string("binary64 numerical output; ")+outcome_support_kind(r))+"],\"primal\":"+(value.primal?numbers(*value.primal):"null")+",\"original_objective\":"+optional_number(r.objective)+",\"objective_unavailable_reason\":"+(r.objective?"null":json_string("no finite evaluated objective"))+",\"bounds\":{\"lower\":null,\"upper\":null},\"family\":{\"available\":false,\"reason\":\"point only\"},\"primal_residuals\":"+primal_json(value.residuals.primal)+",\"dual_residuals\":"+dual_json(value.residuals.dual)+",\"raw_diagnostics\":"+json_string(value.raw_diagnostics)+"}";
     }
     return trial_envelope(f.id,f.input.identity,"csl.lp.highs",r,result,round,sequence,purpose);
 }

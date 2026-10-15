@@ -65,6 +65,8 @@ class RecordTests(unittest.TestCase):
             lambda v: v["payload"]["trials"][0]["timings"]["public_run"].update(duration_ns=-1),
             lambda v: v["payload"]["trials"][0]["timings"]["public_run"].update(unit="ms"),
             lambda v: v["payload"]["trials"][0]["result"].update(outcome="unbounded"),
+            lambda v: v["payload"]["trials"][0]["result"].update(support={"kind":"exact_farkas_verified"}),
+            lambda v: v["payload"]["trials"][3]["result"].update(support={"kind":"untrusted"}),
             lambda v: v["payload"]["trials"][0]["result"]["primal_residuals"]["context"]["subject"].update(program="wrong"),
         ):
             view = self.fixture()
