@@ -72,9 +72,13 @@ struct RegisteredCompletenessEvidence {
     // Opaque verifier-defined serialized text; decoding does not confer trust.
     std::string proof;
 };
+// Support payloads record claims only. Publication of a complete family still
+// requires the selected registered proof to pass its compiled verifier.
+using CompletenessSupport = std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,
+    RegisteredCompletenessEvidence,Unestablished,SymbolicArgument,CertificateReference,NumericalCheck>;
 struct CompletenessEvidence {
     FamilyIdentity binding;
-    std::variant<NumericalCoverageEvidence,ValidatedCoverageEvidence,RegisteredCompletenessEvidence> support;
+    CompletenessSupport support;
 };
 struct CompleteOptimalFamily {
     JointRelation relation;
