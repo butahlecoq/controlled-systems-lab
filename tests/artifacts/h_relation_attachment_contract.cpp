@@ -38,5 +38,7 @@ TEST_CASE("H attachment rejects digest mismatch, malformed bytes and resource ex
  CHECK(std::get<ar::ArtifactError>(ar::decode_h_relation_attachment(bad,limits(),encoded.digest())).code==ar::ArtifactErrorCode::identity);
  CHECK(std::get<ar::ArtifactError>(ar::decode_h_relation_attachment(encoded.bytes(),ar::HRelationAttachmentLimits{2,16,64,4096})).code==ar::ArtifactErrorCode::limit);
  auto corrupt=std::vector<std::byte>(encoded.bytes().begin(),encoded.bytes().end());corrupt.back()=std::byte{'x'};
- CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_h_relation_attachment(corrupt,limits())));`n auto unknown=std::vector<std::byte>(encoded.bytes().begin(),encoded.bytes().end());for(std::size_t i=0;i+1<unknown.size();++i)if(unknown[i]==std::byte{'/'}&&unknown[i+1]==std::byte{'1'})unknown[i+1]=std::byte{'9'};`n const auto unsupported=ar::decode_h_relation_attachment(unknown,limits());REQUIRE(std::holds_alternative<ar::ArtifactError>(unsupported));CHECK(std::get<ar::ArtifactError>(unsupported).code==ar::ArtifactErrorCode::unsupported);
+ CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_h_relation_attachment(corrupt,limits())));
+ auto unknown=std::vector<std::byte>(encoded.bytes().begin(),encoded.bytes().end());for(std::size_t i=0;i+1<unknown.size();++i)if(unknown[i]==std::byte{'/'}&&unknown[i+1]==std::byte{'1'})unknown[i+1]=std::byte{'9'};
+ const auto unsupported=ar::decode_h_relation_attachment(unknown,limits());REQUIRE(std::holds_alternative<ar::ArtifactError>(unsupported));CHECK(std::get<ar::ArtifactError>(unsupported).code==ar::ArtifactErrorCode::unsupported);
 }
