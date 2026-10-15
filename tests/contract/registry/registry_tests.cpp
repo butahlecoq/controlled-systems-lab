@@ -61,8 +61,8 @@ public:
     }
 };
 
-LinearProgram generated_interval_lp(std::string id) {
-    return publish({{{"problem"},{std::move(id)}},{3},2,{0,1,{0},{},{}},{{0,1}}, {}});
+LinearProgram generated_interval_lp(const ProblemId& problem,std::string id) {
+    return publish({{problem,{std::move(id)}},{3},2,{0,1,{0},{},{}},{{0,1}}, {}});
 }
 
 class RetainEvidenceThenRejectWorkspace final : public SynthesisWorkspace {
@@ -76,7 +76,7 @@ public:
     SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
         const ExecutionContext& execution) override {
         const auto id=problem.identity();
-        auto accepted_request=generated_interval_lp("generated/accepted/lp/1");
+        auto accepted_request=generated_interval_lp(id,"generated/accepted/lp/1");
         auto accepted_preparation=provider_.prepare(accepted_request);
         if(const auto* rejected=std::get_if<Rejection>(&accepted_preparation))
             throw std::logic_error("accepted LP request rejected: "+rejected->diagnostics.front().field);
@@ -100,7 +100,7 @@ public:
         if(const auto* diagnostics=std::get_if<Diagnostics>(&published))
             throw std::logic_error("candidate fixture publication failed: "+diagnostics->front().field);
 
-        auto rejected_request=generated_interval_lp("generated/rejected/lp/2");
+        auto rejected_request=generated_interval_lp(id,"generated/rejected/lp/2");
         auto rejected_preparation=provider_.prepare(rejected_request);
         if(const auto* rejection=std::get_if<Rejection>(&rejected_preparation)) {
             RequestProvenance provenance{{rejected_request.identity().program.value},rejection->provenance.port,
