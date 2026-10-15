@@ -8,7 +8,8 @@
 
 namespace csl::synthesis::strategy_a {
 // OBS-03 plan slots owned by Strategy A. Callers who enable timing must include
-// these IDs in the CollectionPlan, rooted/nested as described in timing.md.
+// these IDs in the CollectionPlan, rooted/nested as described in
+// docs/contracts/timing-collector.md.
 namespace timing {
 inline constexpr artifacts::SpanId run{0};
 inline constexpr artifacts::SpanId forward{1};
