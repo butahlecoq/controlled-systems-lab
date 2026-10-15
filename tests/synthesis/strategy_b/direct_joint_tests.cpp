@@ -268,9 +268,11 @@ template<class Program,class Base> class OracleWorkspace final:public Base {
         EvidenceSupport support=SymbolicArgument{"literal-joint-oracle","Hand-minimized objective on the authored joint relation."};
         ProgramObjectiveBound bound{value_,{id,support,{}}};
         if(stop_)stop_->request_stop();
-        const bool infeasible=outcome_==MathematicalOutcome::infeasible;
-        ProgramResult result{termination_,{id,outcome_,infeasible?EvidenceSupport{Unestablished{}}:support,{}},
-            infeasible?std::nullopt:std::optional<Vector>{anchor_},infeasible?ProgramObjectiveEvidence{}:ProgramObjectiveEvidence{bound,bound},
+        const bool no_finite_solution=outcome_==MathematicalOutcome::infeasible ||
+            outcome_==MathematicalOutcome::infimum_not_attained;
+        ProgramResult result{termination_,{id,outcome_,no_finite_solution?EvidenceSupport{Unestablished{}}:support,{}},
+            no_finite_solution?std::nullopt:std::optional<Vector>{anchor_},
+            no_finite_solution?ProgramObjectiveEvidence{}:ProgramObjectiveEvidence{bound,bound},
             "independent analytic oracle"};
         if(before_return_)before_return_();
         return result;
@@ -1128,6 +1130,38 @@ TEST_CASE("registered Strategy B retains infeasible program evidence while the p
     REQUIRE(retained->optimization);
     CHECK(retained->optimization->termination==Termination::completed);
     CHECK(retained->optimization->outcome.value==MathematicalOutcome::infeasible);
+}
+TEST_CASE("registered Strategy B retains unattained-infimum program evidence while the public boundary rejects its source conflict") {
+    const auto p=resolve(integrator(LinearTerminal{{0},3}));
+    const auto q=request(p);
+    const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,{},MathematicalOutcome::infimum_not_attained);
+    auto workspace=prepared.create();
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+
+    const auto result=accepted(workspace->run(context));
+
+    // The authored integrator has feasible histories, so the injected solver's
+    // unattained-infimum status cannot be transferred to the source problem.
+    CHECK(result.termination==Termination::contract_rejected);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.objective.upper);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    const auto retained=std::dynamic_pointer_cast<const DirectJointPayload>(candidate.relation.payload);
+    REQUIRE(retained);
+    REQUIRE(retained->optimization);
+    CHECK(retained->optimization->termination==Termination::completed);
+    CHECK(retained->optimization->outcome.value==MathematicalOutcome::infimum_not_attained);
+    CHECK_FALSE(retained->optimization->primal);
+    CHECK_FALSE(retained->optimization->objective.lower);
+    CHECK_FALSE(retained->optimization->objective.upper);
 }
 TEST_CASE("T-S02 verifier admits constant linear quadratic and residual norm objectives") {
     const std::vector<TerminalObjective> objectives{
