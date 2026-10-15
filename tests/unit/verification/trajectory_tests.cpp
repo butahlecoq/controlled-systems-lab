@@ -257,6 +257,23 @@ TEST_CASE("explicit numerical thresholds and finite arithmetic do not certify va
     CHECK(r.validated==CheckStatus::unsupported);
     q=request(p);q.witness.states[0][0]=std::numeric_limits<double>::quiet_NaN();CHECK(verify_trajectory(p,q).feasibility==CheckStatus::invalid_input);
 }
+TEST_CASE("unknown assurance values are rejected instead of downgraded to numerical verification") {
+    const auto p=resolve(scalar());
+    auto q=request(p);
+    q.assurance=static_cast<Assurance>(127);
+
+    const auto report=verify_trajectory(p,q);
+    CHECK(report.termination==Termination::completed);
+    CHECK(report.bindings==CheckStatus::numerical_pass);
+    CHECK(report.feasibility==CheckStatus::invalid_input);
+    CHECK(report.objective==CheckStatus::invalid_input);
+    CHECK(report.optimality==CheckStatus::unsupported);
+    CHECK(report.completeness==CheckStatus::unsupported);
+    CHECK(report.validated==CheckStatus::unsupported);
+    CHECK(std::any_of(report.diagnostics.begin(),report.diagnostics.end(),[](const auto& diagnostic) {
+        return diagnostic.field=="assurance" && diagnostic.code==DiagnosticCode::invalid_input;
+    }));
+}
 TEST_CASE("stops and count limits retain supplied evidence and checked prefixes") {
     auto p=resolve(scalar());auto q=request(p);q.bounds.lower=ObjectiveBound{2,{p.identity(),CertificateReference{"retained","external"}}};
     std::stop_source stop;stop.request_stop();ExecutionContext c;c.cancellation=stop.get_token();
