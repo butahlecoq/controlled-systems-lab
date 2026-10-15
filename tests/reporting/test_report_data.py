@@ -75,6 +75,21 @@ class RecordTests(unittest.TestCase):
                 # Reseal envelope: nested structural/oracle checks must still run.
                 self.data.validate_view(self.data.seal(view["payload"]))
 
+    def test_nonconvex_unestablished_record_without_assumptions_is_valid(self):
+        view = self.fixture()
+        result = view["payload"]["trials"][0]["result"]
+        self.assertEqual(result["support"], {"kind":"unestablished"})
+        result.pop("assumptions")
+        self.data.validate_view(self.data.seal(view["payload"]))
+
+    def test_exact_farkas_projection_requires_its_assumption_provenance(self):
+        view = self.fixture()
+        result = view["payload"]["trials"][3]["result"]
+        self.assertEqual(result["support"], {"kind":"exact_farkas_verified"})
+        result.pop("assumptions")
+        with self.assertRaises(ValueError):
+            self.data.validate_view(self.data.seal(view["payload"]))
+
     def test_failed_trial_retained_and_success_subset_not_summarized(self):
         view = self.fixture()
         trial = view["payload"]["trials"][0]
