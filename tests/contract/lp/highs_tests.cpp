@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <barrier>
 #include <future>
 #include <limits>
@@ -94,7 +95,10 @@ TEST_CASE("literal offset equality free fixed infeasible unbounded and zero-dime
     const auto bad = accepted(bad_worker->run(context()));
     CHECK(bad.termination == Termination::completed);
     CHECK(bad.outcome.value == MathematicalOutcome::infeasible);
-    CHECK(std::holds_alternative<Unestablished>(bad.outcome.support));
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(bad.outcome.support));
+    const auto& proof = std::get<ExactFarkasEvidence>(bad.outcome.support);
+    CHECK(proof.subject() == infeasible.identity());
+    CHECK(verify_linear_infeasibility_certificate(infeasible,proof.certificate()).index() == 0);
     CHECK_FALSE(bad.objective.lower);
     const auto unbounded = accepted(make_linear_program({{{"native-test"},{"unbounded"}},
         {-1},0,{0,1,{0},{},{}},{{0,{}}},{}}));
@@ -120,6 +124,22 @@ TEST_CASE("literal offset equality free fixed infeasible unbounded and zero-dime
     const auto large_result = accepted(large_worker->run(context()));
     cost(large_result,large,0);
     CHECK((*large_result.primal)[0] == 1e21);
+}
+
+TEST_CASE("HiGHS infeasibility ray is accepted only as an exact Farkas certificate") {
+    const auto program = accepted(make_linear_program({{{"native-test"},{"farkas-ray"}},
+        {0},0,{2,1,{0,1,2},{0,0},{1,1}},{{{},{}}},{{{},0},{1,{}}}}));
+    auto [worker] = prepare(program).create();
+    const auto result = accepted(worker->run(context()));
+
+    REQUIRE(result.termination == Termination::completed);
+    REQUIRE(result.outcome.value == MathematicalOutcome::infeasible);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(result.outcome.support));
+    const auto& evidence = std::get<ExactFarkasEvidence>(result.outcome.support);
+    CHECK(evidence.subject() == program.identity());
+    const auto verified = verify_linear_infeasibility_certificate(program,evidence.certificate());
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
+    CHECK(std::get<ExactFarkasEvidence>(verified).certificate() == evidence.certificate());
 }
 
 TEST_CASE("native limits and pre-stops never claim optimal or reuse a previous candidate") {
