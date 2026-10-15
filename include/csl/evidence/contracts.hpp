@@ -17,12 +17,13 @@ struct LinearInfeasibilityCertificate {
     Vector row_lower, row_upper, variable_lower, variable_upper;
     bool operator==(const LinearInfeasibilityCertificate&) const = default;
 };
-namespace optimization::detail { class FarkasEvidenceFactory; }
+class LinearProgram;
+namespace optimization { class FarkasEvidenceFactory; }
 class ExactFarkasEvidence {
     LinearInfeasibilityCertificate certificate_;
     explicit ExactFarkasEvidence(LinearInfeasibilityCertificate certificate)
         :certificate_(std::move(certificate)){}
-    friend class optimization::detail::FarkasEvidenceFactory;
+    friend class optimization::FarkasEvidenceFactory;
 public:
     ExactFarkasEvidence(const ExactFarkasEvidence&)=default;
     ExactFarkasEvidence(ExactFarkasEvidence&&) noexcept=default;
@@ -31,6 +32,16 @@ public:
     const ProgramIdentity& subject() const noexcept { return certificate_.subject; }
     const LinearInfeasibilityCertificate& certificate() const noexcept { return certificate_; }
 };
+namespace optimization {
+// This complete, non-constructible type reserves the only construction seam.
+// Its private factory is callable only by the exact LP verifier below.
+class FarkasEvidenceFactory final {
+    FarkasEvidenceFactory() = delete;
+    static ExactFarkasEvidence create(LinearInfeasibilityCertificate certificate);
+    friend std::variant<ExactFarkasEvidence,Diagnostics> verify_linear_infeasibility_certificate(
+        const ::csl::LinearProgram&,const LinearInfeasibilityCertificate&);
+};
+}
 using EvidenceSupport = std::variant<Unestablished, NumericalCheck, SymbolicArgument, CertificateReference,
     ExactFarkasEvidence>;
 struct ClaimEvidence { ProblemId problem; EvidenceSupport support; };
