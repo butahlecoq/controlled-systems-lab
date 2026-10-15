@@ -36,6 +36,11 @@ target_link_libraries(linear_program_tests PRIVATE CSL::optimization doctest::do
 add_test(NAME linear_program_tests COMMAND linear_program_tests)
 csl_test_target(linear_program_tests optimization)
 
+add_executable(linear_infeasibility_certificate_tests tests/unit/optimization/linear_infeasibility_certificate_tests.cpp)
+target_link_libraries(linear_infeasibility_certificate_tests PRIVATE CSL::optimization doctest::doctest)
+add_test(NAME linear_infeasibility_certificate_tests COMMAND linear_infeasibility_certificate_tests)
+csl_test_target(linear_infeasibility_certificate_tests optimization)
+
 add_executable(objectives_tests tests/unit/objectives/objectives_tests.cpp)
 target_link_libraries(objectives_tests PRIVATE CSL::objectives doctest::doctest)
 add_test(NAME objectives_tests COMMAND objectives_tests)

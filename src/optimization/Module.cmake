@@ -6,7 +6,8 @@ target_link_libraries(csl_objectives PUBLIC CSL::numeric)
 
 include(cmake/ObjectivesDependencies.cmake)
 
-csl_add_library(csl_optimization STATIC src/optimization/linear_program.cpp src/optimization/lp_backend.cpp)
+csl_add_library(csl_optimization STATIC src/optimization/linear_program.cpp src/optimization/lp_backend.cpp
+  src/optimization/linear_infeasibility_certificate.cpp)
 
 target_link_libraries(csl_optimization PUBLIC CSL::numeric)
 
