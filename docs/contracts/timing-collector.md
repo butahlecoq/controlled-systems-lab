@@ -6,6 +6,26 @@ callers remain source compatible; the compatible-toolchain contract is not a
 stable binary ABI. No executor scheduling or mutable solver workspace changes.
 OBS-03 owns automatic instrumentation of mathematical ports.
 
+## Strategy A phase slots
+
+The public `csl/synthesis/strategy_a/strategy.hpp` header reserves these planned
+IDs for the first Strategy A timing slice. The caller must put all five IDs in
+the resolved `CollectionPlan`; ID 0 is the run root and IDs 1–4 are nested below
+it. The operation labels are `strategy-a/run`, `strategy-a/forward`,
+`strategy-a/feasible-preimage`, `strategy-a/terminal-optimization`, and
+`strategy-a/terminal-preimage`. The `SpanDescriptor` remains authoritative for
+module/backend provenance and all other observations. Phase spans measure the
+named Strategy A logical phase; backend-specific LP, convex, geometry,
+conversion, and provider identities still require instrumentation at those
+ports. Strategy A does not translate collector ticks into the legacy
+`SynthesisResult::spans` seconds field.
+
+An enabled plan that omits a reserved ID causes that span start to be rejected
+by the collector; the mathematical result is not changed by timing failures.
+Unentered phases remain incomplete, not zero-duration. A stopped root closes
+with the synthesis result's termination, while a completed phase records its
+own return status.
+
 Resolve the OBS-01 `CollectionPlan` before execution. Its fixed span IDs, explicit
 `nested`/`spawned` parents, module identities, shards and wall clock domain remain
 authoritative. `make_timing_collector(plan, clock, run_id, worker_ids)` admits one

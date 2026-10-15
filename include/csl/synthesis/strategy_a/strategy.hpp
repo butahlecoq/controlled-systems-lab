@@ -4,8 +4,19 @@
 #include <csl/reachability/nominal_forward.hpp>
 #include <csl/synthesis/control_recovery.hpp>
 #include <csl/synthesis/terminal_minimizers.hpp>
+#include <csl/artifacts/run_statistics.hpp>
 
 namespace csl::synthesis::strategy_a {
+// OBS-03 plan slots owned by Strategy A. Callers who enable timing must include
+// these IDs in the CollectionPlan, rooted/nested as described in
+// docs/contracts/timing-collector.md.
+namespace timing {
+inline constexpr artifacts::SpanId run{0};
+inline constexpr artifacts::SpanId forward{1};
+inline constexpr artifacts::SpanId feasible_preimage{2};
+inline constexpr artifacts::SpanId terminal_optimization{3};
+inline constexpr artifacts::SpanId terminal_preimage{4};
+}
 enum class PreimageTarget { forward_terminal_slice, terminal_candidate };
 // Scoped derivation evidence: terminal-program bounds concern the supplied
 // forward slice, not an independently verified original-problem optimum.

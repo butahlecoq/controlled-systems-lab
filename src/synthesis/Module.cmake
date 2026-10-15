@@ -10,7 +10,7 @@ target_link_libraries(csl_control_recovery PUBLIC CSL::resolved_problem CSL::set
 
 csl_add_library(csl_strategy_a STATIC src/synthesis/strategy_a/strategy.cpp)
 
-target_link_libraries(csl_strategy_a PUBLIC CSL::nominal_forward CSL::terminal_minimizers CSL::control_recovery)
+target_link_libraries(csl_strategy_a PUBLIC CSL::nominal_forward CSL::terminal_minimizers CSL::control_recovery CSL::artifacts)
 
 csl_add_library(csl_strategy_ts01 STATIC src/synthesis/strategy_ts01/analytic_profile.cpp)
 

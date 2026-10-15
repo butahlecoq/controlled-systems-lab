@@ -1,6 +1,7 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
+#include <csl/execution/timing_collector.hpp>
 #include "../../registry/compiled_verifiers.hpp"
 #include "../../registry/strategy_a_lineage.hpp"
 #include <algorithm>
@@ -113,6 +114,34 @@ std::optional<OperationStopped> interruption(const ExecutionContext& context) {
         return OperationStopped{StopReason::deadline_expired,"Deadline expired between Strategy A phases."};
     return {};
 }
+std::optional<execution::observability::TimingScope> timing_scope(
+    const ExecutionContext& context,artifacts::SpanId id) {
+    auto started=execution::observability::start_timing(context,id);
+    if(auto* scope=std::get_if<execution::observability::TimingScope>(&started))return std::move(*scope);
+    return {};
+}
+void close_timing(std::optional<execution::observability::TimingScope>& scope,Termination termination) noexcept {
+    if(scope)scope->close(termination);
+}
+class ResultTimingScope {
+    std::optional<execution::observability::TimingScope> scope_;
+    const Termination* termination_;
+public:
+    ResultTimingScope(std::optional<execution::observability::TimingScope> scope,const Termination& termination)
+        :scope_(std::move(scope)),termination_(&termination){}
+    ~ResultTimingScope(){if(scope_)scope_->close(*termination_);}
+    ResultTimingScope(const ResultTimingScope&)=delete;
+    ResultTimingScope& operator=(const ResultTimingScope&)=delete;
+};
+Termination forward_termination(const reachability::ForwardFailure& failure) {
+    if(std::holds_alternative<Unsupported>(failure.cause))return Termination::operation_rejected;
+    switch(std::get<OperationStopped>(failure.cause).reason) {
+    case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
+    case StopReason::resource_limit:return Termination::resource_limit;
+    case StopReason::numerical_failure:return Termination::numerical_failure;
+    }
+    return Termination::numerical_failure;
+}
 bool publish(SynthesisResult& result,const problem::ResolvedProblem& problem,const FamilyRequest& request,
     JointHistoryRelation history,const reachability::ForwardTube& tube,std::optional<TerminalMinimizers> terminal,
     std::vector<TransformStepIdentity> lineage,PreimageTarget target=PreimageTarget::forward_terminal_slice) {
@@ -151,19 +180,23 @@ public:
         SynthesisResult result{Termination::completed,{problem.identity(),MathematicalOutcome::undetermined,
             Unestablished{},{"forward recurrence, terminal construction and joint-history coverage remain unestablished"}},
             {},{},{},{},{}};
+        ResultTimingScope run_timing{timing_scope(context,timing::run),result.termination};
         std::vector<TransformStepIdentity> lineage;
         try {
             if(auto errors=capabilities(problem,request);!errors.empty()) {
                 reject(result,local({"strategy-a/admission"}),std::move(errors),lineage);return result;
             }
+            auto forward_timing=timing_scope(context,timing::forward);
             auto forwarded=reachability::nominal_forward(problem,{"strategy-a/forward"},forward_,context);
             if(const auto* failure=std::get_if<reachability::ForwardFailure>(&forwarded)) {
+                close_timing(forward_timing,forward_termination(*failure));
                 lineage=forward_lineage(failure->prefix);
                 const auto selected=failure->providers.empty()?local({"strategy-a/forward"}):failure->providers.back();
                 if(const auto* cause=std::get_if<Unsupported>(&failure->cause))reject(result,selected,cause->diagnostics,lineage);
                 else stop(result,selected,std::get<OperationStopped>(failure->cause));
                 return result;
             }
+            close_timing(forward_timing,Termination::completed);
             if(const auto* empty=std::get_if<reachability::EmptyForwardStage>(&forwarded)) {
                 result.outcome.assumptions.push_back("forward stage "+std::to_string(empty->stage.value)+
                     " compiled empty; authored infeasibility is not independently established");return result;
@@ -173,10 +206,13 @@ public:
             auto feasible=sets::from_handle(tube.stages.back().marginal.output);
             if(const auto* error=std::get_if<Diagnostic>(&feasible)){contract_failure(result,{*error});return result;}
             const TerminalSlice slice{problem.identity(),std::get<sets::SetData>(std::move(feasible))};
+            auto feasible_preimage_timing=timing_scope(context,timing::feasible_preimage);
             auto recovery=recover_joint_history(problem,slice.feasible);
             if(const auto* errors=std::get_if<Diagnostics>(&recovery)) {
+                close_timing(feasible_preimage_timing,Termination::operation_rejected);
                 reject(result,local({"strategy-a/feasible-preimage"}),*errors,lineage);return result;
             }
+            close_timing(feasible_preimage_timing,Termination::completed);
             const auto feasible_history=std::get<JointHistoryRelation>(std::move(recovery));
             auto feasible_lineage=lineage;
             feasible_lineage.push_back({{"strategy-a/feasible-preimage"},slice.feasible.metadata()->id,
@@ -185,7 +221,9 @@ public:
             if(auto interrupted=interruption(context)) {
                 stop(result,local({"strategy-a/terminal"}),*interrupted);return result;
             }
+            auto terminal_timing=timing_scope(context,timing::terminal_optimization);
             auto minimized=terminal_.solve(problem,request,slice,context);
+            close_timing(terminal_timing,minimized.termination);
             const auto terminal_request=minimized.optimization?
                 RequestId{minimized.optimization->outcome.subject.program.value}:
                 RequestId{"syn02-terminal:"+slice.feasible.metadata()->id.value};
@@ -213,10 +251,13 @@ public:
                 return result;
             }
             if(auto interrupted=interruption(context)) {stop(result,local({"strategy-a/terminal-preimage"}),*interrupted);return result;}
+            auto terminal_preimage_timing=timing_scope(context,timing::terminal_preimage);
             auto recovered=recover_joint_history(problem,*minimized.relation);
             if(const auto* errors=std::get_if<Diagnostics>(&recovered)) {
+                close_timing(terminal_preimage_timing,Termination::operation_rejected);
                 reject(result,local({"strategy-a/terminal-preimage"}),*errors,lineage);return result;
             }
+            close_timing(terminal_preimage_timing,Termination::completed);
             auto history=std::get<JointHistoryRelation>(std::move(recovered));
             lineage.push_back({{"strategy-a/terminal-preimage"},minimized.relation->metadata()->id,
                 history.relation.metadata()->id,{"csl.synthesis.control-recovery"},"1"});
