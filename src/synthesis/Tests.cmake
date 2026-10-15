@@ -44,9 +44,9 @@ target_link_libraries(control_recovery_public_client PRIVATE CSL::control_recove
 add_test(NAME control_recovery_public_client COMMAND control_recovery_public_client)
 csl_test_target(control_recovery_public_client synthesis)
 
-if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp)
+if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::strategy_a AND TARGET CSL::affine_sum AND TARGET CSL::qhull_conversion)
   add_executable(direct_joint_strategy_tests tests/synthesis/strategy_b/direct_joint_tests.cpp)
-  target_link_libraries(direct_joint_strategy_tests PRIVATE CSL::strategy_b CSL::highs_lp CSL::highs_convex doctest::doctest)
+  target_link_libraries(direct_joint_strategy_tests PRIVATE CSL::strategy_b CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex doctest::doctest)
   target_include_directories(direct_joint_strategy_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/registry)
   add_test(NAME direct_joint_strategy_tests COMMAND direct_joint_strategy_tests)
   csl_test_target(direct_joint_strategy_tests synthesis)
