@@ -25,6 +25,32 @@ public:
             Termination::resource_limit,"selection search budget exhausted"};
     }
 };
+
+using CompletenessSupport = decltype(CompletenessEvidence{}.support);
+
+class MalformedCompletenessProposal final : public SynthesisWorkspace {
+    CompletenessSupport support_;
+public:
+    explicit MalformedCompletenessProposal(CompletenessSupport support) : support_(std::move(support)) {}
+
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
+        const ExecutionContext&) override {
+        const auto id=problem.identity();
+        const ModuleId strategy{"synthetic-completeness-guard"};
+        const std::string version{"1"};
+        const FamilyIdentity identity{id,request,problem.constraints().coordinates(),strategy,version,{}};
+        const JointRelation relation{identity.coordinates,request.representation,
+            std::make_shared<const JointRelationPayload>()};
+        const ClaimEvidence optimum{id,SymbolicArgument{"synthetic optimum","fixture objective"}};
+        const ObjectiveBound bound{0,optimum};
+        CompleteOptimalFamily complete{relation,{optimum,{bound,bound}},
+            {identity,std::move(support_)},Assurance::numerical};
+        SynthesisResult result{Termination::completed,
+            {id,MathematicalOutcome::optimal,optimum.support,{}},{bound,bound},{},{},{},{}};
+        result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
+        return result;
+    }
+};
 }
 
 TEST_CASE("public selector binds omitted provenance without promoting a candidate family") {
@@ -923,6 +949,81 @@ TEST_CASE("strategy registry rejects validated family assurance before planning"
     CHECK(rejection.diagnostics[0].code==DiagnosticCode::unsupported);
     CHECK(rejection.diagnostics[0].field=="family.assurance");
     CHECK(rejection.diagnostics[0].explanation=="Validated family evidence is not implemented");
+}
+
+TEST_CASE("public prepared strategy rejects completeness claims without the selected verifier proof") {
+    // CompletenessEvidence has its own three-alternative schema. Numerical residuals and
+    // unchecked certificates are representable as coverage claims, while only the selected
+    // compiled verifier's opaque proof may authorize publication.
+    const std::vector<std::pair<std::string,CompletenessSupport>> unsupported{
+        {"residual-only numerical coverage",NumericalCoverageEvidence{
+            "binary64 residual observation",{1e-8,1e-8},{"residual-check"},
+            "max residual was observed; no error bound or coverage proof"}},
+        {"unchecked certificate reference",ValidatedCoverageEvidence{
+            "unreviewed-certificate",{"unchecked-verifier"},"binary64"}},
+        {"proof from a different verifier",RegisteredCompletenessEvidence{
+            {"other-verifier"},"99","untrusted proof payload"}}
+    };
+
+    for (const auto& [case_name,support]:unsupported) {
+        CAPTURE(case_name);
+        auto request=strategy_request();
+        request.configuration.strategy={"synthetic-completeness-guard"};
+        request.strategy_version="1";
+        request.family.target=FamilyTarget::exact_optimal_relation;
+        request.family.representation={"synthetic-joint-relation"};
+        Requirements requirements;
+        requirements.output.representation=request.family.representation;
+        requirements.output.family=FamilyTarget::exact_optimal_relation;
+        requirements.output.completeness=Completeness::established;
+
+        StrategyRegistry registry;
+        StrategyRegistration registration{
+            {{"synthetic-completeness-guard"},"1"},
+            [](const StrategyRequest& prepared,const Requirements&) -> Capability {
+                Output output;
+                output.representation=prepared.family.representation;
+                output.assurance=Assurance::numerical;
+                output.family=FamilyTarget::exact_optimal_relation;
+                output.completeness=Completeness::established;
+                return Offer{std::move(output)};
+            },
+            [support](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+                auto checked=std::get<CheckedPipeline<>>(check_pipeline());
+                return compose_strategy(std::move(checked),[support](auto,const StrategyRequest&,
+                    const Requirements&) {
+                    return std::make_unique<MalformedCompletenessProposal>(support);
+                });
+            },
+            StrategyRegistration::CompleteFamilyVerifierKey{
+                {"csl.verifier.ts02-constant-integrator"},"1"}
+        };
+        REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+
+        const auto prepared=registry.prepare(request,requirements);
+        REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+        auto execution=context();
+        execution.numerical=request.family.numerical;
+        const auto answer=std::get<PreparedStrategy>(prepared).create()->run(execution);
+        REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+        const auto& rejected=std::get<SynthesisResult>(answer);
+        CHECK(rejected.termination==Termination::contract_rejected);
+        CHECK_FALSE(rejected.family.has_value());
+        CHECK_FALSE(rejected.complete_proposal.has_value());
+        CHECK_FALSE(rejected.partial_proposal.has_value());
+        CHECK(rejected.outcome.subject==request.problem.identity());
+        CHECK(rejected.outcome.value==MathematicalOutcome::undetermined);
+        CHECK(std::holds_alternative<Unestablished>(rejected.outcome.support));
+        CHECK_FALSE(rejected.objective.lower.has_value());
+        CHECK_FALSE(rejected.objective.upper.has_value());
+        REQUIRE(std::holds_alternative<ContractValidationFailure>(rejected.stop));
+        const auto& diagnostics=std::get<ContractValidationFailure>(rejected.stop).diagnostics;
+        REQUIRE(diagnostics.size()==1);
+        CHECK(diagnostics[0].code==DiagnosticCode::evidence_mismatch);
+        CHECK(diagnostics[0].field=="family.proposal.verifier");
+        CHECK(diagnostics[0].explanation==
+            "Proposal proof payload does not match the frozen strategy registration");
+    }
 }
 
 TEST_CASE("runtime strategy extension adds a different typed dependency tuple without changing the caller") {
