@@ -360,6 +360,9 @@ TEST_CASE("exact reviewed T-S01 executes registered Strategy A providers and com
     REQUIRE(exact);
     CHECK(exact->h_polyhedron().metadata()->set.dimension==5);
     CHECK(exact->h_polyhedron().metadata()->coordinate_labels==std::vector<std::string>{"x0","x1","x2","u0","u1"});
+    // Rank-four affine equalities and substituted H-rows reduce this public relation to
+    // the full locus (0,t,1,t,1-t), with the rows bounding t exactly to [0,1].
+    entire_segment(exact->h_polyhedron(),{0,0,1,0,1},{0,1,0,1,-1});
     CHECK(exact->contains(Vector{0,0,1,0,1}));
     CHECK(exact->contains(Vector{0,.25,1,.25,.75}));
     CHECK(exact->contains(Vector{0,1,1,1,0}));
