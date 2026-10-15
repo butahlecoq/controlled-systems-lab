@@ -148,8 +148,15 @@ public:
 std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,bool reject_terminal=false,
     std::optional<std::stop_source> stop_after_terminal={},bool omit_test_verifier=false,
     bool fail_terminal_numerically=false,bool limit_terminal_resources=false,
-    ExecutionContext* expire_deadline_after_terminal=nullptr) {
+    ExecutionContext* expire_deadline_after_terminal=nullptr,int* lp_workspace_factories=nullptr) {
     auto lp=take(adapters::lp::make_highs_registration());
+    if(lp_workspace_factories) {
+        const auto factory=lp.factory;
+        lp.factory=[factory,lp_workspace_factories](const LinearProgram& program) {
+            ++*lp_workspace_factories;
+            return factory(program);
+        };
+    }
     auto convex=take(adapters::convex::make_highs_registration());
     auto converter=take(adapters::polyhedral::make_qhull_registration(lp));
     auto projection=geometry::polyhedral::make_projection_registration();
@@ -1085,6 +1092,28 @@ TEST_CASE("unsupported authored finite controls and declared temporal coupling r
     source=*integrator().description();source.temporal=TemporalConstraints{{1,5,{0,1},{0},{1}},{{0,0}}};
     problem=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     CHECK(alternative<Rejection>(admit(request(problem))).diagnostics[0].field=="strategy_a.temporal");
+}
+
+TEST_CASE("Strategy A rejects noncompact vertex-ray controls before creating a downstream workspace") {
+    auto source=*integrator().description();
+    const auto ray=take(sets::make_v({{"unbounded-control"},1,{"u"}},
+        {take(numeric::snapshot(Matrix{1,1,{0}})),take(numeric::snapshot(Matrix{1,1,{1}}))})).as_handle();
+    CHECK(ray.metadata.bounded==SetProperty::unknown);
+    const auto representation=std::get<sets::VRepresentation>(take(sets::from_handle(ray)).representation());
+    CHECK(representation.vertices(0,0)==0);
+    CHECK(representation.rays(0,0)==1);
+    source.controls=ContinuousDomain{{ray,interval("u1",0,1,"u")}};
+    const auto problem=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+
+    int lp_workspace_factories=0;
+    const auto admission=admit(request(problem),false,{},false,false,false,nullptr,&lp_workspace_factories);
+    REQUIRE(std::holds_alternative<Rejection>(admission));
+    const auto& rejection=std::get<Rejection>(admission);
+    REQUIRE(rejection.diagnostics.size()==1);
+    CHECK(rejection.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics[0].field=="strategy_a.controls");
+    CHECK(rejection.diagnostics[0].explanation=="Native H, singleton, empty or universal control factors required.");
+    CHECK(lp_workspace_factories==0);
 }
 
 TEST_CASE("empty temporal constraints do not disable Strategy A capability") {
