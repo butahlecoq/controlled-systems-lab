@@ -1,4 +1,5 @@
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -32,7 +33,8 @@ bool finite(std::span<const double> values) {
     return std::all_of(values.begin(),values.end(),[](double v){return std::isfinite(v);});
 }
 bool supported(const EvidenceSupport& support) {
-    return std::holds_alternative<NumericalCheck>(support) || std::holds_alternative<SymbolicArgument>(support);
+    return std::holds_alternative<NumericalCheck>(support) || std::holds_alternative<SymbolicArgument>(support) ||
+        std::holds_alternative<ExactFarkasEvidence>(support);
 }
 bool valid_support(const EvidenceSupport& support) {
     return std::visit([](const auto& value) {
@@ -41,6 +43,8 @@ bool valid_support(const EvidenceSupport& support) {
         else if constexpr(std::is_same_v<T,NumericalCheck>) return nonnegative(value.absolute_tolerance) &&
             nonnegative(value.relative_tolerance) && nonnegative(value.max_residual) && !value.verifier.value.empty();
         else if constexpr(std::is_same_v<T,SymbolicArgument>) return !value.reference.empty() && !value.assumptions.empty();
+        else if constexpr(std::is_same_v<T,ExactFarkasEvidence>) return !value.subject().problem.value.empty() &&
+            !value.subject().program.value.empty();
         else return !value.artifact.empty() && !value.verifier.empty();
     },support);
 }
@@ -98,9 +102,17 @@ Diagnostics check_program_result(const ProgramResult& r,const LinearProgram& p,A
         default: return invalid("lp.outcome","unknown mathematical outcome");
     }
     if(!valid_support(r.outcome.support)) return invalid("lp.outcome.support","invalid support metadata");
+    if(const auto* proof=std::get_if<ExactFarkasEvidence>(&r.outcome.support)) {
+        if(r.outcome.value!=MathematicalOutcome::infeasible)
+            return invalid("lp.infeasibility.outcome","An exact Farkas proof supports only an infeasible outcome.");
+        auto checked=verify_linear_infeasibility_certificate(p,proof->certificate());
+        if(const auto* errors=std::get_if<Diagnostics>(&checked))return *errors;
+    }
     if(r.primal && (r.primal->size()!=p.objective().size() || !finite(*r.primal))) return invalid("lp.primal","invalid candidate shape or values");
     for(const auto* bound:{&r.objective.lower,&r.objective.upper}) if(*bound) {
         if((*bound)->evidence.subject!=p.identity()) return error(DiagnosticCode::evidence_mismatch,"lp.bound.subject","different program");
+        if(std::holds_alternative<ExactFarkasEvidence>((*bound)->evidence.support))
+            return invalid("lp.bound.support","An infeasibility proof cannot support an objective bound.");
         if(!std::isfinite((*bound)->value) || !valid_support((*bound)->evidence.support)) return invalid("lp.bound","nonfinite bound or invalid support");
     }
     if(r.objective.lower && r.objective.upper && r.objective.lower->value>r.objective.upper->value)

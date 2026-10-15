@@ -272,6 +272,32 @@ ST(CollectionRecord,F(problem),F(configuration),F(run),F(settings),F(clocks),F(s
 EMPTY(Unestablished) ST(NumericalCheck,F(absolute_tolerance),F(relative_tolerance),F(max_residual),F(verifier))
 ST(SymbolicArgument,F(reference),F(assumptions)) ST(CertificateReference,F(artifact),F(verifier))
 TAG(Unestablished,"unestablished") TAG(NumericalCheck,"numerical_check") TAG(SymbolicArgument,"symbolic_argument") TAG(CertificateReference,"certificate_reference")
+ST(LinearInfeasibilityCertificate,F(subject),F(row_lower),F(row_upper),F(variable_lower),F(variable_upper))
+TAG(ExactFarkasEvidence,"exact_farkas")
+template<>struct Codec<ExactFarkasEvidence>{
+    static Json put(const ExactFarkasEvidence& value){return {{"subject",artifacts::put(value.subject())},
+        {"certificate",artifacts::put(value.certificate())}};}
+    static ExactFarkasEvidence get(const Json&){throw Invalid{"support.exact_farkas",
+        "Exact Farkas evidence must be reverified against its immutable LP before reconstruction"};}
+};
+template<>struct Codec<EvidenceSupport>{
+    static Json put(const EvidenceSupport& value){return std::visit([](const auto& item)->Json{
+        using T=std::decay_t<decltype(item)>;
+        return {{"kind",Tag<T>::value},{"value",artifacts::put(item)}};
+    },value);}
+    static EvidenceSupport get(const Json& j){
+        closed(j,{"kind","value"});
+        const auto kind=artifacts::get<std::string>(j.at("kind"));
+        if(kind==Tag<ExactFarkasEvidence>::value)
+            return CertificateReference{"unverified-exact-farkas:"+j.at("value").dump(),
+                "csl.optimization.farkas-exact.unverified/1"};
+        if(kind==Tag<Unestablished>::value)return artifacts::get<Unestablished>(j.at("value"));
+        if(kind==Tag<NumericalCheck>::value)return artifacts::get<NumericalCheck>(j.at("value"));
+        if(kind==Tag<SymbolicArgument>::value)return artifacts::get<SymbolicArgument>(j.at("value"));
+        if(kind==Tag<CertificateReference>::value)return artifacts::get<CertificateReference>(j.at("value"));
+        throw Invalid{"support.kind","Unknown evidence support kind"};
+    }
+};
 EN(GeometryClaimScope,EV(GeometryClaimScope,set_relation),EV(GeometryClaimScope,support_value),EV(GeometryClaimScope,containment))
 ST(GeometryRequestIdentity,F(problem),F(request),F(ideal_output)) ST(GeometryReference,F(identity),F(inputs))
 ST(GeometryErrorBound,F(metric),F(bound),F(units))
