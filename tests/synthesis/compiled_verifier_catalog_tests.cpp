@@ -30,7 +30,9 @@ FamilyRequest family_request(const problem::ResolvedProblem& problem) {
     request.representation={"test.relation"};return request;
 }
 class SecondVerifierWorkspace final:public SynthesisWorkspace {
+    EvidenceSupport optimum_support_;
 public:
+    explicit SecondVerifierWorkspace(EvidenceSupport support):optimum_support_(std::move(support)) {}
     SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& request,const ExecutionContext&) override {
         const ModuleId strategy{"test.strategy.second"};const std::string version="7";
         const bool third=request.profile=="profile-b";
@@ -39,7 +41,7 @@ public:
         const std::string proof_text=third?"third-verifier-proof":"second-verifier-proof";
         FamilyIdentity identity{problem.identity(),request,problem.constraints().coordinates(),strategy,version,{}};
         JointRelation relation{identity.coordinates,request.representation,std::make_shared<const JointRelationPayload>()};
-        const ClaimEvidence claim{identity.problem,SymbolicArgument{"second verifier theorem","compiled test catalog"}};
+        const ClaimEvidence claim{identity.problem,optimum_support_};
         const ObjectiveBound bound{2,claim};
         CompleteOptimalFamily complete{relation,{claim,{bound,bound}},
             {identity,RegisteredCompletenessEvidence{verifier,verifier_version,proof_text}},Assurance::numerical};
@@ -49,17 +51,18 @@ public:
         return result;
     }
 };
-StrategyRegistration second_verifier_registration() {
+StrategyRegistration second_verifier_registration(EvidenceSupport support=
+    SymbolicArgument{"second verifier theorem","compiled test catalog"}) {
     return {{ModuleId{"test.strategy.second"},"7"},
         [](const StrategyRequest&,const Requirements&)->Capability {
             Output output;output.representation={"test.relation"};output.assurance=Assurance::numerical;
             output.family=FamilyTarget::exact_optimal_relation;output.completeness=Completeness::established;
             return Offer{std::move(output)};
         },
-        [](const StrategyRequest&,const Requirements&)->std::variant<StrategyPlan,Rejection> {
+        [support=std::move(support)](const StrategyRequest&,const Requirements&)->std::variant<StrategyPlan,Rejection> {
             auto checked=std::get<CheckedPipeline<>>(check_pipeline());
-            return compose_strategy(std::move(checked),[](auto,const StrategyRequest&,const Requirements&) {
-                return std::make_unique<SecondVerifierWorkspace>();
+            return compose_strategy(std::move(checked),[support](auto,const StrategyRequest&,const Requirements&) {
+                return std::make_unique<SecondVerifierWorkspace>(support);
             });
         },
         StrategyRegistration::CompleteFamilyVerifierKey{ModuleId{"test.verifier.second"},"7"}};
@@ -80,6 +83,48 @@ TEST_CASE("a second test-only compiled verifier uses the generic complete-family
     CHECK(result.family->identity().strategy==ModuleId{"test.strategy.second"});
     CHECK(std::get<RegisteredCompletenessEvidence>(std::get<CompleteOptimalFamily>(result.family->outcome()).completeness.support).verifier==ModuleId{"test.verifier.second"});
 }
+TEST_CASE("registered exact-family boundary rejects unsupported optimum support") {
+    const auto problem=resolved_problem();
+    const auto family=family_request(problem);
+    CHECK(family.target==FamilyTarget::exact_optimal_relation);
+    CHECK(family.assurance==Assurance::numerical);
+    const auto numerical=family.numerical;
+    const std::vector<EvidenceSupport> unsupported{
+        Unestablished{},
+        SymbolicArgument{"arbitrary theorem","no verifier-supported derivation"},
+        CertificateReference{problem.identity().value,"unchecked verifier reference"},
+        NumericalCheck{numerical.absolute_tolerance,numerical.relative_tolerance,0,{"test.residual-only"}}
+    };
+    for(const auto& support:unsupported) {
+        StrategyRequest request{problem,StrategyConfiguration{ModuleId{"test.strategy.second"},{},{},{},{},{},{},{},family.representation},family,"",{}};
+        Requirements requirements;requirements.output.representation=family.representation;
+        requirements.output.family=family.target;requirements.output.completeness=Completeness::established;
+        StrategyRegistry registry;REQUIRE_FALSE(registry.add(second_verifier_registration(support)).has_value());
+        const auto prepared=registry.prepare(request,requirements);
+        REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+        auto context=ExecutionContext{};context.numerical=family.numerical;
+        context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+        auto result=std::get<PreparedStrategy>(prepared).create()->run(context);
+        REQUIRE(std::holds_alternative<SynthesisResult>(result));
+        const auto& rejected=std::get<SynthesisResult>(result);
+        CHECK(rejected.termination==Termination::contract_rejected);
+        CHECK_FALSE(rejected.family);
+        CHECK_FALSE(rejected.complete_proposal);
+        CHECK_FALSE(rejected.partial_proposal);
+        CHECK(rejected.outcome.problem==problem.identity());
+        CHECK(rejected.outcome.value==MathematicalOutcome::undetermined);
+        CHECK(std::holds_alternative<Unestablished>(rejected.outcome.support));
+        CHECK_FALSE(rejected.objective.lower);
+        CHECK_FALSE(rejected.objective.upper);
+        REQUIRE(std::holds_alternative<ContractValidationFailure>(rejected.stop));
+        const auto& diagnostics=std::get<ContractValidationFailure>(rejected.stop).diagnostics;
+        REQUIRE(diagnostics.size()==1);
+        CHECK(diagnostics[0].code==DiagnosticCode::evidence_mismatch);
+        CHECK(diagnostics[0].field=="test.verifier.second");
+        CHECK(diagnostics[0].explanation=="Compiled second verifier rejected the proposal");
+    }
+}
+
 TEST_CASE("complete-family verifier selection is frozen per immutable request profile") {
     const auto problem=resolved_problem();
     auto registration=second_verifier_registration();
