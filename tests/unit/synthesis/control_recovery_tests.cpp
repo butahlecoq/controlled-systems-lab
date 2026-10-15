@@ -65,7 +65,7 @@ problem::ResolvedProblem singular_integrator() {
 
 problem::ResolvedProblem zero_state_integrator() {
     const auto model = std::make_shared<const SystemModel>(SystemModel{
-        {{1, 0, 0}, TimeDomain::discrete,
+        {{0, 1, 0}, TimeDomain::discrete,
          LinearStage{{0, 0, {}}, {0, 1, {}}, {0, 0, {}}, {}}}, {}});
     Problem source{{"control-recovery-zero-state"}, model, {0, 1, 2},
         KnownInitial{{}}, ContinuousDomain{{
