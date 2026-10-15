@@ -1348,6 +1348,56 @@ TEST_CASE("registered Strategy B reports infeasibility for an independently cont
     CHECK_FALSE(result.partial_proposal);
     CHECK(result.incumbents.empty());
 }
+TEST_CASE("registered Strategy B reports infeasibility for an explicitly empty control admissibility set") {
+    auto feasible_input=integrator(LinearTerminal{{0},0});
+    feasible_input.controls=ContinuousDomain{{Singleton{{0}},Singleton{{0}}}};
+    const auto feasible_problem=resolve(feasible_input);
+    const auto feasible_request=request(feasible_problem);
+    auto feasible_workspace=registered_prepared(feasible_problem,feasible_request).create();
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+
+    const auto feasible_result=accepted(feasible_workspace->run(context));
+
+    CHECK(feasible_result.termination==Termination::completed);
+    CHECK(feasible_result.outcome.subject==feasible_problem.identity());
+    // The source has a literal feasible optimum, but Strategy B makes only a
+    // candidate-family claim here and does not establish source optimality.
+    CHECK(feasible_result.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(feasible_result.incumbents.size()==1);
+    CHECK(feasible_result.incumbents.front().witness.original_objective==0);
+    CHECK(feasible_result.incumbents.front().witness.states==std::vector<Vector>{{0},{0},{0}});
+    CHECK(feasible_result.incumbents.front().witness.controls==std::vector<Vector>{{0},{0}});
+
+    auto empty_input=integrator(LinearTerminal{{0},0});
+    empty_input.controls=ContinuousDomain{{EmptySet{1},interval(1).as_handle()}};
+    const auto empty_problem=resolve(empty_input);
+    const auto empty_request=request(empty_problem);
+    auto empty_workspace=registered_prepared(empty_problem,empty_request).create();
+
+    const auto result=accepted(empty_workspace->run(context));
+
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==empty_problem.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::infeasible);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(result.outcome.support));
+    const auto& proof=std::get<ExactFarkasEvidence>(result.outcome.support);
+    const ProgramIdentity generated_program{empty_problem.identity(),
+        {"syn04-joint:"+empty_problem.identity().value}};
+    CHECK(proof.subject()==generated_program);
+    const auto generated=accepted(build_joint_program(empty_problem,empty_request));
+    const auto& lp=std::get<LinearProgram>(generated.program);
+    CHECK(lp.identity()==generated_program);
+    const auto verified=optimization::verify_linear_infeasibility_certificate(lp,proof.certificate());
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
+    CHECK(std::get<ExactFarkasEvidence>(verified).certificate()==proof.certificate());
+    CHECK_FALSE(result.objective.lower);
+    CHECK_FALSE(result.objective.upper);
+    CHECK_FALSE(result.family);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    CHECK(result.incumbents.empty());
+}
 TEST_CASE("registered Strategy B retains unattained-infimum program evidence while the public boundary rejects its source conflict") {
     const auto p=resolve(integrator(LinearTerminal{{0},3}));
     const auto q=request(p);
