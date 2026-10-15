@@ -39,6 +39,7 @@ TEST_CASE("verified Farkas metadata round trips only as untrusted recorded certi
  const auto proof=exact_farkas();const auto encoded=take(ar::encode_h_relation_attachment(source(EvidenceSupport{proof}),limits()));const auto decoded=take(ar::decode_h_relation_attachment(encoded.bytes(),limits()));
  REQUIRE(decoded.affine_dimension.has_value());const auto* recorded=std::get_if<ar::RecordedExactFarkasEvidence>(&decoded.affine_dimension->support);REQUIRE(recorded);
  CHECK(recorded->certificate.subject==proof.subject());CHECK(recorded->certificate.row_lower==proof.certificate().row_lower);CHECK(recorded->certificate.row_upper==proof.certificate().row_upper);CHECK(recorded->certificate.variable_lower==proof.certificate().variable_lower);CHECK(recorded->certificate.variable_upper==proof.certificate().variable_upper);
+ const auto bounded=ar::encode_h_relation_attachment(source(EvidenceSupport{proof}),ar::HRelationAttachmentLimits{1\'000\'000,16,3,4096});REQUIRE(std::holds_alternative<ar::ArtifactError>(bounded));CHECK(std::get<ar::ArtifactError>(bounded).code==ar::ArtifactErrorCode::limit);
  static_assert(!std::is_same_v<ar::RecordedExactFarkasEvidence,ExactFarkasEvidence>);
 }
 TEST_CASE("other affine evidence variants remain recorded data"){
