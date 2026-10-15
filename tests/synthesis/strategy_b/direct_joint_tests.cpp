@@ -1433,7 +1433,7 @@ TEST_CASE("synthetic Strategy B registration preserves inner-feasible candidate 
     auto family_request=request(p);
     family_request.target=FamilyTarget::candidate_relaxation;
     family_request.representation={"synthetic-joint-relation"};
-    registry::StrategyConfiguration configuration;
+    StrategyConfiguration configuration;
     configuration.strategy={"csl.synthesis.strategy-b"};
     const registry::StrategyRequest strategy_request{p,configuration,family_request,"synthetic-1"};
     registry::Requirements requirements;
