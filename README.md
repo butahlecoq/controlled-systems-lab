@@ -29,6 +29,7 @@ The example suite covers both real feasibility backends and rejected unknown bac
 | [registered_convex](examples/registered_convex.cpp) | Minimizes original `||(x-3,4)||` on `[0,2]` through the convex port | `x=2 original_cost=4.123105626 squared_cost=17` |
 | [resolved_scenario](examples/resolved_scenario.cpp) | Constructs and publishes a two-stage model; evaluates stated controls | `states=0,0.25,1 controls=0.25,0.75 original_cost=0` |
 | [scenario_file](examples/scenario_file.cpp) | Loads the [JSON template](examples/scenarios/two-stage-integrator.json) into the actual immutable problem and evaluates the same stated history | Same history/cost, plus mathematical identity and separate source digest |
+| [scenario_cli](examples/scenario_cli.cpp) | Validates a user scenario file without starting a solver; prints resolved problem identity, source digest, and requested run intent | `validation=valid`, `mode=validate_only`, `solvers=not_invoked` |
 | [backend_substitution](examples/backend_substitution.cpp) | Runs one unchanged zero-objective equality/nonnegative LP through either `csl.lp.highs` or `phase-one-bland` | Nonnegative `u0,u1`, `sum=1 original_cost=0`; the chosen witness can differ |
 
 Visual Studio executables are under `build/examples/Release/<name>.exe`; single-configuration generators put them under `build/examples/<name>` (with `.exe` on Windows). For example, in PowerShell with Visual Studio:
@@ -38,9 +39,12 @@ Visual Studio executables are under `build/examples/Release/<name>.exe`; single-
 ./build/examples/Release/registered_convex.exe
 ./build/examples/Release/resolved_scenario.exe
 ./build/examples/Release/scenario_file.exe examples/scenarios/two-stage-integrator.json
+./build/examples/Release/scenario_cli.exe --validate-only examples/scenarios/two-stage-integrator.json
 ./build/examples/Release/backend_substitution.exe csl.lp.highs
 ./build/examples/Release/backend_substitution.exe phase-one-bland
 ```
+
+The validation-only CLI checks scenario parsing and canonical model resolution, then reports mathematical identity and source provenance. It displays requested run intent but does not resolve providers, execute algorithms, or promise that a requested method is available. Unsupported input returns a field-specific diagnostic.
 
 Backend IDs are positional arguments, with HiGHS defaults in the first two examples. Selection prints the actual registered ID/version; an unknown ID exits with a registry diagnostic. Phase I supports the demonstrated feasibility profile, not general nonzero-objective optimization or a second control-synthesis strategy. Numerical outcomes retain **unestablished evidence** and do not supply certified bounds or an optimal family.
 

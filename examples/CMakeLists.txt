@@ -108,6 +108,7 @@ csl_example(registered_lp CSL::highs_lp)
 csl_example(registered_convex CSL::highs_convex)
 csl_example(resolved_scenario CSL::resolved_problem)
 csl_example(scenario_file CSL::input)
+csl_example(scenario_cli CSL::input)
 csl_example(backend_substitution CSL::highs_lp CSL::phase_one)
 csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::strategy_b
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
@@ -126,6 +127,17 @@ endfunction()
 example_check(lp_triangle registered_lp "" 0 "x=0 y=1 original_cost=5")
 example_check(convex_original_norm registered_convex "" 0 "original_cost=4.1231056.*squared_cost=17")
 example_check(resolved_history resolved_scenario "" 0 "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
+example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
+  "validation=valid.*schema=csl.scenario/1.*requested=comparison.*mode=validate_only solvers=not_invoked")
+example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
+  "Input rejected: category=io.*expected")
+example_check(scenario_cli_malformed scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/malformed.json" 2
+  "Input rejected: category=syntax.*expected")
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" validation_scenario)
+string(JSON unsupported_validation_scenario SET "${validation_scenario}" temporal "{}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unsupported-validation.json" "${unsupported_validation_scenario}")
+example_check(scenario_cli_unsupported scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/unsupported-validation.json" 2
+  "Input unsupported: path=/temporal feature=temporal")
 example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.0.0.highs.1.11.0")
