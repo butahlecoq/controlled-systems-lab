@@ -49,6 +49,32 @@ public:
         SynthesisResult result;result.termination=Termination::completed;result.complete_proposal=proposal_;return result;
     }
 };
+class SyntheticRelationCandidateWorkspace final:public SynthesisWorkspace {
+public:
+    SynthesisResult solve(const problem::ResolvedProblem& problem,const FamilyRequest& request,
+        const ExecutionContext&) override {
+        const ModuleId strategy{"csl.synthesis.strategy-b"};
+        const std::string version{"synthetic-1"};
+        const FamilyIdentity identity{problem.identity(),request,problem.constraints().coordinates(),strategy,version,{}};
+        const ClaimEvidence feasibility{problem.identity(),
+            SymbolicArgument{"synthetic relation feasibility","fixture claim only"}};
+        CandidateFamily candidate{{identity.coordinates,request.representation,
+            std::make_shared<const JointRelationPayload>()},
+            FeasibleCandidateEvidence{feasibility},RelationFeasibilityEvidence{feasibility}};
+        const auto published=FamilyPublisher::publish(identity,std::move(candidate));
+        SynthesisResult result;
+        result.termination=Termination::completed;
+        result.outcome={problem.identity(),MathematicalOutcome::undetermined,
+            SymbolicArgument{"synthetic candidate","No optimality claim"},{}};
+        if(const auto* diagnostics=std::get_if<Diagnostics>(&published)) {
+            result.termination=Termination::contract_rejected;
+            result.stop=ContractValidationFailure{*diagnostics,{},std::monostate{}};
+            return result;
+        }
+        result.family=std::get<OptimalFamily>(published);
+        return result;
+    }
+};
 registry::StrategyRegistration proposal_only_strategy(CompleteFamilyProposal proposal) {
     registry::StrategyRegistration registration;
     registration.identity={{"csl.synthesis.strategy-b"},"1"};
@@ -1400,6 +1426,77 @@ TEST_CASE("registered Strategy B candidate identity mismatches are rejected by t
     auto wrong_coordinates=expected;++wrong_coordinates.coordinates.horizon;expect_identity_rejection(wrong_coordinates);
     auto wrong_strategy=expected;wrong_strategy.strategy={"csl.synthesis.foreign"};expect_identity_rejection(wrong_strategy);
     auto wrong_version=expected;wrong_version.strategy_version+="-foreign";expect_identity_rejection(wrong_version);
+}
+
+TEST_CASE("synthetic Strategy B registration preserves inner-feasible candidate without optimal-family promotion") {
+    const auto p=resolve(integrator());
+    auto family_request=request(p);
+    family_request.target=FamilyTarget::candidate_relaxation;
+    family_request.representation={"synthetic-joint-relation"};
+    StrategyConfiguration configuration;
+    configuration.strategy={"csl.synthesis.strategy-b"};
+    const registry::StrategyRequest strategy_request{p,configuration,family_request,"synthetic-1"};
+    registry::Requirements requirements;
+    requirements.output.representation=family_request.representation;
+    requirements.output.assurance=Assurance::numerical;
+    requirements.output.family=FamilyTarget::candidate_relaxation;
+    requirements.output.completeness=registry::Completeness::unestablished;
+
+    registry::StrategyRegistry strategies;
+    registry::StrategyRegistration registration;
+    registration.identity={{"csl.synthesis.strategy-b"},"synthetic-1"};
+    registration.capabilities=[](const registry::StrategyRequest&,const registry::Requirements& requested)
+        ->registry::Capability { return registry::Offer{requested.output}; };
+    registration.planner=[](const registry::StrategyRequest&,const registry::Requirements&)
+        ->std::variant<registry::StrategyPlan,registry::Rejection> {
+        auto checked=std::get<registry::CheckedPipeline<>>(registry::check_pipeline());
+        return registry::compose_strategy(std::move(checked),[](auto,const registry::StrategyRequest&,
+            const registry::Requirements&) { return std::make_unique<SyntheticRelationCandidateWorkspace>(); });
+    };
+    REQUIRE_FALSE(strategies.add(std::move(registration)).has_value());
+
+    const auto prepared=strategies.prepare(strategy_request,requirements);
+    REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.numerical=family_request.numerical;
+    const auto answer=std::get<registry::PreparedStrategy>(prepared).create()->run(context);
+    REQUIRE(std::holds_alternative<SynthesisResult>(answer));
+    const auto& result=std::get<SynthesisResult>(answer);
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(std::holds_alternative<SymbolicArgument>(result.outcome.support));
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).reference=="synthetic candidate");
+    CHECK(std::get<SymbolicArgument>(result.outcome.support).assumptions=="No optimality claim");
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    const auto& identity=result.family->identity();
+    CHECK(identity.problem==p.identity());
+    CHECK(identity.request==family_request);
+    CHECK(identity.coordinates==p.constraints().coordinates());
+    CHECK(identity.strategy==ModuleId{"csl.synthesis.strategy-b"});
+    CHECK(identity.strategy_version=="synthetic-1");
+    CHECK(identity.lineage.empty());
+
+    REQUIRE(std::holds_alternative<CandidateFamily>(result.family->outcome()));
+    const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
+    CHECK(candidate.relation.coordinates==identity.coordinates);
+    CHECK(candidate.relation.representation==family_request.representation);
+    REQUIRE(std::holds_alternative<FeasibleCandidateEvidence>(candidate.relation_to_target));
+    const auto& inner=std::get<FeasibleCandidateEvidence>(candidate.relation_to_target);
+    CHECK(inner.feasibility.problem==p.identity());
+    REQUIRE(std::holds_alternative<SymbolicArgument>(inner.feasibility.support));
+    CHECK(std::get<SymbolicArgument>(inner.feasibility.support).reference=="synthetic relation feasibility");
+    CHECK(std::get<SymbolicArgument>(inner.feasibility.support).assumptions=="fixture claim only");
+    REQUIRE(std::holds_alternative<RelationFeasibilityEvidence>(candidate.feasibility));
+    const auto& whole_relation=std::get<RelationFeasibilityEvidence>(candidate.feasibility);
+    CHECK(whole_relation.support.problem==p.identity());
+    REQUIRE(std::holds_alternative<SymbolicArgument>(whole_relation.support.support));
+    CHECK(std::get<SymbolicArgument>(whole_relation.support.support).reference=="synthetic relation feasibility");
+    CHECK(std::get<SymbolicArgument>(whole_relation.support.support).assumptions=="fixture claim only");
 }
 TEST_CASE("late extraction materialization stop retains program evidence incumbent and feasible candidate") {
     const auto p=resolve(integrator());auto q=request(p);q.materialization_limit=7;
