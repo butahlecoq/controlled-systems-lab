@@ -1039,8 +1039,11 @@ TEST_CASE("empty temporal constraints do not disable Strategy A capability") {
     const auto empty=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 
     CHECK(std::holds_alternative<PreparedStrategy>(admit(request(empty))));
+}
 
-    source.temporal=TemporalConstraints{{1,5,{0},{0},{1}},{{0,0}}};
+TEST_CASE("nonempty temporal coupling remains an unsupported Strategy A request") {
+    auto source=*integrator().description();
+    source.temporal=TemporalConstraints{{1,5,{0,1},{0},{1}},{{0,0}}};
     const auto coupled=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
     const auto rejection=alternative<Rejection>(admit(request(coupled)));
     REQUIRE(rejection.diagnostics.size()==1);
