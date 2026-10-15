@@ -32,17 +32,19 @@ using CompletenessSupport = decltype(CompletenessEvidence{}.support);
 class MalformedCompletenessProposal final : public SynthesisWorkspace {
     CompletenessSupport support_;
     std::function<void(FamilyIdentity&)> mutate_binding_;
+    std::vector<TransformStepIdentity> lineage_;
 public:
     explicit MalformedCompletenessProposal(CompletenessSupport support,
-        std::function<void(FamilyIdentity&)> mutate_binding={})
-        : support_(std::move(support)),mutate_binding_(std::move(mutate_binding)) {}
+        std::function<void(FamilyIdentity&)> mutate_binding={},
+        std::vector<TransformStepIdentity> lineage={})
+        : support_(std::move(support)),mutate_binding_(std::move(mutate_binding)),lineage_(std::move(lineage)) {}
 
     SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest& request,
         const ExecutionContext&) override {
         const auto id=problem.identity();
         const ModuleId strategy{"synthetic-completeness-guard"};
         const std::string version{"1"};
-        const FamilyIdentity identity{id,request,problem.constraints().coordinates(),strategy,version,request.lineage};
+        const FamilyIdentity identity{id,request,problem.constraints().coordinates(),strategy,version,lineage_};
         const JointRelation relation{identity.coordinates,request.representation,
             std::make_shared<const JointRelationPayload>()};
         const ClaimEvidence optimum{id,SymbolicArgument{"synthetic optimum","fixture objective"}};
@@ -1077,13 +1079,13 @@ TEST_CASE("public prepared strategy rejects a complete-family proof bound to a d
                 output.completeness=Completeness::established;
                 return Offer{std::move(output)};
             },
-            [mutate_binding](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+            [mutate_binding](const StrategyRequest& prepared,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
                 auto checked=std::get<CheckedPipeline<>>(check_pipeline());
-                return compose_strategy(std::move(checked),[mutate_binding](auto,const StrategyRequest&,
+                return compose_strategy(std::move(checked),[mutate_binding,lineage=prepared.lineage](auto,const StrategyRequest&,
                     const Requirements&) {
                     return std::make_unique<MalformedCompletenessProposal>(
                         RegisteredCompletenessEvidence{{"csl.verifier.ts02-constant-integrator"},"1","opaque-proof"},
-                        mutate_binding);
+                        mutate_binding,lineage);
                 });
             },
             StrategyRegistration::CompleteFamilyVerifierKey{
