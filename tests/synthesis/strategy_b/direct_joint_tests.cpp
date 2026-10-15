@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -189,6 +190,38 @@ std::size_t equality_rank(const sets::HRepresentation& h) {
     }
     return rank;
 }
+std::pair<double,double> parameter_interval(const sets::HRepresentation& h,
+    const Vector& origin,const Vector& direction,double tolerance=1e-7) {
+    auto lower=-std::numeric_limits<double>::infinity();
+    auto upper=std::numeric_limits<double>::infinity();
+    for(std::size_t i=0;i<h.equalities.rows();++i) {
+        double at_origin=0,at_end=0,scale=std::max(1.0,std::abs(h.equality_values[i]));
+        for(std::size_t j=0;j<origin.size();++j) {
+            const auto coefficient=h.equalities(i,j);
+            at_origin+=coefficient*origin[j];at_end+=coefficient*(origin[j]+direction[j]);
+            scale+=std::abs(coefficient)*(std::abs(origin[j])+std::abs(direction[j]));
+        }
+        CHECK(std::abs(at_origin-h.equality_values[i])<=tolerance*scale);
+        CHECK(std::abs(at_end-h.equality_values[i])<=tolerance*scale);
+    }
+    for(std::size_t i=0;i<h.inequalities.rows();++i) {
+        double at_origin=0,slope=0,slope_scale=0;
+        for(std::size_t j=0;j<origin.size();++j) {
+            const auto coefficient=h.inequalities(i,j);
+            at_origin+=coefficient*origin[j];slope+=coefficient*direction[j];
+            slope_scale+=std::abs(coefficient*direction[j]);
+        }
+        const auto rhs=h.upper_bounds[i]-at_origin;
+        if(std::abs(slope)<=tolerance*std::max(1.0,slope_scale)) {
+            CHECK(rhs>=-tolerance*std::max({1.0,std::abs(at_origin),std::abs(h.upper_bounds[i])}));
+            continue;
+        }
+        const auto endpoint=rhs/slope;
+        if(slope>0)upper=std::min(upper,endpoint);
+        else lower=std::max(lower,endpoint);
+    }
+    return {lower,upper};
+}
 template<class Program,class Base> class OracleWorkspace final:public Base {
     Vector anchor_;double value_;bool wrong_;Termination termination_;std::stop_source* stop_;
     std::function<void()> before_return_;
@@ -346,8 +379,6 @@ TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal opti
     const Vector first{0,0,0.5,0,0.5},last{0,1,0.5,1,0.5};
     for(double a:{0.0,0.125,0.25,0.5,0.875,1.0})
         CHECK(contains(relation,{0,a,0.5,a,0.5}));
-    CHECK_FALSE(contains(relation,{0,-0.01,0.5,-0.01,0.5}));
-    CHECK_FALSE(contains(relation,{0,1.01,0.5,1.01,0.5}));
     CHECK_FALSE(contains(relation,{0,0.25,0.6,0.25,0.5}));
     CHECK_FALSE(contains(relation,{0,0.25,0.5,0.25,0.75}));
     const auto b_h=std::get<sets::HRepresentation>(relation.representation());
@@ -355,14 +386,20 @@ TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal opti
 
     // Compare the same resolved profile through Strategy A. Rank four plus
     // the shared endpoints confines each convex H set to the same line;
-    // endpoint and out-of-range checks establish the same whole segment.
+    // intersecting every H-row with this line must yield the entire interval.
     const auto a_result=run_strategy_a(p,q);const auto& a_relation=strategy_a_relation(a_result);
     const auto a_h=std::get<sets::HRepresentation>(a_relation.representation());
     CHECK(equality_rank(a_h)==4);
     CHECK(contains(relation,first));CHECK(contains(relation,last));
     CHECK(contains(a_relation,first,1e-7));CHECK(contains(a_relation,last,1e-7));
-    for(const auto& point:std::vector<Vector>{{0,-0.01,0.5,-0.01,0.5},{0,1.01,0.5,1.01,0.5},
-                                               {0,0.25,0.6,0.25,0.5},{0,0.25,0.5,0.25,0.75}}) {
+    const Vector direction{0,1,0,1,0};
+    const auto b_interval=parameter_interval(b_h,first,direction);
+    const auto a_interval=parameter_interval(a_h,first,direction);
+    CHECK(std::isfinite(b_interval.first));CHECK(std::isfinite(b_interval.second));
+    CHECK(std::abs(b_interval.first)<=1e-7);CHECK(std::abs(b_interval.second-1)<=1e-7);
+    CHECK(std::isfinite(a_interval.first));CHECK(std::isfinite(a_interval.second));
+    CHECK(std::abs(a_interval.first)<=1e-7);CHECK(std::abs(a_interval.second-1)<=1e-7);
+    for(const auto& point:std::vector<Vector>{{0,0.25,0.6,0.25,0.5},{0,0.25,0.5,0.25,0.75}}) {
         CHECK_FALSE(contains(relation,point));CHECK_FALSE(contains(a_relation,point,1e-7));
     }
 }
