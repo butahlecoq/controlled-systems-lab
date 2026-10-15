@@ -640,12 +640,43 @@ TEST_CASE("T-S03 singular A keeps free earlier controls with a unique terminal m
 TEST_CASE("late terminal admission rejection retains a feasible candidate and scoped lineage") {
     auto result=run(request(integrator()),true);
     CHECK(result.termination==Termination::operation_rejected);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
+    CHECK(result.incumbents.empty());CHECK_FALSE(result.complete_proposal);CHECK_FALSE(result.partial_proposal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());CHECK_FALSE(result.family->partial_registry_verified());
     const auto& history=payload(result);CHECK(contains(history.history.relation,{0,1,2,1,1}));
+    REQUIRE(history.terminal);
+    const SetId final_slice{"nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward2/project/output"};
+    CHECK(history.terminal->construction.feasible_slice==final_slice);
+    const auto generated_request=RequestId{"syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward2/project/output"};
     REQUIRE(std::holds_alternative<ScopedRequestRejection>(result.stop));
     const auto& stop=std::get<ScopedRequestRejection>(result.stop);
-    CHECK(stop.request.port=="convex");CHECK(stop.request.actual_module==ModuleId{"csl.convex.highs"});
-    CHECK(stop.retained.partial_or_candidate_family);CHECK(stop.completed_lineage.size()==4);
+    CHECK(stop.request.request==generated_request);
+    CHECK(stop.request.port=="convex");
+    CHECK(stop.request.requested_module==ModuleId{"csl.convex.highs"});
+    CHECK(stop.request.requested_version==std::optional<std::string>{"1.0.0+highs.1.11.0"});
+    CHECK(stop.request.actual_module==ModuleId{"csl.convex.highs"});
+    CHECK(stop.request.actual_version==std::optional<std::string>{"1.0.0+highs.1.11.0"});
+    CHECK_FALSE(stop.retained.lower_bound);CHECK_FALSE(stop.retained.upper_bound);
+    CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
+    const SetId initial{"nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward0/initial"};
+    const SetId reachable0{"nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward0/project/output"};
+    const SetId reachable1{"nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward1/project/output"};
+    const SetId reachable2{"nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward2/project/output"};
+    const SetId recovered{"recovery/joint-history/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf9142:nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward2/project/output"};
+    const std::vector<TransformStepIdentity> expected_lineage{
+        {{"nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward0/stage"},initial,reachable0,{"csl.synthesis.reach-back"},"1"},
+        {{"nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward1/stage"},reachable0,reachable1,{"csl.synthesis.reach-back"},"1"},
+        {{"nominal-forward/86:csl.problem.v1.sha256:b98b5e966ad430ce2e0c8934cc88badcb7eeda9cffb168485606786dba96faf918:strategy-a/forward2/stage"},reachable1,reachable2,{"csl.synthesis.reach-back"},"1"},
+        {{"strategy-a/feasible-preimage"},reachable2,recovered,{"csl.synthesis.control-recovery"},"1"}};
+    CHECK(stop.completed_lineage==expected_lineage);
+    CHECK(stop.completed_lineage==result.family->identity().lineage);
+    REQUIRE(stop.diagnostics.size()==1);
+    CHECK(stop.diagnostics[0].code==DiagnosticCode::unsupported);
     CHECK(stop.diagnostics[0].field=="test.terminal");
+    CHECK(stop.diagnostics[0].explanation=="terminal provider rejected generated request");
     CHECK(history.terminal->construction.feasible_slice==history.forward.stages.back().marginal.output.id);
 }
 TEST_CASE("post-terminal cancellation keeps scoped optimizer and completed terminal lineage") {
