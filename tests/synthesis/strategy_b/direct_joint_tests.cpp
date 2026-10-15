@@ -176,10 +176,14 @@ bool contains(const sets::SetData& set,const Vector& x,double tolerance=1e-10) {
 }
 std::size_t equality_rank(const sets::HRepresentation& h) {
     std::vector<Vector> rows(h.equalities.rows(),Vector(h.equalities.cols()));
-    for(std::size_t r=0;r<rows.size();++r)for(std::size_t c=0;c<rows[r].size();++c)rows[r][c]=h.equalities(r,c);
+    for(std::size_t r=0;r<rows.size();++r) {
+        double scale=0;
+        for(std::size_t c=0;c<rows[r].size();++c)scale=std::max(scale,std::abs(h.equalities(r,c)));
+        if(scale>0)for(std::size_t c=0;c<rows[r].size();++c)rows[r][c]=h.equalities(r,c)/scale;
+    }
     std::size_t rank=0;
     for(std::size_t c=0;c<h.equalities.cols() && rank<rows.size();++c) {
-        auto pivot=rank;while(pivot<rows.size() && std::abs(rows[pivot][c])<1e-7)++pivot;
+        auto pivot=rank;while(pivot<rows.size() && std::abs(rows[pivot][c])<1e-10)++pivot;
         if(pivot==rows.size())continue;
         std::swap(rows[rank],rows[pivot]);
         const auto divisor=rows[rank][c];for(std::size_t j=c;j<rows[rank].size();++j)rows[rank][j]/=divisor;
@@ -195,32 +199,48 @@ std::pair<double,double> parameter_interval(const sets::HRepresentation& h,
     auto lower=-std::numeric_limits<double>::infinity();
     auto upper=std::numeric_limits<double>::infinity();
     for(std::size_t i=0;i<h.equalities.rows();++i) {
-        double at_origin=0,at_end=0,scale=std::max(1.0,std::abs(h.equality_values[i]));
+        long double row_scale=std::abs(static_cast<long double>(h.equality_values[i]));
         for(std::size_t j=0;j<origin.size();++j) {
-            const auto coefficient=h.equalities(i,j);
-            at_origin+=coefficient*origin[j];at_end+=coefficient*(origin[j]+direction[j]);
-            scale+=std::abs(coefficient)*(std::abs(origin[j])+std::abs(direction[j]));
+            row_scale=std::max(row_scale,std::abs(static_cast<long double>(h.equalities(i,j))));
         }
-        CHECK(std::abs(at_origin-h.equality_values[i])<=tolerance*scale);
-        CHECK(std::abs(at_end-h.equality_values[i])<=tolerance*scale);
+        long double at_origin=0,at_end=0;
+        const auto divisor=row_scale>0?row_scale:1.0L;
+        const auto value=static_cast<long double>(h.equality_values[i])/divisor;
+        for(std::size_t j=0;j<origin.size();++j) {
+            const auto coefficient=static_cast<long double>(h.equalities(i,j))/divisor;
+            at_origin+=coefficient*origin[j];at_end+=coefficient*(origin[j]+direction[j]);
+        }
+        CHECK(std::abs(at_origin-value)<=tolerance);
+        CHECK(std::abs(at_end-value)<=tolerance);
     }
     for(std::size_t i=0;i<h.inequalities.rows();++i) {
-        double at_origin=0,slope=0,slope_scale=0;
+        long double row_scale=std::abs(static_cast<long double>(h.upper_bounds[i]));
+        for(std::size_t j=0;j<origin.size();++j)
+            row_scale=std::max(row_scale,std::abs(static_cast<long double>(h.inequalities(i,j))));
+        const auto divisor=row_scale>0?row_scale:1.0L;
+        long double at_origin=0,slope=0;
         for(std::size_t j=0;j<origin.size();++j) {
-            const auto coefficient=h.inequalities(i,j);
+            const auto coefficient=static_cast<long double>(h.inequalities(i,j))/divisor;
             at_origin+=coefficient*origin[j];slope+=coefficient*direction[j];
-            slope_scale+=std::abs(coefficient*direction[j]);
         }
-        const auto rhs=h.upper_bounds[i]-at_origin;
-        if(std::abs(slope)<=tolerance*std::max(1.0,slope_scale)) {
-            CHECK(rhs>=-tolerance*std::max({1.0,std::abs(at_origin),std::abs(h.upper_bounds[i])}));
+        const auto rhs=static_cast<long double>(h.upper_bounds[i])/divisor-at_origin;
+        if(slope==0) {
+            CHECK(rhs>=-tolerance);
             continue;
         }
         const auto endpoint=rhs/slope;
-        if(slope>0)upper=std::min(upper,endpoint);
-        else lower=std::max(lower,endpoint);
+        if(slope>0)upper=std::min(upper,static_cast<double>(endpoint));
+        else lower=std::max(lower,static_cast<double>(endpoint));
     }
     return {lower,upper};
+}
+sets::HRepresentation scaled_parameter_interval(double row_scale) {
+    const Matrix inequalities{2,5,{0,row_scale,0,0,0,0,-row_scale,0,0,0}};
+    const Vector bounds{row_scale,0};
+    const auto set=accepted(sets::make_h({{"scaled-parameter-interval"},5,{"x0","x1","x2","u0","u1"}},
+        {accepted(numeric::snapshot(inequalities)),accepted(numeric::snapshot_vector(bounds)),
+         accepted(numeric::snapshot(Matrix{0,5,{}})),accepted(numeric::snapshot_vector(Vector{}))}));
+    return std::get<sets::HRepresentation>(set.representation());
 }
 template<class Program,class Base> class OracleWorkspace final:public Base {
     Vector anchor_;double value_;bool wrong_;Termination termination_;std::stop_source* stop_;
@@ -332,6 +352,14 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         registry::Completeness::established:registry::Completeness::unestablished;
     return accepted(strategies.prepare({p,configuration,q,"1"},requirements));
 }
+}
+TEST_CASE("row-derived intervals are invariant under positive H-row scaling") {
+    const Vector origin{0,0,0.5,0,0.5},direction{0,1,0,1,0};
+    for(const double scale:{1e-200,1.0,1e200}) {
+        const auto interval=parameter_interval(scaled_parameter_interval(scale),origin,direction);
+        CHECK(std::isfinite(interval.first));CHECK(std::isfinite(interval.second));
+        CHECK(std::abs(interval.first)<=1e-12);CHECK(std::abs(interval.second-1)<=1e-12);
+    }
 }
 TEST_CASE("joint program preserves the two-step integrator and original terminal objective") {
     const auto p=resolve(integrator()); const auto program=accepted(build_joint_program(p,request(p)));
