@@ -50,7 +50,7 @@ T-S01 Strategy A/B runtime verification additionally requires fresh execution re
 
 ## Import, replay, and unsupported behavior
 
-Import performs bounded schema parsing, validates attachment metadata and digest, and (when supplied) checks the artifact's problem binding against the caller's immutable `ResolvedProblem`. Import returns the claim as untrusted recorded data in every case. It does not invoke a solver, selector, or registered verifier and never yields a registry-verified complete family.
+Import performs bounded schema parsing and validates attachment metadata and digest. When the caller supplies an authoritative immutable `ResolvedProblem`, a mismatch with the artifact's problem binding is a typed import rejection; a matching problem identity only revalidates that binding. Without a supplied problem, import may preserve the structurally valid claim as untrusted recorded data. Neither path invokes a solver, selector, or registered verifier, and neither yields a registry-verified complete family.
 
 The replay API must be explicit and fail closed. Candidate designs for review are:
 
@@ -77,7 +77,7 @@ Before enabling v5, tests should cover the following caller-visible behaviors us
 
 1. Encode verified T-S01 Strategy A, T-S01 Strategy B, and T-S02 A/B results. Assert literal profile/verifier/version/payload, exact FamilyIdentity fields, ordered lineage, objective bounds, relation attachment digest, and schema version in the resulting artifact.
 2. Decode each artifact and assert the returned object is `RecordedFamilyClaim`, with exact claim bytes/fields retained and no live `OptimalFamily` publication. Assert no selector can consume the decoded claim.
-3. Mutate each of problem ID, effective objective/family request, coordinate order, strategy ID/version, verifier ID/version, proof payload, and lineage order. Recompute ordinary content hashes where applicable. Structural import may preserve these as claims, but replay must reject them and publish no complete family.
+3. Mutate each of problem ID, effective objective/family request, coordinate order, strategy ID/version, verifier ID/version, proof payload, and lineage order. Recompute ordinary content hashes where applicable. For a problem-ID mismatch, import with an authoritative `ResolvedProblem` must reject; import without one may retain the claim only as untrusted data, and replay must reject it. Other structurally valid identity/proof mutations may likewise be retained as untrusted claims, but replay must reject them and publish no complete family.
 4. Remove or alter the relation attachment, mismatch its declared schema/size/digest, use an unknown verifier version, and use an unsupported profile. Assert typed unsupported/rejection with the exact public diagnostic field and preserved run evidence.
 5. Assert a valid-looking but self-authored v5 claim never becomes trusted solely by decoding, matching a verifier string, matching a digest, or supplying the resolved problem.
 6. Preserve v1-v4 fixture behavior and add a v5 unknown-version case. Re-encoding an imported v5 claim must not set a trusted marker or change its claim into a live family.
