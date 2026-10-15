@@ -111,7 +111,7 @@ TEST_CASE("registered exact-family boundary rejects unsupported optimum support"
         CHECK_FALSE(rejected.family);
         CHECK_FALSE(rejected.complete_proposal);
         CHECK_FALSE(rejected.partial_proposal);
-        CHECK(rejected.outcome.problem==problem.identity());
+        CHECK(rejected.outcome.subject==problem.identity());
         CHECK(rejected.outcome.value==MathematicalOutcome::undetermined);
         CHECK(std::holds_alternative<Unestablished>(rejected.outcome.support));
         CHECK_FALSE(rejected.objective.lower);
