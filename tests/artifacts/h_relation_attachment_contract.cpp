@@ -10,7 +10,7 @@ ar::HRelationAttachmentLimits limits(){return {1'000'000,16,64,4096};}
 template<class T>T take(std::variant<T,ar::ArtifactError> value){REQUIRE(std::holds_alternative<T>(value));return std::get<T>(std::move(value));}
 sets::SetData source(){
  Matrix a{2,2,{1.0,-0.0,0.0,-2.0}},e{1,2,{3.0,4.0}};Vector b{5.0,-0.0},f{6.0};
- auto av=numeric::snapshot(a),bv=numeric::snapshot_vector(b),ev=numeric::snapshot(e),fv=numeric::snapshot_vector(f);
+ auto av=numeric::snapshot(a);auto bv=numeric::snapshot_vector(b);auto ev=numeric::snapshot(e);auto fv=numeric::snapshot_vector(f);
  REQUIRE(std::holds_alternative<numeric::MatrixView>(av));REQUIRE(std::holds_alternative<numeric::VectorView>(bv));
  REQUIRE(std::holds_alternative<numeric::MatrixView>(ev));REQUIRE(std::holds_alternative<numeric::VectorView>(fv));
  sets::AffineDimensionClaim claim{sets::DimensionValue{1},SymbolicArgument{"rank-note","caller supplied"}};
