@@ -388,6 +388,13 @@ SynthesisResult detail::DirectJointExecutionRunner::solve(const problem::Resolve
             // incumbent found below may still provide a valid upper bound.
             result.objective.lower.reset();
         }
+        if(evidence.termination==Termination::completed&&evidence.outcome.value==MathematicalOutcome::infeasible) {
+            result.outcome={p.identity(),MathematicalOutcome::infeasible,Unestablished{}, {
+                "Source generated program: "+evidence.outcome.subject.program.value+".",
+                "Transfer from generated-program infeasibility to the resolved problem is not independently validated."
+            }};
+            result.objective={};
+        }
         if(evidence.primal) {
             const auto& anchor=*evidence.primal;const auto coordinates=build_artifact->coordinates;
             Witness witness{p.identity(),{},{},0};const auto n=coordinates.dimensions.state,m=coordinates.dimensions.control,T=coordinates.horizon;
