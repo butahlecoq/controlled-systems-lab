@@ -3,6 +3,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/optimization/lp_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
+#include "../../../src/adapters/certificate_verification.hpp"
 #include <barrier>
 #include <future>
 #include <limits>
@@ -140,6 +141,42 @@ TEST_CASE("HiGHS infeasibility ray is accepted only as an exact Farkas certifica
     const auto verified = verify_linear_infeasibility_certificate(program,evidence.certificate());
     REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
     CHECK(std::get<ExactFarkasEvidence>(verified).certificate() == evidence.certificate());
+}
+
+TEST_CASE("late certificate verification discards evidence when the final poll observes a stop") {
+    ExecutionContext deadline_context;
+    const auto expired = adapters::highs_detail::verify_then_poll(
+        [&] {
+            deadline_context.deadline = std::chrono::steady_clock::now();
+            return std::optional<int>{42};
+        },
+        [&]() -> std::optional<Termination> {
+            if (deadline_context.deadline && std::chrono::steady_clock::now() >= *deadline_context.deadline)
+                return Termination::resource_limit;
+            return std::nullopt;
+        });
+    CHECK_FALSE(expired.evidence);
+    REQUIRE(expired.stop);
+    CHECK(*expired.stop == Termination::resource_limit);
+
+    ExecutionContext cancellation_context;
+    std::stop_source cancellation;
+    cancellation_context.cancellation = cancellation.get_token();
+    const auto cancelled = adapters::highs_detail::verify_then_poll(
+        [&] {
+            cancellation_context.deadline = std::chrono::steady_clock::now();
+            cancellation.request_stop();
+            return std::optional<int>{42};
+        },
+        [&]() -> std::optional<Termination> {
+            if (cancellation_context.cancellation.stop_requested()) return Termination::cancelled;
+            if (cancellation_context.deadline && std::chrono::steady_clock::now() >= *cancellation_context.deadline)
+                return Termination::resource_limit;
+            return std::nullopt;
+        });
+    CHECK_FALSE(cancelled.evidence);
+    REQUIRE(cancelled.stop);
+    CHECK(*cancelled.stop == Termination::cancelled);
 }
 
 TEST_CASE("native limits and pre-stops never claim optimal or reuse a previous candidate") {

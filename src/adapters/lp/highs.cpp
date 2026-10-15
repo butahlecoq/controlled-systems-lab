@@ -1,6 +1,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/optimization/lp_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
+#include "../certificate_verification.hpp"
 #include "../highs_session.hpp"
 #include <algorithm>
 #include <chrono>
@@ -286,9 +287,15 @@ class HighsLPWorkspace final : public LPWorkspace {
                         result.termination=*state.stop;result.outcome.value=MathematicalOutcome::undetermined;
                         raw << "\ncertificate.extraction=stopped_during_ray";
                     } else if(ray_status==HighsStatus::kOk&&has_ray) {
-                        const auto evidence=exact_farkas_from_ray(p,ray);
-                        if(evidence) {
-                            result.outcome.support=*evidence;
+                        const auto verification=highs_detail::verify_then_poll(
+                            [&] { return exact_farkas_from_ray(p,ray); },
+                            [&] { state.poll();return state.stop; });
+                        if(verification.stop) {
+                            result.termination=*verification.stop;result.outcome.value=MathematicalOutcome::undetermined;
+                            result.outcome.support=Unestablished{};
+                            raw << "\ncertificate.extraction=stopped_during_verification";
+                        } else if(verification.evidence) {
+                            result.outcome.support=*verification.evidence;
                             raw << "\ncertificate.extraction=exact_farkas_verified";
                         } else raw << "\ncertificate.extraction=ray_rejected_by_exact_verifier";
                     } else raw << "\ncertificate.extraction=ray_unavailable";
