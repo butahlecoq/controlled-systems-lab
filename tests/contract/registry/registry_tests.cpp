@@ -803,6 +803,19 @@ TEST_CASE("T-M03 unsupported profiles stay capability rejection rather than infe
     raw=*request.problem.description(); raw.controls = MixedDomain{ContinuousDomain{{UniversalSet{0}}},FiniteDomain{1,{{0}}}}; add_case(raw,"controls");
     raw=*request.problem.description(); raw.information = InformationPattern::feedback; add_case(raw,"information");
     raw=*request.problem.description(); raw.temporal = TemporalConstraints{{1,1,{0,1},{0},{1}},{{0,1}}}; add_case(raw,"temporal");
+    raw=*request.problem.description();
+    auto external_model=std::make_shared<SystemModel>(*raw.model);
+    external_model->dynamics.dimensions.external=1;
+    std::get<LinearStage>(external_model->dynamics.stages).E={1,1,{2}};
+    raw.model=std::move(external_model);
+    raw.external=KnownExternalSequence{{{3}}};
+    auto external_resolution=csl::problem::resolve(raw,
+        {csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedProblem>(external_resolution));
+    auto external_request=request;
+    external_request.problem=std::get<csl::problem::ResolvedProblem>(std::move(external_resolution));
+    external_request.family.objective=external_request.problem.identity();
+    cases.push_back({std::move(external_request),"external"});
     raw=*request.problem.description(); auto continuous = std::make_shared<SystemModel>(*raw.model);
     continuous->dynamics.time_domain = TimeDomain::continuous; raw.model = continuous; add_case(raw,"time_domain");
     raw=*request.problem.description(); raw.objective = ResidualNormTerminal{{1,1,{1}},{0}}; add_case(raw,"objective");
@@ -815,6 +828,8 @@ TEST_CASE("T-M03 unsupported profiles stay capability rejection rather than infe
         CHECK(rejection.provenance.actual->version == "fixture-1");
         CHECK(rejection.diagnostics[0].field == field);
         CHECK(rejection.diagnostics[0].code == DiagnosticCode::unsupported);
+        if(field=="external")
+            CHECK(rejection.diagnostics[0].explanation=="External-input semantics require another capability profile");
     }
 }
 
