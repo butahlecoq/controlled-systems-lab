@@ -41,6 +41,16 @@ target_link_libraries(approximation_policy_tests PRIVATE CSL::approximation CSL:
 add_test(NAME approximation_policy_tests COMMAND approximation_policy_tests)
 csl_test_target(approximation_policy_tests geometry)
 
+add_executable(generator_sets_test tests/unit/geometry/generator_sets_test.cpp)
+target_link_libraries(generator_sets_test PRIVATE CSL::sets CSL::geometry_generators doctest::doctest)
+add_test(NAME generator_sets_test COMMAND generator_sets_test)
+csl_test_target(generator_sets_test geometry)
+
+add_executable(generators_public_client tests/installed/generators_client.cpp)
+target_link_libraries(generators_public_client PRIVATE CSL::geometry_generators)
+add_test(NAME generators_public_client COMMAND generators_public_client)
+csl_test_target(generators_public_client geometry)
+
 add_executable(projection_predecessor_public_client tests/installed/projection_predecessor_client.cpp)
 target_link_libraries(projection_predecessor_public_client PRIVATE CSL::polyhedral)
 add_test(NAME projection_predecessor_public_client COMMAND projection_predecessor_public_client)
