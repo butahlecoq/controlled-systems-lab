@@ -10,6 +10,23 @@ endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
 
+if(CSL_BUILD_EXT01_REPORT)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_ext01_fixed_plan_report benchmarks/reporting/ext01/fixed_plan_driver.cpp)
+target_compile_features(csl_ext01_fixed_plan_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_ext01_fixed_plan_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+target_link_libraries(csl_ext01_fixed_plan_report PRIVATE CSL::fixed_plan_disturbance CSL::worst_case_vertex)
+target_include_directories(csl_ext01_fixed_plan_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+if(BUILD_TESTING)
+add_test(NAME ext01_report_smoke COMMAND csl_ext01_fixed_plan_report --smoke)
+endif()
+if(MSVC)
+target_compile_options(csl_ext01_fixed_plan_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_ext01_fixed_plan_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+endif()
+
 if(CSL_BUILD_GEO03_REPORT)
 add_executable(csl_geo03_conversion_report benchmarks/reporting/geo03/hv_conversion_driver.cpp)
 target_link_libraries(csl_geo03_conversion_report PRIVATE CSL::qhull_conversion CSL::highs_lp)
