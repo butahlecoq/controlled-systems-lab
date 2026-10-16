@@ -1059,7 +1059,7 @@
   "public_report_sha256": {
     "reachability-proof-audit": "50d621dbf13698a89af05a5957bf2bfb9f900e848023519685ee0e1d1a5547eb",
     "adaptive-policy-proof-audit": "412a858e18a678da5a3bcca931a7380525efe29495200e9596b3ce5c53734065",
-    "temporal-lift-source-audit": "9c1f6175386a500c0bea2f2231c89ee5c0af03b62470f01926afa7d63c442f49"
+    "temporal-lift-source-audit": "c661d9513f07c51118446a4ee97d2ed89d19036b69646a985f51f042991a399f"
   },
   "public_report_digest_convention": "utf8-lf"
 }
