@@ -14,9 +14,8 @@ from unittest import mock
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports/ext04"))
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import render_saved as report
+from ext04 import render_saved as report
 import stage_ext04
 
 SOURCE = ROOT / "reports/algorithm-results/ext04-df62c7c6d295e135"

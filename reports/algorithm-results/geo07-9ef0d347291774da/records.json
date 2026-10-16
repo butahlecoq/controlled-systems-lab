@@ -1,0 +1,1453 @@
+{
+  "build_provenance_sha256": "5ae756bd509301ec17945bd7df4e21f2502511bc93bbedee77ffaca0990c04c2",
+  "created_utc": "2026-10-16T13:16:18.715186+00:00",
+  "environment": {
+    "concurrent_work_note": "UTC 2026-10-16T13:16:02.6364135Z; i5-12400F 12 logical processors; CPU load=2%; processor idle=94%; recent stable WMI load samples=0,1,0,1%; active cmake/cl/link=none; resident MSBuild count=3; no other known local build active; ordinary background agents/processes uncontrolled.",
+    "logical_processors": 12,
+    "observed_native_threads": null,
+    "observed_native_threads_reason": "no native thread counter in driver",
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "requested_driver_workers": 1
+  },
+  "harness_commit": "580da5368aac21b14d9e817da5937b4494a905aa",
+  "inputs": {
+    "binary64": true,
+    "canonical_bytes_sha256": "72c0fe84c30a152e4d9be5400e88949d06c307a885913b8977592a9cded7b701",
+    "driver_description_sha256": "54417990966a11e97023f161b7c1fb24be2f1370ae7fd040ee317a347b29e823",
+    "driver_sha256": "4ede941d9cbc498e62226cc8030735661bb14425b5629ef028d8bddcd2c97601",
+    "fixture_sha256": {
+      "box_image": "4918876e6c3cbfaef960475f0eac334bd7746bb17b848b778d21d481bdab908d",
+      "constrained_sum": "b293110c9ad29728d05bb11cd9f5e05c98f6203bff7c4ad04e26747b1d0c1f58",
+      "shared_cancellation": "8dc95b9a367d49b1b5c8993128c760b837284773fa64ed3101e05ef3f2d17c20"
+    },
+    "fixtures": {
+      "box_image": {
+        "affine_map": {
+          "cols": 2,
+          "rows": 1,
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "feasible_factor_witnesses": [
+          [
+            -1.0,
+            -1.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            -1.0,
+            1.0
+          ]
+        ],
+        "infeasible_inside_factor": [
+          2.0,
+          -1.0
+        ],
+        "inside_points": [
+          [
+            2.0
+          ],
+          [
+            7.0
+          ],
+          [
+            12.0
+          ],
+          [
+            8.0
+          ]
+        ],
+        "offset": [
+          4.0
+        ],
+        "operation": "affine_image",
+        "output_id": "report-image",
+        "outside_points": [
+          [
+            1.0
+          ],
+          [
+            13.0
+          ]
+        ],
+        "physical_h": {
+          "equalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "inequalities": {
+            "cols": 1,
+            "rows": 2,
+            "values": [
+              1.0,
+              -1.0
+            ]
+          },
+          "upper": [
+            12.0,
+            -2.0
+          ],
+          "values": []
+        },
+        "source": {
+          "center": [
+            1.0,
+            2.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 2,
+            "rows": 0,
+            "values": []
+          },
+          "equality_values": [],
+          "factor_ids": [
+            "horizontal",
+            "vertical"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 2,
+            "values": [
+              2.0,
+              0.0,
+              0.0,
+              3.0
+            ]
+          },
+          "id": "report-box"
+        }
+      },
+      "constrained_sum": {
+        "feasible_factor_witnesses": [
+          [
+            1.0,
+            1.0,
+            -1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "infeasible_inside_factor": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "inside_points": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "left": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              1.0,
+              -1.0
+            ]
+          },
+          "equality_values": [
+            0.0
+          ],
+          "factor_ids": [
+            "u",
+            "v"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 2,
+            "values": [
+              1.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "id": "report-constrained-left"
+        },
+        "left_only_factor": [
+          1.0,
+          1.0,
+          0.0
+        ],
+        "operation": "dependent_sum",
+        "output_id": "report-constrained-sum",
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            -1.0
+          ]
+        ],
+        "physical_h": {
+          "equalities": {
+            "cols": 2,
+            "rows": 2,
+            "values": [
+              1.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "inequalities": {
+            "cols": 2,
+            "rows": 0,
+            "values": []
+          },
+          "upper": [],
+          "values": [
+            0.0,
+            0.0
+          ]
+        },
+        "right": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              1.0,
+              1.0
+            ]
+          },
+          "equality_values": [
+            0.0
+          ],
+          "factor_ids": [
+            "u",
+            "w"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 2,
+            "values": [
+              -1.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "id": "report-constrained-right"
+        },
+        "right_only_factor": [
+          1.0,
+          0.0,
+          -1.0
+        ]
+      },
+      "shared_cancellation": {
+        "feasible_factor_witnesses": [
+          [
+            -1.0
+          ],
+          [
+            0.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "independent_sum_rejected": true,
+        "inside_points": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "left": {
+          "center": [
+            0.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "equality_values": [],
+          "factor_ids": [
+            "history.0"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 1,
+            "rows": 1,
+            "values": [
+              1.0
+            ]
+          },
+          "id": "report-left"
+        },
+        "operation": "dependent_sum",
+        "output_id": "report-cancelled",
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_h": {
+          "equalities": {
+            "cols": 1,
+            "rows": 1,
+            "values": [
+              1.0
+            ]
+          },
+          "inequalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "upper": [],
+          "values": [
+            0.0
+          ]
+        },
+        "right": {
+          "center": [
+            0.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "equality_values": [],
+          "factor_ids": [
+            "history.0"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 1,
+            "rows": 1,
+            "values": [
+              -1.0
+            ]
+          },
+          "id": "report-right"
+        }
+      }
+    },
+    "representation_claim": "exact shared-factor algebra; binary64 numerical evaluation has no validated rounding enclosure"
+  },
+  "payload_sha256": "9ef0d347291774dae2b7a81192653cb21b66c5784b315b5621101fa0e39a4aa4",
+  "performance_conclusion": "exploratory single-adapter batch observations; no comparator, speedup, or attributed limiter",
+  "process": {
+    "exit_code": 0,
+    "raw_sha256": "768dae54cb5aabcec1445a2703df4ae45ed26145de7f52a012307b8d267dfd36",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "report_id": "geo07-9ef0d347291774da",
+  "rows": [
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 39462100,
+      "error": null,
+      "fixture": "box_image",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1,
+          13
+        ],
+        "physical_witnesses": [
+          2,
+          7,
+          12,
+          8
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 30817700,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          -1,
+          1
+        ],
+        "physical_witnesses": [
+          0,
+          0,
+          0
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 43396400,
+      "error": null,
+      "fixture": "constrained_sum",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 37699000,
+      "error": null,
+      "fixture": "box_image",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1,
+          13
+        ],
+        "physical_witnesses": [
+          2,
+          7,
+          12,
+          8
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 30668200,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          -1,
+          1
+        ],
+        "physical_witnesses": [
+          0,
+          0,
+          0
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 42636300,
+      "error": null,
+      "fixture": "constrained_sum",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 42759900,
+      "error": null,
+      "fixture": "constrained_sum",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 1,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 32355800,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          -1,
+          1
+        ],
+        "physical_witnesses": [
+          0,
+          0,
+          0
+        ],
+        "status": "passed"
+      },
+      "round": 1,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 37747200,
+      "error": null,
+      "fixture": "box_image",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1,
+          13
+        ],
+        "physical_witnesses": [
+          2,
+          7,
+          12,
+          8
+        ],
+        "status": "passed"
+      },
+      "round": 1,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 37299900,
+      "error": null,
+      "fixture": "box_image",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1,
+          13
+        ],
+        "physical_witnesses": [
+          2,
+          7,
+          12,
+          8
+        ],
+        "status": "passed"
+      },
+      "round": 2,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 30582000,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          -1,
+          1
+        ],
+        "physical_witnesses": [
+          0,
+          0,
+          0
+        ],
+        "status": "passed"
+      },
+      "round": 2,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 41648800,
+      "error": null,
+      "fixture": "constrained_sum",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 2,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 41641200,
+      "error": null,
+      "fixture": "constrained_sum",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 3,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 30408900,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          -1,
+          1
+        ],
+        "physical_witnesses": [
+          0,
+          0,
+          0
+        ],
+        "status": "passed"
+      },
+      "round": 3,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 37870000,
+      "error": null,
+      "fixture": "box_image",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1,
+          13
+        ],
+        "physical_witnesses": [
+          2,
+          7,
+          12,
+          8
+        ],
+        "status": "passed"
+      },
+      "round": 3,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 37554900,
+      "error": null,
+      "fixture": "box_image",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1,
+          13
+        ],
+        "physical_witnesses": [
+          2,
+          7,
+          12,
+          8
+        ],
+        "status": "passed"
+      },
+      "round": 4,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 31504100,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          -1,
+          1
+        ],
+        "physical_witnesses": [
+          0,
+          0,
+          0
+        ],
+        "status": "passed"
+      },
+      "round": 4,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 45262400,
+      "error": null,
+      "fixture": "constrained_sum",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 4,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 42813600,
+      "error": null,
+      "fixture": "constrained_sum",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 5,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 30388100,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          -1,
+          1
+        ],
+        "physical_witnesses": [
+          0,
+          0,
+          0
+        ],
+        "status": "passed"
+      },
+      "round": 5,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 36837300,
+      "error": null,
+      "fixture": "box_image",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1,
+          13
+        ],
+        "physical_witnesses": [
+          2,
+          7,
+          12,
+          8
+        ],
+        "status": "passed"
+      },
+      "round": 5,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 36683900,
+      "error": null,
+      "fixture": "box_image",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1,
+          13
+        ],
+        "physical_witnesses": [
+          2,
+          7,
+          12,
+          8
+        ],
+        "status": "passed"
+      },
+      "round": 6,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 32171300,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          -1,
+          1
+        ],
+        "physical_witnesses": [
+          0,
+          0,
+          0
+        ],
+        "status": "passed"
+      },
+      "round": 6,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 43020600,
+      "error": null,
+      "fixture": "constrained_sum",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            -1
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 6,
+      "schema": "csl.geo07-generator-trial/1",
+      "status": "passed",
+      "warmup": false
+    }
+  ],
+  "schema": "csl.geo07-generator-records/1",
+  "source_commit": "db7906cb33ca40da55e31b9bf6b21cf7ffcc1ee4",
+  "source_tree": "80da4dc3eb0dacc318399c3cb80fbc8837d98096",
+  "summary": {
+    "box_image": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 37870000,
+      "median_batch_ns": 37554900,
+      "min_batch_ns": 36683900,
+      "successes": 7
+    },
+    "constrained_sum": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 45262400,
+      "median_batch_ns": 42759900,
+      "min_batch_ns": 41641200,
+      "successes": 7
+    },
+    "shared_cancellation": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 32355800,
+      "median_batch_ns": 30668200,
+      "min_batch_ns": 30388100,
+      "successes": 7
+    }
+  },
+  "timing": {
+    "batch_calls": 5000,
+    "clock": "steady_clock",
+    "internal_phase_counters": "unavailable",
+    "measured_rounds": 7,
+    "minimum_admitted_batch_ns": 20000000,
+    "order": "alternating fixtures",
+    "scope": "fresh public GeneratorSet construction, public affine/dependent operations and independent-sum rejection control, factor lift, literal physical H, factor identity and coefficient checks, per-call nlohmann JSON result construction and assignment; excludes process startup, JSONL serialization, Python saved-row verification, persistence, rendering",
+    "unit": "ns",
+    "warmup_rounds": 1,
+    "workspace": "fresh sets and lift each checked call; same process across rounds"
+  }
+}
