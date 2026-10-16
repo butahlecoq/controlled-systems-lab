@@ -10,6 +10,35 @@ bool same_metadata(const SetMetadata& left,const SetMetadata& right) {
     return left.dimension==right.dimension && left.representation==right.representation &&
         left.convex==right.convex && left.polyhedral==right.polyhedral && left.bounded==right.bounded;
 }
+bool has_constraint_rows(const numeric::MatrixView& required_rows,
+                         const numeric::VectorView& required_values,
+                         const numeric::MatrixView& available_rows,
+                         const numeric::VectorView& available_values) {
+    for(std::size_t required=0;required<required_rows.rows();++required) {
+        bool found=false;
+        for(std::size_t available=0;available<available_rows.rows()&&!found;++available) {
+            if(required_values[required]!=available_values[available])continue;
+            bool same=true;
+            for(std::size_t column=0;column<required_rows.cols();++column)
+                if(required_rows(required,column)!=available_rows(available,column)) {
+                    same=false;
+                    break;
+                }
+            found=same;
+        }
+        if(!found)return false;
+    }
+    return true;
+}
+bool h_constraints_contained(const sets::HRepresentation& required,
+                             const sets::HRepresentation& available) {
+    // Every additional authored constraint can only shrink the defined set.
+    // Compare stored finite coefficients; do not infer algebraic equivalence.
+    return has_constraint_rows(required.inequalities,required.upper_bounds,
+               available.inequalities,available.upper_bounds) &&
+           has_constraint_rows(required.equalities,required.equality_values,
+               available.equalities,available.equality_values);
+}
 std::optional<StructuralBasis> structural_basis(const ApproximationRequest& request,
                                                  const OperationResult& result) {
     if(request.input.id==result.output.id && request.input.payload==result.output.payload &&
@@ -23,6 +52,14 @@ std::optional<StructuralBasis> structural_basis(const ApproximationRequest& requ
            std::get<sets::SetData>(native).metadata()->coordinate_labels) {
         const auto* data=std::get_if<sets::SetData>(&native);
         const auto representation=data->representation();
+        const auto reference_representation=source->representation();
+        if(const auto* reference_h=std::get_if<sets::HRepresentation>(&reference_representation))
+            if(const auto* output_h=std::get_if<sets::HRepresentation>(&representation)) {
+                const auto& required=request.direction==SetRelation::inner?*reference_h:*output_h;
+                const auto& available=request.direction==SetRelation::inner?*output_h:*reference_h;
+                if(h_constraints_contained(required,available))
+                    return StructuralBasis::h_constraint_containment;
+            }
         if(request.direction==SetRelation::inner &&
             (std::holds_alternative<sets::EmptyRepresentation>(representation) ||
              (std::holds_alternative<sets::VRepresentation>(representation) &&
@@ -90,8 +127,8 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
             "Native output exceeds the requested primitive budget, or output size is unavailable.")};
     if(request.direction==SetRelation::heuristic)return HeuristicApproximation{std::move(result)};
     if(const auto basis=structural_basis(request,result)) {
-        result.evidence.support=SymbolicArgument{"CSL native elementary-set identity/inclusion check",
-            "Same immutable set, empty subset, or universal superset over the same ambient coordinates."};
+        result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
+            "Same immutable set, empty subset, universal superset, or exact H constraint containment over the same ambient coordinates."};
         return EnclosedApproximation{std::move(result),*basis};
     }
     return Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",

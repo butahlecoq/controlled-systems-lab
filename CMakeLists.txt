@@ -11,6 +11,7 @@ option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report dr
 option(CSL_BUILD_GEO05_REPORT "Build the GEO-05 projection/predecessor report driver" OFF)
 option(CSL_BUILD_GEO06_REPORT "Build the GEO-06 QuickHull report driver" OFF)
 option(CSL_BUILD_GEO07_PORT_REPORT "Build the GEO-07 registered-port report driver" OFF)
+option(CSL_BUILD_GEO07_REPORT "Build the GEO-07 generator-set report driver" OFF)
 option(CSL_BUILD_OPT04_REPORT "Build the OPT-04 phase-I measurement driver" OFF)
 option(CSL_BUILD_GEO02_REPORT "Build the GEO-02 affine/sum report driver" OFF)
 option(CSL_BUILD_OBSERVABILITY_BENCHMARK "Build the OBS-02 collection overhead measurement driver" OFF)
@@ -19,6 +20,7 @@ option(CSL_BUILD_SYN01_REPORT "Build the private SYN-01 nominal-forward numerica
 option(CSL_BUILD_SYN02_REPORT "Build the SYN-02 terminal minimizer measurement driver" OFF)
 option(CSL_BUILD_SYN07_REPORT "Build the T-S01 exact-family measurement driver" OFF)
 option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driver" OFF)
+option(CSL_BUILD_EXT04_REPORT "Build the EXT-04 observed replay report driver" OFF)
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)
 option(CSL_ENABLE_HIGHS "Build the native HiGHS LP/convex adapters" ON)
@@ -34,7 +36,7 @@ include(cmake/ModulePolicy.cmake)
 
 # Include module-owned declarations in the project scope so dependency pins and
 # package state remain shared. The same order is used for focused test ownership.
-set(csl_modules contracts numeric optimization registry sets model geometry problem
+set(csl_modules contracts numeric optimization registry sets model controllers geometry problem
   reachability synthesis verification input execution artifacts adapters/highs adapters/polyhedral application)
 foreach(module IN LISTS csl_modules)
   include(src/${module}/Module.cmake)

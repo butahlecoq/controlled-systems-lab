@@ -1,0 +1,29 @@
+{
+  "build_processes": [
+    {
+      "name": "MSBuild.exe",
+      "pid": 4804,
+      "status": "running"
+    },
+    {
+      "name": "MSBuild.exe",
+      "pid": 8952,
+      "status": "running"
+    },
+    {
+      "name": "MSBuild.exe",
+      "pid": 20260,
+      "status": "running"
+    }
+  ],
+  "concurrent_work": "GEO-07 author remained paused through the EXT-04 collection; no competing local build/test workload reported.",
+  "cpu": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+  "cpu_percent_5s": 1.1,
+  "host": "DESKTOP-S9O3F6S",
+  "logical_processors": 12,
+  "memory_available_bytes": 16064139264,
+  "memory_total_bytes": 34189107200,
+  "observed_utc": "2026-10-16T14:10:15.147172+00:00",
+  "os": "Windows-11-10.0.22631-SP0",
+  "physical_cores": 6
+}

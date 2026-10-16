@@ -1,0 +1,2668 @@
+{
+  "build_provenance_sha256": "39b8dddc63c295782c055340647722aee4a260819c14fd4b60f2a881a6f343f2",
+  "created_utc": "2026-10-16T14:10:09.517795+00:00",
+  "environment": {
+    "concurrent_work_note": "UTC pre-collection 2026-10-16T14:09:43.875616+00:00; Windows host DESKTOP-S9O3F6S; 12 logical / 6 physical CPU cores; CPU utilization over 5s 1.1%; available memory 16062087168 of 34189107200 bytes. GEO-07 author paused local builds/tests before this collection; no cmake/cl/link process; residual MSBuild nodes previously observed at 0 CPU-seconds over 5 seconds. No other competing build or test workload known.",
+    "logical_processors": 12,
+    "observed_native_threads": null,
+    "observed_native_threads_reason": "no native thread counter in driver",
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "requested_driver_workers": 1
+  },
+  "harness_commit": "959755ed5f69641ae643e852c00efe718fa9eb86",
+  "harness_tree": "88080619380041a3e0cef209cc9e6ee167db4e76",
+  "inputs": {
+    "assurance": "sampled binary64 replay only; no policy or all-disturbance certificate",
+    "canonical_bytes_sha256": "67db874c4f1fa6baabeed15c5f314ddc55cb1a9b357624a7bddd78b53722033a",
+    "driver_description_sha256": "453dbf4e01d3c69126bc27eca0ea26b97b5bb53f8f5cae81d3fe5fbaf9c0a67b",
+    "driver_sha256": "e2bb83872fc298bbfc0fe8381fcfa4aadd956875281856520d8ce6c16ca8e251",
+    "fixture_sha256": {
+      "no_channel": "33d03c0270c12a3c18fbf8ada14b69d9922a6368e1e17d816869e1201650852d",
+      "partial_noisy_delayed": "596effc03561bb9f5a1031afb4a77e54945a98634c9c9bf16990049fa7a936b9",
+      "post_feedthrough": "40f9a32817650e8e41db0a3af6c02d0bb7f93b8b7b5c316ac5c045cccabdf44a"
+    },
+    "fixtures": {
+      "no_channel": {
+        "A": [
+          1
+        ],
+        "B": [
+          1
+        ],
+        "E": [],
+        "channels": [],
+        "controller": "constant u=2",
+        "dimensions": [
+          1,
+          1,
+          0
+        ],
+        "errors": [],
+        "estimator": "zero with empty history",
+        "external": [
+          []
+        ],
+        "horizon": 1,
+        "initial": [
+          5
+        ],
+        "offset": [
+          0
+        ],
+        "times": [
+          0,
+          1
+        ]
+      },
+      "partial_noisy_delayed": {
+        "A": [
+          1,
+          0,
+          0,
+          1
+        ],
+        "B": [
+          1,
+          0
+        ],
+        "E": [],
+        "channels": [
+          {
+            "C": [
+              1,
+              0
+            ],
+            "Du": [
+              0
+            ],
+            "Dw": [],
+            "F": [
+              1
+            ],
+            "available_at": "before(0)",
+            "input_stage": null,
+            "measured_at": "before(0)",
+            "offset": [
+              0
+            ],
+            "state_stage": 0
+          },
+          {
+            "C": [
+              0,
+              1
+            ],
+            "Du": [
+              0
+            ],
+            "Dw": [],
+            "F": [],
+            "available_at": "before(1)",
+            "input_stage": null,
+            "measured_at": "after(0)",
+            "offset": [
+              0
+            ],
+            "state_stage": 1
+          }
+        ],
+        "controller": "u0=estimate[0]-3; u1=estimate[0]",
+        "dimensions": [
+          2,
+          1,
+          0
+        ],
+        "errors": [
+          [
+            [
+              3
+            ]
+          ],
+          [
+            []
+          ]
+        ],
+        "estimator": "last output in first coordinate, other coordinate zero",
+        "external": [
+          [],
+          []
+        ],
+        "horizon": 2,
+        "initial": [
+          1,
+          7
+        ],
+        "offset": [
+          0,
+          0
+        ],
+        "times": [
+          0,
+          1,
+          2
+        ]
+      },
+      "post_feedthrough": {
+        "A": [
+          1
+        ],
+        "B": [
+          1
+        ],
+        "E": [],
+        "channels": [
+          {
+            "C": [
+              1
+            ],
+            "Du": [
+              2
+            ],
+            "Dw": [],
+            "F": [
+              1
+            ],
+            "available_at": "after(0)",
+            "input_stage": 0,
+            "measured_at": "after(0)",
+            "offset": [
+              0
+            ],
+            "state_stage": 0
+          }
+        ],
+        "controller": "u0=1; u1=estimate[0]",
+        "dimensions": [
+          1,
+          1,
+          0
+        ],
+        "errors": [
+          [
+            [
+              3
+            ]
+          ]
+        ],
+        "estimator": "last output, or zero before any output",
+        "external": [
+          [],
+          []
+        ],
+        "horizon": 2,
+        "initial": [
+          2
+        ],
+        "offset": [
+          0
+        ],
+        "times": [
+          0,
+          1,
+          2
+        ]
+      }
+    }
+  },
+  "payload_sha256": "df62c7c6d295e135b3eec2659d3ad8ed1e8a71abe27083bb92eb5e292f26dc55",
+  "performance_conclusion": "exploratory single-path batch observations; no comparator, speedup, or attributed limiter",
+  "process": {
+    "exit_code": 0,
+    "raw_sha256": "7c6c33024ffa93eb37065bf1a66df8a8f02827e0e0e039ec93a9090db1b900d8",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "report_id": "ext04-df62c7c6d295e135",
+  "rows": [
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 251966400,
+      "error": null,
+      "fixture": "partial_noisy_delayed",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            }
+          ],
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            },
+            {
+              "available_at": "before(1)",
+              "channel": 1,
+              "measured_at": "after(0)",
+              "released_at": "before(1)",
+              "released_index": 1,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          1,
+          2
+        ],
+        "available_values": [
+          [
+            [
+              4.0
+            ]
+          ],
+          [
+            [
+              4.0
+            ],
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            7.0,
+            0.0
+          ]
+        ],
+        "measurement_events": [
+          "before(0)",
+          "after(0)"
+        ],
+        "observed_channels": [
+          0,
+          1
+        ],
+        "observed_values": [
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "before(0)",
+          "before(1)"
+        ],
+        "released": [
+          {
+            "available_at": "before(0)",
+            "channel": 0,
+            "measured_at": "before(0)",
+            "released_at": "before(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              4.0
+            ]
+          },
+          {
+            "available_at": "before(1)",
+            "channel": 1,
+            "measured_at": "after(0)",
+            "released_at": "before(1)",
+            "released_index": 1,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            1.0,
+            7.0
+          ],
+          [
+            2.0,
+            7.0
+          ],
+          [
+            9.0,
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 162057900,
+      "error": null,
+      "fixture": "post_feedthrough",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [],
+          [
+            {
+              "available_at": "after(0)",
+              "channel": 0,
+              "measured_at": "after(0)",
+              "released_at": "after(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          0,
+          1
+        ],
+        "available_values": [
+          [],
+          [
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            0.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "measurement_events": [
+          "after(0)"
+        ],
+        "observed_channels": [
+          0
+        ],
+        "observed_values": [
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "after(0)"
+        ],
+        "released": [
+          {
+            "available_at": "after(0)",
+            "channel": 0,
+            "measured_at": "after(0)",
+            "released_at": "after(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ],
+          [
+            10.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 65897900,
+      "error": null,
+      "fixture": "no_channel",
+      "result": {
+        "actions": [
+          [
+            2.0
+          ]
+        ],
+        "available": [
+          []
+        ],
+        "available_counts": [
+          0
+        ],
+        "available_values": [
+          []
+        ],
+        "decision_stages": [
+          0
+        ],
+        "estimates": [
+          [
+            0.0
+          ]
+        ],
+        "measurement_events": [],
+        "observed_channels": [],
+        "observed_values": [],
+        "release_events": [],
+        "released": [],
+        "states": [
+          [
+            5.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 253277900,
+      "error": null,
+      "fixture": "partial_noisy_delayed",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            }
+          ],
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            },
+            {
+              "available_at": "before(1)",
+              "channel": 1,
+              "measured_at": "after(0)",
+              "released_at": "before(1)",
+              "released_index": 1,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          1,
+          2
+        ],
+        "available_values": [
+          [
+            [
+              4.0
+            ]
+          ],
+          [
+            [
+              4.0
+            ],
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            7.0,
+            0.0
+          ]
+        ],
+        "measurement_events": [
+          "before(0)",
+          "after(0)"
+        ],
+        "observed_channels": [
+          0,
+          1
+        ],
+        "observed_values": [
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "before(0)",
+          "before(1)"
+        ],
+        "released": [
+          {
+            "available_at": "before(0)",
+            "channel": 0,
+            "measured_at": "before(0)",
+            "released_at": "before(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              4.0
+            ]
+          },
+          {
+            "available_at": "before(1)",
+            "channel": 1,
+            "measured_at": "after(0)",
+            "released_at": "before(1)",
+            "released_index": 1,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            1.0,
+            7.0
+          ],
+          [
+            2.0,
+            7.0
+          ],
+          [
+            9.0,
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 161885300,
+      "error": null,
+      "fixture": "post_feedthrough",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [],
+          [
+            {
+              "available_at": "after(0)",
+              "channel": 0,
+              "measured_at": "after(0)",
+              "released_at": "after(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          0,
+          1
+        ],
+        "available_values": [
+          [],
+          [
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            0.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "measurement_events": [
+          "after(0)"
+        ],
+        "observed_channels": [
+          0
+        ],
+        "observed_values": [
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "after(0)"
+        ],
+        "released": [
+          {
+            "available_at": "after(0)",
+            "channel": 0,
+            "measured_at": "after(0)",
+            "released_at": "after(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ],
+          [
+            10.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 68229700,
+      "error": null,
+      "fixture": "no_channel",
+      "result": {
+        "actions": [
+          [
+            2.0
+          ]
+        ],
+        "available": [
+          []
+        ],
+        "available_counts": [
+          0
+        ],
+        "available_values": [
+          []
+        ],
+        "decision_stages": [
+          0
+        ],
+        "estimates": [
+          [
+            0.0
+          ]
+        ],
+        "measurement_events": [],
+        "observed_channels": [],
+        "observed_values": [],
+        "release_events": [],
+        "released": [],
+        "states": [
+          [
+            5.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 0,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 67760200,
+      "error": null,
+      "fixture": "no_channel",
+      "result": {
+        "actions": [
+          [
+            2.0
+          ]
+        ],
+        "available": [
+          []
+        ],
+        "available_counts": [
+          0
+        ],
+        "available_values": [
+          []
+        ],
+        "decision_stages": [
+          0
+        ],
+        "estimates": [
+          [
+            0.0
+          ]
+        ],
+        "measurement_events": [],
+        "observed_channels": [],
+        "observed_values": [],
+        "release_events": [],
+        "released": [],
+        "states": [
+          [
+            5.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 1,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 159933700,
+      "error": null,
+      "fixture": "post_feedthrough",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [],
+          [
+            {
+              "available_at": "after(0)",
+              "channel": 0,
+              "measured_at": "after(0)",
+              "released_at": "after(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          0,
+          1
+        ],
+        "available_values": [
+          [],
+          [
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            0.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "measurement_events": [
+          "after(0)"
+        ],
+        "observed_channels": [
+          0
+        ],
+        "observed_values": [
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "after(0)"
+        ],
+        "released": [
+          {
+            "available_at": "after(0)",
+            "channel": 0,
+            "measured_at": "after(0)",
+            "released_at": "after(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ],
+          [
+            10.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 1,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 260384300,
+      "error": null,
+      "fixture": "partial_noisy_delayed",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            }
+          ],
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            },
+            {
+              "available_at": "before(1)",
+              "channel": 1,
+              "measured_at": "after(0)",
+              "released_at": "before(1)",
+              "released_index": 1,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          1,
+          2
+        ],
+        "available_values": [
+          [
+            [
+              4.0
+            ]
+          ],
+          [
+            [
+              4.0
+            ],
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            7.0,
+            0.0
+          ]
+        ],
+        "measurement_events": [
+          "before(0)",
+          "after(0)"
+        ],
+        "observed_channels": [
+          0,
+          1
+        ],
+        "observed_values": [
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "before(0)",
+          "before(1)"
+        ],
+        "released": [
+          {
+            "available_at": "before(0)",
+            "channel": 0,
+            "measured_at": "before(0)",
+            "released_at": "before(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              4.0
+            ]
+          },
+          {
+            "available_at": "before(1)",
+            "channel": 1,
+            "measured_at": "after(0)",
+            "released_at": "before(1)",
+            "released_index": 1,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            1.0,
+            7.0
+          ],
+          [
+            2.0,
+            7.0
+          ],
+          [
+            9.0,
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 1,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 252267900,
+      "error": null,
+      "fixture": "partial_noisy_delayed",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            }
+          ],
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            },
+            {
+              "available_at": "before(1)",
+              "channel": 1,
+              "measured_at": "after(0)",
+              "released_at": "before(1)",
+              "released_index": 1,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          1,
+          2
+        ],
+        "available_values": [
+          [
+            [
+              4.0
+            ]
+          ],
+          [
+            [
+              4.0
+            ],
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            7.0,
+            0.0
+          ]
+        ],
+        "measurement_events": [
+          "before(0)",
+          "after(0)"
+        ],
+        "observed_channels": [
+          0,
+          1
+        ],
+        "observed_values": [
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "before(0)",
+          "before(1)"
+        ],
+        "released": [
+          {
+            "available_at": "before(0)",
+            "channel": 0,
+            "measured_at": "before(0)",
+            "released_at": "before(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              4.0
+            ]
+          },
+          {
+            "available_at": "before(1)",
+            "channel": 1,
+            "measured_at": "after(0)",
+            "released_at": "before(1)",
+            "released_index": 1,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            1.0,
+            7.0
+          ],
+          [
+            2.0,
+            7.0
+          ],
+          [
+            9.0,
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 2,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 166015500,
+      "error": null,
+      "fixture": "post_feedthrough",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [],
+          [
+            {
+              "available_at": "after(0)",
+              "channel": 0,
+              "measured_at": "after(0)",
+              "released_at": "after(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          0,
+          1
+        ],
+        "available_values": [
+          [],
+          [
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            0.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "measurement_events": [
+          "after(0)"
+        ],
+        "observed_channels": [
+          0
+        ],
+        "observed_values": [
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "after(0)"
+        ],
+        "released": [
+          {
+            "available_at": "after(0)",
+            "channel": 0,
+            "measured_at": "after(0)",
+            "released_at": "after(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ],
+          [
+            10.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 2,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 68257400,
+      "error": null,
+      "fixture": "no_channel",
+      "result": {
+        "actions": [
+          [
+            2.0
+          ]
+        ],
+        "available": [
+          []
+        ],
+        "available_counts": [
+          0
+        ],
+        "available_values": [
+          []
+        ],
+        "decision_stages": [
+          0
+        ],
+        "estimates": [
+          [
+            0.0
+          ]
+        ],
+        "measurement_events": [],
+        "observed_channels": [],
+        "observed_values": [],
+        "release_events": [],
+        "released": [],
+        "states": [
+          [
+            5.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 2,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 67807900,
+      "error": null,
+      "fixture": "no_channel",
+      "result": {
+        "actions": [
+          [
+            2.0
+          ]
+        ],
+        "available": [
+          []
+        ],
+        "available_counts": [
+          0
+        ],
+        "available_values": [
+          []
+        ],
+        "decision_stages": [
+          0
+        ],
+        "estimates": [
+          [
+            0.0
+          ]
+        ],
+        "measurement_events": [],
+        "observed_channels": [],
+        "observed_values": [],
+        "release_events": [],
+        "released": [],
+        "states": [
+          [
+            5.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 3,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 157319500,
+      "error": null,
+      "fixture": "post_feedthrough",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [],
+          [
+            {
+              "available_at": "after(0)",
+              "channel": 0,
+              "measured_at": "after(0)",
+              "released_at": "after(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          0,
+          1
+        ],
+        "available_values": [
+          [],
+          [
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            0.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "measurement_events": [
+          "after(0)"
+        ],
+        "observed_channels": [
+          0
+        ],
+        "observed_values": [
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "after(0)"
+        ],
+        "released": [
+          {
+            "available_at": "after(0)",
+            "channel": 0,
+            "measured_at": "after(0)",
+            "released_at": "after(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ],
+          [
+            10.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 3,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 261357300,
+      "error": null,
+      "fixture": "partial_noisy_delayed",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            }
+          ],
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            },
+            {
+              "available_at": "before(1)",
+              "channel": 1,
+              "measured_at": "after(0)",
+              "released_at": "before(1)",
+              "released_index": 1,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          1,
+          2
+        ],
+        "available_values": [
+          [
+            [
+              4.0
+            ]
+          ],
+          [
+            [
+              4.0
+            ],
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            7.0,
+            0.0
+          ]
+        ],
+        "measurement_events": [
+          "before(0)",
+          "after(0)"
+        ],
+        "observed_channels": [
+          0,
+          1
+        ],
+        "observed_values": [
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "before(0)",
+          "before(1)"
+        ],
+        "released": [
+          {
+            "available_at": "before(0)",
+            "channel": 0,
+            "measured_at": "before(0)",
+            "released_at": "before(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              4.0
+            ]
+          },
+          {
+            "available_at": "before(1)",
+            "channel": 1,
+            "measured_at": "after(0)",
+            "released_at": "before(1)",
+            "released_index": 1,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            1.0,
+            7.0
+          ],
+          [
+            2.0,
+            7.0
+          ],
+          [
+            9.0,
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 3,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 250065800,
+      "error": null,
+      "fixture": "partial_noisy_delayed",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            }
+          ],
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            },
+            {
+              "available_at": "before(1)",
+              "channel": 1,
+              "measured_at": "after(0)",
+              "released_at": "before(1)",
+              "released_index": 1,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          1,
+          2
+        ],
+        "available_values": [
+          [
+            [
+              4.0
+            ]
+          ],
+          [
+            [
+              4.0
+            ],
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            7.0,
+            0.0
+          ]
+        ],
+        "measurement_events": [
+          "before(0)",
+          "after(0)"
+        ],
+        "observed_channels": [
+          0,
+          1
+        ],
+        "observed_values": [
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "before(0)",
+          "before(1)"
+        ],
+        "released": [
+          {
+            "available_at": "before(0)",
+            "channel": 0,
+            "measured_at": "before(0)",
+            "released_at": "before(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              4.0
+            ]
+          },
+          {
+            "available_at": "before(1)",
+            "channel": 1,
+            "measured_at": "after(0)",
+            "released_at": "before(1)",
+            "released_index": 1,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            1.0,
+            7.0
+          ],
+          [
+            2.0,
+            7.0
+          ],
+          [
+            9.0,
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 4,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 163152500,
+      "error": null,
+      "fixture": "post_feedthrough",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [],
+          [
+            {
+              "available_at": "after(0)",
+              "channel": 0,
+              "measured_at": "after(0)",
+              "released_at": "after(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          0,
+          1
+        ],
+        "available_values": [
+          [],
+          [
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            0.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "measurement_events": [
+          "after(0)"
+        ],
+        "observed_channels": [
+          0
+        ],
+        "observed_values": [
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "after(0)"
+        ],
+        "released": [
+          {
+            "available_at": "after(0)",
+            "channel": 0,
+            "measured_at": "after(0)",
+            "released_at": "after(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ],
+          [
+            10.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 4,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 76103000,
+      "error": null,
+      "fixture": "no_channel",
+      "result": {
+        "actions": [
+          [
+            2.0
+          ]
+        ],
+        "available": [
+          []
+        ],
+        "available_counts": [
+          0
+        ],
+        "available_values": [
+          []
+        ],
+        "decision_stages": [
+          0
+        ],
+        "estimates": [
+          [
+            0.0
+          ]
+        ],
+        "measurement_events": [],
+        "observed_channels": [],
+        "observed_values": [],
+        "release_events": [],
+        "released": [],
+        "states": [
+          [
+            5.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 4,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 68215900,
+      "error": null,
+      "fixture": "no_channel",
+      "result": {
+        "actions": [
+          [
+            2.0
+          ]
+        ],
+        "available": [
+          []
+        ],
+        "available_counts": [
+          0
+        ],
+        "available_values": [
+          []
+        ],
+        "decision_stages": [
+          0
+        ],
+        "estimates": [
+          [
+            0.0
+          ]
+        ],
+        "measurement_events": [],
+        "observed_channels": [],
+        "observed_values": [],
+        "release_events": [],
+        "released": [],
+        "states": [
+          [
+            5.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 5,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 160891000,
+      "error": null,
+      "fixture": "post_feedthrough",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [],
+          [
+            {
+              "available_at": "after(0)",
+              "channel": 0,
+              "measured_at": "after(0)",
+              "released_at": "after(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          0,
+          1
+        ],
+        "available_values": [
+          [],
+          [
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            0.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "measurement_events": [
+          "after(0)"
+        ],
+        "observed_channels": [
+          0
+        ],
+        "observed_values": [
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "after(0)"
+        ],
+        "released": [
+          {
+            "available_at": "after(0)",
+            "channel": 0,
+            "measured_at": "after(0)",
+            "released_at": "after(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ],
+          [
+            10.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 5,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 254441900,
+      "error": null,
+      "fixture": "partial_noisy_delayed",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            }
+          ],
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            },
+            {
+              "available_at": "before(1)",
+              "channel": 1,
+              "measured_at": "after(0)",
+              "released_at": "before(1)",
+              "released_index": 1,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          1,
+          2
+        ],
+        "available_values": [
+          [
+            [
+              4.0
+            ]
+          ],
+          [
+            [
+              4.0
+            ],
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            7.0,
+            0.0
+          ]
+        ],
+        "measurement_events": [
+          "before(0)",
+          "after(0)"
+        ],
+        "observed_channels": [
+          0,
+          1
+        ],
+        "observed_values": [
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "before(0)",
+          "before(1)"
+        ],
+        "released": [
+          {
+            "available_at": "before(0)",
+            "channel": 0,
+            "measured_at": "before(0)",
+            "released_at": "before(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              4.0
+            ]
+          },
+          {
+            "available_at": "before(1)",
+            "channel": 1,
+            "measured_at": "after(0)",
+            "released_at": "before(1)",
+            "released_index": 1,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            1.0,
+            7.0
+          ],
+          [
+            2.0,
+            7.0
+          ],
+          [
+            9.0,
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 5,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 258912500,
+      "error": null,
+      "fixture": "partial_noisy_delayed",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            }
+          ],
+          [
+            {
+              "available_at": "before(0)",
+              "channel": 0,
+              "measured_at": "before(0)",
+              "released_at": "before(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                4.0
+              ]
+            },
+            {
+              "available_at": "before(1)",
+              "channel": 1,
+              "measured_at": "after(0)",
+              "released_at": "before(1)",
+              "released_index": 1,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          1,
+          2
+        ],
+        "available_values": [
+          [
+            [
+              4.0
+            ]
+          ],
+          [
+            [
+              4.0
+            ],
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            4.0,
+            0.0
+          ],
+          [
+            7.0,
+            0.0
+          ]
+        ],
+        "measurement_events": [
+          "before(0)",
+          "after(0)"
+        ],
+        "observed_channels": [
+          0,
+          1
+        ],
+        "observed_values": [
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "before(0)",
+          "before(1)"
+        ],
+        "released": [
+          {
+            "available_at": "before(0)",
+            "channel": 0,
+            "measured_at": "before(0)",
+            "released_at": "before(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              4.0
+            ]
+          },
+          {
+            "available_at": "before(1)",
+            "channel": 1,
+            "measured_at": "after(0)",
+            "released_at": "before(1)",
+            "released_index": 1,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            1.0,
+            7.0
+          ],
+          [
+            2.0,
+            7.0
+          ],
+          [
+            9.0,
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 6,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 158058200,
+      "error": null,
+      "fixture": "post_feedthrough",
+      "result": {
+        "actions": [
+          [
+            1.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "available": [
+          [],
+          [
+            {
+              "available_at": "after(0)",
+              "channel": 0,
+              "measured_at": "after(0)",
+              "released_at": "after(0)",
+              "released_index": 0,
+              "sample": 0,
+              "values": [
+                7.0
+              ]
+            }
+          ]
+        ],
+        "available_counts": [
+          0,
+          1
+        ],
+        "available_values": [
+          [],
+          [
+            [
+              7.0
+            ]
+          ]
+        ],
+        "decision_stages": [
+          0,
+          1
+        ],
+        "estimates": [
+          [
+            0.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "measurement_events": [
+          "after(0)"
+        ],
+        "observed_channels": [
+          0
+        ],
+        "observed_values": [
+          [
+            7.0
+          ]
+        ],
+        "release_events": [
+          "after(0)"
+        ],
+        "released": [
+          {
+            "available_at": "after(0)",
+            "channel": 0,
+            "measured_at": "after(0)",
+            "released_at": "after(0)",
+            "released_index": 0,
+            "sample": 0,
+            "values": [
+              7.0
+            ]
+          }
+        ],
+        "states": [
+          [
+            2.0
+          ],
+          [
+            3.0
+          ],
+          [
+            10.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 6,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 68212800,
+      "error": null,
+      "fixture": "no_channel",
+      "result": {
+        "actions": [
+          [
+            2.0
+          ]
+        ],
+        "available": [
+          []
+        ],
+        "available_counts": [
+          0
+        ],
+        "available_values": [
+          []
+        ],
+        "decision_stages": [
+          0
+        ],
+        "estimates": [
+          [
+            0.0
+          ]
+        ],
+        "measurement_events": [],
+        "observed_channels": [],
+        "observed_values": [],
+        "release_events": [],
+        "released": [],
+        "states": [
+          [
+            5.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "status": "passed"
+      },
+      "round": 6,
+      "schema": "csl.ext04-replay-trial/1",
+      "status": "passed",
+      "warmup": false
+    }
+  ],
+  "schema": "csl.ext04-replay-records/1",
+  "source_commit": "c23aaf13c1c1e5480cc22dd5bac5cd3e79562609",
+  "source_tree": "7564bc7062fde25ca00920451298a0a316e1c277",
+  "summary": {
+    "no_channel": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 76103000,
+      "median_batch_ns": 68215900,
+      "min_batch_ns": 67760200,
+      "successes": 7
+    },
+    "partial_noisy_delayed": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 261357300,
+      "median_batch_ns": 254441900,
+      "min_batch_ns": 250065800,
+      "successes": 7
+    },
+    "post_feedthrough": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 166015500,
+      "median_batch_ns": 160891000,
+      "min_batch_ns": 157319500,
+      "successes": 7
+    }
+  },
+  "timing": {
+    "batch_calls": 5000,
+    "clock": "steady_clock",
+    "internal_phase_counters": "unavailable",
+    "measured_rounds": 7,
+    "minimum_admitted_batch_ns": 20000000,
+    "order": "alternating fixtures",
+    "scope": "batch of fresh public LinearSystem snapshots and replay_observed_policy calls, estimator/controller callbacks, full literal state/history/release/input oracle checks, and per-call result JSON construction and assignment/replacement; excludes process startup, JSONL serialization, Python saved-row validation, persistence and rendering",
+    "unit": "ns",
+    "warmup_rounds": 1,
+    "workspace": "fresh system snapshot and replay result each checked call; same process across rounds"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "D:\\work\\PhD\\repo\\.worktrees\\geo07-report-harness\\build\\geo07-report\\Release\\csl_geo07_generator_report.exe",
+    "--measure",
+    "7",
+    "1",
+    "5000"
+  ],
+  "exit_code": 0,
+  "schema": "csl.geo07-process-capture/1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "768dae54cb5aabcec1445a2703df4ae45ed26145de7f52a012307b8d267dfd36",
+  "timed_out": false
+}
