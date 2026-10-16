@@ -36,7 +36,7 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 
 [Temporal coupling](temporal-coupling.md) distinguishes reserved cross-step constraints from unchanged first archival experiments. It includes the joint convexity derivation, an exact slew-limit memory lift, a recurrence counterexample and algorithm-specific limits.
 
-[Reachability proof audit](reachability-proof-audit.md) and [adaptive-policy proof audit](adaptive-policy-proof-audit.md) publish the reviewed conditional proofs, counterexamples and source-policy distinctions for Q04/Q05. The [provenance record](proof-audit-provenance.json) preserves their correction/version chains; both original scientific issues remain open.
+[Reachability proof audit](reachability-proof-audit.md) and [adaptive-policy proof audit](adaptive-policy-proof-audit.md) publish the reviewed conditional proofs, counterexamples and source-policy distinctions for Q04/Q05. The [reachability source correspondence](reachability-source-correspondence.md) compares L05's Table 1 claims with the archived L26/W12 listing without treating that listing as the historical experiment generator. The [provenance record](proof-audit-provenance.json) preserves the proof reports' correction/version chains; both original scientific issues remain open.
 
 ## Selected first benchmark
 
