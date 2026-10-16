@@ -22,6 +22,8 @@ when one of these independent structural checks succeeds:
 | Same immutable set handle and matching envelope | Output equals reference |
 | Native empty output, same ordered native coordinates | Output is inside reference |
 | Native universal output, same ordered native coordinates | Reference is inside output |
+| Native H output and reference, same ordered native coordinates; every reference inequality and equality row occurs unchanged in the output | Output is inside reference (inner) |
+| Native H output and reference, same ordered native coordinates; every output inequality and equality row occurs unchanged in the reference | Reference is inside output (outer) |
 
 Native V data with zero vertex rows is empty under the set contract, including
 when ray rows exist. This policy does not infer nontrivial containment from a
@@ -30,6 +32,13 @@ declared capability. It rejects a requested enclosure when none of the checked
 bases applies. A structural basis replaces the provider's support claim in the
 returned geometry evidence; it does not claim validated arithmetic. Validated
 assurance remains unsupported by the registry.
+
+The H check compares stored finite binary64 coefficients and right-hand sides
+for exact equality, separately for inequality and equality rows. Row order and
+duplicate rows do not matter. It proves inclusion from the defining formulas
+by retaining or adding constraints; it does not solve a containment problem,
+recognize algebraically equivalent rows, establish nonemptiness, or validate
+rounding of coefficients supplied by a provider.
 
 For native output, `size_budget` counts H inequality plus equality rows, V
 vertex plus ray rows, or one singleton point. Empty and universal forms count
@@ -56,8 +65,9 @@ remain separate.
 
 ## Remaining APP-01 work
 
-This prerequisite does not close #24. It provides only elementary structural
-enclosures. A nontrivial box, parallelotope, zonotope or ellipsoid adapter needs
+This prerequisite does not close #24. It provides elementary structural
+enclosures and native H constraint containment. A nontrivial box,
+parallelotope, zonotope or ellipsoid adapter needs
 an independent inclusion verifier with claim-specific evidence, a compatible
 output-size accounting method, and contract tests on analytic inner/outer cases.
 The planned APP-02/03/04 adapters must not reinterpret numerical residuals or
