@@ -51,6 +51,7 @@ struct FactorPolyhedron {
     SetData factors; // exact H form in the factor coordinates, modulo binary64 coefficients
     Matrix map;      // physical x = map * xi + offset
     Vector offset;
+    std::vector<FactorId> factor_ids; // ordered H axes and map columns
 };
 std::variant<FactorPolyhedron, Diagnostics> factor_polyhedron(const GeneratorSet&);
 

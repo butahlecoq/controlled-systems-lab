@@ -116,6 +116,13 @@ add_test(NAME installed_sets_client COMMAND installed_sets_client)
 set_tests_properties(installed_sets_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed sets client: retained H segment and elementary zero-dimensional cases passed")
 
+add_executable(installed_generators_client generators_client.cpp)
+target_link_libraries(installed_generators_client PRIVATE CSL::geometry_generators)
+set_target_properties(installed_generators_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_generators_client COMMAND installed_generators_client)
+set_tests_properties(installed_generators_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed generators client: retained factor identity and affine literal passed")
+
 add_executable(installed_objectives_client objectives_client.cpp)
 target_link_libraries(installed_objectives_client PRIVATE CSL::objectives)
 set_target_properties(installed_objectives_client PROPERTIES CXX_EXTENSIONS OFF)

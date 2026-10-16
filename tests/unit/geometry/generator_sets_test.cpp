@@ -63,6 +63,15 @@ HRepresentation h_reference(const Matrix& inequalities,const Vector& upper,
         std::get<numeric::MatrixView>(numeric::snapshot(equalities)),
         std::get<numeric::VectorView>(numeric::snapshot_vector(values))};
 }
+
+Vector map_lift(const FactorPolyhedron& lift, const Vector& factors) {
+    REQUIRE(factors.size()==lift.map.cols);
+    Vector point=lift.offset;
+    for (std::size_t i=0;i<lift.map.rows;++i)
+        for (std::size_t j=0;j<lift.map.cols;++j)
+            point[i]+=lift.map.values[i*lift.map.cols+j]*factors[j];
+    return point;
+}
 }
 
 TEST_CASE("box affine image keeps factor IDs and agrees with H-polyhedron corner queries") {
@@ -75,6 +84,16 @@ TEST_CASE("box affine image keeps factor IDs and agrees with H-polyhedron corner
     CHECK(in_factor_polyhedron(image,{-1,-1}));
     CHECK(in_factor_polyhedron(image,{1,1}));
     CHECK_FALSE(in_factor_polyhedron(image,{2,0}));
+    const auto lifted=accepted(factor_polyhedron(image));
+    CHECK(lifted.factor_ids==std::vector<FactorId>{{"horizontal"},{"vertical"}});
+    const auto output_h=h_reference({2,1,{1,-1}},{12,-2},{0,1,{}},{});
+    for (const auto& factors:std::vector<Vector>{{-1,-1},{0,0},{1,1},{2,1},{-2,-1}}) {
+        const auto physical=map_lift(lifted,factors);
+        CHECK(in_factor_polyhedron(image,factors)==in_reference_h(output_h,physical));
+    }
+    CHECK(map_lift(lifted,{-1,-1})==Vector{2});
+    CHECK(map_lift(lifted,{1,1})==Vector{12});
+    CHECK(map_lift(lifted,{2,1})==Vector{14});
     const auto reference=h_reference({4,2,{1,0,-1,0,0,1,0,-1}},
         {3,1,5,1},{0,2,{}},{});
     for (const double x:Vector{-1,3}) for (const double y:Vector{-1,5}) {
@@ -125,12 +144,54 @@ TEST_CASE("constrained equalities survive image and dependent sum") {
         {1,1,1,1},{1,2,{1,-1}},{0});
     CHECK(in_reference_h(diagonal,{1,1}));
     CHECK_FALSE(in_reference_h(diagonal,{1,-1}));
-    const auto sum=accepted(dependent_sum(constrained,constrained,{"twice"}));
-    CHECK(sum.factor_ids()==std::vector<FactorId>{{"u"},{"v"}});
+    const auto right=accepted(make_generator_set({{"right"},{0,0},
+        {2,2,{-1,0,0,1}},{{"u"},{"w"}},{1,2,{1,1}},{0},{}}));
+    const auto sum=accepted(dependent_sum(constrained,right,{"joined"}));
+    CHECK(sum.factor_ids()==std::vector<FactorId>{{"u"},{"v"},{"w"}});
     CHECK(sum.equalities().rows==2);
-    CHECK(sum.equalities().values==Vector{1,-1,1,-1});
-    CHECK(in_factor_polyhedron(sum,{0.5,0.5}));
-    CHECK_FALSE(in_factor_polyhedron(sum,{0.5,-0.5}));
+    CHECK(sum.equalities().values==Vector{1,-1,0,1,0,1});
+    CHECK(in_factor_polyhedron(sum,{1,1,-1}));
+    CHECK_FALSE(in_factor_polyhedron(sum,{1,1,0})); // left only
+    CHECK_FALSE(in_factor_polyhedron(sum,{1,0,-1})); // right only
+    const auto joined=accepted(factor_polyhedron(sum));
+    CHECK(joined.factor_ids==std::vector<FactorId>{{"u"},{"v"},{"w"}});
+    const auto physical_h=h_reference({0,2,{}},{},{2,2,{1,0,0,1}},{0,0});
+    for (const auto& factors:std::vector<Vector>{{1,1,-1},{0,0,0},{1,1,0},{1,0,-1}})
+        CHECK(in_factor_polyhedron(sum,factors)==in_reference_h(physical_h,map_lift(joined,factors)));
+    CHECK(map_lift(joined,{1,1,-1})==Vector{0,0});
+    CHECK(map_lift(joined,{1,1,0})==Vector{0,1});
+}
+
+TEST_CASE("lift retains factor order when equal names appear in different source columns") {
+    const auto left=accepted(make_generator_set({{"ordered-left"},{0},{1,2,{1,2}},
+        {{"a"},{"b"}},{0,2,{}},{},{}}));
+    const auto right=accepted(make_generator_set({{"ordered-right"},{0},{1,2,{3,4}},
+        {{"b"},{"a"}},{0,2,{}},{},{}}));
+    const auto sum=accepted(dependent_sum(left,right,{"reordered"}));
+    const auto lift=accepted(factor_polyhedron(sum));
+    CHECK(lift.factor_ids==std::vector<FactorId>{{"a"},{"b"}});
+    CHECK(map_lift(lift,{1,0})==Vector{5});
+    CHECK(map_lift(lift,{0,1})==Vector{5});
+}
+
+TEST_CASE("zero-column singleton and contradictory equalities remain explicit") {
+    const auto singleton=accepted(make_generator_set({{"fixed"},{3,-1},{2,0,{}},
+        {},{0,0,{}},{},{}}));
+    const auto lifted=accepted(factor_polyhedron(singleton));
+    CHECK(lifted.factor_ids.empty());
+    CHECK(in_factor_polyhedron(singleton,{}));
+    CHECK(map_lift(lifted,{})==Vector{3,-1});
+    const auto zero_rows=accepted(affine_image(singleton,{0,2,{}},{},{"zero-rows"}));
+    CHECK(zero_rows.center().empty());
+    CHECK(zero_rows.generators().rows==0);
+    CHECK(map_lift(accepted(factor_polyhedron(zero_rows)),{}).empty());
+
+    const auto contradiction=accepted(make_generator_set({{"inconsistent"},{0},{1,1,{1}},
+        {{"q"}},{2,1,{1,1}},{0,1},{}}));
+    const auto h=accepted(factor_polyhedron(contradiction));
+    CHECK(h.factor_ids==std::vector<FactorId>{{"q"}});
+    for (const double value:Vector{-1,0,1})
+        CHECK_FALSE(in_factor_polyhedron(contradiction,{value}));
 }
 
 TEST_CASE("generator data rejects invalid identities, shapes and nonfinite arithmetic") {

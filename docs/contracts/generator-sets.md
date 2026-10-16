@@ -31,7 +31,8 @@ cancels.
 
 `factor_polyhedron` gives the equivalent lifted H description in **factor**
 coordinates: `ξ_j <= 1`, `-ξ_j <= 1`, and the original equality rows, together
-with the affine map `x=c+Gξ`. This is an explicit exact representation
+with the affine map `x=c+Gξ` and ordered factor IDs identifying every H axis
+and map column. This is an explicit exact representation
 conversion in real-set algebra; it is not an ambient H/V materialization.
 No general intersection, ambient H/V conversion, support, membership,
 constraint feasibility, or generator reduction is exposed by this slice.
@@ -49,9 +50,10 @@ There is no performance claim. Generator and equality storage can grow with
 repeated sums, and no automatic reduction is performed.
 
 The unit tests use independent literal H-polyhedron membership queries for a
-box, the synchronized cancellation singleton, and a constrained diagonal
-segment. They also check the lifted H form, preserved factor IDs and rows,
-invalid inputs and an installed public client. These finite cases establish
+box image, the synchronized cancellation singleton, and a constrained sum.
+They also check the lifted H form, preserved factor IDs and rows, invalid inputs,
+zero-column and contradictory-factor cases. A separate `find_package(CSL CONFIG)`
+installed consumer checks the exported public target. These finite cases establish
 behavior only for the supplied coordinates, not general numerical validity.
 
 ## Publication gate

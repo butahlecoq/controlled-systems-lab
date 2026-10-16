@@ -106,7 +106,8 @@ std::variant<FactorPolyhedron,Diagnostics> factor_polyhedron(const GeneratorSet&
         {std::get<numeric::MatrixView>(h_view),std::get<numeric::VectorView>(upper_view),
          std::get<numeric::MatrixView>(e_view),std::get<numeric::VectorView>(value_view)});
     if (auto error=std::get_if<Diagnostic>(&factors)) return Diagnostics{*error};
-    return FactorPolyhedron{std::get<SetData>(std::move(factors)),set.generators(),set.center()};
+    return FactorPolyhedron{std::get<SetData>(std::move(factors)),set.generators(),
+        set.center(),set.factor_ids()};
 }
 } // namespace csl::sets
 
