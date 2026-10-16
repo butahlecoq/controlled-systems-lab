@@ -18,6 +18,8 @@ Legacy Word recovery does not decode embedded Equation Editor objects or figures
 
 The characterization script executes selected archived definitions, bypassing demonstration code, and writes legacy-characterization.json. The B08 reference is independent of archived Python source: it uses the transcribed four-step linear model, enumerates all finite controls and disturbance-box corner images, and writes reference-b08.json. It is a floating-point reference, not a validated rounding proof, nonlinear simulation or historical timing reproduction.
 
+The [B08 displayed-data exact audit](../b08-displayed-exact-audit.md) adds an independent standard-library rational reference for those **printed** coefficients and action bounds. Run `python -B -O docs/research/tools/check_b08_displayed_exact.py --verify-record docs/research/evidence/b08-displayed-exact.json`. Its exact squared value and three minimizers are checked against literals, including under optimized Python; the saved record is recomputed and compared. It does not alter the older NumPy artifact or claim the unpublished MATLAB arrays.
+
 ~~~text
 python docs/research/tools/verify_docs.py
 ~~~
