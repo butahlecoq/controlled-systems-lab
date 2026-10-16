@@ -51,7 +51,7 @@ TEST_CASE("other affine evidence variants remain recorded data"){
  const auto cert_record=take(ar::decode_h_relation_attachment(certificate.bytes(),limits()));const auto& c=std::get<ar::RecordedCertificateReference>(cert_record.affine_dimension->support);CHECK(c.artifact=="proof.bin");CHECK(c.verifier=="untrusted-ref");
  const auto absent=take(ar::encode_h_relation_attachment(source(EvidenceSupport{Unestablished{}}),limits()));const auto absent_record=take(ar::decode_h_relation_attachment(absent.bytes(),limits()));CHECK(std::holds_alternative<Unestablished>(absent_record.affine_dimension->support));
 }TEST_CASE("H attachment byte preflight includes metadata text before JSON construction"){
- auto constrained=limits();constrained.max_bytes=200;const auto result=ar::encode_h_relation_attachment(source(SymbolicArgument{"r","a"},std::string(256,\'r\')),constrained);REQUIRE(std::holds_alternative<ar::ArtifactError>(result));CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);CHECK(std::get<ar::ArtifactError>(result).path=="attachment.bytes");
+ auto constrained=limits();constrained.max_bytes=200;const auto result=ar::encode_h_relation_attachment(source(SymbolicArgument{"r","a"},std::string(256,'r')),constrained);REQUIRE(std::holds_alternative<ar::ArtifactError>(result));CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);CHECK(std::get<ar::ArtifactError>(result).path=="attachment.bytes");
 }
 TEST_CASE("H attachment rejects digest mismatch, malformed bytes, unknown version, and resource excess"){
  const auto encoded=take(ar::encode_h_relation_attachment(source(),limits()));std::array<std::byte,3> bad{std::byte{'b'},std::byte{'a'},std::byte{'d'}};
