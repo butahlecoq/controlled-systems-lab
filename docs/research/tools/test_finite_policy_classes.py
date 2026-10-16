@@ -26,6 +26,25 @@ class FinitePolicyClassTests(unittest.TestCase):
         self.assertEqual(result.replanning_first_actions[(1, (2, -1))], (-1,))
         self.assertEqual(result.replanning_history_costs, {(-1, 0): 2, (0, 0): 1, (1, 0): 2})
 
+    def test_executed_replanning_can_strictly_improve_on_initial_fixed_plan(self):
+        # Any fixed suffix has worst |w0+u1|=2; observing w0 permits
+        # u1=-w0 and terminal cost zero on both complete histories.
+        game = Game((0,), ((0,), (-1, 1)), ((-1, 1), (0,)),
+                    lambda stage, state, action, disturbance:
+                        (state[0] + action + disturbance,),
+                    lambda stage, state: True,
+                    lambda state: Fraction(abs(state[0])))
+        result = compare(game)
+        self.assertEqual(result.fixed_plan_values, {(0, -1): 2, (0, 1): 2})
+        self.assertEqual(result.fixed_value, 2)
+        self.assertEqual(result.replanning_first_actions[(1, (-1,))], (1,))
+        self.assertEqual(result.replanning_first_actions[(1, (1,))], (-1,))
+        self.assertEqual(result.replanning_history_costs, {(-1, 0): 0, (1, 0): 0})
+        self.assertEqual(result.replanning_worst,
+                         max(result.replanning_history_costs.values()))
+        self.assertEqual(result.replanning_worst, 0)
+        self.assertEqual(result.causal_value, 0)
+
     def test_causal_continuation_has_interior_worst_cost(self):
         result = compare(l13_policy_gap_game())
         self.assertEqual(result.causal_first_actions[(0, (0, 0))], (0,))
