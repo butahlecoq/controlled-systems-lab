@@ -24,6 +24,11 @@ target_link_libraries(projection_predecessor_tests PRIVATE CSL::polyhedral docte
 add_test(NAME projection_predecessor_tests COMMAND projection_predecessor_tests)
 csl_test_target(projection_predecessor_tests geometry)
 
+add_executable(approximation_policy_tests tests/contract/geometry/approximation_policy_tests.cpp)
+target_link_libraries(approximation_policy_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
+add_test(NAME approximation_policy_tests COMMAND approximation_policy_tests)
+csl_test_target(approximation_policy_tests geometry)
+
 add_executable(projection_predecessor_public_client tests/installed/projection_predecessor_client.cpp)
 target_link_libraries(projection_predecessor_public_client PRIVATE CSL::polyhedral)
 add_test(NAME projection_predecessor_public_client COMMAND projection_predecessor_public_client)
