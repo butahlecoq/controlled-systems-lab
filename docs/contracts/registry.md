@@ -133,6 +133,17 @@ static-key fallback. In the established-completeness path, an empty selection
 or unknown key is a scoped admission rejection with requested strategy identity
 and verifier-selection diagnostics, and creates no workspace.
 
+`PreparedStrategy::expected_synthesis_identity()` returns a value copy of the
+resolved problem ID, frozen family request, canonical coordinates, selected
+strategy ID and version, and expected ordered lineage captured during
+preparation. The method is read-only and does not expose the retained
+`StrategyRequest`, registry, callbacks, or mutable aliases. It exists so an
+application can independently bind downstream verification to the admission
+snapshot rather than copying identity fields from a strategy-produced family.
+The copy remains valid after the registry and registration are destroyed; it
+does not confer family validity or completeness. This additive source-interface
+contract requires integration review with the application composition seam.
+
 Contract examples:
 
 | Registration/request | Expected preparation result |

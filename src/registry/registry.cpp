@@ -3,6 +3,11 @@
 #include <algorithm>
 
 namespace csl::registry {
+SynthesisIdentityExpectation PreparedStrategy::expected_synthesis_identity() const {
+    return {request_->problem.identity(), request_->family,
+        request_->problem.constraints().coordinates(), request_->configuration.strategy,
+        request_->strategy_version, request_->lineage};
+}
 namespace {
 bool matches_prepared_identity(const FamilyIdentity& actual,
     const problem::ResolvedProblem& problem,const FamilyRequest& family,

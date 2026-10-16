@@ -302,3 +302,12 @@ foreach(header IN LISTS installed_contract_headers)
   add_library(installed_header_${header_name} OBJECT "${source}")
   target_link_libraries(installed_header_${header_name} PRIVATE CSL::contracts)
 endforeach()
+
+if(TARGET CSL::application)
+add_executable(installed_application_client application_client.cpp)
+target_link_libraries(installed_application_client PRIVATE CSL::application)
+set_target_properties(installed_application_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_application_client COMMAND installed_application_client)
+set_tests_properties(installed_application_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed application client: guarded profile rejection passed")
+endif()

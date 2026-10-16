@@ -401,6 +401,9 @@ class PreparedStrategy {
 public:
     const std::vector<Provenance>& provenance() const { return provenance_; }
     const Requirements& requirements() const { return requirements_; }
+    // Identity expectations frozen during preparation, including actual
+    // registered strategy version and expected transformation lineage.
+    SynthesisIdentityExpectation expected_synthesis_identity() const;
     std::unique_ptr<BoundWorkspace<StrategyPort>> create() const {
         auto workspace=factory_(*request_,requirements_);
         if((complete_family_verifier_&&family_authority_)||(partial_family_verifier_&&partial_family_authority_))
