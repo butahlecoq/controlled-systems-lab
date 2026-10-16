@@ -18,7 +18,10 @@ target_compile_definitions(csl_ext01_fixed_plan_report PRIVATE $<$<CONFIG:Releas
 target_link_libraries(csl_ext01_fixed_plan_report PRIVATE CSL::fixed_plan_disturbance CSL::worst_case_vertex)
 target_include_directories(csl_ext01_fixed_plan_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 if(BUILD_TESTING)
-add_test(NAME ext01_report_smoke COMMAND csl_ext01_fixed_plan_report --smoke)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME ext01_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/ext01/check_smoke.py
+  $<TARGET_FILE:csl_ext01_fixed_plan_report>)
 endif()
 if(MSVC)
 target_compile_options(csl_ext01_fixed_plan_report PRIVATE /W4 /WX /permissive-)

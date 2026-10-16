@@ -52,8 +52,20 @@ json l19() {
     auto result=optimization::snapshot(QuadraticTerminal{{1,1,{2}},{-2},1});
     if(!std::holds_alternative<optimization::Objective>(result))
         throw std::runtime_error("L19 objective rejected");
+    const auto& objective=std::get<optimization::Objective>(result);
+    const Vector sampled_points{0,1,2};
+    Vector observed_values;
+    for(const double point:sampled_points) {
+        const Vector input{point};
+        const auto evaluated=optimization::evaluate(objective,input);
+        if(!std::holds_alternative<double>(evaluated))
+            throw std::runtime_error("L19 sample evaluation failed");
+        observed_values.push_back(std::get<double>(evaluated));
+    }
+    if(observed_values!=Vector{1,0,1})
+        throw std::runtime_error("L19 sampled objective values mismatch");
     const auto worst=optimization::worst_case_vertex(domain,
-        std::get<optimization::Objective>(result),3);
+        objective,3);
     if(!std::holds_alternative<optimization::WorstCaseValue>(worst))
         throw std::runtime_error("L19 did not return a value");
     const auto& value=std::get<optimization::WorstCaseValue>(worst);
@@ -61,7 +73,8 @@ json l19() {
         throw std::runtime_error("L19 literal oracle mismatch");
     return {{"status","numerical_value"},{"worst_value",value.value},
         {"maximizer",value.maximizer},{"evaluated_vertices",value.evaluated_vertices},
-        {"stationary_midpoint_value",0}};
+        {"sampled_points",sampled_points},{"observed_objective_values",observed_values},
+        {"stationary_midpoint_value",observed_values[1]}};
 }
 
 json integrator_case(bool narrow) {

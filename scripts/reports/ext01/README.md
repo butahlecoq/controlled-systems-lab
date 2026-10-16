@@ -12,7 +12,7 @@ The executable has four independent fixtures:
 
 | Fixture | Work and asserted result | Evidence limit |
 |---|---|---|
-| `l19` | Three V rows for `(x-1)^2` on `[0,2]`; worst value 1 at endpoint 0, stationary midpoint value 0. | Native numerical objective and authored V rows. |
+| `l19` | Three V rows for `(x-1)^2` on `[0,2]`; public objective evaluations at 0, 1 and 2 return `[1,0,1]`; worst value 1 at endpoint 0, stationary midpoint value 0. | Native numerical objective and authored V rows. |
 | `integrator_feasible` | Two-step `x'=x+u+w`, `u=0`, `w` in `[-1,1]`, safe `[-3,3]`; four terminal candidates `[-2,0,0,2]` and worst terminal `x²=4`. | Complete fixed-plan V candidates under independent compact disturbances and convex H safety. |
 | `integrator_violation` | Same model with stage-one safe `[-0.5,0.5]`; stage-one successor `-1` rejects the entire plan. | Robust violation; no clipped tube or objective. |
 | `b08_rounded` | Enumerates 625 fixed four-action plans and 256 disturbance-corner histories per plan; minimum worst value `67.150601101407` within `1e-8`, three ties. | Displayed rounded B08 arrays only. The published 67.12, nonlinear dynamics, unrounded MATLAB arrays, historical timing, and validated rounding are separate. |
@@ -30,7 +30,9 @@ cmake --build build/ext01-report --config Release --target csl_ext01_fixed_plan_
 build/ext01-report/Release/csl_ext01_fixed_plan_report.exe --smoke
 ```
 
-Smoke emits four JSONL records with literal checks. These elapsed values are
+Smoke emits four JSONL records with literal checks. `ext01_report_smoke`
+checks the JSONL surface, including the evaluated L19 sample values, against
+independent literals. These elapsed values are
 functional smoke data, not accepted performance measurements. The driver exits
 nonzero on any fixture or oracle failure.
 
