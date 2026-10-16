@@ -29,7 +29,7 @@ ExactFarkasEvidence exact_farkas(){
 TEST_CASE("H attachment round trips ordered binary64 coefficients and metadata into an inert DTO"){
  static_assert(std::is_same_v<decltype(ar::decode_h_relation_attachment(std::span<const std::byte>{},limits())),ar::ArtifactResult<ar::RecordedHRelation>>);
  static_assert(!std::is_same_v<ar::RecordedHRelation,sets::SetData>);
- const auto encoded=take(ar::encode_h_relation_attachment(source(),limits()));auto exact_size_limits=limits();exact_size_limits.max_bytes=encoded.bytes().size();CHECK(std::holds_alternative<ar::ArtifactResult<problem::ResolvedContent>>(ar::encode_h_relation_attachment(source(),exact_size_limits)));const auto decoded=take(ar::decode_h_relation_attachment(encoded.bytes(),limits(),encoded.digest()));
+ const auto encoded=take(ar::encode_h_relation_attachment(source(),limits()));auto exact_size_limits=limits();exact_size_limits.max_bytes=encoded.bytes().size();CHECK(std::holds_alternative<problem::ResolvedContent>(ar::encode_h_relation_attachment(source(),exact_size_limits)));const auto decoded=take(ar::decode_h_relation_attachment(encoded.bytes(),limits(),encoded.digest()));
  CHECK(decoded.id.value=="relation");CHECK(decoded.metadata.dimension==2);CHECK(decoded.coordinate_labels==std::vector<std::string>{"x","u"});
  REQUIRE(decoded.affine_dimension.has_value());CHECK(decoded.affine_dimension->origin==sets::DimensionOrigin::supplied);CHECK(std::get<sets::DimensionValue>(decoded.affine_dimension->value).value==1);
  const auto& support=std::get<ar::RecordedSymbolicArgument>(decoded.affine_dimension->support);CHECK(support.reference=="rank-note");CHECK(support.assumptions=="caller supplied");
