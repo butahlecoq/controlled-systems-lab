@@ -217,9 +217,9 @@ def page(record: dict, svg: bytes) -> bytes:
         ("Constrained disjoint-ID Minkowski sum", "1 ≤ x ≤ 7",
          "center 4; generators [1, 0, 0, 2]; factor IDs u, v, p, q; equalities u = v and p = −q",
          "three feasible physical witnesses and two outside points"),
-        ("Bounded zonotope to V conversion", "2 ≤ x ≤ 12; V = {2, 6, 8, 12}",
-         "vertices 2, 6, 8, 12; zero rays; coordinate label x",
-         "all four vertices and two outside points"),
+        ("Bounded zonotope to V conversion", "2 ≤ x ≤ 12; V-representation rows {2, 6, 8, 12}",
+         "enumerated corner images 2, 6, 8, 12; zero rays; coordinate label x",
+         "all four V-representation rows and two outside points; only 2 and 12 are extreme endpoints"),
     )
     outcome_rows = "".join(
         "<tr><th scope=\"row\">" + escape(label) + "</th><td>" + escape(expected) +
@@ -262,7 +262,8 @@ def page(record: dict, svg: bytes) -> bytes:
         '<thead><tr><th>Fixture</th><th>Expected physical set</th><th>Observed output</th><th>Checked examples</th></tr></thead><tbody>' +
         outcome_rows + '</tbody></table></div>'
         '<p>Every fresh call checked factor IDs, coefficients and equality rows where applicable, feasible witnesses against physical H, '
-        'outside points, V vertices, and scoped rejection controls. The requested relation was equivalent with numerical assurance and no error bound. '
+        'outside points, V-representation rows, and scoped rejection controls. The two interior corner images, 6 and 8, are redundant rows. '
+        'The requested relation was equivalent with numerical assurance and no error bound. '
         'These examples do not establish general geometric correctness, constrained conversion, intersection, overlapping-ID independent sums, or validated arithmetic.</p></div>'
         '<div class="card"><h2>Measured verified batches</h2>'
         '<p>One excluded warmup and seven measured batches per fixture in alternating order. Each batch made 5,000 fresh registered-port calls; '

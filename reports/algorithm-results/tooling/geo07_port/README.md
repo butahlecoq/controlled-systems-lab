@@ -15,12 +15,14 @@ The three authored fixtures are:
 | --- | --- | --- |
 | `affine_box` | Affine image of `c=(1,2)`, `G=diag(2,3)` by `[1,1]` plus `4` | `2 ≤ x ≤ 12`; factors and coefficients retained |
 | `constrained_disjoint_sum` | Minkowski sum of `x=1+u, u=v` and `x=3+2q, p=-q`, with disjoint IDs | `1 ≤ x ≤ 7`; both equality rows and IDs retained |
-| `finite_v` | Unconstrained two-factor segment `7+2a+3b`, explicit cap `4` | V vertices `2,6,8,12`, zero rays and label `x` |
+| `finite_v` | Unconstrained two-factor segment `7+2a+3b`, explicit cap `4` | Enumerated corner images / V-representation rows `2,6,8,12`, zero rays and label `x` |
 
 Each fresh call verifies feasible factor witnesses and physical H in/out
-answers or exact V vertex bytes. The call also verifies scoped rejection of
+answers or exact V-representation row bytes. Only 2 and 12 are extreme
+endpoints of this segment; 6 and 8 are redundant interior corner images.
+The call also verifies scoped rejection of
 validated assurance, shared-ID independent sum, intersection, a too-small
-vertex cap, constrained conversion and H conversion. The exact authored
+enumeration cap, constrained conversion and H conversion. The exact authored
 inputs, public request identity, H/V references, witnesses, control requests
 and output identity appear in `--describe`. The Python collector compares
 that catalogue with independent literal values, writes canonical

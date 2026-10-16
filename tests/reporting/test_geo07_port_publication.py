@@ -137,6 +137,11 @@ class Geo07PortPublicationTests(unittest.TestCase):
                         "exploratory", "inconclusive", "binary64", "7f31a8988d36fde6846b4fbb463b797ced9f4b93796bf06e3e9db5843a7d433e"):
             with self.subTest(literal=literal):
                 self.assertIn(literal, page)
+        self.assertIn("enumerated corner images 2, 6, 8, 12", page)
+        self.assertIn("only 2 and 12 are extreme endpoints", page)
+        self.assertIn("V-representation rows", page)
+        self.assertNotIn("all four vertices", page)
+        self.assertNotIn("V vertices", page)
         trials = list(csv.DictReader(io.StringIO((BUNDLE / "trials.csv").read_text(encoding="utf-8"))))
         self.assertEqual(len(trials), 24)
         self.assertEqual(sum(row["warmup"] == "True" for row in trials), 3)
