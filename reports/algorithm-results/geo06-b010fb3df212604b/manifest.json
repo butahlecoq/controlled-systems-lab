@@ -1,0 +1,11 @@
+{
+  "schema": "csl.geo06-report-manifest/1",
+  "report_id": "geo06-b010fb3df212604b",
+  "files": {
+    "build-log.txt": "f2fb4242a9b2489a6a2d6d17254888674699b778b2937941dba9df69bed10121",
+    "build-provenance.json": "dcb90f67f4fc19b8caf7051e89f4865d7b3893bad45029f40f5b540666fc6250",
+    "index.html": "353858fab99e1ff4b384e4eb7420b0884d89d6da48259c8813a6c7d3260655db",
+    "records.json": "cf85a4ceccedee1d96ce4a507e3262649146c1bee6e2a073257feb3274470f87",
+    "trials.csv": "8890053b2f906952d796ba32ee2046efa8fc336511a772a329d99285d41a159c"
+  }
+}
