@@ -490,6 +490,16 @@ log hashes, collection provenance, independent validation result, deterministic
 HTML/SVG/CSV, native manifest and source ZIP. The saved-only checker rebuilds
 the record, tables, figure, page and ZIP from those retained bytes.
 
+The collector saves raw stdout/stderr SHA-256 in `collection.json` at collection
+time. The builder verifies both before parsing, requires the exact expected
+source-file hash keys, recomputes the literal fixture digest, and cross-checks
+the saved executable description against the source commit, harness digest,
+Release mode, language standard, NDEBUG and batch protocol. Synthetic regression
+collections and rows use `purpose=test`; only an explicit local test gate lets
+the builder/checker handle them. Their HTML and records visibly identify
+synthetic values. The production OPT-07 adapter rejects such bundles, including
+when schema-3 site staging is invoked with a test option.
+
 `opt07-ordered-hull` is registered for the schema-3 Pages publisher; a native
 bundle and catalogue row are pending an independently reviewed genuine
 measurement. The record supports descriptive single-adapter observations only:

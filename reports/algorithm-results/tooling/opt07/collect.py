@@ -25,6 +25,24 @@ else:
     from validate import validate_stream
 
 
+SOURCE_PATHS = (
+    "src/geometry/hull/ordered_reducer.cpp", "src/geometry/hull_reducer.cpp",
+    "src/geometry/exact_convex_combination.hpp",
+    "include/csl/geometry/hull_reducer.hpp",
+    "reports/algorithm-results/tooling/opt07/ordered_hull_driver.cpp",
+    "reports/algorithm-results/tooling/opt07/oracle.py",
+    "reports/algorithm-results/tooling/opt07/validate.py",
+    "reports/algorithm-results/tooling/opt07/collect.py",
+)
+HARNESS_PATH = "reports/algorithm-results/tooling/opt07/ordered_hull_driver.cpp"
+
+
+def fixture_sha256() -> str:
+    fixture_bytes = json.dumps(FIXTURES, sort_keys=True, separators=(",", ":"),
+                               ensure_ascii=True).encode("utf-8")
+    return hashlib.sha256(fixture_bytes).hexdigest()
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as source:
@@ -121,7 +139,7 @@ def preflight(exe: Path, source_root: Path, source_commit: str,
     description = json.loads(command(str(exe), "describe"))
     require(description.get("kind") == "describe" and
             description.get("source_commit") == source_commit and
-            description.get("harness_sha256") == sha256(harness / "ordered_hull_driver.cpp") and
+            description.get("harness_sha256") == sha256(source_root / HARNESS_PATH) and
             description.get("configuration") == "Release" and
             description.get("ndebug") is True and
             description.get("cxx_standard", 0) >= 202002 and
@@ -137,17 +155,6 @@ def preflight(exe: Path, source_root: Path, source_commit: str,
     sanitized_log = sanitize_build_log(raw_log, public_log_roots(source_root, build_root))
     note = concurrent_work.read_text(encoding="utf-8").strip()
     require(bool(note), "concurrent-work note is required")
-    source_paths = [
-        "src/geometry/hull/ordered_reducer.cpp", "src/geometry/hull_reducer.cpp",
-        "src/geometry/exact_convex_combination.hpp",
-        "include/csl/geometry/hull_reducer.hpp",
-        "reports/algorithm-results/tooling/opt07/ordered_hull_driver.cpp",
-        "reports/algorithm-results/tooling/opt07/oracle.py",
-        "reports/algorithm-results/tooling/opt07/validate.py",
-        "reports/algorithm-results/tooling/opt07/collect.py",
-    ]
-    fixture_bytes = json.dumps(FIXTURES, sort_keys=True, separators=(",", ":"),
-                               ensure_ascii=True).encode("utf-8")
     return {
         "source_commit": source_commit,
         "algorithm": {"method": "csl.hull.ordered-membership", "version": "1.0.0",
@@ -157,8 +164,8 @@ def preflight(exe: Path, source_root: Path, source_commit: str,
                     "presolve": "off", "parallel": "off",
                     "simplex_iteration_limit": None},
         "source_sha256": {relative: sha256(source_root / relative)
-                          for relative in source_paths},
-        "fixture_sha256": hashlib.sha256(fixture_bytes).hexdigest(),
+                          for relative in SOURCE_PATHS},
+        "fixture_sha256": fixture_sha256(),
         "executable_sha256": sha256(exe),
         "build_log_sha256": sha256(build_log),
         "sanitized_build_log_sha256": hashlib.sha256(
@@ -211,7 +218,10 @@ def main() -> None:
     (args.out / "raw-stderr.txt").write_bytes(result.stderr)
     (args.out / "release-build-log-sanitized.txt").write_text(
         sanitized, encoding="utf-8", newline="\n")
+    evidence["purpose"] = "measurement"
     evidence["process_exit_code"] = result.returncode
+    evidence["raw_stdout_sha256"] = hashlib.sha256(result.stdout).hexdigest()
+    evidence["raw_stderr_sha256"] = hashlib.sha256(result.stderr).hexdigest()
     (args.out / "collection.json").write_text(
         json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     require(command("git", "-C", str(args.source_root.resolve()), "rev-parse", "HEAD") ==

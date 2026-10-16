@@ -1,15 +1,21 @@
 """Literal, solver-independent checks for the OPT-07 standalone harness."""
 import json
+import importlib
 import math
 import sys
 import tempfile
+from types import ModuleType
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] /
-                       "reports/algorithm-results/tooling/opt07"))
-from oracle import validate_call  # noqa: E402
-from validate import validate_stream  # noqa: E402
+_package_name = "csl_opt07_report_tooling"
+_tooling = Path(__file__).resolve().parents[2] / "reports/algorithm-results/tooling/opt07"
+if _package_name not in sys.modules:
+    package = ModuleType(_package_name)
+    package.__path__ = [str(_tooling)]
+    sys.modules[_package_name] = package
+validate_call = importlib.import_module(_package_name + ".oracle").validate_call
+validate_stream = importlib.import_module(_package_name + ".validate").validate_stream
 
 
 def valid_late_row():

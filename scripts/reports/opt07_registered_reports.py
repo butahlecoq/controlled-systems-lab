@@ -33,6 +33,8 @@ LIMITS = ("Three fixed small binary64 clouds; independent exact-dyadic deletion 
 def adapt(bundle: Path) -> common.PublicationRecord:
     bundle = Path(bundle)
     record = source.check(bundle)
+    if record.get("purpose") != "measurement":
+        raise ValueError("test-only OPT-07 artifact cannot be published")
     if re.fullmatch(r"opt07-[0-9a-f]{16}", bundle.name) is None:
         raise ValueError("unsafe OPT-07 source identity")
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))

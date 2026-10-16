@@ -92,12 +92,20 @@ python -B reports/algorithm-results/tooling/opt07/build_bundle.py check `
   --bundle reports/algorithm-results/opt07-<content-id>
 ```
 
+The collector records SHA-256 of exact raw stdout and stderr bytes at collection
+time. The builder verifies both hashes before parsing the JSONL. It also requires
+the exact reviewed source-file hash key set, recomputes the literal fixture
+digest, and binds the saved harness digest to the executable description.
 The bundle retains exact raw JSONL and stderr bytes, the sanitized Release log,
 collection provenance including the raw local log hash, all batch outcomes,
 derived CSV/HTML/SVG, and an exact-file manifest. The checker regenerates the
 record and every display from raw bytes without invoking the driver. The
 `opt07-ordered-hull` schema-3 publisher adapter is registered, but no catalogue
 row is added until a genuine measured bundle passes saved-artifact review.
+Synthetic tests use `purpose=test` in the collection and every raw row; they
+exercise the complete 24-batch/2,400-row validator only through explicit
+`build_bundle.py --allow-test`. Their records and pages say TEST / synthetic.
+The publisher rejects these bundles even if the site checker has test mode.
 Independent publication review, main-only Pages deployment, and live URL/ZIP
 verification remain pending. No comparison or historical runtime assertion
 follows from these fixtures.

@@ -16,11 +16,13 @@ import statistics
 import zipfile
 
 if __package__:
-    from .collect import sanitize_build_log
+    from .collect import (HARNESS_PATH, SOURCE_PATHS, fixture_sha256,
+                          sanitize_build_log)
     from .oracle import FIXTURES, require
     from .validate import validate_stream
 else:
-    from collect import sanitize_build_log
+    from collect import (HARNESS_PATH, SOURCE_PATHS, fixture_sha256,
+                         sanitize_build_log)
     from oracle import FIXTURES, require
     from validate import validate_stream
 
@@ -34,7 +36,7 @@ SOURCE_FILES = {
 }
 TRIAL_FIELDS = ("case_id", "round", "warmup", "calls", "verified_calls",
                 "elapsed_ns", "status", "failed_calls")
-SUMMARY_FIELDS = ("case_id", "points", "measured_batches", "measured_calls",
+SUMMARY_FIELDS = ("case_id", "points", "nonwarmup_batches", "nonwarmup_calls",
                   "median_batch_ns", "min_batch_ns", "max_batch_ns", "failed_calls")
 
 
@@ -59,16 +61,23 @@ def csv_bytes(rows: list[dict], fields: tuple[str, ...]) -> bytes:
     return buffer.getvalue().encode("utf-8")
 
 
-def read_collection(directory: Path) -> tuple[dict, list[dict], dict]:
+def read_collection(directory: Path, *, allow_test: bool = False) -> tuple[dict, list[dict], dict]:
     collection = json.loads((directory / "collection.json").read_text(encoding="utf-8"))
     require(isinstance(collection, dict), "collection metadata must be an object")
+    purpose = collection.get("purpose")
+    require(purpose in ("measurement", "test"), "collection purpose missing or invalid")
+    require(purpose != "test" or allow_test, "test-only collection requires explicit test gate")
     source_commit = collection.get("source_commit")
     require(isinstance(source_commit, str) and
             re.fullmatch(r"[0-9a-f]{40}", source_commit) is not None,
             "full measured source commit required")
     description = collection.get("description", {})
-    require(description.get("source_commit") == source_commit and
+    require(description.get("kind") == "describe" and
+            description.get("source_commit") == source_commit and
             description.get("configuration") == "Release" and
+            description.get("ndebug") is True and
+            type(description.get("cxx_standard")) is int and
+            description["cxx_standard"] >= 202002 and
             description.get("batch_calls") == 100 and
             description.get("repetitions") == 7 and
             collection.get("algorithm", {}).get("method") == "csl.hull.ordered-membership" and
@@ -85,10 +94,16 @@ def read_collection(directory: Path) -> tuple[dict, list[dict], dict]:
                             "executable_sha256", "fixture_sha256",
                             "cmake_cache_sha256", "generated_release_project_sha256")) and
             isinstance(collection.get("source_sha256"), dict) and
-            bool(collection["source_sha256"]) and
-            all(re.fullmatch(r"[0-9a-f]{64}", value) is not None
+            set(collection["source_sha256"]) == set(SOURCE_PATHS) and
+            all(isinstance(value, str) and
+                re.fullmatch(r"[0-9a-f]{64}", value) is not None
                 for value in collection["source_sha256"].values()),
-            "collection provenance hashes missing")
+            "source file inventory or collection provenance hashes differ")
+    require(collection["fixture_sha256"] == fixture_sha256(),
+            "fixture digest differs from saved oracle catalogue")
+    require(description.get("harness_sha256") ==
+            collection["source_sha256"][HARNESS_PATH],
+            "harness digest differs from source inventory")
     release = collection.get("release_project", {})
     require(release.get("LanguageStandard") == "stdcpp20" and
             release.get("Optimization") == "MaxSpeed" and
@@ -104,20 +119,27 @@ def read_collection(directory: Path) -> tuple[dict, list[dict], dict]:
             "sanitized Release log hash mismatch")
     sanitize_build_log(public_log.decode("utf-8"), {})
     stderr = (directory / "raw-stderr.txt").read_bytes()
-    sanitize_build_log(stderr.decode("utf-8"), {})
     raw = directory / "raw-stdout.jsonl"
-    validation = validate_stream(raw, "measurement")
+    require(all(isinstance(collection.get(key), str) and
+                re.fullmatch(r"[0-9a-f]{64}", collection[key]) is not None
+                for key in ("raw_stdout_sha256", "raw_stderr_sha256")) and
+            digest(raw.read_bytes()) == collection["raw_stdout_sha256"],
+            "raw stdout hash differs from collection-time evidence")
+    require(digest(stderr) == collection["raw_stderr_sha256"],
+            "raw stderr hash differs from collection-time evidence")
+    sanitize_build_log(stderr.decode("utf-8"), {})
+    validation = validate_stream(raw, purpose)
     saved_validation = json.loads((directory / "functional-validation.json").read_text(encoding="utf-8"))
     require(validation == saved_validation and
-            validation == {"purpose": "measurement", "fixtures": 3,
+            validation == {"purpose": purpose, "fixtures": 3,
                            "batches": 24, "calls": 2400},
             "saved functional validation differs from raw measurement")
     rows = [json.loads(line) for line in raw.read_text(encoding="utf-8").splitlines()]
     return collection, rows, validation
 
 
-def report_record(directory: Path) -> dict:
-    collection, raw_rows, validation = read_collection(directory)
+def report_record(directory: Path, *, allow_test: bool = False) -> dict:
+    collection, raw_rows, validation = read_collection(directory, allow_test=allow_test)
     batches = []
     for case_id in FIXTURES:
         for round_id in range(8):
@@ -139,19 +161,23 @@ def report_record(directory: Path) -> dict:
                     not row["warmup"]]
         values = [row["elapsed_ns"] for row in measured]
         summary.append({"case_id": case_id, "points": len(fixture["points"]),
-                        "measured_batches": len(measured),
-                        "measured_calls": sum(row["calls"] for row in measured),
+                        "nonwarmup_batches": len(measured),
+                        "nonwarmup_calls": sum(row["calls"] for row in measured),
                         "median_batch_ns": statistics.median(values),
                         "min_batch_ns": min(values), "max_batch_ns": max(values),
                         "failed_calls": sum(row["failed_calls"] for row in measured)})
-    payload = {"schema": SCHEMA, "source_commit": collection["source_commit"],
+    payload = {"schema": SCHEMA, "purpose": collection["purpose"],
+               "source_commit": collection["source_commit"],
                "collection": collection, "validation": validation,
                "raw_stdout_sha256": digest((directory / "raw-stdout.jsonl").read_bytes()),
                "raw_stderr_sha256": digest((directory / "raw-stderr.txt").read_bytes()),
                "sanitized_build_log_sha256": collection["sanitized_build_log_sha256"],
                "batches": batches, "summary": summary,
                "scientific_scope": "exact dyadic certificates for represented binary64 points in three fixed small clouds",
-               "performance_interpretation": "descriptive single-adapter batches; no comparator, speedup, source-mapped limiter, or scalability claim"}
+               "performance_interpretation": (
+                   "synthetic test data; no measured performance observation" if
+                   collection["purpose"] == "test" else
+                   "descriptive single-adapter batches; no comparator, speedup, source-mapped limiter, or scalability claim")}
     payload_sha256 = payload_digest(payload)
     return {**payload, "report_id": "opt07-" + payload_sha256[:16],
             "payload_sha256": payload_sha256}
@@ -159,6 +185,7 @@ def report_record(directory: Path) -> dict:
 
 def latency_svg(record: dict) -> str:
     rows = record["summary"]
+    test = record["purpose"] == "test"
     top = max(row["max_batch_ns"] for row in rows) or 1
     strokes = []
     for index, row in enumerate(rows):
@@ -169,9 +196,12 @@ def latency_svg(record: dict) -> str:
         strokes.append(f'<line x1="{x}" x2="{x}" y1="{high:.1f}" y2="{low:.1f}" stroke="#285c75" stroke-width="3"/>')
         strokes.append(f'<line x1="{x-16}" x2="{x+16}" y1="{med:.1f}" y2="{med:.1f}" stroke="#a44828" stroke-width="6"/>')
         strokes.append(f'<text x="{x}" y="280" text-anchor="middle">{html.escape(row["case_id"])}</text>')
+    title = "TEST / synthetic batch values" if test else "OPT-07 measured batch duration"
+    description = ("Synthetic test values exercise report rendering; they are not timing observations."
+                   if test else "Seven measured 100-call batches per fixture; median marker and minimum-to-maximum range, in nanoseconds.")
     return ('<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" '
-            'viewBox="0 0 680 310"><title id="title">OPT-07 measured batch duration</title>'
-            '<desc id="desc">Seven measured 100-call batches per fixture; median marker and minimum-to-maximum range, in nanoseconds.</desc>'
+            f'viewBox="0 0 680 310"><title id="title">{title}</title>'
+            f'<desc id="desc">{description}</desc>'
             '<style>text{font:13px system-ui,sans-serif;fill:#182b36}</style>'
             '<text x="24" y="28">Duration per 100-call batch (ns)</text>'
             + "".join(strokes) + '</svg>')
@@ -179,20 +209,32 @@ def latency_svg(record: dict) -> str:
 
 def page(record: dict) -> str:
     esc = lambda value: html.escape(str(value), quote=True)
+    test = record["purpose"] == "test"
     rows = "".join("<tr>" + "".join(f"<td>{esc(row[field])}</td>" for field in
                    SUMMARY_FIELDS) + "</tr>" for row in record["summary"])
     trial_rows = "".join("<tr>" + "".join(f"<td>{esc(row[field])}</td>" for field in
                          TRIAL_FIELDS) + "</tr>" for row in record["batches"])
     headers = lambda fields: "".join(f"<th scope=\"col\">{esc(field)}</th>" for field in fields)
     collection = record["collection"]
+    test_notice = ('<p><strong>TEST / synthetic data. No algorithm measurement was run; '
+                   'durations and provenance values are generated test fixtures and must not be published.</strong></p>'
+                   if test else "")
+    source_label = "synthetic source marker" if test else "measured source commit"
+    oracle_text = ("The 2,400 synthetic rows pass the independent exact-dyadic certificate and literal support oracle. This checks the report pipeline only."
+                   if test else "Every one of 2,400 calls passed the independent exact-dyadic certificate and literal support oracle. This is evidence for these represented inputs, not a general or validated-real hull theorem.")
+    section_title = "Synthetic test batches" if test else "Measured batches"
+    caption = ("Generated values exercise seven nonwarmup 100-row batches per fixture. The plotted values have no runtime meaning."
+               if test else "Each marker is the median of seven measured 100-call batches; the line spans minimum to maximum. One warmup batch per fixture is excluded. Durations are for registered run_with calls and output moves; fresh workspace construction, independent validation, JSON and HTML are outside the interval. Lazy native initialization inside the calls is included. No per-call latency is inferred by division.")
+    release_note = ("Compiler and host fields below are synthetic test placeholders."
+                    if test else "Exact compile command is in the saved sanitized Release build log.")
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OPT-07 ordered hull result</title><style>body{{font:16px/1.5 system-ui,sans-serif;max-width:74rem;margin:2rem auto;padding:0 1rem;color:#172b36}}table{{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}}th,td{{border:1px solid #bcc9d0;padding:.35rem;text-align:left}}code{{overflow-wrap:anywhere}}figure{{margin:1.5rem 0}}svg{{max-width:100%}}</style></head><body>
 <h1>OPT-07 ordered hull membership</h1>
-<p>Native record <code>{esc(record["report_id"])}</code>; measured source commit <code>{esc(record["source_commit"])}</code>. Algorithm <code>{esc(collection["algorithm"]["method"])}</code> version <code>{esc(collection["algorithm"]["version"])}</code>; backend <code>{esc(collection["backend"]["method"])}</code> adapter <code>{esc(collection["backend"]["adapter_version"])}</code>.</p>
-<p>Three fixed binary64 clouds exercise signed-score ordering, a zero-width duplicate, and a late exterior point. Every one of 2,400 calls passed the independent exact-dyadic certificate and literal support oracle. This is evidence for these represented inputs, not a general or validated-real hull theorem.</p>
-<h2>Measured batches</h2><figure>{latency_svg(record)}<figcaption>Each marker is the median of seven measured 100-call batches; the line spans minimum to maximum. One warmup batch per fixture is excluded. Durations are for registered <code>run_with</code> calls and output moves; fresh workspace construction, independent validation, JSON and HTML are outside the interval. Lazy native initialization inside the calls is included. No per-call latency is inferred by division.</figcaption></figure>
+{test_notice}<p>Native record <code>{esc(record["report_id"])}</code>; {source_label} <code>{esc(record["source_commit"])}</code>. Algorithm <code>{esc(collection["algorithm"]["method"])}</code> version <code>{esc(collection["algorithm"]["version"])}</code>; backend <code>{esc(collection["backend"]["method"])}</code> adapter <code>{esc(collection["backend"]["adapter_version"])}</code>.</p>
+<p>Three fixed binary64 clouds exercise signed-score ordering, a zero-width duplicate, and a late exterior point. {oracle_text}</p>
+<h2>{section_title}</h2><figure>{latency_svg(record)}<figcaption>{caption}</figcaption></figure>
 <table><thead><tr>{headers(SUMMARY_FIELDS)}</tr></thead><tbody>{rows}</tbody></table>
 <h2>All batch outcomes</h2><table><thead><tr>{headers(TRIAL_FIELDS)}</tr></thead><tbody>{trial_rows}</tbody></table>
-<p>Performance interpretation: {esc(record["performance_interpretation"])}. Internal LP phase durations, pivots and observed native thread count are unavailable. Configured native threads: {esc(collection["backend"]["configured_threads"])}. OS: {esc(collection["environment"]["os"])}; machine: {esc(collection["environment"]["machine"])}; logical processors: {esc(collection["environment"]["logical_processors"])}. Release compiler project: {esc(collection["release_project"]["LanguageStandard"])} with {esc(collection["release_project"]["Optimization"])} and NDEBUG; exact compile command is in the saved sanitized build log. Concurrent-work note: {esc(collection["environment"]["concurrent_work_note"])}.</p>
+<p>Performance interpretation: {esc(record["performance_interpretation"])}. Internal LP phase durations, pivots and observed native thread count are unavailable. Configured native threads: {esc(collection["backend"]["configured_threads"])}. OS: {esc(collection["environment"]["os"])}; machine: {esc(collection["environment"]["machine"])}; logical processors: {esc(collection["environment"]["logical_processors"])}. Release compiler project: {esc(collection["release_project"]["LanguageStandard"])} with {esc(collection["release_project"]["Optimization"])} and NDEBUG. {release_note} Concurrent-work note: {esc(collection["environment"]["concurrent_work_note"])}.</p>
 <h2>Saved evidence</h2><ul><li><a href="records.json">Versioned records and provenance</a></li><li><a href="raw-stdout.jsonl">Exact raw call and batch JSONL</a></li><li><a href="raw-stderr.txt">Exact process stderr</a></li><li><a href="collection.json">Collection provenance</a></li><li><a href="functional-validation.json">Independent validation result</a></li><li><a href="release-build-log-sanitized.txt">Sanitized Release build log</a></li><li><a href="trials.csv">All batch CSV</a></li><li><a href="summary.csv">Summary CSV</a></li><li><a href="latency.svg">Standalone figure</a></li><li><a href="manifest.json">Native manifest</a></li></ul>
 <p>Generated from saved bytes without running the algorithm. The raw local build-log SHA-256 is preserved in collection provenance; its public copy is sanitized and separately hashed.</p></body></html>'''
 
@@ -209,8 +251,8 @@ def source_zip_bytes(bundle: Path) -> bytes:
     return buffer.getvalue()
 
 
-def build(collection: Path, root: Path) -> Path:
-    record = report_record(collection)
+def build(collection: Path, root: Path, *, allow_test: bool = False) -> Path:
+    record = report_record(collection, allow_test=allow_test)
     bundle = root / record["report_id"]
     archive = root / (bundle.name + ".source.zip")
     require(not bundle.exists() and not archive.exists(), "report destination already exists")
@@ -229,11 +271,11 @@ def build(collection: Path, root: Path) -> Path:
         (bundle / name).write_bytes(content)
     (bundle / "manifest.json").write_bytes(json_bytes(manifest))
     archive.write_bytes(source_zip_bytes(bundle))
-    check(bundle)
+    check(bundle, allow_test=allow_test)
     return bundle
 
 
-def check(bundle: Path) -> dict:
+def check(bundle: Path, *, allow_test: bool = False) -> dict:
     require(bundle.is_dir() and not bundle.is_symlink(), "report directory required")
     entries = list(bundle.iterdir())
     require({path.name for path in entries} == SOURCE_FILES | {"manifest.json"} and
@@ -247,7 +289,7 @@ def check(bundle: Path) -> dict:
     for name in SOURCE_FILES:
         require(digest((bundle / name).read_bytes()) == manifest["files"][name],
                 f"native report hash mismatch: {name}")
-    record = report_record(bundle)
+    record = report_record(bundle, allow_test=allow_test)
     require(record["report_id"] == bundle.name and
             (bundle / "records.json").read_bytes() == json_bytes(record),
             "saved record differs from exact raw bytes")
@@ -271,16 +313,18 @@ def main() -> None:
     parser.add_argument("--collection", type=Path)
     parser.add_argument("--out-root", type=Path)
     parser.add_argument("--bundle", type=Path)
+    parser.add_argument("--allow-test", action="store_true",
+                        help="admit explicitly labeled synthetic test records locally; never publish")
     args = parser.parse_args()
     if args.action == "build":
         require(args.collection is not None and args.out_root is not None and
                 args.bundle is None, "build requires collection and out-root")
-        bundle = build(args.collection, args.out_root)
+        bundle = build(args.collection, args.out_root, allow_test=args.allow_test)
     else:
         require(args.bundle is not None and args.collection is None and
                 args.out_root is None, "check requires bundle")
         bundle = args.bundle
-        check(bundle)
+        check(bundle, allow_test=args.allow_test)
     print(json.dumps({"report_id": bundle.name, "status": "saved_report_valid"},
                      sort_keys=True))
 

@@ -12,7 +12,7 @@ else:
 
 
 def validate_stream(path: Path, purpose: str) -> dict:
-    require(purpose in ("smoke", "measurement"), "unknown purpose")
+    require(purpose in ("smoke", "measurement", "test"), "unknown purpose")
     rows = []
     for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         try:
@@ -60,7 +60,7 @@ def validate_stream(path: Path, purpose: str) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("path", type=Path)
-    parser.add_argument("--purpose", choices=("smoke", "measurement"), required=True)
+    parser.add_argument("--purpose", choices=("smoke", "measurement", "test"), required=True)
     args = parser.parse_args()
     print(json.dumps(validate_stream(args.path, args.purpose), sort_keys=True))
 

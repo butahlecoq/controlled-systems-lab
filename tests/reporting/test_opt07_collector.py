@@ -1,11 +1,25 @@
 """Public-log redaction and source-bound collector regressions."""
+import importlib
+import contextlib
+import hashlib
+import io
+import json
+import subprocess
 import sys
+import tempfile
+from types import ModuleType
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] /
-                       "reports/algorithm-results/tooling/opt07"))
-from collect import sanitize_build_log  # noqa: E402
+_package_name = "csl_opt07_report_tooling"
+_tooling = Path(__file__).resolve().parents[2] / "reports/algorithm-results/tooling/opt07"
+if _package_name not in sys.modules:
+    package = ModuleType(_package_name)
+    package.__path__ = [str(_tooling)]
+    sys.modules[_package_name] = package
+collector = importlib.import_module(_package_name + ".collect")
+sanitize_build_log = collector.sanitize_build_log
 
 
 class SanitizedLogTests(unittest.TestCase):
@@ -52,6 +66,40 @@ class SanitizedLogTests(unittest.TestCase):
             with self.subTest(path=path), self.assertRaisesRegex(
                     ValueError, "residual absolute"):
                 sanitize_build_log(f"Change Dir: '{path}'", self.ROOTS)
+
+    def test_mocked_collection_saves_raw_digests_with_exact_bytes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            log = root / "release.log"
+            log.write_bytes(b"Clean Release log\n")
+            out = root / "saved"
+            commit = "a" * 40
+            stdout = b'{"purpose":"test","synthetic":true}\n'
+            stderr = b"synthetic diagnostic\r\n"
+            evidence = {"source_commit": commit,
+                        "sanitized_build_log_sha256": hashlib.sha256(
+                            log.read_bytes()).hexdigest()}
+            argv = ["collect.py", "measure", "--exe", str(root / "build/Release/csl_opt07_measure.exe"),
+                    "--source-root", str(root), "--source-commit", commit,
+                    "--build-log", str(log), "--concurrent-work-file", str(log),
+                    "--out", str(out)]
+            with patch.object(sys, "argv", argv), \
+                 patch.object(collector, "preflight", return_value=evidence), \
+                 patch.object(collector.subprocess, "run", return_value=
+                              subprocess.CompletedProcess([], 0, stdout, stderr)), \
+                 patch.object(collector, "command", side_effect=lambda *args:
+                              commit if args[-2:] == ("rev-parse", "HEAD") else ""), \
+                 patch.object(collector, "validate_stream", return_value=
+                              {"purpose": "measurement", "fixtures": 3,
+                               "batches": 24, "calls": 2400}), \
+                 contextlib.redirect_stdout(io.StringIO()):
+                collector.main()
+            saved = json.loads((out / "collection.json").read_text(encoding="utf-8"))
+            self.assertEqual(saved["purpose"], "measurement")
+            self.assertEqual(saved["raw_stdout_sha256"], hashlib.sha256(stdout).hexdigest())
+            self.assertEqual(saved["raw_stderr_sha256"], hashlib.sha256(stderr).hexdigest())
+            self.assertEqual((out / "raw-stdout.jsonl").read_bytes(), stdout)
+            self.assertEqual((out / "raw-stderr.txt").read_bytes(), stderr)
 
 
 if __name__ == "__main__":
