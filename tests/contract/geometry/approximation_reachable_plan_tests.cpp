@@ -108,15 +108,15 @@ TEST_CASE("admitted inner stage point and verified original trajectory yield its
     CHECK(std::holds_alternative<EnclosedApproximation>(*report.approximation));
 }
 
-TEST_CASE("stage and ordered state-coordinate mismatches cannot yield an achievable value") {
+TEST_CASE("selected stage state membership and ordered coordinate map gate the achievable value") {
     const auto problem=scalar_problem();
     const auto reference=interval("stage1",2,4), inner=singleton("inner",3);
     const auto request=query(problem,reference,inner);
     auto stage=binding(problem,reference);
     stage.stage={0};
-    const auto wrong_stage=check(problem,stage,request,inner,witness(problem));
-    CHECK_FALSE(wrong_stage.numerical_achievable_value);
-    CHECK(wrong_stage.membership==verification::CheckStatus::violation);
+    const auto stage_zero_state_outside_inner=check(problem,stage,request,inner,witness(problem));
+    CHECK_FALSE(stage_zero_state_outside_inner.numerical_achievable_value);
+    CHECK(stage_zero_state_outside_inner.membership==verification::CheckStatus::violation);
     stage=binding(problem,reference);
     stage.state_coordinates={1};
     const auto wrong_map=check(problem,stage,request,inner,witness(problem));

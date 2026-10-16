@@ -79,11 +79,16 @@ remain separate.
 declares a `StageSetReference` with the resolved problem identity, a stage in
 `[0,T]`, the exact input set handle, ordered set-to-state coordinate indices,
 and the reference ID used as the approximation request's ideal output. The
-check requires the complete resolved identity and request identity to match,
-the native set handle to be the same immutable payload and envelope, and the
-coordinate indices to be the full original state order `0,...,n-1`. No
-projection or relabelling is inferred. The resolved identity digest already
-includes the initial information, external-input and information-pattern
+check matches the stage reference's resolved problem ID to the original
+`ResolvedProblem` and the approximation request's problem ID, and matches its
+reference ID to the request's ideal-output ID. It also requires the native
+input set handle to be the same immutable payload and envelope, and the
+coordinate indices to be the full original state order `0,...,n-1`. It does
+not independently derive a `RequestId` from the declared stage. Registered
+approximation admission separately checks provider evidence against the full
+`GeometryRequestIdentity`, including `RequestId`. No projection or relabelling
+is inferred. The resolved identity digest already includes the initial
+information, external-input and information-pattern
 semantics; the currently supported profile is nominal open-loop, a known
 initial point, and absent or known external sequence. Uncertain, adversarial,
 feedback and partial-coordinate references are unsupported here.
