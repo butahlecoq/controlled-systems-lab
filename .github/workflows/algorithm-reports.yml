@@ -29,6 +29,8 @@ jobs:
         env:
           MPLCONFIGDIR: ${{ github.workspace }}/build/report-mpl-config
         run: python -m unittest discover -s tests/reporting -p 'test_*.py'
+      - name: Validate frozen issue 3 saved measurement and projections
+        run: python scripts/reports/issue3/render_saved.py --bundle reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f --check
       - name: Check reviewed catalogue and stage only allowlisted files
         id: catalog
         shell: bash

@@ -10,6 +10,33 @@ endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
 
+if(CSL_BUILD_ISSUE3_REPORT)
+include(cmake/JsonDependencies.cmake)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue3/finite_catalogue_driver.cpp
+    ISSUE3_FIXTURE_SHA256)
+execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ISSUE3_HARNESS_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+add_executable(csl_issue3_finite_action_report benchmarks/reporting/issue3/finite_catalogue_driver.cpp)
+target_link_libraries(csl_issue3_finite_action_report PRIVATE CSL::finite_action_minimax CSL::resolved_core)
+target_include_directories(csl_issue3_finite_action_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_issue3_finite_action_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_issue3_finite_action_report PRIVATE
+    $<$<CONFIG:Release>:NDEBUG> CSL_ISSUE3_HARNESS_COMMIT="${ISSUE3_HARNESS_COMMIT}"
+    CSL_ISSUE3_FIXTURE_SHA256="${ISSUE3_FIXTURE_SHA256}")
+if(MSVC)
+target_compile_options(csl_issue3_finite_action_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_issue3_finite_action_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME issue3_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/issue3/check_smoke.py
+  $<TARGET_FILE:csl_issue3_finite_action_report>)
+set_tests_properties(issue3_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_FINITE_FEEDBACK_REPORT)
 add_executable(csl_finite_feedback_report benchmarks/reporting/finite_feedback/driver.cpp)
 target_link_libraries(csl_finite_feedback_report PRIVATE CSL::finite_feedback_port)
