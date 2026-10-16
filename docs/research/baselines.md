@@ -118,7 +118,7 @@ The disturbance box is |w1|<=0.1+0.1t and |w2|<=0.1+0.3t. The stated criterion i
 
 Reported optimal plan (0.6,0.6,-0.3,0), worst-case cost 67.12. Reported nonlinear state (1200.139,-2.294,450.406,-16.254), cost 14.048 (table rounded 14.05). Reported worst-case linear state (1201.14,-27.29,452.61,-61.25), cost 67.12. Historical runtime 37 s on MATLAB R2014a, i7-3770 3.4 GHz, 8 GB RAM; a GT 730 is listed, but GPU execution is not established by its presence.
 
-**Open numerical inconsistency:** the stated Euclidean norm at the displayed nonlinear state is approximately 16.42, not 14.048. Resolve source coordinates, criterion implementation, or transcription; retain the reported value.
+**Open numerical inconsistency:** the stated Euclidean norm at the displayed nonlinear state is approximately 16.42, not 14.048. Resolve source coordinates, criterion implementation, or transcription; retain the reported value. The [exact displayed-data audit](b08-displayed-exact-audit.md) independently confirms the finite linear reference's three tied plans and its separate cost disagreement under the printed rational inputs.
 
 ## B09: minimax adaptive experiment
 
@@ -154,6 +154,8 @@ Synthetic scaling extensions should vary dimension, horizon, action count, distu
 
 ## Independent partial check completed
 
-[reference-b08.json](reference-b08.json) and [reference_b08.py](tools/reference_b08.py) record an exhaustive floating-point check of the displayed B08 discrete model: all 625 plans and 256 disturbance-box corner images per plan. Computed minimum: 67.150601101407, compared with reported 67.12. The published plan has the same computed objective within numerical tolerance; three plans tie at absolute tolerance 1e-8. Thus the source's reported unique plan is not unique for the displayed unconstrained rounded discrete model. This does not resolve uniqueness for any unreported constraints or original unrounded data.
+[reference-b08.json](reference-b08.json) and [reference_b08.py](tools/reference_b08.py) record an exhaustive floating-point check of the displayed B08 discrete model: all 625 plans and 256 disturbance-box corner images per plan. Computed minimum: 67.150601101407, compared with reported 67.12. The published plan has the same computed objective within numerical tolerance; three plans tie at absolute tolerance 1e-8. This does not resolve uniqueness for any unreported constraints or original unrounded data.
+
+The subsequent [exact rational audit](b08-displayed-exact-audit.md) proves that all three plans have identical squared worst-case value `112730080707/25000000` for the printed decimals, with no tie tolerance. This exact statement is confined to the displayed model; the source names one plan and does not establish uniqueness for an unrecovered generating revision.
 
 The independently evaluated L04 nonlinear displayed-state norm is 16.42069149; the L13 original adaptive displayed-state norm is 20.79278721. These are arithmetic checks of printed coordinates, not nonlinear-plant reproductions. No timing speedup or validated numerical enclosure is claimed.
