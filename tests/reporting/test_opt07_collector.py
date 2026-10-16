@@ -40,8 +40,11 @@ class SanitizedLogTests(unittest.TestCase):
             self.assertNotIn(private.lower(), clean.lower())
 
     def test_unknown_absolute_path_fails_closed(self):
-        with self.assertRaisesRegex(ValueError, "residual absolute"):
-            sanitize_build_log("unexpected E:/private/other/file.cpp", self.ROOTS)
+        for raw in ("unexpected E:/private/other/file.cpp",
+                    "Path:C:/private/file.cpp"):
+            with self.subTest(raw=raw), self.assertRaisesRegex(
+                    ValueError, "residual absolute"):
+                sanitize_build_log(raw, self.ROOTS)
 
     def test_unc_paths_with_forward_or_mixed_separators_fail_closed(self):
         for path in ("//private-host/share/build.log",

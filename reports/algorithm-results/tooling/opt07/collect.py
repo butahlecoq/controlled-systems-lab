@@ -86,8 +86,10 @@ def sanitize_build_log(raw: str, roots: dict[str, Path]) -> str:
         path_pattern = r"[\\/]".join(re.escape(part) for part in parts)
         clean = re.sub(path_pattern + r"(?=$|[\\/]|[^A-Za-z0-9_.-])",
                        lambda match: label, clean, flags=re.IGNORECASE)
-    if re.search(r'''(?<![A-Za-z0-9_:$])(?:[A-Za-z]:[\\/]|[\\/]{2}[^\\/\s"']+[\\/][^\\/\s"']+)''',
-                 clean):
+    drive = re.search(r"(?<![A-Za-z0-9_$])[A-Za-z]:[\\/]", clean)
+    unc = re.search(r'''(?<![A-Za-z0-9_:$])[\\/]{2}[^\\/\s"']+[\\/][^\\/\s"']+''',
+                    clean)
+    if drive or unc:
         raise ValueError("residual absolute path in sanitized build log")
     return clean
 
