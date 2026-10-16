@@ -49,6 +49,10 @@ python scripts/reports/geo06_report.py check `
 
 The final report directory under `reports/algorithm-results/<report-id>/`
 contains `records.json`, `trials.csv`, `index.html`, and `manifest.json`.
+If the driver exits unsuccessfully, times out, emits stderr, or fails the
+saved-row oracle, the collector instead writes `raw-driver-output.csv`,
+`process-stderr.txt`, and `collection-status.json` to the requested output
+directory, marked nonpublishable, before exiting unsuccessfully.
 The output is regenerated and validated solely from saved records. A later
 artifact commit differs from the source and harness identities. Publication
 requires registration with the Pages catalogue and a live URL check; a local

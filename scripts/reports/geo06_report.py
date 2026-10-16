@@ -72,6 +72,39 @@ def validate_rows(rows, repetitions, warmups, calls):
             raise ValueError("QuickHull output or work count differs from analytic fixture")
 
 
+def preserve_failed_run(out, stdout, stderr, exit_code, reason):
+    """Keep rejected process evidence outside any publishable report bundle."""
+    out.mkdir(parents=True)
+    (out / "raw-driver-output.csv").write_text(stdout, encoding="utf-8")
+    (out / "process-stderr.txt").write_text(stderr, encoding="utf-8")
+    (out / "collection-status.json").write_text(json.dumps({
+        "schema": "csl.geo06-rejected-collection/1", "publishable": False,
+        "process_exit_code": exit_code, "reason": reason,
+        "stdout_sha256": hashlib.sha256(stdout.encode()).hexdigest(),
+        "stderr_sha256": hashlib.sha256(stderr.encode()).hexdigest(),
+    }, indent=2) + "\n", encoding="utf-8")
+
+
+def execute_driver(command, out, repetitions, calls):
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=300, check=False)
+    except subprocess.TimeoutExpired as error:
+        stdout = error.stdout.decode(errors="replace") if isinstance(error.stdout, bytes) else error.stdout or ""
+        stderr = error.stderr.decode(errors="replace") if isinstance(error.stderr, bytes) else error.stderr or ""
+        preserve_failed_run(out, stdout, stderr, None, "driver timed out")
+        raise ValueError("driver timed out; raw output retained") from error
+    if result.returncode or result.stderr:
+        preserve_failed_run(out, result.stdout, result.stderr, result.returncode, "driver failed or wrote stderr")
+        raise ValueError("driver failed; raw output retained")
+    try:
+        rows = rows_from_text(result.stdout)
+        validate_rows(rows, repetitions, 1, calls)
+    except ValueError as error:
+        preserve_failed_run(out, result.stdout, result.stderr, result.returncode, str(error))
+        raise ValueError("driver output rejected; raw output retained") from error
+    return result, rows
+
+
 def summarize(rows):
     result = {}
     for name in ORDER:
@@ -165,12 +198,8 @@ def collect(args):
                            capture_output=True, text=True, timeout=300, check=False)
     if build.returncode:
         raise ValueError("final Release build failed: " + build.stderr[-500:])
-    result = subprocess.run([str(exe), "--measure", str(args.repetitions), "1", str(args.calls)],
-                            capture_output=True, text=True, timeout=300, check=False)
-    rows = rows_from_text(result.stdout)
-    validate_rows(rows, args.repetitions, 1, args.calls)
-    if result.returncode or result.stderr:
-        raise ValueError("driver failed; preserve stdout/stderr separately before retrying")
+    result, rows = execute_driver([str(exe), "--measure", str(args.repetitions), "1", str(args.calls)],
+                                  args.out, args.repetitions, args.calls)
     note = args.concurrent_work.read_text(encoding="utf-8")
     compiler_files = list((build_dir / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
     if len(compiler_files) != 1:
