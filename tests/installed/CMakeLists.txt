@@ -123,6 +123,13 @@ add_test(NAME installed_generators_client COMMAND installed_generators_client)
 set_tests_properties(installed_generators_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed generators client: retained factor identity and affine literal passed")
 
+add_executable(installed_generator_adapter_client generator_adapter_client.cpp)
+target_link_libraries(installed_generator_adapter_client PRIVATE CSL::generator_adapter)
+set_target_properties(installed_generator_adapter_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_generator_adapter_client COMMAND installed_generator_adapter_client)
+set_tests_properties(installed_generator_adapter_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed generator adapter client: prepared box image and literal V conversion passed")
+
 add_executable(installed_objectives_client objectives_client.cpp)
 target_link_libraries(installed_objectives_client PRIVATE CSL::objectives)
 set_target_properties(installed_objectives_client PROPERTIES CXX_EXTENSIONS OFF)

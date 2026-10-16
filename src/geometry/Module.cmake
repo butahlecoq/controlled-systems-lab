@@ -21,6 +21,9 @@ target_link_libraries(csl_affine_sum PUBLIC CSL::sets CSL::hull CSL::registry)
 csl_add_library(csl_geometry_generators STATIC src/geometry/generators/generator_sets.cpp)
 target_link_libraries(csl_geometry_generators PUBLIC CSL::sets)
 
+csl_add_library(csl_generator_adapter STATIC src/geometry/generators/adapter.cpp)
+target_link_libraries(csl_generator_adapter PUBLIC CSL::geometry_generators CSL::registry)
+
 csl_add_library(csl_approximation STATIC src/geometry/approximation/policy.cpp)
 target_link_libraries(csl_approximation PUBLIC CSL::sets CSL::registry)
 
