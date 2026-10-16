@@ -20,7 +20,7 @@ constexpr std::string_view schema="csl.ext04-replay-trial/1";
 constexpr std::string_view timed_scope=
     "batch of fresh public LinearSystem snapshots and replay_observed_policy calls, "
     "estimator/controller callbacks, full literal state/history/release/input oracle checks, "
-    "and per-call result JSON construction; excludes process startup, JSONL serialization, "
+    "and per-call result JSON construction and assignment/replacement; excludes process startup, JSONL serialization, "
     "Python saved-row validation, persistence and rendering";
 constexpr std::array<std::string_view,3> fixtures{
     "partial_noisy_delayed","post_feedthrough","no_channel"};
@@ -91,19 +91,47 @@ json expected(std::size_t fixture) {
         {"measurement_events",{"before(0)","after(0)"}},
         {"release_events",{"before(0)","before(1)"}},
         {"actions",{{1},{7}}},{"estimates",{{4,0},{7,0}}},
-        {"available_values",{{{4}},{{4},{7}}}},{"available_counts",{1,2}}};
+        {"available_values",{{{4}},{{4},{7}}}},{"available_counts",{1,2}},
+        {"decision_stages",{0,1}},
+        {"released",{
+            {{"released_index",0},{"channel",0},{"sample",0},{"measured_at","before(0)"},
+             {"available_at","before(0)"},{"released_at","before(0)"},{"values",{4}}},
+            {{"released_index",1},{"channel",1},{"sample",0},{"measured_at","after(0)"},
+             {"available_at","before(1)"},{"released_at","before(1)"},{"values",{7}}}}},
+        {"available",{
+            {{{"released_index",0},{"channel",0},{"sample",0},{"measured_at","before(0)"},
+              {"available_at","before(0)"},{"released_at","before(0)"},{"values",{4}}}},
+            {{{"released_index",0},{"channel",0},{"sample",0},{"measured_at","before(0)"},
+              {"available_at","before(0)"},{"released_at","before(0)"},{"values",{4}}},
+             {{"released_index",1},{"channel",1},{"sample",0},{"measured_at","after(0)"},
+              {"available_at","before(1)"},{"released_at","before(1)"},{"values",{7}}}}}}};
     if (fixture==1) return {
         {"status","passed"},{"states",{{2},{3},{10}}},
         {"observed_values",{{7}}},{"observed_channels",{0}},
         {"measurement_events",{"after(0)"}},{"release_events",{"after(0)"}},
         {"actions",{{1},{7}}},{"estimates",{{0},{7}}},
         {"available_values",{json::array(),json::array({json::array({7})})}},
-        {"available_counts",{0,1}}};
+        {"available_counts",{0,1}},{"decision_stages",{0,1}},
+        {"released",{{{"released_index",0},{"channel",0},{"sample",0},{"measured_at","after(0)"},
+                      {"available_at","after(0)"},{"released_at","after(0)"},{"values",{7}}}}},
+        {"available",{json::array(),
+                      {{{"released_index",0},{"channel",0},{"sample",0},{"measured_at","after(0)"},
+                        {"available_at","after(0)"},{"released_at","after(0)"},{"values",{7}}}}}}};
     return {{"status","passed"},{"states",{{5},{7}}},
         {"observed_values",json::array()},{"observed_channels",json::array()},
         {"measurement_events",json::array()},{"release_events",json::array()},
         {"actions",{{2}}},{"estimates",{{0}}},
-        {"available_values",{json::array()}},{"available_counts",{0}}};
+        {"available_values",{json::array()}},{"available_counts",{0}},
+        {"decision_stages",{0}},{"released",json::array()},
+        {"available",{json::array()}}};
+}
+
+json identity(const ReleasedObservation& item,std::size_t released_index) {
+    return {{"released_index",released_index},{"channel",item.channel.value},
+        {"sample",item.sample.value},
+        {"measured_at",event(item.value.metadata.sample.measured_at)},
+        {"available_at",event(item.value.metadata.sample.available_at)},
+        {"released_at",event(item.released_at)},{"values",item.value.values}};
 }
 
 json observed(const ReplayRecord& record) {
@@ -111,8 +139,12 @@ json observed(const ReplayRecord& record) {
         {"observed_values",json::array()},{"observed_channels",json::array()},
         {"measurement_events",json::array()},{"release_events",json::array()},
         {"actions",json::array()},{"estimates",json::array()},
-        {"available_values",json::array()},{"available_counts",json::array()}};
-    for (const auto& item:record.released) {
+        {"available_values",json::array()},{"available_counts",json::array()},
+        {"decision_stages",json::array()},{"released",json::array()},
+        {"available",json::array()}};
+    for (std::size_t index=0;index<record.released.size();++index) {
+        const auto& item=record.released[index];
+        value["released"].push_back(identity(item,index));
         value["observed_values"].push_back(item.value.values);
         value["observed_channels"].push_back(item.channel.value);
         value["measurement_events"].push_back(event(item.value.metadata.sample.measured_at));
@@ -121,12 +153,26 @@ json observed(const ReplayRecord& record) {
             "release event differs from validated metadata");
     }
     for (const auto& decision:record.decisions) {
+        value["decision_stages"].push_back(decision.stage.value);
         value["actions"].push_back(decision.action);
         value["estimates"].push_back(decision.estimate);
         value["available_counts"].push_back(decision.available.size());
         json available=json::array();
-        for (const auto& item:decision.available) available.push_back(item.value.values);
+        json available_events=json::array();
+        for (const auto& item:decision.available) {
+            available.push_back(item.value.values);
+            std::size_t index=0;
+            while (index<record.released.size() &&
+                !(record.released[index].channel.value==item.channel.value &&
+                  record.released[index].sample.value==item.sample.value)) ++index;
+            require(index<record.released.size(),"decision history has unknown observation");
+            auto event_identity=identity(item,index);
+            require(event_identity==value["released"][index],
+                "decision history differs from released observation");
+            available_events.push_back(std::move(event_identity));
+        }
         value["available_values"].push_back(std::move(available));
+        value["available"].push_back(std::move(available_events));
     }
     return value;
 }

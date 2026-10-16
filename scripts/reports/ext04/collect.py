@@ -19,7 +19,7 @@ TRIAL_SCHEMA = "csl.ext04-replay-trial/1"
 RECORD_SCHEMA = "csl.ext04-replay-records/1"
 INTERVAL = ("batch of fresh public LinearSystem snapshots and replay_observed_policy calls, "
             "estimator/controller callbacks, full literal state/history/release/input oracle checks, "
-            "and per-call result JSON construction; excludes process startup, JSONL serialization, "
+            "and per-call result JSON construction and assignment/replacement; excludes process startup, JSONL serialization, "
             "Python saved-row validation, persistence and rendering")
 EXPECTED = {
     "partial_noisy_delayed": {
@@ -28,19 +28,40 @@ EXPECTED = {
         "measurement_events": ["before(0)", "after(0)"],
         "release_events": ["before(0)", "before(1)"],
         "actions": [[1.0], [7.0]], "estimates": [[4.0, 0.0], [7.0, 0.0]],
-        "available_values": [[[4.0]], [[4.0], [7.0]]], "available_counts": [1, 2]},
+        "available_values": [[[4.0]], [[4.0], [7.0]]], "available_counts": [1, 2],
+        "decision_stages": [0, 1],
+        "released": [
+            {"released_index": 0, "channel": 0, "sample": 0, "measured_at": "before(0)",
+             "available_at": "before(0)", "released_at": "before(0)", "values": [4.0]},
+            {"released_index": 1, "channel": 1, "sample": 0, "measured_at": "after(0)",
+             "available_at": "before(1)", "released_at": "before(1)", "values": [7.0]}],
+        "available": [
+            [{"released_index": 0, "channel": 0, "sample": 0, "measured_at": "before(0)",
+              "available_at": "before(0)", "released_at": "before(0)", "values": [4.0]}],
+            [{"released_index": 0, "channel": 0, "sample": 0, "measured_at": "before(0)",
+              "available_at": "before(0)", "released_at": "before(0)", "values": [4.0]},
+             {"released_index": 1, "channel": 1, "sample": 0, "measured_at": "after(0)",
+              "available_at": "before(1)", "released_at": "before(1)", "values": [7.0]}]]},
     "post_feedthrough": {
         "status": "passed", "states": [[2.0], [3.0], [10.0]],
         "observed_values": [[7.0]], "observed_channels": [0],
         "measurement_events": ["after(0)"], "release_events": ["after(0)"],
         "actions": [[1.0], [7.0]], "estimates": [[0.0], [7.0]],
-        "available_values": [[], [[7.0]]], "available_counts": [0, 1]},
+        "available_values": [[], [[7.0]]], "available_counts": [0, 1],
+        "decision_stages": [0, 1],
+        "released": [{"released_index": 0, "channel": 0, "sample": 0,
+                      "measured_at": "after(0)", "available_at": "after(0)",
+                      "released_at": "after(0)", "values": [7.0]}],
+        "available": [[], [{"released_index": 0, "channel": 0, "sample": 0,
+                            "measured_at": "after(0)", "available_at": "after(0)",
+                            "released_at": "after(0)", "values": [7.0]}]]},
     "no_channel": {
         "status": "passed", "states": [[5.0], [7.0]],
         "observed_values": [], "observed_channels": [],
         "measurement_events": [], "release_events": [],
         "actions": [[2.0]], "estimates": [[0.0]],
-        "available_values": [[]], "available_counts": [0]},
+        "available_values": [[]], "available_counts": [0],
+        "decision_stages": [0], "released": [], "available": [[]]},
 }
 INPUTS = {
     "partial_noisy_delayed": {
@@ -183,6 +204,15 @@ def save_capture(out: Path, stdout: bytes, stderr: bytes, code: int | None,
         "stdout_sha256": sha(stdout), "stderr_sha256": sha(stderr)}))
 
 
+def save_build_evidence(out: Path, cache: bytes, compiler: bytes,
+                        build_stdout: bytes, build_stderr: bytes) -> None:
+    for name, payload in (("CMakeCache.raw.txt", cache),
+                          ("CMakeCXXCompiler.raw.cmake", compiler),
+                          ("build.stdout.log", build_stdout),
+                          ("build.stderr.log", build_stderr)):
+        (out / name).write_bytes(payload)
+
+
 def reject(out: Path, reason: str) -> None:
     (out / "collection-status.json").write_bytes(json_bytes({
         "schema": "csl.ext04-collection-status/1", "publishable": False,
@@ -220,19 +250,58 @@ def release_project(path: Path) -> dict:
               if item.get("Condition") == "'$(Configuration)|$(Platform)'=='Release|x64'"]
     if len(groups) != 1:
         raise ValueError("unique x64 Release graph unavailable: " + path.name)
+    configurations = [item for item in root.findall(ns + "PropertyGroup")
+                      if item.get("Condition") == "'$(Configuration)|$(Platform)'=='Release|x64'"
+                      and item.get("Label") == "Configuration"]
+    if len(configurations) != 1:
+        raise ValueError("unique x64 Release toolset unavailable: " + path.name)
     def fields(name):
         node = groups[0].find(ns + name)
         return {child.tag.removeprefix(ns): (child.text or "") for child in node} if node is not None else {}
-    return {"compile": fields("ClCompile"), "link": fields("Link"),
+    configuration = {child.tag.removeprefix(ns): (child.text or "") for child in configurations[0]}
+    return {"configuration": configuration, "compile": fields("ClCompile"), "link": fields("Link"),
             "archive": fields("Lib"), "project_sha256": sha(path.read_bytes())}
 
 
-def compiler_version(raw: bytes) -> str:
-    matches = [match.group(1) for line in raw.decode("utf-8").splitlines()
-               if (match := re.fullmatch(r'set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)', line))]
-    if len(matches) != 1:
-        raise ValueError("unique compiler version evidence unavailable")
-    return matches[0]
+def compiler_identity(raw: bytes, settings: dict) -> dict[str, str]:
+    lines = raw.decode("utf-8").splitlines()
+    # CMake emits quoted paths/identity values and may emit the architecture bare.
+    def field(name: str) -> str:
+        matches = [match for line in lines
+                   if (match := re.fullmatch(r'set\(' + re.escape(name) +
+                                             r' (?:"([^"]+)"|([^ )]+))\)', line))]
+        if len(matches) != 1:
+            raise ValueError("unique compiler evidence unavailable: " + name)
+        return matches[0].group(1) or matches[0].group(2)
+    compiler_id = field("CMAKE_CXX_COMPILER_ID")
+    version = field("CMAKE_CXX_COMPILER_VERSION")
+    frontend = field("CMAKE_CXX_COMPILER_FRONTEND_VARIANT")
+    architecture = field("CMAKE_CXX_COMPILER_ARCHITECTURE_ID")
+    if (compiler_id != "MSVC" or frontend != "MSVC" or architecture != "x64" or
+            not re.fullmatch(r"19\.\d+\.\d+(?:\.\d+)?", version)):
+        raise ValueError("compiler identity is not x64 MSVC")
+    if settings.get("CMAKE_GENERATOR_TOOLSET") not in ("", "v143"):
+        raise ValueError("unreviewed generator toolset")
+    instance_text = settings.get("CMAKE_GENERATOR_INSTANCE")
+    if not instance_text:
+        raise ValueError("Visual Studio generator instance unavailable")
+    try:
+        instance = Path(instance_text).resolve(strict=True)
+        compiler = Path(field("CMAKE_CXX_COMPILER")).resolve(strict=True)
+    except OSError as error:
+        raise ValueError("configured MSVC compiler path unavailable") from error
+    try:
+        relative = compiler.relative_to(instance)
+    except ValueError as error:
+        raise ValueError("compiler is outside generator instance") from error
+    parts = [part.casefold() for part in relative.parts]
+    if (len(parts) != 8 or parts[:3] != ["vc", "tools", "msvc"] or
+            not re.fullmatch(r"14\.\d+\.\d+", parts[3]) or
+            parts[4:] != ["bin", "hostx64", "x64", "cl.exe"]):
+        raise ValueError("compiler path is not the x64 MSVC toolset")
+    return {"id": compiler_id, "version": version, "frontend": frontend,
+            "architecture": architecture, "toolset": "v143", "path": compiler.as_posix(),
+            "generator_instance": instance.as_posix(), "exe_sha256": sha(compiler.read_bytes())}
 
 
 def admit_release(settings: dict, targets: dict, build: Path) -> None:
@@ -244,9 +313,13 @@ def admit_release(settings: dict, targets: dict, build: Path) -> None:
             settings.get("CSL_ENABLE_QHULL") != "OFF" or
             settings.get("BUILD_TESTING") != "OFF" or
             settings.get("CMAKE_GENERATOR") != "Visual Studio 17 2022" or
-            settings.get("CMAKE_GENERATOR_PLATFORM") != "x64"):
+            settings.get("CMAKE_GENERATOR_PLATFORM") != "x64" or
+            settings.get("CMAKE_GENERATOR_TOOLSET") not in ("", "v143") or
+            not settings.get("CMAKE_GENERATOR_INSTANCE")):
         raise ValueError("configured report profile differs")
     for name in ("driver", "controller_library"):
+        if targets[name]["configuration"].get("PlatformToolset") != "v143":
+            raise ValueError("unreviewed Release platform toolset: " + name)
         compile_fields = targets[name]["compile"]
         if (compile_fields.get("Optimization") != "MaxSpeed" or
                 compile_fields.get("InlineFunctionExpansion") != "AnySuitable" or
@@ -306,9 +379,16 @@ def collect(args) -> str:
     (build / "ext04-final-build.stderr.log").write_bytes(built.stderr)
     if built.returncode:
         raise ValueError("fresh Release build failed; exact logs retained")
+    if (build / "CMakeCache.txt").read_bytes() != cache_raw:
+        raise ValueError("CMake cache changed during fresh build")
     targets = {"driver": release_project(build / "csl_ext04_observed_replay_report.vcxproj"),
                "controller_library": release_project(build / "csl_controllers.vcxproj")}
     admit_release(settings, targets, build)
+    compiler_files = list((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
+    if len(compiler_files) != 1:
+        raise ValueError("configured compiler evidence unavailable")
+    compiler_raw = compiler_files[0].read_bytes()
+    compiler = compiler_identity(compiler_raw, settings)
     described = subprocess.run([str(exe), "--describe"], capture_output=True, timeout=30)
     (build / "ext04-driver-description.jsonl").write_bytes(described.stdout)
     (build / "ext04-driver-description.stderr").write_bytes(described.stderr)
@@ -324,6 +404,7 @@ def collect(args) -> str:
     save_capture(out, stdout, stderr, code, command, timed_out=timed_out)
     (out / "driver-description.jsonl").write_bytes(described.stdout)
     (out / "fixture-inputs.json").write_bytes(input_bytes)
+    save_build_evidence(out, cache_raw, compiler_raw, built.stdout, built.stderr)
     try:
         if code or stderr or timed_out:
             raise ValueError("driver failed, timed out, or wrote stderr")
@@ -331,20 +412,18 @@ def collect(args) -> str:
         if (git(root, "rev-parse", "HEAD") != args.harness_commit or
                 git(root, "status", "--porcelain=v1", "--untracked-files=all")):
             raise ValueError("source changed during collection")
-        compiler_files = list((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
-        if len(compiler_files) != 1:
-            raise ValueError("configured compiler evidence unavailable")
-        compiler_raw = compiler_files[0].read_bytes()
+        if ((build / "CMakeCache.txt").read_bytes() != cache_raw or
+                compiler_files[0].read_bytes() != compiler_raw or
+                sha(Path(compiler["path"]).read_bytes()) != compiler["exe_sha256"]):
+            raise ValueError("build evidence changed during collection")
         provenance = {"schema": "csl.ext04-build-provenance/1", "source_commit": SOURCE,
                       "harness_commit": args.harness_commit, "configuration": "Release",
                       "settings": {name: settings[name] for name in RELEASE_FLAGS},
-                      "targets": targets, "compiler_version": compiler_version(compiler_raw),
+                      "targets": targets, "compiler": compiler,
                       "compiler_file_sha256": sha(compiler_raw), "cache_sha256": sha(cache_raw),
                       "exe_sha256": sha(exe.read_bytes()),
                       "build_stdout_sha256": sha(built.stdout), "build_stderr_sha256": sha(built.stderr)}
         (out / "build-provenance.json").write_bytes(json_bytes(provenance))
-        (out / "build.stdout.log").write_bytes(built.stdout)
-        (out / "build.stderr.log").write_bytes(built.stderr)
         record = {"schema": RECORD_SCHEMA, "source_commit": SOURCE,
                   "harness_commit": args.harness_commit,
                   "source_tree": git(root, "rev-parse", SOURCE + "^{tree}"),

@@ -28,7 +28,8 @@ completeness, or validated rounding enclosure.
 
 The measured interval is one batch of fresh public model snapshots and replay
 calls, callback execution, full literal comparisons and per-call JSON result
-construction. It excludes process startup, JSONL serialization, Python
+construction and assignment/replacement of the prior result. It excludes
+process startup, JSONL serialization, Python
 validation, persistence and rendering. One warmup per fixture is excluded;
 at least seven measured repetitions alternate fixture order. Successful
 batches must have at least 20 ms of measured work. Results are descriptive
@@ -59,8 +60,9 @@ Use a clean checkout of the exact reviewed harness commit. The collector
 rejects other source deltas, dirty source, stale paths, non-Release flags,
 compiler overrides, a missing concurrent-work note, incomplete/failing JSONL,
 or a batch shorter than 20 ms. It performs a fresh Release rebuild before
-launching the driver. The exact build graph, compiler version, source/harness
-commits, driver and executable hashes, full fixture hashes, raw process bytes,
+launching the driver. The exact build graph, compiler ID/version/toolset/path
+and binary hash, raw CMake cache and compiler evidence, source/harness commits,
+driver and executable hashes, full fixture hashes, raw process bytes,
 OS/host note and every attempted row are saved. A rejected attempt preserves
 raw stdout/stderr bytes and a nonpublishable status; it cannot be repaired into
 an accepted collection by selecting only successful rows.
