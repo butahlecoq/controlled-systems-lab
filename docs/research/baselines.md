@@ -120,6 +120,8 @@ Reported optimal plan (0.6,0.6,-0.3,0), worst-case cost 67.12. Reported nonlinea
 
 **Open numerical inconsistency:** the stated Euclidean norm at the displayed nonlinear state is approximately 16.42, not 14.048. Resolve source coordinates, criterion implementation, or transcription; retain the reported value. The [exact displayed-data audit](b08-displayed-exact-audit.md) independently confirms the finite linear reference's three tied plans and its separate cost disagreement under the printed rational inputs.
 
+The [printed terminal-row rounding audit](b08-reported-rounding-audit.md) checks both nonlinear row precisions with exact rational intervals and independently tests the linear Table 2 row against the printed plan's 256 disturbance corners. It keeps the historical values above unchanged.
+
 ## B09: minimax adaptive experiment
 
 L13, Table 2, PDF p. 14, DOI 10.18287/2541-7533-2019-18-4-129-145:
