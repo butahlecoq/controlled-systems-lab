@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 import datetime as dt
 import hashlib
@@ -107,7 +108,7 @@ def validate_rows(rows: list[dict], repetitions: int) -> None:
     if not isinstance(repetitions, int) or repetitions < 7 or len(rows) != repetitions + 1:
         raise ValueError("expected one warmup and at least seven measured trials")
     for row, (index, warmup) in zip(rows, expected_identities(repetitions)):
-        if set(row) != set(FIELDS) | {"stdout", "stderr"}:
+        if set(row) != set(FIELDS) | {"stdout_base64", "stderr_base64"}:
             raise ValueError("trial fields differ")
         if row["repetition"] != index or row["warmup"] is not warmup:
             raise ValueError("trial order or identity differs")
@@ -115,10 +116,15 @@ def validate_rows(rows: list[dict], repetitions: int) -> None:
                 not isinstance(row["timed_out"], bool) or
                 not isinstance(row["work_observed"], bool)):
             raise ValueError("invalid duration or observation")
-        if sha(row["stdout"].encode("utf-8")) != row["stdout_sha256"] or sha(row["stderr"].encode("utf-8")) != row["stderr_sha256"]:
+        try:
+            stdout = base64.b64decode(row["stdout_base64"], validate=True)
+            stderr = base64.b64decode(row["stderr_base64"], validate=True)
+        except (ValueError, TypeError) as error:
+            raise ValueError("invalid raw process output encoding") from error
+        if sha(stdout) != row["stdout_sha256"] or sha(stderr) != row["stderr_sha256"]:
             raise ValueError("raw process output hash differs")
         passed = (row["exit_code"] == 0 and not row["timed_out"] and
-                  row["stdout"].strip() == EXPECTED_OUTPUT and row["stderr"] == "")
+                  stdout.strip() == EXPECTED_OUTPUT.encode("ascii") and stderr == b"")
         if row["status"] != ("passed" if passed else "failed") or row["work_observed"] != passed:
             raise ValueError("process status or work evidence differs")
 
@@ -198,24 +204,40 @@ def save_bytes(path: Path, data: bytes) -> None:
         os.fsync(stream.fileno())
 
 
+def source_zip_bytes(bundle: Path) -> bytes:
+    stream = io.BytesIO()
+    with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_STORED) as archive:
+        for path in sorted(bundle.iterdir()):
+            entry = zipfile.ZipInfo(path.name, date_time=(1980, 1, 1, 0, 0, 0))
+            entry.compress_type = zipfile.ZIP_STORED
+            entry.create_system = 3
+            entry.external_attr = 0o100644 << 16
+            archive.writestr(entry, path.read_bytes())
+    return stream.getvalue()
+
+
 def run_child(command: list[str], index: int, warmup: bool, timeout: int) -> dict:
     start = time.perf_counter_ns()
+    detail = "child failed, timed out, or output differed"
     try:
-        process = subprocess.run(command, capture_output=True, text=True, encoding="utf-8",
-                                 errors="replace", timeout=timeout, check=False)
+        process = subprocess.run(command, capture_output=True, timeout=timeout, check=False)
         stdout, stderr, exit_code, timed_out = process.stdout, process.stderr, process.returncode, False
     except subprocess.TimeoutExpired as error:
-        stdout = error.stdout.decode("utf-8", errors="replace") if isinstance(error.stdout, bytes) else error.stdout or ""
-        stderr = error.stderr.decode("utf-8", errors="replace") if isinstance(error.stderr, bytes) else error.stderr or ""
+        stdout, stderr = error.stdout or b"", error.stderr or b""
         exit_code, timed_out = None, True
+    except OSError as error:
+        stdout, stderr = b"", b""
+        exit_code, timed_out = None, False
+        detail = f"child launch/capture failed: {type(error).__name__}: {error}"
     duration = time.perf_counter_ns() - start
-    passed = exit_code == 0 and not timed_out and stdout.strip() == EXPECTED_OUTPUT and not stderr
+    passed = exit_code == 0 and not timed_out and stdout.strip() == EXPECTED_OUTPUT.encode("ascii") and not stderr
     return {"repetition": index, "warmup": warmup, "status": "passed" if passed else "failed",
             "duration_ns": duration, "exit_code": exit_code, "timed_out": timed_out,
-            "work_observed": passed, "stdout_sha256": sha(stdout.encode("utf-8")),
-            "stderr_sha256": sha(stderr.encode("utf-8")),
-            "detail": "exact checker and saved-record comparison passed" if passed else "child failed, timed out, or output differed",
-            "stdout": stdout, "stderr": stderr}
+            "work_observed": passed, "stdout_sha256": sha(stdout),
+            "stderr_sha256": sha(stderr),
+            "detail": "exact checker and saved-record comparison passed" if passed else detail,
+            "stdout_base64": base64.b64encode(stdout).decode("ascii"),
+            "stderr_base64": base64.b64encode(stderr).decode("ascii")}
 
 
 def collect(args) -> str:
@@ -279,11 +301,7 @@ def collect(args) -> str:
     inventory = {path.name: sha(path.read_bytes()) for path in sorted(args.out.iterdir()) if path.is_file()}
     save_bytes(args.out / "manifest.json", (json.dumps({"schema": "csl.b08-report-files/1",
         "report_id": record["report_id"], "files": inventory}, indent=2, sort_keys=True) + "\n").encode("utf-8"))
-    with zipfile.ZipFile(args.out.with_suffix(".zip"), "w", compression=zipfile.ZIP_STORED) as archive:
-        for path in sorted(args.out.iterdir()):
-            entry = zipfile.ZipInfo(path.name, date_time=(1980, 1, 1, 0, 0, 0))
-            entry.compress_type = zipfile.ZIP_STORED
-            archive.writestr(entry, path.read_bytes())
+    save_bytes(args.out.with_suffix(".zip"), source_zip_bytes(args.out))
     return record["report_id"]
 
 
@@ -308,12 +326,8 @@ def check(bundle: Path) -> str:
     for name, digest in manifest["files"].items():
         if sha((bundle / name).read_bytes()) != digest:
             raise ValueError("bundle file hash differs: " + name)
-    with zipfile.ZipFile(bundle.with_suffix(".zip")) as archive:
-        if set(archive.namelist()) != expected | {"manifest.json"}:
-            raise ValueError("offline ZIP inventory differs")
-        for name in archive.namelist():
-            if archive.read(name) != (bundle / name).read_bytes():
-                raise ValueError("offline ZIP file differs: " + name)
+    if bundle.with_suffix(".zip").read_bytes() != source_zip_bytes(bundle):
+        raise ValueError("offline ZIP bytes or metadata differ")
     return record["report_id"]
 
 

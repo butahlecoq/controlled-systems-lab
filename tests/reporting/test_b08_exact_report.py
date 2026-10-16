@@ -1,6 +1,7 @@
 """Behavior checks for the saved-data B08 exact report harness."""
 from __future__ import annotations
 
+import base64
 import hashlib
 import importlib.util
 import json
@@ -8,7 +9,6 @@ import subprocess
 import sys
 import tempfile
 import unittest
-import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -29,7 +29,8 @@ def fixture_record():
                      "work_observed": True, "stdout_sha256": report.sha(stdout.encode()),
                      "stderr_sha256": report.sha(b""),
                      "detail": "exact checker and saved-record comparison passed",
-                     "stdout": stdout, "stderr": ""})
+                     "stdout_base64": base64.b64encode(stdout.encode()).decode(),
+                     "stderr_base64": ""})
     raw = "".join(json.dumps(row, sort_keys=True, allow_nan=False) + "\n" for row in rows).encode()
     record = {"schema": report.SCHEMA, "purpose": "measurement", "created_utc": "2026-10-16T00:00:00Z",
               "source": {"source_commit": report.SOURCE, "harness_commit": "a" * 40,
@@ -63,9 +64,27 @@ class B08ExactReportTests(unittest.TestCase):
                                0, True, 10)
         self.assertEqual(row["status"], "failed")
         self.assertEqual(row["exit_code"], 7)
-        self.assertEqual(row["stdout"].strip(), "bad")
-        self.assertEqual(row["stderr"].strip(), "failed")
+        self.assertEqual(base64.b64decode(row["stdout_base64"]).strip(), b"bad")
+        self.assertEqual(base64.b64decode(row["stderr_base64"]).strip(), b"failed")
         self.assertFalse(row["work_observed"])
+
+    def test_child_output_preserves_exact_crlf_and_non_utf8_bytes(self):
+        row = report.run_child([sys.executable, "-c",
+            "import sys; sys.stdout.buffer.write(bytes([65, 13, 10, 255])); sys.stderr.buffer.write(bytes([66, 13, 10, 254]))"],
+            0, True, 10)
+        self.assertEqual(base64.b64decode(row["stdout_base64"]), b"A\r\n\xff")
+        self.assertEqual(base64.b64decode(row["stderr_base64"]), b"B\r\n\xfe")
+        self.assertEqual(row["stdout_sha256"], report.sha(b"A\r\n\xff"))
+        self.assertEqual(row["stderr_sha256"], report.sha(b"B\r\n\xfe"))
+        self.assertEqual(row["status"], "failed")
+
+    def test_child_spawn_error_is_a_failed_attempt(self):
+        row = report.run_child([str(ROOT / "missing-python-executable")], 0, True, 10)
+        self.assertEqual(row["status"], "failed")
+        self.assertIsNone(row["exit_code"])
+        self.assertIn("child launch/capture failed", row["detail"])
+        self.assertEqual(base64.b64decode(row["stdout_base64"]), b"")
+        self.assertEqual(base64.b64decode(row["stderr_base64"]), b"")
 
     def test_saved_bundle_and_csv_tamper(self):
         record, raw = fixture_record()
@@ -79,10 +98,13 @@ class B08ExactReportTests(unittest.TestCase):
             files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in bundle.iterdir()}
             (bundle / "manifest.json").write_text(json.dumps({"schema": "csl.b08-report-files/1",
                 "report_id": record["report_id"], "files": files}), encoding="utf-8")
-            with zipfile.ZipFile(bundle.with_suffix(".zip"), "w") as archive:
-                for path in bundle.iterdir():
-                    archive.write(path, arcname=path.name)
+            bundle.with_suffix(".zip").write_bytes(report.source_zip_bytes(bundle))
             self.assertEqual(report.check(bundle), record["report_id"])
+            zip_data = bundle.with_suffix(".zip").read_bytes()
+            bundle.with_suffix(".zip").write_bytes(zip_data + b"tampered")
+            with self.assertRaisesRegex(ValueError, "ZIP bytes or metadata differ"):
+                report.check(bundle)
+            bundle.with_suffix(".zip").write_bytes(zip_data)
             with (bundle / "trials.csv").open("ab") as stream:
                 stream.write(b"tampered\n")
             with self.assertRaisesRegex(ValueError, "CSV differs"):
@@ -102,7 +124,9 @@ class B08ExactReportTests(unittest.TestCase):
         example, _ = fixture_record()
         rows = example["rows"]
         rows[3] = {**rows[3], "status": "failed", "exit_code": 7,
-                   "work_observed": False, "stdout": "bad\n", "stderr": "failed\n",
+                   "work_observed": False,
+                   "stdout_base64": base64.b64encode(b"bad\n").decode(),
+                   "stderr_base64": base64.b64encode(b"failed\n").decode(),
                    "stdout_sha256": report.sha(b"bad\n"),
                    "stderr_sha256": report.sha(b"failed\n"),
                    "detail": "child failed, timed out, or output differed"}
