@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import copy
 
 MODULE = Path(__file__).resolve().parents[2] / "scripts" / "reports" / "geo06_report.py"
 SPEC = importlib.util.spec_from_file_location("geo06_report", MODULE)
@@ -58,6 +59,52 @@ class Geo06ReportTests(unittest.TestCase):
             status = json.loads((out / "collection-status.json").read_text(encoding="utf-8"))
             self.assertEqual(status["process_exit_code"], 7)
             self.assertFalse(status["publishable"])
+
+    def test_release_admission_rejects_optimization_override(self):
+        settings = {"CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+                    "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+                    "CMAKE_EXE_LINKER_FLAGS": "/machine:x64",
+                    "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/INCREMENTAL:NO",
+                    "CMAKE_STATIC_LINKER_FLAGS": "/machine:x64",
+                    "CMAKE_STATIC_LINKER_FLAGS_RELEASE": ""}
+        compile_settings = {"Optimization": "MaxSpeed", "InlineFunctionExpansion": "AnySuitable",
+                            "LanguageStandard": "stdcpp20", "RuntimeLibrary": "MultiThreadedDLL",
+                            "PreprocessorDefinitions": "%(PreprocessorDefinitions);NDEBUG;CMAKE_INTDIR=Release"}
+        targets = {"driver": {"compile": compile_settings,
+                              "link": {"GenerateDebugInformation": "false",
+                                       "AdditionalOptions": "%(AdditionalOptions) /machine:x64",
+                                       "AdditionalDependencies": "Release\\csl_quickhull_2d.lib;kernel32.lib"}},
+                   "quickhull_library": {"compile": copy.deepcopy(compile_settings),
+                                         "archive": {"AdditionalOptions": "%(AdditionalOptions) /machine:x64"}}}
+        self.assertEqual(report.admit_release_settings(settings, targets)["cache_flags"]["CMAKE_CXX_FLAGS_RELEASE"],
+                         "/O2 /Ob2 /DNDEBUG")
+        settings["CMAKE_CXX_FLAGS_RELEASE"] = "/Od /DNDEBUG"
+        with self.assertRaisesRegex(ValueError, "unreviewed Release flag"):
+            report.admit_release_settings(settings, targets)
+        settings["CMAKE_CXX_FLAGS_RELEASE"] = "/O2 /Ob2 /DNDEBUG"
+        targets["quickhull_library"]["compile"]["Optimization"] = "Disabled"
+        with self.assertRaisesRegex(ValueError, "quickhull_library"):
+            report.admit_release_settings(settings, targets)
+
+    def test_successful_raw_csv_survives_later_collection_error(self):
+        import csv
+        import io
+        stream = io.StringIO()
+        writer = csv.DictWriter(stream, fieldnames=report.FIELDS, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(self.rows())
+        expected = stream.getvalue()
+        with tempfile.TemporaryDirectory() as temporary:
+            out = Path(temporary) / "collection"
+            script = "import sys; sys.stdout.write(" + repr(expected) + ")"
+            result, rows = report.execute_driver([sys.executable, "-c", script], out, 7, 10)
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(len(rows), 24)
+            report.mark_post_driver_failure(out, OSError("later provenance read failed"))
+            self.assertEqual((out / "trials.csv").read_text(encoding="utf-8"), expected)
+            status = json.loads((out / "collection-status.json").read_text(encoding="utf-8"))
+            self.assertFalse(status["publishable"])
+            self.assertIn("later provenance read failed", status["reason"])
 
 
 if __name__ == "__main__":

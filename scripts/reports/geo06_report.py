@@ -16,8 +16,11 @@ import statistics
 import subprocess
 import sys
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 SCHEMA = "csl.geo06-quickhull-report/1"
+INTERVAL = ("batch of fresh QuickHull calls plus per-call index copy and literal oracle comparison; "
+            "excludes process startup, CSV serialization and Python saved-row verification")
 SOURCE = "ce63bff5a0face88c3c5e977f7d96337e8cbe948"
 CASES = {
     "square_duplicates": {"points": [[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5], [0, 0], [1, 0]], "indices": "0:1:2:3"},
@@ -29,6 +32,14 @@ FIELDS = ("scenario", "repetition", "warmup", "calls", "duration_ns", "status", 
 ALLOWED = {"CMakeLists.txt", "cmake/OptionalReports.cmake", "benchmarks/reporting/geo06/quickhull_driver.cpp",
            "scripts/reports/geo06_report.py", "reports/algorithm-results/tooling/geo06/README.md",
            "tests/reporting/test_geo06_report.py"}
+RELEASE_FLAGS = {
+    "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+    "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+    "CMAKE_EXE_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/INCREMENTAL:NO",
+    "CMAKE_STATIC_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_STATIC_LINKER_FLAGS_RELEASE": "",
+}
 
 
 def digest(value):
@@ -102,7 +113,18 @@ def execute_driver(command, out, repetitions, calls):
     except ValueError as error:
         preserve_failed_run(out, result.stdout, result.stderr, result.returncode, str(error))
         raise ValueError("driver output rejected; raw output retained") from error
+    out.mkdir(parents=True)
+    (out / "trials.csv").write_text(result.stdout, encoding="utf-8")
     return result, rows
+
+
+def mark_post_driver_failure(out, error):
+    if out.is_dir() and (out / "trials.csv").is_file() and not (out / "manifest.json").exists():
+        (out / "collection-status.json").write_text(json.dumps({
+            "schema": "csl.geo06-rejected-collection/1", "publishable": False,
+            "reason": "post-driver collection failed: " + str(error),
+            "raw_csv_sha256": hashlib.sha256((out / "trials.csv").read_bytes()).hexdigest(),
+        }, indent=2) + "\n", encoding="utf-8")
 
 
 def summarize(rows):
@@ -125,6 +147,60 @@ def strict_json(path):
     return json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=pairs)
 
 
+def cache_settings(cache):
+    settings = {}
+    for line in cache.splitlines():
+        if line.startswith("//") or line.startswith("#") or "=" not in line or ":" not in line.split("=", 1)[0]:
+            continue
+        key, value = line.split("=", 1)
+        name = key.split(":", 1)[0]
+        if name in settings:
+            raise ValueError("duplicate CMake cache setting: " + name)
+        settings[name] = value
+    return settings
+
+
+def release_project(path):
+    root = ET.parse(path).getroot()
+    ns = "{http://schemas.microsoft.com/developer/msbuild/2003}"
+    groups = [item for item in root.findall(ns + "ItemDefinitionGroup")
+              if item.get("Condition") == "'$(Configuration)|$(Platform)'=='Release|x64'"]
+    if len(groups) != 1:
+        raise ValueError("unique x64 Release target graph missing: " + path.name)
+    def fields(name):
+        node = groups[0].find(ns + name)
+        return {child.tag.removeprefix(ns): (child.text or "") for child in node} if node is not None else {}
+    return {"compile": fields("ClCompile"), "link": fields("Link"), "archive": fields("Lib"),
+            "project_sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+
+
+def admit_release_settings(settings, targets):
+    for name, expected in RELEASE_FLAGS.items():
+        if settings.get(name) != expected:
+            raise ValueError("unreviewed Release flag: " + name)
+    for name in ("driver", "quickhull_library"):
+        compile_settings = targets[name]["compile"]
+        if (compile_settings.get("Optimization") != "MaxSpeed" or
+                compile_settings.get("InlineFunctionExpansion") != "AnySuitable" or
+                compile_settings.get("LanguageStandard") != "stdcpp20" or
+                compile_settings.get("RuntimeLibrary") != "MultiThreadedDLL" or
+                "NDEBUG" not in compile_settings.get("PreprocessorDefinitions", "").split(";") or
+                compile_settings.get("AdditionalOptions", "") not in ("", "%(AdditionalOptions)")):
+            raise ValueError("unreviewed Release compile settings: " + name)
+    link = targets["driver"]["link"]
+    if (link.get("GenerateDebugInformation") != "false" or
+            link.get("AdditionalOptions") != "%(AdditionalOptions) /machine:x64" or
+            "Release\\csl_quickhull_2d.lib" not in link.get("AdditionalDependencies", "")):
+        raise ValueError("unreviewed Release link settings or missing QuickHull library")
+    if targets["quickhull_library"]["archive"].get("AdditionalOptions") != "%(AdditionalOptions) /machine:x64":
+        raise ValueError("unreviewed Release archive settings")
+    return {"cache_flags": {name: settings[name] for name in RELEASE_FLAGS}, "targets": targets}
+
+
+def admit_release(cache, targets):
+    return admit_release_settings(cache_settings(cache), targets)
+
+
 def validate(record):
     if record.get("schema") != SCHEMA or record.get("purpose") != "measurement":
         raise ValueError("unregistered report schema or purpose")
@@ -134,7 +210,7 @@ def validate(record):
         raise ValueError("record identity differs")
     if record.get("source_commit") != SOURCE or not re.fullmatch(r"[0-9a-f]{40}", record.get("harness_commit", "")):
         raise ValueError("source or harness identity differs")
-    if record.get("catalog") != CASES or record.get("interval") != "each batch of fresh QuickHull calls, including result observation; excludes process startup, JSON/CSV, and verification":
+    if record.get("catalog") != CASES or record.get("interval") != INTERVAL:
         raise ValueError("catalog or interval differs")
     rows = record["rows"]
     validate_rows(rows, record["repetitions"], record["warmups"], record["calls_per_trial"])
@@ -151,7 +227,7 @@ def render_html(record):
              "<h1>GEO-06 geometric QuickHull: analytic microfixtures</h1>",
              "<p>Descriptive single-adapter Release measurements. No competitor, speedup, application throughput, or scalability claim. Orientation is exact only for supplied binary64 coordinates. These fixtures are not a general correctness proof.</p>",
              f"<p>Source commit <code>{record['source_commit']}</code>; harness commit <code>{record['harness_commit']}</code>; report <code>{record['report_id']}</code>.</p>",
-             f"<p>{record['repetitions']} measured batches per fixture, {record['calls_per_trial']} QuickHull calls per batch, {record['warmups']} excluded warmup. Interleaved forward/reverse case order. Each batch constructs its result and observes every returned index. Timings use steady-clock nanoseconds; no profile or limiter attribution was collected.</p>",
+             f"<p>{record['repetitions']} measured batches per fixture, {record['calls_per_trial']} QuickHull calls per batch, {record['warmups']} excluded warmup. Interleaved forward/reverse case order. Each timed batch includes per-call index copy and literal oracle comparison. These are verified-call-batch timings, not isolated adapter latency. Timings use steady-clock nanoseconds; no profile or limiter attribution was collected.</p>",
              f"<table><caption>Batch latency; {record['repetitions']} measurements per fixture</caption><thead><tr><th>Fixture</th><th>Points</th><th>Hull indices</th><th>Median ns</th><th>Range ns</th></tr></thead><tbody>"]
     for name in ORDER:
         data = record["summary"][name]
@@ -182,6 +258,11 @@ def collect(args):
         raise ValueError("only the Release report executable is admissible")
     if args.out.exists():
         raise ValueError("report destination must be new")
+    note = args.concurrent_work.read_text(encoding="utf-8").strip()
+    if len(note) < 10 or "TODO" in note or "TBD" in note:
+        raise ValueError("concurrent-work note must describe observed activity before execution")
+    if any(os.environ.get(name) for name in ("CL", "_CL_", "LINK")):
+        raise ValueError("MSVC CL/_CL_/LINK environment overrides are not admitted")
     cache = (args.build_dir / "CMakeCache.txt").read_text(encoding="utf-8")
     if "CSL_BUILD_GEO06_REPORT:BOOL=ON" not in cache or "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" not in cache:
         raise ValueError("configured build identity differs")
@@ -198,9 +279,15 @@ def collect(args):
                            capture_output=True, text=True, timeout=300, check=False)
     if build.returncode:
         raise ValueError("final Release build failed: " + build.stderr[-500:])
+    targets = {"driver": release_project(build_dir / "csl_geo06_quickhull_report.vcxproj"),
+               "quickhull_library": release_project(build_dir / "csl_quickhull_2d.vcxproj")}
+    provenance = admit_release(cache, targets)
+    provenance.update({"schema": "csl.geo06-build-provenance/1", "source_commit": SOURCE,
+                       "harness_commit": args.harness_commit,
+                       "exe_sha256": hashlib.sha256(exe.read_bytes()).hexdigest()})
+    provenance_bytes = (json.dumps(provenance, indent=2, sort_keys=True) + "\n").encode("utf-8")
     result, rows = execute_driver([str(exe), "--measure", str(args.repetitions), "1", str(args.calls)],
                                   args.out, args.repetitions, args.calls)
-    note = args.concurrent_work.read_text(encoding="utf-8")
     compiler_files = list((build_dir / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
     if len(compiler_files) != 1:
         raise ValueError("CMake compiler identity unavailable")
@@ -215,22 +302,22 @@ def collect(args):
                    "native_thread_count": {"available": False, "reason": "not observed"},
                    "concurrent_work": note, "exe_sha256": hashlib.sha256(exe.read_bytes()).hexdigest(),
                    "cmake_cache_sha256": hashlib.sha256(cache.encode()).hexdigest(),
+                   "build_provenance_sha256": hashlib.sha256(provenance_bytes).hexdigest(),
                    "final_build_exit_code": build.returncode}
     record = {"schema": SCHEMA, "purpose": "measurement", "source_commit": SOURCE,
               "harness_commit": args.harness_commit, "created_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
               "catalog": CASES, "repetitions": args.repetitions, "warmups": 1,
               "calls_per_trial": args.calls, "rows": rows, "summary": summarize(rows),
               "process_exit_code": result.returncode, "stderr": result.stderr,
-              "interval": "each batch of fresh QuickHull calls, including result observation; excludes process startup, JSON/CSV, and verification",
+              "interval": INTERVAL,
               "environment": environment, "raw_csv_sha256": hashlib.sha256(result.stdout.encode()).hexdigest()}
     sha = digest(record)
     record["payload_sha256"] = sha
     record["report_id"] = "geo06-" + sha[:16]
     validate(record)
-    args.out.mkdir(parents=True)
     (args.out / "records.json").write_text(json.dumps(record, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
-    (args.out / "trials.csv").write_text(result.stdout, encoding="utf-8")
     (args.out / "index.html").write_text(render_html(record), encoding="utf-8")
+    (args.out / "build-provenance.json").write_bytes(provenance_bytes)
     redacted_build = build.stdout
     for path, label in ((build_dir, "BUILD_ROOT"), (Path.cwd(), "SOURCE_ROOT"), (Path.home(), "USER_HOME")):
         redacted_build = redacted_build.replace(str(path), label).replace(str(path).replace("\\", "/"), label)
@@ -247,10 +334,22 @@ def check(args):
         raise ValueError("raw CSV differs from saved rows")
     if (args.bundle / "index.html").read_text(encoding="utf-8") != render_html(record):
         raise ValueError("HTML differs from saved rows")
+    provenance_bytes = (args.bundle / "build-provenance.json").read_bytes()
+    if hashlib.sha256(provenance_bytes).hexdigest() != record["environment"]["build_provenance_sha256"]:
+        raise ValueError("build provenance differs from record")
+    provenance = strict_json(args.bundle / "build-provenance.json")
+    if (provenance.get("schema") != "csl.geo06-build-provenance/1" or
+            provenance.get("source_commit") != record["source_commit"] or
+            provenance.get("harness_commit") != record["harness_commit"] or
+            provenance.get("exe_sha256") != record["environment"]["exe_sha256"]):
+        raise ValueError("build provenance identity differs")
+    admit_release_settings(provenance["cache_flags"], provenance["targets"])
     manifest = strict_json(args.bundle / "manifest.json")
     if manifest.get("schema") != "csl.geo06-report-manifest/1" or manifest.get("report_id") != record["report_id"]:
         raise ValueError("manifest identity differs")
-    if set(manifest["files"]) != {"records.json", "trials.csv", "index.html", "build-log.txt"}:
+    expected_files = {"records.json", "trials.csv", "index.html", "build-log.txt", "build-provenance.json"}
+    if (set(manifest["files"]) != expected_files or
+            {p.name for p in args.bundle.iterdir() if p.is_file()} != expected_files | {"manifest.json"}):
         raise ValueError("manifest inventory differs")
     for name, expected in manifest["files"].items():
         if hashlib.sha256((args.bundle / name).read_bytes()).hexdigest() != expected:
@@ -276,6 +375,8 @@ def main():
     try:
         collect(args) if args.action == "collect" else check(args)
     except (OSError, ValueError, subprocess.SubprocessError) as error:
+        if args.action == "collect":
+            mark_post_driver_failure(args.out, error)
         parser.exit(2, f"GEO-06 report: {error}\n")
 
 

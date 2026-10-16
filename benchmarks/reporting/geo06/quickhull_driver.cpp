@@ -66,7 +66,7 @@ void run(const Case& item, int repetition, bool warmup, int calls) {
 int main(int argc, char** argv) {
     try {
         if (argc == 2 && std::string(argv[1]) == "--describe") {
-            std::cout << "csl.geo06-driver/1,QuickHull2D,3 fixtures,call-only steady_clock nanoseconds\n";
+            std::cout << "csl.geo06-driver/1,QuickHull2D,3 fixtures,verified-call-batch steady_clock nanoseconds\n";
             return 0;
         }
         bool smoke = argc == 2 && std::string(argv[1]) == "--smoke";

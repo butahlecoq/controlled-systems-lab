@@ -12,15 +12,24 @@ order. The driver checks every call against these literals; the Python
 collector separately checks every saved row. These checks establish the named
 examples only. Exact orientation refers to represented binary64 coordinates.
 
-The measured interval surrounds a batch of fresh `quickhull_2d` calls and
-immediate observation of each returned result. It excludes process startup,
-CSV serialization, and independent saved-row verification. The driver uses
+The measured interval surrounds a batch of fresh `quickhull_2d` calls,
+the copy of each returned index vector, and its literal oracle comparison.
+These are verified-call-batch timings, not isolated adapter latency. The
+interval excludes process startup, CSV serialization, and Python saved-row
+verification. The driver uses
 the C++ steady clock. One warmup per fixture is excluded, followed by seven
 repetitions in alternating fixture order. Every row retains the requested
 call count, observed vertex count, output indices, status, and nanoseconds.
 The report has no competitor and no measured limiter profile; its timings
 must not be turned into a performance ranking. OS thread count and internal
 phase timing are unavailable.
+
+Only the exact reviewed MSVC x64 Release flags are admitted. The collector
+checks the CMake cache and both generated Release target definitions: `/O2`,
+`/Ob2`, `NDEBUG`, C++20, and nonincremental x64 linking. It saves the relevant
+compile/link/archive settings, compiler identity, target project hashes,
+executable hash, and final build log for audit. MSVC `CL`, `_CL_`, and `LINK`
+environment overrides are rejected.
 
 After independent review of this fixed harness commit, configure a clean
 Release build with `CSL_BUILD_GEO06_REPORT=ON`, `CSL_ENABLE_HIGHS=OFF`,
@@ -35,6 +44,13 @@ $cmake = 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Co
 & $cmake --build build/geo06-report --config Release `
   --target csl_geo06_quickhull_report --parallel 4
 build/geo06-report/Release/csl_geo06_quickhull_report.exe --smoke
+$load = (Get-CimInstance Win32_Processor | ForEach-Object {
+  "CPU load=$($_.LoadPercentage)% logical cores=$($_.NumberOfLogicalProcessors)"
+}) -join '; '
+$jobs = (Get-Process cmake,MSBuild,cl,python -ErrorAction SilentlyContinue |
+  Group-Object ProcessName | ForEach-Object { "$($_.Name)=$($_.Count)" }) -join ', '
+"UTC $([DateTime]::UtcNow.ToString('o')); $load; selected concurrent processes: $jobs; snapshot only" |
+  Set-Content -LiteralPath build/geo06-report/concurrent-work.txt -Encoding utf8
 $harnessCommit = git rev-parse HEAD
 python scripts/reports/geo06_report.py collect `
   --exe build/geo06-report/Release/csl_geo06_quickhull_report.exe `
@@ -48,11 +64,15 @@ python scripts/reports/geo06_report.py check `
 ```
 
 The final report directory under `reports/algorithm-results/<report-id>/`
-contains `records.json`, `trials.csv`, `index.html`, and `manifest.json`.
+contains `records.json`, `trials.csv`, `index.html`, `build-provenance.json`,
+`build-log.txt`, and `manifest.json`.
 If the driver exits unsuccessfully, times out, emits stderr, or fails the
 saved-row oracle, the collector instead writes `raw-driver-output.csv`,
 `process-stderr.txt`, and `collection-status.json` to the requested output
 directory, marked nonpublishable, before exiting unsuccessfully.
+The concurrent-work note is checked before native execution. A successful
+driver's raw CSV is saved immediately; if later collection steps fail, it
+remains in a nonpublishable directory with `collection-status.json`.
 The output is regenerated and validated solely from saved records. A later
 artifact commit differs from the source and harness identities. Publication
 requires registration with the Pages catalogue and a live URL check; a local
