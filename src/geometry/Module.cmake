@@ -4,6 +4,8 @@ csl_add_library(csl_hull STATIC src/geometry/hull_reducer.cpp src/geometry/basis
 
 target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry PRIVATE CSL::phase_one)
 
+csl_add_library(csl_quickhull_2d STATIC src/geometry/hull/quickhull_2d.cpp)
+
 csl_add_library(csl_polyhedral STATIC
   src/geometry/polyhedral/intersection.cpp
   src/geometry/polyhedral/halfspace_reducer.cpp
@@ -21,6 +23,8 @@ install(FILES docs/contracts/projection-and-predecessor.md DESTINATION ${CMAKE_I
 install(FILES docs/contracts/polyhedral-intersection.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
+
+install(FILES docs/contracts/quickhull-2d.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 

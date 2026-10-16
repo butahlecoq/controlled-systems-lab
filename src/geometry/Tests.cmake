@@ -5,6 +5,18 @@ if(TARGET CSL::highs_lp)
   csl_test_target(hull_reducer_test geometry)
 endif()
 
+add_executable(quickhull_2d_test tests/unit/geometry/quickhull_2d_test.cpp)
+target_link_libraries(quickhull_2d_test PRIVATE CSL::quickhull_2d doctest::doctest)
+add_test(NAME quickhull_2d_test COMMAND quickhull_2d_test)
+csl_test_target(quickhull_2d_test geometry)
+
+if(TARGET CSL::highs_lp)
+  add_executable(quickhull_2d_lp_test tests/unit/geometry/quickhull_2d_lp_test.cpp)
+  target_link_libraries(quickhull_2d_lp_test PRIVATE CSL::quickhull_2d CSL::hull CSL::highs_lp doctest::doctest)
+  add_test(NAME quickhull_2d_lp_test COMMAND quickhull_2d_lp_test)
+  csl_test_target(quickhull_2d_lp_test geometry)
+endif()
+
 if(TARGET CSL::highs_lp)
   add_executable(barycentric_membership_test tests/unit/geometry/barycentric_membership_test.cpp)
   target_link_libraries(barycentric_membership_test PRIVATE CSL::hull CSL::highs_lp doctest::doctest)
