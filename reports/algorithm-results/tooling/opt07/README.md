@@ -1,4 +1,4 @@
-# OPT-07 ordered hull harness: functional phase
+# OPT-07 ordered hull harness and measured report
 
 This standalone C++20 harness selects `csl.hull.ordered-membership` through
 `Registry<HullReducerPort>` and supplies the production HiGHS LP adapter. It
@@ -10,10 +10,14 @@ analytic support. The separate Python validator independently rechecks all
 saved certificate weights with `Fraction.from_float` and the complete batch
 matrix. A changed unit in the last place is rejected.
 
-This is **functional harness and saved-data tooling only**. No accepted measurement,
-report bundle, performance conclusion or published URL exists for OPT-07 yet. The
+The accepted native report is
+[`opt07-bbb4aee749d643ff`](../../opt07-bbb4aee749d643ff/), collected from
+clean reviewed source `52444e305684c0b59c049cce9f9de7ea09eb4a4a`.
+Its 2,400 calls all passed independent validation. The 21 measured 100-call
+batches are descriptive evidence for three small fixtures; there is no
+comparator, speedup, source-mapped limiter or scalability conclusion. The
 overflow identity fallback is covered by product tests but excluded from the
-HiGHS timing fixtures because extreme scaling would confound the small report.
+HiGHS timing fixtures because extreme scaling would confound this report.
 
 ## Functional smoke
 
@@ -38,7 +42,7 @@ are outside each batch timer. The timer includes the loop of public registered
 `run_with` calls and moves of output variants into a preallocated vector.
 Any lazy HiGHS initialization on those fresh workspaces is inside the timer.
 
-## Proposed measurement after independent review
+## Reproducing the reviewed measurement protocol
 
 Freeze and independently review the source and harness commit, then configure
 and build it from a **clean** worktree. Save a verbose clean Release build log
@@ -71,7 +75,7 @@ python -B reports/algorithm-results/tooling/opt07/collect.py measure `
   --out build/opt07-harness/collection-001
 ```
 
-The proposed run has one excluded warmup and seven measured batches per
+The accepted run has one excluded warmup and seven measured batches per
 fixture, with 100 calls per batch and fresh LP and hull workspaces created
 before each timed batch. Each call retains original point IDs, all removal
 terms and binary64 weights, attempts, counters and support values in raw
@@ -100,12 +104,12 @@ The bundle retains exact raw JSONL and stderr bytes, the sanitized Release log,
 collection provenance including the raw local log hash, all batch outcomes,
 derived CSV/HTML/SVG, and an exact-file manifest. The checker regenerates the
 record and every display from raw bytes without invoking the driver. The
-`opt07-ordered-hull` schema-3 publisher adapter is registered, but no catalogue
-row is added until a genuine measured bundle passes saved-artifact review.
+`opt07-ordered-hull` schema-3 publisher adapter and catalogue row admit only
+this reviewed measurement bundle.
 Synthetic tests use `purpose=test` in the collection and every raw row; they
 exercise the complete 24-batch/2,400-row validator only through explicit
 `build_bundle.py --allow-test`. Their records and pages say TEST / synthetic.
 The publisher rejects these bundles even if the site checker has test mode.
-Independent publication review, main-only Pages deployment, and live URL/ZIP
-verification remain pending. No comparison or historical runtime assertion
-follows from these fixtures.
+Main-only Pages deployment and live URL/ZIP verification are the remaining
+publication gates. No comparison or historical runtime assertion follows
+from these fixtures.

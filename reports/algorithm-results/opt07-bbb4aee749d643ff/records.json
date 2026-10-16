@@ -1,0 +1,362 @@
+{
+  "batches": [
+    {
+      "calls": 100,
+      "case_id": "signed-score",
+      "elapsed_ns": 54493400,
+      "failed_calls": 0,
+      "round": 0,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": true
+    },
+    {
+      "calls": 100,
+      "case_id": "signed-score",
+      "elapsed_ns": 53691000,
+      "failed_calls": 0,
+      "round": 1,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "signed-score",
+      "elapsed_ns": 52385400,
+      "failed_calls": 0,
+      "round": 2,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "signed-score",
+      "elapsed_ns": 51580600,
+      "failed_calls": 0,
+      "round": 3,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "signed-score",
+      "elapsed_ns": 52116200,
+      "failed_calls": 0,
+      "round": 4,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "signed-score",
+      "elapsed_ns": 51192500,
+      "failed_calls": 0,
+      "round": 5,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "signed-score",
+      "elapsed_ns": 52023400,
+      "failed_calls": 0,
+      "round": 6,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "signed-score",
+      "elapsed_ns": 53811700,
+      "failed_calls": 0,
+      "round": 7,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "zero-width-duplicate",
+      "elapsed_ns": 35420500,
+      "failed_calls": 0,
+      "round": 0,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": true
+    },
+    {
+      "calls": 100,
+      "case_id": "zero-width-duplicate",
+      "elapsed_ns": 41002000,
+      "failed_calls": 0,
+      "round": 1,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "zero-width-duplicate",
+      "elapsed_ns": 35886100,
+      "failed_calls": 0,
+      "round": 2,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "zero-width-duplicate",
+      "elapsed_ns": 35802800,
+      "failed_calls": 0,
+      "round": 3,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "zero-width-duplicate",
+      "elapsed_ns": 37373700,
+      "failed_calls": 0,
+      "round": 4,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "zero-width-duplicate",
+      "elapsed_ns": 36054200,
+      "failed_calls": 0,
+      "round": 5,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "zero-width-duplicate",
+      "elapsed_ns": 35782800,
+      "failed_calls": 0,
+      "round": 6,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "zero-width-duplicate",
+      "elapsed_ns": 35349400,
+      "failed_calls": 0,
+      "round": 7,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "late-outside",
+      "elapsed_ns": 36101400,
+      "failed_calls": 0,
+      "round": 0,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": true
+    },
+    {
+      "calls": 100,
+      "case_id": "late-outside",
+      "elapsed_ns": 37072200,
+      "failed_calls": 0,
+      "round": 1,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "late-outside",
+      "elapsed_ns": 35798400,
+      "failed_calls": 0,
+      "round": 2,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "late-outside",
+      "elapsed_ns": 36088900,
+      "failed_calls": 0,
+      "round": 3,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "late-outside",
+      "elapsed_ns": 36184800,
+      "failed_calls": 0,
+      "round": 4,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "late-outside",
+      "elapsed_ns": 36447300,
+      "failed_calls": 0,
+      "round": 5,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "late-outside",
+      "elapsed_ns": 37316000,
+      "failed_calls": 0,
+      "round": 6,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    },
+    {
+      "calls": 100,
+      "case_id": "late-outside",
+      "elapsed_ns": 36124100,
+      "failed_calls": 0,
+      "round": 7,
+      "status": "complete",
+      "verified_calls": 100,
+      "warmup": false
+    }
+  ],
+  "collection": {
+    "algorithm": {
+      "method": "csl.hull.ordered-membership",
+      "source": "src/geometry/hull/ordered_reducer.cpp",
+      "version": "1.0.0"
+    },
+    "backend": {
+      "adapter_version": "1.0.0+highs.1.11.0",
+      "configured_threads": 1,
+      "method": "csl.lp.highs",
+      "native_version": "1.11.0",
+      "parallel": "off",
+      "presolve": "off",
+      "simplex_iteration_limit": null
+    },
+    "build_log_sha256": "3058f2e495703782a234ae9f89f7d694f1535619ef7a210a310aab3252f4faa3",
+    "cmake_cache_sha256": "a918a2890c12cf5511e36ce95b4d3289bb33522838becc6d33a26de4344db342",
+    "description": {
+      "batch_calls": 100,
+      "configuration": "Release",
+      "cxx_standard": 202002,
+      "harness_sha256": "fef873dc4594d31c1161fd71b427b3be0f64571d051b90a3d4189859d2c79091",
+      "kind": "describe",
+      "ndebug": true,
+      "repetitions": 7,
+      "source_commit": "52444e305684c0b59c049cce9f9de7ea09eb4a4a"
+    },
+    "environment": {
+      "concurrent_work_note": "Pre-run observation (2026-10-16 23:22 Europe/Moscow): Windows host with 12 logical processors; Win32_Processor LoadPercentage 7. Three resident MSBuild processes used 0.00 CPU seconds over a two-second check after the clean Release build. No other deliberate local compilation or benchmark is running. GitHub Actions checks are remote; helper agents are idle. One excluded warmup and seven measured 100-call batches per fixture are planned.",
+      "logical_processors": 12,
+      "machine": "AMD64",
+      "native_thread_policy": "HiGHS adapter configured for one thread",
+      "observed_native_threads": null,
+      "os": "Windows-11-10.0.22631-SP0",
+      "python": "3.13.5"
+    },
+    "executable_sha256": "58e39e0eeb4fb9fd643c8c1c0aaddb0de86c614b77d7391903f5f6cff6de26d5",
+    "fixture_sha256": "a2dae7711d2be367e9b54885b608f8182a452ce01657adc84aa12b083cea3fd1",
+    "generated_release_project_sha256": "eb31119267bf4fecc155270a1d0dc4a5a5e6ccd2bb3c7059f1a3888ea0efe523",
+    "process_exit_code": 0,
+    "protocol": {
+      "calls_per_batch": 100,
+      "internal_lp_phase_timing": "unavailable",
+      "measured_batches_per_fixture": 7,
+      "performance_interpretation": "single adapter; no comparator or speedup claim",
+      "timing_scope": "steady_clock spans the loop of 100 registered HullReducer.run_with calls, lazy native initialization and output vector moves; input/workspace construction, verification, JSON and rendering excluded",
+      "warmup_batches_per_fixture": 1,
+      "workspace_policy": "fresh LP and HullReducer workspaces per call, created before timer"
+    },
+    "purpose": "measurement",
+    "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw_stdout_sha256": "1321a3480d197bb890b21ee32687501ccc41af388c42ade187134a90b9df6974",
+    "release_project": {
+      "LanguageStandard": "stdcpp20",
+      "Optimization": "MaxSpeed",
+      "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CSL_OPT07_SOURCE_COMMIT=\"52444e305684c0b59c049cce9f9de7ea09eb4a4a\";CSL_OPT07_HARNESS_SHA256=\"fef873dc4594d31c1161fd71b427b3be0f64571d051b90a3d4189859d2c79091\";CSL_OPT07_CONFIG=\"Release\";CMAKE_INTDIR=\"Release\""
+    },
+    "sanitized_build_log_sha256": "bfdbd654d520c4cc2441aaf4aec1a183526fae6b5e2449f7c738871c9e8db0b3",
+    "source_commit": "52444e305684c0b59c049cce9f9de7ea09eb4a4a",
+    "source_sha256": {
+      "include/csl/geometry/hull_reducer.hpp": "40c4bfb5e9cb3227bd73a20c748e0adbf0f70f3848db3a2732578d3c82c6324d",
+      "reports/algorithm-results/tooling/opt07/collect.py": "e4918634db271029a886f65af893347e55083c06d2366c0641c07be069f30bee",
+      "reports/algorithm-results/tooling/opt07/oracle.py": "55b6fc967a8e51e5972d049cd68b4e811b511b3a907f95f2b952d47a48226228",
+      "reports/algorithm-results/tooling/opt07/ordered_hull_driver.cpp": "fef873dc4594d31c1161fd71b427b3be0f64571d051b90a3d4189859d2c79091",
+      "reports/algorithm-results/tooling/opt07/validate.py": "2423d3115fbfd77a3c70b9466b1217dcf2ccf0b3b4518e4ea53a03969519ae5b",
+      "src/geometry/exact_convex_combination.hpp": "3449d12cc341019c6ac114b56ba7c7cdb9b86e112a3c1306f6366ea8c268ebb8",
+      "src/geometry/hull/ordered_reducer.cpp": "3ed79890d898b181eadc8bb8c9413f7887cbe265db9642e33577b9fc96acfe59",
+      "src/geometry/hull_reducer.cpp": "170be71891d9dec1353e830d4135c6e09d43ae4bb102c1d3e6154a8418b3f240"
+    }
+  },
+  "payload_sha256": "bbb4aee749d643ffe76fd02fdc9b7c4fb9dcfafcb3bba35b485721fb212f0fa4",
+  "performance_interpretation": "descriptive single-adapter batches; no comparator, speedup, source-mapped limiter, or scalability claim",
+  "purpose": "measurement",
+  "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "raw_stdout_sha256": "1321a3480d197bb890b21ee32687501ccc41af388c42ade187134a90b9df6974",
+  "report_id": "opt07-bbb4aee749d643ff",
+  "sanitized_build_log_sha256": "bfdbd654d520c4cc2441aaf4aec1a183526fae6b5e2449f7c738871c9e8db0b3",
+  "schema": "csl.opt07-ordered-hull-report/1",
+  "scientific_scope": "exact dyadic certificates for represented binary64 points in three fixed small clouds",
+  "source_commit": "52444e305684c0b59c049cce9f9de7ea09eb4a4a",
+  "summary": [
+    {
+      "case_id": "signed-score",
+      "failed_calls": 0,
+      "max_batch_ns": 53811700,
+      "median_batch_ns": 52116200,
+      "min_batch_ns": 51192500,
+      "nonwarmup_batches": 7,
+      "nonwarmup_calls": 700,
+      "points": 6
+    },
+    {
+      "case_id": "zero-width-duplicate",
+      "failed_calls": 0,
+      "max_batch_ns": 41002000,
+      "median_batch_ns": 35886100,
+      "min_batch_ns": 35349400,
+      "nonwarmup_batches": 7,
+      "nonwarmup_calls": 700,
+      "points": 4
+    },
+    {
+      "case_id": "late-outside",
+      "failed_calls": 0,
+      "max_batch_ns": 37316000,
+      "median_batch_ns": 36184800,
+      "min_batch_ns": 35798400,
+      "nonwarmup_batches": 7,
+      "nonwarmup_calls": 700,
+      "points": 4
+    }
+  ],
+  "validation": {
+    "batches": 24,
+    "calls": 2400,
+    "fixtures": 3,
+    "purpose": "measurement"
+  }
+}

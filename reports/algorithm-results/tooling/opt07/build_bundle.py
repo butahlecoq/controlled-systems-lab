@@ -8,6 +8,7 @@ import argparse
 import csv
 import hashlib
 import html
+import math
 import io
 import json
 from pathlib import Path
@@ -186,8 +187,14 @@ def report_record(directory: Path, *, allow_test: bool = False) -> dict:
 def latency_svg(record: dict) -> str:
     rows = record["summary"]
     test = record["purpose"] == "test"
-    top = max(row["max_batch_ns"] for row in rows) or 1
+    top = max(10_000_000, math.ceil(max(row["max_batch_ns"] for row in rows) / 10_000_000) * 10_000_000)
     strokes = []
+    ticks = []
+    for step in range(5):
+        value = top * step / 4
+        y = 245 - 190 * step / 4
+        ticks.append(f'<line x1="100" x2="640" y1="{y:.1f}" y2="{y:.1f}" stroke="#d9e2e7"/>')
+        ticks.append(f'<text x="92" y="{y + 4:.1f}" text-anchor="end">{value / 1_000_000:.1f}</text>')
     for index, row in enumerate(rows):
         x = 130 + index * 210
         scale = lambda value: 245 - 190 * value / top
@@ -198,13 +205,13 @@ def latency_svg(record: dict) -> str:
         strokes.append(f'<text x="{x}" y="280" text-anchor="middle">{html.escape(row["case_id"])}</text>')
     title = "TEST / synthetic batch values" if test else "OPT-07 measured batch duration"
     description = ("Synthetic test values exercise report rendering; they are not timing observations."
-                   if test else "Seven measured 100-call batches per fixture; median marker and minimum-to-maximum range, in nanoseconds.")
+                   if test else "Seven measured 100-call batches per fixture; median marker and minimum-to-maximum range, in milliseconds.")
     return ('<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" '
             f'viewBox="0 0 680 310"><title id="title">{title}</title>'
             f'<desc id="desc">{description}</desc>'
             '<style>text{font:13px system-ui,sans-serif;fill:#182b36}</style>'
-            '<text x="24" y="28">Duration per 100-call batch (ns)</text>'
-            + "".join(strokes) + '</svg>')
+            '<text x="24" y="28">Duration per 100-call batch (ms)</text>'
+            + "".join(ticks) + "".join(strokes) + '</svg>')
 
 
 def page(record: dict) -> str:

@@ -1,0 +1,4 @@
+case_id,points,nonwarmup_batches,nonwarmup_calls,median_batch_ns,min_batch_ns,max_batch_ns,failed_calls
+signed-score,6,7,700,52116200,51192500,53811700,0
+zero-width-duplicate,4,7,700,35886100,35349400,41002000,0
+late-outside,4,7,700,36184800,35798400,37316000,0
