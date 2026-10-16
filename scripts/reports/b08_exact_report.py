@@ -168,12 +168,42 @@ def validate_record(record: dict) -> dict:
     return record
 
 
+def render_trial_figure(rows: list[dict], median_ns: int) -> str:
+    durations = [row["duration_ns"] for row in rows]
+    tick_ns = 100_000_000
+    lower = min(durations) // tick_ns * tick_ns
+    upper = ((max(durations) // tick_ns) + 1) * tick_ns
+    position = lambda duration: 150 + (duration - lower) * 540 // (upper - lower)
+    lines = [
+        '<figure><svg viewBox="0 0 800 290" role="img" aria-labelledby="trial-title trial-desc" xmlns="http://www.w3.org/2000/svg">',
+        '<title id="trial-title">Fresh-process durations for all B08 attempts</title>',
+        '<desc id="trial-desc">One excluded warmup and seven measured checker runs. Horizontal position is duration in seconds; the dotted line marks the measured median. Exact nanoseconds are in the trial CSV.</desc>',
+        f'<line x1="150" y1="258" x2="690" y2="258" stroke="#444"/>',
+        f'<text x="150" y="278" text-anchor="middle">{lower / 1e9:.3f} s</text>',
+        f'<text x="690" y="278" text-anchor="middle">{upper / 1e9:.3f} s</text>',
+        f'<line x1="{position(median_ns)}" y1="30" x2="{position(median_ns)}" y2="250" stroke="#a32a2a" stroke-dasharray="4 4"/>',
+        f'<text x="150" y="21">Measured median: {median_ns / 1e9:.3f} s</text>',
+    ]
+    for number, row in enumerate(rows):
+        y = 47 + number * 28
+        label = "Warmup" if row["warmup"] else f"Trial {number}"
+        color = "#777" if row["warmup"] else "#12649a"
+        duration = row["duration_ns"]
+        lines.extend((
+            f'<text x="8" y="{y + 5}">{label}</text>',
+            f'<circle cx="{position(duration)}" cy="{y}" r="5" fill="{color}"><title>{label}: {duration} ns</title></circle>',
+            f'<text x="710" y="{y + 5}">{duration / 1e9:.3f} s</text>',
+        ))
+    lines.extend(('</svg><figcaption>Individual fresh-process times. The gray warmup is excluded from the median; displayed seconds are rounded to 0.001 s. Exact nanoseconds remain in the CSV.</figcaption></figure>',))
+    return "\n".join(lines)
+
+
 def render_html(record: dict) -> str:
     validate_record(record)
     data = record["summary"]
     if data is None:
         raise ValueError("failed collection cannot be published")
-    rows = ["<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>B08 displayed-data exact reference</title></head><body>",
+    rows = ["<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>B08 displayed-data exact reference</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;color:#17212b}table{border-collapse:collapse}th,td{padding:.35rem .75rem;border:1px solid #9da9b3;text-align:right}figure{margin:1.5rem 0}svg{display:block;max-width:800px;width:100%;font:14px system-ui,sans-serif}figcaption{max-width:800px}pre{overflow-x:auto;background:#f3f5f7;padding:1rem}code{overflow-wrap:anywhere}</style></head><body>",
             "<h1>B08 displayed-data exact reference</h1>",
             "<p>Descriptive single-checker Python measurements. This is the printed rounded linear model, not the historical MATLAB run, nonlinear plant or a complete optimal-control family. No comparator, speedup or source-mapped limiter was measured; performance interpretation is inconclusive.</p>",
             f"<p>Source commit <code>{record['source']['source_commit']}</code>; harness commit <code>{record['source']['harness_commit']}</code>; report <code>{record['report_id']}</code>.</p>",
@@ -181,6 +211,7 @@ def render_html(record: dict) -> str:
             f"<p>{record['repetitions']} measured fresh child processes and one excluded warmup. {html.escape(INTERVAL)}. Interpreter startup and output capture are included, so these are process-level times.</p>",
             "<table><caption>Fresh-process latency, nanoseconds</caption><thead><tr><th>Median</th><th>Minimum</th><th>Maximum</th><th>Successful trials</th></tr></thead><tbody>",
             f"<tr><td>{data['median_ns']}</td><td>{data['min_ns']}</td><td>{data['max_ns']}</td><td>{data['trials']}</td></tr></tbody></table>",
+            render_trial_figure(record["rows"], data["median_ns"]),
             "<p>All attempts, including the excluded warmup, are retained in the raw records. Peak memory, child CPU time and interpreter internal phase timings are unavailable. The host activity note and actual Python executable identity are in the saved record.</p>",
             "<p><a href=\"records.json\">Saved JSON</a> · <a href=\"trials.csv\">Trial CSV</a> · <a href=\"raw-trials.jsonl\">Raw process output and attempts</a> · <a href=\"manifest.json\">File hashes</a></p>",
             "<h2>Environment</h2><pre>", html.escape(json.dumps(record["environment"], indent=2, ensure_ascii=False)),

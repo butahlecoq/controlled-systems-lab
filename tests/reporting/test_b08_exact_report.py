@@ -53,6 +53,16 @@ def fixture_record():
 
 
 class B08ExactReportTests(unittest.TestCase):
+    def test_saved_report_figure_plots_all_attempts(self):
+        path = ROOT / "reports/algorithm-results/b08-exact-b0d0e85d4d338f56/records.json"
+        record = json.loads(path.read_text(encoding="utf-8"))
+        page = report.render_html(record)
+        self.assertEqual(page.count("<circle "), 8)
+        self.assertIn("Warmup: 1619303200 ns", page)
+        self.assertIn("Trial 7: 1626761800 ns", page)
+        self.assertIn("Measured median: 1.651 s", page)
+        self.assertIn("The gray warmup is excluded from the median", page)
+
     def test_real_checker_functional_smoke(self):
         result = subprocess.run([sys.executable, "-B", "-O", str(TOOL), "smoke"],
                                 cwd=ROOT, capture_output=True, text=True, timeout=60)

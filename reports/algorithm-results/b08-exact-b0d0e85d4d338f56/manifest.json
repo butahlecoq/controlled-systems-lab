@@ -1,0 +1,10 @@
+{
+  "files": {
+    "index.html": "55a8d485c943ba12ff6db365365bd39cfeeab3d78bc1014d05a429d8900d6192",
+    "raw-trials.jsonl": "0bca6e1f8919de38a354e3238550a662e6094752a2c94cb3a787463e5c442014",
+    "records.json": "d584d26eb9f90e850dd309d82d396790db52846d58bc221bbd0d6019840158c8",
+    "trials.csv": "3e534de6e021f8312f58d850867f3395304f29dcd8d01c359331d955bc457fae"
+  },
+  "report_id": "b08-exact-b0d0e85d4d338f56",
+  "schema": "csl.b08-report-files/1"
+}
