@@ -1,0 +1,13 @@
+{
+  "schema": "csl.ext01-excluded-collection-attempt/1",
+  "phase": "nonreported_profile",
+  "status": "terminated_after_capture_deadlock",
+  "accepted_trial_started": false,
+  "collector_process_id": 11832,
+  "driver_process_id": 3588,
+  "cause": "The first collector waited for child exit before draining anonymous stdout/stderr pipes; the child filled the Windows pipe buffer. Both owned processes were stopped, then capture was changed to durable files and regression tested.",
+  "stdout_available": false,
+  "stderr_available": false,
+  "unavailable_reason": "The first collector held output in anonymous pipes; termination discarded unread bytes before a durable capture existed.",
+  "timings_accepted": false
+}

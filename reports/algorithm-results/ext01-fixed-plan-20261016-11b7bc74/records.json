@@ -1,0 +1,756 @@
+{
+  "arithmetic": {
+    "assurance": "numerical; no validated rounding enclosure",
+    "b08_tie_absolute_tolerance": 1e-08,
+    "objective_policy_absolute_tolerance": 1e-08,
+    "objective_policy_relative_tolerance": 1e-08,
+    "type": "binary64"
+  },
+  "attempts": 32,
+  "build": {
+    "binary_sha256": "9297ef4623f5fb885d94562b1327765ccba86282bfb0fc74803e33212d548954",
+    "cmake": {
+      "generator": "Visual Studio 17 2022",
+      "version": {
+        "isDirty": false,
+        "major": 3,
+        "minor": 31,
+        "patch": 6,
+        "string": "3.31.6-msvc6",
+        "suffix": "msvc6"
+      }
+    },
+    "compiler": {
+      "compiler": {
+        "id": "MSVC",
+        "implicit": {
+          "includeDirectories": [],
+          "linkDirectories": [],
+          "linkFrameworkDirectories": [],
+          "linkLibraries": []
+        },
+        "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+        "version": "19.44.35215.0"
+      },
+      "language": "CXX",
+      "sourceFileExtensions": [
+        "C",
+        "M",
+        "c++",
+        "cc",
+        "cpp",
+        "cxx",
+        "mm",
+        "mpp",
+        "CPP",
+        "ixx",
+        "cppm",
+        "ccm",
+        "cxxm",
+        "c++m"
+      ]
+    },
+    "configuration": "Release",
+    "driver_sha256": "25f89543d4627ecce2a4f40dde5e51b7d1da75c7737a9e199ac7835962d374d9",
+    "fresh_build_sha256": "b9aa62a77cf19a93e85e0aac3d2a19084f5f1341b1610c8c308d87d9c187603f",
+    "graph_sha256": "4e35bb72e7bce244feac7e67e36fad4d1b184038af470c3c8136c59e04a16fa4"
+  },
+  "collected_utc": "2026-10-16T11:38:38.707297+00:00",
+  "environment": {
+    "actual_native_threads": null,
+    "actual_native_threads_reason": "No native thread-count counter in the report driver; standalone process is sequential at the fixture loop.",
+    "concurrent_work_note": "No other known local heavy build active; ordinary background processes not controlled.",
+    "host_cpu_percent_after_measurement": 1.4,
+    "host_cpu_percent_before_profile": 8.8,
+    "host_cpu_percent_between_runs": 1.3,
+    "logical_processors": 12,
+    "machine": "AMD64",
+    "memory_total_bytes": 34189107200,
+    "physical_cores": 6,
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "psutil": "7.0.0",
+    "python": "3.13.5",
+    "release": "11",
+    "requested_driver_workers": 1,
+    "system": "Windows",
+    "version": "10.0.22631"
+  },
+  "failures": 0,
+  "harness_commit": "11b7bc74e4756bafc2c6c450628d10c6a62f8f39",
+  "inputs": {
+    "assumptions": "Independent compact V disturbances, affine model, convex H safety; displayed rounded B08 arrays.",
+    "authored_fixture_sha256": "25f89543d4627ecce2a4f40dde5e51b7d1da75c7737a9e199ac7835962d374d9",
+    "b08_saved_reference_sha256": "d9aed4974d06d49e42e740e5c4be7b73ac06c7f76a110e4500eadb1d44180997"
+  },
+  "performance_conclusion": "Exploratory single-adapter observations; no comparator or speedup claim.",
+  "report_id": "ext01-fixed-plan-20261016-11b7bc74",
+  "schema": "csl.ext01-fixed-plan-records/1",
+  "source_commit": "fd75a63657bc6b1d8cbd26c644bd8fb39cc1a3ec",
+  "source_delta": [
+    "CMakeLists.txt",
+    "benchmarks/reporting/ext01/fixed_plan_driver.cpp",
+    "cmake/OptionalReports.cmake",
+    "scripts/reports/ext01/README.md",
+    "scripts/reports/ext01/check_smoke.py"
+  ],
+  "source_tree": "1a90152038ab9d4eec8bd96329b7311121ab1a2c",
+  "successes": 32,
+  "summary": [
+    {
+      "attempts": 7,
+      "batch": 10000,
+      "failures": 0,
+      "fixture": "l19",
+      "max_elapsed_ns": 57473800,
+      "median_elapsed_ns": 45803600,
+      "min_elapsed_ns": 45122800,
+      "successes": 7
+    },
+    {
+      "attempts": 7,
+      "batch": 5000,
+      "failures": 0,
+      "fixture": "integrator_feasible",
+      "max_elapsed_ns": 108355200,
+      "median_elapsed_ns": 97209600,
+      "min_elapsed_ns": 96530900,
+      "successes": 7
+    },
+    {
+      "attempts": 7,
+      "batch": 5000,
+      "failures": 0,
+      "fixture": "integrator_violation",
+      "max_elapsed_ns": 78145700,
+      "median_elapsed_ns": 76543900,
+      "min_elapsed_ns": 73668300,
+      "successes": 7
+    },
+    {
+      "attempts": 7,
+      "batch": 1,
+      "failures": 0,
+      "fixture": "b08_rounded",
+      "max_elapsed_ns": 94758500,
+      "median_elapsed_ns": 91284100,
+      "min_elapsed_ns": 90217000,
+      "successes": 7
+    }
+  ],
+  "timing": {
+    "clock": "steady_clock",
+    "interval_interpretation": "The L19 10000-call batch is about 44 ms on this host; report its batch time with range, not an extrapolated single-call latency or throughput claim.",
+    "measured_rounds": 7,
+    "minimum_admitted_batch_interval_ns": 20000000,
+    "order": "Alternating fixture order by round",
+    "profile_is_reported": false,
+    "raw_sha256": "7e6a864ecd08a084ca79b3f74fc226686ec2bc8224bb51536182e9129083f16b",
+    "scope": "Fixture construction, public API calls, literal checks and JSON result object; excludes process startup, JSONL serialization, persistence, rendering.",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unit": "ns",
+    "warmup_rounds": 1,
+    "workspace_reuse": "Fixture and API results constructed anew for each checked call; one warmup round excluded."
+  },
+  "trials": [
+    {
+      "batch": 10000,
+      "checked_calls": 10000,
+      "elapsed_ns": 49338300,
+      "fixture": "l19",
+      "result": {
+        "evaluated_vertices": 3,
+        "maximizer": [
+          0.0
+        ],
+        "observed_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "sampled_points": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "stationary_midpoint_value": 0.0,
+        "status": "numerical_value",
+        "worst_value": 1.0
+      },
+      "round": 0,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 101218500,
+      "fixture": "integrator_feasible",
+      "result": {
+        "stages": 3,
+        "status": "numerical_reachable",
+        "terminal_candidates": 4,
+        "terminal_worst_value": 4
+      },
+      "round": 0,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 77007500,
+      "fixture": "integrator_violation",
+      "result": {
+        "stage": 1,
+        "status": "robust_violation",
+        "violating_successor": [
+          -1.0
+        ]
+      },
+      "round": 0,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": true
+    },
+    {
+      "batch": 1,
+      "checked_calls": 1,
+      "elapsed_ns": 105428600,
+      "fixture": "b08_rounded",
+      "result": {
+        "disturbance_histories": 160000,
+        "minimum_worst_value": 67.15060110140755,
+        "plan_count": 625,
+        "status": "numerical_reference",
+        "ties_at_1e-8": 3
+      },
+      "round": 0,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": true
+    },
+    {
+      "batch": 1,
+      "checked_calls": 1,
+      "elapsed_ns": 94758500,
+      "fixture": "b08_rounded",
+      "result": {
+        "disturbance_histories": 160000,
+        "minimum_worst_value": 67.15060110140755,
+        "plan_count": 625,
+        "status": "numerical_reference",
+        "ties_at_1e-8": 3
+      },
+      "round": 1,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 78145700,
+      "fixture": "integrator_violation",
+      "result": {
+        "stage": 1,
+        "status": "robust_violation",
+        "violating_successor": [
+          -1.0
+        ]
+      },
+      "round": 1,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 108355200,
+      "fixture": "integrator_feasible",
+      "result": {
+        "stages": 3,
+        "status": "numerical_reachable",
+        "terminal_candidates": 4,
+        "terminal_worst_value": 4
+      },
+      "round": 1,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 10000,
+      "checked_calls": 10000,
+      "elapsed_ns": 57473800,
+      "fixture": "l19",
+      "result": {
+        "evaluated_vertices": 3,
+        "maximizer": [
+          0.0
+        ],
+        "observed_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "sampled_points": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "stationary_midpoint_value": 0.0,
+        "status": "numerical_value",
+        "worst_value": 1.0
+      },
+      "round": 1,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 10000,
+      "checked_calls": 10000,
+      "elapsed_ns": 45251100,
+      "fixture": "l19",
+      "result": {
+        "evaluated_vertices": 3,
+        "maximizer": [
+          0.0
+        ],
+        "observed_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "sampled_points": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "stationary_midpoint_value": 0.0,
+        "status": "numerical_value",
+        "worst_value": 1.0
+      },
+      "round": 2,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 97117100,
+      "fixture": "integrator_feasible",
+      "result": {
+        "stages": 3,
+        "status": "numerical_reachable",
+        "terminal_candidates": 4,
+        "terminal_worst_value": 4
+      },
+      "round": 2,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 73668300,
+      "fixture": "integrator_violation",
+      "result": {
+        "stage": 1,
+        "status": "robust_violation",
+        "violating_successor": [
+          -1.0
+        ]
+      },
+      "round": 2,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 1,
+      "checked_calls": 1,
+      "elapsed_ns": 94362600,
+      "fixture": "b08_rounded",
+      "result": {
+        "disturbance_histories": 160000,
+        "minimum_worst_value": 67.15060110140755,
+        "plan_count": 625,
+        "status": "numerical_reference",
+        "ties_at_1e-8": 3
+      },
+      "round": 2,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 1,
+      "checked_calls": 1,
+      "elapsed_ns": 91123000,
+      "fixture": "b08_rounded",
+      "result": {
+        "disturbance_histories": 160000,
+        "minimum_worst_value": 67.15060110140755,
+        "plan_count": 625,
+        "status": "numerical_reference",
+        "ties_at_1e-8": 3
+      },
+      "round": 3,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 76849300,
+      "fixture": "integrator_violation",
+      "result": {
+        "stage": 1,
+        "status": "robust_violation",
+        "violating_successor": [
+          -1.0
+        ]
+      },
+      "round": 3,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 96530900,
+      "fixture": "integrator_feasible",
+      "result": {
+        "stages": 3,
+        "status": "numerical_reachable",
+        "terminal_candidates": 4,
+        "terminal_worst_value": 4
+      },
+      "round": 3,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 10000,
+      "checked_calls": 10000,
+      "elapsed_ns": 45146900,
+      "fixture": "l19",
+      "result": {
+        "evaluated_vertices": 3,
+        "maximizer": [
+          0.0
+        ],
+        "observed_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "sampled_points": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "stationary_midpoint_value": 0.0,
+        "status": "numerical_value",
+        "worst_value": 1.0
+      },
+      "round": 3,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 10000,
+      "checked_calls": 10000,
+      "elapsed_ns": 47478900,
+      "fixture": "l19",
+      "result": {
+        "evaluated_vertices": 3,
+        "maximizer": [
+          0.0
+        ],
+        "observed_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "sampled_points": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "stationary_midpoint_value": 0.0,
+        "status": "numerical_value",
+        "worst_value": 1.0
+      },
+      "round": 4,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 99208700,
+      "fixture": "integrator_feasible",
+      "result": {
+        "stages": 3,
+        "status": "numerical_reachable",
+        "terminal_candidates": 4,
+        "terminal_worst_value": 4
+      },
+      "round": 4,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 76543900,
+      "fixture": "integrator_violation",
+      "result": {
+        "stage": 1,
+        "status": "robust_violation",
+        "violating_successor": [
+          -1.0
+        ]
+      },
+      "round": 4,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 1,
+      "checked_calls": 1,
+      "elapsed_ns": 91053300,
+      "fixture": "b08_rounded",
+      "result": {
+        "disturbance_histories": 160000,
+        "minimum_worst_value": 67.15060110140755,
+        "plan_count": 625,
+        "status": "numerical_reference",
+        "ties_at_1e-8": 3
+      },
+      "round": 4,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 1,
+      "checked_calls": 1,
+      "elapsed_ns": 90217000,
+      "fixture": "b08_rounded",
+      "result": {
+        "disturbance_histories": 160000,
+        "minimum_worst_value": 67.15060110140755,
+        "plan_count": 625,
+        "status": "numerical_reference",
+        "ties_at_1e-8": 3
+      },
+      "round": 5,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 75986200,
+      "fixture": "integrator_violation",
+      "result": {
+        "stage": 1,
+        "status": "robust_violation",
+        "violating_successor": [
+          -1.0
+        ]
+      },
+      "round": 5,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 97495400,
+      "fixture": "integrator_feasible",
+      "result": {
+        "stages": 3,
+        "status": "numerical_reachable",
+        "terminal_candidates": 4,
+        "terminal_worst_value": 4
+      },
+      "round": 5,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 10000,
+      "checked_calls": 10000,
+      "elapsed_ns": 45803600,
+      "fixture": "l19",
+      "result": {
+        "evaluated_vertices": 3,
+        "maximizer": [
+          0.0
+        ],
+        "observed_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "sampled_points": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "stationary_midpoint_value": 0.0,
+        "status": "numerical_value",
+        "worst_value": 1.0
+      },
+      "round": 5,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 10000,
+      "checked_calls": 10000,
+      "elapsed_ns": 46002900,
+      "fixture": "l19",
+      "result": {
+        "evaluated_vertices": 3,
+        "maximizer": [
+          0.0
+        ],
+        "observed_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "sampled_points": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "stationary_midpoint_value": 0.0,
+        "status": "numerical_value",
+        "worst_value": 1.0
+      },
+      "round": 6,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 97209600,
+      "fixture": "integrator_feasible",
+      "result": {
+        "stages": 3,
+        "status": "numerical_reachable",
+        "terminal_candidates": 4,
+        "terminal_worst_value": 4
+      },
+      "round": 6,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 75939700,
+      "fixture": "integrator_violation",
+      "result": {
+        "stage": 1,
+        "status": "robust_violation",
+        "violating_successor": [
+          -1.0
+        ]
+      },
+      "round": 6,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 1,
+      "checked_calls": 1,
+      "elapsed_ns": 91357800,
+      "fixture": "b08_rounded",
+      "result": {
+        "disturbance_histories": 160000,
+        "minimum_worst_value": 67.15060110140755,
+        "plan_count": 625,
+        "status": "numerical_reference",
+        "ties_at_1e-8": 3
+      },
+      "round": 6,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 1,
+      "checked_calls": 1,
+      "elapsed_ns": 91284100,
+      "fixture": "b08_rounded",
+      "result": {
+        "disturbance_histories": 160000,
+        "minimum_worst_value": 67.15060110140755,
+        "plan_count": 625,
+        "status": "numerical_reference",
+        "ties_at_1e-8": 3
+      },
+      "round": 7,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 77313600,
+      "fixture": "integrator_violation",
+      "result": {
+        "stage": 1,
+        "status": "robust_violation",
+        "violating_successor": [
+          -1.0
+        ]
+      },
+      "round": 7,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 97131200,
+      "fixture": "integrator_feasible",
+      "result": {
+        "stages": 3,
+        "status": "numerical_reachable",
+        "terminal_candidates": 4,
+        "terminal_worst_value": 4
+      },
+      "round": 7,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    },
+    {
+      "batch": 10000,
+      "checked_calls": 10000,
+      "elapsed_ns": 45122800,
+      "fixture": "l19",
+      "result": {
+        "evaluated_vertices": 3,
+        "maximizer": [
+          0.0
+        ],
+        "observed_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "sampled_points": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "stationary_midpoint_value": 0.0,
+        "status": "numerical_value",
+        "worst_value": 1.0
+      },
+      "round": 7,
+      "schema": "csl.ext01-raw-trial/1",
+      "warmup": false
+    }
+  ]
+}

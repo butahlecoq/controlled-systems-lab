@@ -1,0 +1,8 @@
+Internal ctest changing into directory: D:/work/PhD/ext01-measure/build/ext01-report
+Test project D:/work/PhD/ext01-measure/build/ext01-report
+    Start 1: ext01_report_smoke
+1/1 Test #1: ext01_report_smoke ...............   Passed    0.14 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.15 sec

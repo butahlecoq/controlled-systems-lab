@@ -1,0 +1,8 @@
+{
+  "failure_count": 0,
+  "profile_attempts": 32,
+  "raw_sha256": "7e6a864ecd08a084ca79b3f74fc226686ec2bc8224bb51536182e9129083f16b",
+  "records_sha256": "ad6b9ff08d4fad677a0b8ab21fd9a768400496570996d9c527b3e9cad91581df",
+  "schema": "csl.ext01-collection-status/1",
+  "status": "complete"
+}
