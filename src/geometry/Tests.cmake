@@ -41,6 +41,11 @@ target_link_libraries(approximation_policy_tests PRIVATE CSL::approximation CSL:
 add_test(NAME approximation_policy_tests COMMAND approximation_policy_tests)
 csl_test_target(approximation_policy_tests geometry)
 
+add_executable(approximation_reachable_plan_tests tests/contract/geometry/approximation_reachable_plan_tests.cpp)
+target_link_libraries(approximation_reachable_plan_tests PRIVATE CSL::approximation doctest::doctest)
+add_test(NAME approximation_reachable_plan_tests COMMAND approximation_reachable_plan_tests)
+csl_test_target(approximation_reachable_plan_tests geometry)
+
 add_executable(generator_sets_test tests/unit/geometry/generator_sets_test.cpp)
 target_link_libraries(generator_sets_test PRIVATE CSL::sets CSL::geometry_generators doctest::doctest)
 add_test(NAME generator_sets_test COMMAND generator_sets_test)
