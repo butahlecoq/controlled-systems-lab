@@ -94,11 +94,16 @@ TEST_CASE("registered convex finite infeasible and QP iteration-limit outcomes s
     CHECK(infeasible.outcome.value==MathematicalOutcome::infeasible);
     CHECK(infeasible.outcome.subject==impossible.identity());
     CHECK(std::holds_alternative<Unestablished>(infeasible.outcome.support));
+    CHECK(infeasible.raw_diagnostics.find("phase.feasibility.model_status=8\n")!=std::string::npos);
+    CHECK(infeasible.raw_diagnostics.find("phase.qp.api_status=")==std::string::npos);
     if(infeasible.primal) {
         REQUIRE(infeasible.residuals.primal);
         const double x=infeasible.primal->at(0);
+        const double independent_cost=(x-2)*(x-2);
         const double row_violation=std::max(0.0,2-x);
         const double variable_violation=std::max({0.0,-x,x-1});
+        CHECK(accepted(evaluate(impossible.original_objective(),*infeasible.primal))==doctest::Approx(independent_cost));
+        check_reported_original_cost(infeasible,independent_cost);
         CHECK(std::max(row_violation,variable_violation)>=0.5);
         CHECK(infeasible.residuals.primal->context.subject==impossible.identity());
         CHECK(infeasible.residuals.primal->rows.violation==doctest::Approx(row_violation).epsilon(1e-8));
@@ -113,6 +118,9 @@ TEST_CASE("registered convex finite infeasible and QP iteration-limit outcomes s
     CHECK(limited.outcome.value==MathematicalOutcome::undetermined);
     CHECK(limited.outcome.subject==finite.identity());
     CHECK(std::holds_alternative<Unestablished>(limited.outcome.support));
+    CHECK(limited.raw_diagnostics.find("options.qp_iteration_limit=0\n")!=std::string::npos);
+    CHECK(limited.raw_diagnostics.find("phase.qp.model_status=14\n")!=std::string::npos);
+    CHECK(limited.raw_diagnostics.find("phase.qp.iterations=0\n")!=std::string::npos);
     if(limited.primal) {
         const double x=limited.primal->at(0);
         const double independent_cost=(x-2)*(x-2);
