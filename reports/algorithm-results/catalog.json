@@ -224,6 +224,18 @@
       "measured_scope": "21 verified measured call batches across three analytic QuickHull clouds; 1000 calls per batch; performance interpretation inconclusive",
       "evidence_limits": "Descriptive single-adapter verified-call batches on three tiny analytic clouds; timed index copies and literal oracle comparisons are included; no comparator, speedup, application-scale, or scalability claim; no source-mapped limiter profile; binary64 input orientation is exact only for represented coordinates",
       "zip_sha256": "9523a907b67dd576c6a107b849b6cd415095a711e839bcbdc4f52e77d8d6b6d8"
+    },
+    {
+      "report_id": "b08-displayed-exact-5db00478351f310ecece0eae0187ace7de79b8c0850c958568232dd0bc779116",
+      "report_kind": "b08-displayed-exact",
+      "source_report_id": "b08-exact-b0d0e85d4d338f56",
+      "payload_schema": "csl.b08-displayed-exact-report/1",
+      "payload_sha256": "559ad53d0ea897592ed2ec018e3584ff135313d676a94ef16903446669605cf8",
+      "native_payload_sha256": "b0d0e85d4d338f564a83180b1888d1df52ad76b292b4cfc68d2d2cdd2d5b3e00",
+      "source_commit": "78212b21d42ec3f136f0e1c72b2b0861d306792c",
+      "measured_scope": "Printed B08 linear model, 625 plans x 256 corners; 7 verified fresh-process measured trials after one excluded warmup; performance interpretation inconclusive",
+      "evidence_limits": "Printed rounded L04 linear model only; historical 67.12, unrounded arrays, nonlinear plant, and complete optimal family remain unresolved; fresh CPython process time includes startup and output capture; no comparator or speedup; no source-mapped limiter",
+      "zip_sha256": "3b29d56fcbc356816c725e431a215091429263080ad3f51cca1fa30e4aae98b1"
     }
   ]
 }
