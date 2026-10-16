@@ -10,8 +10,17 @@ The DOC compound file contains 118 `ObjectPool/_<id>/Equation Native` streams. L
 |---|---|---|
 | p. 6, (1.4)–(1.5) | `_1603887352`, `_1603887377` | The two flow and tank recurrences display the same signs and time convention as L11 p. 6 and published R40 p. 168. These are separate version-5 objects, not a recovered implementation. |
 | p. 7, (1.8)–(1.9); p. 8, (1.10) | `_1565687909`, `_1565688266`; `_1571927465`; `_1565690295`, `_1565690397` | The control domain in (1.8) uses `t=0,…,T−1`; (1.10) defines the purported program with `t=1,…,T−1`, while its terminal-state expression again uses `t=0,…,T−1`. The mismatch is present in L11 and [R40](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019) (1.8)/(1.10), and in A41 p. 6 under renumbered (1.9)/(1.11). L12's (1.9) calls `||x(T)−x_d||₄` Euclidean; A41 p. 6 prints subscript 2 instead, without resolving the first-action range. |
-| p. 12, numerical model | `_1569834835`, `_1569834853`, `_1572170474`, `_1572170498` | `x₀=(1216.904,119500,438.787,45300)`, the displayed `A` with stock rows `−6.25`, `B=(17,0,−12,0)`, and flow bounds `[1176,1224]`, `[432,468]` match L11 p. 12, A41 pp. 11–12 and R40 p. 172. The `A/B` stream's SHA-256 is `1705d95f22156f8e75a61f820fb444645debb31f5b5b66b89615be1f0e19d11a`. |
+| p. 12, numerical model | `_1569834835`, `_1569834853`, `_1572170474`, `_1572170498` | `x₀=(1216.904,119500,438.787,45300)`, the displayed `A` with stock rows `−6.25`, `B=(17,0,−12,0)`, and flow bounds `[1176,1224]`, `[432,468]` match L11 p. 12, A41 pp. 11–12 and R40 p. 172. Each object's displayed item and native-stream digest are mapped below. |
 | p. 13, numerical result | `_1603890820`, `_1604662739` | The endpoint `(1200.7,−22.929,450.2,−7.709)` and reported `Φ=30.899` match L11 p. 13, A41 p. 12 and R40 pp. 172–174. Their native-stream SHA-256 digests are `f205ab1a39d3ab426411f5a2f75014165b7b67102bd144fb0c5f4b1aad102f89` and `ad4c975606032b57fa4a7e825b74fd0732226d83d188bdb030e540435b617efc`, respectively. |
+
+For the four L12 p. 12 objects, SHA-256 covers the bytes of each original `Equation Native` stream, not the rendered PDF or temporary DOCX:
+
+| Original `ObjectPool` ID | Displayed item | Native-stream SHA-256 |
+|---|---|---|
+| `_1569834835` | Initial state `x(0)=x₀` | `6b9967c72fcd2c1ed15abe36673be3b64d5d7a129633f4e7951997054313e56f` |
+| `_1569834853` | Matrices `A(t)` and `B(t)` | `1705d95f22156f8e75a61f820fb444645debb31f5b5b66b89615be1f0e19d11a` |
+| `_1572170474` | `x₁(t)∈[1176;1224]` | `6bd5e6954a1ea54c6434fdd4e535c1e39dde5c1d7473844606047ab8d524c6f7` |
+| `_1572170498` | `x₃(t)∈[432;468]` | `22caa30196bb5ca8cfa255ad3c0ac69cf250b4793c1f25d254f12fe53796e548` |
 
 The weighted five-term terminal criterion on L12 p. 13 was checked visually against L11 p. 13, A41 p. 12 and [R40 p. 172](https://sciencejournals.ru/issues/teorsist/2019/vol_2019/iss_1/TeorSist1902009Kalev/TeorSist1902009Kalev.pdf): the coefficients are `64/9` on the third and fourth squared terms, and the fifth is `(x₂−8x₄/3)²`, all under one square root. A unique original `Equation Native` object for that complete displayed expression was not established, so this note makes no object-ID attribution for it. L12 p. 13 and R40 describe an unspecified family size `k` and then three plotted controls; A41 p. 12 instead displays 100 controls in its intermediate family. This is a revision difference, not evidence that either draft supplies the saved optimizer `U` rows.
 
