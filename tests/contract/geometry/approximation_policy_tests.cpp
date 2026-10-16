@@ -28,6 +28,21 @@ SetHandle two_points(const char* id) {
     return take(sets::make_v({{id},1,{"x"}},
         {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)})).as_handle();
 }
+SetHandle h_set(const char* id, Vector inequality_rows, Vector upper_bounds,
+                Vector equality_rows = {}, Vector equality_values = {},
+                const char* coordinate = "x") {
+    const auto inequalities = numeric::snapshot(Matrix{inequality_rows.size(),1,std::move(inequality_rows)});
+    const auto bounds = numeric::snapshot_vector(upper_bounds);
+    const auto equalities = numeric::snapshot(Matrix{equality_rows.size(),1,std::move(equality_rows)});
+    const auto values = numeric::snapshot_vector(equality_values);
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(values));
+    return take(sets::make_h({{id},1,{coordinate}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(bounds),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(values)})).as_handle();
+}
 ApproximationRequest request(SetHandle input, SetRelation relation, RepresentationId representation) {
     return {{{"problem/a"},{"approx/a"},{"reference/a"}},std::move(input),std::move(representation),relation,2,Assurance::numerical};
 }
@@ -79,6 +94,57 @@ TEST_CASE("registered outer approximation admits a universal superset") {
     auto outcome=execute(methods,query);
     REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
     CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::universal_superset);
+}
+
+TEST_CASE("dropping a native H constraint admits a nontrivial outer enclosure") {
+    auto input=h_set("reference",{1.0,-1.0},{2.0,1.0}); // [-1,2]
+    auto output=h_set("outer",{-1.0},{1.0}); // [-1,+infinity)
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    query.size_budget=1;
+    auto outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    CHECK(std::get<EnclosedApproximation>(outcome).result.output.id==SetId{"outer"});
+    CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::h_constraint_containment);
+}
+
+TEST_CASE("adding a native H equality admits a nontrivial inner enclosure") {
+    auto input=h_set("reference",{1.0,-1.0},{2.0,1.0}); // [-1,2]
+    auto output=h_set("inner",{-1.0,1.0},{1.0,2.0},{1.0},{0.0}); // {0}
+    auto query=request(input,SetRelation::inner,output.metadata.representation);
+    query.size_budget=3;
+    auto outcome=execute(provider(query,output,SetRelation::inner,SetRelation::inner),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    CHECK(std::get<EnclosedApproximation>(outcome).result.output.id==SetId{"inner"});
+    CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::h_constraint_containment);
+}
+
+TEST_CASE("different H coefficients or coordinate labels do not prove enclosure") {
+    auto input=h_set("reference",{1.0,-1.0},{2.0,1.0});
+    auto changed=h_set("changed",{1.0},{3.0}); // Not an authored reference row.
+    auto query=request(input,SetRelation::outer,changed.metadata.representation);
+    auto outcome=execute(provider(query,changed,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
+
+    auto relabeled=h_set("relabeled",{1.0},{2.0},{},{},"y");
+    query=request(input,SetRelation::outer,relabeled.metadata.representation);
+    outcome=execute(provider(query,relabeled,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
+}
+
+TEST_CASE("dropping an H equality supports only the outer direction") {
+    auto input=h_set("reference",{1.0},{2.0},{1.0},{0.0}); // {0}
+    auto output=h_set("candidate",{1.0},{2.0}); // (-infinity,2]
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    auto outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome)); // Dropping equality is a sound outer relation.
+    CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::h_constraint_containment);
+
+    query=request(input,SetRelation::inner,output.metadata.representation);
+    outcome=execute(provider(query,output,SetRelation::inner,SetRelation::inner),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
 }
 
 TEST_CASE("an enclosure cannot change the native coordinate system") {
