@@ -1,4 +1,4 @@
-# Generator-set algebra: first GEO-07 slice
+# Generator-set algebra and registered adapter: GEO-07 slices
 
 `CSL::geometry_generators` exposes immutable native generator payloads through
 `csl/sets/generator_sets.hpp` and three operations through
@@ -34,27 +34,45 @@ coordinates: `ξ_j <= 1`, `-ξ_j <= 1`, and the original equality rows, together
 with the affine map `x=c+Gξ` and ordered factor IDs identifying every H axis
 and map column. This is an explicit exact representation
 conversion in real-set algebra; it is not an ambient H/V materialization.
-No general intersection, ambient H/V conversion, support, membership,
-constraint feasibility, or generator reduction is exposed by this slice.
+No general intersection, ambient H conversion, support, membership,
+constraint feasibility, or generator reduction is exposed by the native slice.
 An intersection must use a richer representation and must not be returned as
 an ordinary zonotope through silent enclosure. Finite and mixed action
 catalogues are outside this continuous-factor contract.
 
-The formulas are algebraically exact over real inputs. Coefficients are stored
-and computed in binary64, so arithmetic can round. Input nonfinite values,
-malformed shapes/IDs and nonfinite results are rejected; these checks do not
-give a validated set inclusion or global error bound. This slice has no
-`GeometryPort` registration or assurance/evidence claim. A later adapter must
-specify numerical evidence and retain dependency semantics at that boundary.
-There is no performance claim. Generator and equality storage can grow with
-repeated sums, and no automatic reduction is performed.
+The registered `CSL::generator_adapter` target supplies a `GeometryPort` for
+affine images and disjoint-ID Minkowski sums of native generator handles. Its
+prepared-provider path retains IDs and equality rows in the output. A shared
+ID means the factors are dependent, so the independent-sum port rejects that
+request; use native `dependent_sum` for a synchronized sum. The adapter also
+supplies a `ConversionPort` for an explicit, bounded unconstrained zonotope to
+`csl.polyhedron.v` conversion. It enumerates every factor-cube corner, maps
+each corner into ambient coordinates and returns the resulting V payload
+without vertex deduplication or reduction. The caller must set a positive
+vertex cap, and admission rejects a factor count whose `2^count` exceeds it.
+The V payload has ambient coordinate labels but cannot carry factor identity.
+Constrained conversion, intersection and output shapes outside these narrow
+closures are unsupported.
+
+The formulas and conversion are equivalent in real-set algebra. Coefficients
+are stored and computed in binary64, so arithmetic can round. Input nonfinite
+values, malformed shapes/IDs and nonfinite results are rejected; these checks
+do not give a validated set inclusion or global error bound. The registered
+port offers numerical assurance with a symbolic representation argument and
+rejects validated assurance. This argument describes real-set algebra and
+does not certify rounded coordinates. There is no performance claim.
+Generator and equality storage can grow with repeated sums, and conversion
+can grow exponentially in the number of factors. No automatic reduction is
+performed.
 
 The unit tests use independent literal H-polyhedron membership queries for a
 box image, the synchronized cancellation singleton, and a constrained sum.
 They also check the lifted H form, preserved factor IDs and rows, invalid inputs,
 zero-column and contradictory-factor cases. A separate `find_package(CSL CONFIG)`
-installed consumer checks the exported public target. These finite cases establish
-behavior only for the supplied coordinates, not general numerical validity.
+installed consumer checks both exported public targets. Prepared-provider tests
+exercise literal ambient H answers and V vertices for the registered operations
+and conversion. These finite cases establish behavior only for the supplied
+coordinates, not general numerical validity.
 
 ## Publication gate
 
@@ -70,6 +88,9 @@ saved bundle independently, merge and deploy from main, then open the immutable
 Pages URL and link it in the PR and issue. Report a single-adapter exploratory
 timing without a speedup or unsupported exact-arithmetic claim.
 
-Issue #32 remains open after this slice: it still requires registered
-`GeometryPort`/conversion integration, ambient polyhedral oracle queries and
-the published report, as well as a review of the full acceptance checklist.
+Issue #32 remains open after these slices. The registered adapter adds a
+bounded subset of the requested closure and conversion surface. A separate
+fixed-source public-API report and review are required before this numerical
+adapter can merge; the native algorithm's report does not cover the new port.
+The full acceptance checklist, including broader geometry integration,
+remains to be reviewed.
