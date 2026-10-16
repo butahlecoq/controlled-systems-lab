@@ -1,0 +1,17 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Exploratory and inconclusive single-adapter timings; concurrent builds observed; no comparator, source-mapped limiter, speedup, continuous-state, partial-observation, physical-model, or global causal minimax claim",
+      "measured_scope": "28 verified registered-port calls, seven per four authored finite games",
+      "native_payload_sha256": "f953d66092cac83bb61ac7db9ef96f7a6123673ee50f74a41743e59bafe80d23",
+      "payload_schema": "csl.finite-feedback-records/1",
+      "payload_sha256": "f953d66092cac83bb61ac7db9ef96f7a6123673ee50f74a41743e59bafe80d23",
+      "report_id": "finite-feedback-registered-450f0be187f7f228883df0f43b23697c4a191fd42787c1e7233e6e6e7b94a30f",
+      "report_kind": "finite-feedback-registered-port",
+      "source_commit": "6602f0f88a8ef2071edefbbd913f7c4bbb6201df",
+      "source_report_id": "finite-feedback-bee7e6d32c88451d",
+      "zip_sha256": "d7a8239df554246021e3df9a1bd7396d95b5d71aee4f272e9b0b9d85c973963a"
+    }
+  ],
+  "schema": "csl.finite-feedback-report-extension/1"
+}

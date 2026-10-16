@@ -1,0 +1,1148 @@
+{
+  "configuration": "Release",
+  "generator": {
+    "build": "BUILD_ROOT",
+    "source": "SOURCE_ROOT"
+  },
+  "schema": "csl.finite-feedback-build-graph/1",
+  "targets": {
+    "ZERO_CHECK": {
+      "artifacts": [],
+      "compile_groups": [],
+      "dependencies": [],
+      "type": "UTILITY"
+    },
+    "csl_affine_sum": {
+      "artifacts": [
+        "csl_affine_sum.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_hull",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_phase_one",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_application": {
+      "artifacts": [
+        "csl_application.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_artifacts",
+        "csl_contracts",
+        "csl_execution",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_verification",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_approximation": {
+      "artifacts": [
+        "csl_approximation.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_artifacts": {
+      "artifacts": [
+        "csl_artifacts.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_execution",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_contracts": {
+      "artifacts": [
+        "csl_contracts.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_control_recovery": {
+      "artifacts": [
+        "csl_control_recovery.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_controllers": {
+      "artifacts": [
+        "csl_controllers.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_convex": {
+      "artifacts": [
+        "csl_convex.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_execution": {
+      "artifacts": [
+        "csl_execution.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_finite_feedback": {
+      "artifacts": [
+        "csl_finite_feedback.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_finite_feedback_port": {
+      "artifacts": [
+        "csl_finite_feedback_port.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_finite_feedback",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_finite_feedback_report": {
+      "artifacts": [
+        "csl_finite_feedback_report.exe",
+        "csl_finite_feedback_report.pdb"
+      ],
+      "compile_groups": [
+        {
+          "defines": [
+            "NDEBUG"
+          ],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_finite_feedback",
+        "csl_finite_feedback_port",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "EXECUTABLE"
+    },
+    "csl_fixed_plan_disturbance": {
+      "artifacts": [
+        "csl_fixed_plan_disturbance.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_sets"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_generator_adapter": {
+      "artifacts": [
+        "csl_generator_adapter.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_geometry_generators",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_geometry_generators": {
+      "artifacts": [
+        "csl_geometry_generators.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_numeric",
+        "csl_sets"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_hull": {
+      "artifacts": [
+        "csl_hull.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_phase_one",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_input": {
+      "artifacts": [
+        "csl_input.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_model": {
+      "artifacts": [
+        "csl_model.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_numeric"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_nominal_forward": {
+      "artifacts": [
+        "csl_nominal_forward.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_polyhedral",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_numeric": {
+      "artifacts": [
+        "csl_numeric.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_objectives": {
+      "artifacts": [
+        "csl_objectives.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [
+            "EIGEN_MPL2_ONLY"
+          ],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_numeric"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_optimization": {
+      "artifacts": [
+        "csl_optimization.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_numeric"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_phase_one": {
+      "artifacts": [
+        "csl_phase_one.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [
+            "EIGEN_DONT_PARALLELIZE",
+            "EIGEN_MPL2_ONLY"
+          ],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_polyhedral": {
+      "artifacts": [
+        "csl_polyhedral.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_problem": {
+      "artifacts": [
+        "csl_problem.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_sets"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_quickhull_2d": {
+      "artifacts": [
+        "csl_quickhull_2d.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_registry": {
+      "artifacts": [
+        "csl_registry.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_resolved_core": {
+      "artifacts": [
+        "csl_resolved_core.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_sets"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_resolved_problem": {
+      "artifacts": [
+        "csl_resolved_problem.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_sets": {
+      "artifacts": [
+        "csl_sets.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_numeric"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_strategy_a": {
+      "artifacts": [
+        "csl_strategy_a.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_artifacts",
+        "csl_contracts",
+        "csl_control_recovery",
+        "csl_convex",
+        "csl_execution",
+        "csl_model",
+        "csl_nominal_forward",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_polyhedral",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_terminal_minimizers",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_strategy_b": {
+      "artifacts": [
+        "csl_strategy_b.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_artifacts",
+        "csl_contracts",
+        "csl_convex",
+        "csl_execution",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_strategy_ts01",
+        "csl_verification",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_strategy_ts01": {
+      "artifacts": [
+        "csl_strategy_ts01.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_terminal_minimizers": {
+      "artifacts": [
+        "csl_terminal_minimizers.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_convex",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_verification": {
+      "artifacts": [
+        "csl_verification.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_verifiers": {
+      "artifacts": [
+        "csl_verifiers.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_problem",
+        "csl_resolved_core",
+        "csl_sets"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_witness_selector": {
+      "artifacts": [
+        "csl_witness_selector.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_model",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_optimization",
+        "csl_problem",
+        "csl_registry",
+        "csl_resolved_core",
+        "csl_resolved_problem",
+        "csl_sets",
+        "csl_strategy_ts01",
+        "csl_verifiers"
+      ],
+      "type": "STATIC_LIBRARY"
+    },
+    "csl_worst_case_vertex": {
+      "artifacts": [
+        "csl_worst_case_vertex.lib"
+      ],
+      "compile_groups": [
+        {
+          "defines": [],
+          "fragments": [
+            "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD",
+            "/W4",
+            "/WX",
+            "/permissive-"
+          ],
+          "language": "CXX",
+          "standard": "20"
+        }
+      ],
+      "dependencies": [
+        "ZERO_CHECK",
+        "csl_contracts",
+        "csl_numeric",
+        "csl_objectives",
+        "csl_sets"
+      ],
+      "type": "STATIC_LIBRARY"
+    }
+  }
+}
