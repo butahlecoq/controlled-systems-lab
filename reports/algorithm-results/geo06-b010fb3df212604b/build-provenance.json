@@ -1,0 +1,76 @@
+{
+  "cache_flags": {
+    "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+    "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+    "CMAKE_EXE_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/INCREMENTAL:NO",
+    "CMAKE_STATIC_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_STATIC_LINKER_FLAGS_RELEASE": ""
+  },
+  "exe_sha256": "ba9716cf0b6415fe6b4d3f76096e6a66fb743bdf66731b4164a3e16c9bec56de",
+  "harness_commit": "74651cb028b9c2359d666ae5f141c66e0b03708b",
+  "schema": "csl.geo06-build-provenance/1",
+  "source_commit": "ce63bff5a0face88c3c5e977f7d96337e8cbe948",
+  "targets": {
+    "driver": {
+      "archive": {},
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\geo06-report\\include;%(AdditionalIncludeDirectories)",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "UseFullPaths": "false"
+      },
+      "link": {
+        "AdditionalDependencies": "Release\\csl_quickhull_2d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib",
+        "AdditionalLibraryDirectories": "%(AdditionalLibraryDirectories)",
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64",
+        "GenerateDebugInformation": "false",
+        "IgnoreSpecificDefaultLibraries": "%(IgnoreSpecificDefaultLibraries)",
+        "ImportLibrary": "D:/work/PhD/repo/.worktrees/geo06-report/build/geo06-report/Release/csl_geo06_quickhull_report.lib",
+        "ProgramDataBaseFile": "D:/work/PhD/repo/.worktrees/geo06-report/build/geo06-report/Release/csl_geo06_quickhull_report.pdb",
+        "SubSystem": "Console"
+      },
+      "project_sha256": "fe19e447ebe60faa1b6077fe52adccfaace033b79215e752a9e9f2d4df6f89f7"
+    },
+    "quickhull_library": {
+      "archive": {
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64"
+      },
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\geo06-report\\include;%(AdditionalIncludeDirectories)",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "link": {},
+      "project_sha256": "53a606641584983c45fbb14afc610ac7edee1c4f4e6231b6427042a49df7f872"
+    }
+  }
+}

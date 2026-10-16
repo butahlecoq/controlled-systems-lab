@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GEO-06 QuickHull results</title></head><body>
+<h1>GEO-06 geometric QuickHull: analytic microfixtures</h1>
+<p>Descriptive single-adapter Release measurements. No competitor, speedup, application throughput, or scalability claim. Orientation is exact only for supplied binary64 coordinates. These fixtures are not a general correctness proof.</p>
+<p>Source commit <code>ce63bff5a0face88c3c5e977f7d96337e8cbe948</code>; harness commit <code>74651cb028b9c2359d666ae5f141c66e0b03708b</code>; report <code>geo06-b010fb3df212604b</code>.</p>
+<p>7 measured batches per fixture, 1000 QuickHull calls per batch, 1 excluded warmup. Interleaved forward/reverse case order. Each timed batch includes per-call index copy and literal oracle comparison. These are verified-call-batch timings, not isolated adapter latency. Timings use steady-clock nanoseconds; no profile or limiter attribution was collected.</p>
+<table><caption>Batch latency; 7 measurements per fixture</caption><thead><tr><th>Fixture</th><th>Points</th><th>Hull indices</th><th>Median ns</th><th>Range ns</th></tr></thead><tbody>
+<tr><th>square_duplicates</th><td>7</td><td>0:1:2:3</td><td>2494000</td><td>2466100–2597000</td></tr>
+<tr><th>collinear_endpoints</th><td>5</td><td>1:3</td><td>790100</td><td>737800–950900</td></tr>
+<tr><th>skinny_triangle</th><td>4</td><td>0:1:2</td><td>2263100</td><td>2158200–2684600</td></tr>
+</tbody></table>
+<p>All 21 measured batches passed the literal vertex-index oracle. The saved CSV retains every warmup and measured row. Observed OS thread count, per-call memory, and internal phase timings are unavailable.</p>
+<p><a href="records.json">Saved JSON</a> · <a href="trials.csv">Raw trial CSV</a> · <a href="manifest.json">File hashes</a></p>
+<h2>Environment</h2><pre>
+{
+  &quot;os&quot;: &quot;Windows-11-10.0.22631-SP0&quot;,
+  &quot;cpu&quot;: &quot;Intel64 Family 6 Model 151 Stepping 5, GenuineIntel&quot;,
+  &quot;logical_cores&quot;: 12,
+  &quot;python&quot;: &quot;3.13.5&quot;,
+  &quot;compiler&quot;: &quot;C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe&quot;,
+  &quot;compiler_version&quot;: &quot;19.44.35215.0&quot;,
+  &quot;build&quot;: &quot;Release / NDEBUG / C++20&quot;,
+  &quot;native_thread_count&quot;: {
+    &quot;available&quot;: false,
+    &quot;reason&quot;: &quot;not observed&quot;
+  },
+  &quot;concurrent_work&quot;: &quot;UTC 2026-10-16T11:40:40.2506634Z\nCPU load=0% logical cores=12\nSelected concurrent process counts: MSBuild=3, python=29\nEXT-01 timed trials had exited before this snapshot. Other agents deferred heavy local jobs. This is a point-in-time snapshot; the machine was not reserved exclusively.&quot;,
+  &quot;exe_sha256&quot;: &quot;ba9716cf0b6415fe6b4d3f76096e6a66fb743bdf66731b4164a3e16c9bec56de&quot;,
+  &quot;cmake_cache_sha256&quot;: &quot;819bc4764d1c91d92882c9035bc4276185d43987abf59548e31ec015f446cc62&quot;,
+  &quot;build_provenance_sha256&quot;: &quot;dcb90f67f4fc19b8caf7051e89f4865d7b3893bad45029f40f5b540666fc6250&quot;,
+  &quot;final_build_exit_code&quot;: 0
+}
+</pre></body></html>

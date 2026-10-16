@@ -20,6 +20,22 @@ Keep execution, measurement collection, scientific saved records, HTML rendering
 
 Independent review checks mathematical/evidence labels, measurement validity and module boundaries. Verify raw-record/HTML consistency and regeneration, visually inspect the page, and open the deployed URL before claiming publication. The orchestrator publishes the reviewed artifact. Private historical source code and raw archives remain unchanged and are not copied into the report site.
 
+## GEO-06 QuickHull report
+
+The GEO-06 report uses solver source `ce63bff5a0face88c3c5e977f7d96337e8cbe948`
+and independently reviewed harness `74651cb028b9c2359d666ae5f141c66e0b03708b`.
+Its saved native bundle is `geo06-b010fb3df212604b`: three small analytic
+clouds, one excluded warmup and seven measured batches of 1,000 calls per cloud.
+Every batch checks literal hull indices. The measured interval includes the
+QuickHull call, index copy and oracle comparison. The Release build log,
+compiler/link options, host note, all trial rows and exact file hashes are
+retained with the versioned HTML and offline ZIP. This is a single-adapter
+observation with no comparator, speedup or source-mapped limiter profile;
+performance interpretation is inconclusive. The report covers the supplied
+binary64 coordinates and does not establish general geometric correctness.
+Independent report review, main-only deployment and verified live links remain
+publication gates.
+
 ## Reference-LP pipeline
 
 The [report-record contract](../contracts/algorithm-report-records.md) specifies the executable, saved schemas, exact timing scopes, independent literals, build/environment provenance, commands and OBS migration. `csl_lp_report --smoke` is a bounded functional test. Accepted seven-trial measurements and the separate counter profile follow review of a fixed clean Release code commit; their source identity is distinct from the later artifact commit.

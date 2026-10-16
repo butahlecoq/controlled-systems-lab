@@ -212,6 +212,18 @@
       "measured_scope": "One exact T-S01 paired experiment; one excluded warmup and seven alternating measured pairs; performance conclusion inconclusive",
       "evidence_limits": "Complete-family status is exact-profile and registered-verifier evidence for this admitted T-S01 fixture under Assurance::numerical; validated arithmetic is unavailable.; This is one tiny scalar two-stage integrator fixture; the observed timing distributions do not establish an application-scale or general strategy performance ranking.; No separate limiter profile was performed. The source-level latency limiter is unknown; the result is explicitly inconclusive and claims no winner.; The live complete-family proof payload is not serialized. Original-data witness checks establish bindings, feasibility, and objective only; independent optimality and completeness statuses remain unsupported.; Internal LP/convex, projection, affine-sum, conversion, hull-membership, verifier subphase durations/call counts, CPU time, and per-call peak memory are unavailable.; The collector launcher exited 1 on an overly strict stdout byte comparison; algorithm return code was 0 and retained stdout matches the raw event file after CRLF-to-LF normalization.",
       "zip_sha256": "c75227f9fcdb0bb90b724d698a170306662562e79ef4835589be26b0b0c5da11"
+    },
+    {
+      "report_id": "geo06-f8bee6d8f950343215dd24afeff5091669b8940e7d2106e6834e904b6ec4c074",
+      "report_kind": "geo06-quickhull",
+      "source_report_id": "geo06-b010fb3df212604b",
+      "payload_schema": "csl.geo06-quickhull-report/1",
+      "payload_sha256": "516c4b0c612b13507d655c52ab5b109b2f8864c5a19f24bf002ff22633be15a5",
+      "native_payload_sha256": "b010fb3df212604b92ea351a5be6cfcff233c6ceed5e0cba8d2d7ba57a006620",
+      "source_commit": "ce63bff5a0face88c3c5e977f7d96337e8cbe948",
+      "measured_scope": "21 verified measured call batches across three analytic QuickHull clouds; 1000 calls per batch; performance interpretation inconclusive",
+      "evidence_limits": "Descriptive single-adapter verified-call batches on three tiny analytic clouds; timed index copies and literal oracle comparisons are included; no comparator, speedup, application-scale, or scalability claim; no source-mapped limiter profile; binary64 input orientation is exact only for represented coordinates",
+      "zip_sha256": "9523a907b67dd576c6a107b849b6cd415095a711e839bcbdc4f52e77d8d6b6d8"
     }
   ]
 }

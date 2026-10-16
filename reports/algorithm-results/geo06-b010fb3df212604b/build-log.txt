@@ -1,0 +1,6 @@
+Р’РµСЂСЃРёСЏ MSBuild 17.14.19+164abd434 РґР»СЏ .NET Framework
+
+  РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+  csl_quickhull_2d.vcxproj -> BUILD_ROOT\Release\csl_quickhull_2d.lib
+  РџСЂРѕРІРµСЂРєР° РёСЃС‚РѕС‡РЅРёРєРѕРІ РЅР° РЅР°Р»РёС‡РёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ РјРѕРґСѓР»СЏвЂ¦
+  csl_geo06_quickhull_report.vcxproj -> BUILD_ROOT\Release\csl_geo06_quickhull_report.exe

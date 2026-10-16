@@ -1,0 +1,377 @@
+{
+  "schema": "csl.geo06-quickhull-report/1",
+  "purpose": "measurement",
+  "source_commit": "ce63bff5a0face88c3c5e977f7d96337e8cbe948",
+  "harness_commit": "74651cb028b9c2359d666ae5f141c66e0b03708b",
+  "created_utc": "2026-10-16T11:40:45Z",
+  "catalog": {
+    "square_duplicates": {
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "indices": "0:1:2:3"
+    },
+    "collinear_endpoints": {
+      "points": [
+        [
+          2,
+          2
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          2,
+          2
+        ]
+      ],
+      "indices": "1:3"
+    },
+    "skinny_triangle": {
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          8.881784197001252e-16
+        ],
+        [
+          0.5,
+          2.220446049250313e-16
+        ]
+      ],
+      "indices": "0:1:2"
+    }
+  },
+  "repetitions": 7,
+  "warmups": 1,
+  "calls_per_trial": 1000,
+  "rows": [
+    {
+      "scenario": "square_duplicates",
+      "repetition": 0,
+      "warmup": 1,
+      "calls": 1000,
+      "duration_ns": 1678400,
+      "status": "passed",
+      "observed_vertices": 4000,
+      "indices": "0:1:2:3"
+    },
+    {
+      "scenario": "collinear_endpoints",
+      "repetition": 0,
+      "warmup": 1,
+      "calls": 1000,
+      "duration_ns": 758200,
+      "status": "passed",
+      "observed_vertices": 2000,
+      "indices": "1:3"
+    },
+    {
+      "scenario": "skinny_triangle",
+      "repetition": 0,
+      "warmup": 1,
+      "calls": 1000,
+      "duration_ns": 2175100,
+      "status": "passed",
+      "observed_vertices": 3000,
+      "indices": "0:1:2"
+    },
+    {
+      "scenario": "square_duplicates",
+      "repetition": 0,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2466100,
+      "status": "passed",
+      "observed_vertices": 4000,
+      "indices": "0:1:2:3"
+    },
+    {
+      "scenario": "collinear_endpoints",
+      "repetition": 0,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 737800,
+      "status": "passed",
+      "observed_vertices": 2000,
+      "indices": "1:3"
+    },
+    {
+      "scenario": "skinny_triangle",
+      "repetition": 0,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2350400,
+      "status": "passed",
+      "observed_vertices": 3000,
+      "indices": "0:1:2"
+    },
+    {
+      "scenario": "skinny_triangle",
+      "repetition": 1,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2263100,
+      "status": "passed",
+      "observed_vertices": 3000,
+      "indices": "0:1:2"
+    },
+    {
+      "scenario": "collinear_endpoints",
+      "repetition": 1,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 790100,
+      "status": "passed",
+      "observed_vertices": 2000,
+      "indices": "1:3"
+    },
+    {
+      "scenario": "square_duplicates",
+      "repetition": 1,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2565900,
+      "status": "passed",
+      "observed_vertices": 4000,
+      "indices": "0:1:2:3"
+    },
+    {
+      "scenario": "square_duplicates",
+      "repetition": 2,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2597000,
+      "status": "passed",
+      "observed_vertices": 4000,
+      "indices": "0:1:2:3"
+    },
+    {
+      "scenario": "collinear_endpoints",
+      "repetition": 2,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 801800,
+      "status": "passed",
+      "observed_vertices": 2000,
+      "indices": "1:3"
+    },
+    {
+      "scenario": "skinny_triangle",
+      "repetition": 2,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2268200,
+      "status": "passed",
+      "observed_vertices": 3000,
+      "indices": "0:1:2"
+    },
+    {
+      "scenario": "skinny_triangle",
+      "repetition": 3,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2210400,
+      "status": "passed",
+      "observed_vertices": 3000,
+      "indices": "0:1:2"
+    },
+    {
+      "scenario": "collinear_endpoints",
+      "repetition": 3,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 852500,
+      "status": "passed",
+      "observed_vertices": 2000,
+      "indices": "1:3"
+    },
+    {
+      "scenario": "square_duplicates",
+      "repetition": 3,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2494000,
+      "status": "passed",
+      "observed_vertices": 4000,
+      "indices": "0:1:2:3"
+    },
+    {
+      "scenario": "square_duplicates",
+      "repetition": 4,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2477500,
+      "status": "passed",
+      "observed_vertices": 4000,
+      "indices": "0:1:2:3"
+    },
+    {
+      "scenario": "collinear_endpoints",
+      "repetition": 4,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 755900,
+      "status": "passed",
+      "observed_vertices": 2000,
+      "indices": "1:3"
+    },
+    {
+      "scenario": "skinny_triangle",
+      "repetition": 4,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2158200,
+      "status": "passed",
+      "observed_vertices": 3000,
+      "indices": "0:1:2"
+    },
+    {
+      "scenario": "skinny_triangle",
+      "repetition": 5,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2170500,
+      "status": "passed",
+      "observed_vertices": 3000,
+      "indices": "0:1:2"
+    },
+    {
+      "scenario": "collinear_endpoints",
+      "repetition": 5,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 757000,
+      "status": "passed",
+      "observed_vertices": 2000,
+      "indices": "1:3"
+    },
+    {
+      "scenario": "square_duplicates",
+      "repetition": 5,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2491100,
+      "status": "passed",
+      "observed_vertices": 4000,
+      "indices": "0:1:2:3"
+    },
+    {
+      "scenario": "square_duplicates",
+      "repetition": 6,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2561900,
+      "status": "passed",
+      "observed_vertices": 4000,
+      "indices": "0:1:2:3"
+    },
+    {
+      "scenario": "collinear_endpoints",
+      "repetition": 6,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 950900,
+      "status": "passed",
+      "observed_vertices": 2000,
+      "indices": "1:3"
+    },
+    {
+      "scenario": "skinny_triangle",
+      "repetition": 6,
+      "warmup": 0,
+      "calls": 1000,
+      "duration_ns": 2684600,
+      "status": "passed",
+      "observed_vertices": 3000,
+      "indices": "0:1:2"
+    }
+  ],
+  "summary": {
+    "square_duplicates": {
+      "trials": 7,
+      "median_batch_ns": 2494000,
+      "min_batch_ns": 2466100,
+      "max_batch_ns": 2597000
+    },
+    "collinear_endpoints": {
+      "trials": 7,
+      "median_batch_ns": 790100,
+      "min_batch_ns": 737800,
+      "max_batch_ns": 950900
+    },
+    "skinny_triangle": {
+      "trials": 7,
+      "median_batch_ns": 2263100,
+      "min_batch_ns": 2158200,
+      "max_batch_ns": 2684600
+    }
+  },
+  "process_exit_code": 0,
+  "stderr": "",
+  "interval": "batch of fresh QuickHull calls plus per-call index copy and literal oracle comparison; excludes process startup, CSV serialization and Python saved-row verification",
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "cpu": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "logical_cores": 12,
+    "python": "3.13.5",
+    "compiler": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+    "compiler_version": "19.44.35215.0",
+    "build": "Release / NDEBUG / C++20",
+    "native_thread_count": {
+      "available": false,
+      "reason": "not observed"
+    },
+    "concurrent_work": "UTC 2026-10-16T11:40:40.2506634Z\nCPU load=0% logical cores=12\nSelected concurrent process counts: MSBuild=3, python=29\nEXT-01 timed trials had exited before this snapshot. Other agents deferred heavy local jobs. This is a point-in-time snapshot; the machine was not reserved exclusively.",
+    "exe_sha256": "ba9716cf0b6415fe6b4d3f76096e6a66fb743bdf66731b4164a3e16c9bec56de",
+    "cmake_cache_sha256": "819bc4764d1c91d92882c9035bc4276185d43987abf59548e31ec015f446cc62",
+    "build_provenance_sha256": "dcb90f67f4fc19b8caf7051e89f4865d7b3893bad45029f40f5b540666fc6250",
+    "final_build_exit_code": 0
+  },
+  "raw_csv_sha256": "1c9abf0be13bba64d20f35ea1130ea756b533ee864e688f76f9117381b28fad0",
+  "payload_sha256": "b010fb3df212604b92ea351a5be6cfcff233c6ceed5e0cba8d2d7ba57a006620",
+  "report_id": "geo06-b010fb3df212604b"
+}
