@@ -1,0 +1,23 @@
+{
+  "files": {
+    "build-provenance.json": "bc675c0a5b3a35d02e300c8b506fa7259cfe74cc667046c1af982f0021fe2bb9",
+    "build.capture.json": "5c7fcdcbefcad7281ec32ad223b83d1c8c9b6374fa5a0680ba5a6da59ecf6d3a",
+    "build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout": "9e69b24fb1a06b1ecf7698a07bbb061ecaf8ee6cafc6c9a614993c39cec29748",
+    "collection-status.json": "abe86de822c2889ea0c5a3ef7b5682f5457687aaa086e54941277224b76a24af",
+    "describe.capture.json": "75277ca4c9686976004760202aed4db89155b995ff68bb7f1b2f9ff1e5650f08",
+    "describe.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "describe.stdout": "aea78ddfc0faed7fe141d08f14c8cb1d256cbd680befe04072610f323470b577",
+    "fixture-inputs.json": "d815e5287b4870a5687508a2b5785f86e5fcf816738c69c2fa7c1f7bf15badd5",
+    "host-observation.json": "2d3018f3be58d836c3c37146c669690bdb2b7d0d3d0163415ce1b855316b7d00",
+    "host-observation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke.capture.json": "28eeee41b0c02a955f441043511d2801b2313bb545cb501a043ea264d387da01",
+    "smoke.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke.stdout": "fe5fc1772af419542b73a5ac8860a505876de08c158e76363397b4df3e944b93",
+    "trials.capture.json": "3c97d6262b3b5cba8d4fb0b32b61d58422032d55964cc803b43e72e7e0a97586",
+    "trials.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials.stdout": "e23dfbb8b418d8e5fec6db261d4a4294a770d865cfc265aa21e803de8a5c4dfd"
+  },
+  "report_id": "rejected",
+  "schema": "csl.geo07-dependent-manifest/1"
+}

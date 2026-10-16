@@ -1,0 +1,1304 @@
+{
+  "build_provenance_sha256": "876168d4165416d9cd5edd113814e2b883ba47e29ec4c1a21517cbabd76242a0",
+  "collection_end_utc": "2026-10-16T17:07:41.946895+00:00",
+  "collection_start_utc": "2026-10-16T17:07:41.469449+00:00",
+  "created_utc": "2026-10-16T17:07:41.993358+00:00",
+  "environment": {
+    "host_observation": {
+      "build_processes": {
+        "MSBuild": 0,
+        "cl": 0,
+        "cmake": 0
+      },
+      "cpu_load_percent": 0,
+      "logical_processors": 12,
+      "observed_utc": "2026-10-16T17:07:41.4247033+00:00",
+      "schema": "csl.geo07-dependent-host/1"
+    },
+    "host_observation_sha256": "672272d7325e6c881028884837e117383dfda221694623da9e1f0f566805aa3b",
+    "logical_processors": 12,
+    "observed_native_threads": null,
+    "observed_native_threads_reason": "no native thread counter in driver",
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "requested_driver_workers": 1
+  },
+  "harness_commit": "eef1eda3d326418a392b3cc1e8f8f4b204ca7a73",
+  "harness_tree": "555954400146134d67a4aefca19bb767106c7e5f",
+  "inputs": {
+    "assurance": "numerical",
+    "canonical_bytes_sha256": "d815e5287b4870a5687508a2b5785f86e5fcf816738c69c2fa7c1f7bf15badd5",
+    "driver_description_sha256": "aea78ddfc0faed7fe141d08f14c8cb1d256cbd680befe04072610f323470b577",
+    "driver_source_sha256": "c43de00a9a11b2b974d9562bcdbccff1eb3f0982f08602e595e0561b50c94b36",
+    "fixture_sha256": {
+      "constrained_shared": "2362b4539bbf773933e53aab771c2f3ff2e2801f12022a054a6c5fc0ba3ab899",
+      "shared_cancellation": "25c960d8ce4d038b57813dfaa354475acb641bc1589090910f5616dfa627f0ea"
+    },
+    "fixtures": {
+      "constrained_shared": {
+        "feasible_factor_witnesses": [
+          [
+            -1.0,
+            -1.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            -1.0
+          ]
+        ],
+        "inside_points": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "left": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              1.0,
+              -1.0
+            ]
+          },
+          "equality_values": [
+            0.0
+          ],
+          "factor_ids": [
+            "u",
+            "v"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 2,
+            "values": [
+              1.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "id": "dependent-constrained-left"
+        },
+        "operation": "dependent_sum",
+        "output_id": "dependent-constrained-origin",
+        "output_representation": "csl.constrained-zonotope",
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_h": {
+          "equalities": {
+            "cols": 2,
+            "rows": 2,
+            "values": [
+              1.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "inequalities": {
+            "cols": 2,
+            "rows": 0,
+            "values": []
+          },
+          "upper": [],
+          "values": [
+            0.0,
+            0.0
+          ]
+        },
+        "public_request": {
+          "assurance": "numerical",
+          "prepared_output_relation": "equivalent",
+          "prepared_scalar": "binary64",
+          "problem_id": "geo07-dependent",
+          "registration_version": "1.1.0",
+          "request_id": "constrained-shared"
+        },
+        "registration": "csl.geometry.generators.operations",
+        "rejection_controls": {
+          "independent_shared_ids": true
+        },
+        "right": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              1.0,
+              1.0
+            ]
+          },
+          "equality_values": [
+            0.0
+          ],
+          "factor_ids": [
+            "u",
+            "w"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 2,
+            "values": [
+              -1.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "id": "dependent-constrained-right"
+        }
+      },
+      "shared_cancellation": {
+        "feasible_factor_witnesses": [
+          [
+            -1.0
+          ],
+          [
+            0.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "inside_points": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "left": {
+          "center": [
+            0.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "equality_values": [],
+          "factor_ids": [
+            "history.0"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 1,
+            "rows": 1,
+            "values": [
+              1.0
+            ]
+          },
+          "id": "dependent-cancel-left"
+        },
+        "operation": "dependent_sum",
+        "output_id": "dependent-cancel-origin",
+        "output_representation": "csl.zonotope",
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_h": {
+          "equalities": {
+            "cols": 1,
+            "rows": 1,
+            "values": [
+              1.0
+            ]
+          },
+          "inequalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "upper": [],
+          "values": [
+            0.0
+          ]
+        },
+        "public_request": {
+          "assurance": "numerical",
+          "prepared_output_relation": "equivalent",
+          "prepared_scalar": "binary64",
+          "problem_id": "geo07-dependent",
+          "registration_version": "1.1.0",
+          "request_id": "shared-cancellation"
+        },
+        "registration": "csl.geometry.generators.operations",
+        "rejection_controls": {
+          "independent_shared_ids": true
+        },
+        "right": {
+          "center": [
+            0.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "equality_values": [],
+          "factor_ids": [
+            "history.0"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 1,
+            "rows": 1,
+            "values": [
+              -1.0
+            ]
+          },
+          "id": "dependent-cancel-right"
+        }
+      }
+    },
+    "representation_claim": "equivalent real-set dependent generator algebra; no validated binary64 rounding enclosure",
+    "scalar": "binary64"
+  },
+  "payload_sha256": "4dcc5a8fe36f17eddf6774fa4ebb21d3857f216ced7e0fae5f04f28c2a1428c6",
+  "performance_conclusion": "exploratory single-adapter batch observations; no comparator, speedup, or attributed limiter",
+  "process": {
+    "exit_code": 0,
+    "raw_sha256": "3cc538611451add4eaef7adcbb5f225bbe668eadb8c32bd9e98de298f85fbc0c",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "report_id": "geo07-dependent-4dcc5a8fe36f17ed",
+  "review_seal_sha256": "7d79566fbd0a60ba8aa318da34956294036bd7e3e2221303f1c954fa8b75e001",
+  "reviewed_code_commit": "eaa32fdfdcf42b3f3f3221dd3031d654fe05e576",
+  "rows": [
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 26335300,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "equalities": [],
+        "error_bound": false,
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 0,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 31954900,
+      "error": null,
+      "fixture": "constrained_shared",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 0,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 25956800,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "equalities": [],
+        "error_bound": false,
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 0,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 31589700,
+      "error": null,
+      "fixture": "constrained_shared",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 0,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 32664800,
+      "error": null,
+      "fixture": "constrained_shared",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 1,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 28182000,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "equalities": [],
+        "error_bound": false,
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 1,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 25647700,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "equalities": [],
+        "error_bound": false,
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 2,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 32725000,
+      "error": null,
+      "fixture": "constrained_shared",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 2,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 33118200,
+      "error": null,
+      "fixture": "constrained_shared",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 3,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 28287800,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "equalities": [],
+        "error_bound": false,
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 3,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 25870200,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "equalities": [],
+        "error_bound": false,
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 4,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 31826800,
+      "error": null,
+      "fixture": "constrained_shared",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 4,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 32201200,
+      "error": null,
+      "fixture": "constrained_shared",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 5,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 25649700,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "equalities": [],
+        "error_bound": false,
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 5,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 26255700,
+      "error": null,
+      "fixture": "shared_cancellation",
+      "result": {
+        "center": [
+          0.0
+        ],
+        "equalities": [],
+        "error_bound": false,
+        "factor_ids": [
+          "history.0"
+        ],
+        "generators": [
+          0.0
+        ],
+        "outside_points": [
+          [
+            -1.0
+          ],
+          [
+            1.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 6,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 2000,
+      "checked_calls": 2000,
+      "elapsed_ns": 32156200,
+      "error": null,
+      "fixture": "constrained_shared",
+      "result": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "w"
+        ],
+        "generators": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "outside_points": [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "physical_witnesses": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "rejections": {
+          "independent_shared_ids": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 6,
+      "schema": "csl.geo07-dependent-trial/1",
+      "status": "passed",
+      "warmup": false
+    }
+  ],
+  "schema": "csl.geo07-dependent-records/1",
+  "source_commit": "5411e37ad456f0d5b3bf775130f149622ef5ebfa",
+  "source_tree": "29996b5a58a1bb775cd7ea5e85b24a49cfaf7938",
+  "summary": {
+    "constrained_shared": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 33118200,
+      "median_batch_ns": 32201200,
+      "min_batch_ns": 31589700,
+      "successes": 7
+    },
+    "shared_cancellation": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 28287800,
+      "median_batch_ns": 25956800,
+      "min_batch_ns": 25647700,
+      "successes": 7
+    }
+  },
+  "timing": {
+    "batch_calls": 2000,
+    "clock": "steady_clock",
+    "internal_phase_counters": "unavailable",
+    "measured_rounds": 7,
+    "minimum_admitted_batch_ns": 20000000,
+    "order": "alternating fixtures",
+    "scope": "fresh native generator handles and prepared registered GeometryPort, DependentSum admission and workspace execution, literal factor and physical H checks, independent Minkowski rejection, evidence verification and per-call JSON result assignment; excludes process startup, JSONL serialization, Python saved-row validation, persistence and rendering",
+    "unit": "ns",
+    "warmup_rounds": 1
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "files": {
+    "build-provenance.json": "a5d009bfc0d571f73fc703de9fe844e12baa870aca7e16d4463515423484d6e8",
+    "build.capture.json": "c21cda122452732405a8d0458ec369b93dc09841a74c47dfd1e9c3658300fe08",
+    "build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout": "80cf8279634f3a18e02b3ff09e4f1d154689dad15b5fcf5308b7f39ae31dc633",
+    "collection-status.json": "eebcf930237181b9e4e9b5886768425431c28210693790f758b18fcd0ea14572",
+    "describe.capture.json": "75277ca4c9686976004760202aed4db89155b995ff68bb7f1b2f9ff1e5650f08",
+    "describe.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "describe.stdout": "aea78ddfc0faed7fe141d08f14c8cb1d256cbd680befe04072610f323470b577",
+    "fixture-inputs.json": "d815e5287b4870a5687508a2b5785f86e5fcf816738c69c2fa7c1f7bf15badd5",
+    "host-observation.json": "70e310c46fe1eb8218d981ac21a1b4fcc98766740f59191c0a4aad2377f5db22",
+    "host-observation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke.capture.json": "8c820e309e05013fba6dccd9180832d434ac2faf16bece03e8c4aa8a158523d8",
+    "smoke.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke.stdout": "f7e8966b11907e38058046580dea5cb7f3023f9957543f4d7dfce984ab3bae4e"
+  },
+  "report_id": "rejected",
+  "schema": "csl.geo07-dependent-manifest/1"
+}
