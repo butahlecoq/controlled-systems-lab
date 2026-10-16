@@ -1,0 +1,17 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Exploratory and inconclusive single-adapter observations; no comparator, limiter profile, speedup, application-scale or complete-family claim; binary64 evaluation has no validated rounding enclosure",
+      "measured_scope": "21 verified measured batches across three bounded public GeometryPort/ConversionPort fixtures; 5,000 fresh calls per batch",
+      "native_payload_sha256": "34cc02bbb2228057e86231665d8c9cfab480988fbf4f0d5e23f36d633ce76bdf",
+      "payload_schema": "csl.geo07-port-records/1",
+      "payload_sha256": "34cc02bbb2228057e86231665d8c9cfab480988fbf4f0d5e23f36d633ce76bdf",
+      "report_id": "geo07-registered-ports-5da2b9dfd2650afff575e2294b58d817d4bb58013e1332efe95725b9901f559b",
+      "report_kind": "geo07-registered-generator-ports",
+      "source_commit": "41b4b58f2ef982e75554519862afdd803e30f717",
+      "source_report_id": "geo07-port-4dee19cde3d50259",
+      "zip_sha256": "63a226d6e5a5df0352e2e44ff39dcbc7aa586c1a3b82f4d10effea718cd62fcc"
+    }
+  ],
+  "schema": "csl.geo07-port-report-extension/1"
+}

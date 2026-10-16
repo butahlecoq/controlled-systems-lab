@@ -1,0 +1,4 @@
+fixture,batch,attempts,successes,failures,median_batch_ns,min_batch_ns,max_batch_ns
+affine_box,5000,7,7,0,57405300,56795100,58240800
+constrained_disjoint_sum,5000,7,7,0,69538200,68829600,74890800
+finite_v,5000,7,7,0,83049900,82441700,84470700
