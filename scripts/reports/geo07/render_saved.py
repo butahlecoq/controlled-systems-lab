@@ -178,7 +178,7 @@ def page(record: dict, svg: bytes) -> bytes:
     downloads = ("records.json", "trials.jsonl", "trials.csv", "summary.csv", "fixture-inputs.json",
                  "driver-description.jsonl", "build-provenance.json", "build.stdout.log", "build.stderr.log",
                  "process-capture.json", "driver.stderr", "manifest.json", "report-manifest.json",
-                 "performance.svg", "bundle.zip")
+                 "performance.svg")
     links = "".join('<li><a href="' + name + '">' + escape(name) + '</a></li>' for name in downloads)
     env = record["environment"]
     html = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+from html.parser import HTMLParser
 import io
 import json
 from pathlib import Path
@@ -9,6 +10,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,6 +20,16 @@ import render_saved as report
 import stage_geo07
 
 SOURCE = ROOT / "reports/algorithm-results/geo07-9ef0d347291774da"
+
+
+class LocalLinks(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.hrefs = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            self.hrefs.extend(value for key, value in attrs if key == "href")
 
 
 class Geo07PublicationTests(unittest.TestCase):
@@ -37,6 +49,42 @@ class Geo07PublicationTests(unittest.TestCase):
                              (SOURCE / "trials.jsonl").read_bytes())
             self.assertEqual(archive.read(SOURCE.name + "/index.html"),
                              (SOURCE / "index.html").read_bytes())
+
+    def test_extracted_offline_page_has_no_dead_local_downloads(self):
+        with zipfile.ZipFile(io.BytesIO((SOURCE / "bundle.zip").read_bytes())) as archive:
+            page = archive.read(SOURCE.name + "/index.html").decode("utf-8")
+            links = LocalLinks()
+            links.feed(page)
+            self.assertTrue(links.hrefs)
+            for href in links.hrefs:
+                with self.subTest(href=href):
+                    self.assertIn(SOURCE.name + "/" + href, archive.namelist())
+
+    def test_public_id_binds_all_publisher_modules_with_lf_line_endings(self):
+        publisher_files = ("stage_geo07.py", "geo07/render_saved.py",
+                           "geo07/collect.py", "registered_reports.py")
+        original_id = stage_geo07.validate(SOURCE).report_id
+        with tempfile.TemporaryDirectory() as directory:
+            fake_root = Path(directory)
+            originals = {}
+            for name in publisher_files:
+                content = (ROOT / "scripts/reports" / name).read_bytes()
+                originals[name] = content
+                target = fake_root / "scripts/reports" / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
+            with mock.patch.object(stage_geo07, "ROOT", fake_root):
+                self.assertEqual(stage_geo07.validate(SOURCE).report_id, original_id)
+                for name in publisher_files:
+                    target = fake_root / "scripts/reports" / name
+                    target.write_bytes(originals[name].replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+                self.assertEqual(stage_geo07.validate(SOURCE).report_id, original_id)
+                for name in publisher_files:
+                    target = fake_root / "scripts/reports" / name
+                    target.write_bytes(originals[name] + b"\n# reviewed publisher change\n")
+                    with self.subTest(publisher=name):
+                        self.assertNotEqual(stage_geo07.validate(SOURCE).report_id, original_id)
+                    target.write_bytes(originals[name])
 
     def test_changed_native_raw_or_displayed_summary_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

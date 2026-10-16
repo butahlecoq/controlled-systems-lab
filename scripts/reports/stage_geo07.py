@@ -27,6 +27,8 @@ SCOPE = "21 verified measured batches across three bounded public generator-set 
 LIMITS = ("Exploratory and inconclusive single-adapter timings; no comparator, limiter profile, speedup or complete-family claim; "
           "binary64 evaluation has no validated rounding enclosure")
 FILES = report.SOURCE_FILES | report.RENDERED_FILES
+PUBLISHERS = ("stage_geo07.py", "geo07/render_saved.py", "geo07/collect.py",
+              "registered_reports.py")
 
 
 def require(condition: bool, message: str) -> None:
@@ -36,6 +38,11 @@ def require(condition: bool, message: str) -> None:
 
 def digest(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
+
+
+def publisher_digest(name: str) -> str:
+    source = (ROOT / "scripts/reports" / name).read_bytes()
+    return digest(source.replace(b"\r\n", b"\n").replace(b"\r", b"\n"))
 
 
 def read_json(path: Path) -> dict:
@@ -55,8 +62,7 @@ def validate(bundle: Path) -> common.PublicationRecord:
     identity = {
         "schema": "csl.geo07-publication-identity/1", "source_report_id": bundle.name,
         "source_files": {name: digest((bundle / name).read_bytes()) for name in sorted(FILES)},
-        "publisher": {name: digest((ROOT / "scripts/reports" / name).read_bytes())
-                      for name in ("stage_geo07.py", "geo07/render_saved.py")},
+        "publisher": {name: publisher_digest(name) for name in PUBLISHERS},
     }
     public_id = "geo07-generator-sets-" + common._digest(identity)
     record = read_json(bundle / "records.json")
