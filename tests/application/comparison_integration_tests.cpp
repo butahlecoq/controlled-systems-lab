@@ -78,17 +78,24 @@ template<class Port> registry::PreparedProvider<Port> selected(
 }
 
 struct Modules {
-    registry::StrategyRegistry strategies;
-    registry::Registry<registry::SelectorPort> selectors;
+    std::shared_ptr<registry::Registry<registry::GeometryPort>> projections;
+    std::shared_ptr<registry::Registry<registry::GeometryPort>> affines;
+    std::shared_ptr<registry::Registry<registry::ConversionPort>> conversions;
     std::shared_ptr<registry::Registry<registry::LPPort>> lps;
     std::shared_ptr<registry::Registry<registry::ConvexPort>> convexes;
+    registry::StrategyRegistry strategies;
+    registry::Registry<registry::SelectorPort> selectors;
     registry::PreparedProvider<registry::LPPort> membership;
 
-    Modules(std::shared_ptr<registry::Registry<registry::LPPort>> lp_registry,
+    Modules(std::shared_ptr<registry::Registry<registry::GeometryPort>> projection_registry,
+        std::shared_ptr<registry::Registry<registry::GeometryPort>> affine_registry,
+        std::shared_ptr<registry::Registry<registry::ConversionPort>> conversion_registry,
+        std::shared_ptr<registry::Registry<registry::LPPort>> lp_registry,
         std::shared_ptr<registry::Registry<registry::ConvexPort>> convex_registry,
         registry::PreparedProvider<registry::LPPort> prepared_membership)
-        : lps(std::move(lp_registry)), convexes(std::move(convex_registry)),
-          membership(std::move(prepared_membership)) {}
+        : projections(std::move(projection_registry)), affines(std::move(affine_registry)),
+          conversions(std::move(conversion_registry)), lps(std::move(lp_registry)),
+          convexes(std::move(convex_registry)), membership(std::move(prepared_membership)) {}
 };
 
 Modules modules() {
@@ -99,15 +106,16 @@ Modules modules() {
     auto affine = geometry::make_affine_sum_registration({
         selected(geometry::make_lp_hull_reducer_registration(), ""),
         selected(lp, "csl.program-result.v1"), selected(converter, "csl.polyhedron.v")});
-    registry::Registry<registry::GeometryPort> projections, affines;
-    registry::Registry<registry::ConversionPort> conversions;
+    auto projections = std::make_shared<registry::Registry<registry::GeometryPort>>();
+    auto affines = std::make_shared<registry::Registry<registry::GeometryPort>>();
+    auto conversions = std::make_shared<registry::Registry<registry::ConversionPort>>();
     auto lps = std::make_shared<registry::Registry<registry::LPPort>>();
     auto convexes = std::make_shared<registry::Registry<registry::ConvexPort>>();
     const registry::Method pm{projection.identity.id, {}}, am{affine.identity.id, {}},
         cm{converter.identity.id, {}}, lm{lp.identity.id, {}}, qm{convex.identity.id, {}};
-    REQUIRE_FALSE(projections.add(projection));
-    REQUIRE_FALSE(affines.add(affine));
-    REQUIRE_FALSE(conversions.add(converter));
+    REQUIRE_FALSE(projections->add(projection));
+    REQUIRE_FALSE(affines->add(affine));
+    REQUIRE_FALSE(conversions->add(converter));
     REQUIRE_FALSE(lps->add(lp));
     REQUIRE_FALSE(convexes->add(convex));
     registry::Requirements h, v, program;
@@ -117,11 +125,12 @@ Modules modules() {
     v.output.relation = SetRelation::equivalent;
     program.output.representation = {"csl.program-result.v1"};
     auto providers = take(registry::check_providers(
-        registry::select_provider(projections, pm, h), registry::select_provider(affines, am, v),
-        registry::select_provider(conversions, cm, h), registry::select_provider(*lps, lm, program),
+        registry::select_provider(*projections, pm, h), registry::select_provider(*affines, am, v),
+        registry::select_provider(*conversions, cm, h), registry::select_provider(*lps, lm, program),
         registry::select_provider(*convexes, qm, program)));
     auto membership = take(registry::prepare_provider(registry::select_provider(*lps, lm, program)));
-    Modules result{std::move(lps), std::move(convexes), std::move(membership)};
+    Modules result{std::move(projections), std::move(affines), std::move(conversions),
+        std::move(lps), std::move(convexes), std::move(membership)};
     REQUIRE_FALSE(result.strategies.add(synthesis::strategy_a::make_registration(std::move(providers))));
     REQUIRE_FALSE(result.strategies.add(synthesis::strategy_b::make_registration(*result.lps, *result.convexes)));
     auto selector = synthesis::witness_selector::make_registration(result.membership);
@@ -240,6 +249,19 @@ void compare_profile(const std::string& profile) {
 }
 }
 
+TEST_CASE("application preparation retains provider registries after module assembly returns") {
+    const auto problem = source("ts01_exact_integrator");
+    auto request = request_for(problem, "ts01_exact_integrator");
+    auto registered = modules();
+    auto admission = application::prepare_comparison(request, registered.strategies);
+    REQUIRE(std::holds_alternative<application::PreparedComparison>(admission));
+    const auto& prepared = std::get<application::PreparedComparison>(admission);
+    CHECK(prepared.problem().identity() == problem.identity());
+    CHECK(prepared.strategies().size() == 2);
+    const auto workspaces = prepared.create();
+    CHECK(workspaces[0] != nullptr);
+    CHECK(workspaces[1] != nullptr);
+}
 TEST_CASE("application composes and verifies paired T-S01 complete families") {
     compare_profile("ts01_exact_integrator");
 }
