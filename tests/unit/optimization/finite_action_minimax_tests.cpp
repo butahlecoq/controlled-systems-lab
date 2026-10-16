@@ -47,7 +47,8 @@ TEST_CASE("finite action minimax compares complete adversarial maxima and retain
     CHECK(first.worst_value==1);
     CHECK(first.maximizer==Vector{0});
     CHECK(first.evaluated_vertices==2);
-    const auto& vertices=std::get<sets::VRepresentation>(first.terminal.representation()).vertices;
+    const auto representation=first.terminal.representation();
+    const auto& vertices=std::get<sets::VRepresentation>(representation).vertices;
     REQUIRE(vertices.rows()==2);
     CHECK(vertices(0,0)==0);
     CHECK(vertices(1,0)==2);
