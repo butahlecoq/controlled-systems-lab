@@ -24,6 +24,8 @@ when one of these independent structural checks succeeds:
 | Native universal output, same ordered native coordinates | Reference is inside output |
 | Native H output and reference, same ordered native coordinates; every reference inequality and equality row occurs unchanged in the output | Output is inside reference (inner) |
 | Native H output and reference, same ordered native coordinates; every output inequality and equality row occurs unchanged in the reference | Reference is inside output (outer) |
+| Native singleton output and native H reference, same ordered native coordinates; the point satisfies every H row under exact stored binary64 arithmetic | Singleton is inside reference (inner) |
+| Native singleton reference and native H output, same ordered native coordinates; the point satisfies every H row under exact stored binary64 arithmetic | Reference is inside output (outer) |
 
 Native V data with zero vertex rows is empty under the set contract, including
 when ray rows exist. This policy does not infer nontrivial containment from a
@@ -39,6 +41,14 @@ duplicate rows do not matter. It proves inclusion from the defining formulas
 by retaining or adding constraints; it does not solve a containment problem,
 recognize algebraically equivalent rows, establish nonemptiness, or validate
 rounding of coefficients supplied by a provider.
+
+The H/singleton check evaluates each finite stored coefficient-times-coordinate
+product and sum as an exact dyadic value. An inequality must hold without a
+tolerance, and an equality must be exactly zero. Checked arithmetic failure
+rejects admission. This proves containment for the mathematical sets defined
+by those particular stored binary64 values, including large cancelling
+products; it does not prove that those values approximate a real-world model
+or that earlier numerical set construction was outward rounded.
 
 For native output, `size_budget` counts H inequality plus equality rows, V
 vertex plus ray rows, or one singleton point. Empty and universal forms count
@@ -66,7 +76,8 @@ remain separate.
 ## Remaining APP-01 work
 
 This prerequisite does not close #24. It provides elementary structural
-enclosures and native H constraint containment. A nontrivial box,
+enclosures, native H constraint containment, and native H/singleton
+containment. A nontrivial box,
 parallelotope, zonotope or ellipsoid adapter needs
 an independent inclusion verifier with claim-specific evidence, a compatible
 output-size accounting method, and contract tests on analytic inner/outer cases.
@@ -74,4 +85,16 @@ The planned APP-02/03/04 adapters must not reinterpret numerical residuals or
 provider declarations as inclusion proofs. A public flow connecting an admitted
 inner reachable state to a separately verified concrete trajectory and bound
 claim is also needed before the full achievable-plan acceptance criterion is
-met. None of this changes the current first-comparison synthesis scope.
+met. That next contract needs a stage-indexed reachable-set reference bound to
+a `ResolvedProblem` identity, the exact initial/information/external-input
+semantics, and the coordinate map for the inner state. It must accept a concrete
+`Witness`, check that the chosen stage state belongs to the admitted inner
+result, then require `verification::verify_trajectory` on the unchanged
+original problem to report completed numerical-pass bindings, feasibility and
+objective with a recomputed original objective. Only then may it publish a
+numerical achievable-plan value; validated feasibility and a bound on the
+global optimum need separate proof. A follow-up contract PR can establish the
+reference and result types, followed by an implementation PR with analytic
+positive and negative trajectories, wrong-stage/problem bindings, and
+unsupported-profile cases. None of this changes the current first-comparison
+synthesis scope.
