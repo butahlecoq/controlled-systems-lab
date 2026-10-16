@@ -1,0 +1,14 @@
+{
+  "command": [
+    "REPORT_EXE",
+    "--measure",
+    "7",
+    "1",
+    "5000"
+  ],
+  "exit_code": 0,
+  "schema": "csl.ext04-process-capture/1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "7c6c33024ffa93eb37065bf1a66df8a8f02827e0e0e039ec93a9090db1b900d8",
+  "timed_out": false
+}

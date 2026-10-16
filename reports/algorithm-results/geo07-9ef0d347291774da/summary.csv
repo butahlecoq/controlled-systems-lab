@@ -1,0 +1,4 @@
+fixture,batch,attempts,successes,failures,median_batch_ns,min_batch_ns,max_batch_ns
+box_image,5000,7,7,0,37554900,36683900,37870000
+shared_cancellation,5000,7,7,0,30668200,30388100,32355800
+constrained_sum,5000,7,7,0,42759900,41641200,45262400

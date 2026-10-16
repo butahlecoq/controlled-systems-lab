@@ -8,6 +8,13 @@ if(TARGET CSL::highs_convex)
 endif()
 
 if(TARGET CSL::highs_convex)
+  add_executable(convex_backend_contract tests/contract/optimization/convex_backend_contract.cpp)
+  target_link_libraries(convex_backend_contract PRIVATE CSL::highs_convex doctest::doctest Threads::Threads)
+  add_test(NAME convex_backend_contract COMMAND convex_backend_contract)
+  csl_test_target(convex_backend_contract adapters)
+endif()
+
+if(TARGET CSL::highs_convex)
   add_executable(convex_public_client tests/installed/convex_client.cpp)
   target_link_libraries(convex_public_client PRIVATE CSL::highs_convex)
   add_test(NAME convex_public_client COMMAND convex_public_client)

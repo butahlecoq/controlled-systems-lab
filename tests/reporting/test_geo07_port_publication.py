@@ -15,10 +15,9 @@ from unittest import mock
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports/geo07_port"))
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import render_saved as report
 import stage_geo07_port as stage
+report = stage.report
 
 BUNDLE = ROOT / "reports/algorithm-results/geo07-port-4dee19cde3d50259"
 

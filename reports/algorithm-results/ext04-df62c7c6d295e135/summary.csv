@@ -1,0 +1,4 @@
+fixture,attempts,successes,failures,median_batch_ns,min_batch_ns,max_batch_ns
+partial_noisy_delayed,7,7,0,254441900,250065800,261357300
+post_feedthrough,7,7,0,160891000,157319500,166015500
+no_channel,7,7,0,68215900,67760200,76103000

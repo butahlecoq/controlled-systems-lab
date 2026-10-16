@@ -1,0 +1,367 @@
+{
+  "box_image": {
+    "affine_map": {
+      "cols": 2,
+      "rows": 1,
+      "values": [
+        1.0,
+        1.0
+      ]
+    },
+    "feasible_factor_witnesses": [
+      [
+        -1.0,
+        -1.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        1.0,
+        1.0
+      ],
+      [
+        -1.0,
+        1.0
+      ]
+    ],
+    "infeasible_inside_factor": [
+      2.0,
+      -1.0
+    ],
+    "inside_points": [
+      [
+        2.0
+      ],
+      [
+        7.0
+      ],
+      [
+        12.0
+      ],
+      [
+        8.0
+      ]
+    ],
+    "offset": [
+      4.0
+    ],
+    "operation": "affine_image",
+    "output_id": "report-image",
+    "outside_points": [
+      [
+        1.0
+      ],
+      [
+        13.0
+      ]
+    ],
+    "physical_h": {
+      "equalities": {
+        "cols": 1,
+        "rows": 0,
+        "values": []
+      },
+      "inequalities": {
+        "cols": 1,
+        "rows": 2,
+        "values": [
+          1.0,
+          -1.0
+        ]
+      },
+      "upper": [
+        12.0,
+        -2.0
+      ],
+      "values": []
+    },
+    "source": {
+      "center": [
+        1.0,
+        2.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 2,
+        "rows": 0,
+        "values": []
+      },
+      "equality_values": [],
+      "factor_ids": [
+        "horizontal",
+        "vertical"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 2,
+        "rows": 2,
+        "values": [
+          2.0,
+          0.0,
+          0.0,
+          3.0
+        ]
+      },
+      "id": "report-box"
+    }
+  },
+  "constrained_sum": {
+    "feasible_factor_witnesses": [
+      [
+        1.0,
+        1.0,
+        -1.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "infeasible_inside_factor": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "inside_points": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "left": {
+      "center": [
+        0.0,
+        0.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 2,
+        "rows": 1,
+        "values": [
+          1.0,
+          -1.0
+        ]
+      },
+      "equality_values": [
+        0.0
+      ],
+      "factor_ids": [
+        "u",
+        "v"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 2,
+        "rows": 2,
+        "values": [
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "id": "report-constrained-left"
+    },
+    "left_only_factor": [
+      1.0,
+      1.0,
+      0.0
+    ],
+    "operation": "dependent_sum",
+    "output_id": "report-constrained-sum",
+    "outside_points": [
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        -1.0
+      ]
+    ],
+    "physical_h": {
+      "equalities": {
+        "cols": 2,
+        "rows": 2,
+        "values": [
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "inequalities": {
+        "cols": 2,
+        "rows": 0,
+        "values": []
+      },
+      "upper": [],
+      "values": [
+        0.0,
+        0.0
+      ]
+    },
+    "right": {
+      "center": [
+        0.0,
+        0.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 2,
+        "rows": 1,
+        "values": [
+          1.0,
+          1.0
+        ]
+      },
+      "equality_values": [
+        0.0
+      ],
+      "factor_ids": [
+        "u",
+        "w"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 2,
+        "rows": 2,
+        "values": [
+          -1.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "id": "report-constrained-right"
+    },
+    "right_only_factor": [
+      1.0,
+      0.0,
+      -1.0
+    ]
+  },
+  "shared_cancellation": {
+    "feasible_factor_witnesses": [
+      [
+        -1.0
+      ],
+      [
+        0.0
+      ],
+      [
+        1.0
+      ]
+    ],
+    "independent_sum_rejected": true,
+    "inside_points": [
+      [
+        0.0
+      ],
+      [
+        0.0
+      ],
+      [
+        0.0
+      ]
+    ],
+    "left": {
+      "center": [
+        0.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 1,
+        "rows": 0,
+        "values": []
+      },
+      "equality_values": [],
+      "factor_ids": [
+        "history.0"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 1,
+        "rows": 1,
+        "values": [
+          1.0
+        ]
+      },
+      "id": "report-left"
+    },
+    "operation": "dependent_sum",
+    "output_id": "report-cancelled",
+    "outside_points": [
+      [
+        -1.0
+      ],
+      [
+        1.0
+      ]
+    ],
+    "physical_h": {
+      "equalities": {
+        "cols": 1,
+        "rows": 1,
+        "values": [
+          1.0
+        ]
+      },
+      "inequalities": {
+        "cols": 1,
+        "rows": 0,
+        "values": []
+      },
+      "upper": [],
+      "values": [
+        0.0
+      ]
+    },
+    "right": {
+      "center": [
+        0.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 1,
+        "rows": 0,
+        "values": []
+      },
+      "equality_values": [],
+      "factor_ids": [
+        "history.0"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 1,
+        "rows": 1,
+        "values": [
+          -1.0
+        ]
+      },
+      "id": "report-right"
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "build_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build_stdout_sha256": "385975aead7b17f9d66f89400d8504cc8eb482ab031dd6e0d87ce3065c4b2cb9",
+  "cache_sha256": "5f4bb30e6bd0795995db4795579cfa09946ce778103cf0b1eee355c2f1e7fe5a",
+  "compiler_file_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+  "compiler_version": "19.44.35215.0",
+  "configuration": "Release",
+  "exe_sha256": "e5b99f8e4e0a6f3f845f32fc73a45079a8c44f97801480ec1dd3b68eb1717385",
+  "harness_commit": "580da5368aac21b14d9e817da5937b4494a905aa",
+  "schema": "csl.geo07-build-provenance/1",
+  "settings": {
+    "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+    "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+    "CMAKE_EXE_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/INCREMENTAL:NO",
+    "CMAKE_STATIC_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_STATIC_LINKER_FLAGS_RELEASE": ""
+  },
+  "source_commit": "db7906cb33ca40da55e31b9bf6b21cf7ffcc1ee4",
+  "targets": {
+    "driver": {
+      "archive": {},
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\geo07-report-harness\\include;%(AdditionalIncludeDirectories)",
+        "AdditionalOptions": "%(AdditionalOptions) /external:I \"D:/work/PhD/repo/.worktrees/geo07-report-harness/build/geo07-report/_deps/csl_json-src/include\"",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "ExternalWarningLevel": "TurnOffAllWarnings",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "link": {
+        "AdditionalDependencies": "Release\\csl_geometry_generators.lib;Release\\csl_sets.lib;Release\\csl_numeric.lib;Release\\csl_contracts.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib",
+        "AdditionalLibraryDirectories": "%(AdditionalLibraryDirectories)",
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64",
+        "GenerateDebugInformation": "false",
+        "IgnoreSpecificDefaultLibraries": "%(IgnoreSpecificDefaultLibraries)",
+        "ImportLibrary": "D:/work/PhD/repo/.worktrees/geo07-report-harness/build/geo07-report/Release/csl_geo07_generator_report.lib",
+        "ProgramDataBaseFile": "D:/work/PhD/repo/.worktrees/geo07-report-harness/build/geo07-report/Release/csl_geo07_generator_report.pdb",
+        "SubSystem": "Console"
+      },
+      "project_sha256": "ccf3c7ac9c41ed3c0af8f8013fa76a0de95138fa6c3fd90a9adb23de353823b1"
+    },
+    "generator_library": {
+      "archive": {
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64"
+      },
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\geo07-report-harness\\include;%(AdditionalIncludeDirectories)",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "link": {},
+      "project_sha256": "e70ea5c7e7fdbdf54067cb4602559a431e361a19ae76a72092acbd840ed6f1e1"
+    }
+  }
+}

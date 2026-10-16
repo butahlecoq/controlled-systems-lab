@@ -1,0 +1,27 @@
+{
+  "files": {
+    "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "CMakeCache.raw.txt": "148ee80e07567f39a1067b53d6cd8f808af1bd6e795812c3dc6fbf498148abdc",
+    "build-provenance.json": "39b8dddc63c295782c055340647722aee4a260819c14fd4b60f2a881a6f343f2",
+    "build.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout.log": "191da747a363e2f657c729a44a5d5ca56ed84ba923a52a5adf8273544e8cd3f7",
+    "collection-status.json": "b82d96f5bb468c0e292f8fac8e33ad5004444ae57f963acaa1412ebf6aeabd34",
+    "driver-description.jsonl": "453dbf4e01d3c69126bc27eca0ea26b97b5bb53f8f5cae81d3fe5fbaf9c0a67b",
+    "driver.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fixture-inputs.json": "67db874c4f1fa6baabeed15c5f314ddc55cb1a9b357624a7bddd78b53722033a",
+    "host-post.json": "7619f6c36dd6081b433b0c31c69fcadc4af1044ecd5307170d90411dbaa7c072",
+    "host-pre.json": "065ba5ab520ef3825a2a7b35f0e512468a1cf06f875a4589aabf9adf6209c5e5",
+    "index.html": "0a33bf830a2e4abe77a4b6f2fede1d29bb25836778e30222cb297afeff621ae3",
+    "manifest.json": "13950e8c24b689b18109b9da182d575ab5d55f3f0dc5749f6510b9f438811343",
+    "performance.svg": "1872af6abeef0c1d3c897b120ca7869772e6da77fd2109ab11d59da8e50e5b3e",
+    "process-capture.json": "bfed55ecd8428ebe749eac591ec5242f7189e5209bf8d883fc16c83281068370",
+    "records.json": "0d11f932157f0bde7d3ab605bf4bcc56a8cf8c755ad0642f9452713123ed1b70",
+    "summary.csv": "fc191ec827dc4c84318fe84059a025f9cb914961035894f488059b0de3ffce2e",
+    "trials.csv": "5c42c9cdfa80ddf66dc5db5abc1c01b3849138425d84943e31978f081f094f98",
+    "trials.jsonl": "7c6c33024ffa93eb37065bf1a66df8a8f02827e0e0e039ec93a9090db1b900d8"
+  },
+  "harness_commit": "959755ed5f69641ae643e852c00efe718fa9eb86",
+  "report_id": "ext04-df62c7c6d295e135",
+  "schema": "csl.ext04-render-manifest/1",
+  "source_commit": "c23aaf13c1c1e5480cc22dd5bac5cd3e79562609"
+}

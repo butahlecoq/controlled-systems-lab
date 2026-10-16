@@ -6,7 +6,7 @@ namespace csl::geometry::approximation {
 
 // These proofs are derived from the native elementary-set definitions, never
 // from a provider's unverified inclusion assertion.
-enum class StructuralBasis { identical_set, empty_subset, universal_superset };
+enum class StructuralBasis { identical_set, empty_subset, universal_superset, h_constraint_containment };
 struct EnclosedApproximation { OperationResult result; StructuralBasis basis; };
 struct HeuristicApproximation { OperationResult result; };
 using RunOutcome = std::variant<EnclosedApproximation, HeuristicApproximation,

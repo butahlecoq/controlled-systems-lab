@@ -10,6 +10,27 @@ endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
 
+if(CSL_BUILD_EXT04_REPORT)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_ext04_observed_replay_report benchmarks/reporting/ext04/observed_replay_driver.cpp)
+target_link_libraries(csl_ext04_observed_replay_report PRIVATE CSL::controllers)
+target_include_directories(csl_ext04_observed_replay_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_ext04_observed_replay_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_ext04_observed_replay_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+if(MSVC)
+target_compile_options(csl_ext04_observed_replay_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_ext04_observed_replay_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME ext04_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/ext04/check_smoke.py
+  $<TARGET_FILE:csl_ext04_observed_replay_report>)
+set_tests_properties(ext04_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_EXT01_REPORT)
 include(cmake/JsonDependencies.cmake)
 add_executable(csl_ext01_fixed_plan_report benchmarks/reporting/ext01/fixed_plan_driver.cpp)
@@ -78,6 +99,27 @@ add_test(NAME geo07_port_report_smoke COMMAND Python3::Interpreter
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/geo07_port/check_smoke.py
   $<TARGET_FILE:csl_geo07_port_report>)
 set_tests_properties(geo07_port_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
+if(CSL_BUILD_GEO07_REPORT)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_geo07_generator_report benchmarks/reporting/geo07/generator_driver.cpp)
+target_link_libraries(csl_geo07_generator_report PRIVATE CSL::geometry_generators)
+target_include_directories(csl_geo07_generator_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_geo07_generator_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_geo07_generator_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+if(MSVC)
+target_compile_options(csl_geo07_generator_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_geo07_generator_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME geo07_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/geo07/check_smoke.py
+  $<TARGET_FILE:csl_geo07_generator_report>)
+set_tests_properties(geo07_report_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 
