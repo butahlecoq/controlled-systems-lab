@@ -1,0 +1,91 @@
+#include <csl/artifacts/h_relation_attachment.hpp>
+#include <nlohmann/json.hpp>
+#include <bit>
+#include <charconv>
+#include <limits>
+#include <stdexcept>
+
+namespace csl::artifacts {
+namespace {
+using Json=nlohmann::ordered_json;
+using Bytes=std::vector<std::byte>;
+ArtifactError error(ArtifactErrorCode code,std::string path,std::string message){return {code,std::move(path),std::move(message)};}
+std::string bits(double value){char out[16];auto r=std::to_chars(out,out+sizeof(out),std::bit_cast<std::uint64_t>(value),16);std::string s(16-(r.ptr-out),'0');s.append(out,r.ptr);return s;}
+double number(const Json& j){if(!j.is_string()||j.get_ref<const std::string&>().size()!=16)throw std::runtime_error("Expected 16 hexadecimal binary64 digits");auto s=j.get<std::string>();std::uint64_t v{};auto r=std::from_chars(s.data(),s.data()+s.size(),v,16);if(r.ec!=std::errc{}||r.ptr!=s.data()+s.size())throw std::runtime_error("Invalid binary64 bits");return std::bit_cast<double>(v);}
+Json encode_doubles(std::span<const double> values){Json a=Json::array();for(double x:values)a.push_back(bits(x));return a;}
+std::vector<double> decode_doubles(const Json& j,std::uint64_t max_count=std::numeric_limits<std::uint64_t>::max()){if(!j.is_array()||j.size()>max_count)throw std::runtime_error("Coefficient count limit exceeded");std::vector<double> out;out.reserve(j.size());for(const auto& x:j)out.push_back(number(x));return out;}
+Json support(const EvidenceSupport& v){return std::visit([](const auto& x)->Json{using T=std::decay_t<decltype(x)>;
+ if constexpr(std::is_same_v<T,Unestablished>)return {{"kind","unestablished"}};
+ else if constexpr(std::is_same_v<T,NumericalCheck>)return {{"kind","numerical_check"},{"absolute_tolerance",bits(x.absolute_tolerance)},{"relative_tolerance",bits(x.relative_tolerance)},{"max_residual",bits(x.max_residual)},{"verifier",x.verifier.value}};
+ else if constexpr(std::is_same_v<T,SymbolicArgument>)return {{"kind","symbolic_argument"},{"reference",x.reference},{"assumptions",x.assumptions}};
+ else if constexpr(std::is_same_v<T,CertificateReference>)return {{"kind","certificate_reference"},{"artifact",x.artifact},{"verifier",x.verifier}};
+ else if constexpr(std::is_same_v<T,ExactFarkasEvidence>){const auto& c=x.certificate();return {{"kind","exact_farkas_recorded"},{"subject",{{"problem",c.subject.problem.value},{"program",c.subject.program.value}}},{"row_lower",encode_doubles(std::span<const double>{c.row_lower.data(),c.row_lower.size()})},{"row_upper",encode_doubles(std::span<const double>{c.row_upper.data(),c.row_upper.size()})},{"variable_lower",encode_doubles(std::span<const double>{c.variable_lower.data(),c.variable_lower.size()})},{"variable_upper",encode_doubles(std::span<const double>{c.variable_upper.data(),c.variable_upper.size()})}};}
+ },v);}
+RecordedEvidenceSupport support(const Json& j,std::uint64_t max_rows){const auto k=j.at("kind").get<std::string>();if(k=="unestablished")return Unestablished{};
+ if(k=="numerical_check")return RecordedNumericalCheck{number(j.at("absolute_tolerance")),number(j.at("relative_tolerance")),number(j.at("max_residual")),ModuleId{j.at("verifier").get<std::string>()}};
+ if(k=="symbolic_argument")return RecordedSymbolicArgument{j.at("reference").get<std::string>(),j.at("assumptions").get<std::string>()};
+ if(k=="certificate_reference")return RecordedCertificateReference{j.at("artifact").get<std::string>(),j.at("verifier").get<std::string>()};
+ if(k=="exact_farkas_recorded"){LinearInfeasibilityCertificate c{{ProblemId{j.at("subject").at("problem").get<std::string>()},ProgramId{j.at("subject").at("program").get<std::string>()}},decode_doubles(j.at("row_lower"),max_rows),decode_doubles(j.at("row_upper"),max_rows),decode_doubles(j.at("variable_lower"),max_rows),decode_doubles(j.at("variable_upper"),max_rows)};return RecordedExactFarkasEvidence{std::move(c)};}
+ throw std::runtime_error("Unknown recorded evidence support variant");}
+std::uint64_t u64(const Json& j){if(!j.is_string())throw std::runtime_error("Expected unsigned integer string");auto s=j.get<std::string>();std::uint64_t v{};auto r=std::from_chars(s.data(),s.data()+s.size(),v);if(r.ec!=std::errc{}||r.ptr!=s.data()+s.size())throw std::runtime_error("Invalid unsigned integer");return v;}
+std::string text(const Json& j){if(!j.is_string())throw std::runtime_error("Expected text");return j.get<std::string>();}
+bool valid(HRelationAttachmentLimits l){return l.max_bytes>0;}
+std::optional<ArtifactError> charge(std::uint64_t& used,std::string_view s,HRelationAttachmentLimits l){if(s.size()>l.max_text_bytes||used>l.max_text_bytes-s.size())return error(ArtifactErrorCode::limit,"attachment.text","Metadata text limit exceeded");used+=s.size();return {};}
+std::optional<ArtifactError> charge_recorded_text(const Json& support,std::uint64_t& used,HRelationAttachmentLimits l){
+ const auto kind=support.at("kind").get<std::string>();
+ auto field=[&](const Json& value)->std::optional<ArtifactError>{if(!value.is_string())throw std::runtime_error("Expected evidence text");return charge(used,value.get_ref<const std::string&>(),l);};
+ if(kind=="symbolic_argument"){
+  if(auto e=field(support.at("reference")))return e;
+  return field(support.at("assumptions"));
+ }
+ if(kind=="certificate_reference"){
+  if(auto e=field(support.at("artifact")))return e;
+  return field(support.at("verifier"));
+ }
+ if(kind=="numerical_check")return field(support.at("verifier"));
+ if(kind=="exact_farkas_recorded"){
+  const auto& subject=support.at("subject");
+  if(auto e=field(subject.at("problem")))return e;
+  return field(subject.at("program"));
+ }
+ return {};
+}
+Json matrix(const numeric::MatrixView& m){Json a=Json::array();for(std::size_t r=0;r<m.rows();++r)for(std::size_t c=0;c<m.cols();++c)a.push_back(bits(m(r,c)));return {{"rows",std::to_string(m.rows())},{"cols",std::to_string(m.cols())},{"bits",std::move(a)}};}
+std::vector<double> coefficients(const Json& j,std::uint64_t rows,std::uint64_t cols){if(u64(j.at("rows"))!=rows||u64(j.at("cols"))!=cols)throw std::runtime_error("Matrix shape mismatch");if(cols&&rows>std::numeric_limits<std::uint64_t>::max()/cols)throw std::runtime_error("Coefficient count overflow");const auto& a=j.at("bits");if(!a.is_array()||a.size()!=rows*cols)throw std::runtime_error("Coefficient count mismatch");std::vector<double> out;out.reserve(a.size());for(const auto& x:a)out.push_back(number(x));return out;}
+bool preflight(const sets::Metadata& m,const sets::HRepresentation& h,HRelationAttachmentLimits l,std::uint64_t){
+ std::uint64_t text_bytes=0;auto add_text=[&](std::string_view v){if(v.size()>l.max_text_bytes-text_bytes)return false;text_bytes+=v.size();return true;};
+ if(!add_text(m.id.value)){return false;}
+ for(const auto& label:m.coordinate_labels){if(!add_text(label)){return false;}}
+ const std::uint64_t rows=static_cast<std::uint64_t>(h.inequalities.rows()+h.equalities.rows());const std::uint64_t dim=m.set.dimension;const std::uint64_t capacity=l.max_bytes/18;
+ if(rows&&dim==std::numeric_limits<std::uint64_t>::max()){return false;}
+ if(rows&&(dim+1)>capacity/rows){return false;}
+ std::uint64_t numeric_count=rows*(dim+1);
+ if(m.affine_dimension){const auto& evidence=m.affine_dimension->claim.support;const bool ok=std::visit([&](const auto& x){using T=std::decay_t<decltype(x)>;if constexpr(std::is_same_v<T,SymbolicArgument>)return add_text(x.reference)&&add_text(x.assumptions);else if constexpr(std::is_same_v<T,CertificateReference>)return add_text(x.artifact)&&add_text(x.verifier);else if constexpr(std::is_same_v<T,NumericalCheck>)return add_text(x.verifier.value);else if constexpr(std::is_same_v<T,ExactFarkasEvidence>){const auto& c=x.certificate();if(!add_text(c.subject.problem.value)||!add_text(c.subject.program.value))return false;std::uint64_t count=0;for(const auto size:{c.row_lower.size(),c.row_upper.size(),c.variable_lower.size(),c.variable_upper.size()}){if(size>l.max_rows-count)return false;count+=size;}if(count>capacity-numeric_count){return false;}numeric_count+=count;return true;}else return true;},evidence);if(!ok)return false;}
+ if(numeric_count>capacity){return false;}
+  return text_bytes<=l.max_bytes-numeric_count*18;
+}
+}
+ArtifactResult<problem::ResolvedContent> encode_h_relation_attachment(const sets::SetData& set,HRelationAttachmentLimits l){
+ if(!valid(l))return error(ArtifactErrorCode::invalid_input,"attachment.limits","Limits must be positive");
+ try{const auto m=set.metadata();const auto rep=set.representation();const auto* h=std::get_if<sets::HRepresentation>(&rep);if(!h)return error(ArtifactErrorCode::unsupported,"attachment.representation","Only H-representation data is supported");
+  if(m->set.representation.value!="csl.polyhedron.h"||m->set.convex!=SetProperty::yes||m->set.polyhedral!=SetProperty::yes||m->set.bounded!=SetProperty::unknown||(m->affine_dimension&&m->affine_dimension->origin!=sets::DimensionOrigin::supplied))return error(ArtifactErrorCode::invalid_input,"attachment.metadata","H metadata violates SetData factory contract");
+  const auto dim=m->set.dimension,ir=h->inequalities.rows(),er=h->equalities.rows();if(dim>l.max_dimension||ir>l.max_rows||er>l.max_rows-ir)return error(ArtifactErrorCode::limit,"attachment.shape","Dimension or row limit exceeded");const auto rows=ir+er;if(dim&&rows>l.max_bytes/18/dim)return error(ArtifactErrorCode::limit,"attachment.coefficients","Coefficient count exceeds byte budget");
+  if(!preflight(*m,*h,l,rows)){return error(ArtifactErrorCode::limit,"attachment.bytes","Minimum required payload exceeds configured limits");}
+  std::uint64_t used=0;if(auto e=charge(used,m->id.value,l))return *e;for(const auto& s:m->coordinate_labels)if(auto e=charge(used,s,l))return *e;
+  Json affine=nullptr;if(m->affine_dimension){const auto& a=m->affine_dimension->claim;Json v=std::holds_alternative<sets::EmptyAffineDimension>(a.value)?Json{{"kind","empty"}}:Json{{"kind","dimension"},{"value",std::to_string(std::get<sets::DimensionValue>(a.value).value)}};affine={{"origin","supplied"},{"value",std::move(v)},{"support",support(a.support)}};}
+  Json j={{"schema","csl.h-relation-attachment/1"},{"id",m->id.value},{"dimension",std::to_string(dim)},{"representation","csl.polyhedron.h"},{"convex","yes"},{"polyhedral","yes"},{"bounded","unknown"},{"labels",m->coordinate_labels},{"affine_dimension",std::move(affine)},{"inequalities",matrix(h->inequalities)},{"upper_bounds",encode_doubles(h->upper_bounds.values())},{"equalities",matrix(h->equalities)},{"equality_values",encode_doubles(h->equality_values.values())}};
+  const auto s=j.dump();if(s.size()>l.max_bytes)return error(ArtifactErrorCode::limit,"attachment.bytes","Encoded attachment exceeds byte limit");Bytes b; b.reserve(s.size());for(unsigned char c:s)b.push_back(static_cast<std::byte>(c));auto owned=problem::snapshot_content(b);if(auto* c=std::get_if<problem::ResolvedContent>(&owned))return *c;return error(ArtifactErrorCode::allocation,"attachment.content","Could not own attachment bytes");
+ }catch(const std::exception& e){return error(ArtifactErrorCode::invalid_input,"attachment.encode",e.what());}}
+ArtifactResult<RecordedHRelation> decode_h_relation_attachment(std::span<const std::byte> bytes,HRelationAttachmentLimits l,std::optional<problem::ContentDigest> expected){
+ if(!valid(l)){return error(ArtifactErrorCode::invalid_input,"attachment.limits","Limits must be positive");}
+ if(bytes.size()>l.max_bytes){return error(ArtifactErrorCode::limit,"attachment.bytes","Attachment exceeds byte limit");}
+ auto owned=problem::snapshot_content(bytes,expected);if(!std::holds_alternative<problem::ResolvedContent>(owned)){return error(ArtifactErrorCode::identity,"attachment.digest","Attachment digest mismatch");}
+ try{const auto content=std::get<problem::ResolvedContent>(std::move(owned));std::string source;source.reserve(content.bytes().size());for(auto b:content.bytes())source.push_back(static_cast<char>(std::to_integer<unsigned char>(b)));const auto j=Json::parse(source);if(j.dump()!=source)return error(ArtifactErrorCode::invalid_input,"attachment.trailing_bytes","Attachment is not in canonical form or contains trailing bytes");if(j.at("schema")!="csl.h-relation-attachment/1")return error(ArtifactErrorCode::unsupported,"attachment.schema","Unknown H-relation schema");
+  const auto dim=u64(j.at("dimension"));if(dim>l.max_dimension)return error(ArtifactErrorCode::limit,"attachment.dimension","Dimension limit exceeded");if(text(j.at("representation"))!="csl.polyhedron.h"||text(j.at("convex"))!="yes"||text(j.at("polyhedral"))!="yes"||text(j.at("bounded"))!="unknown")throw std::runtime_error("H metadata violates SetData factory contract");const auto id=text(j.at("id"));std::uint64_t used=0;if(auto e=charge(used,id,l))return *e;
+  const auto& labels=j.at("labels");if(!labels.is_array()||(!labels.empty()&&labels.size()!=dim))throw std::runtime_error("Coordinate label count mismatch");std::vector<std::string> names;names.reserve(labels.size());for(const auto& x:labels){auto s=text(x);if(auto e=charge(used,s,l))return *e;names.push_back(std::move(s));}
+  const auto ir=u64(j.at("inequalities").at("rows")),er=u64(j.at("equalities").at("rows"));if(ir>l.max_rows||er>l.max_rows-ir)return error(ArtifactErrorCode::limit,"attachment.rows","Row limit exceeded");const auto rows=ir+er;if(dim&&rows>l.max_bytes/18/dim)return error(ArtifactErrorCode::limit,"attachment.coefficients","Coefficient count exceeds byte budget");auto av=coefficients(j.at("inequalities"),ir,dim),ev=coefficients(j.at("equalities"),er,dim);auto b=decode_doubles(j.at("upper_bounds"),l.max_rows),f=decode_doubles(j.at("equality_values"),l.max_rows);if(b.size()!=ir||f.size()!=er)throw std::runtime_error("Bound count mismatch");
+  auto am=numeric::snapshot(Matrix{static_cast<std::size_t>(ir),static_cast<std::size_t>(dim),std::move(av)});auto bm=numeric::snapshot_vector(b);auto em=numeric::snapshot(Matrix{static_cast<std::size_t>(er),static_cast<std::size_t>(dim),std::move(ev)});auto fm=numeric::snapshot_vector(f);if(!std::holds_alternative<numeric::MatrixView>(am)||!std::holds_alternative<numeric::VectorView>(bm)||!std::holds_alternative<numeric::MatrixView>(em)||!std::holds_alternative<numeric::VectorView>(fm))throw std::runtime_error("Nonfinite or invalid H coefficients");
+  std::optional<RecordedAffineDimensionClaim> claim;const auto& a=j.at("affine_dimension");if(!a.is_null()){if(a.at("origin")!="supplied")throw std::runtime_error("Unsupported affine-dimension origin");const auto& v=a.at("value");sets::AffineDimension value;if(v.at("kind")=="empty")value=sets::EmptyAffineDimension{};else if(v.at("kind")=="dimension"){const auto n=u64(v.at("value"));if(n>dim)throw std::runtime_error("Affine dimension exceeds ambient dimension");value=sets::DimensionValue{static_cast<std::size_t>(n)};}else throw std::runtime_error("Unknown affine dimension");const auto& recorded_support=a.at("support");if(recorded_support.at("kind")=="exact_farkas_recorded"){std::uint64_t count=0;for(const auto* key:{"row_lower","row_upper","variable_lower","variable_upper"}){const auto& values=recorded_support.at(key);if(!values.is_array()||values.size()>l.max_rows-count)return error(ArtifactErrorCode::limit,"attachment.evidence.rows","Recorded Farkas row limit exceeded before allocation");count+=values.size();}}if(auto e=charge_recorded_text(recorded_support,used,l))return *e;auto sup=support(recorded_support,l.max_rows);claim=RecordedAffineDimensionClaim{std::move(value),sets::DimensionOrigin::supplied,std::move(sup)};}
+  SetMetadata metadata{static_cast<std::size_t>(dim),{"csl.polyhedron.h"},SetProperty::yes,SetProperty::yes,SetProperty::unknown};return RecordedHRelation{SetId{id},metadata,std::move(names),std::move(claim),{std::get<numeric::MatrixView>(am),std::get<numeric::VectorView>(bm),std::get<numeric::MatrixView>(em),std::get<numeric::VectorView>(fm)}};
+ }catch(const std::exception& e){return error(ArtifactErrorCode::invalid_input,"attachment.decode",e.what());}}
+} // namespace csl::artifacts
