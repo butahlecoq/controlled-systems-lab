@@ -1,5 +1,6 @@
 #include <csl/geometry/hull_reducer.hpp>
 #include "exact_convex_combination.hpp"
+#include "hull/reducer_internal.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -218,8 +219,8 @@ public:
 };
 } // namespace
 
-HullReductionResult reduce_hull(const PointCloud& cloud, LPWorkspace& lp,
-                                const ExecutionContext& context) {
+HullReductionResult detail::reduce_hull_in_order(const PointCloud& cloud, LPWorkspace& lp,
+        const ExecutionContext& context, const std::vector<std::size_t>& order) {
     if (cloud.problem.value.empty()) return invalid("point_cloud.problem", "Problem identity is required");
     if (!std::isfinite(context.numerical.absolute_tolerance) || context.numerical.absolute_tolerance < 0 ||
         !std::isfinite(context.numerical.relative_tolerance) || context.numerical.relative_tolerance < 0 ||
@@ -235,8 +236,7 @@ HullReductionResult reduce_hull(const PointCloud& cloud, LPWorkspace& lp,
     }
 
     HullReduction output{ReductionStatus::complete, {}, {}, 0, {}};
-    output.retained.resize(cloud.points.size());
-    std::iota(output.retained.begin(), output.retained.end(), std::size_t{0});
+    output.retained = order;
     if (output.retained.size() < 2) return output;
 
     std::size_t position = 0;
@@ -289,6 +289,13 @@ HullReductionResult reduce_hull(const PointCloud& cloud, LPWorkspace& lp,
     }
     restore_certificates_outside_policy(cloud, output, context.numerical);
     return output;
+}
+
+HullReductionResult reduce_hull(const PointCloud& cloud, LPWorkspace& lp,
+        const ExecutionContext& context) {
+    std::vector<std::size_t> order(cloud.points.size());
+    std::iota(order.begin(), order.end(), std::size_t{0});
+    return detail::reduce_hull_in_order(cloud, lp, context, order);
 }
 
 registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration() {

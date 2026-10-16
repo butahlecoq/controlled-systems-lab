@@ -72,6 +72,13 @@ Tests: all permutations yield the same hull; zero-width box; <2 unique points; t
 
 Suggested tickets: implement deterministic distance ordering/preconditioning; implement streaming filter plus mandatory final reduction; implement audited active grouping variant behind a separately named strategy; only then benchmark Normal/Uniform/Sphere fixtures corresponding to L07 pp. 53–55. Do not ship a ticket saying “the archived recursive divide-and-conquer simplex method” because that exact algorithm has not been found.
 
+The first OPT-07 increment implements the active A29 distance score as the
+[`csl.hull.ordered-membership` adapter](../contracts/hull-reduction.md#ordered-hull-strategy-opt-07-bounded-adapter),
+then applies the existing certified LP reducer. It preserves original IDs and
+has defined zero-width and overflow fallbacks. This is deliberate bounded
+preconditioning; it does not reproduce A29's streaming filter or A33's active
+grouping/final-reduction sequence, and it carries no historical speed claim.
+
 ## 4. Separate geometric Quickhull experiment
 
 `Scientific Research/quickhull.m:1–21` initializes extreme x-coordinate endpoints and sides; nested `qh:22–52` picks the farthest point and recursively processes subsets. It is a two-dimensional geometric hull algorithm with plotting mixed into computation, slope divisions (vertical lines problematic), and missing safe empty initial-subset handling. It contains no simplex calls.

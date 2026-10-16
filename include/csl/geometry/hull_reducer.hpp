@@ -42,6 +42,16 @@ struct BasisReuseMetrics {
     bool fell_back_to_lp_baseline{};
 };
 
+struct OrderedReductionMetrics {
+    // Original PointCloud indices before any LP call. Ties keep input order.
+    std::vector<std::size_t> processing_order;
+    std::size_t ordered_candidates{};
+    std::size_t zero_width_coordinates{};
+    // True when finite input has a range or score unsafe for binary64 sorting.
+    // In that case processing_order is the original input order.
+    bool used_identity_fallback{};
+};
+
 struct ConvexCombination {
     std::size_t point;
     double weight;
@@ -69,6 +79,8 @@ struct HullReduction {
     std::vector<MembershipAttempt> attempts;
     // Present only for a reducer that performs within-solve basis reuse.
     std::optional<BasisReuseMetrics> basis_reuse{};
+    // Present only for a reducer that sorts candidates before certified LP reduction.
+    std::optional<OrderedReductionMetrics> ordered{};
 };
 
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;
@@ -85,6 +97,12 @@ public:
 // All other outcomes conservatively retain the candidate.
 HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
                                 const ExecutionContext&);
+
+// Applies the archived Scientific Research bounding-box score as a deterministic
+// candidate order, then runs the same certified LP reduction over original IDs.
+HullReductionResult reduce_ordered_hull(const PointCloud&, LPWorkspace&,
+                                        const ExecutionContext&);
+
 
 } // namespace csl::geometry
 
@@ -105,4 +123,5 @@ namespace csl::geometry {
 // Registers the LP-backed membership reducer as one replaceable implementation
 // behind HullReducerPort. The LP workspace remains a separate dependency.
 registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration();
+registry::Registration<registry::HullReducerPort> make_ordered_hull_reducer_registration();
 } // namespace csl::geometry
