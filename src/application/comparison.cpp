@@ -109,21 +109,28 @@ ComparisonExecution run_comparison(const PreparedComparison& prepared,
                     selection = std::move(*unsupported_selection);
                 } else {
                     auto selected_result = std::get<WitnessSelection>(std::move(selected));
-                    for (const auto& witness : selected_result.batch.witnesses) {
-                        verification::TrajectoryRequest request;
-                        request.witness = witness;
-                        const auto expected = prepared.expected_synthesis_identity(index);
-                        request.assurance = expected.request.assurance;
-                        request.outcome = result->outcome;
-                        request.family = result->family;
-                        request.bounds = result->objective;
-                        request.expected_synthesis = verification::ExpectedSynthesisBinding{
-                            expected.request, expected.strategy, expected.strategy_version,
-                            expected.lineage};
-                        reports.push_back(verification::verify_trajectory(prepared.problem(), request,
-                            effective_context, membership_provider));
+                    const auto expected = prepared.expected_synthesis_identity(index);
+                    if (!expected.lineage) {
+                        selection = Unsupported{{Diagnostic{DiagnosticCode::unsupported,
+                            "comparison.verification.lineage",
+                            "The prepared strategy did not provide an expected transformation lineage; "
+                            "the selected witnesses were not independently verified."}}};
+                    } else {
+                        for (const auto& witness : selected_result.batch.witnesses) {
+                            verification::TrajectoryRequest request;
+                            request.witness = witness;
+                            request.assurance = expected.request.assurance;
+                            request.outcome = result->outcome;
+                            request.family = result->family;
+                            request.bounds = result->objective;
+                            request.expected_synthesis = verification::ExpectedSynthesisBinding{
+                                expected.request, expected.strategy, expected.strategy_version,
+                                *expected.lineage};
+                            reports.push_back(verification::verify_trajectory(prepared.problem(), request,
+                                effective_context, membership_provider));
+                        }
+                        selection = std::move(selected_result);
                     }
-                    selection = std::move(selected_result);
                 }
             }
         }
