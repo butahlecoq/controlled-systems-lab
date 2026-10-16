@@ -4,8 +4,8 @@
 
 namespace csl::geometry::generators {
 
-// Affine images and independent Minkowski sums on native generator handles.
-// A shared FactorId is dependent and cannot enter the independent sum port.
+// Affine images, independent Minkowski sums and typed dependent sums on native
+// generator handles. Shared FactorIds remain rejected for MinkowskiSum.
 registry::Registration<registry::GeometryPort> make_operation_registration();
 
 // Explicit finite V materialization of an unconstrained zonotope. The caller

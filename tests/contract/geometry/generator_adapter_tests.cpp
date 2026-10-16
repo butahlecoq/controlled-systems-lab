@@ -134,6 +134,95 @@ TEST_CASE("generator geometry keeps equalities and rejects dependent Minkowski a
     CHECK(std::holds_alternative<registry::Rejection>(ordinary.prepare(validated)));
 }
 
+TEST_CASE("registered dependent sum cancels one shared factor and binds ordered evidence") {
+    auto geometry=provider(geometry::generators::make_operation_registration(),{"csl.zonotope"});
+    const auto left=generator("cancel-left",{0},{1,1,{1}},{{"history.0"}},{0,1,{}},{});
+    const auto right=generator("cancel-right",{0},{1,1,{-1}},{{"history.0"}},{0,1,{}},{});
+    const OperationRequest request{{{"geo07"},{"dependent-cancel"},{"origin"}},
+        {"csl.geometry.generators.operations"},DependentSum{left.as_handle(),right.as_handle()},
+        SetRelation::equivalent,Assurance::numerical};
+    const auto result=run(geometry,request);
+    CHECK(result.relation==SetRelation::equivalent);
+    CHECK(check_geometry_evidence(result.evidence,request).empty());
+    const auto sum=take(sets::from_generator_handle(result.output));
+    CHECK(sum.center()==Vector{0});
+    CHECK(sum.generators().values==Vector{0});
+    CHECK(sum.factor_ids()==std::vector<sets::FactorId>{{"history.0"}});
+    CHECK(sum.equalities().rows==0);
+    CHECK(sum.center()[0]-sum.generators().values[0]==0);
+    CHECK(sum.center()[0]+sum.generators().values[0]==0);
+    CHECK((sum.center()[0]<=0 && -sum.center()[0]<=0)); // literal H: x <= 0, -x <= 0
+    CHECK_FALSE((1<=0 && -1<=0));
+    auto swapped=request;
+    swapped.operation=DependentSum{right.as_handle(),left.as_handle()};
+    CHECK_FALSE(check_geometry_evidence(result.evidence,swapped).empty());
+    auto independent=request;
+    independent.operation=MinkowskiSum{left.as_handle(),right.as_handle()};
+    expect_unsupported(geometry.prepare(independent),"generators.minkowski.factor_ids");
+    auto validated=request;
+    validated.assurance=Assurance::validated;
+    CHECK(std::holds_alternative<registry::Rejection>(geometry.prepare(validated)));
+    auto forged=left.as_handle();
+    forged.metadata.representation={"csl.polyhedron.h"};
+    auto wrong_representation=request;
+    wrong_representation.operation=DependentSum{forged,right.as_handle()};
+    CHECK(std::holds_alternative<registry::Rejection>(geometry.prepare(wrong_representation)));
+    const auto labelled=take(sets::make_generator_set({{"labelled"},{0},{1,1,{1}},
+        {{"history.0"}},{0,1,{}},{},{"x"}}));
+    auto wrong_labels=request;
+    wrong_labels.operation=DependentSum{labelled.as_handle(),right.as_handle()};
+    const auto label_rejection=geometry.prepare(wrong_labels);
+    const auto* rejection=std::get_if<registry::Rejection>(&label_rejection);
+    REQUIRE(rejection);
+    REQUIRE(rejection->diagnostics.size()==1);
+    CHECK(rejection->diagnostics.front().field=="generators.dependent.labels");
+}
+
+TEST_CASE("registered dependent constrained sum retains shared axes and both equalities") {
+    auto geometry=provider(geometry::generators::make_operation_registration(),
+        {"csl.constrained-zonotope"});
+    const auto left=generator("dependent-left",{0,0},{2,2,{1,0,0,1}},
+        {{"u"},{"v"}},{1,2,{1,-1}},{0});
+    const auto right=generator("dependent-right",{0,0},{2,2,{-1,0,0,1}},
+        {{"u"},{"w"}},{1,2,{1,1}},{0});
+    const OperationRequest request{{{"geo07"},{"dependent-constrained"},{"origin-2d"}},
+        {"csl.geometry.generators.operations"},DependentSum{left.as_handle(),right.as_handle()},
+        SetRelation::equivalent,Assurance::numerical};
+    const auto result=run(geometry,request);
+    CHECK(check_geometry_evidence(result.evidence,request).empty());
+    const auto sum=take(sets::from_generator_handle(result.output));
+    CHECK(sum.center()==Vector{0,0});
+    CHECK(sum.factor_ids()==std::vector<sets::FactorId>{{"u"},{"v"},{"w"}});
+    CHECK(sum.generators().values==Vector{0,0,0,0,1,1});
+    CHECK(sum.equalities().rows==2);
+    CHECK(sum.equalities().values==Vector{1,-1,0,1,0,1});
+    CHECK(sum.equality_values()==Vector{0,0});
+    const auto lifted=take(sets::factor_polyhedron(sum));
+    CHECK(lifted.factor_ids==sum.factor_ids());
+    // The authored H reference is x=0,y=0: both equalities force v=u,w=-u.
+    for(const double u:Vector{-1,0,1}) {
+        const Vector factors{u,u,-u};
+        CHECK(factors[0]-factors[1]==0); // literal left equality
+        CHECK(factors[0]+factors[2]==0); // literal right equality
+        const Vector physical{
+            lifted.offset[0]+lifted.map.values[0]*factors[0]+
+                lifted.map.values[1]*factors[1]+lifted.map.values[2]*factors[2],
+            lifted.offset[1]+lifted.map.values[3]*factors[0]+
+                lifted.map.values[4]*factors[1]+lifted.map.values[5]*factors[2]};
+        CHECK(physical==Vector{0,0}); // literal ambient H: x=0, y=0
+    }
+    const Vector infeasible{1,1,0};
+    CHECK(infeasible[0]-infeasible[1]==0);
+    CHECK_FALSE(infeasible[0]+infeasible[2]==0); // right equality excludes it
+    const Vector outside{
+        lifted.offset[0]+lifted.map.values[0]*infeasible[0]+
+            lifted.map.values[1]*infeasible[1]+lifted.map.values[2]*infeasible[2],
+        lifted.offset[1]+lifted.map.values[3]*infeasible[0]+
+            lifted.map.values[4]*infeasible[1]+lifted.map.values[5]*infeasible[2]};
+    CHECK(outside==Vector{0,1});
+    CHECK_FALSE(outside==Vector{0,0}); // literal ambient H excludes (0,1)
+}
+
 TEST_CASE("prepared disjoint constrained Minkowski sum keeps both equalities and physical interval") {
     auto constrained=provider(geometry::generators::make_operation_registration(),
         {"csl.constrained-zonotope"});
