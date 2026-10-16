@@ -6,6 +6,7 @@
 #include <csl/sets/generator_sets.hpp>
 #include <algorithm>
 #include <set>
+#include <tuple>
 #include <utility>
 
 using namespace csl;
@@ -44,6 +45,16 @@ OperationResult run(registry::PreparedProvider<registry::ConversionPort>& select
 }
 bool physical_box_h(double x) { return x<=12 && -x<=-2; }
 bool physical_sum_h(double x) { return x<=9 && -x<=-3; }
+bool physical_diagonal_image_h(double x) { return x<=0 && -x<=0; }
+bool physical_constrained_sum_h(double x) { return x<=7 && -x<=-1; }
+void expect_unsupported(const std::variant<registry::PreparedPipeline<registry::GeometryPort>,
+        registry::Rejection>& admission,const std::string& field) {
+    const auto* rejection=std::get_if<registry::Rejection>(&admission);
+    REQUIRE(rejection);
+    REQUIRE(rejection->diagnostics.size()==1);
+    CHECK(rejection->diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(rejection->diagnostics[0].field==field);
+}
 }
 
 TEST_CASE("prepared generator geometry preserves box factors and independent sum") {
@@ -92,23 +103,72 @@ TEST_CASE("generator geometry keeps equalities and rejects dependent Minkowski a
         SetRelation::equivalent,Assurance::numerical};
     CHECK(std::holds_alternative<registry::Rejection>(ordinary.prepare(image_request)));
     const auto image=take(sets::from_generator_handle(run(constrained,image_request).output));
+    CHECK(image.center()==Vector{0});
+    CHECK(image.generators().rows==1);
+    CHECK(image.generators().cols==2);
+    CHECK(image.generators().values==Vector{1,-1});
     CHECK(image.factor_ids()==std::vector<sets::FactorId>{{"u"},{"v"}});
     CHECK(image.equalities().values==Vector{1,-1});
     CHECK(image.equality_values()==Vector{0});
+    for(const double factor:Vector{-1,0,1}) {
+        const double x=image.center()[0]+image.generators().values[0]*factor+
+            image.generators().values[1]*factor;
+        CHECK(x==0);
+        CHECK(physical_diagonal_image_h(x));
+    }
+    CHECK_FALSE(physical_diagonal_image_h(-1));
+    CHECK_FALSE(physical_diagonal_image_h(1));
 
     const auto left=generator("left",{0},{1,1,{1}},{{"history.0"}},{0,1,{}},{});
     const auto right=generator("right",{0},{1,1,{-1}},{{"history.0"}},{0,1,{}},{});
     const OperationRequest alias{{{"geo07"},{"shared"},{"not-independent"}},
         {"csl.geometry.generators.operations"},MinkowskiSum{left.as_handle(),right.as_handle()},
         SetRelation::equivalent,Assurance::numerical};
-    CHECK(std::holds_alternative<registry::Rejection>(ordinary.prepare(alias)));
+    expect_unsupported(ordinary.prepare(alias),"generators.minkowski.factor_ids");
     auto intersection=alias;
     intersection.operation=Intersection{left.as_handle(),right.as_handle()};
-    CHECK(std::holds_alternative<registry::Rejection>(ordinary.prepare(intersection)));
+    expect_unsupported(ordinary.prepare(intersection),"generators.operation");
     auto validated=alias;
     validated.operation=AffineImage{left.as_handle(),{1,1,{1}},{0}};
     validated.assurance=Assurance::validated;
     CHECK(std::holds_alternative<registry::Rejection>(ordinary.prepare(validated)));
+}
+
+TEST_CASE("prepared disjoint constrained Minkowski sum keeps both equalities and physical interval") {
+    auto constrained=provider(geometry::generators::make_operation_registration(),
+        {"csl.constrained-zonotope"});
+    // Left: x=1+u, u=v. Right: x=3+2q, p=-q.
+    const auto left=generator("left-constrained",{1},{1,2,{1,0}},
+        {{"u"},{"v"}},{1,2,{1,-1}},{0});
+    const auto right=generator("right-constrained",{3},{1,2,{0,2}},
+        {{"p"},{"q"}},{1,2,{1,1}},{0});
+    const OperationRequest request{{{"geo07"},{"constrained-independent-sum"},{"constrained-sum"}},
+        {"csl.geometry.generators.operations"},MinkowskiSum{left.as_handle(),right.as_handle()},
+        SetRelation::equivalent,Assurance::numerical};
+    const auto result=run(constrained,request);
+    CHECK(result.relation==SetRelation::equivalent);
+    CHECK(check_geometry_evidence(result.evidence,request).empty());
+    const auto sum=take(sets::from_generator_handle(result.output));
+    CHECK(sum.center()==Vector{4});
+    CHECK(sum.generators().rows==1);
+    CHECK(sum.generators().cols==4);
+    CHECK(sum.generators().values==Vector{1,0,0,2});
+    CHECK(sum.factor_ids()==std::vector<sets::FactorId>{{"u"},{"v"},{"p"},{"q"}});
+    CHECK(sum.equalities().rows==2);
+    CHECK(sum.equalities().cols==4);
+    CHECK(sum.equalities().values==Vector{1,-1,0,0,0,0,1,1});
+    CHECK(sum.equality_values()==Vector{0,0});
+    for(const auto [u,q,expected_x]:std::vector<std::tuple<double,double,double>>{
+            {-1,-1,1},{0,0,4},{1,1,7}}) {
+        const Vector factors{u,u,-q,q};
+        const double x=sum.center()[0]+sum.generators().values[0]*factors[0]+
+            sum.generators().values[1]*factors[1]+sum.generators().values[2]*factors[2]+
+            sum.generators().values[3]*factors[3];
+        CHECK(x==expected_x);
+        CHECK(physical_constrained_sum_h(x));
+    }
+    CHECK_FALSE(physical_constrained_sum_h(0));
+    CHECK_FALSE(physical_constrained_sum_h(8));
 }
 
 TEST_CASE("bounded explicit zonotope to V conversion has literal vertices and closure gates") {
