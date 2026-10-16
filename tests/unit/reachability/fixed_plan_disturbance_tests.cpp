@@ -92,6 +92,28 @@ TEST_CASE("all catalogued fixed plans are robustly infeasible under a narrow saf
     }
 }
 
+TEST_CASE("later unsupported data takes precedence over an earlier robust violation") {
+    auto plan=request(3);
+    plan.admissible_states[0]=safe(1,2); // x0=0 already violates this set.
+    plan.disturbances[1]=take(sets::make_v({{"unbounded-w1"},1,{"w"}},
+        {take(numeric::snapshot(Matrix{1,1,{0}})),
+         take(numeric::snapshot(Matrix{1,1,{1}}))}));
+    const auto unbounded=fixed_plan_disturbance(plan,8);
+    REQUIRE(std::holds_alternative<Unsupported>(unbounded));
+    CHECK(std::get<Unsupported>(unbounded).diagnostics[0].field=="fixed_plan.bounded");
+
+    plan.disturbances[1]=interval("w1",-1,1,"w");
+    plan.admissible_states[2]=interval("unsupported-safe",-3,3,"x");
+    const auto later_safe=fixed_plan_disturbance(plan,8);
+    REQUIRE(std::holds_alternative<Unsupported>(later_safe));
+    CHECK(std::get<Unsupported>(later_safe).diagnostics[0].field=="fixed_plan.safe.representation");
+
+    plan.admissible_states[2]=safe(-3,3);
+    const auto later_capacity=fixed_plan_disturbance(plan,2);
+    REQUIRE(std::holds_alternative<Unsupported>(later_capacity));
+    CHECK(std::get<Unsupported>(later_capacity).diagnostics[0].field=="fixed_plan.capacity");
+}
+
 TEST_CASE("B08 displayed rounded model gives the independent finite-plan reference") {
     SystemModel authored{{{4,1,2},TimeDomain::discrete,
         LinearStage{{4,4,{1,0,0,0,-25,1,0,0,0,0,1,0,0,0,-25,1}},

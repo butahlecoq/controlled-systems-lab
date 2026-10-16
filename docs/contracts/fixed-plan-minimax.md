@@ -19,6 +19,9 @@ across stages. The caller caps generated
 points per stage. The module generates every pair of previous candidate and
 current disturbance vertex. It applies the model's `A x + B u + E w + a`
 transition, then checks **every** successor against the next state set. A
+whole-request preflight checks all stage representations, boundedness, dimensions
+and candidate growth before any propagation, so a later unsupported input or
+capacity limit is not hidden by an earlier robust violation. A
 violating successor returns `FixedPlanViolation` with its stage and coordinates;
 the module never clips it away. An empty initial/disturbance description
 returns `FixedPlanEmpty`. Unsupported representations, mismatched dimensions,

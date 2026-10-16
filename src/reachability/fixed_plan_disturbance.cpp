@@ -113,15 +113,37 @@ FixedPlanOutcome fixed_plan_disturbance(const FixedPlanRequest& request,
         for(double value:request.controls[stage])if(!std::isfinite(value))
             return unsupported("fixed_plan.control","Controls must be finite.",DiagnosticCode::invalid_input);
     }
-    for(const auto& safe:request.admissible_states)
+    for(const auto& safe:request.admissible_states) {
         if(safe.metadata()->set.dimension!=dims.state||
            (!safe.metadata()->coordinate_labels.empty() && !request.initial.metadata()->coordinate_labels.empty() &&
             safe.metadata()->coordinate_labels!=request.initial.metadata()->coordinate_labels))
             return unsupported("fixed_plan.safe.dimension","Safe set dimensions or named coordinates differ from initial state.",DiagnosticCode::invalid_input);
-    if(const auto stop=stopped(context))return *stop;
+        const auto representation=safe.representation();
+        if(!std::holds_alternative<sets::HRepresentation>(representation) &&
+           !std::holds_alternative<sets::SingletonRepresentation>(representation) &&
+           !std::holds_alternative<sets::UniversalRepresentation>(representation) &&
+           !std::holds_alternative<sets::EmptyRepresentation>(representation))
+            return unsupported("fixed_plan.safe.representation","Safe set requires H, singleton, universal or empty representation.");
+    }
+    // Admit the complete request before a robust violation can be reported.
     auto current_result=points(request.initial,max_points);
     if(const auto* error=std::get_if<Unsupported>(&current_result))return *error;
     auto current=std::get<Points>(std::move(current_result));
+    std::vector<Points> all_disturbances;
+    all_disturbances.reserve(horizon);
+    for(const auto& set:request.disturbances) {
+        auto result=points(set,max_points);
+        if(const auto* error=std::get_if<Unsupported>(&result))return *error;
+        all_disturbances.push_back(std::get<Points>(std::move(result)));
+    }
+    auto candidate_count=current.size();
+    for(const auto& disturbance:all_disturbances) {
+        if(disturbance.empty()) {candidate_count=0;continue;}
+        if(candidate_count>max_points/disturbance.size())
+            return unsupported("fixed_plan.capacity","Generated successor count exceeds caller limit.");
+        candidate_count*=disturbance.size();
+    }
+    if(const auto stop=stopped(context))return *stop;
     if(current.empty())return FixedPlanEmpty{0};
     for(const auto& point:current) {
         const auto membership=contains(request.admissible_states[0],point,context.numerical);
@@ -132,12 +154,8 @@ FixedPlanOutcome fixed_plan_disturbance(const FixedPlanRequest& request,
     FixedPlanReachable tube{{request.initial},Assurance::numerical};
     for(std::size_t stage=0;stage<horizon;++stage) {
         if(const auto stop=stopped(context))return *stop;
-        auto disturbances_result=points(request.disturbances[stage],max_points);
-        if(const auto* error=std::get_if<Unsupported>(&disturbances_result))return *error;
-        const auto& disturbances=std::get<Points>(disturbances_result);
+        const auto& disturbances=all_disturbances[stage];
         if(disturbances.empty())return FixedPlanEmpty{stage+1};
-        if(current.size()>max_points/disturbances.size())
-            return unsupported("fixed_plan.capacity","Generated successor count exceeds caller limit.");
         Points next;
         next.reserve(current.size()*disturbances.size());
         for(const auto& state:current)for(const auto& disturbance:disturbances) {
