@@ -14,6 +14,7 @@ import platform
 import re
 import subprocess
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
 
 from oracle import FIXTURES, require
@@ -60,6 +61,37 @@ def release_project(path: Path) -> dict:
             ("LanguageStandard", "Optimization", "PreprocessorDefinitions")}
 
 
+def public_log_roots(source_root: Path, build_root: Path) -> dict[str, Path]:
+    """Local installation roots that may occur in verbose CMake/MSBuild logs."""
+    roots = {
+        "$SOURCE_ROOT": source_root,
+        "$BUILD_ROOT": build_root,
+        "$TEMP_ROOT": Path(tempfile.gettempdir()),
+        "$USER_ROOT": Path.home(),
+    }
+    for label, variable in (("$PROGRAM_FILES_X86", "ProgramFiles(x86)"),
+                            ("$PROGRAM_FILES", "ProgramFiles"),
+                            ("$WINDOWS_ROOT", "SystemRoot")):
+        if value := os.environ.get(variable):
+            roots[label] = Path(value)
+    return roots
+
+
+def sanitize_build_log(raw: str, roots: dict[str, Path]) -> str:
+    """Redact local roots in either slash style; reject unknown absolute paths."""
+    clean = raw
+    for label, path in sorted(roots.items(), key=lambda item: len(str(item[1])),
+                              reverse=True):
+        parts = str(path).rstrip("\\/").replace("\\", "/").split("/")
+        path_pattern = r"[\\/]".join(re.escape(part) for part in parts)
+        clean = re.sub(path_pattern + r"(?=$|[\\/]|[^A-Za-z0-9_.-])",
+                       lambda match: label, clean, flags=re.IGNORECASE)
+    if re.search(r"(?<![A-Za-z0-9_$])(?:[A-Za-z]:[\\/]|\\\\[^\\\s]+\\[^\\\s]+)",
+                 clean):
+        raise ValueError("residual absolute path in sanitized build log")
+    return clean
+
+
 def preflight(exe: Path, source_root: Path, source_commit: str,
               build_log: Path, concurrent_work: Path) -> dict:
     source_root = source_root.resolve(strict=True)
@@ -96,6 +128,7 @@ def preflight(exe: Path, source_root: Path, source_commit: str,
     require(any("/O2" in line and "/std:c++20" in line and
                 re.search(r"/D\s+NDEBUG\b", line) for line in harness_commands),
             "verbose clean Release build evidence is incomplete")
+    sanitized_log = sanitize_build_log(raw_log, public_log_roots(source_root, build_root))
     note = concurrent_work.read_text(encoding="utf-8").strip()
     require(bool(note), "concurrent-work note is required")
     source_paths = [
@@ -122,6 +155,8 @@ def preflight(exe: Path, source_root: Path, source_commit: str,
         "fixture_sha256": hashlib.sha256(fixture_bytes).hexdigest(),
         "executable_sha256": sha256(exe),
         "build_log_sha256": sha256(build_log),
+        "sanitized_build_log_sha256": hashlib.sha256(
+            sanitized_log.encode("utf-8")).hexdigest(),
         "cmake_cache_sha256": sha256(build_root / "CMakeCache.txt"),
         "generated_release_project_sha256": sha256(build_root / "csl_opt07_measure.vcxproj"),
         "release_project": release,
@@ -158,13 +193,16 @@ def main() -> None:
         return
     require(args.out is not None and not args.out.exists(),
             "measurement output must be a fresh directory")
+    sanitized = sanitize_build_log(
+        args.build_log.read_text(encoding="utf-8", errors="replace"),
+        public_log_roots(args.source_root.resolve(), args.exe.resolve().parent.parent))
+    require(hashlib.sha256(sanitized.encode("utf-8")).hexdigest() ==
+            evidence["sanitized_build_log_sha256"],
+            "build log changed after preflight")
     args.out.mkdir(parents=True)
     result = subprocess.run([str(args.exe.resolve()), "measure"], capture_output=True)
     (args.out / "raw-stdout.jsonl").write_bytes(result.stdout)
     (args.out / "raw-stderr.txt").write_bytes(result.stderr)
-    sanitized = args.build_log.read_text(encoding="utf-8", errors="replace")
-    sanitized = sanitized.replace(str(args.source_root.resolve()), "$SOURCE_ROOT")
-    sanitized = sanitized.replace(str(args.exe.resolve().parent.parent), "$BUILD_ROOT")
     (args.out / "release-build-log-sanitized.txt").write_text(
         sanitized, encoding="utf-8", newline="\n")
     evidence["process_exit_code"] = result.returncode
