@@ -1,0 +1,16 @@
+{
+  "files": {
+    "build-provenance.json": "5ae756bd509301ec17945bd7df4e21f2502511bc93bbedee77ffaca0990c04c2",
+    "build.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout.log": "385975aead7b17f9d66f89400d8504cc8eb482ab031dd6e0d87ce3065c4b2cb9",
+    "collection-status.json": "b6f10826590a80828daff97f83f94f14bf5f2bbaad378783c5a38f536d67b5a7",
+    "driver-description.jsonl": "54417990966a11e97023f161b7c1fb24be2f1370ae7fd040ee317a347b29e823",
+    "driver.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fixture-inputs.json": "72c0fe84c30a152e4d9be5400e88949d06c307a885913b8977592a9cded7b701",
+    "process-capture.json": "42ba793070e90a6c4ac63561b162dd6e2d9c73dce08131fa8e5cad84a637cf95",
+    "records.json": "4dc756380e87bd4e9342f55777bb2adb9a9aaeba62e9e142fb656d60d393d7c6",
+    "trials.jsonl": "768dae54cb5aabcec1445a2703df4ae45ed26145de7f52a012307b8d267dfd36"
+  },
+  "report_id": "geo07-9ef0d347291774da",
+  "schema": "csl.geo07-manifest/1"
+}

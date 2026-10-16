@@ -1,0 +1,17 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Exploratory and inconclusive single-adapter timings; no comparator, limiter profile, speedup or complete-family claim; binary64 evaluation has no validated rounding enclosure",
+      "measured_scope": "21 verified measured batches across three bounded public generator-set fixtures; 5,000 fresh calls per batch",
+      "native_payload_sha256": "866569e0d1c5dd6030e6229209a237e2a938c1b73f1e1262ca9aa2eaee091acb",
+      "payload_schema": "csl.geo07-generator-records/1",
+      "payload_sha256": "866569e0d1c5dd6030e6229209a237e2a938c1b73f1e1262ca9aa2eaee091acb",
+      "report_id": "geo07-generator-sets-ac2949b3c3ebf7723130205090f78442c9a5bd41a654d38855f1a68fe15d0e99",
+      "report_kind": "geo07-generator-sets",
+      "source_commit": "db7906cb33ca40da55e31b9bf6b21cf7ffcc1ee4",
+      "source_report_id": "geo07-9ef0d347291774da",
+      "zip_sha256": "36c6424e4f88d8f343755f090b25bfded148fa36485c66e7b77d23d09aa053d6"
+    }
+  ],
+  "schema": "csl.geo07-report-extension/1"
+}
