@@ -43,7 +43,7 @@ TEST_CASE("T-M03: singular dynamics remain representable; inverse-only pipeline 
     auto rejected = check_nominal_profile(p, true, Assurance::numerical);
     REQUIRE(rejected.size() == 1);
     CHECK(rejected[0].code == DiagnosticCode::unsupported);
-    CHECK(rejected[0].field == "dynamics.inverse");
+    CHECK(rejected[0].field == "dynamics.stages[0].A");
 }
 TEST_CASE("T-M03: future profiles do not masquerade as infeasibility") {
     auto p = make_problem();
