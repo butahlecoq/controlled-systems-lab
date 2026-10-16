@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "id": "R29-corrected-scalar-reference",
+  "status": "editorial_reference_not_historical_run",
+  "sources": {
+    "paper_id": "R29",
+    "paper_sha256": "8a70eddbd71571ea8443f92be1a799dc0ad6162fbfab902b88a931ab08981b4a",
+    "paper_pages": [105, 107, 108],
+    "editable_source_id": "A22",
+    "editable_source_sha256": "08d20e71e9f6537982822a12b0f54d49607113628398ac2b7678a54173a30e4f",
+    "audit": "docs/research/zonotope-paper-input-audit.md"
+  },
+  "printed": {
+    "horizon": 16,
+    "state_dimension": 4,
+    "control_dimension": 1,
+    "A": [["1", "0", "0", "0"], ["-13/2", "1", "0", "0"], ["0", "0", "1", "0"], ["0", "0", "-13/2", "1"]],
+    "B": ["4", "0", "2", "0"],
+    "initial_center": ["1150", "119600", "430", "44720"],
+    "initial_generator_diagonal": ["20", "500", "10", "300"],
+    "scalar_bound": ["-1", "1"]
+  },
+  "inferred_interpretation": {
+    "control_set": "P(t)=Z(0,[1])=[-1,1] for each t=0,...,15",
+    "control_center": "0",
+    "control_generator": "1",
+    "control_factor_ids": "u.0 through u.15, independent across stages",
+    "basis": "R29's scalar u(t), printed B of shape 4x1, and bound |u(t)|<=1; repairs the printed four-component c2/l1 and Ac2 dimensional anomalies",
+    "authority": "editorial_mathematical_inference_not_recovered_run_input"
+  },
+  "requested_result": "unreduced_exact_rational_reachable_zonotope_reference",
+  "objective": null,
+  "historical_timing": null
+}
