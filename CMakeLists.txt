@@ -17,6 +17,7 @@ option(CSL_BUILD_SYN06_REPORT "Build the SYN-06 verifier measurement driver" OFF
 option(CSL_BUILD_SYN01_REPORT "Build the private SYN-01 nominal-forward numerical report driver" OFF)
 option(CSL_BUILD_SYN02_REPORT "Build the SYN-02 terminal minimizer measurement driver" OFF)
 option(CSL_BUILD_SYN07_REPORT "Build the T-S01 exact-family measurement driver" OFF)
+option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driver" OFF)
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)
 option(CSL_ENABLE_HIGHS "Build the native HiGHS LP/convex adapters" ON)
