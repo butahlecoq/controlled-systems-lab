@@ -11,6 +11,7 @@ option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report dr
 option(CSL_BUILD_GEO05_REPORT "Build the GEO-05 projection/predecessor report driver" OFF)
 option(CSL_BUILD_GEO06_REPORT "Build the GEO-06 QuickHull report driver" OFF)
 option(CSL_BUILD_GEO07_PORT_REPORT "Build the GEO-07 registered-port report driver" OFF)
+option(CSL_BUILD_GEO07_DEPENDENT_REPORT "Build the GEO-07 dependent-sum report driver" OFF)
 option(CSL_BUILD_GEO07_REPORT "Build the GEO-07 generator-set report driver" OFF)
 option(CSL_BUILD_OPT04_REPORT "Build the OPT-04 phase-I measurement driver" OFF)
 option(CSL_BUILD_GEO02_REPORT "Build the GEO-02 affine/sum report driver" OFF)
