@@ -92,3 +92,35 @@ requests. [Issue #353](https://github.com/butahlecoq/controlled-systems-lab/issu
 tracks a typed oracle port and registration with capability/provenance tests.
 An eventual complete finite optimal-plan family needs its own representation
 and verifier before any `StrategyPort` claim.
+
+## Typed numerical oracle registration
+
+`CSL::finite_action_minimax_port` installs the separate
+`<csl/optimization/finite_action_minimax_port.hpp>` interface. Its
+`FiniteActionMinimaxQuery` freezes the complete request and caller limits.
+`csl.optimization.finite-action-minimax@1.0.0` registers an exclusive
+workspace under `FiniteActionMinimaxPort`; clients select it through
+`Registry<FiniteActionMinimaxPort>` with the
+`csl.optimization.finite-action-minimax.value` output representation and
+binary64 numerical assurance. Preparation retains requested and actual
+method/version provenance, and a workspace runs only its prepared query.
+The port verifies the problem/request identity and numerical assurance of
+completed optimal or infeasible results before returning them.
+
+Capability admission covers the declared affine `LinearSystem`, immutable
+convex terminal `Objective`, compact native V, singleton, or empty initial
+and independent disturbance sets, and H, singleton, universal, or empty safe
+sets. Shape, capacity, numerical-policy, and execution checks remain with the
+underlying oracle. Consequently registration rejection is distinct from its
+`Unsupported` outcome. The returned `FiniteActionMinimaxOutcome` preserves
+optimal, all-infeasible, empty-catalogue, no-scenario, unsupported, and
+stopped variants; no branch publishes an optimal-family relation or validated
+arithmetic assurance.
+
+The scientific next step is a separately reviewed representation and verifier
+for a finite optimal-plan relation. Its scope must define whether the objects
+are index tuples, state-control trajectories, or policies, and prove the
+membership and completeness claim against the admissible scenarios and
+objective. Only after that contract exists can reviewers decide whether a
+verified relation has the joint-family semantics required by `StrategyPort`.
+The scalar oracle and its near-minimizer indices do not authorize that mapping.

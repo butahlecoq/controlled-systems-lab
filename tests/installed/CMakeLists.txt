@@ -85,6 +85,12 @@ set_target_properties(installed_finite_feedback_client PROPERTIES CXX_EXTENSIONS
 add_test(NAME installed_finite_feedback_client COMMAND installed_finite_feedback_client)
 set_tests_properties(installed_finite_feedback_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed finite feedback client: registered winning action passed")
+add_executable(installed_finite_action_minimax_client finite_action_minimax_client.cpp)
+target_link_libraries(installed_finite_action_minimax_client PRIVATE CSL::finite_action_minimax_port)
+set_target_properties(installed_finite_action_minimax_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_finite_action_minimax_client COMMAND installed_finite_action_minimax_client)
+set_tests_properties(installed_finite_action_minimax_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed finite minimax client: registered scalar and provenance passed")
 set_tests_properties(installed_model_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed model client: immutable LTI/LTV and scheduled observation literals passed")
 add_executable(installed_public_client public_client.cpp)

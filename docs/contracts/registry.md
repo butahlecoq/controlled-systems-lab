@@ -30,6 +30,12 @@ adapter with factor-identity semantics; its existing `MinkowskiSum` request
 retains the independent-set meaning. See the [geometry source contract](core-interfaces.md)
 and [generator adapter](generator-sets.md).
 
+`FiniteActionMinimaxPort` is a separate numerical-oracle interface. Its frozen
+query contains the finite-action minimax request and limits, and its result
+keeps the oracle's six distinct outcome variants. The registered reference
+and its bounded scope are documented in [finite-action minimax](finite-action-minimax.md).
+It does not construct a `SynthesisOutcome` or claim a joint optimal family.
+
 `SelectorRequest` pairs the existing family and witness request;
 `StrategyRequest` owns an immutable `ResolvedProblem`, the effective
 `FamilyRequest`, strategy configuration and selected strategy version. LP and
