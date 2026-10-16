@@ -116,6 +116,17 @@ TEST_CASE("unreachable target remains empty after singular predecessor projectio
     auto s=h("S",2,{0,2,{}},{},{1,2,{0,1}},{1});
     auto result=run(predecessor(x.as_handle(),interval("U",-1,1).as_handle(),s.as_handle(),
         {2,2,{1,0,0,0}},{2,1,{1,0}},{0,0}));
+    const auto representation=take(sets::from_handle(result.result.output)).representation();
+    const auto* rows=std::get_if<sets::HRepresentation>(&representation);
+    REQUIRE(rows);
+    bool contradiction=false;
+    for(std::size_t row=0;row<rows->inequalities.rows();++row) {
+        bool zero=true;
+        for(std::size_t column=0;column<rows->inequalities.cols();++column)
+            zero=zero && rows->inequalities(row,column)==0;
+        contradiction=contradiction || (zero && rows->upper_bounds[row]<0);
+    }
+    CHECK(contradiction); // No physical state satisfies 0 <= a negative bound.
     CHECK_FALSE(contains(result.result.output,{0,0}));
     CHECK_FALSE(contains(result.result.output,{100,-100}));
 }
@@ -291,6 +302,33 @@ TEST_CASE("predecessor rejects a provider before creating any incompatible works
     CHECK(*creations==0);
     request.A.values.clear();
     CHECK(std::holds_alternative<Diagnostics>(reachability::prepare_nominal_predecessor(request,selected)));
+    CHECK(*creations==0);
+}
+
+TEST_CASE("unavailable geometry operation rejects before creating a projection workspace") {
+    auto entry=geometry::polyhedral::make_projection_registration();
+    auto creations=std::make_shared<int>(0);
+    auto create=entry.factory;
+    entry.factory=[creations,create](const OperationRequest& request) {
+        ++*creations;
+        return create(request);
+    };
+    auto selected=provider(std::move(entry),"csl.polyhedron.h");
+    const auto left=interval("left",-1,1).as_handle();
+    const auto right=interval("right",0,2).as_handle();
+    const OperationRequest request{{{"test03"},{"intersection-request"},{"intersection-reference"}},
+        {"csl.geometry.polyhedral-projection"},Intersection{left,right},
+        SetRelation::equivalent,Assurance::numerical};
+
+    const auto admission=selected.prepare(request);
+    const auto* rejection=std::get_if<Rejection>(&admission);
+    REQUIRE(rejection);
+    REQUIRE(rejection->diagnostics.size()==1);
+    CHECK(rejection->diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(rejection->diagnostics.front().field=="projection.operation");
+    CHECK(rejection->provenance.requested.id.value=="csl.geometry.polyhedral-projection");
+    REQUIRE(rejection->provenance.actual);
+    CHECK(rejection->provenance.actual->id.value=="csl.geometry.polyhedral-projection");
     CHECK(*creations==0);
 }
 
