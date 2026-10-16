@@ -1,0 +1,5 @@
+{
+  "publishable": false,
+  "reason": "host observation is stale, busy, or malformed",
+  "schema": "csl.geo07-dependent-collection-status/1"
+}

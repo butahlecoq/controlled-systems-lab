@@ -1,0 +1,275 @@
+{
+  "constrained_shared": {
+    "feasible_factor_witnesses": [
+      [
+        -1.0,
+        -1.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        1.0,
+        1.0,
+        -1.0
+      ]
+    ],
+    "inside_points": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "left": {
+      "center": [
+        0.0,
+        0.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 2,
+        "rows": 1,
+        "values": [
+          1.0,
+          -1.0
+        ]
+      },
+      "equality_values": [
+        0.0
+      ],
+      "factor_ids": [
+        "u",
+        "v"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 2,
+        "rows": 2,
+        "values": [
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "id": "dependent-constrained-left"
+    },
+    "operation": "dependent_sum",
+    "output_id": "dependent-constrained-origin",
+    "output_representation": "csl.constrained-zonotope",
+    "outside_points": [
+      [
+        0.0,
+        1.0
+      ],
+      [
+        1.0,
+        0.0
+      ]
+    ],
+    "physical_h": {
+      "equalities": {
+        "cols": 2,
+        "rows": 2,
+        "values": [
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "inequalities": {
+        "cols": 2,
+        "rows": 0,
+        "values": []
+      },
+      "upper": [],
+      "values": [
+        0.0,
+        0.0
+      ]
+    },
+    "public_request": {
+      "assurance": "numerical",
+      "prepared_output_relation": "equivalent",
+      "prepared_scalar": "binary64",
+      "problem_id": "geo07-dependent",
+      "registration_version": "1.1.0",
+      "request_id": "constrained-shared"
+    },
+    "registration": "csl.geometry.generators.operations",
+    "rejection_controls": {
+      "independent_shared_ids": true
+    },
+    "right": {
+      "center": [
+        0.0,
+        0.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 2,
+        "rows": 1,
+        "values": [
+          1.0,
+          1.0
+        ]
+      },
+      "equality_values": [
+        0.0
+      ],
+      "factor_ids": [
+        "u",
+        "w"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 2,
+        "rows": 2,
+        "values": [
+          -1.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "id": "dependent-constrained-right"
+    }
+  },
+  "shared_cancellation": {
+    "feasible_factor_witnesses": [
+      [
+        -1.0
+      ],
+      [
+        0.0
+      ],
+      [
+        1.0
+      ]
+    ],
+    "inside_points": [
+      [
+        0.0
+      ],
+      [
+        0.0
+      ],
+      [
+        0.0
+      ]
+    ],
+    "left": {
+      "center": [
+        0.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 1,
+        "rows": 0,
+        "values": []
+      },
+      "equality_values": [],
+      "factor_ids": [
+        "history.0"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 1,
+        "rows": 1,
+        "values": [
+          1.0
+        ]
+      },
+      "id": "dependent-cancel-left"
+    },
+    "operation": "dependent_sum",
+    "output_id": "dependent-cancel-origin",
+    "output_representation": "csl.zonotope",
+    "outside_points": [
+      [
+        -1.0
+      ],
+      [
+        1.0
+      ]
+    ],
+    "physical_h": {
+      "equalities": {
+        "cols": 1,
+        "rows": 1,
+        "values": [
+          1.0
+        ]
+      },
+      "inequalities": {
+        "cols": 1,
+        "rows": 0,
+        "values": []
+      },
+      "upper": [],
+      "values": [
+        0.0
+      ]
+    },
+    "public_request": {
+      "assurance": "numerical",
+      "prepared_output_relation": "equivalent",
+      "prepared_scalar": "binary64",
+      "problem_id": "geo07-dependent",
+      "registration_version": "1.1.0",
+      "request_id": "shared-cancellation"
+    },
+    "registration": "csl.geometry.generators.operations",
+    "rejection_controls": {
+      "independent_shared_ids": true
+    },
+    "right": {
+      "center": [
+        0.0
+      ],
+      "coordinate_labels": [],
+      "equalities": {
+        "cols": 1,
+        "rows": 0,
+        "values": []
+      },
+      "equality_values": [],
+      "factor_ids": [
+        "history.0"
+      ],
+      "factor_interval": [
+        -1.0,
+        1.0
+      ],
+      "generators": {
+        "cols": 1,
+        "rows": 1,
+        "values": [
+          -1.0
+        ]
+      },
+      "id": "dependent-cancel-right"
+    }
+  }
+}

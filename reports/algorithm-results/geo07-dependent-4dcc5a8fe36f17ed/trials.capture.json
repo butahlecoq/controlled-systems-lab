@@ -1,0 +1,13 @@
+{
+  "command": [
+    "D:\\work\\PhD\\repo\\.worktrees\\issue32-dependent-report\\build\\geo07-dependent-accepted\\Release\\csl_geo07_dependent_report.exe",
+    "--measure",
+    "7",
+    "1",
+    "2000"
+  ],
+  "exit_code": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3cc538611451add4eaef7adcbb5f225bbe668eadb8c32bd9e98de298f85fbc0c",
+  "timed_out": false
+}
