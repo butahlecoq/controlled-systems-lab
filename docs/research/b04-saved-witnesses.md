@@ -115,6 +115,43 @@ The original printed B04 model retains `x0=(1216.904,119500,438.787,45300)` and 
 
 The prior private configuration search covered 31 of 34 inventoried top-level packages (three third-party libraries excluded), 373 selected source files, five parsed nonlibrary MAT workspaces, and eleven adjacent model XML inventories. It did not recover the exact T16 driver/U rows. This is bounded negative evidence: opaque MCOS/polyhedral MAT data, embedded equations, two mislabeled RTF documents, several binary/generated/model variants and sources outside the archive were not semantically exhausted. No new archive-wide search was performed for this curation.
 
+### Focused FIG workspace inspection (2026-10-17)
+
+A later read-only check inspected A39 and three neighboring FIGs plus `matlab.mat` under the same private `Семинар ИММ/Статья` directory. These neighbors are search inputs, not newly established B04 run sources. Original bytes were hashed before parsing; no archived code or model was executed and no raw plot/control arrays were published.
+
+| Private file | Bytes | SHA-256 | Parsed top-level content |
+|---|---:|---|---|
+| `1st.fig` (A39) | 1131239 | `1120e70dbf3a300d1f8c9ee19d1082632c3adbb24f5ac445802954b164181f38` | `hgS_070000`, `hgM_070000`, `__function_workspace__` |
+| `2nd.fig` | 283060 | `0bb9f9b63baceb3965415ea3846eac439705fba26ed1ef159abc56bd3cf14e29` | Same three MAT variables |
+| `2nd(2).fig` | 535358 | `cb3f6d7c30d57d43e7acfeff359e665570e9461490e2da569bd2ad5703a45e05` | Same three MAT variables |
+| `2ndZoom.fig` | 226514 | `e6396ba1b6a4453b5086c2f979479bcfa215ad626111456af959da0c23bc2b52` | Same three MAT variables |
+| `matlab.mat` | 3109 | `1625d3058a8f861e2b634a80d3950ebf267cd9e2b39c5fab562ecc0f2d63555f` | `x` and `xd`, each a 1-by-500 double array |
+
+SciPy `whosmat` identified each FIG's `__function_workspace__` as a `uint8` array. To inspect its MAT v5 element in memory, load that array as inert bytes, take the first four bytes as the version/endian marker (`00 01 49 4d`), skip its next four zero pad bytes, and prepend a 124-byte synthetic MAT header before the first matrix element. Run this Python from the private directory:
+
+~~~python
+from io import BytesIO
+from pathlib import Path
+import struct
+from scipy.io import loadmat, whosmat
+
+src = Path("1st.fig")
+data = loadmat(src, variable_names=["__function_workspace__"])["__function_workspace__"].tobytes()
+size = struct.unpack_from("<I", data, 12)[0]
+mat = BytesIO(b"MATLAB 5.0 MAT-file, memory audit".ljust(124, b" ")
+              + data[:4] + data[8:16 + size])
+print(whosmat(mat))
+mat.seek(0)
+wrapper = loadmat(mat, struct_as_record=False, squeeze_me=True)["__function_workspace__"].item()
+print(wrapper.MCOS["s2"][0], len(wrapper.MCOS["arr"][0]))
+fields = {name for item in wrapper.MCOS["arr"][0]
+          if hasattr(item, "_fieldnames") for name in item._fieldnames}
+print(sorted(name for name in fields if any(term in name.lower()
+             for term in ("control", "userdata", "appdata", "workspace"))))
+~~~
+
+For A39 this yields a one-element struct containing an MCOS `FileWrapper__` with 4,936 decoded entries and no matching field names in the final print. Its visible struct fields and strings describe figure, axes, annotation, and patch properties; the only 16-by-16 numeric array among those entries is all ones. The sibling wrappers have 10,849, 10,429, and 7,891 entries. Their 16-entry numeric arrays are permutations of 1 through 16 next to 16-by-3 patch vertices, not identified control histories. Traversing the `hgS_070000` graphics trees found no nonempty `ApplicationData` or `UserData` holding a driver, U-row table, or configuration. The parsed surfaces therefore do not recover the original T16 U rows, row mapping, stage constraints, or generating revision. Proprietary MCOS internals and other archived sources remain outside this negative finding.
+
 Adjacent T16 adaptive drivers are distinct variants; they cannot supply canonical missing stage sets. A01's present row selections also differ from A40's U averaging. A41 p. 6 uses conflicting control index ranges (1..T-1 versus 0..T-1), p. 12 reports 100 controls, and p. 14 claims intersection-vertex coverage. Three saved histories do not establish those claims or resolve the indexing intent.
 
 Before original issues [#1](https://github.com/butahlecoq/controlled-systems-lab/issues/1), [#2](https://github.com/butahlecoq/controlled-systems-lab/issues/2), [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6) or [#10](https://github.com/butahlecoq/controlled-systems-lab/issues/10) can meet their respective restoration obligations, remaining work includes canonical numerical stage domains and any stock restrictions; first-action convention; original T16 generating revision and U row mapping; coefficient/unit authority; frozen generator and objective conflict; and constrained optimum/family completeness checks. An explicitly authorized reference variant is another route, with its assumptions recorded separately. Delivery of #108 closes only this curation scope. Historical timing reports remain contextual; no speed claim is made.
