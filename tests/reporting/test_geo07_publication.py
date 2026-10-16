@@ -60,6 +60,25 @@ class Geo07PublicationTests(unittest.TestCase):
                 with self.subTest(href=href):
                     self.assertIn(SOURCE.name + "/" + href, archive.namelist())
 
+    def test_public_zip_root_and_nested_pages_have_live_local_links(self):
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            (site / "index.html").write_text('<html><body><ul></ul></body></html>', encoding="utf-8")
+            rid = stage_geo07.stage(SOURCE.parent / "geo07-publications.json", site)
+            with zipfile.ZipFile(site / (rid + ".zip")) as archive:
+                extracted = site / "extracted"
+                archive.extractall(extracted)
+            nested_page = rid + "/index.html"
+            for page_name in ("index.html", nested_page):
+                links = LocalLinks()
+                links.feed((extracted / page_name).read_text(encoding="utf-8"))
+                self.assertTrue(links.hrefs)
+                if page_name == "index.html":
+                    self.assertIn(nested_page, links.hrefs)
+                for href in links.hrefs:
+                    with self.subTest(page=page_name, href=href):
+                        self.assertTrue(((extracted / page_name).parent / href).is_file())
+
     def test_public_id_binds_all_publisher_modules_with_lf_line_endings(self):
         publisher_files = ("stage_geo07.py", "geo07/render_saved.py",
                            "geo07/collect.py", "registered_reports.py")
