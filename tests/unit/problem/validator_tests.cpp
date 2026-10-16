@@ -177,6 +177,34 @@ TEST_CASE("actual strategy admission rejects inverse assumptions without changin
     }
     CHECK(p.identity().value=="csl.problem.v1.sha256:"+scalar_digest);
 }
+TEST_CASE("uncertain initial quantifiers retain identity and reject before workspace creation") {
+    Strategies registry;
+    const auto known=published(scalar());
+    std::vector<ResolvedProblem> uncertain;
+    for(const auto quantifier:{SetQuantifier::existential,SetQuantifier::universal}) {
+        auto input=scalar();
+        input.initial=InitialSet{Singleton{{2}},quantifier};
+        auto resolved=published(input);
+        CHECK(std::get<InitialSet>(*resolved.initial().description()).quantifier==quantifier);
+        CHECK(resolved.identity()!=known.identity());
+        const auto admission=prepare_strategy(resolved,registry.strategies,configuration("forward"));
+        REQUIRE(std::holds_alternative<Rejection>(admission));
+        const auto& diagnostics=std::get<Rejection>(admission).diagnostics;
+        REQUIRE(diagnostics.size()==1);
+        CHECK(diagnostics[0].code==DiagnosticCode::unsupported);
+        CHECK(diagnostics[0].field=="initial");
+        CHECK(*registry.factories==0);
+        uncertain.push_back(std::move(resolved));
+    }
+    CHECK(uncertain[0].identity()!=uncertain[1].identity());
+
+    const auto admitted=accepted(prepare_strategy(known,registry.strategies,configuration("forward")));
+    CHECK(*registry.factories==0);
+    const auto result=accepted(admitted.preparation().create()->run({}));
+    REQUIRE(result.incumbents.size()==1);
+    CHECK(result.incumbents[0].witness.states==std::vector<Vector>{{2},{3}});
+    CHECK(result.incumbents[0].witness.original_objective==3);
+}
 TEST_CASE("resolved content SHA256 matches independent padding and multiblock literal vectors") {
     const std::pair<std::size_t,const char*> vectors[]={
         {0,"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
