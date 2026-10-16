@@ -38,6 +38,8 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 
 [Reachability proof audit](reachability-proof-audit.md) and [adaptive-policy proof audit](adaptive-policy-proof-audit.md) publish the reviewed conditional proofs, counterexamples and source-policy distinctions for Q04/Q05. The [reachability source correspondence](reachability-source-correspondence.md) compares L05's Table 1 claims with the archived L26/W12 listing without treating that listing as the historical experiment generator. The [provenance record](proof-audit-provenance.json) preserves the proof reports' correction/version chains; both original scientific issues remain open.
 
+The [issue #5 feedback contract follow-up](feedback-contract-followup.md) turns the reviewed policy distinctions into a bounded robust predecessor and evidence handoff without claiming an implemented feedback solver.
+
 ## Selected first benchmark
 
 [B04 restoration](b04-restoration.md) records the owner-selected nominal scenario, its versioned historical manifest and an exact terminal-invariant audit. Source gaps and the model/result inconsistency remain explicit before implementation comparisons.
