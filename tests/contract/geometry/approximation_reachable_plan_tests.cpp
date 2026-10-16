@@ -47,6 +47,12 @@ SetHandle v_interval(const char* id) {
     return take(sets::make_v({{id},1,{"x"}},{vertices,rays})).as_handle();
 }
 
+SetHandle empty_v_with_ray(const char* id) {
+    auto vertices=take(numeric::snapshot(Matrix{0,1,{}}));
+    auto rays=take(numeric::snapshot(Matrix{1,1,{1}}));
+    return take(sets::make_v({{id},1,{"x"}},{vertices,rays})).as_handle();
+}
+
 class FixedWorkspace final : public SetApproximatorWorkspace {
     SetTransformOutcome result_;
 public:
@@ -162,6 +168,19 @@ TEST_CASE("native V membership remains unsupported without a verified membership
     const auto request=query(problem,reference,reference);
     const auto report=check(problem,binding(problem,reference),request,reference,witness(problem));
     CHECK(report.membership==verification::CheckStatus::unsupported);
+    CHECK_FALSE(report.numerical_achievable_value);
+}
+
+TEST_CASE("an admitted zero-vertex V inner set has no member even when it stores a ray") {
+    const auto problem=scalar_problem();
+    const auto reference=interval("stage1",2,4), inner=empty_v_with_ray("empty-inner");
+    const auto request=query(problem,reference,inner);
+    const auto report=check(problem,binding(problem,reference),request,inner,witness(problem));
+    REQUIRE(report.approximation);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(*report.approximation));
+    CHECK(std::get<EnclosedApproximation>(*report.approximation).basis==StructuralBasis::empty_subset);
+    CHECK(report.membership==verification::CheckStatus::violation);
+    CHECK_FALSE(report.trajectory);
     CHECK_FALSE(report.numerical_achievable_value);
 }
 

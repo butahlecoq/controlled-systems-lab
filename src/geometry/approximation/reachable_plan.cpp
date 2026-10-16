@@ -74,7 +74,9 @@ CheckStatus native_membership(const SetHandle& handle,std::span<const double> po
     }
     const auto representation=data->representation();
     if(std::holds_alternative<sets::UniversalRepresentation>(representation))return CheckStatus::numerical_pass;
-    if(std::holds_alternative<sets::EmptyRepresentation>(representation)) {
+    const auto* v=std::get_if<sets::VRepresentation>(&representation);
+    if(std::holds_alternative<sets::EmptyRepresentation>(representation) ||
+       (v && v->vertices.rows()==0)) {
         diagnose(report,DiagnosticCode::invalid_claim,"reachable_plan.membership","empty inner set has no member");
         return CheckStatus::violation;
     }
