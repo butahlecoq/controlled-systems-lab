@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>B08 displayed-data exact reference</title></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>B08 displayed-data exact reference</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;color:#17212b}table{border-collapse:collapse}th,td{padding:.35rem .75rem;border:1px solid #9da9b3;text-align:right}figure{margin:1.5rem 0}svg{display:block;max-width:800px;width:100%;font:14px system-ui,sans-serif}figcaption{max-width:800px}pre{overflow-x:auto;background:#f3f5f7;padding:1rem}code{overflow-wrap:anywhere}</style></head><body>
 <h1>B08 displayed-data exact reference</h1>
 <p>Descriptive single-checker Python measurements. This is the printed rounded linear model, not the historical MATLAB run, nonlinear plant or a complete optimal-control family. No comparator, speedup or source-mapped limiter was measured; performance interpretation is inconclusive.</p>
 <p>Source commit <code>78212b21d42ec3f136f0e1c72b2b0861d306792c</code>; harness commit <code>5748952af0ce9fca7aee625e7c62f20cff1d713f</code>; report <code>b08-exact-b0d0e85d4d338f56</code>.</p>
@@ -6,6 +6,39 @@
 <p>7 measured fresh child processes and one excluded warmup. parent perf_counter_ns immediately before child process spawn through child exit and captured stdout/stderr return; includes CPython startup, 625x256 exact rational enumeration, literal checks and record comparison; excludes parent validation, CSV/JSON persistence, HTML rendering and ZIP creation. Interpreter startup and output capture are included, so these are process-level times.</p>
 <table><caption>Fresh-process latency, nanoseconds</caption><thead><tr><th>Median</th><th>Minimum</th><th>Maximum</th><th>Successful trials</th></tr></thead><tbody>
 <tr><td>1651407800</td><td>1626761800</td><td>1683302400</td><td>7</td></tr></tbody></table>
+<figure><svg viewBox="0 0 800 290" role="img" aria-labelledby="trial-title trial-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="trial-title">Fresh-process durations for all B08 attempts</title>
+<desc id="trial-desc">One excluded warmup and seven measured checker runs. Horizontal position is duration in seconds; the dotted line marks the measured median. Exact nanoseconds are in the trial CSV.</desc>
+<line x1="150" y1="258" x2="690" y2="258" stroke="#444"/>
+<text x="150" y="278" text-anchor="middle">1.600 s</text>
+<text x="690" y="278" text-anchor="middle">1.700 s</text>
+<line x1="427" y1="30" x2="427" y2="250" stroke="#a32a2a" stroke-dasharray="4 4"/>
+<text x="150" y="21">Measured median: 1.651 s</text>
+<text x="8" y="52">Warmup</text>
+<circle cx="254" cy="47" r="5" fill="#777"><title>Warmup: 1619303200 ns</title></circle>
+<text x="710" y="52">1.619 s</text>
+<text x="8" y="80">Trial 1</text>
+<circle cx="466" cy="75" r="5" fill="#12649a"><title>Trial 1: 1658595900 ns</title></circle>
+<text x="710" y="80">1.659 s</text>
+<text x="8" y="108">Trial 2</text>
+<circle cx="465" cy="103" r="5" fill="#12649a"><title>Trial 2: 1658341800 ns</title></circle>
+<text x="710" y="108">1.658 s</text>
+<text x="8" y="136">Trial 3</text>
+<circle cx="427" cy="131" r="5" fill="#12649a"><title>Trial 3: 1651407800 ns</title></circle>
+<text x="710" y="136">1.651 s</text>
+<text x="8" y="164">Trial 4</text>
+<circle cx="324" cy="159" r="5" fill="#12649a"><title>Trial 4: 1632298200 ns</title></circle>
+<text x="710" y="164">1.632 s</text>
+<text x="8" y="192">Trial 5</text>
+<circle cx="599" cy="187" r="5" fill="#12649a"><title>Trial 5: 1683302400 ns</title></circle>
+<text x="710" y="192">1.683 s</text>
+<text x="8" y="220">Trial 6</text>
+<circle cx="389" cy="215" r="5" fill="#12649a"><title>Trial 6: 1644345600 ns</title></circle>
+<text x="710" y="220">1.644 s</text>
+<text x="8" y="248">Trial 7</text>
+<circle cx="294" cy="243" r="5" fill="#12649a"><title>Trial 7: 1626761800 ns</title></circle>
+<text x="710" y="248">1.627 s</text>
+</svg><figcaption>Individual fresh-process times. The gray warmup is excluded from the median; displayed seconds are rounded to 0.001 s. Exact nanoseconds remain in the CSV.</figcaption></figure>
 <p>All attempts, including the excluded warmup, are retained in the raw records. Peak memory, child CPU time and interpreter internal phase timings are unavailable. The host activity note and actual Python executable identity are in the saved record.</p>
 <p><a href="records.json">Saved JSON</a> · <a href="trials.csv">Trial CSV</a> · <a href="raw-trials.jsonl">Raw process output and attempts</a> · <a href="manifest.json">File hashes</a></p>
 <h2>Environment</h2><pre>
