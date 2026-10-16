@@ -1,0 +1,30 @@
+{
+  "binary_artifact": "Release/csl_app01_plan_report.exe",
+  "binary_sha256": "9514f7922d9a104c36061f2883bca67ff20f329f8dddec5e97ead316f3d2dd17",
+  "configuration": "Release",
+  "dependencies": [
+    "csl_approximation",
+    "csl_contracts",
+    "csl_model",
+    "csl_numeric",
+    "csl_objectives",
+    "csl_optimization",
+    "csl_problem",
+    "csl_registry",
+    "csl_resolved_core",
+    "csl_resolved_problem",
+    "csl_sets",
+    "csl_verification",
+    "csl_verifiers"
+  ],
+  "flags": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD /W4 /WX /permissive-",
+  "generator": "Visual Studio 17 2022",
+  "release_cxx20_ndebug": true,
+  "schema": "csl.app01-build-graph/1",
+  "source_commit": "22d406fd9ea92315ef2a4f6b5703eec74e710d47",
+  "source_tree": "b6ddb7fa23bf570bf014e319783de0567c6c8e6f",
+  "sources": [
+    "benchmarks/reporting/app01/plan_driver.cpp"
+  ],
+  "target": "csl_app01_plan_report"
+}

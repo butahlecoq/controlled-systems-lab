@@ -234,6 +234,18 @@ target_compile_definitions(csl_syn06_verifier_report PRIVATE $<$<CONFIG:Release>
 target_link_libraries(csl_syn06_verifier_report PRIVATE CSL::verification)
 endif()
 
+if(CSL_BUILD_APP01_REPORT)
+add_executable(csl_app01_plan_report benchmarks/reporting/app01/plan_driver.cpp)
+target_compile_features(csl_app01_plan_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_app01_plan_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+target_link_libraries(csl_app01_plan_report PRIVATE CSL::approximation)
+if(MSVC)
+target_compile_options(csl_app01_plan_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_app01_plan_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+endif()
+
 if(CSL_BUILD_SYN02_REPORT)
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE SYN02_HARNESS_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)

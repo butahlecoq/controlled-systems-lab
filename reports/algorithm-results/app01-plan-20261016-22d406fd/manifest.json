@@ -1,0 +1,25 @@
+{
+  "files": {
+    "README.md": "593afa3589a1dbc4abfd80289296cae0901873daca53b8a51a0b8c276a6103d6",
+    "build-graph.json": "24cdc81915ec9e65d16bd1a4bdbde85d408d82ccc2590f5b34f5fab60df69b1b",
+    "build-log.txt": "6457088ccc0d2fd99818a182e02c0ffbdb7739e9774c123305788896f50c3635",
+    "build-provenance.json": "17466238dca12c54b241bc714d729e31953647c9b0840fef6ae34842daab21c6",
+    "configure-log.txt": "67cbf6d6880c0878cddc7f87b40f1ed10535e90dc3e5b26b820f0c16b8eb8f82",
+    "index.html": "54947c78cf175f3b6647234ef5dc33117d7ee01375a251520fc270f0a6411211",
+    "latency.svg": "b49511b6b857415cbe0d3509d2475e636a2c2fff9ed6f0a110236616c12886b3",
+    "measurement-command.txt": "bb89188ca3e1db416cb58a5cdc1a139009f1802f52dc86e125c1346b8fab069c",
+    "pilot-raw.jsonl": "d9f922f24ab7e8707642857fa7a7603ce27a8b344cc9eff2f2ea1ebb99fc7d08",
+    "pilot.json": "87c4f6d5f5141464bdb3a922588b1a4933df3a9ae1d7ff8da370de7cebd7b01a",
+    "plan-driver.bin": "9514f7922d9a104c36061f2883bca67ff20f329f8dddec5e97ead316f3d2dd17",
+    "plan_driver.cpp": "9d8bb5c481b95e662a408d0f8ecd84c038b99ced7b3a85214a4ed3cde38fd2f4",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile-raw.jsonl": "0b5312d85a1986442129c68dbbcd27e2679dde4dbf034c8256a20df89635ef6d",
+    "profile.json": "18764ffe2c33c7e988fc29f504574b9b3dca174ba789f35699f7d2a93d21c521",
+    "raw-events.jsonl": "6635ffbbf6a9d7b8a6e4a1a330ec239e735a86bd4f47eceb9ec05d208a355a3a",
+    "records.json": "4ad04fee287477076d8add1a621b5d3ee5fbfe8cef9ff2b6ece7076e11caa49e",
+    "summary.csv": "5b344d033716206cde43ab75eed3347dde844b9b25d4c167ff4fa85d91d450c8",
+    "trials.csv": "e297b1a842e37e75fcd3d4b823a3ef7dd55110e90b88eaa486d66c8bae6377a2"
+  },
+  "report_id": "app01-plan-20261016-22d406fd",
+  "schema": "csl.app01-source-manifest/1"
+}

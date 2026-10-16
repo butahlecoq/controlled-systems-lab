@@ -1,4 +1,4 @@
-# Approximation policy and evidence (APP-01 prerequisite)
+# Approximation policy and evidence (APP-01 incremental contract)
 
 `CSL::approximation` exposes `geometry::approximation::run_registered` through
 `<csl/geometry/approximation.hpp>`. It selects the existing, separate
@@ -73,28 +73,61 @@ about enclosure or completeness of an optimizer family. The policy returns no
 family or achievable-plan claim, and the synthesis family publication gates
 remain separate.
 
+## Stage set and numerical achievable-plan check
+
+`<csl/geometry/reachable_plan.hpp>` exposes `check_inner_state_plan`. The caller
+declares a `StageSetReference` with the resolved problem identity, a stage in
+`[0,T]`, the exact input set handle, ordered set-to-state coordinate indices,
+and the reference ID used as the approximation request's ideal output. The
+check matches the stage reference's resolved problem ID to the original
+`ResolvedProblem` and the approximation request's problem ID, and matches its
+reference ID to the request's ideal-output ID. It also requires the native
+input set handle to be the same immutable payload and envelope, and the
+coordinate indices to be the full original state order `0,...,n-1`. It does
+not independently derive a `RequestId` from the declared stage. Registered
+approximation admission separately checks provider evidence against the full
+`GeometryRequestIdentity`, including `RequestId`. No projection or relabelling
+is inferred. The resolved identity digest already includes the initial
+information, external-input and information-pattern
+semantics; the currently supported profile is nominal open-loop, a known
+initial point, and absent or known external sequence. Uncertain, adversarial,
+feedback and partial-coordinate references are unsupported here.
+
+The check first invokes registered approximation admission for an **inner,
+numerical** request. An admitted native empty set has no member. Native
+singleton membership compares stored values exactly; native H membership
+evaluates stored finite binary64 rows with checked exact dyadic arithmetic;
+native universal membership accepts finite points. Other representations,
+including nonempty V data without an independently verified membership
+oracle, are unsupported. These checks concern only the stored set and point;
+they do not validate the original model or prove that the caller-declared
+reference set is the complete reachable set.
+
+Only after the selected witness state is admitted does the function invoke
+`verification::verify_trajectory` with a witness-only request against the
+**unchanged** `ResolvedProblem`. `PlanCheck::numerical_achievable_value` is
+present only when termination is completed, binding, feasibility and original
+objective statuses are all `numerical_pass`, and the independently recomputed
+original objective is finite. The value is that recomputed cost, never the
+provider's objective or a set extremum. The report retains the approximation
+outcome and, when run, the full trajectory report; rejection, violation,
+unsupported membership, cancellation and numerical failure publish no value.
+Numerical feasibility follows the trajectory verifier's stated binary64
+tolerance policy. This is no validated real-model feasible-plan certificate,
+global optimum bound, reachable-set completeness claim or optimizer-family
+relation. It is a numerically checked, concrete plan value.
+
 ## Remaining APP-01 work
 
-This prerequisite does not close #24. It provides elementary structural
+This incremental contract does not close #24. It provides elementary structural
 enclosures, native H constraint containment, and native H/singleton
 containment. A nontrivial box,
 parallelotope, zonotope or ellipsoid adapter needs
 an independent inclusion verifier with claim-specific evidence, a compatible
 output-size accounting method, and contract tests on analytic inner/outer cases.
 The planned APP-02/03/04 adapters must not reinterpret numerical residuals or
-provider declarations as inclusion proofs. A public flow connecting an admitted
-inner reachable state to a separately verified concrete trajectory and bound
-claim is also needed before the full achievable-plan acceptance criterion is
-met. That next contract needs a stage-indexed reachable-set reference bound to
-a `ResolvedProblem` identity, the exact initial/information/external-input
-semantics, and the coordinate map for the inner state. It must accept a concrete
-`Witness`, check that the chosen stage state belongs to the admitted inner
-result, then require `verification::verify_trajectory` on the unchanged
-original problem to report completed numerical-pass bindings, feasibility and
-objective with a recomputed original objective. Only then may it publish a
-numerical achievable-plan value; validated feasibility and a bound on the
-global optimum need separate proof. A follow-up contract PR can establish the
-reference and result types, followed by an implementation PR with analytic
-positive and negative trajectories, wrong-stage/problem bindings, and
-unsupported-profile cases. None of this changes the current first-comparison
-synthesis scope.
+provider declarations as inclusion proofs. A producer-side proof that a
+declared stage reference is the complete reachable set, independent membership
+for additional representations, nontrivial error bounds, validated
+feasibility, and any optimizer-family enclosure need separate evidence.
+None of this changes the current first-comparison synthesis scope.

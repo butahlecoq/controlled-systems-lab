@@ -1,0 +1,109 @@
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  execution.cpp
+  geometry.cpp
+  outcomes.cpp
+  synthesis.cpp
+  model.cpp
+  problem.cpp
+  Компиляция…
+  model.cpp
+  outcomes.cpp
+  synthesis.cpp
+  problem.cpp
+  geometry.cpp
+  execution.cpp
+  csl_contracts.vcxproj -> BUILD_ROOT\Release\csl_contracts.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  data.cpp
+  Компиляция…
+  data.cpp
+  csl_numeric.vcxproj -> BUILD_ROOT\Release\csl_numeric.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  linear_system.cpp
+  Компиляция…
+  linear_system.cpp
+  csl_model.vcxproj -> BUILD_ROOT\Release\csl_model.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  objective_reformulation.cpp
+  Компиляция…
+  objective_reformulation.cpp
+  csl_objectives.vcxproj -> BUILD_ROOT\Release\csl_objectives.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  lp_backend.cpp
+  linear_program.cpp
+  linear_infeasibility_certificate.cpp
+  Компиляция…
+  lp_backend.cpp
+  linear_infeasibility_certificate.cpp
+  linear_program.cpp
+  csl_optimization.vcxproj -> BUILD_ROOT\Release\csl_optimization.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  data.cpp
+  Компиляция…
+  data.cpp
+  csl_sets.vcxproj -> BUILD_ROOT\Release\csl_sets.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  domains.cpp
+  initial_information.cpp
+  constraints.cpp
+  Компиляция…
+  domains.cpp
+  initial_information.cpp
+  constraints.cpp
+  csl_problem.vcxproj -> BUILD_ROOT\Release\csl_problem.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  resolved.cpp
+  identity.cpp
+  Компиляция…
+  identity.cpp
+  resolved.cpp
+  csl_resolved_core.vcxproj -> BUILD_ROOT\Release\csl_resolved_core.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  compiled_verifiers.cpp
+  Компиляция…
+  compiled_verifiers.cpp
+  csl_verifiers.vcxproj -> BUILD_ROOT\Release\csl_verifiers.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  registry.cpp
+  Компиляция…
+  registry.cpp
+  csl_registry.vcxproj -> BUILD_ROOT\Release\csl_registry.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  validator.cpp
+  Компиляция…
+  validator.cpp
+  csl_resolved_problem.vcxproj -> BUILD_ROOT\Release\csl_resolved_problem.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  trajectory.cpp
+  Компиляция…
+  trajectory.cpp
+  csl_verification.vcxproj -> BUILD_ROOT\Release\csl_verification.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  reachable_plan.cpp
+  policy.cpp
+  Компиляция…
+  policy.cpp
+  reachable_plan.cpp
+  csl_approximation.vcxproj -> BUILD_ROOT\Release\csl_approximation.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  plan_driver.cpp
+  Компиляция…
+  plan_driver.cpp
+  csl_app01_plan_report.vcxproj -> BUILD_ROOT\Release\csl_app01_plan_report.exe

@@ -1,0 +1,4 @@
+fixture,trials,checked_calls,failures,batch,median_elapsed_ns,min_elapsed_ns,max_elapsed_ns
+valid_plan,7,280000,0,40000,189260900,188594600,194168900
+invalid_plan,7,280000,0,40000,190658800,188401400,196353800
+empty_inner,7,280000,0,40000,127618800,125651800,134408100

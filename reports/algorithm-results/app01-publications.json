@@ -1,0 +1,16 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Binary64 supplied examples only; value 3 is conditional on original-problem verification. No validated inclusion, optimality, reachable-set completeness, comparator, speedup, or established performance limiter",
+      "measured_scope": "Registered inner state-plan check and original-problem trajectory verification on three literal scalar fixtures",
+      "payload_schema": "csl.app01-plan-report/1",
+      "payload_sha256": "da8aa16d74dce2ae25e884ee09c13020d1213826fa81f69afb0acd9d9ff96911",
+      "report_id": "app01-plan-20261016-969e78e97747c512b0b406eb3329365da3c8d648521a13242cf56fa78c23a578",
+      "report_kind": "app01-plan",
+      "source_commit": "22d406fd9ea92315ef2a4f6b5703eec74e710d47",
+      "source_report_id": "app01-plan-20261016-22d406fd",
+      "zip_sha256": "fee221923e1c55ce12a67dd1f045c46c80040a64be3e9dc15dd1531b1eaf70ec"
+    }
+  ],
+  "schema": "csl.app01-report-extension/1"
+}
