@@ -5,6 +5,8 @@ import json
 import subprocess
 import sys
 
+from collect import admit_description
+
 SOURCE = "db7906cb33ca40da55e31b9bf6b21cf7ffcc1ee4"
 EXPECTED = {
     "box_image": {"status": "passed", "center": [7.0], "generators": [2.0, 3.0],
@@ -61,6 +63,7 @@ def main(executable: str) -> None:
     described = subprocess.run([executable, "--describe"], capture_output=True, check=True)
     if described.stderr:
         raise ValueError("driver describe wrote stderr")
+    admit_description(described.stdout)
     description = parse_lines(described.stdout)
     if (len(description) != 1 or description[0].get("source_commit") != SOURCE or
             description[0].get("module") != "CSL::geometry_generators" or

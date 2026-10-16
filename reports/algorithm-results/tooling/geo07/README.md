@@ -19,15 +19,22 @@ general geometric correctness. The report is a single-adapter observation;
 there is no competitor, speedup, application throughput, or scaling claim.
 
 The native interval uses `steady_clock` around a batch of freshly constructed
-sets, public operations, factor lifts, literal oracle comparisons, and JSON
-result construction. Process startup, JSONL serialization, Python saved-row
+sets, public affine/dependent operations, an independent-sum rejection control,
+factor lifts, literal H, factor and coefficient comparisons, and JSON
+result construction and per-call assignment. Process startup, JSONL serialization, Python saved-row
 verification, persistence, rendering, and deployment are outside that interval.
 Every call must complete its oracle checks. One warmup batch per fixture is
 excluded; at least seven measured batches per fixture alternate fixture order.
 The collector admits only batches of at least 20 ms and retains every raw row.
 The `checked_calls` count and literal result are independently validated from
 saved JSONL. The resulting batch times include verification cost and are not
-isolated operation latency. Internal phase counters, measured native thread
+isolated operation latency. The driver `--describe` catalogue records every
+authored center, generator matrix, factor ID, equality system, affine map,
+physical H reference and query point. The collector checks that catalogue
+against independent literal data before measurement, saves canonical UTF-8
+`fixture-inputs.json`, and puts each fixture payload and its SHA-256 in
+`records.json`. It also retains the exact raw `driver-description.jsonl` bytes
+and hash; the manifest hashes both files. Internal phase counters, measured native thread
 count, and a source-mapped limiter are unavailable; performance interpretation
 remains exploratory and inconclusive.
 
@@ -90,7 +97,8 @@ in `driver.stderr` before parsing. `process-capture.json` hashes those bytes.
 Malformed JSON, wrong oracle output, missing calls, short intervals, nonzero
 exit, timeout, or stderr leave a nonpublishable `collection-status.json` and
 the raw evidence. Accepted rows produce deterministic `records.json`,
-`build-provenance.json`, build logs, and an exact-byte SHA-256 manifest. The
+`fixture-inputs.json`, `driver-description.jsonl`, `build-provenance.json`, build logs,
+and an exact-byte SHA-256 manifest. The
 collector records source and harness commits separately from a later artifact
 commit. It does not render or publish a report. Scientific review, saved-record
 to HTML consistency, offline artifact generation, main-only Pages deployment,

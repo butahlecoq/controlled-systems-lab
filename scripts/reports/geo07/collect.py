@@ -47,9 +47,69 @@ RELEASE_FLAGS = {
     "CMAKE_STATIC_LINKER_FLAGS": "/machine:x64",
     "CMAKE_STATIC_LINKER_FLAGS_RELEASE": "",
 }
-INTERVAL = ("fresh public GeneratorSet construction, affine/dependent operation, factor lift, "
-            "literal physical H and factor identity checks; excludes process startup, JSONL "
-            "serialization, Python saved-row verification, persistence, rendering")
+INTERVAL = ("fresh public GeneratorSet construction, public affine/dependent operations and "
+            "independent-sum rejection control, factor lift, literal physical H, factor identity "
+            "and coefficient checks, per-call nlohmann JSON result "
+            "construction and assignment; excludes process startup, JSONL serialization, "
+            "Python saved-row verification, persistence, rendering")
+
+
+def matrix(rows: int, cols: int, values: list[float]) -> dict:
+    return {"rows": rows, "cols": cols, "values": values}
+
+
+def generator(id: str, center: list[float], generators: dict, factor_ids: list[str],
+              equalities: dict, equality_values: list[float]) -> dict:
+    return {"id": id, "center": center, "generators": generators,
+            "factor_ids": factor_ids, "equalities": equalities,
+            "equality_values": equality_values, "coordinate_labels": [],
+            "factor_interval": [-1.0, 1.0]}
+
+
+INPUTS = {
+    "box_image": {
+        "operation": "affine_image",
+        "source": generator("report-box", [1.0, 2.0], matrix(2, 2, [2.0, 0.0, 0.0, 3.0]),
+                            ["horizontal", "vertical"], matrix(0, 2, []), []),
+        "affine_map": matrix(1, 2, [1.0, 1.0]), "offset": [4.0], "output_id": "report-image",
+        "physical_h": {"inequalities": matrix(2, 1, [1.0, -1.0]), "upper": [12.0, -2.0],
+                       "equalities": matrix(0, 1, []), "values": []},
+        "feasible_factor_witnesses": [[-1.0, -1.0], [0.0, 0.0], [1.0, 1.0], [-1.0, 1.0]],
+        "inside_points": [[2.0], [7.0], [12.0], [8.0]],
+        "outside_points": [[1.0], [13.0]],
+        "infeasible_inside_factor": [2.0, -1.0],
+    },
+    "shared_cancellation": {
+        "operation": "dependent_sum", "output_id": "report-cancelled",
+        "left": generator("report-left", [0.0], matrix(1, 1, [1.0]),
+                          ["history.0"], matrix(0, 1, []), []),
+        "right": generator("report-right", [0.0], matrix(1, 1, [-1.0]),
+                           ["history.0"], matrix(0, 1, []), []),
+        "physical_h": {"inequalities": matrix(0, 1, []), "upper": [],
+                       "equalities": matrix(1, 1, [1.0]), "values": [0.0]},
+        "feasible_factor_witnesses": [[-1.0], [0.0], [1.0]],
+        "inside_points": [[0.0], [0.0], [0.0]],
+        "outside_points": [[-1.0], [1.0]],
+        "independent_sum_rejected": True,
+    },
+    "constrained_sum": {
+        "operation": "dependent_sum", "output_id": "report-constrained-sum",
+        "left": generator("report-constrained-left", [0.0, 0.0],
+                          matrix(2, 2, [1.0, 0.0, 0.0, 1.0]), ["u", "v"],
+                          matrix(1, 2, [1.0, -1.0]), [0.0]),
+        "right": generator("report-constrained-right", [0.0, 0.0],
+                           matrix(2, 2, [-1.0, 0.0, 0.0, 1.0]), ["u", "w"],
+                           matrix(1, 2, [1.0, 1.0]), [0.0]),
+        "physical_h": {"inequalities": matrix(0, 2, []), "upper": [],
+                       "equalities": matrix(2, 2, [1.0, 0.0, 0.0, 1.0]), "values": [0.0, 0.0]},
+        "feasible_factor_witnesses": [[1.0, 1.0, -1.0], [0.0, 0.0, 0.0]],
+        "inside_points": [[0.0, 0.0], [0.0, 0.0]],
+        "outside_points": [[0.0, 1.0], [0.0, -1.0]],
+        "left_only_factor": [1.0, 1.0, 0.0],
+        "right_only_factor": [1.0, 0.0, -1.0],
+        "infeasible_inside_factor": [1.0, 0.0, 0.0],
+    },
+}
 
 
 def sha(data: bytes) -> str:
@@ -81,6 +141,24 @@ def parse_raw(raw: bytes) -> list[dict]:
             raise ValueError("driver event is not an object")
         rows.append(row)
     return rows
+
+
+def admit_description(raw: bytes) -> tuple[bytes, dict[str, str]]:
+    description = parse_raw(raw)
+    if len(description) != 1:
+        raise ValueError("driver description count differs")
+    value = description[0]
+    if (value.get("schema") != "csl.geo07-generator-driver/1" or
+            value.get("source_commit") != SOURCE or
+            value.get("module") != "CSL::geometry_generators" or
+            value.get("scalar") != "binary64" or
+            value.get("fixtures") != list(EXPECTED) or
+            value.get("timed_scope") != INTERVAL or
+            json_bytes(value.get("inputs")) != json_bytes(INPUTS)):
+        raise ValueError("driver source, timing scope, or authored input catalogue differs")
+    payload = json_bytes(INPUTS)
+    hashes = {name: sha(json_bytes(INPUTS[name])) for name in EXPECTED}
+    return payload, hashes
 
 
 def admit_raw(raw: bytes, *, repetitions: int, batch: int) -> tuple[list[dict], dict]:
@@ -244,13 +322,7 @@ def collect(args) -> str:
     describe = subprocess.run([str(exe), "--describe"], capture_output=True, timeout=30)
     if describe.returncode or describe.stderr:
         raise ValueError("driver description failed")
-    description = parse_raw(describe.stdout)
-    if (len(description) != 1 or description[0].get("source_commit") != SOURCE or
-            description[0].get("schema") != "csl.geo07-generator-driver/1" or
-            description[0].get("module") != "CSL::geometry_generators" or
-            description[0].get("scalar") != "binary64" or
-            description[0].get("fixtures") != list(EXPECTED)):
-        raise ValueError("driver source or fixture identity differs")
+    input_bytes, input_hashes = admit_description(describe.stdout)
     command = [str(exe), "--measure", str(args.repetitions), "1", str(args.batch)]
     try:
         measured = subprocess.run(command, cwd=root, capture_output=True, timeout=600)
@@ -258,6 +330,8 @@ def collect(args) -> str:
     except subprocess.TimeoutExpired as error:
         stdout, stderr, code, timed_out = error.stdout or b"", error.stderr or b"", None, True
     save_capture(out, stdout, stderr, code, command, timed_out=timed_out)
+    (out / "driver-description.jsonl").write_bytes(describe.stdout)
+    (out / "fixture-inputs.json").write_bytes(input_bytes)
     try:
         if code or stderr or timed_out:
             raise ValueError("driver failed, timed out, or wrote stderr")
@@ -286,7 +360,10 @@ def collect(args) -> str:
                   "harness_commit": args.harness_commit,
                   "source_tree": git(root, "rev-parse", "HEAD^{tree}"),
                   "created_utc": datetime.now(timezone.utc).isoformat(),
-                  "inputs": {"fixtures": list(EXPECTED), "driver_sha256": sha((root / "benchmarks/reporting/geo07/generator_driver.cpp").read_bytes()),
+                  "inputs": {"fixtures": INPUTS, "fixture_sha256": input_hashes,
+                             "canonical_bytes_sha256": sha(input_bytes),
+                             "driver_description_sha256": sha(describe.stdout),
+                             "driver_sha256": sha((root / "benchmarks/reporting/geo07/generator_driver.cpp").read_bytes()),
                              "binary64": True, "representation_claim": "exact shared-factor algebra; binary64 numerical evaluation has no validated rounding enclosure"},
                   "timing": {"clock": "steady_clock", "unit": "ns", "scope": INTERVAL,
                              "warmup_rounds": 1, "measured_rounds": args.repetitions,

@@ -31,6 +31,26 @@ def encoded(rows):
 
 
 class ReportAdmission(unittest.TestCase):
+    def test_description_admits_exact_authored_inputs_and_scope(self):
+        described = {"schema": "csl.geo07-generator-driver/1", "source_commit": collect.SOURCE,
+                     "module": "CSL::geometry_generators", "scalar": "binary64",
+                     "fixtures": list(collect.EXPECTED), "timed_scope": collect.INTERVAL,
+                     "inputs": collect.INPUTS}
+        raw = encoded([described])
+        payload, hashes = collect.admit_description(raw)
+        self.assertEqual(payload, collect.json_bytes(collect.INPUTS))
+        self.assertEqual(hashes["box_image"], hashlib.sha256(
+            collect.json_bytes(collect.INPUTS["box_image"])).hexdigest())
+        for mutate in (
+            lambda value: value.update({"timed_scope": "operations only"}),
+            lambda value: value["inputs"]["box_image"]["affine_map"]["values"].__setitem__(0, 9),
+            lambda value: value["inputs"]["constrained_sum"]["right"]["equalities"]["values"].__setitem__(1, 9),
+        ):
+            candidate = deepcopy(described)
+            mutate(candidate)
+            with self.subTest(mutate=mutate), self.assertRaises(ValueError):
+                collect.admit_description(encoded([candidate]))
+
     def test_release_gate_rejects_changed_flags_or_library(self):
         build = Path("C:/reviewed/build")
         cache = {**collect.RELEASE_FLAGS, "CSL_BUILD_GEO07_REPORT": "ON",
