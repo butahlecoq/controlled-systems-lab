@@ -23,4 +23,8 @@ csl_add_library(csl_convex STATIC src/optimization/convex_backend.cpp)
 
 target_link_libraries(csl_convex PUBLIC CSL::objectives CSL::optimization)
 
+csl_add_library(csl_worst_case_vertex STATIC src/optimization/worst_case_vertex.cpp)
+
+target_link_libraries(csl_worst_case_vertex PUBLIC CSL::objectives CSL::sets)
+
 csl_install_headers(optimization)

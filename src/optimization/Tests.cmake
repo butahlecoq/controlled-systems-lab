@@ -60,3 +60,8 @@ add_executable(objectives_public_client tests/installed/objectives_client.cpp)
 target_link_libraries(objectives_public_client PRIVATE CSL::objectives)
 add_test(NAME objectives_public_client COMMAND objectives_public_client)
 csl_test_target(objectives_public_client optimization)
+
+add_executable(worst_case_vertex_tests tests/unit/optimization/worst_case_vertex_tests.cpp)
+target_link_libraries(worst_case_vertex_tests PRIVATE CSL::worst_case_vertex doctest::doctest)
+add_test(NAME worst_case_vertex_tests COMMAND worst_case_vertex_tests)
+csl_test_target(worst_case_vertex_tests optimization)
