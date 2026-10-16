@@ -16,7 +16,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
-SOURCE = "6c1cde0fcaabf40b8fdcb5973f36465cdccdcaf4"
+SOURCE = "994f3ee4310b4087d289e2eb02adbdb9dfd97827"
 TARGET = "csl_issue3_finite_action_report"
 ALLOWED_DELTA = {
     "CMakeLists.txt", "cmake/OptionalReports.cmake",

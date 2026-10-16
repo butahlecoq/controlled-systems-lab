@@ -16,7 +16,7 @@ namespace {
 using namespace csl;
 using namespace csl::optimization;
 using nlohmann::json;
-constexpr std::string_view source_commit="6c1cde0fcaabf40b8fdcb5973f36465cdccdcaf4";
+constexpr std::string_view source_commit="994f3ee4310b4087d289e2eb02adbdb9dfd97827";
 
 template<class T> T take(std::variant<T,Diagnostic> result) {
     if(!std::holds_alternative<T>(result)) throw std::runtime_error("invalid report fixture");

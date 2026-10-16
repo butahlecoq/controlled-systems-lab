@@ -18,7 +18,7 @@ def main() -> None:
     fixture_hash = hashlib.sha256(driver.read_bytes()).hexdigest()
     for row in rows:
         assert row["schema"] == "csl.issue3-raw-trial/1"
-        assert row["source_commit"] == "6c1cde0fcaabf40b8fdcb5973f36465cdccdcaf4"
+        assert row["source_commit"] == "994f3ee4310b4087d289e2eb02adbdb9dfd97827"
         assert len(row["harness_commit"]) == 40
         assert row["checked_calls"] == row["batch"] == 1
         assert row["elapsed_ns"] > 0

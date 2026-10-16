@@ -1,7 +1,7 @@
 # Issue #3 finite-action minimax report harness
 
 This stacked harness exercises `finite_action_minimax` from frozen source commit
-`6c1cde0fcaabf40b8fdcb5973f36465cdccdcaf4` (PR #351). The driver is a
+`994f3ee4310b4087d289e2eb02adbdb9dfd97827` (PR #351). The driver is a
 non-installed Release executable. Its exact harness commit is embedded at CMake
 configuration time and emitted on every raw JSONL row. The branch contains no
 accepted measurement or published report; an independent review of the fixed
@@ -63,6 +63,14 @@ construction and ends after public execution, independent literal checks and
 JSON result construction. It excludes JSONL serialization, process startup,
 persistence, plotting and rendering. The rows are batch observations with
 different batch sizes; do not infer single-call latency from them.
+
+The B08 canonical input includes the exact hexadecimal binary64 vertices
+read from the actual native V disturbance sets, alongside separately named
+authored halfwidth parameters. This distinguishes stage-two arithmetic such as
+`0.1+0.1*2` from the rounded authored decimal `0.3`. The collector's functional
+`test_capture.py` checks this identity distinction and retained partial
+stdout/stderr on timeout. Preflight records both the pinned source tree and
+the distinct harness tree.
 
 Collection must preserve raw stdout JSONL, stderr, process exit status and any
 failed or partial attempt. It must verify clean Release/NDEBUG/C++20 build
