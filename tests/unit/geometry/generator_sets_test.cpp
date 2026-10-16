@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <limits>
+#include <utility>
 
 using namespace csl;
 using namespace csl::sets;
@@ -87,13 +88,22 @@ TEST_CASE("box affine image keeps factor IDs and agrees with H-polyhedron corner
     const auto lifted=accepted(factor_polyhedron(image));
     CHECK(lifted.factor_ids==std::vector<FactorId>{{"horizontal"},{"vertical"}});
     const auto output_h=h_reference({2,1,{1,-1}},{12,-2},{0,1,{}},{});
-    for (const auto& factors:std::vector<Vector>{{-1,-1},{0,0},{1,1},{2,1},{-2,-1}}) {
-        const auto physical=map_lift(lifted,factors);
-        CHECK(in_factor_polyhedron(image,factors)==in_reference_h(output_h,physical));
+    for (const auto& [factors,physical]:std::vector<std::pair<Vector,Vector>>{
+            {{-1,-1},{2}},{{0,0},{7}},{{1,1},{12}},{{-1,1},{8}}}) {
+        CHECK(in_factor_polyhedron(image,factors));
+        CHECK(map_lift(lifted,factors)==physical);
+        CHECK(in_reference_h(output_h,physical));
     }
-    CHECK(map_lift(lifted,{-1,-1})==Vector{2});
-    CHECK(map_lift(lifted,{1,1})==Vector{12});
-    CHECK(map_lift(lifted,{2,1})==Vector{14});
+    for (const auto& [factors,physical]:std::vector<std::pair<Vector,Vector>>{
+            {{2,1},{14}},{{-2,-1},{0}}}) {
+        CHECK_FALSE(in_factor_polyhedron(image,factors));
+        CHECK(map_lift(lifted,factors)==physical);
+        CHECK_FALSE(in_reference_h(output_h,physical));
+    }
+    // Noninjectivity: an inadmissible factor tuple can map to an admitted point.
+    CHECK_FALSE(in_factor_polyhedron(image,{2,-1}));
+    CHECK(map_lift(lifted,{2,-1})==Vector{8});
+    CHECK(in_reference_h(output_h,{8}));
     const auto reference=h_reference({4,2,{1,0,-1,0,0,1,0,-1}},
         {3,1,5,1},{0,2,{}},{});
     for (const double x:Vector{-1,3}) for (const double y:Vector{-1,5}) {
@@ -156,10 +166,20 @@ TEST_CASE("constrained equalities survive image and dependent sum") {
     const auto joined=accepted(factor_polyhedron(sum));
     CHECK(joined.factor_ids==std::vector<FactorId>{{"u"},{"v"},{"w"}});
     const auto physical_h=h_reference({0,2,{}},{},{2,2,{1,0,0,1}},{0,0});
-    for (const auto& factors:std::vector<Vector>{{1,1,-1},{0,0,0},{1,1,0},{1,0,-1}})
-        CHECK(in_factor_polyhedron(sum,factors)==in_reference_h(physical_h,map_lift(joined,factors)));
-    CHECK(map_lift(joined,{1,1,-1})==Vector{0,0});
-    CHECK(map_lift(joined,{1,1,0})==Vector{0,1});
+    for (const auto& factors:std::vector<Vector>{{1,1,-1},{0,0,0}}) {
+        CHECK(in_factor_polyhedron(sum,factors));
+        CHECK(map_lift(joined,factors)==Vector{0,0});
+        CHECK(in_reference_h(physical_h,{0,0}));
+    }
+    for (const auto& [factors,physical]:std::vector<std::pair<Vector,Vector>>{
+            {{1,1,0},{0,1}},{{1,0,-1},{0,-1}}}) {
+        CHECK_FALSE(in_factor_polyhedron(sum,factors));
+        CHECK(map_lift(joined,factors)==physical);
+        CHECK_FALSE(in_reference_h(physical_h,physical));
+    }
+    CHECK_FALSE(in_factor_polyhedron(sum,{1,0,0}));
+    CHECK(map_lift(joined,{1,0,0})==Vector{0,0});
+    CHECK(in_reference_h(physical_h,{0,0}));
 }
 
 TEST_CASE("lift retains factor order when equal names appear in different source columns") {
