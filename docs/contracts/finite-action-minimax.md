@@ -110,9 +110,12 @@ completed optimal or infeasible results before returning them.
 Capability admission covers the declared affine `LinearSystem`, immutable
 convex terminal `Objective`, compact native V, singleton, or empty initial
 and independent disturbance sets, and H, singleton, universal, or empty safe
-sets. Shape, capacity, numerical-policy, and execution checks remain with the
-underlying oracle. Consequently registration rejection is distinct from its
-`Unsupported` outcome. The returned `FiniteActionMinimaxOutcome` preserves
+sets. Admission also checks request identities, dimensions, finite action rows,
+the near-optimal tolerance, point and plan limits, and the objective/output
+assurance match before creating a workspace. Execution-context numerical
+settings, cancellation, deadlines, and arithmetic failures remain run-time
+checks. Consequently registration rejection is distinct from the admitted
+oracle's `Unsupported` outcome. The returned `FiniteActionMinimaxOutcome` preserves
 optimal, all-infeasible, empty-catalogue, no-scenario, unsupported, and
 stopped variants; no branch publishes an optimal-family relation or validated
 arithmetic assurance.

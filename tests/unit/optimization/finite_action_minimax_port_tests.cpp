@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/optimization/finite_action_minimax_port.hpp>
+#include <limits>
 
 using namespace csl;
 using namespace csl::optimization;
@@ -122,8 +123,44 @@ TEST_CASE("all distinct solver statuses survive registered execution") {
     input.request.disturbances[0]=take(sets::make_empty({{"no-w"},1,{"w"}}));
     CHECK(std::holds_alternative<FiniteMinimaxNoScenarios>(run(registry,input)));
     input=query();
+    ExecutionContext invalid_numerical{};
+    invalid_numerical.numerical.absolute_tolerance=-1;
+    const auto unsupported=run(registry,input,invalid_numerical);
+    REQUIRE(std::holds_alternative<Unsupported>(unsupported));
+    CHECK(std::get<Unsupported>(unsupported).diagnostics[0].field=="fixed_plan.numerical");
+}
+
+TEST_CASE("malformed actions and exhausted limits reject at capability admission") {
+    Registry<FiniteActionMinimaxPort> registry;
+    auto entry=make_finite_action_minimax_registration();
+    int created=0;
+    auto factory=entry.factory;
+    entry.factory=[&](const FiniteActionMinimaxQuery& input) {
+        ++created;
+        return factory(input);
+    };
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
+    auto check_rejected=[&](const FiniteActionMinimaxQuery& input,const char* field) {
+        auto prepared=prepare_pipeline(select(registry,method(),input,finite_action_minimax_requirements()));
+        REQUIRE(std::holds_alternative<Rejection>(prepared));
+        CHECK(std::get<Rejection>(prepared).diagnostics[0].field==field);
+        CHECK(created==0);
+    };
+    auto input=query();
+    input.request.actions.catalogue[0]={0,1};
+    check_rejected(input,"finite_minimax.action");
+    input=query();
+    input.request.actions.catalogue[0][0]=std::numeric_limits<double>::infinity();
+    check_rejected(input,"finite_minimax.action");
+    input=query();
+    input.limits.near_optimal_tolerance=-1;
+    check_rejected(input,"finite_minimax.tolerance");
+    input=query();
     input.limits.max_plans=1;
-    CHECK(std::holds_alternative<Unsupported>(run(registry,input)));
+    check_rejected(input,"finite_minimax.capacity");
+    input=query();
+    input.limits.max_points_per_stage=1;
+    check_rejected(input,"fixed_plan.capacity");
 }
 
 TEST_CASE("capability rejects out-of-scope inputs before workspace creation with provenance") {
