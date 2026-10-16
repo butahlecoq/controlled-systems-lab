@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/adapters/convex/highs.hpp>
+#include <algorithm>
 #include <charconv>
 #include <cmath>
 #include <memory>
@@ -20,9 +21,9 @@ template<class T, class... R> T accepted(std::variant<T, R...> result) {
     return std::get<T>(std::move(result));
 }
 
-ProgramResult solve_registered(const ConvexProgram& program) {
+ProgramResult solve_registered(const ConvexProgram& program,HighsConvexOptions options={}) {
     Registry<ConvexPort> registry;
-    REQUIRE_FALSE(registry.add(accepted(make_highs_registration())));
+    REQUIRE_FALSE(registry.add(accepted(make_highs_registration(options))));
     Requirements requirements;
     requirements.output.representation={"csl.program-result.v1"};
     auto plan=accepted(prepare_pipeline(select(registry,Method{{"csl.convex.highs"},{}},program,requirements)));
@@ -30,6 +31,110 @@ ProgramResult solve_registered(const ConvexProgram& program) {
     ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),
         {},{},{1e-8,1e-8},"test-06-literal"};
     return accepted(workspace->run(context));
+}
+
+void check_numerical_point(const ProgramResult& result,const ConvexProgram& program);
+void check_reported_original_cost(const ProgramResult& result,double independent_cost);
+
+TEST_CASE("convex publication rejects nonconvex and unresolved quadratic curvature") {
+    // A negative 1D Hessian has eigenvalue -2; a tiny negative eigenvalue
+    // stays unresolved under the numerical PSD policy, never silently clipped.
+    for(const auto [hessian,code]: {
+        std::pair{-2.0,DiagnosticCode::invalid_input},
+        std::pair{-1e-10,DiagnosticCode::unsupported}}) {
+        const auto input=ConvexProgramInput{{{"test-06"},{"curvature-preflight"}},
+            QuadraticTerminal{{1,1,{hessian}},{0},0},
+            {0,1,{0},{},{}},{{0,1}},{},{}};
+        const auto published=make_convex_program(input);
+        REQUIRE(std::holds_alternative<Diagnostics>(published));
+        const auto& diagnostics=std::get<Diagnostics>(published);
+        REQUIRE(diagnostics.size()==1);
+        CHECK(diagnostics[0].code==code);
+        CHECK(diagnostics[0].field=="objective.psd");
+    }
+}
+
+TEST_CASE("registered convex port rejects unavailable evidence before creating a workspace") {
+    const auto program=accepted(make_convex_program({{{"test-06"},{"unsupported-evidence"}},
+        QuadraticTerminal{{1,1,{2}},{-4},4},{0,1,{0},{},{}},{{0,1}},{},{}}));
+    Registry<ConvexPort> registry;
+    REQUIRE_FALSE(registry.add(accepted(make_highs_registration())));
+    Requirements requested;
+    requested.output.representation={"csl.program-result.v1"};
+    requested.output.assurance=Assurance::validated;
+    const auto prepared=prepare_pipeline(select(registry,Method{{"csl.convex.highs"},{}},program,requested));
+    REQUIRE(std::holds_alternative<Rejection>(prepared));
+    const auto& rejection=std::get<Rejection>(prepared);
+    CHECK(rejection.provenance.port=="convex");
+    CHECK(rejection.provenance.requested.id.value=="csl.convex.highs");
+    REQUIRE(rejection.provenance.actual);
+    CHECK(rejection.provenance.actual->id.value=="csl.convex.highs");
+    REQUIRE_FALSE(rejection.diagnostics.empty());
+    CHECK(rejection.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics[0].field=="output.assurance");
+}
+
+TEST_CASE("registered convex finite infeasible and QP iteration-limit outcomes stay distinct") {
+    const auto finite=accepted(make_convex_program({{{"test-06"},{"status-finite"}},
+        QuadraticTerminal{{1,1,{2}},{-4},4},{0,1,{0},{},{}},{{0,1}},{},{}}));
+    const auto solved=solve_registered(finite);
+    check_numerical_point(solved,finite);
+    CHECK(solved.primal->at(0)==doctest::Approx(1).epsilon(1e-8));
+    CHECK((solved.primal->at(0)-2)*(solved.primal->at(0)-2)==doctest::Approx(1).epsilon(1e-8));
+    CHECK(solved.residuals.primal->variables.violation==doctest::Approx(0).epsilon(1e-8));
+    check_reported_original_cost(solved,1);
+
+    // x is within [0,1], while the authored row requires x>=2.
+    const auto impossible=accepted(make_convex_program({{{"test-06"},{"status-infeasible"}},
+        QuadraticTerminal{{1,1,{2}},{-4},4},
+        {1,1,{0,1},{0},{1}},{{0,1}},{{2,{}}},{}}));
+    const auto infeasible=solve_registered(impossible);
+    INFO(infeasible.raw_diagnostics);
+    CHECK(infeasible.termination==Termination::completed);
+    CHECK(infeasible.outcome.value==MathematicalOutcome::infeasible);
+    CHECK(infeasible.outcome.subject==impossible.identity());
+    CHECK(std::holds_alternative<Unestablished>(infeasible.outcome.support));
+    CHECK(infeasible.raw_diagnostics.find("phase.feasibility.model_status=8\n")!=std::string::npos);
+    CHECK(infeasible.raw_diagnostics.find("phase.qp.api_status=")==std::string::npos);
+    if(infeasible.primal) {
+        REQUIRE(infeasible.residuals.primal);
+        const double x=infeasible.primal->at(0);
+        const double independent_cost=(x-2)*(x-2);
+        const double row_violation=std::max(0.0,2-x);
+        const double variable_violation=std::max({0.0,-x,x-1});
+        CHECK(accepted(evaluate(impossible.original_objective(),*infeasible.primal))==doctest::Approx(independent_cost));
+        check_reported_original_cost(infeasible,independent_cost);
+        CHECK(std::max(row_violation,variable_violation)>=0.5);
+        CHECK(infeasible.residuals.primal->context.subject==impossible.identity());
+        CHECK(infeasible.residuals.primal->rows.violation==doctest::Approx(row_violation).epsilon(1e-8));
+        CHECK(infeasible.residuals.primal->variables.violation==doctest::Approx(variable_violation).epsilon(1e-8));
+    }
+    CHECK_FALSE(infeasible.objective.lower);
+    CHECK_FALSE(infeasible.objective.upper);
+
+    const auto limited=solve_registered(finite,{{},0});
+    INFO(limited.raw_diagnostics);
+    CHECK(limited.termination==Termination::resource_limit);
+    CHECK(limited.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(limited.outcome.subject==finite.identity());
+    CHECK(std::holds_alternative<Unestablished>(limited.outcome.support));
+    CHECK(limited.raw_diagnostics.find("options.qp_iteration_limit=0\n")!=std::string::npos);
+    CHECK(limited.raw_diagnostics.find("phase.qp.model_status=14\n")!=std::string::npos);
+    CHECK(limited.raw_diagnostics.find("phase.qp.iterations=0\n")!=std::string::npos);
+    if(limited.primal) {
+        const double x=limited.primal->at(0);
+        const double independent_cost=(x-2)*(x-2);
+        CHECK(accepted(evaluate(finite.original_objective(),*limited.primal))==doctest::Approx(independent_cost));
+        check_reported_original_cost(limited,independent_cost);
+        REQUIRE(limited.residuals.primal);
+        CHECK(limited.residuals.primal->context.subject==finite.identity());
+        CHECK(limited.residuals.primal->variables.violation==doctest::Approx(std::max({0.0,-x,x-1})).epsilon(1e-8));
+    }
+    if(limited.residuals.dual)
+        CHECK(limited.residuals.dual->context.subject==finite.identity());
+    CHECK_FALSE(limited.objective.lower);
+    CHECK_FALSE(limited.objective.upper);
+    CHECK(check_program_result(limited,finite,Assurance::numerical).empty());
 }
 
 void check_numerical_point(const ProgramResult& result,const ConvexProgram& program) {
