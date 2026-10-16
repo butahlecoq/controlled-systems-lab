@@ -24,6 +24,7 @@ ALLOWED_DELTA = {
     "scripts/reports/issue3/README.md", "scripts/reports/issue3/check_smoke.py",
     "scripts/reports/issue3/collect.py",
     "scripts/reports/issue3/test_capture.py",
+    "scripts/reports/issue3/test_measured_path.py",
 }
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 import collector_common as common
@@ -243,11 +244,11 @@ def main() -> None:
             return
         raw, errors, return_code, timed_out = capture(
             [str(exe), "--measure", "7"], out, "accepted", 1800)
-        capture = {"schema": "csl.issue3-process-capture/1", "return_code": return_code,
+        capture_record = {"schema": "csl.issue3-process-capture/1", "return_code": return_code,
                    "timed_out": timed_out, "stdout_sha256": hashlib.sha256(raw).hexdigest(),
                    "stderr_sha256": hashlib.sha256(errors).hexdigest(),
                    "attempted_utc": datetime.now(timezone.utc).isoformat()}
-        save(out / "process-capture.json", capture)
+        save(out / "process-capture.json", capture_record)
         if return_code or timed_out or errors:
             raise ValueError("measured child failed; raw stdout/stderr retained")
         smoke_rows = [json.loads(line) for line in
@@ -257,7 +258,7 @@ def main() -> None:
             raise ValueError("source changed during collection")
         save(out / "collection-status.json", {"schema": "csl.issue3-collection-status/1",
              "status": "complete", "trial_count": len(rows), "warmup_count": 8,
-             "measured_count": 56, "raw_sha256": capture["stdout_sha256"]})
+             "measured_count": 56, "raw_sha256": capture_record["stdout_sha256"]})
         print("saved 64 validated raw trial rows at", out)
     except Exception as error:
         save(out / "collection-error.json", {"error_type": type(error).__name__,
