@@ -1,0 +1,207 @@
+{
+  "scenario_id": "R29-corrected-scalar-reference",
+  "status": "editorial_reference_not_historical_run",
+  "public_digest_convention": "utf8-lf",
+  "scenario_sha256": "aba4b74c35f76f3a16175242092c86a10d6e2980ab50983c65669a9f98ab0f5e",
+  "checker_sha256": "86e7d19143aa57c3d892fce92beafa1887ed18c29fc30ae1009cceabaddb6e7e",
+  "source_id": "R29",
+  "source_sha256": "8a70eddbd71571ea8443f92be1a799dc0ad6162fbfab902b88a931ab08981b4a",
+  "editable_source_id": "A22",
+  "editable_source_sha256": "08d20e71e9f6537982822a12b0f54d49607113628398ac2b7678a54173a30e4f",
+  "arithmetic": "exact rational (Python Fraction); no floating conversion",
+  "horizon": 16,
+  "closed_form_verified_stages": 17,
+  "generator_count_by_stage": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "terminal_center_exact": [
+    "1150",
+    "0",
+    "430",
+    "0"
+  ],
+  "terminal_factor_ids": [
+    "x0.0",
+    "x0.1",
+    "x0.2",
+    "x0.3",
+    "u.0",
+    "u.1",
+    "u.2",
+    "u.3",
+    "u.4",
+    "u.5",
+    "u.6",
+    "u.7",
+    "u.8",
+    "u.9",
+    "u.10",
+    "u.11",
+    "u.12",
+    "u.13",
+    "u.14",
+    "u.15"
+  ],
+  "terminal_generator_columns_exact": [
+    [
+      "20",
+      "-2080",
+      "0",
+      "0"
+    ],
+    [
+      "0",
+      "500",
+      "0",
+      "0"
+    ],
+    [
+      "0",
+      "0",
+      "10",
+      "-1040"
+    ],
+    [
+      "0",
+      "0",
+      "0",
+      "300"
+    ],
+    [
+      "4",
+      "-390",
+      "2",
+      "-195"
+    ],
+    [
+      "4",
+      "-364",
+      "2",
+      "-182"
+    ],
+    [
+      "4",
+      "-338",
+      "2",
+      "-169"
+    ],
+    [
+      "4",
+      "-312",
+      "2",
+      "-156"
+    ],
+    [
+      "4",
+      "-286",
+      "2",
+      "-143"
+    ],
+    [
+      "4",
+      "-260",
+      "2",
+      "-130"
+    ],
+    [
+      "4",
+      "-234",
+      "2",
+      "-117"
+    ],
+    [
+      "4",
+      "-208",
+      "2",
+      "-104"
+    ],
+    [
+      "4",
+      "-182",
+      "2",
+      "-91"
+    ],
+    [
+      "4",
+      "-156",
+      "2",
+      "-78"
+    ],
+    [
+      "4",
+      "-130",
+      "2",
+      "-65"
+    ],
+    [
+      "4",
+      "-104",
+      "2",
+      "-52"
+    ],
+    [
+      "4",
+      "-78",
+      "2",
+      "-39"
+    ],
+    [
+      "4",
+      "-52",
+      "2",
+      "-26"
+    ],
+    [
+      "4",
+      "-26",
+      "2",
+      "-13"
+    ],
+    [
+      "4",
+      "0",
+      "2",
+      "0"
+    ]
+  ],
+  "terminal_coordinate_intervals_exact": [
+    [
+      "1066",
+      "1234"
+    ],
+    [
+      "-5700",
+      "5700"
+    ],
+    [
+      "388",
+      "472"
+    ],
+    [
+      "-2900",
+      "2900"
+    ]
+  ],
+  "historical_run_reproduced": false,
+  "limitations": [
+    "Scalar P(t)=Z(0,[1]) and independent temporal factor IDs are an editorial interpretation of the printed scalar bound, not recovered executable input.",
+    "This is unreduced nominal reachable-set propagation from a set-valued initial condition, not an optimal family or historical timing result.",
+    "Exact rational reference arithmetic does not validate the separate binary64 generator adapter or any numerical enclosure."
+  ]
+}

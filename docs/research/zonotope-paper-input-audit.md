@@ -24,4 +24,13 @@ The paper defines a zonotope as `Z(c,G)={c+G ξ: ξ∈[-1,1]^m}` on p. 105 and p
 
 The corrected reference inputs preserve the published `A`, `B`, initial zonotope and scalar bound while recording both editorial inferences explicitly. They do not silently substitute the four-component control vector or invent a second control channel. In exact real arithmetic, the stated recurrence adds one generator per step, so an unreduced 16-step terminal zonotope has the four initial generator columns and sixteen control-image columns. This is a representation identity, not a claim about floating-point equality, vertex count, runtime, or complete trajectory recovery.
 
-The archived A04 `Scientific Research/Zonotope.m` (SHA-256 `23b52c42f62dc9a692ccb5252debe4f927692589c88cb9517b42f84a24f0364f` in the [register](archive-selected-sources.json)) has commented four-state fuel matrices, but its active example instead uses a three-state matrix, a `3×2` input matrix and five steps; it also includes optional generator reduction and plotting. It is not a runnable source match for the R29 16-step case. The source audit therefore stops at a candidate reference-input contract: an independent exact/validated operation check, saved run provenance and a report are still needed before a corrected numerical baseline can be published. A complete joint optimal state/control family additionally needs an objective, history-preserving relation and verified coverage under the [architecture contract](../architecture/modular-algorithms-and-solution-sets.md#optimal-solution-families).
+The archived A04 `Scientific Research/Zonotope.m` (SHA-256 `23b52c42f62dc9a692ccb5252debe4f927692589c88cb9517b42f84a24f0364f` in the [register](archive-selected-sources.json)) has commented four-state fuel matrices, but its active example instead uses a three-state matrix, a `3×2` input matrix and five steps; it also includes optional generator reduction and plotting. It is not a runnable source match for the R29 16-step case.
+
+The [corrected scalar-input reference](r29-corrected-scalar-reference.md)
+implements the explicit editorial interpretation above using exact-rational
+unreduced propagation, a distinct scenario ID, per-stage closed-form checks,
+literal terminal anchors and a saved record. It is a mathematical reference,
+not a recovered historical run or binary64 validation. A complete joint
+optimal state/control family additionally needs an objective,
+history-preserving relation and verified coverage under the
+[architecture contract](../architecture/modular-algorithms-and-solution-sets.md#optimal-solution-families).
