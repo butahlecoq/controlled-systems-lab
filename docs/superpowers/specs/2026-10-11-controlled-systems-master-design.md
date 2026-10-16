@@ -1,6 +1,6 @@
 # Controlled Systems Lab: consolidated requirements and architecture specification
 
-Date: 2026-10-12. Version: 0.7. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that the product exists.
+Date: 2026-10-16. Version: 0.8. Status: consolidated draft for owner/scientific review. This document records the conversation's decisions and turns them into traceable requirements. It is not an implementation plan or a claim that every capability exists.
 
 ## Product intent
 
@@ -29,8 +29,8 @@ All newly authored artifacts are in English. Owner discussion is in Russian. The
 | Working baseline control bound | Owner decision: use `u ∈ [-1,1]` for initial baseline scenarios as an explicit modeling assumption | This does not establish the canonical B04 archival bound. Keep assumed-data baseline scenarios distinct; leave the historical manifest and restoration status unchanged until original inputs/conventions are sourced |
 | Testing | Owner explicitly requested module unit tests | Include unit, contract, mathematical and integration acceptance evidence |
 | Delivery through subagents | Owner proposed specification -> tickets -> subagent implementation | Fix dependencies/ownership before parallel implementation |
-| Library API, CMake, double, initial polyhedral strategy | Assistant proposals | Review with owner; do not label them prior owner decisions |
-| Specific matrix/solver/test libraries, deployment targets, file syntax and launch interface | Open | Scenario-file input is confirmed; CLI/library packaging and any later graphical interface remain proposals |
+| Library API, CMake, double, initial polyhedral strategy | Assistant proposals in the original design discussion | The native library and CMake build are implemented for scoped profiles; this does not retroactively make them prior owner decisions or approve every numerical strategy |
+| Specific matrix/solver/test libraries, deployment targets, file syntax and launch interface | Integrations were originally open; [CORE-01](https://github.com/butahlecoq/controlled-systems-lab/issues/11) selected scoped, pinned defaults in [ADR 0002](../../architecture/decisions/0002-native-integrations.md), pending independent integration review | Eigen, HiGHS, JSON, doctest, CMake and the bounded Qhull conversion profile have explicit capabilities; scenario-file input is confirmed, while broader geometry support, distribution targets and launcher scope have separate reviews |
 
 The accepted language decision is [ADR 0001](../../architecture/decisions/0001-cpp20-core.md). Concrete native interfaces are in the subordinate [C++ contracts draft](2026-10-11-cpp-core-contracts-design.md). Earlier research/architecture notes remain supporting evidence; this document is the requirements entry point. If a supporting note conflicts with a confirmed requirement, record and reconcile the discrepancy before implementing it.
 
@@ -127,7 +127,7 @@ The first comparison presents final optimal-family results, selected controls/tr
 
 Public ports return common statuses and evidence while retaining raw backend diagnostics. Backend library containers stay behind adapters. Expected capability/math/numerical failures are represented in results; allocation/programming error policy will be settled in the implementation plan. A future C ABI is distinct from selecting registered native modules at runtime.
 
-The [native contract document](2026-10-11-cpp-core-contracts-design.md) specifies illustrative types, ownership, result/family semantics and an intended user flow. Its code fences remain design sketches. CORE-01 supplies the subordinate [compiled interface revision 1.1](../../contracts/core-interfaces.md), including scoped mathematical-outcome claims and explicit geometry operands/reference evidence, and [dependency decision/probes](../../architecture/decisions/0002-native-integrations.md), pending integration review; numerical adapters and synthesis remain downstream work.
+The [native contract document](2026-10-11-cpp-core-contracts-design.md) specifies illustrative types, ownership, result/family semantics and an intended user flow. Its code fences remain design sketches. CORE-01 established the subordinate [compiled interface](../../contracts/core-interfaces.md), now at source revision 1.6, and the [pinned dependency decision/probes](../../architecture/decisions/0002-native-integrations.md). Integration review remains open. The [current composition map](../../architecture/framework-composition.md) records implemented adapters and the narrow T-S01/T-S02 complete-family profiles; this requirements specification does not extend those claims to general models.
 
 ## Scenario-file workflow
 
@@ -186,9 +186,9 @@ Module unit tests are a required deliverable. Use mathematical answers, invarian
 
 At the first-slice boundary, every implemented capability has applicable unit/contract tests, T-S01/02/03 and T-V01/02 establish end-to-end semantics, T-X01 verifies the mandatory two-strategy comparison, T-I01/02/03 cover the primary scenario-file workflow, and integration/resource tests cover advertised execution behavior. Tests for later representations or certificate verifiers are added when those capabilities are implemented. Unsupported capabilities are tested as diagnostics now.
 
-Property tests may add random low-dimensional examples with fixed reproducible seeds; compare to independent analytic/exhaustive reference cases where possible. Sanitizer/race-check tooling should cover native ownership/concurrency when supported by the selected compiler platform. The test framework and CI matrix remain planning choices. Performance studies report measurements rather than fragile wall-clock unit-test thresholds.
+Property tests may add random low-dimensional examples with fixed reproducible seeds; compare to independent analytic/exhaustive reference cases where possible. Sanitizer/race-check tooling should cover native ownership/concurrency when supported by the selected compiler platform. The selected doctest/CTest integration and hosted compiler/sanitizer checks cover implemented profiles; further tests remain ticket-specific. Performance studies report measurements rather than fragile wall-clock unit-test thresholds.
 
-Archived runtime values are context, not cross-hardware pass/fail limits. B04 matching is gated by canonical restoration, not by ordinary module tests. No product unit tests are currently implemented in this documentation-only repository state.
+Archived runtime values are context, not cross-hardware pass/fail limits. B04 matching is gated by canonical restoration, not by ordinary module tests. Product unit, contract, and analytic-profile tests now run through the [native build](../../build/native.md); their presence does not establish the broader first-slice acceptance cases listed above.
 
 ## Scientific prerequisites and baseline restoration
 
@@ -226,8 +226,8 @@ Subagents may propose contract changes but cannot silently alter accepted requir
 
 ## Open decisions for the next review
 
-- Accept the proposed first polyhedral nominal slice and its supported complete-family construction; distinguish mathematical exactness from numerical evidence.
-- Select the first matrix, LP, convex solver, CMake packaging and test integrations without exposing their internal types in the public contract.
+- Review complete-family coverage beyond the currently admitted analytic T-S01/T-S02 profiles; distinguish mathematical exactness from numerical evidence.
+- Independently review the scoped Eigen, HiGHS, Qhull, doctest and CMake selections in [ADR 0002](../../architecture/decisions/0002-native-integrations.md), including license/notice obligations, operation and capacity limits, and native cancellation/concurrency behavior. Revisit the chosen integrations only where that review finds a concrete gap.
 - Review the scenario-file form, syntax and proposed CLI launcher; select supported compiler/OS distribution targets. No real-time deadline is currently specified.
 - Choose compatible backends/representations for the two selected optimization strategies and realistic scale ranges using the supplied experiments. Reachable-set approximation comparison is a later slice.
 - Restore B04 canonical inputs separately; its control interval remains unresolved until sourced. Initial baseline scenarios may use the owner-selected explicit assumption `u ∈ [-1,1]` under a distinct scenario identity.
@@ -235,3 +235,4 @@ Subagents may propose contract changes but cannot silently alter accepted requir
 Changes to these open proposals do not reopen the confirmed C++ choice or silently change archival data. Stable requirement IDs and a dated change record should keep subsequent tickets/reviews traceable.
 
 - Version 0.7: owner requires published HTML numerical and performance artifacts whenever an algorithm produces results; EXP-09 and T-HTML01 add inspectable reports and public links, beginning with the reference LP adapter. All original backlog/scientific criteria remain unchanged.
+- Version 0.8: reconcile the historical integration and test-status text with merged CORE-01, the current compiled interface, native tests and the scoped implementation map. The pending integration review and broader first-slice acceptance cases remain open.
