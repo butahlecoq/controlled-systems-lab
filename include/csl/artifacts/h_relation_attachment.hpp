@@ -29,8 +29,10 @@ struct RecordedHRelation {
     sets::HRepresentation representation;
 };
 
-// Encodes ordered logical H rows as exact binary64 bit patterns. Import creates
-// only an inert RecordedHRelation, never SetData or verifier-authorized evidence.
+// Encodes ordered logical H rows as exact binary64 bit patterns. Byte equality
+// establishes exact encoding equality only, not mathematical relation equivalence.
+// Import creates only an inert RecordedHRelation, never SetData or
+// verifier-authorized evidence.
 ArtifactResult<problem::ResolvedContent> encode_h_relation_attachment(
     const sets::SetData&, HRelationAttachmentLimits);
 ArtifactResult<RecordedHRelation> decode_h_relation_attachment(
