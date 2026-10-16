@@ -1,7 +1,11 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/adapters/convex/highs.hpp>
+#include <charconv>
+#include <cmath>
 #include <memory>
+#include <string_view>
+#include <system_error>
 #include <utility>
 #include <variant>
 
@@ -48,6 +52,23 @@ void check_numerical_point(const ProgramResult& result,const ConvexProgram& prog
     CHECK(result.residuals.dual->stationarity->violation<=1e-8);
     CHECK(check_program_result(result,program,Assurance::numerical).empty());
 }
+
+void check_reported_original_cost(const ProgramResult& result,double independent_cost) {
+    constexpr std::string_view marker="\nobjective.original=";
+    const std::string_view raw=result.raw_diagnostics;
+    const auto position=raw.rfind(marker); // A retried QP can retain earlier attempts.
+    REQUIRE(position!=std::string_view::npos);
+    const auto start=position+marker.size();
+    const auto end=raw.find_first_of("\r\n",start);
+    const auto number=raw.substr(start,end==std::string_view::npos?raw.size()-start:end-start);
+    double reported=0;
+    const auto [parsed,error]=std::from_chars(number.data(),number.data()+number.size(),reported);
+    REQUIRE(error==std::errc{});
+    REQUIRE(parsed==number.data()+number.size());
+    REQUIRE(std::isfinite(reported));
+    // The adapter uses the default stream precision for diagnostic text.
+    CHECK(std::abs(reported-independent_cost)<=1e-8+1e-5*std::abs(independent_cost));
+}
 }
 
 TEST_CASE("registered convex boundary QP returns the hand-solved original cost") {
@@ -63,6 +84,7 @@ TEST_CASE("registered convex boundary QP returns the hand-solved original cost")
     CHECK(independent_cost==doctest::Approx(1).epsilon(1e-8));
     CHECK(derivative==doctest::Approx(-2).epsilon(1e-8));
     CHECK(accepted(evaluate(program.original_objective(),*result.primal))==doctest::Approx(independent_cost));
+    check_reported_original_cost(result,independent_cost);
 }
 
 TEST_CASE("registered convex singular QP returns one point without claiming its whole optimal segment") {
@@ -80,6 +102,7 @@ TEST_CASE("registered convex singular QP returns one point without claiming its 
     CHECK(residual==doctest::Approx(0).epsilon(1e-8));
     CHECK(independent_cost==doctest::Approx(0).epsilon(1e-8));
     CHECK(accepted(evaluate(program.original_objective(),*result.primal))==doctest::Approx(independent_cost));
+    check_reported_original_cost(result,independent_cost);
     CHECK(accepted(evaluate(program.original_objective(),Vector{0,1}))==doctest::Approx(0));
     CHECK(accepted(evaluate(program.original_objective(),Vector{1,0}))==doctest::Approx(0));
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
@@ -112,4 +135,5 @@ TEST_CASE("registered unconstrained positive-definite QP respects the translated
     CHECK(gradient_x==doctest::Approx(0).epsilon(1e-8));
     CHECK(gradient_y==doctest::Approx(0).epsilon(1e-8));
     CHECK(accepted(evaluate(program.original_objective(),*result.primal))==doctest::Approx(independent_cost));
+    check_reported_original_cost(result,independent_cost);
 }
