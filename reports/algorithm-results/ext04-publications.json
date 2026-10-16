@@ -1,0 +1,17 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Exploratory, inconclusive single-path batch observations; no comparator, source-mapped limiter, speedup, all-disturbance guarantee, policy certificate, complete family or validated rounding claim",
+      "measured_scope": "21 verified measured batches across three explicitly sampled public replay fixtures; 5,000 fresh calls per batch",
+      "native_payload_sha256": "48a1acb8404ff12ed3e2bce334aff27d548db4622f3f47c7f5cf2d415107e6ad",
+      "payload_schema": "csl.ext04-replay-records/1",
+      "payload_sha256": "48a1acb8404ff12ed3e2bce334aff27d548db4622f3f47c7f5cf2d415107e6ad",
+      "report_id": "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34",
+      "report_kind": "ext04-observed-replay",
+      "source_commit": "c23aaf13c1c1e5480cc22dd5bac5cd3e79562609",
+      "source_report_id": "ext04-df62c7c6d295e135",
+      "zip_sha256": "b55221859b711d1ff17eab550fbc18db75417957657d55be731fc79662619803"
+    }
+  ],
+  "schema": "csl.ext04-report-extension/1"
+}

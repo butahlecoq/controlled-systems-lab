@@ -1,0 +1,396 @@
+Change Dir: 'D:/work/PhD/repo/.worktrees/ext04-report-harness/build/ext04-report'
+
+Run Clean Command: "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" CSL.sln /t:Clean /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+Сборка начата 16.10.2026 17:09:53.
+
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" в узле 1 (целевые объекты Clean).
+ValidateSolutionConfiguration:
+  Создание конфигурации решения "Release|x64".
+ValidateProjects:
+  Проект"INSTALL" не выбран для сборки в конфигурации решения "Release|x64".
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_worst_case_vertex.vcxproj.metaproj" (2) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_worst_case_vertex.vcxproj.metaproj" (2) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_sets.vcxproj.metaproj" (3) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_sets.vcxproj.metaproj" (3) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_numeric.vcxproj.metaproj" (4) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_numeric.vcxproj.metaproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_contracts.vcxproj.metaproj" (5) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_contracts.vcxproj.metaproj" (5) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ZERO_CHECK.vcxproj" (6) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ZERO_CHECK.vcxproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_contracts.vcxproj.metaproj" (5) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_contracts.vcxproj" (7) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_contracts.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_contracts.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_numeric.vcxproj.metaproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_numeric.vcxproj" (8) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_numeric.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_numeric.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_sets.vcxproj.metaproj" (3) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_sets.vcxproj" (9) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_sets.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_sets.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_sets.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_worst_case_vertex.vcxproj.metaproj" (2) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_objectives.vcxproj.metaproj" (10) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_objectives.vcxproj.metaproj" (10) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_objectives.vcxproj" (11) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_objectives.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_objectives.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_objectives.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_worst_case_vertex.vcxproj.metaproj" (2) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_worst_case_vertex.vcxproj" (12) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_worst_case_vertex.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_worst_case_vertex.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_worst_case_vertex.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_witness_selector.vcxproj.metaproj" (13) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_witness_selector.vcxproj.metaproj" (13) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verifiers.vcxproj.metaproj" (14) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verifiers.vcxproj.metaproj" (14) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_core.vcxproj.metaproj" (15) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_core.vcxproj.metaproj" (15) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_problem.vcxproj.metaproj" (16) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_problem.vcxproj.metaproj" (16) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_model.vcxproj.metaproj" (17) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_model.vcxproj.metaproj" (17) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_model.vcxproj" (18) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_model.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_model.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_problem.vcxproj.metaproj" (16) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_problem.vcxproj" (19) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_problem.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_problem.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_problem.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_core.vcxproj.metaproj" (15) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_core.vcxproj" (20) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_resolved_core.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_core.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_core.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verifiers.vcxproj.metaproj" (14) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verifiers.vcxproj" (21) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_verifiers.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verifiers.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verifiers.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_witness_selector.vcxproj.metaproj" (13) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_ts01.vcxproj.metaproj" (22) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_ts01.vcxproj.metaproj" (22) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_problem.vcxproj.metaproj" (23) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_problem.vcxproj.metaproj" (23) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_registry.vcxproj.metaproj" (24) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_registry.vcxproj.metaproj" (24) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_registry.vcxproj" (25) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_registry.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_registry.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_registry.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_problem.vcxproj.metaproj" (23) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_problem.vcxproj" (26) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_resolved_problem.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_problem.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_resolved_problem.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_ts01.vcxproj.metaproj" (22) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_ts01.vcxproj" (27) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_strategy_ts01.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_ts01.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_ts01.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_witness_selector.vcxproj.metaproj" (13) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_optimization.vcxproj.metaproj" (28) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_optimization.vcxproj.metaproj" (28) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_optimization.vcxproj" (29) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_optimization.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_optimization.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_optimization.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_witness_selector.vcxproj.metaproj" (13) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_witness_selector.vcxproj" (30) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_witness_selector.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_witness_selector.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_witness_selector.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verification.vcxproj.metaproj" (31) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verification.vcxproj.metaproj" (31) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verification.vcxproj" (32) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_verification.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verification.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_verification.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_terminal_minimizers.vcxproj.metaproj" (33) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_terminal_minimizers.vcxproj.metaproj" (33) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_convex.vcxproj.metaproj" (34) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_convex.vcxproj.metaproj" (34) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_convex.vcxproj" (35) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_convex.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_convex.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_convex.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_terminal_minimizers.vcxproj.metaproj" (33) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_terminal_minimizers.vcxproj" (36) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_terminal_minimizers.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_terminal_minimizers.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_terminal_minimizers.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_b.vcxproj.metaproj" (37) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_b.vcxproj.metaproj" (37) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_execution.vcxproj.metaproj" (38) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_execution.vcxproj.metaproj" (38) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_execution.vcxproj" (39) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_execution.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_execution.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_execution.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_b.vcxproj.metaproj" (37) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_artifacts.vcxproj.metaproj" (40) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_artifacts.vcxproj.metaproj" (40) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_artifacts.vcxproj" (41) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_artifacts.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_artifacts.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_artifacts.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_b.vcxproj.metaproj" (37) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_b.vcxproj" (42) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_strategy_b.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_b.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_b.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_a.vcxproj.metaproj" (43) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_a.vcxproj.metaproj" (43) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_polyhedral.vcxproj.metaproj" (44) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_polyhedral.vcxproj.metaproj" (44) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_polyhedral.vcxproj" (45) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_polyhedral.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_polyhedral.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_polyhedral.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_a.vcxproj.metaproj" (43) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_nominal_forward.vcxproj.metaproj" (46) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_nominal_forward.vcxproj.metaproj" (46) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_nominal_forward.vcxproj" (47) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_nominal_forward.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_nominal_forward.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_nominal_forward.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_a.vcxproj.metaproj" (43) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_control_recovery.vcxproj.metaproj" (48) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_control_recovery.vcxproj.metaproj" (48) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_control_recovery.vcxproj" (49) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_control_recovery.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_control_recovery.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_control_recovery.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_a.vcxproj.metaproj" (43) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_a.vcxproj" (50) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_strategy_a.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_a.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_strategy_a.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_quickhull_2d.vcxproj.metaproj" (51) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_quickhull_2d.vcxproj.metaproj" (51) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_quickhull_2d.vcxproj" (52) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_quickhull_2d.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_quickhull_2d.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_quickhull_2d.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_phase_one.vcxproj.metaproj" (53) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_phase_one.vcxproj.metaproj" (53) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_phase_one.vcxproj" (54) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_phase_one.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_phase_one.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_phase_one.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_input.vcxproj.metaproj" (55) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_input.vcxproj.metaproj" (55) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_input.vcxproj" (56) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_input.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_input.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_input.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_hull.vcxproj.metaproj" (57) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_hull.vcxproj.metaproj" (57) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_hull.vcxproj" (58) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_hull.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_hull.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_hull.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_fixed_plan_disturbance.vcxproj.metaproj" (59) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_fixed_plan_disturbance.vcxproj.metaproj" (59) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_fixed_plan_disturbance.vcxproj" (60) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_fixed_plan_disturbance.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_fixed_plan_disturbance.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_fixed_plan_disturbance.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj.metaproj" (61) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj.metaproj" (61) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_controllers.vcxproj.metaproj" (62) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_controllers.vcxproj.metaproj" (62) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_controllers.vcxproj" (63) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_controllers.dir\Release\csl_controllers.tlog\csl_controllers.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_controllers.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_controllers.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj.metaproj" (61) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj" (64) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_ext04_observed_replay_report.dir\Release\csl_ext0.60527A2F.tlog\csl_ext04_observed_replay_report.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_approximation.vcxproj.metaproj" (65) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_approximation.vcxproj.metaproj" (65) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_approximation.vcxproj" (66) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_approximation.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_approximation.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_approximation.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_application.vcxproj.metaproj" (67) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_application.vcxproj.metaproj" (67) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_application.vcxproj" (68) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_application.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_application.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_application.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_affine_sum.vcxproj.metaproj" (69) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_affine_sum.vcxproj.metaproj" (69) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_affine_sum.vcxproj" (70) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "csl_affine_sum.dir\Release\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_affine_sum.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_affine_sum.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ALL_BUILD.vcxproj.metaproj" (71) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ALL_BUILD.vcxproj.metaproj" (71) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ALL_BUILD.vcxproj" (72) в узле 1 (целевые объекты Clean).
+CoreClean:
+  Создание каталога "x64\Release\ALL_BUILD\".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ALL_BUILD.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ALL_BUILD.vcxproj.metaproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\CSL.sln" завершена (целевые объекты Clean).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:00.81
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" csl_ext04_observed_replay_report.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+Сборка начата 16.10.2026 17:09:54.
+
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj" в узле 1 (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ZERO_CHECK.vcxproj" (2) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+CustomBuild:
+  1>Checking Build System
+FinalizeBuildStatus:
+  Файл "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\ZERO_CHECK.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_contracts.vcxproj" (3) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/ext04-report-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\problem.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\geometry.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\outcomes.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\execution.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\synthesis.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\model.cpp"
+  execution.cpp
+  outcomes.cpp
+  geometry.cpp
+  problem.cpp
+  synthesis.cpp
+  model.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\problem.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\model.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\geometry.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\outcomes.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\execution.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\contracts\synthesis.cpp"
+  problem.cpp
+  outcomes.cpp
+  model.cpp
+  execution.cpp
+  geometry.cpp
+  synthesis.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_contracts.dir\Release\model.obj
+  csl_contracts.dir\Release\problem.obj
+  csl_contracts.dir\Release\geometry.obj
+  csl_contracts.dir\Release\outcomes.obj
+  csl_contracts.dir\Release\execution.obj
+  csl_contracts.dir\Release\synthesis.obj
+  csl_contracts.vcxproj -> D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_contracts.lib
+FinalizeBuildStatus:
+  Файл "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_contracts.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_controllers.vcxproj" (4) в узле 1 (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_controllers.vcxproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_model.vcxproj" (5) в узле 1 (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_model.vcxproj" (5) выполняет сборку "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_numeric.vcxproj" (6) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/ext04-report-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /scanDependencies "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_numeric.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\numeric\data.cpp"
+  data.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_numeric.pdb" /sourceDependencies "csl_numeric.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\numeric\data.cpp"
+  data.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_numeric.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_numeric.dir\Release\data.obj
+  csl_numeric.vcxproj -> D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_numeric.lib
+FinalizeBuildStatus:
+  Файл "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_numeric.vcxproj" завершена (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/ext04-report-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /scanDependencies "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_model.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\model\linear_system.cpp"
+  linear_system.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_model.pdb" /sourceDependencies "csl_model.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\model\linear_system.cpp"
+  linear_system.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_model.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_model.dir\Release\linear_system.obj
+  csl_model.vcxproj -> D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_model.lib
+FinalizeBuildStatus:
+  Файл "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_model.vcxproj" завершена (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_controllers.dir\Release\csl_controllers.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_controllers.dir\Release\csl_controllers.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/ext04-report-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_controllers.dir\Release\\" /scanDependencies "csl_controllers.dir\Release\\" /Fo"csl_controllers.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_controllers.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\controllers\observed_replay.cpp"
+  observed_replay.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_controllers.dir\Release\\" /Fo"csl_controllers.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_controllers.pdb" /sourceDependencies "csl_controllers.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\ext04-report-harness\src\controllers\observed_replay.cpp"
+  observed_replay.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_controllers.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_controllers.dir\Release\observed_replay.obj
+  csl_controllers.vcxproj -> D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_controllers.lib
+FinalizeBuildStatus:
+  Файл "csl_controllers.dir\Release\csl_controllers.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_controllers.dir\Release\csl_controllers.tlog\csl_controllers.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_controllers.vcxproj" завершена (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_ext04_observed_replay_report.dir\Release\csl_ext0.60527A2F.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_ext04_observed_replay_report.dir\Release\csl_ext0.60527A2F.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/ext04-report-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_ext04_observed_replay_report.dir\Release\\" /scanDependencies "csl_ext04_observed_replay_report.dir\Release\\" /Fo"csl_ext04_observed_replay_report.dir\Release\\" /Fd"csl_ext04_observed_replay_report.dir\Release\vc143.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/repo/.worktrees/ext04-report-harness/build/ext04-report/_deps/csl_json-src/include" "D:\work\PhD\repo\.worktrees\ext04-report-harness\benchmarks\reporting\ext04\observed_replay_driver.cpp"
+  observed_replay_driver.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\ext04-report-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_ext04_observed_replay_report.dir\Release\\" /Fo"csl_ext04_observed_replay_report.dir\Release\\" /Fd"csl_ext04_observed_replay_report.dir\Release\vc143.pdb" /sourceDependencies "csl_ext04_observed_replay_report.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/repo/.worktrees/ext04-report-harness/build/ext04-report/_deps/csl_json-src/include" "D:\work\PhD\repo\.worktrees\ext04-report-harness\benchmarks\reporting\ext04\observed_replay_driver.cpp"
+  observed_replay_driver.cpp
+Link:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_ext04_observed_replay_report.exe" /INCREMENTAL:NO /NOLOGO Release\csl_controllers.lib Release\csl_model.lib Release\csl_numeric.lib Release\csl_contracts.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"D:/work/PhD/repo/.worktrees/ext04-report-harness/build/ext04-report/Release/csl_ext04_observed_replay_report.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/work/PhD/repo/.worktrees/ext04-report-harness/build/ext04-report/Release/csl_ext04_observed_replay_report.lib" /MACHINE:X64  /machine:x64 csl_ext04_observed_replay_report.dir\Release\observed_replay_driver.obj
+  csl_ext04_observed_replay_report.vcxproj -> D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\Release\csl_ext04_observed_replay_report.exe
+FinalizeBuildStatus:
+  Файл "csl_ext04_observed_replay_report.dir\Release\csl_ext0.60527A2F.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_ext04_observed_replay_report.dir\Release\csl_ext0.60527A2F.tlog\csl_ext04_observed_replay_report.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\ext04-report-harness\build\ext04-report\csl_ext04_observed_replay_report.vcxproj" завершена (целевые объекты по умолчанию).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:11.10
+
