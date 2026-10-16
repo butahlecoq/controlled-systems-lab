@@ -10,8 +10,8 @@ analytic support. The separate Python validator independently rechecks all
 saved certificate weights with `Fraction.from_float` and the complete batch
 matrix. A changed unit in the last place is rejected.
 
-This is **functional harness evidence only**. No accepted measurement, report
-bundle, performance conclusion or published URL exists for OPT-07 yet. The
+This is **functional harness and saved-data tooling only**. No accepted measurement,
+report bundle, performance conclusion or published URL exists for OPT-07 yet. The
 overflow identity fallback is covered by product tests but excluded from the
 HiGHS timing fixtures because extreme scaling would confound the small report.
 
@@ -76,8 +76,28 @@ fixture, with 100 calls per batch and fresh LP and hull workspaces created
 before each timed batch. Each call retains original point IDs, all removal
 terms and binary64 weights, attempts, counters and support values in raw
 JSONL. Failed process output remains saved. Internal solver phase times,
-pivots and observed OS thread count are unavailable. A later saved-data
-report and publication adapter must summarize the raw rows, preserve all
-failures, build an immutable standalone HTML/ZIP bundle, pass independent
-saved-artifact review, and verify live Pages downloads. No comparison or
-historical runtime assertion follows from these fixtures.
+pivots and observed OS thread count are unavailable. The report builder admits
+only a complete, oracle-verified measurement and never silently filters failed
+or missing rows. A failed collection retains its raw bytes locally for review.
+
+After independent review of genuine saved collection bytes, these saved-only
+commands create and recheck a versioned native bundle and deterministic offline
+source ZIP:
+
+```powershell
+python -B reports/algorithm-results/tooling/opt07/build_bundle.py build `
+  --collection build/opt07-harness/collection-001 `
+  --out-root reports/algorithm-results
+python -B reports/algorithm-results/tooling/opt07/build_bundle.py check `
+  --bundle reports/algorithm-results/opt07-<content-id>
+```
+
+The bundle retains exact raw JSONL and stderr bytes, the sanitized Release log,
+collection provenance including the raw local log hash, all batch outcomes,
+derived CSV/HTML/SVG, and an exact-file manifest. The checker regenerates the
+record and every display from raw bytes without invoking the driver. The
+`opt07-ordered-hull` schema-3 publisher adapter is registered, but no catalogue
+row is added until a genuine measured bundle passes saved-artifact review.
+Independent publication review, main-only Pages deployment, and live URL/ZIP
+verification remain pending. No comparison or historical runtime assertion
+follows from these fixtures.

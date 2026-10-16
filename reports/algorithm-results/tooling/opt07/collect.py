@@ -17,8 +17,12 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 
-from oracle import FIXTURES, require
-from validate import validate_stream
+if __package__:
+    from .oracle import FIXTURES, require
+    from .validate import validate_stream
+else:
+    from oracle import FIXTURES, require
+    from validate import validate_stream
 
 
 def sha256(path: Path) -> str:

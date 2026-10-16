@@ -5,7 +5,10 @@ import argparse
 import json
 from pathlib import Path
 
-from oracle import FIXTURES, require, validate_call
+if __package__:
+    from .oracle import FIXTURES, require, validate_call
+else:
+    from oracle import FIXTURES, require, validate_call
 
 
 def validate_stream(path: Path, purpose: str) -> dict:

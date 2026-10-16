@@ -473,6 +473,29 @@ staged byte-for-byte.
 
 The manifest records the exact staged file inventory and SHA-256 values, including the staged page, figures, evidence files and serialized envelope. The manifest itself is excluded from its own file list. The offline ZIP contains the same envelope and manifest bytes as the staged directory and uses deterministic, uncompressed entries. Schema-1/2 catalogues remain readable under their existing publication path; schema-3 rows require the common envelope metadata. An unknown native payload schema is rejected before output is created.
 
+## OPT-07 ordered hull saved report
+
+`csl.opt07-ordered-hull-report/1` is the native saved-data schema for the
+bounded registered `csl.hull.ordered-membership` strategy. The standalone
+builder under `reports/algorithm-results/tooling/opt07` consumes only a future
+completed `collect.py measure` directory. It rechecks all 2,400 raw call rows
+against literal fixture order/support and exact dyadic deletion certificates,
+then requires one excluded warmup and seven 100-call measured batches for each
+of three clouds. Every batch and status remains in the JSONL and projected CSV;
+missing, failed, or corrupt rows prevent publication instead of being removed
+from the timing distribution. The record derives per-fixture batch median and
+range without treating a 100-call batch as a per-call latency. It retains exact
+raw stdout/stderr, the sanitized Release build log, both raw-local and public
+log hashes, collection provenance, independent validation result, deterministic
+HTML/SVG/CSV, native manifest and source ZIP. The saved-only checker rebuilds
+the record, tables, figure, page and ZIP from those retained bytes.
+
+`opt07-ordered-hull` is registered for the schema-3 Pages publisher; a native
+bundle and catalogue row are pending an independently reviewed genuine
+measurement. The record supports descriptive single-adapter observations only:
+three tiny binary64 clouds, exact certificates for represented coordinates,
+no comparator, source-mapped limiter, historical runtime, or speedup claim.
+
 SYN-02 keeps `csl.syn02-terminal-report/1` and its native `report_id` in
 `records.json`; the schema-3 public ID is derived from the complete validated
 native bundle inventory (manifest-listed files plus `manifest.json`) and the
