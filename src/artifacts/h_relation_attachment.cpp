@@ -42,7 +42,8 @@ bool preflight(const sets::Metadata& m,const sets::HRepresentation& h,HRelationA
  if(rows&&(dim+1)>capacity/rows){return false;}
  std::uint64_t numeric_count=rows*(dim+1);
  if(m.affine_dimension){const auto& evidence=m.affine_dimension->claim.support;const bool ok=std::visit([&](const auto& x){using T=std::decay_t<decltype(x)>;if constexpr(std::is_same_v<T,SymbolicArgument>)return add_text(x.reference)&&add_text(x.assumptions);else if constexpr(std::is_same_v<T,CertificateReference>)return add_text(x.artifact)&&add_text(x.verifier);else if constexpr(std::is_same_v<T,NumericalCheck>)return add_text(x.verifier.value);else if constexpr(std::is_same_v<T,ExactFarkasEvidence>){const auto& c=x.certificate();if(!add_text(c.subject.problem.value)||!add_text(c.subject.program.value))return false;std::uint64_t count=0;for(const auto size:{c.row_lower.size(),c.row_upper.size(),c.variable_lower.size(),c.variable_upper.size()}){if(size>l.max_rows-count)return false;count+=size;}if(count>capacity-numeric_count){return false;}numeric_count+=count;return true;}else return true;},evidence);if(!ok)return false;}
- return numeric_count<=capacity;
+ if(numeric_count>capacity){return false;}
+  return text_bytes<=l.max_bytes-numeric_count*18;
 }
 }
 ArtifactResult<problem::ResolvedContent> encode_h_relation_attachment(const sets::SetData& set,HRelationAttachmentLimits l){
