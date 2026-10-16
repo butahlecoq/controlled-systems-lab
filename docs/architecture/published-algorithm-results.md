@@ -20,6 +20,23 @@ Keep execution, measurement collection, scientific saved records, HTML rendering
 
 Independent review checks mathematical/evidence labels, measurement validity and module boundaries. Verify raw-record/HTML consistency and regeneration, visually inspect the page, and open the deployed URL before claiming publication. The orchestrator publishes the reviewed artifact. Private historical source code and raw archives remain unchanged and are not copied into the report site.
 
+## GEO-07 registered dependent generator sum report
+
+The bounded GEO-07 dependent-sum bundle
+[`geo07-dependent-4dcc5a8fe36f17ed`](../../reports/algorithm-results/geo07-dependent-4dcc5a8fe36f17ed/)
+uses frozen algorithm source `5411e37ad456f0d5b3bf775130f149622ef5ebfa`
+and sealed harness `eef1eda3d326418a392b3cc1e8f8f4b204ca7a73`, whose
+code parent was independently reviewed. Its two public `GeometryPort`
+fixtures check shared factor cancellation, constrained equalities, literal
+physical H references and the existing independent Minkowski rejection.
+The accepted collection contains one excluded warmup and seven alternating
+2,000-call measured batches per fixture. Two earlier rejected attempts and
+their raw bytes remain in the saved bundle. The observations cover the whole
+checked public path on supplied binary64 examples. There is no comparator,
+speedup, source-mapped limiter or validated rounding enclosure; performance
+interpretation is inconclusive. Independent saved report review, main-only
+deployment and live hash verification remain publication gates.
+
 ## GEO-06 QuickHull report
 
 The GEO-06 report uses solver source `ce63bff5a0face88c3c5e977f7d96337e8cbe948`

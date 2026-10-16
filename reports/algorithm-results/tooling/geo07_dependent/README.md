@@ -6,7 +6,8 @@ the public `GeometryPort` registration at version `1.1.0`, sends a typed
 `DependentSum`, executes its workspace, and checks the returned evidence and
 literal factor and physical H references. The existing independent
 `MinkowskiSum` request is tested as a scoped rejection for the same shared-ID
-operands. No accepted numerical measurement or report exists for this harness.
+operands. Its measured result is a separate saved report awaiting independent
+scientific review and publication.
 
 | Fixture | Shared factor relation | Literal physical reference |
 | --- | --- | --- |
@@ -56,7 +57,7 @@ compiler and executable provenance, a manifest and a nonpublishable status.
 Every timeout or process failure retains available raw stdout/stderr and a
 nonpublishable manifest. It never invokes `--measure`.
 
-## Future reviewed collection
+## Reviewed collection protocol
 
 Independent source and harness reviews, exact-head CI and an idle host window
 are prerequisites for collection. After the harness code is reviewed, add
@@ -72,3 +73,41 @@ work. Raw failures remain rejected and reviewable. Accepted rows become saved
 records for independent scientific review, HTML/ZIP rendering, main-only Pages
 deployment and live hash verification under the
 [published-results contract](../../../../docs/architecture/published-algorithm-results.md).
+
+## Saved collection and regeneration
+
+Independent harness reviews cover code commit
+`eaa32fdfdcf42b3f3f3221dd3031d654fe05e576`. Its metadata-only seal child
+`eef1eda3d326418a392b3cc1e8f8f4b204ca7a73` produced the accepted raw
+collection `accepted-003`. The immutable source bundle is
+[`geo07-dependent-4dcc5a8fe36f17ed`](../../geo07-dependent-4dcc5a8fe36f17ed/).
+It contains the complete Release build, description, smoke and trial captures,
+the host observation, all process status/byte hashes, and the two rejected
+attempts under `evidence/`. The first attempt observed three idle MSBuild
+nodes and stopped before measured trials. The second passed its checks but
+1,000-call batches were below the 20 ms admission floor. Their raw output and
+nonpublishable manifests remain available for audit.
+
+The accepted run made one excluded warmup and seven alternating 2,000-call
+measured batches per fixture, with zero observed failures. Its raw trial SHA-256
+is `3cc538611451add4eaef7adcbb5f225bbe668eadb8c32bd9e98de298f85fbc0c`;
+records SHA-256 is `fb4a0bab5953e679ece8e814aeb2a0fcbe68c4816fad3cc097c9e1b48774399c`.
+The saved batches are exploratory observations of this whole checked public
+path. Performance interpretation is inconclusive without a comparator,
+application workload or source-mapped limiter profile.
+
+From this publication branch, regeneration reads saved bytes only:
+
+```powershell
+python -B scripts/reports/geo07_dependent/render_saved.py `
+  --bundle reports/algorithm-results/geo07-dependent-4dcc5a8fe36f17ed --check
+python -B -m unittest tests.reporting.test_geo07_dependent_publication
+python -B scripts/reports/site.py --catalog reports/algorithm-results/catalog.json `
+  --check --out build/geo07-dependent-site
+python -B scripts/reports/stage_geo07_dependent.py `
+  --catalog reports/algorithm-results/geo07-dependent-publications.json `
+  --site build/geo07-dependent-site
+```
+
+The Pages workflow stages the content-bound route only from main. Merge,
+deployment and live URL/hash verification remain pending.

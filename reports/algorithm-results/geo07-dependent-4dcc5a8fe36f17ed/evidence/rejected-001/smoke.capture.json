@@ -1,0 +1,10 @@
+{
+  "command": [
+    "D:\\work\\PhD\\repo\\.worktrees\\issue32-dependent-report\\build\\geo07-dependent-accepted\\Release\\csl_geo07_dependent_report.exe",
+    "--smoke"
+  ],
+  "exit_code": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f7e8966b11907e38058046580dea5cb7f3023f9957543f4d7dfce984ab3bae4e",
+  "timed_out": false
+}
