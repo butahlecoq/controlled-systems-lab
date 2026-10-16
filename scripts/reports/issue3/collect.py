@@ -9,6 +9,7 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import platform
 import subprocess
@@ -22,6 +23,7 @@ ALLOWED_DELTA = {
     "benchmarks/reporting/issue3/finite_catalogue_driver.cpp",
     "scripts/reports/issue3/README.md", "scripts/reports/issue3/check_smoke.py",
     "scripts/reports/issue3/collect.py",
+    "scripts/reports/issue3/test_capture.py",
 }
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
 import collector_common as common
@@ -38,6 +40,37 @@ def digest(path: Path) -> str:
 def save(path: Path, value: dict) -> None:
     common.durable_text(path, json.dumps(value, indent=2, sort_keys=True,
                                          ensure_ascii=False, allow_nan=False) + "\n")
+
+
+def durable_bytes(path: Path, value: bytes) -> None:
+    with path.open("wb") as stream:
+        stream.write(value)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def capture(command: list[str], out: Path, name: str,
+            timeout_seconds: int) -> tuple[bytes, bytes, int, bool]:
+    """Retain complete or partial process bytes and status before interpreting them."""
+    try:
+        completed = subprocess.run(command, cwd=ROOT, capture_output=True,
+                                   timeout=timeout_seconds, check=False)
+        stdout, stderr, code, timed_out = (completed.stdout, completed.stderr,
+                                           completed.returncode, False)
+    except subprocess.TimeoutExpired as error:
+        stdout = error.stdout or b""
+        stderr = error.stderr or b""
+        code, timed_out = 124, True
+    except OSError as error:
+        stdout, stderr, code, timed_out = b"", str(error).encode(), 127, False
+    durable_bytes(out / f"{name}.stdout", stdout)
+    durable_bytes(out / f"{name}.stderr", stderr)
+    save(out / f"{name}.process.json", {
+        "schema": "csl.issue3-process-capture/1", "command": command,
+        "return_code": code, "timed_out": timed_out,
+        "stdout_sha256": hashlib.sha256(stdout).hexdigest(),
+        "stderr_sha256": hashlib.sha256(stderr).hexdigest()})
+    return stdout, stderr, code, timed_out
 
 
 def admission(args: argparse.Namespace) -> tuple[str, Path, Path]:
@@ -72,19 +105,15 @@ def authenticate_build(args: argparse.Namespace, head: str, build: Path, exe: Pa
     configure = [str(args.cmake), "-S", str(ROOT), "-B", str(build),
                  "-DCSL_BUILD_ISSUE3_REPORT=ON", "-DCSL_ENABLE_HIGHS=OFF",
                  "-DCSL_ENABLE_QHULL=OFF"]
-    with (out / "configure.stdout.txt").open("wb") as stdout, \
-         (out / "configure.stderr.txt").open("wb") as stderr:
-        completed = subprocess.run(configure, cwd=ROOT, stdout=stdout, stderr=stderr,
-                                   timeout=600, check=False)
-    if completed.returncode:
+    _, _, configure_code, configure_timeout = capture(configure, out, "configure", 600)
+    if configure_code or configure_timeout:
         raise ValueError("fresh CMake configure failed; output retained")
 
     def build_command(command: list[str]) -> tuple[str, str, int, bool]:
-        completed = subprocess.run([str(args.cmake), *command[1:]], cwd=ROOT,
-                                   capture_output=True, timeout=600, check=False)
-        return (completed.stdout.decode("utf-8", errors="replace"),
-                completed.stderr.decode("utf-8", errors="replace"),
-                completed.returncode, False)
+        stdout, stderr, code, timed_out = capture(
+            [str(args.cmake), *command[1:]], out, "fresh-build", 600)
+        return (stdout.decode("utf-8", errors="replace"),
+                stderr.decode("utf-8", errors="replace"), code, timed_out)
 
     common.fresh_release_build(build, TARGET, out / "fresh-build.json", ROOT,
                                source_commit=SOURCE, harness_commit=head,
@@ -96,28 +125,26 @@ def authenticate_build(args: argparse.Namespace, head: str, build: Path, exe: Pa
                   "csl_worst_case_vertex", "csl_objectives", "csl_sets",
                   "csl_model", "csl_resolved_core"})
     save(out / "build-graph.json", graph)
-    smoke = subprocess.run([str(exe), "--smoke"], cwd=ROOT, capture_output=True,
-                           timeout=60, check=False)
-    (out / "smoke.stdout.jsonl").write_bytes(smoke.stdout)
-    (out / "smoke.stderr.txt").write_bytes(smoke.stderr)
-    if smoke.returncode or smoke.stderr:
+    smoke_stdout, smoke_stderr, smoke_code, smoke_timeout = capture(
+        [str(exe), "--smoke"], out, "smoke", 60)
+    if smoke_code or smoke_timeout or smoke_stderr:
         raise ValueError("fresh executable smoke failed; raw output retained")
-    rows = [json.loads(line) for line in smoke.stdout.splitlines()]
+    rows = [json.loads(line) for line in smoke_stdout.splitlines()]
     if len(rows) != 8 or any(row.get("source_commit") != SOURCE or
                              row.get("harness_commit") != head for row in rows):
         raise ValueError("fresh executable embedded source/harness IDs differ")
     fixture_hash = digest(ROOT / "benchmarks/reporting/issue3/finite_catalogue_driver.cpp")
     if any(row.get("fixture_sha256") != fixture_hash for row in rows):
         raise ValueError("embedded fixture SHA-256 differs from actual driver source")
-    checked = subprocess.run([sys.executable,
+    checked_stdout, checked_stderr, checked_code, checked_timeout = capture([sys.executable,
         str(ROOT / "scripts/reports/issue3/check_smoke.py"), str(exe)],
-        cwd=ROOT, capture_output=True, timeout=60, check=False)
-    (out / "smoke-check.stdout.txt").write_bytes(checked.stdout)
-    (out / "smoke-check.stderr.txt").write_bytes(checked.stderr)
-    if checked.returncode:
+        out, "smoke-check", 60)
+    if checked_code or checked_timeout or checked_stderr:
         raise ValueError("independent literal smoke check failed")
     return {"schema": "csl.issue3-preflight/1", "source_commit": SOURCE,
-            "harness_commit": head, "source_tree": run("git", "rev-parse", "HEAD^{tree}"),
+            "harness_commit": head,
+            "source_tree": run("git", "rev-parse", f"{SOURCE}^{{tree}}"),
+            "harness_tree": run("git", "rev-parse", "HEAD^{tree}"),
             "fixture_sha256": fixture_hash, "binary_sha256": digest(exe),
             "build_graph_sha256": digest(out / "build-graph.json"),
             "fresh_build_sha256": digest(out / "fresh-build.json"),
@@ -214,17 +241,8 @@ def main() -> None:
         if args.preflight_only:
             print("preflight only; no measured calls", out)
             return
-        with (out / "accepted.stdout.jsonl").open("wb") as stdout, \
-             (out / "accepted.stderr.txt").open("wb") as stderr:
-            try:
-                completed = subprocess.run([str(exe), "--measure", "7"], cwd=ROOT,
-                                           stdout=stdout, stderr=stderr,
-                                           timeout=1800, check=False)
-                return_code, timed_out = completed.returncode, False
-            except subprocess.TimeoutExpired:
-                return_code, timed_out = None, True
-        raw = (out / "accepted.stdout.jsonl").read_bytes()
-        errors = (out / "accepted.stderr.txt").read_bytes()
+        raw, errors, return_code, timed_out = capture(
+            [str(exe), "--measure", "7"], out, "accepted", 1800)
         capture = {"schema": "csl.issue3-process-capture/1", "return_code": return_code,
                    "timed_out": timed_out, "stdout_sha256": hashlib.sha256(raw).hexdigest(),
                    "stderr_sha256": hashlib.sha256(errors).hexdigest(),
@@ -233,7 +251,7 @@ def main() -> None:
         if return_code or timed_out or errors:
             raise ValueError("measured child failed; raw stdout/stderr retained")
         smoke_rows = [json.loads(line) for line in
-                      (out / "smoke.stdout.jsonl").read_bytes().splitlines()]
+                      (out / "smoke.stdout").read_bytes().splitlines()]
         rows = validate_rows(raw, head, provenance["fixture_sha256"], smoke_rows)
         if run("git", "rev-parse", "HEAD") != head or run("git", "status", "--porcelain", "--untracked-files=all"):
             raise ValueError("source changed during collection")

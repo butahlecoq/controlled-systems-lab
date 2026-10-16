@@ -6,6 +6,7 @@
 #include <cmath>
 #include <iostream>
 #include <span>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -160,7 +161,7 @@ json cancelled_case() {
     return {{"status","stopped"},{"reason","cancelled"}};
 }
 
-json b08() {
+FiniteActionMinimaxRequest b08_request() {
     const SystemModel authored{{{4,1,2},TimeDomain::discrete,
         LinearStage{{4,4,{1,0,0,0,-25,1,0,0,0,0,1,0,0,0,-25,1}},
                     {4,1,{20.073,0,-10.473,0}},
@@ -180,9 +181,13 @@ json b08() {
         safe_sets.push_back(take(sets::make_universal({{"b08-safe"+std::to_string(stage)},4,{}})));
     const auto objective=std::get<Objective>(snapshot(ResidualNormTerminal{
         {4,4,{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}},{1200,0,450,0}}));
-    const FiniteActionMinimaxRequest input{{"b08-displayed-rounded"},{"issue3-report-b08"},
+    return {{"b08-displayed-rounded"},{"issue3-report-b08"},
         system,initial,{1,{{0.6},{0.3},{0},{-0.3},{-0.6}}},
         disturbances,safe_sets,objective};
+}
+
+json b08() {
+    const auto input=b08_request();
     const auto outcome=finite_action_minimax(input,{625,256,1e-8});
     if(!std::holds_alternative<FiniteMinimaxOptimal>(outcome))
         throw std::runtime_error("B08 whole-catalogue outcome mismatch");
@@ -250,7 +255,27 @@ json details(std::string_view name) {
                 {"objective",quadratic},{"pre_cancelled",name=="cancelled"}}},
             {"expected",expected}};
     }
-    if(name=="b08_rounded") return {
+    if(name=="b08_rounded") {
+        const auto input=b08_request();
+        json vertices=json::array();
+        for(const auto& disturbance:input.disturbances) {
+            const auto representation=disturbance.representation();
+            if(!std::holds_alternative<sets::VRepresentation>(representation))
+                throw std::runtime_error("B08 input description lost V representation");
+            const auto& matrix=std::get<sets::VRepresentation>(representation).vertices;
+            json stage=json::array();
+            for(std::size_t row=0;row<matrix.rows();++row) {
+                json coordinate=json::array();
+                for(std::size_t column=0;column<matrix.cols();++column) {
+                    std::ostringstream stream;
+                    stream<<std::hexfloat<<matrix(row,column);
+                    coordinate.push_back(stream.str());
+                }
+                stage.push_back(std::move(coordinate));
+            }
+            vertices.push_back(std::move(stage));
+        }
+        return {
         {"problem_id","b08-displayed-rounded"},{"request_id","issue3-report-b08"},
         {"limits",{{"max_plans",625},{"max_points_per_stage",256},
                    {"near_optimal_tolerance",1e-8}}},
@@ -262,13 +287,15 @@ json details(std::string_view name) {
                               {"initial",{1182.074,119560,459.832,45260}},
                               {"horizon",4}}},
             {"actions",{{0.6},{0.3},{0},{-0.3},{-0.6}}},
-            {"disturbance_halfwidths",{{0.1,0.1},{0.2,0.4},{0.3,0.7},{0.4,1.0}}},
+            {"authored_disturbance_halfwidths",{{0.1,0.1},{0.2,0.4},{0.3,0.7},{0.4,1.0}}},
+            {"disturbance_vertices_binary64_hex",vertices},
             {"safe","universal"},{"objective",{{"type","residual_norm_terminal"},
                 {"C",{{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}},
                 {"target",{1200,0,450,0}}}}}},
         {"expected",{{"status","numerical_optimal"},{"value",67.150601101407},
             {"plan_count",625},{"evaluated_vertices",160000},
             {"minimizing_plan_indices",{17,33,129}}}}};
+    }
     throw std::runtime_error("unknown fixture metadata");
 }
 

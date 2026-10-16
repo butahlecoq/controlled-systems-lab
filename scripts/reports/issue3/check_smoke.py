@@ -63,6 +63,12 @@ def main() -> None:
     }
     assert by_fixture["cancelled"]["result"] == {"status": "stopped", "reason": "cancelled"}
     b08 = by_fixture["b08_rounded"]["result"]
+    b08_input = json.loads(by_fixture["b08_rounded"]["input_canonical"])
+    vertices = b08_input["disturbance_vertices_binary64_hex"]
+    assert len(vertices) == 4
+    assert vertices[2][0][0] == float.hex(-(0.1 + 0.1 * 2))
+    assert vertices[2][0][0] != float.hex(-0.3)
+    assert vertices[3][0][1] == float.hex(-(0.1 + 0.3 * 3))
     assert b08["status"] == "numerical_optimal"
     assert b08["plan_count"] == 625
     assert b08["evaluated_vertices"] == 160000
