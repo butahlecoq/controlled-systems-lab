@@ -29,7 +29,9 @@ and harness trees, Release/C++20/NDEBUG build graph, process success and empty
 stderr; verifies all ordered fixture rounds, work counts, canonical input
 hashes and literal scientific outcomes; and reconstructs the record, CSV, SVG
 and HTML byte for byte. The schema-3 site stage verifies the committed offline
-ZIP against the generated publication and its catalogue SHA-256.
+ZIP against the generated publication and its catalogue SHA-256. The immutable
+public route binds every native file digest and the LF-normalized SHA-256 of
+the publisher module; changing publication code creates a new route.
 
 Each figure/table duration is a **batch** interval. L19 uses 10,000 checked
 calls, each small status fixture uses 5,000, and B08 uses one whole 625-plan,
