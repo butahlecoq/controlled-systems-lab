@@ -1,0 +1,597 @@
+{
+  "build_graph_sha256": "36e14649764300d64e5c7d3b6a7f8429fa84ac6ae7c02fb4facfbd22ebcafdbf",
+  "collection_end_utc": "2026-10-16T16:32:31.8731271Z",
+  "collection_start_utc": "2026-10-16T16:32:31.8664759Z",
+  "environment": {
+    "actual_outer_workers": 1,
+    "arithmetic": "finite integer table indices and Boolean policy; steady-clock nanoseconds",
+    "compiler": "MSVC 19.44.35215.0",
+    "configuration": "Release",
+    "host_post": {
+      "concurrent_build_processes": [
+        {
+          "CPU": 12.84375,
+          "Id": 816,
+          "ProcessName": "MSBuild"
+        },
+        {
+          "CPU": 11.25,
+          "Id": 8996,
+          "ProcessName": "MSBuild"
+        },
+        {
+          "CPU": 10.640625,
+          "Id": 12692,
+          "ProcessName": "MSBuild"
+        }
+      ],
+      "cpu": {
+        "Name": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "NumberOfCores": 6,
+        "NumberOfLogicalProcessors": 12
+      },
+      "note": "Concurrent repository work may influence exploratory timings.",
+      "observed_utc": "2026-10-16T16:32:31.8731271Z",
+      "os": {
+        "Caption": "Майкрософт Windows 11 Домашняя",
+        "FreePhysicalMemory": 15075344,
+        "TotalVisibleMemorySize": 33387800,
+        "Version": "10.0.22631"
+      },
+      "schema": "csl.finite-feedback-host-observation/1"
+    },
+    "host_pre": {
+      "concurrent_build_processes": [
+        {
+          "CPU": 12.84375,
+          "Id": 816,
+          "ProcessName": "MSBuild"
+        },
+        {
+          "CPU": 11.25,
+          "Id": 8996,
+          "ProcessName": "MSBuild"
+        },
+        {
+          "CPU": 10.640625,
+          "Id": 12692,
+          "ProcessName": "MSBuild"
+        }
+      ],
+      "cpu": {
+        "Name": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "NumberOfCores": 6,
+        "NumberOfLogicalProcessors": 12
+      },
+      "note": "Other repository agents were active; concurrent build processes observed. Timings are descriptive and inconclusive.",
+      "observed_utc": "2026-10-16T16:32:30.6817302Z",
+      "os": {
+        "Caption": "Майкрософт Windows 11 Домашняя",
+        "FreePhysicalMemory": 15087364,
+        "TotalVisibleMemorySize": 33387800,
+        "Version": "10.0.22631"
+      },
+      "schema": "csl.finite-feedback-host-observation/1"
+    },
+    "native_thread_unavailable_reason": "driver does not observe OS native thread count",
+    "observed_native_threads": null,
+    "order": "seven round-robin repetitions with rotating first fixture",
+    "requested_native_threads": 1,
+    "requested_outer_workers": 1,
+    "reuse": "one process; fresh registry, prepared plan, and workspace per call",
+    "warmup": "one excluded call per fixture; process/cache state may be warm"
+  },
+  "executable_sha256": "5c1fce3255fd0c900c366ff2c60cd1fc76f5aa6fefaf2a76f43e1604f2888859",
+  "fixture_oracle": {
+    "branching": {
+      "branch_actions": "1:0|2:1",
+      "initial_actions": "0",
+      "initial_winning": "1"
+    },
+    "clipping": {
+      "branch_actions": "",
+      "initial_actions": "",
+      "initial_winning": "0"
+    },
+    "empty-action": {
+      "branch_actions": "",
+      "initial_actions": "",
+      "initial_winning": "0"
+    },
+    "nominal": {
+      "branch_actions": "",
+      "initial_actions": "0",
+      "initial_winning": "1"
+    }
+  },
+  "harness_commit": "6602f0f88a8ef2071edefbbd913f7c4bbb6201df",
+  "interpretation": "Inconclusive exploratory single-adapter timings; no competitor, speedup, source-mapped limiter, continuous-state or physical-model claim.",
+  "payload_sha256": "bee7e6d32c88451d256539dd0e1d0eea40d7c1f03b715124a0adf49c93bf5d7f",
+  "raw_csv_sha256": "562317b6b869250ad61a537ad09696458b3e6a5f45651dcd11227dbc48932522",
+  "report_id": "finite-feedback-bee7e6d32c88451d",
+  "schema": "csl.finite-feedback-records/1",
+  "source_commit": "6602f0f88a8ef2071edefbbd913f7c4bbb6201df",
+  "source_sha256": {
+    "benchmarks/reporting/finite_feedback/driver.cpp": "51d5576831d3e6109bd830026240423c15a0d2db89de41e7f9725f21aee4fea9",
+    "cmake/OptionalReports.cmake": "6de76ac59b352a1175f65b8c4fdfdce145996beecdf19fc09fb150249af67f3f",
+    "include/csl/reachability/finite_feedback_port.hpp": "225a87ba9019fcd23ae1be25276a5308da2f44d0e331d62d6ad5081af3f82e04",
+    "src/reachability/finite_feedback.cpp": "98d39d009f7671f3b5a3c8faea74c9dd72f4ccffb779556e7ade7d2aaa998692",
+    "src/reachability/finite_feedback_port.cpp": "30d0c01b9f373e67b6bb181f6d8b8f481dc3c7ca6e7075e611752ea888fc3ccb"
+  },
+  "summary": [
+    {
+      "attempts": 7,
+      "failures": 0,
+      "matches": 7,
+      "max_ns": 4500,
+      "median_ns": 3900,
+      "min_ns": 3800,
+      "scenario": "clipping"
+    },
+    {
+      "attempts": 7,
+      "failures": 0,
+      "matches": 7,
+      "max_ns": 5400,
+      "median_ns": 5000,
+      "min_ns": 4800,
+      "scenario": "branching"
+    },
+    {
+      "attempts": 7,
+      "failures": 0,
+      "matches": 7,
+      "max_ns": 3900,
+      "median_ns": 3600,
+      "min_ns": 3500,
+      "scenario": "empty-action"
+    },
+    {
+      "attempts": 7,
+      "failures": 0,
+      "matches": 7,
+      "max_ns": 6800,
+      "median_ns": 3800,
+      "min_ns": 3700,
+      "scenario": "nominal"
+    }
+  ],
+  "timing": {
+    "clock": "std::chrono::steady_clock",
+    "internal_phases": null,
+    "interval": "before registry construction through registered execution, full-policy reference comparison, and literal oracle; excludes fixture construction, destruction, CSV serialization, and process startup",
+    "measured_repetitions_per_fixture": 7,
+    "native_only_time": null,
+    "unavailable_reason": "frozen public driver exposes only the whole verified call interval",
+    "unit": "ns",
+    "warmups": 4
+  },
+  "trials": [
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "14200",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "warmup",
+      "repetition": "0",
+      "scenario": "clipping",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "1:0|2:1",
+      "detail": "",
+      "elapsed_ns": "9100",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "warmup",
+      "repetition": "0",
+      "scenario": "branching",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "4400",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "warmup",
+      "repetition": "0",
+      "scenario": "empty-action",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "4300",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "warmup",
+      "repetition": "0",
+      "scenario": "nominal",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "4500",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "0",
+      "scenario": "clipping",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "1:0|2:1",
+      "detail": "",
+      "elapsed_ns": "5400",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "0",
+      "scenario": "branching",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3700",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "0",
+      "scenario": "empty-action",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "4000",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "0",
+      "scenario": "nominal",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "1:0|2:1",
+      "detail": "",
+      "elapsed_ns": "5400",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "1",
+      "scenario": "branching",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3600",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "1",
+      "scenario": "empty-action",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3800",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "1",
+      "scenario": "nominal",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "4000",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "1",
+      "scenario": "clipping",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3900",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "2",
+      "scenario": "empty-action",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3700",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "2",
+      "scenario": "nominal",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3900",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "2",
+      "scenario": "clipping",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "1:0|2:1",
+      "detail": "",
+      "elapsed_ns": "5000",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "2",
+      "scenario": "branching",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "6800",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "3",
+      "scenario": "nominal",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3800",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "3",
+      "scenario": "clipping",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "1:0|2:1",
+      "detail": "",
+      "elapsed_ns": "4800",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "3",
+      "scenario": "branching",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3600",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "3",
+      "scenario": "empty-action",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "4200",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "4",
+      "scenario": "clipping",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "1:0|2:1",
+      "detail": "",
+      "elapsed_ns": "4800",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "4",
+      "scenario": "branching",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3500",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "4",
+      "scenario": "empty-action",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3800",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "4",
+      "scenario": "nominal",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "1:0|2:1",
+      "detail": "",
+      "elapsed_ns": "5100",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "5",
+      "scenario": "branching",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3500",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "5",
+      "scenario": "empty-action",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3900",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "5",
+      "scenario": "nominal",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3800",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "5",
+      "scenario": "clipping",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3900",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "6",
+      "scenario": "empty-action",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3800",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "6",
+      "scenario": "nominal",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "",
+      "detail": "",
+      "elapsed_ns": "3800",
+      "initial_actions": "",
+      "initial_winning": "0",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "6",
+      "scenario": "clipping",
+      "status": "passed"
+    },
+    {
+      "branch_actions": "1:0|2:1",
+      "detail": "",
+      "elapsed_ns": "4800",
+      "initial_actions": "0",
+      "initial_winning": "1",
+      "provider_id": "csl.reachability.finite-feedback-table",
+      "provider_version": "1.0.0",
+      "purpose": "trial",
+      "repetition": "6",
+      "scenario": "branching",
+      "status": "passed"
+    }
+  ],
+  "work": {
+    "cancelled": 0,
+    "failed": 0,
+    "matched": 28,
+    "measured_registered_calls": 28,
+    "missing": 0,
+    "smoke_calls": 4,
+    "unsupported": 0,
+    "warmup_calls": 4
+  }
+}

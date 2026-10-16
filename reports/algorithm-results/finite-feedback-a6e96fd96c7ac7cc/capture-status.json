@@ -1,0 +1,93 @@
+{
+  "build_end_utc": "2026-10-16T16:41:50.440098+00:00",
+  "build_start_utc": "2026-10-16T16:41:19.839596+00:00",
+  "commands": {
+    "build": [
+      "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "--build",
+      "D:\\work\\PhD\\repo\\.worktrees\\issue5-saved-report\\build\\finite-feedback-clean-002",
+      "--config",
+      "Release",
+      "--target",
+      "csl_finite_feedback_report",
+      "--parallel",
+      "4",
+      "--verbose"
+    ],
+    "configure": [
+      "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "-S",
+      "D:\\work\\PhD\\repo\\.worktrees\\issue5-saved-report",
+      "-B",
+      "D:\\work\\PhD\\repo\\.worktrees\\issue5-saved-report\\build\\finite-feedback-clean-002",
+      "-G",
+      "Visual Studio 17 2022",
+      "-A",
+      "x64",
+      "-DCSL_BUILD_FINITE_FEEDBACK_REPORT=ON",
+      "-DCSL_ENABLE_HIGHS=OFF",
+      "-DCSL_ENABLE_QHULL=OFF",
+      "-DBUILD_TESTING=OFF"
+    ],
+    "measure": [
+      "csl_finite_feedback_report.exe",
+      "--measure",
+      "7"
+    ],
+    "smoke": [
+      "csl_finite_feedback_report.exe",
+      "--smoke"
+    ]
+  },
+  "configure_start_utc": "2026-10-16T16:41:12.524792+00:00",
+  "executable_sha256_after": "9caffb4aa5be3c73868258a79e01f94a72c90cb5116973496f0a00eac04b0e1d",
+  "executable_sha256_before": "9caffb4aa5be3c73868258a79e01f94a72c90cb5116973496f0a00eac04b0e1d",
+  "executable_size_bytes": 113664,
+  "failure": null,
+  "host_post": {
+    "concurrent_work": "Other repository work may be active; single-session timings are exploratory.",
+    "logical_processors": 12,
+    "observed_utc": "2026-10-16T16:41:50.517017+00:00",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "schema": "csl.finite-feedback-host-observation/2"
+  },
+  "host_pre": {
+    "concurrent_work": "Other repository work may be active; single-session timings are exploratory.",
+    "logical_processors": 12,
+    "observed_utc": "2026-10-16T16:41:50.440420+00:00",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "schema": "csl.finite-feedback-host-observation/2"
+  },
+  "measure_end_utc": "2026-10-16T16:41:50.517003+00:00",
+  "measure_start_utc": "2026-10-16T16:41:50.510575+00:00",
+  "postrun": {
+    "commit": "d0da7cb3b167f21e620b716b615e7b77cf5bd7aa",
+    "git_version": "git version 2.51.2.windows.1",
+    "observed_utc": "2026-10-16T16:41:50.598562+00:00",
+    "schema": "csl.finite-feedback-clean-tree-receipt/1",
+    "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tracked_count": 1438,
+    "tree": "9312c4bdb889814bf3cd1f930e9c2c68f8af6510"
+  },
+  "prebuild": {
+    "commit": "d0da7cb3b167f21e620b716b615e7b77cf5bd7aa",
+    "git_version": "git version 2.51.2.windows.1",
+    "observed_utc": "2026-10-16T16:41:12.486811+00:00",
+    "schema": "csl.finite-feedback-clean-tree-receipt/1",
+    "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tracked_count": 1438,
+    "tree": "9312c4bdb889814bf3cd1f930e9c2c68f8af6510"
+  },
+  "return_codes": {
+    "build": 0,
+    "configure": 0,
+    "measure": 0,
+    "smoke": 0
+  },
+  "schema": "csl.finite-feedback-capture/2",
+  "source_commit": "d0da7cb3b167f21e620b716b615e7b77cf5bd7aa",
+  "source_tree": "9312c4bdb889814bf3cd1f930e9c2c68f8af6510",
+  "state": "captured"
+}

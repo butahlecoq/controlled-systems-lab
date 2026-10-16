@@ -1,0 +1,5 @@
+purpose,scenario,repetition,status,initial_winning,initial_actions,branch_actions,elapsed_ns,provider_id,provider_version,detail
+smoke,clipping,0,passed,0,,,23600,csl.reachability.finite-feedback-table,1.0.0,
+smoke,branching,0,passed,1,0,1:0|2:1,8300,csl.reachability.finite-feedback-table,1.0.0,
+smoke,empty-action,0,passed,0,,,3600,csl.reachability.finite-feedback-table,1.0.0,
+smoke,nominal,0,passed,1,0,,4000,csl.reachability.finite-feedback-table,1.0.0,

@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/geometry/approximation.hpp>
 #include <csl/sets/data.hpp>
+#include <limits>
 
 using namespace csl;
 using namespace csl::geometry::approximation;
@@ -19,6 +20,12 @@ SetHandle set(const char* kind, const char* id, const char* coordinate="x") {
     auto view=numeric::snapshot_vector(point);
     REQUIRE(std::holds_alternative<numeric::VectorView>(view));
     return take(sets::make_singleton(description,std::get<numeric::VectorView>(view))).as_handle();
+}
+SetHandle point_set(const char* id, double value, const char* coordinate="x") {
+    auto point=numeric::snapshot_vector(Vector{value});
+    REQUIRE(std::holds_alternative<numeric::VectorView>(point));
+    return take(sets::make_singleton({{id},1,{coordinate}},
+        std::get<numeric::VectorView>(point))).as_handle();
 }
 SetHandle two_points(const char* id) {
     const auto vertices=numeric::snapshot(Matrix{2,1,{0.0,1.0}});
@@ -145,6 +152,75 @@ TEST_CASE("dropping an H equality supports only the outer direction") {
     outcome=execute(provider(query,output,SetRelation::inner,SetRelation::inner),query);
     REQUIRE(std::holds_alternative<Unsupported>(outcome));
     CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
+}
+
+TEST_CASE("a singleton satisfying every H row is an admitted inner enclosure") {
+    auto input=h_set("reference",{1.0,-1.0},{2.0,1.0},{1.0},{0.0});
+    auto output=point_set("inner",0.0);
+    auto query=request(input,SetRelation::inner,output.metadata.representation);
+    query.size_budget=1;
+    auto outcome=execute(provider(query,output,SetRelation::inner,SetRelation::inner),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::h_point_containment);
+
+    output=point_set("outside",1.0);
+    query=request(input,SetRelation::inner,output.metadata.representation);
+    outcome=execute(provider(query,output,SetRelation::inner,SetRelation::inner),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
+}
+
+TEST_CASE("H rows containing the reference singleton are an admitted outer enclosure") {
+    auto input=point_set("reference",1.0);
+    auto output=h_set("outer",{1.0,-1.0},{2.0,-1.0});
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    auto outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::h_point_containment);
+
+    output=h_set("outside",{1.0},{0.0});
+    query=request(input,SetRelation::outer,output.metadata.representation);
+    outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
+}
+
+TEST_CASE("H point containment uses exact stored binary64 values and ordered coordinates") {
+    auto input=point_set("reference",0.3);
+    auto output=h_set("rounded",{0.1},{0.03});
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    auto outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
+
+    output=h_set("relabeled",{1.0},{1.0},{},{},"y");
+    query=request(input,SetRelation::outer,output.metadata.representation);
+    outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
+}
+
+TEST_CASE("exact H point check survives cancellation beyond floating point range") {
+    const double huge=std::numeric_limits<double>::max();
+    auto point=numeric::snapshot_vector(Vector{huge,huge});
+    auto rows=numeric::snapshot(Matrix{1,2,{huge,-huge}});
+    auto bounds=numeric::snapshot_vector(Vector{0.0});
+    auto no_rows=numeric::snapshot(Matrix{0,2,{}});
+    auto no_values=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::VectorView>(point));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rows));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(no_rows));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(no_values));
+    auto input=take(sets::make_singleton({{"reference"},2,{"x","y"}},
+        std::get<numeric::VectorView>(point))).as_handle();
+    auto output=take(sets::make_h({{"outer"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(rows),std::get<numeric::VectorView>(bounds),
+         std::get<numeric::MatrixView>(no_rows),std::get<numeric::VectorView>(no_values)})).as_handle();
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    auto outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::h_point_containment);
 }
 
 TEST_CASE("an enclosure cannot change the native coordinate system") {
