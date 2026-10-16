@@ -127,8 +127,10 @@ def generated(record: dict) -> dict[str, bytes]:
     host = record["environment"]["host_pre"]
     html = ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" '
             'content="width=device-width,initial-scale=1"><title>Finite feedback registered-port results</title>'
-            '<style>body{font:16px/1.5 system-ui,sans-serif;max-width:70rem;margin:auto;padding:2rem;color:#172033}'
-            'table{border-collapse:collapse;width:100%}th,td{border:1px solid #b7c2ce;padding:.45rem;text-align:left}'
+            '<style>body{font:16px/1.5 system-ui,sans-serif;max-width:70rem;box-sizing:border-box;'
+            'margin:auto;padding:1rem;color:#172033}'
+            'table{border-collapse:collapse;display:block;max-width:100%;overflow-x:auto}'
+            'th,td{border:1px solid #b7c2ce;padding:.45rem;text-align:left}'
             'th{background:#eef3f8}code{overflow-wrap:anywhere}img{max-width:100%}</style></head><body>'
             '<h1>Finite feedback: verified registered-port calls</h1><p><strong>Verdict:</strong> '
             'inconclusive exploratory single-adapter timings. No comparator or speedup is claimed.</p>'
