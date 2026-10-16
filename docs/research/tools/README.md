@@ -20,6 +20,8 @@ The characterization script executes selected archived definitions, bypassing de
 
 The [B08 displayed-data exact audit](../b08-displayed-exact-audit.md) adds an independent standard-library rational reference for those **printed** coefficients and action bounds. Run `python -B -O docs/research/tools/check_b08_displayed_exact.py --verify-record docs/research/evidence/b08-displayed-exact.json`. Its exact squared value and three minimizers are checked against literals, including under optimized Python; the saved record is recomputed and compared. It does not alter the older NumPy artifact or claim the unpublished MATLAB arrays.
 
+The [L13 displayed-decimal criterion audit](../l13-displayed-criterion-audit.md) computes the printed Euclidean and A09 synchronization-augmented squared norms for all four non-reference Table 2 states with exact fractions. Run `python -B -O docs/research/tools/check_l13_displayed_criteria.py` and `python -B -O docs/research/tools/test_l13_displayed_criteria.py`. The literal tests check all four reported rows and an independent input. The A09 formula is a candidate comparison, not a reconstruction of the published run.
+
 ~~~text
 python docs/research/tools/verify_docs.py
 ~~~
