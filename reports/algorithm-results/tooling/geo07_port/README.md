@@ -114,3 +114,53 @@ provenance and a SHA-256 manifest are saved under the new collection path.
 Scientific review, deterministic rendering and ZIP, catalogue registration,
 main-only deployment and live Pages verification are later gates under
 [`published-algorithm-results.md`](../../../../docs/architecture/published-algorithm-results.md).
+
+## Accepted saved collection and publication source
+
+Independent saved-record audits accepted `collection-002`, report ID
+`geo07-port-4dee19cde3d50259`, from frozen source
+`41b4b58f2ef982e75554519862afdd803e30f717` and sealed harness
+`95ba77d3fb2077ec3f56c8fe68903eb18f26488a`. The committed report
+directory carries every native collector file byte-for-byte, including its
+native manifest, plus a separate immediately-after-run host observation.
+The raw JSONL SHA-256 is
+`41649b7f4acde2c0e980b7c648358d9d217f68e3e5ec9c103f25173e7ab0d39e`;
+the records SHA-256 is
+`e197ee1852fdb49b3b9180e0a7bfee3004cbb5bb000cf3f175f5ba22b61a5cb1`;
+the post-run host note SHA-256 is
+`dff519dc043fe14cd451f919315a9eee34f00a919e979fba46be809a71548c8a`.
+
+All 24 saved batches passed literal checks: one excluded warmup and seven
+measured batches per fixture, 5,000 checked fresh calls per batch, 120,000
+checked calls overall and zero failures. The verified-batch medians/ranges in
+milliseconds are affine image `57.405 [56.795, 58.241]`, constrained sum
+`69.538 [68.830, 74.891]`, and V conversion `83.050 [82.442, 84.471]`.
+These are descriptive single-adapter observations, including verification
+cost, with no comparator or attributed limiter. Performance interpretation is
+exploratory and inconclusive. The representation algebra is equivalent for
+the authored real-set fixtures; binary64 evaluation has no validated rounding
+enclosure.
+
+The earlier `collection-001` is excluded: its 1,000-call batches passed
+literal checks but fell below the 20 ms admission floor. Its raw SHA-256 is
+`7f31a8988d36fde6846b4fbb463b797ced9f4b93796bf06e3e9db5843a7d433e`.
+Those rejected raw bytes and their pre-rebuild build evidence remain outside
+the published bundle. The renderer never invokes the native driver:
+
+```powershell
+python -B scripts/reports/geo07_port/render_saved.py `
+  --bundle reports/algorithm-results/geo07-port-4dee19cde3d50259 --check
+python -B -m unittest tests.reporting.test_geo07_port_publication
+python -B scripts/reports/site.py --catalog reports/algorithm-results/catalog.json `
+  --check --out build/geo07-port-report-site
+python -B scripts/reports/stage_geo07_port.py `
+  --catalog reports/algorithm-results/geo07-port-publications.json `
+  --site build/geo07-port-report-site
+```
+
+The source page, table CSVs, SVG, report manifest and source ZIP are
+deterministically regenerated from the saved files. The typed extension
+catalogue binds all staged bytes and LF-normalized publisher source to an
+immutable public route; its ZIP has a root landing page and a complete nested
+report. Main-only Pages deployment and opening its live links remain pending.
+The separate adapter source/harness PRs and GEO-07 issue #32 remain open.

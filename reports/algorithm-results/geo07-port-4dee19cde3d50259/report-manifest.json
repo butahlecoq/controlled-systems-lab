@@ -1,0 +1,28 @@
+{
+  "files": {
+    "build-provenance.json": "ef51a66039a935f95bbd90dfd1a846a734dd273291602737ce2d53baca7d7fdb",
+    "build.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout.log": "9cd60324978aa07fca6b73b47b2cb85fd3632ac6bf9cc156340e05cc38c916ff",
+    "collection-status.json": "19d68ef02693f5c4a0485ba642d96c63b11f8630c015c15f506e481df1c0fea5",
+    "driver-description.jsonl": "a2b660ddaf620d3956a7ceca5ea98dcd8bce9c65906484ce0a5966a287f5b127",
+    "driver.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fixture-inputs.json": "b7b5ea70dc87ddb6359a33f40278eb879d2cd53927a5304ff72aa058d54edc77",
+    "host-observation.json": "fbb1805b82ec420665e0db6a0996223d71a590d4122b55f14ff045c28a5dec69",
+    "host-observation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "index.html": "67a9d6c36ae6a6a9974d57c2b5cca3f1e45bbf558dc24e34398995f9b3f4476e",
+    "manifest.json": "27b162d9d9ac271c7eea3145a4cb75972e13f11771ff700341c8603cf9ce63a2",
+    "performance.svg": "eae67a9f192ff610f5ce144bc9847a1ef15e90af44ae0b9c9d90fb8bcb41131a",
+    "post-host-observation.json": "dff519dc043fe14cd451f919315a9eee34f00a919e979fba46be809a71548c8a",
+    "process-capture.json": "65389fb84dc79fee1deffd7c53eb9187fc401c319debebd4b062fbadda69c0e1",
+    "records.json": "e197ee1852fdb49b3b9180e0a7bfee3004cbb5bb000cf3f175f5ba22b61a5cb1",
+    "review-seal.json": "d355f3a4fc92d51e88ba4266a2819ff54f7fe291ee2f336771397c85b0af8015",
+    "summary.csv": "532158516b6d0f14a0ffa25bc2101e4120f20772619cbc5b27ba7c2900f7d1ae",
+    "trials.csv": "724fa5e7f74d5e3ccadf589dc2fc1824c28b8f160ad0ea1529d371ab22b425f4",
+    "trials.jsonl": "41649b7f4acde2c0e980b7c648358d9d217f68e3e5ec9c103f25173e7ab0d39e"
+  },
+  "harness_commit": "95ba77d3fb2077ec3f56c8fe68903eb18f26488a",
+  "post_host_sha256": "dff519dc043fe14cd451f919315a9eee34f00a919e979fba46be809a71548c8a",
+  "report_id": "geo07-port-4dee19cde3d50259",
+  "schema": "csl.geo07-port-render-manifest/1",
+  "source_commit": "41b4b58f2ef982e75554519862afdd803e30f717"
+}

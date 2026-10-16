@@ -1,0 +1,1546 @@
+{
+  "build_provenance_sha256": "ef51a66039a935f95bbd90dfd1a846a734dd273291602737ce2d53baca7d7fdb",
+  "collection_end_utc": "2026-10-16T14:51:37.703130+00:00",
+  "collection_start_utc": "2026-10-16T14:51:36.008720+00:00",
+  "created_utc": "2026-10-16T14:51:37.796575+00:00",
+  "environment": {
+    "host_observation": {
+      "build_processes": {
+        "MSBuild": 0,
+        "cl": 0,
+        "cmake": 0
+      },
+      "cpu_load_percent": 0,
+      "logical_processors": 12,
+      "observed_utc": "2026-10-16T14:51:35.9694324+00:00",
+      "schema": "csl.geo07-port-host-observation/1"
+    },
+    "host_observation_sha256": "fbb1805b82ec420665e0db6a0996223d71a590d4122b55f14ff045c28a5dec69",
+    "logical_processors": 12,
+    "observed_native_threads": null,
+    "observed_native_threads_reason": "no native thread counter in driver",
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "requested_driver_workers": 1
+  },
+  "harness_commit": "95ba77d3fb2077ec3f56c8fe68903eb18f26488a",
+  "harness_tree": "43e7485fd9b39a29a746788f271104c10b150725",
+  "inputs": {
+    "binary64": true,
+    "canonical_bytes_sha256": "b7b5ea70dc87ddb6359a33f40278eb879d2cd53927a5304ff72aa058d54edc77",
+    "driver_description_sha256": "a2b660ddaf620d3956a7ceca5ea98dcd8bce9c65906484ce0a5966a287f5b127",
+    "driver_sha256": "46741aa820722e7e5fed9e9205579117200daa069682461bf0a1cf65c8e6710b",
+    "fixture_sha256": {
+      "affine_box": "e92964a7ede02afbe573d046720f2f0e0b2926f90305b432ff268bbb70b81f56",
+      "constrained_disjoint_sum": "23933b765023b89ee4392a33777cba5da8212c50e7e417f76b9c3a229df63532",
+      "finite_v": "159a6b1215de12d5255dddc7c71a73ca7105ecc2f0e0c7dd94bc638b9e7816ce"
+    },
+    "fixtures": {
+      "affine_box": {
+        "affine_map": {
+          "cols": 2,
+          "rows": 1,
+          "values": [
+            1.0,
+            1.0
+          ]
+        },
+        "feasible_factor_witnesses": [
+          [
+            -1.0,
+            -1.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            -1.0,
+            1.0
+          ]
+        ],
+        "inside_points": [
+          [
+            2.0
+          ],
+          [
+            7.0
+          ],
+          [
+            12.0
+          ],
+          [
+            8.0
+          ]
+        ],
+        "offset": [
+          4.0
+        ],
+        "operation": "affine_image",
+        "output_id": "port-box-image",
+        "output_representation": "csl.zonotope",
+        "outside_points": [
+          [
+            1.0
+          ],
+          [
+            13.0
+          ]
+        ],
+        "physical_h": {
+          "equalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "inequalities": {
+            "cols": 1,
+            "rows": 2,
+            "values": [
+              1.0,
+              -1.0
+            ]
+          },
+          "upper": [
+            12.0,
+            -2.0
+          ],
+          "values": []
+        },
+        "public_request": {
+          "assurance": "numerical",
+          "prepared_output_relation": "equivalent",
+          "prepared_scalar": "binary64",
+          "problem_id": "geo07-port",
+          "request_id": "affine-box"
+        },
+        "registration": "csl.geometry.generators.operations",
+        "rejection_controls": {
+          "validated_assurance": true
+        },
+        "source": {
+          "center": [
+            1.0,
+            2.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 2,
+            "rows": 0,
+            "values": []
+          },
+          "equality_values": [],
+          "factor_ids": [
+            "horizontal",
+            "vertical"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 2,
+            "values": [
+              2.0,
+              0.0,
+              0.0,
+              3.0
+            ]
+          },
+          "id": "port-box"
+        }
+      },
+      "constrained_disjoint_sum": {
+        "feasible_factor_witnesses": [
+          [
+            -1.0,
+            -1.0,
+            1.0,
+            -1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0,
+            -1.0,
+            1.0
+          ]
+        ],
+        "inside_points": [
+          [
+            1.0
+          ],
+          [
+            4.0
+          ],
+          [
+            7.0
+          ]
+        ],
+        "left": {
+          "center": [
+            1.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              1.0,
+              -1.0
+            ]
+          },
+          "equality_values": [
+            0.0
+          ],
+          "factor_ids": [
+            "u",
+            "v"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              1.0,
+              0.0
+            ]
+          },
+          "id": "port-sum-left"
+        },
+        "operation": "minkowski_sum",
+        "output_id": "port-constrained-sum",
+        "output_representation": "csl.constrained-zonotope",
+        "outside_points": [
+          [
+            0.0
+          ],
+          [
+            8.0
+          ]
+        ],
+        "physical_h": {
+          "equalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "inequalities": {
+            "cols": 1,
+            "rows": 2,
+            "values": [
+              1.0,
+              -1.0
+            ]
+          },
+          "upper": [
+            7.0,
+            -1.0
+          ],
+          "values": []
+        },
+        "public_request": {
+          "assurance": "numerical",
+          "prepared_output_relation": "equivalent",
+          "prepared_scalar": "binary64",
+          "problem_id": "geo07-port",
+          "request_id": "constrained-sum"
+        },
+        "registration": "csl.geometry.generators.operations",
+        "rejection_controls": {
+          "intersection": true,
+          "shared_ids": "left used twice"
+        },
+        "right": {
+          "center": [
+            3.0
+          ],
+          "coordinate_labels": [],
+          "equalities": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              1.0,
+              1.0
+            ]
+          },
+          "equality_values": [
+            0.0
+          ],
+          "factor_ids": [
+            "p",
+            "q"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              0.0,
+              2.0
+            ]
+          },
+          "id": "port-sum-right"
+        }
+      },
+      "finite_v": {
+        "operation": "conversion",
+        "output_id": "port-v",
+        "output_representation": "csl.polyhedron.v",
+        "outside_points": [
+          [
+            1.0
+          ],
+          [
+            13.0
+          ]
+        ],
+        "physical_h": {
+          "equalities": {
+            "cols": 1,
+            "rows": 0,
+            "values": []
+          },
+          "inequalities": {
+            "cols": 1,
+            "rows": 2,
+            "values": [
+              1.0,
+              -1.0
+            ]
+          },
+          "upper": [
+            12.0,
+            -2.0
+          ],
+          "values": []
+        },
+        "public_request": {
+          "assurance": "numerical",
+          "prepared_output_relation": "equivalent",
+          "prepared_scalar": "binary64",
+          "problem_id": "geo07-port",
+          "request_id": "finite-v"
+        },
+        "registration": "csl.geometry.generators.v-conversion",
+        "rejection_controls": {
+          "cap": 3,
+          "constrained": {
+            "center": [
+              0.0
+            ],
+            "coordinate_labels": [],
+            "equalities": {
+              "cols": 1,
+              "rows": 1,
+              "values": [
+                1.0
+              ]
+            },
+            "equality_values": [
+              0.0
+            ],
+            "factor_ids": [
+              "r"
+            ],
+            "factor_interval": [
+              -1.0,
+              1.0
+            ],
+            "generators": {
+              "cols": 1,
+              "rows": 1,
+              "values": [
+                1.0
+              ]
+            },
+            "id": "port-constrained-control"
+          },
+          "h_output": "csl.polyhedron.h",
+          "validated_assurance": true
+        },
+        "source": {
+          "center": [
+            7.0
+          ],
+          "coordinate_labels": [
+            "x"
+          ],
+          "equalities": {
+            "cols": 2,
+            "rows": 0,
+            "values": []
+          },
+          "equality_values": [],
+          "factor_ids": [
+            "a",
+            "b"
+          ],
+          "factor_interval": [
+            -1.0,
+            1.0
+          ],
+          "generators": {
+            "cols": 2,
+            "rows": 1,
+            "values": [
+              2.0,
+              3.0
+            ]
+          },
+          "id": "port-v-source"
+        },
+        "vertex_cap": 4,
+        "vertices": [
+          [
+            2.0
+          ],
+          [
+            6.0
+          ],
+          [
+            8.0
+          ],
+          [
+            12.0
+          ]
+        ]
+      }
+    },
+    "representation_claim": "equivalent real-set affine, disjoint-ID sum and bounded V algebra; binary64 evaluation has no validated rounding enclosure"
+  },
+  "payload_sha256": "4dee19cde3d5025992022c650d4af1045732c264e236594a853225618b3334e2",
+  "performance_conclusion": "exploratory single-adapter batch observations; no comparator, speedup, or attributed limiter",
+  "process": {
+    "exit_code": 0,
+    "raw_sha256": "41649b7f4acde2c0e980b7c648358d9d217f68e3e5ec9c103f25173e7ab0d39e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "report_id": "geo07-port-4dee19cde3d50259",
+  "review_seal_sha256": "d355f3a4fc92d51e88ba4266a2819ff54f7fe291ee2f336771397c85b0af8015",
+  "reviewed_code_commit": "2ccea2271e3e8d0518543e8aa20b0bbbdf3b33be",
+  "rows": [
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 58590600,
+      "error": null,
+      "fixture": "affine_box",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "physical_witnesses": [
+          2.0,
+          7.0,
+          12.0,
+          8.0
+        ],
+        "rejections": {
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 0,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 69544300,
+      "error": null,
+      "fixture": "constrained_disjoint_sum",
+      "result": {
+        "center": [
+          4.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "p",
+          "q"
+        ],
+        "generators": [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "outside_points": [
+          0.0,
+          8.0
+        ],
+        "physical_witnesses": [
+          1.0,
+          4.0,
+          7.0
+        ],
+        "rejections": {
+          "intersection": "generators.operation",
+          "shared_id": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 0,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 82430400,
+      "error": null,
+      "fixture": "finite_v",
+      "result": {
+        "error_bound": false,
+        "labels": [
+          "x"
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "rays": 0,
+        "rejections": {
+          "cap": "generators.convert.cap",
+          "constrained": "generators.convert.equalities",
+          "h_output": "generators.convert.output",
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument",
+        "vertices": [
+          2.0,
+          6.0,
+          8.0,
+          12.0
+        ]
+      },
+      "round": 0,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": true
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 57302900,
+      "error": null,
+      "fixture": "affine_box",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "physical_witnesses": [
+          2.0,
+          7.0,
+          12.0,
+          8.0
+        ],
+        "rejections": {
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 0,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 68860400,
+      "error": null,
+      "fixture": "constrained_disjoint_sum",
+      "result": {
+        "center": [
+          4.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "p",
+          "q"
+        ],
+        "generators": [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "outside_points": [
+          0.0,
+          8.0
+        ],
+        "physical_witnesses": [
+          1.0,
+          4.0,
+          7.0
+        ],
+        "rejections": {
+          "intersection": "generators.operation",
+          "shared_id": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 0,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 83594300,
+      "error": null,
+      "fixture": "finite_v",
+      "result": {
+        "error_bound": false,
+        "labels": [
+          "x"
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "rays": 0,
+        "rejections": {
+          "cap": "generators.convert.cap",
+          "constrained": "generators.convert.equalities",
+          "h_output": "generators.convert.output",
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument",
+        "vertices": [
+          2.0,
+          6.0,
+          8.0,
+          12.0
+        ]
+      },
+      "round": 0,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 84470700,
+      "error": null,
+      "fixture": "finite_v",
+      "result": {
+        "error_bound": false,
+        "labels": [
+          "x"
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "rays": 0,
+        "rejections": {
+          "cap": "generators.convert.cap",
+          "constrained": "generators.convert.equalities",
+          "h_output": "generators.convert.output",
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument",
+        "vertices": [
+          2.0,
+          6.0,
+          8.0,
+          12.0
+        ]
+      },
+      "round": 1,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 68937200,
+      "error": null,
+      "fixture": "constrained_disjoint_sum",
+      "result": {
+        "center": [
+          4.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "p",
+          "q"
+        ],
+        "generators": [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "outside_points": [
+          0.0,
+          8.0
+        ],
+        "physical_witnesses": [
+          1.0,
+          4.0,
+          7.0
+        ],
+        "rejections": {
+          "intersection": "generators.operation",
+          "shared_id": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 1,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 57210500,
+      "error": null,
+      "fixture": "affine_box",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "physical_witnesses": [
+          2.0,
+          7.0,
+          12.0,
+          8.0
+        ],
+        "rejections": {
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 1,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 57562900,
+      "error": null,
+      "fixture": "affine_box",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "physical_witnesses": [
+          2.0,
+          7.0,
+          12.0,
+          8.0
+        ],
+        "rejections": {
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 2,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 74890800,
+      "error": null,
+      "fixture": "constrained_disjoint_sum",
+      "result": {
+        "center": [
+          4.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "p",
+          "q"
+        ],
+        "generators": [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "outside_points": [
+          0.0,
+          8.0
+        ],
+        "physical_witnesses": [
+          1.0,
+          4.0,
+          7.0
+        ],
+        "rejections": {
+          "intersection": "generators.operation",
+          "shared_id": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 2,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 84051500,
+      "error": null,
+      "fixture": "finite_v",
+      "result": {
+        "error_bound": false,
+        "labels": [
+          "x"
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "rays": 0,
+        "rejections": {
+          "cap": "generators.convert.cap",
+          "constrained": "generators.convert.equalities",
+          "h_output": "generators.convert.output",
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument",
+        "vertices": [
+          2.0,
+          6.0,
+          8.0,
+          12.0
+        ]
+      },
+      "round": 2,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 82873200,
+      "error": null,
+      "fixture": "finite_v",
+      "result": {
+        "error_bound": false,
+        "labels": [
+          "x"
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "rays": 0,
+        "rejections": {
+          "cap": "generators.convert.cap",
+          "constrained": "generators.convert.equalities",
+          "h_output": "generators.convert.output",
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument",
+        "vertices": [
+          2.0,
+          6.0,
+          8.0,
+          12.0
+        ]
+      },
+      "round": 3,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 70030600,
+      "error": null,
+      "fixture": "constrained_disjoint_sum",
+      "result": {
+        "center": [
+          4.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "p",
+          "q"
+        ],
+        "generators": [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "outside_points": [
+          0.0,
+          8.0
+        ],
+        "physical_witnesses": [
+          1.0,
+          4.0,
+          7.0
+        ],
+        "rejections": {
+          "intersection": "generators.operation",
+          "shared_id": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 3,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 58240800,
+      "error": null,
+      "fixture": "affine_box",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "physical_witnesses": [
+          2.0,
+          7.0,
+          12.0,
+          8.0
+        ],
+        "rejections": {
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 3,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 57405300,
+      "error": null,
+      "fixture": "affine_box",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "physical_witnesses": [
+          2.0,
+          7.0,
+          12.0,
+          8.0
+        ],
+        "rejections": {
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 4,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 69538200,
+      "error": null,
+      "fixture": "constrained_disjoint_sum",
+      "result": {
+        "center": [
+          4.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "p",
+          "q"
+        ],
+        "generators": [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "outside_points": [
+          0.0,
+          8.0
+        ],
+        "physical_witnesses": [
+          1.0,
+          4.0,
+          7.0
+        ],
+        "rejections": {
+          "intersection": "generators.operation",
+          "shared_id": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 4,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 83049900,
+      "error": null,
+      "fixture": "finite_v",
+      "result": {
+        "error_bound": false,
+        "labels": [
+          "x"
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "rays": 0,
+        "rejections": {
+          "cap": "generators.convert.cap",
+          "constrained": "generators.convert.equalities",
+          "h_output": "generators.convert.output",
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument",
+        "vertices": [
+          2.0,
+          6.0,
+          8.0,
+          12.0
+        ]
+      },
+      "round": 4,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 82441700,
+      "error": null,
+      "fixture": "finite_v",
+      "result": {
+        "error_bound": false,
+        "labels": [
+          "x"
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "rays": 0,
+        "rejections": {
+          "cap": "generators.convert.cap",
+          "constrained": "generators.convert.equalities",
+          "h_output": "generators.convert.output",
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument",
+        "vertices": [
+          2.0,
+          6.0,
+          8.0,
+          12.0
+        ]
+      },
+      "round": 5,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 70328100,
+      "error": null,
+      "fixture": "constrained_disjoint_sum",
+      "result": {
+        "center": [
+          4.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "p",
+          "q"
+        ],
+        "generators": [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "outside_points": [
+          0.0,
+          8.0
+        ],
+        "physical_witnesses": [
+          1.0,
+          4.0,
+          7.0
+        ],
+        "rejections": {
+          "intersection": "generators.operation",
+          "shared_id": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 5,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 57878600,
+      "error": null,
+      "fixture": "affine_box",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "physical_witnesses": [
+          2.0,
+          7.0,
+          12.0,
+          8.0
+        ],
+        "rejections": {
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 5,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 56795100,
+      "error": null,
+      "fixture": "affine_box",
+      "result": {
+        "center": [
+          7.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "horizontal",
+          "vertical"
+        ],
+        "generators": [
+          2.0,
+          3.0
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "physical_witnesses": [
+          2.0,
+          7.0,
+          12.0,
+          8.0
+        ],
+        "rejections": {
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 6,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 68829600,
+      "error": null,
+      "fixture": "constrained_disjoint_sum",
+      "result": {
+        "center": [
+          4.0
+        ],
+        "equalities": [
+          1.0,
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "error_bound": false,
+        "factor_ids": [
+          "u",
+          "v",
+          "p",
+          "q"
+        ],
+        "generators": [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        "outside_points": [
+          0.0,
+          8.0
+        ],
+        "physical_witnesses": [
+          1.0,
+          4.0,
+          7.0
+        ],
+        "rejections": {
+          "intersection": "generators.operation",
+          "shared_id": "generators.minkowski.factor_ids"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument"
+      },
+      "round": 6,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    },
+    {
+      "batch": 5000,
+      "checked_calls": 5000,
+      "elapsed_ns": 82973100,
+      "error": null,
+      "fixture": "finite_v",
+      "result": {
+        "error_bound": false,
+        "labels": [
+          "x"
+        ],
+        "outside_points": [
+          1.0,
+          13.0
+        ],
+        "rays": 0,
+        "rejections": {
+          "cap": "generators.convert.cap",
+          "constrained": "generators.convert.equalities",
+          "h_output": "generators.convert.output",
+          "validated": "generators.assurance"
+        },
+        "relation": "equivalent",
+        "status": "passed",
+        "support": "symbolic_argument",
+        "vertices": [
+          2.0,
+          6.0,
+          8.0,
+          12.0
+        ]
+      },
+      "round": 6,
+      "schema": "csl.geo07-port-trial/1",
+      "status": "passed",
+      "warmup": false
+    }
+  ],
+  "schema": "csl.geo07-port-records/1",
+  "source_commit": "41b4b58f2ef982e75554519862afdd803e30f717",
+  "source_tree": "54e7efa11cb55522a114d55e978f6874a8b1d251",
+  "summary": {
+    "affine_box": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 58240800,
+      "median_batch_ns": 57405300,
+      "min_batch_ns": 56795100,
+      "successes": 7
+    },
+    "constrained_disjoint_sum": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 74890800,
+      "median_batch_ns": 69538200,
+      "min_batch_ns": 68829600,
+      "successes": 7
+    },
+    "finite_v": {
+      "attempts": 7,
+      "failures": 0,
+      "max_batch_ns": 84470700,
+      "median_batch_ns": 83049900,
+      "min_batch_ns": 82441700,
+      "successes": 7
+    }
+  },
+  "timing": {
+    "batch_calls": 5000,
+    "clock": "steady_clock",
+    "internal_phase_counters": "unavailable",
+    "measured_rounds": 7,
+    "minimum_admitted_batch_ns": 20000000,
+    "order": "alternating fixtures",
+    "scope": "fresh public generator handles and prepared GeometryPort/ConversionPort registration, admission, workspace execution, literal physical H/V and factor checks, scoped rejection controls, per-call nlohmann JSON result construction and assignment; excludes process startup, JSONL serialization, Python saved-row verification, persistence, rendering",
+    "unit": "ns",
+    "warmup_rounds": 1,
+    "workspace": "fresh sets, registration, preparation and workspace each checked call; same process across rounds"
+  }
+}

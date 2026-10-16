@@ -1,0 +1,442 @@
+Change Dir: 'D:/work/PhD/repo/.worktrees/geo07-port-harness/build/geo07-port'
+
+Run Clean Command: "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" CSL.sln /t:Clean /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+Сборка начата 16.10.2026 17:51:00.
+
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\CSL.sln" в узле 1 (целевые объекты Clean).
+ValidateSolutionConfiguration:
+  Создание конфигурации решения "Release|x64".
+ValidateProjects:
+  Проект"INSTALL" не выбран для сборки в конфигурации решения "Release|x64".
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_worst_case_vertex.vcxproj.metaproj" (2) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_worst_case_vertex.vcxproj.metaproj" (2) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_sets.vcxproj.metaproj" (3) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_sets.vcxproj.metaproj" (3) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_numeric.vcxproj.metaproj" (4) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_numeric.vcxproj.metaproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_contracts.vcxproj.metaproj" (5) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_contracts.vcxproj.metaproj" (5) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\ZERO_CHECK.vcxproj" (6) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\ZERO_CHECK.vcxproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_contracts.vcxproj.metaproj" (5) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_contracts.vcxproj" (7) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_contracts.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_contracts.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_numeric.vcxproj.metaproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_numeric.vcxproj" (8) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_numeric.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_numeric.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_sets.vcxproj.metaproj" (3) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_sets.vcxproj" (9) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_sets.dir\Release\csl_sets.tlog\csl_sets.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_sets.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_sets.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_worst_case_vertex.vcxproj.metaproj" (2) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_objectives.vcxproj.metaproj" (10) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_objectives.vcxproj.metaproj" (10) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_objectives.vcxproj" (11) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_objectives.dir\Release\csl_objectives.tlog\csl_objectives.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_objectives.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_objectives.vcxproj.metaproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_worst_case_vertex.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_witness_selector.vcxproj.metaproj" (13) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_witness_selector.vcxproj.metaproj" (13) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_verifiers.vcxproj.metaproj" (14) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_verifiers.vcxproj.metaproj" (14) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_core.vcxproj.metaproj" (15) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_core.vcxproj.metaproj" (15) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_problem.vcxproj.metaproj" (16) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_problem.vcxproj.metaproj" (16) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_model.vcxproj.metaproj" (17) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_model.vcxproj.metaproj" (17) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_model.vcxproj" (18) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_model.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_model.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_problem.vcxproj.metaproj" (16) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_problem.vcxproj" (19) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_problem.dir\Release\csl_problem.tlog\csl_problem.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_problem.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_problem.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_core.vcxproj.metaproj" (15) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_core.vcxproj" (20) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_resolved_core.dir\Release\csl_reso.9C100932.tlog\csl_resolved_core.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_core.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_core.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_verifiers.vcxproj.metaproj" (14) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_verifiers.vcxproj" (21) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_verifiers.dir\Release\csl_verifiers.tlog\csl_verifiers.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_verifiers.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_verifiers.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_witness_selector.vcxproj.metaproj" (13) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_strategy_ts01.vcxproj.metaproj" (22) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_strategy_ts01.vcxproj.metaproj" (22) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_problem.vcxproj.metaproj" (23) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_problem.vcxproj.metaproj" (23) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj.metaproj" (24) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj.metaproj" (24) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj" (25) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj.metaproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_problem.vcxproj.metaproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_strategy_ts01.vcxproj.metaproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_witness_selector.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj.metaproj" (59) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj.metaproj" (59) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj" (60) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_geometry_generators.dir\Release\csl_geom.4CFF110B.tlog\csl_geometry_generators.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\CSL.sln" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj.metaproj" (61) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj.metaproj" (61) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj.metaproj" (62) в узле 1 (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj.metaproj" (62) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" (63) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_generator_adapter.dir\Release\csl_gene.0ADC7DFE.tlog\csl_generator_adapter.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj.metaproj" завершена (целевые объекты Clean).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj.metaproj" (61) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj" (64) в узле 1 (целевые объекты Clean).
+_PrepareForClean:
+  Файл "csl_geo07_port_report.dir\Release\csl_geo0.E11A68EC.tlog\csl_geo07_port_report.lastbuildstate" удаляется.
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj.metaproj" завершена (целевые объекты Clean).
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\CSL.sln" завершена (целевые объекты Clean).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:00.80
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" csl_geo07_port_report.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+Сборка начата 16.10.2026 17:51:01.
+
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj" в узле 1 (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\ZERO_CHECK.vcxproj" (2) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+CustomBuild:
+  1>Checking Build System
+FinalizeBuildStatus:
+  Файл "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\ZERO_CHECK.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_contracts.vcxproj" (3) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\outcomes.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\execution.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\problem.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\geometry.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\synthesis.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\model.cpp"
+  geometry.cpp
+  synthesis.cpp
+  outcomes.cpp
+  problem.cpp
+  execution.cpp
+  model.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\problem.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\model.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\geometry.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\outcomes.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\execution.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\contracts\synthesis.cpp"
+  model.cpp
+  outcomes.cpp
+  problem.cpp
+  geometry.cpp
+  execution.cpp
+  synthesis.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_contracts.dir\Release\model.obj
+  csl_contracts.dir\Release\problem.obj
+  csl_contracts.dir\Release\geometry.obj
+  csl_contracts.dir\Release\outcomes.obj
+  csl_contracts.dir\Release\execution.obj
+  csl_contracts.dir\Release\synthesis.obj
+  csl_contracts.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_contracts.lib
+FinalizeBuildStatus:
+  Файл "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_contracts.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj" (1) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" (4) в узле 1 (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj" (5) в узле 1 (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj" (5) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_numeric.vcxproj" (6) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /scanDependencies "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_numeric.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\numeric\data.cpp"
+  data.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_numeric.pdb" /sourceDependencies "csl_numeric.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\numeric\data.cpp"
+  data.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_numeric.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_numeric.dir\Release\data.obj
+  csl_numeric.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_numeric.lib
+FinalizeBuildStatus:
+  Файл "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_numeric.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj" (5) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_sets.vcxproj" (7) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_sets.dir\Release\\" /scanDependencies "csl_sets.dir\Release\\" /Fo"csl_sets.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_sets.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\sets\data.cpp"
+  data.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_sets.dir\Release\\" /Fo"csl_sets.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_sets.pdb" /sourceDependencies "csl_sets.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\sets\data.cpp"
+  data.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_sets.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_sets.dir\Release\data.obj
+  csl_sets.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_sets.lib
+FinalizeBuildStatus:
+  Файл "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_sets.dir\Release\csl_sets.tlog\csl_sets.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_sets.vcxproj" завершена (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_geometry_generators.dir\Release\csl_geom.4CFF110B.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_geometry_generators.dir\Release\csl_geom.4CFF110B.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_geometry_generators.dir\Release\\" /scanDependencies "csl_geometry_generators.dir\Release\\" /Fo"csl_geometry_generators.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_geometry_generators.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\geometry\generators\generator_sets.cpp"
+  generator_sets.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_geometry_generators.dir\Release\\" /Fo"csl_geometry_generators.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_geometry_generators.pdb" /sourceDependencies "csl_geometry_generators.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\geometry\generators\generator_sets.cpp"
+  generator_sets.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_geometry_generators.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_geometry_generators.dir\Release\generator_sets.obj
+  csl_geometry_generators.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_geometry_generators.lib
+FinalizeBuildStatus:
+  Файл "csl_geometry_generators.dir\Release\csl_geom.4CFF110B.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_geometry_generators.dir\Release\csl_geom.4CFF110B.tlog\csl_geometry_generators.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geometry_generators.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_model.vcxproj" (8) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /scanDependencies "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_model.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\model\linear_system.cpp"
+  linear_system.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_model.pdb" /sourceDependencies "csl_model.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\model\linear_system.cpp"
+  linear_system.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_model.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_model.dir\Release\linear_system.obj
+  csl_model.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_model.lib
+FinalizeBuildStatus:
+  Файл "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_model.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_objectives.vcxproj" (9) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_objectives.dir\Release\\" /scanDependencies "csl_objectives.dir\Release\\" /Fo"csl_objectives.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_objectives.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/repo/.worktrees/geo07-port-harness/build/geo07-port/_deps/csl_objectives_eigen-src" "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\optimization\objective_reformulation.cpp"
+  objective_reformulation.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_objectives.dir\Release\\" /Fo"csl_objectives.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_objectives.pdb" /sourceDependencies "csl_objectives.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/repo/.worktrees/geo07-port-harness/build/geo07-port/_deps/csl_objectives_eigen-src" "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\optimization\objective_reformulation.cpp"
+  objective_reformulation.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_objectives.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_objectives.dir\Release\objective_reformulation.obj
+  csl_objectives.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_objectives.lib
+FinalizeBuildStatus:
+  Файл "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_objectives.dir\Release\csl_objectives.tlog\csl_objectives.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_objectives.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_problem.vcxproj" (10) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\constraints.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\domains.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\initial_information.cpp"
+  constraints.cpp
+  domains.cpp
+  initial_information.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\constraints.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\domains.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\initial_information.cpp"
+  constraints.cpp
+  domains.cpp
+  initial_information.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_problem.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_problem.dir\Release\domains.obj
+  csl_problem.dir\Release\constraints.obj
+  csl_problem.dir\Release\initial_information.obj
+  csl_problem.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_problem.lib
+FinalizeBuildStatus:
+  Файл "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_problem.dir\Release\csl_problem.tlog\csl_problem.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_problem.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" (4) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj" (11) в узле 1 (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj" (11) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_core.vcxproj" (12) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_resolved_core.dir\Release\csl_reso.9C100932.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_resolved_core.dir\Release\csl_reso.9C100932.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /scanDependencies "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_resolved_core.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\resolved.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /scanDependencies "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_resolved_core.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\identity.cpp"
+  resolved.cpp
+  identity.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_resolved_core.pdb" /sourceDependencies "csl_resolved_core.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\resolved.cpp"
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_resolved_core.pdb" /sourceDependencies "csl_resolved_core.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\problem\identity.cpp"
+  identity.cpp
+  resolved.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_resolved_core.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_resolved_core.dir\Release\identity.obj
+  csl_resolved_core.dir\Release\resolved.obj
+  csl_resolved_core.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_resolved_core.lib
+FinalizeBuildStatus:
+  Файл "csl_resolved_core.dir\Release\csl_reso.9C100932.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_resolved_core.dir\Release\csl_reso.9C100932.tlog\csl_resolved_core.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_resolved_core.vcxproj" завершена (целевые объекты по умолчанию).
+Проект "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj" (11) выполняет сборку "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_verifiers.vcxproj" (13) в узле 1 (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_verifiers.dir\Release\csl_verifiers.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_verifiers.dir\Release\csl_verifiers.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_verifiers.dir\Release\\" /scanDependencies "csl_verifiers.dir\Release\\" /Fo"csl_verifiers.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_verifiers.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\registry\compiled_verifiers.cpp"
+  compiled_verifiers.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_verifiers.dir\Release\\" /Fo"csl_verifiers.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_verifiers.pdb" /sourceDependencies "csl_verifiers.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\registry\compiled_verifiers.cpp"
+  compiled_verifiers.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_verifiers.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_verifiers.dir\Release\compiled_verifiers.obj
+  csl_verifiers.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_verifiers.lib
+FinalizeBuildStatus:
+  Файл "csl_verifiers.dir\Release\csl_verifiers.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_verifiers.dir\Release\csl_verifiers.tlog\csl_verifiers.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_verifiers.vcxproj" завершена (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_registry.dir\Release\\" /scanDependencies "csl_registry.dir\Release\\" /Fo"csl_registry.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_registry.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\registry\registry.cpp"
+  registry.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_registry.dir\Release\\" /Fo"csl_registry.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_registry.pdb" /sourceDependencies "csl_registry.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\registry\registry.cpp"
+  registry.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_registry.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_registry.dir\Release\registry.obj
+  csl_registry.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_registry.lib
+FinalizeBuildStatus:
+  Файл "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_registry.vcxproj" завершена (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_generator_adapter.dir\Release\csl_gene.0ADC7DFE.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_generator_adapter.dir\Release\csl_gene.0ADC7DFE.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_generator_adapter.dir\Release\\" /scanDependencies "csl_generator_adapter.dir\Release\\" /Fo"csl_generator_adapter.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_generator_adapter.pdb" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\geometry\generators\adapter.cpp"
+  adapter.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_generator_adapter.dir\Release\\" /Fo"csl_generator_adapter.dir\Release\\" /Fd"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_generator_adapter.pdb" /sourceDependencies "csl_generator_adapter.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "D:\work\PhD\repo\.worktrees\geo07-port-harness\src\geometry\generators\adapter.cpp"
+  adapter.cpp
+Lib:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_generator_adapter.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_generator_adapter.dir\Release\adapter.obj
+  csl_generator_adapter.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_generator_adapter.lib
+FinalizeBuildStatus:
+  Файл "csl_generator_adapter.dir\Release\csl_gene.0ADC7DFE.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_generator_adapter.dir\Release\csl_gene.0ADC7DFE.tlog\csl_generator_adapter.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_generator_adapter.vcxproj" завершена (целевые объекты по умолчанию).
+PrepareForBuild:
+  Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+InitializeBuildStatus:
+  Создание "csl_geo07_port_report.dir\Release\csl_geo0.E11A68EC.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+  Обращение к "csl_geo07_port_report.dir\Release\csl_geo0.E11A68EC.tlog\unsuccessfulbuild".
+CustomBuild:
+  Building Custom Rule D:/work/PhD/repo/.worktrees/geo07-port-harness/CMakeLists.txt
+SetModuleDependencies:
+  Проверка источников на наличие зависимостей модуля…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_geo07_port_report.dir\Release\\" /scanDependencies "csl_geo07_port_report.dir\Release\\" /Fo"csl_geo07_port_report.dir\Release\\" /Fd"csl_geo07_port_report.dir\Release\vc143.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/repo/.worktrees/geo07-port-harness/build/geo07-port/_deps/csl_json-src/include" "D:\work\PhD\repo\.worktrees\geo07-port-harness\benchmarks\reporting\geo07_port\adapter_driver.cpp"
+  adapter_driver.cpp
+ClCompile:
+  Компиляция…
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"D:\work\PhD\repo\.worktrees\geo07-port-harness\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_geo07_port_report.dir\Release\\" /Fo"csl_geo07_port_report.dir\Release\\" /Fd"csl_geo07_port_report.dir\Release\vc143.pdb" /sourceDependencies "csl_geo07_port_report.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "D:/work/PhD/repo/.worktrees/geo07-port-harness/build/geo07-port/_deps/csl_json-src/include" "D:\work\PhD\repo\.worktrees\geo07-port-harness\benchmarks\reporting\geo07_port\adapter_driver.cpp"
+  adapter_driver.cpp
+Link:
+  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_geo07_port_report.exe" /INCREMENTAL:NO /NOLOGO Release\csl_generator_adapter.lib Release\csl_geometry_generators.lib Release\csl_registry.lib Release\csl_verifiers.lib Release\csl_resolved_core.lib Release\csl_problem.lib Release\csl_sets.lib Release\csl_model.lib Release\csl_objectives.lib Release\csl_numeric.lib Release\csl_contracts.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"D:/work/PhD/repo/.worktrees/geo07-port-harness/build/geo07-port/Release/csl_geo07_port_report.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/work/PhD/repo/.worktrees/geo07-port-harness/build/geo07-port/Release/csl_geo07_port_report.lib" /MACHINE:X64  /machine:x64 csl_geo07_port_report.dir\Release\adapter_driver.obj
+  csl_geo07_port_report.vcxproj -> D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\Release\csl_geo07_port_report.exe
+FinalizeBuildStatus:
+  Файл "csl_geo07_port_report.dir\Release\csl_geo0.E11A68EC.tlog\unsuccessfulbuild" удаляется.
+  Обращение к "csl_geo07_port_report.dir\Release\csl_geo0.E11A68EC.tlog\csl_geo07_port_report.lastbuildstate".
+Сборка проекта "D:\work\PhD\repo\.worktrees\geo07-port-harness\build\geo07-port\csl_geo07_port_report.vcxproj" завершена (целевые объекты по умолчанию).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:32.80
+
