@@ -11,11 +11,12 @@ harness head precedes collection.
 
 | Case | Public result checked on every call |
 |---|---|
-| `l19` | Zero-horizon action product, `(x-1)^2` on V rows `0,1,2`; sampled values `1,0,1`, maximum `1`, one empty plan and three evaluated vertices. The middle sample is stationary and below the endpoint maximum. |
+| `l19` | Two one-step actions `0,1`, disturbance vertices `0,1`, objective `(x-1)^2`; sampled values `1,0,1`, both action worst values `1`, maximizers `0,2` and four total terminal evaluations. The middle point is stationary and below either endpoint maximum. |
 | `integrator` | Two one-step plans; worst values `1,4`, unique minimizer index `0`. |
 | `all_infeasible` | Two plans each violate stage-one robust safety; no optimum is published. |
 | `empty_catalogue` | Distinct empty-action status for a positive horizon. |
 | `no_scenarios` | Empty disturbance set has no adversarial trajectory to score. |
+| `unsupported` | Plan limit one rejects a two-plan catalogue without a partial optimum. |
 | `cancelled` | Pre-cancelled search returns `OperationStopped`, with no partial optimum. |
 | `b08_rounded` | Entire displayed-data four-step catalogue: 625 plans, 256 corners per plan, 160,000 checked vertices, minimum approximately `67.150601101407`, minimizing plan indices `17,33,129` at absolute tie tolerance `1e-8`. |
 
@@ -34,19 +35,30 @@ $cmake = 'C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/Co
 python scripts/reports/issue3/check_smoke.py build/issue3-report/Release/csl_issue3_finite_action_report.exe
 ```
 
-The smoke emits seven checked JSONL rows and is functional evidence, not
+The smoke emits eight checked JSONL rows and is functional evidence, not
 accepted performance data. Configure again at the reviewed clean harness commit
 before any measurement so the embedded identity matches the executable.
 
 ## Measurement protocol and pending gates
 
-After independent source and harness review, a collection tool can run
-`--measure 7`: one excluded warmup then seven measured rounds in alternating
+After independent source and harness review, `collect.py` authenticates a clean
+exact reviewed head, the allowlisted source-to-harness delta, configured CMake
+Release target and dependency graph, NDEBUG/C++20 flags, fresh build, executable
+hash and embedded source/harness/fixture IDs before running `--measure 7`.
+`--preflight-only` exercises these checks without measurement. Accepted capture
+requires a separate review-evidence JSON file naming the exact reviewed head
+and two independent review URLs. It saves raw stdout/stderr and process status
+before checking the rows, retaining failed and partial attempts. It does not
+render or publish a report.
+
+Measurement then uses one excluded warmup and seven measured rounds in alternating
 fixture order. Each `l19` observation checks 10,000 fresh public calls, each
 small status case checks 5,000, and each B08 observation checks one full
 catalogue. Every call in a batch is checked against its literal result. Each
 row retains `batch`, `checked_calls`, integer `steady_clock` nanoseconds,
-source/harness commits and the result. The interval starts before fixture
+source/harness commits, exact source fixture and canonical input SHA-256,
+problem/request IDs, limits, objective convention, assurance, counts and
+expected-versus-observed fields. The interval starts before fixture
 construction and ends after public execution, independent literal checks and
 JSON result construction. It excludes JSONL serialization, process startup,
 persistence, plotting and rendering. The rows are batch observations with

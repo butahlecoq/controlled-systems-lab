@@ -12,14 +12,17 @@ endif()
 
 if(CSL_BUILD_ISSUE3_REPORT)
 include(cmake/JsonDependencies.cmake)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue3/finite_catalogue_driver.cpp
+    ISSUE3_FIXTURE_SHA256)
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ISSUE3_HARNESS_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
-add_executable(csl_issue3_finite_action_report benchmarks/reporting/issue3/finite_action_driver.cpp)
-target_link_libraries(csl_issue3_finite_action_report PRIVATE CSL::finite_action_minimax)
+add_executable(csl_issue3_finite_action_report benchmarks/reporting/issue3/finite_catalogue_driver.cpp)
+target_link_libraries(csl_issue3_finite_action_report PRIVATE CSL::finite_action_minimax CSL::resolved_core)
 target_include_directories(csl_issue3_finite_action_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_issue3_finite_action_report PRIVATE cxx_std_20)
 target_compile_definitions(csl_issue3_finite_action_report PRIVATE
-    $<$<CONFIG:Release>:NDEBUG> CSL_ISSUE3_HARNESS_COMMIT="${ISSUE3_HARNESS_COMMIT}")
+    $<$<CONFIG:Release>:NDEBUG> CSL_ISSUE3_HARNESS_COMMIT="${ISSUE3_HARNESS_COMMIT}"
+    CSL_ISSUE3_FIXTURE_SHA256="${ISSUE3_FIXTURE_SHA256}")
 if(MSVC)
 target_compile_options(csl_issue3_finite_action_report PRIVATE /W4 /WX /permissive-)
 else()

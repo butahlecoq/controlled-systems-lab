@@ -1,9 +1,11 @@
 #include <csl/optimization/finite_action_minimax.hpp>
+#include <csl/problem/resolved_problem.hpp>
 #include <nlohmann/json.hpp>
 
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -48,9 +50,6 @@ FiniteActionMinimaxRequest integrator(double bound) {
 json l19() {
     const SystemModel authored{{{1,1,1},TimeDomain::discrete,
         LinearStage{{1,1,{1}},{1,1,{1}},{1,1,{1}},{0}}},{}};
-    const auto initial=take(sets::make_v({{"l19"},1,{"x"}},
-        {take(numeric::snapshot(Matrix{3,1,{0,1,2}})),
-         take(numeric::snapshot(Matrix{0,1,{}}))}));
     const auto objective=std::get<Objective>(snapshot(QuadraticTerminal{{1,1,{2}},{-2},1}));
     Vector values;
     for(const double point:Vector{0,1,2}) {
@@ -60,19 +59,28 @@ json l19() {
     }
     if(values!=Vector{1,0,1}) throw std::runtime_error("L19 stationary interior sample mismatch");
     const FiniteActionMinimaxRequest input{{"issue3-l19"},{"report-l19"},
-        take(model::snapshot(authored,Vector{0})),initial,{1,{}},{},
-        {take(sets::make_universal({{"l19-safe"},1,{"x"}}))},objective};
-    const auto outcome=finite_action_minimax(input,{1,3,0});
+        take(model::snapshot(authored,Vector{0,1})),singleton("l19-x0",0),
+        {1,{{0},{1}}},{interval("l19-w0",0,1)},
+        {safe(10),safe(10)},objective};
+    const auto outcome=finite_action_minimax(input,{2,2,0});
     if(!std::holds_alternative<FiniteMinimaxOptimal>(outcome))
         throw std::runtime_error("L19 minimax outcome mismatch");
     const auto& result=std::get<FiniteMinimaxOptimal>(outcome);
-    if(result.value!=1 || result.plans.size()!=1 ||
-       result.minimizing_plan_indices!=std::vector<std::size_t>{0} ||
+    if(result.value!=1 || result.plans.size()!=2 ||
+       result.minimizing_plan_indices!=std::vector<std::size_t>{0,1} ||
        !std::holds_alternative<FinitePlanFeasible>(result.plans[0]) ||
-       std::get<FinitePlanFeasible>(result.plans[0]).evaluated_vertices!=3)
+       !std::holds_alternative<FinitePlanFeasible>(result.plans[1]))
         throw std::runtime_error("L19 literal minimax oracle mismatch");
+    const auto& first=std::get<FinitePlanFeasible>(result.plans[0]);
+    const auto& second=std::get<FinitePlanFeasible>(result.plans[1]);
+    if(first.worst_value!=1 || second.worst_value!=1 ||
+       first.evaluated_vertices!=2 || second.evaluated_vertices!=2 ||
+       first.maximizer!=Vector{0} || second.maximizer!=Vector{2})
+        throw std::runtime_error("L19 action endpoint evidence mismatch");
     return {{"status","numerical_optimal"},{"value",result.value},{"plan_count",result.plans.size()},
-        {"minimizing_plan_indices",result.minimizing_plan_indices},{"evaluated_vertices",3},
+        {"minimizing_plan_indices",result.minimizing_plan_indices},{"evaluated_vertices",4},
+        {"worst_values",Vector{first.worst_value,second.worst_value}},
+        {"maximizers",std::vector<Vector>{first.maximizer,second.maximizer}},
         {"sampled_objective_values",values}};
 }
 
@@ -93,7 +101,8 @@ json integrator_case() {
     }
     if(values!=Vector{1,4}) throw std::runtime_error("integrator worst values mismatch");
     return {{"status","numerical_optimal"},{"value",result.value},{"plan_count",result.plans.size()},
-        {"minimizing_plan_indices",result.minimizing_plan_indices},{"worst_values",values}};
+        {"minimizing_plan_indices",result.minimizing_plan_indices},{"worst_values",values},
+        {"evaluated_vertices",4}};
 }
 
 json infeasible_case() {
@@ -105,7 +114,11 @@ json infeasible_case() {
        rejected[0].violating_successor!=Vector{2} ||
        rejected[1].violating_successor!=Vector{1})
         throw std::runtime_error("all-infeasible literal oracle mismatch");
-    return {{"status","infeasible"},{"rejected_plans",rejected.size()},{"violating_stage",1}};
+    return {{"status","infeasible"},{"rejected_plans",json::array({
+        {{"action_indices",rejected[0].action_indices},{"stage",rejected[0].stage},
+         {"violating_successor",rejected[0].violating_successor}},
+        {{"action_indices",rejected[1].action_indices},{"stage",rejected[1].stage},
+         {"violating_successor",rejected[1].violating_successor}}})}};
 }
 
 json empty_case() {
@@ -124,6 +137,15 @@ json no_scenarios_case() {
            finite_action_minimax(input,{2,2,0})))
         throw std::runtime_error("no-scenarios oracle mismatch");
     return {{"status","no_scenarios"}};
+}
+
+json unsupported_case() {
+    const auto outcome=finite_action_minimax(integrator(10),{1,2,0});
+    if(!std::holds_alternative<Unsupported>(outcome) ||
+       std::get<Unsupported>(outcome).diagnostics.size()!=1 ||
+       std::get<Unsupported>(outcome).diagnostics[0].field!="finite_minimax.capacity")
+        throw std::runtime_error("unsupported capacity oracle mismatch");
+    return {{"status","unsupported"},{"field","finite_minimax.capacity"}};
 }
 
 json cancelled_case() {
@@ -183,17 +205,118 @@ json b08() {
 }
 
 using Case=json (*)();
+json details(std::string_view name) {
+    const json base_model={{"A",{{1}}},{"B",{{1}}},{"D",{{1}}},
+        {"initial",{0}},{"horizon",1}};
+    const json quadratic={{"type","quadratic_terminal"},{"Q",{{2}}},{"q",{-2}},
+        {"c",1},{"convention","0.5*x'Q*x+q'x+c"}};
+    if(name=="l19") return {
+        {"problem_id","issue3-l19"},{"request_id","report-l19"},
+        {"limits",{{"max_plans",2},{"max_points_per_stage",2},{"near_optimal_tolerance",0}}},
+        {"objective_convention","0.5*x'Q*x+q'x+c"},{"assurance","numerical"},
+        {"input",{{"model",base_model},{"actions",{{0},{1}}},
+            {"disturbance_vertices",{{0},{1}}},{"safe_bound",10},{"objective",quadratic}}},
+        {"expected",{{"status","numerical_optimal"},{"value",1},{"plan_count",2},
+            {"minimizing_plan_indices",{0,1}},{"evaluated_vertices",4},
+            {"worst_values",{1,1}},{"maximizers",{{0},{2}}},
+            {"sampled_objective_values",{1,0,1}}}}};
+    if(name=="integrator" || name=="all_infeasible" || name=="empty_catalogue" ||
+       name=="no_scenarios" || name=="unsupported" || name=="cancelled") {
+        const bool narrow=name=="all_infeasible";
+        json actions=json::array({json::array({0}),json::array({1})});
+        if(name=="empty_catalogue") actions=json::array();
+        json disturbance=json::array({json::array({0}),json::array({2})});
+        if(name=="no_scenarios") disturbance=json::array();
+        const std::size_t max_plans=name=="unsupported"?1:2;
+        json expected;
+        if(name=="integrator") expected={{"status","numerical_optimal"},{"value",1},
+            {"plan_count",2},{"minimizing_plan_indices",{0}},{"worst_values",{1,4}},
+            {"evaluated_vertices",4}};
+        else if(narrow) expected={{"status","infeasible"},{"rejected_plans",json::array({
+            {{"action_indices",{0}},{"stage",1},{"violating_successor",{2}}},
+            {{"action_indices",{1}},{"stage",1},{"violating_successor",{1}}}})}};
+        else if(name=="empty_catalogue") expected={{"status","empty_catalogue"}};
+        else if(name=="no_scenarios") expected={{"status","no_scenarios"}};
+        else if(name=="unsupported") expected={{"status","unsupported"},
+            {"field","finite_minimax.capacity"}};
+        else expected={{"status","stopped"},{"reason","cancelled"}};
+        return {{"problem_id","issue3-integrator"},{"request_id","report-integrator"},
+            {"limits",{{"max_plans",max_plans},{"max_points_per_stage",2},
+                       {"near_optimal_tolerance",0}}},
+            {"objective_convention","0.5*x'Q*x+q'x+c"},
+            {"assurance",name=="integrator" || narrow?json("numerical"):json(nullptr)},
+            {"input",{{"model",base_model},{"actions",actions},
+                {"disturbance_vertices",disturbance},{"safe_bound",narrow?0.5:10.0},
+                {"objective",quadratic},{"pre_cancelled",name=="cancelled"}}},
+            {"expected",expected}};
+    }
+    if(name=="b08_rounded") return {
+        {"problem_id","b08-displayed-rounded"},{"request_id","issue3-report-b08"},
+        {"limits",{{"max_plans",625},{"max_points_per_stage",256},
+                   {"near_optimal_tolerance",1e-8}}},
+        {"objective_convention","Euclidean terminal residual norm"},
+        {"assurance","numerical"},
+        {"input",{{"model",{{"A",{{1,0,0,0},{-25,1,0,0},{0,0,1,0},{0,0,-25,1}}},
+                              {"B",{{20.073},{0},{-10.473},{0}}},
+                              {"D",{{1,0},{0,0},{0,-1},{0,0}}},
+                              {"initial",{1182.074,119560,459.832,45260}},
+                              {"horizon",4}}},
+            {"actions",{{0.6},{0.3},{0},{-0.3},{-0.6}}},
+            {"disturbance_halfwidths",{{0.1,0.1},{0.2,0.4},{0.3,0.7},{0.4,1.0}}},
+            {"safe","universal"},{"objective",{{"type","residual_norm_terminal"},
+                {"C",{{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}},
+                {"target",{1200,0,450,0}}}}}},
+        {"expected",{{"status","numerical_optimal"},{"value",67.150601101407},
+            {"plan_count",625},{"evaluated_vertices",160000},
+            {"minimizing_plan_indices",{17,33,129}}}}};
+    throw std::runtime_error("unknown fixture metadata");
+}
+
+bool matches(json observed,json expected,std::string_view name) {
+    if(name=="b08_rounded") {
+        if(!observed.contains("value") || !observed["value"].is_number()) return false;
+        const auto value=observed["value"].get<double>();
+        if(std::abs(value-67.150601101407)>1e-8) return false;
+        observed["value"]=expected["value"];
+    }
+    return observed==expected;
+}
+
 void emit(std::string_view name,Case run,std::size_t round,bool warmup,std::size_t batch) {
+    const auto metadata=details(name);
+    const auto input_canonical=metadata["input"].dump();
+    const auto bytes=std::as_bytes(std::span<const char>{input_canonical.data(),input_canonical.size()});
+    const auto input_hash=problem::hex(take(problem::snapshot_content(bytes)).digest());
     const auto start=std::chrono::steady_clock::now();
     json result;
-    for(std::size_t i=0;i<batch;++i) result=run();
+    for(std::size_t i=0;i<batch;++i) {
+        result=run();
+        if(!matches(result,metadata["expected"],name))
+            throw std::runtime_error("observed result differs from independent fixture expectation");
+    }
     const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::steady_clock::now()-start).count();
     if(elapsed<=0)throw std::runtime_error("nonpositive clock interval");
+    json plan_count=nullptr;
+    if(result.contains("plan_count")) plan_count=result["plan_count"];
+    else if(result.contains("rejected_plans")) plan_count=result["rejected_plans"].size();
+    else if(result["status"]=="empty_catalogue") plan_count=0;
+    json row_count=nullptr;
+    if(result.contains("evaluated_vertices")) row_count=result["evaluated_vertices"];
+    else if(result["status"]=="infeasible" || result["status"]=="empty_catalogue") row_count=0;
     std::cout<<json{{"schema","csl.issue3-raw-trial/1"},{"fixture",name},
         {"source_commit",source_commit},{"harness_commit",CSL_ISSUE3_HARNESS_COMMIT},
+        {"fixture_sha256",CSL_ISSUE3_FIXTURE_SHA256},
+        {"input_canonical",input_canonical},{"input_sha256",input_hash},
+        {"problem_id",metadata["problem_id"]},{"request_id",metadata["request_id"]},
+        {"limits",metadata["limits"]},{"objective_convention",metadata["objective_convention"]},
+        {"assurance",metadata["assurance"]},
+        {"plan_count",plan_count},{"evaluated_terminal_rows",row_count},
         {"round",round},{"warmup",warmup},{"batch",batch},
-        {"checked_calls",batch},{"elapsed_ns",elapsed},{"result",result}}.dump()<<'\n';
+        {"checked_calls",batch},{"elapsed_ns",elapsed},{"result",result},
+        {"checks",{{"expected",metadata["expected"]},{"observed",result},
+                   {"absolute_tolerance",name=="b08_rounded"?1e-8:0.0},
+                   {"passed",true}}}}.dump()<<'\n';
 }
 } // namespace
 
@@ -213,6 +336,7 @@ int main(int argc,char** argv) {
         const std::pair<std::string_view,Case> cases[]{
             {"l19",l19},{"integrator",integrator_case},{"all_infeasible",infeasible_case},
             {"empty_catalogue",empty_case},{"no_scenarios",no_scenarios_case},
+            {"unsupported",unsupported_case},
             {"cancelled",cancelled_case},
             {"b08_rounded",b08}};
         for(std::size_t round=0;round<rounds+(mode=="--measure");++round) {
