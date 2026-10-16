@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import os
@@ -16,6 +16,8 @@ import sys
 import xml.etree.ElementTree as ET
 
 SOURCE = "41b4b58f2ef982e75554519862afdd803e30f717"
+SEAL_PATH = "scripts/reports/geo07_port/review-seal.json"
+HOST_SCHEMA = "csl.geo07-port-host-observation/1"
 DESCRIPTION_SCHEMA = "csl.geo07-port-driver/1"
 TRIAL_SCHEMA = "csl.geo07-port-trial/1"
 RECORD_SCHEMA = "csl.geo07-port-records/1"
@@ -48,6 +50,7 @@ ALLOWED = {
     "benchmarks/reporting/geo07_port/adapter_driver.cpp",
     "scripts/reports/geo07_port/check_smoke.py",
     "scripts/reports/geo07_port/collect.py",
+    SEAL_PATH,
     "reports/algorithm-results/tooling/geo07_port/README.md",
     "tests/reporting/test_geo07_port_harness.py",
     "docs/superpowers/plans/2026-10-16-geo07-port-harness.md",
@@ -215,8 +218,10 @@ def admit_raw(raw: bytes, *, repetitions: int, batch: int) -> tuple[list[dict], 
 
 
 def save_capture(out: Path, stdout: bytes, stderr: bytes, code: int | None,
-                 command: list[str], *, timed_out: bool = False) -> None:
-    out.mkdir(parents=True, exist_ok=False)
+                 command: list[str], *, timed_out: bool = False,
+                 collection_start_utc: str | None = None,
+                 collection_end_utc: str | None = None) -> None:
+    out.mkdir(parents=True, exist_ok=True)
     for name, payload in (("trials.jsonl", stdout), ("driver.stderr", stderr)):
         with (out / name).open("wb") as stream:
             stream.write(payload)
@@ -225,7 +230,16 @@ def save_capture(out: Path, stdout: bytes, stderr: bytes, code: int | None,
     (out / "process-capture.json").write_bytes(json_bytes({
         "schema": "csl.geo07-port-process-capture/1", "command": command,
         "exit_code": code, "timed_out": timed_out,
-        "stdout_sha256": sha(stdout), "stderr_sha256": sha(stderr)}))
+        "stdout_sha256": sha(stdout), "stderr_sha256": sha(stderr),
+        "host_observation_sha256": sha((out / "host-observation.json").read_bytes()),
+        "collection_start_utc": collection_start_utc,
+        "collection_end_utc": collection_end_utc}))
+
+
+def save_host_observation(out: Path, raw: bytes, stderr: bytes = b"") -> None:
+    out.mkdir(parents=True, exist_ok=False)
+    (out / "host-observation.json").write_bytes(raw)
+    (out / "host-observation.stderr").write_bytes(stderr)
 
 
 def reject(out: Path, reason: str) -> None:
@@ -248,6 +262,76 @@ def admit_changed_paths(changed: set[str]) -> None:
     if not changed <= ALLOWED:
         raise ValueError("algorithm source changed outside report harness: " +
                          repr(sorted(changed - ALLOWED)))
+
+
+def admit_reviewed_head(actual: str, claimed: str, parent: str, parent_tree: str,
+                        last_changed: set[str], seal: dict) -> None:
+    if (not all(re.fullmatch(r"[0-9a-f]{40}", value or "")
+                for value in (actual, claimed, parent, parent_tree)) or
+            actual != claimed or actual == parent or
+            last_changed != {SEAL_PATH} or
+            seal != {"schema": "csl.geo07-port-review-seal/1", "source_commit": SOURCE,
+                     "reviewed_code_commit": parent, "reviewed_code_tree": parent_tree}):
+        raise ValueError("actual HEAD is not the metadata-only child of reviewed harness code")
+
+
+def admit_checkout(root: Path, claimed: str) -> tuple[str, str, bytes]:
+    seal_raw = (root / SEAL_PATH).read_bytes()
+    seal = json.loads(seal_raw, object_pairs_hook=strict_json_pairs)
+    actual_head = git(root, "rev-parse", "HEAD")
+    parent_head = git(root, "rev-parse", "HEAD^")
+    admit_reviewed_head(actual_head, claimed, parent_head,
+                        git(root, "rev-parse", parent_head + "^{tree}"),
+                        set(git(root, "diff", "--name-only", "HEAD^", "HEAD").splitlines()), seal)
+    if git(root, "status", "--porcelain=v1", "--untracked-files=all"):
+        raise ValueError("harness source tree must be clean")
+    return actual_head, parent_head, seal_raw
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def host_observation() -> tuple[bytes, bytes, int]:
+    # Run only after the final clean Release build; the collector owns the observation.
+    script = r'''$cpu = @(Get-CimInstance Win32_Processor)
+$jobs = @(Get-Process cmake,MSBuild,cl -ErrorAction SilentlyContinue)
+[pscustomobject]@{
+  schema = 'csl.geo07-port-host-observation/1'
+  observed_utc = [DateTimeOffset]::UtcNow.ToString('o')
+  cpu_load_percent = [math]::Round(($cpu | Measure-Object LoadPercentage -Average).Average)
+  logical_processors = [int](($cpu | Measure-Object NumberOfLogicalProcessors -Sum).Sum)
+  build_processes = [pscustomobject]@{
+    cmake = @($jobs | Where-Object ProcessName -EQ 'cmake').Count
+    MSBuild = @($jobs | Where-Object ProcessName -EQ 'MSBuild').Count
+    cl = @($jobs | Where-Object ProcessName -EQ 'cl').Count
+  }
+} | ConvertTo-Json -Compress -Depth 3'''
+    result = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+                            capture_output=True, timeout=30)
+    return result.stdout, result.stderr, result.returncode
+
+
+def admit_host_observation(raw: bytes, build_end: datetime, collection_start: datetime) -> dict:
+    try:
+        value = json.loads(raw, object_pairs_hook=strict_json_pairs)
+        observed = datetime.fromisoformat(value["observed_utc"])
+    except (ValueError, UnicodeError, KeyError, TypeError) as error:
+        raise ValueError("structured host observation unavailable") from error
+    if (not isinstance(value, dict) or set(value) != {"schema", "observed_utc", "cpu_load_percent",
+                                                      "logical_processors", "build_processes"} or
+            value["schema"] != HOST_SCHEMA or observed.tzinfo is None or
+            observed.utcoffset() != timedelta(0) or
+            not build_end < observed <= collection_start or
+            collection_start - observed > timedelta(seconds=30) or
+            type(value["cpu_load_percent"]) not in (int, float) or
+            not 0 <= value["cpu_load_percent"] <= 25 or
+            type(value["logical_processors"]) is not int or value["logical_processors"] < 1 or
+            not isinstance(value["build_processes"], dict) or
+            set(value["build_processes"]) != {"cmake", "MSBuild", "cl"} or
+            any(type(count) is not int or count != 0 for count in value["build_processes"].values())):
+        raise ValueError("host observation is stale, busy, or malformed")
+    return value
 
 
 def cache_settings(text: str) -> dict[str, str]:
@@ -328,21 +412,14 @@ def collect(args) -> str:
         raise ValueError("driver profile must have 7-100 rounds and 1-100000 calls per batch")
     if Path.cwd().resolve() != root:
         raise ValueError("run from harness source root")
-    if not re.fullmatch(r"[0-9a-f]{40}", args.harness_commit or "") or git(root, "rev-parse", "HEAD") != args.harness_commit:
-        raise ValueError("checkout differs from reviewed harness commit")
-    if git(root, "status", "--porcelain=v1", "--untracked-files=all"):
-        raise ValueError("harness source tree must be clean")
-    changed = set(git(root, "diff", "--name-only", SOURCE, args.harness_commit).splitlines())
-    admit_changed_paths(changed)
+    actual_head, parent_head, seal_raw = admit_checkout(root, args.harness_commit)
+    admit_changed_paths(set(git(root, "diff", "--name-only", SOURCE, actual_head).splitlines()))
     build = args.build_dir.resolve(strict=True)
     exe = args.exe.resolve(strict=True)
     out = args.out.resolve()
     if (build == root or not build.is_relative_to(root) or exe != build / "Release" / "csl_geo07_port_report.exe" or
             not out.is_relative_to(build) or out.exists()):
         raise ValueError("build, Release executable, or new output destination differs")
-    note = args.concurrent_work.read_text(encoding="utf-8").strip()
-    if len(note) < 10 or "TODO" in note or "TBD" in note:
-        raise ValueError("observed concurrent-work note required before measurement")
     if any(os.environ.get(name) for name in ("CL", "_CL_", "LINK")):
         raise ValueError("MSVC environment flag overrides are not admitted")
     cache_raw = (build / "CMakeCache.txt").read_bytes()
@@ -361,6 +438,7 @@ def collect(args) -> str:
     build_stderr.write_bytes(build_run.stderr)
     if build_run.returncode:
         raise ValueError("fresh Release build failed; logs retained in build directory")
+    build_end = utc_now()
     targets = {"driver": release_project(build / "csl_geo07_port_report.vcxproj"),
                "adapter_library": release_project(build / "csl_generator_adapter.vcxproj"),
                "generator_library": release_project(build / "csl_geometry_generators.vcxproj")}
@@ -370,26 +448,41 @@ def collect(args) -> str:
         raise ValueError("driver description failed")
     input_bytes, input_hashes = admit_description(describe.stdout)
     command = [str(exe), "--measure", str(args.repetitions), "1", str(args.batch)]
+    host_raw, host_stderr, host_code = host_observation()
+    save_host_observation(out, host_raw, host_stderr)
+    (out / "review-seal.json").write_bytes(seal_raw)
+    collection_start = utc_now()
+    try:
+        if host_code or host_stderr:
+            raise ValueError("host observation command failed")
+        note = admit_host_observation(host_raw, build_end, collection_start)
+    except Exception as error:
+        reject(out, str(error))
+        raise
     try:
         measured = subprocess.run(command, cwd=root, capture_output=True, timeout=600)
         stdout, stderr, code, timed_out = measured.stdout, measured.stderr, measured.returncode, False
     except subprocess.TimeoutExpired as error:
         stdout, stderr, code, timed_out = error.stdout or b"", error.stderr or b"", None, True
-    save_capture(out, stdout, stderr, code, command, timed_out=timed_out)
+    collection_end = utc_now()
+    save_capture(out, stdout, stderr, code, command, timed_out=timed_out,
+                 collection_start_utc=collection_start.isoformat(),
+                 collection_end_utc=collection_end.isoformat())
     (out / "driver-description.jsonl").write_bytes(describe.stdout)
     (out / "fixture-inputs.json").write_bytes(input_bytes)
     try:
         if code or stderr or timed_out:
             raise ValueError("driver failed, timed out, or wrote stderr")
         rows, summary = admit_raw(stdout, repetitions=args.repetitions, batch=args.batch)
-        if git(root, "rev-parse", "HEAD") != args.harness_commit or git(root, "status", "--porcelain=v1", "--untracked-files=all"):
+        if git(root, "rev-parse", "HEAD") != actual_head or git(root, "status", "--porcelain=v1", "--untracked-files=all"):
             raise ValueError("source changed during collection")
         compiler_files = list((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
         if len(compiler_files) != 1:
             raise ValueError("configured compiler evidence unavailable")
         compiler_raw = compiler_files[0].read_bytes()
         provenance = {"schema": "csl.geo07-port-build-provenance/1", "source_commit": SOURCE,
-                      "harness_commit": args.harness_commit, "configuration": "Release",
+                      "harness_commit": actual_head, "review_seal_sha256": sha(seal_raw),
+                      "configuration": "Release",
                       "settings": {name: settings[name] for name in RELEASE_FLAGS},
                       "targets": targets, "compiler_version": compiler_version(compiler_raw),
                       "compiler_file_sha256": sha(compiler_raw), "cache_sha256": sha(cache_raw),
@@ -399,10 +492,14 @@ def collect(args) -> str:
         (out / "build.stdout.log").write_bytes(build_run.stdout)
         (out / "build.stderr.log").write_bytes(build_run.stderr)
         record = {"schema": RECORD_SCHEMA, "source_commit": SOURCE,
-                  "harness_commit": args.harness_commit,
+                  "harness_commit": actual_head,
+                  "reviewed_code_commit": parent_head,
+                  "review_seal_sha256": sha(seal_raw),
                   "source_tree": git(root, "rev-parse", SOURCE + "^{tree}"),
                   "harness_tree": git(root, "rev-parse", "HEAD^{tree}"),
-                  "created_utc": datetime.now(timezone.utc).isoformat(),
+                  "created_utc": utc_now().isoformat(),
+                  "collection_start_utc": collection_start.isoformat(),
+                  "collection_end_utc": collection_end.isoformat(),
                   "inputs": {"fixtures": INPUTS, "fixture_sha256": input_hashes,
                              "canonical_bytes_sha256": sha(input_bytes),
                              "driver_description_sha256": sha(describe.stdout),
@@ -418,7 +515,8 @@ def collect(args) -> str:
                                   "logical_processors": os.cpu_count(), "python": platform.python_version(),
                                   "requested_driver_workers": 1, "observed_native_threads": None,
                                   "observed_native_threads_reason": "no native thread counter in driver",
-                                  "concurrent_work_note": note},
+                                  "host_observation": note,
+                                  "host_observation_sha256": sha(host_raw)},
                   "process": {"exit_code": code, "stderr_sha256": sha(stderr),
                               "raw_sha256": sha(stdout)},
                   "build_provenance_sha256": sha((out / "build-provenance.json").read_bytes()),
@@ -445,7 +543,6 @@ def main() -> None:
     parser.add_argument("--build-dir", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--harness-commit", required=True)
-    parser.add_argument("--concurrent-work", type=Path, required=True)
     parser.add_argument("--repetitions", type=int, default=7)
     parser.add_argument("--batch", type=int, default=1000)
     args = parser.parse_args()

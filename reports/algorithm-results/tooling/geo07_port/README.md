@@ -69,13 +69,23 @@ python -B -m unittest discover -s tests/reporting -p test_geo07_port_harness.py
 
 Collection requires independent review and exact-head CI for this harness,
 a clean checkout at that reviewed commit, and an observed idle host window.
+The final commit changes only `scripts/reports/geo07_port/review-seal.json`.
+That seal pins its reviewed code parent and tree; the collector checks the
+actual HEAD, its parent and the final commit's exact changed-path set before
+building or invoking the driver. `--harness-commit` cross-checks the checked
+out HEAD and cannot authorize a newer code commit.
 The collector rebuilds the exact configured Release target with
 `--clean-first --verbose`, checks MSVC x64 `/O2 /Ob2 /DNDEBUG` and the driver,
 adapter and native generator library project/link graph, rejects `CL`, `_CL_`
 and `LINK` overrides, and retains build stdout/stderr, project hashes,
-compiler evidence and exact executable hash. Capture a concurrent-work note
-immediately before collection, including CPU load and build processes. If the
-host is busy, defer rather than measuring through the load.
+compiler evidence and exact executable hash. After the final rebuild and
+driver description, the collector captures its own structured Windows CPU
+load, logical processor count and `cmake`/`MSBuild`/`cl` process counts. The
+UTC observation must be after the rebuild, at most 30 seconds before the
+measurement start, have CPU load at most 25%, and have zero build processes.
+If the host is busy, it saves the exact observation bytes and a nonpublishable
+status without invoking `--measure`. An admitted attempt retains those raw
+bytes, their SHA-256 in the record and manifest, and UTC collection start/end.
 The record separates the frozen source tree from the reviewed harness tree.
 
 The following commands are a plan only. **They have not been run for this PR.**
@@ -87,20 +97,12 @@ $cmake = 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Co
   -DCSL_ENABLE_QHULL=OFF -DBUILD_TESTING=OFF
 & $cmake --build build/geo07-port --config Release `
   --target csl_geo07_port_report --parallel 4
-$load = (Get-CimInstance Win32_Processor | ForEach-Object {
-  "CPU load=$($_.LoadPercentage)% logical cores=$($_.NumberOfLogicalProcessors)"
-}) -join '; '
-$jobs = (Get-Process cmake,MSBuild,cl,python -ErrorAction SilentlyContinue |
-  Group-Object ProcessName | ForEach-Object { "$($_.Name)=$($_.Count)" }) -join ', '
-"UTC $([DateTime]::UtcNow.ToString('o')); $load; selected concurrent processes: $jobs; observed host window" |
-  Set-Content -LiteralPath build/geo07-port/concurrent-work.txt -Encoding utf8
 $harnessCommit = git rev-parse HEAD
 python -B scripts/reports/geo07_port/collect.py `
   --exe build/geo07-port/Release/csl_geo07_port_report.exe `
   --build-dir build/geo07-port `
   --out build/geo07-port/collection-001 `
   --harness-commit $harnessCommit `
-  --concurrent-work build/geo07-port/concurrent-work.txt `
   --repetitions 7 --batch 1000
 ```
 

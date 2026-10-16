@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import datetime, timedelta, timezone
 import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 
@@ -32,6 +34,93 @@ def fake_rows(repetitions=7, batch=5):
 
 
 class PortReportAdmission(unittest.TestCase):
+    def test_review_seal_rejects_forged_sha_and_later_clean_code_commit(self):
+        code, sealed, later, tree = "a" * 40, "b" * 40, "c" * 40, "d" * 40
+        seal = {"schema": "csl.geo07-port-review-seal/1", "source_commit": collect.SOURCE,
+                "reviewed_code_commit": code, "reviewed_code_tree": tree}
+        collect.admit_reviewed_head(sealed, sealed, code, tree,
+                                    {collect.SEAL_PATH}, seal)
+        for actual, claimed, parent, changed in (
+            (later, later, sealed, {"benchmarks/reporting/geo07_port/adapter_driver.cpp"}),
+            (later, later, code, {"benchmarks/reporting/geo07_port/adapter_driver.cpp", collect.SEAL_PATH}),
+            (later, sealed, code, {collect.SEAL_PATH}),
+        ):
+            with self.subTest(actual=actual, parent=parent, changed=changed), self.assertRaises(ValueError):
+                collect.admit_reviewed_head(actual, claimed, parent, tree, changed, seal)
+
+    def test_real_checkout_admission_rejects_later_clean_code_commit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            def git(*args):
+                return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
+            git("init", "-q")
+            git("config", "user.name", "Harness Test")
+            git("config", "user.email", "harness@example.invalid")
+            git("config", "core.autocrlf", "false")
+            code = root / "adapter_driver.cpp"
+            code.write_text("reviewed code\n", encoding="utf-8")
+            git("add", ".")
+            git("commit", "-qm", "reviewed code")
+            reviewed = git("rev-parse", "HEAD")
+            seal_path = root / collect.SEAL_PATH
+            seal_path.parent.mkdir(parents=True)
+            seal_path.write_bytes(collect.json_bytes({
+                "schema": "csl.geo07-port-review-seal/1", "source_commit": collect.SOURCE,
+                "reviewed_code_commit": reviewed,
+                "reviewed_code_tree": git("rev-parse", "HEAD^{tree}")}))
+            git("add", ".")
+            git("commit", "-qm", "seal reviewed code")
+            sealed = git("rev-parse", "HEAD")
+            self.assertEqual(collect.admit_checkout(root, sealed)[:2], (sealed, reviewed))
+            with self.assertRaises(ValueError):
+                collect.admit_checkout(root, reviewed)
+            code.write_text("later unreviewed code\n", encoding="utf-8")
+            git("add", ".")
+            git("commit", "-qm", "later code")
+            with self.assertRaises(ValueError):
+                collect.admit_checkout(root, git("rev-parse", "HEAD"))
+
+    def test_host_preflight_requires_fresh_idle_structured_observation(self):
+        build_end = datetime(2026, 10, 16, 12, 0, 0, tzinfo=timezone.utc)
+        start = build_end + timedelta(seconds=8)
+        note = {"schema": "csl.geo07-port-host-observation/1",
+                "observed_utc": (build_end + timedelta(seconds=5)).isoformat(),
+                "cpu_load_percent": 7, "logical_processors": 16,
+                "build_processes": {"cmake": 0, "MSBuild": 0, "cl": 0}}
+        raw = collect.json_bytes(note)
+        self.assertEqual(collect.admit_host_observation(raw, build_end, start), note)
+        for change in (
+            lambda item: item.update({"observed_utc": (build_end - timedelta(seconds=1)).isoformat()}),
+            lambda item: item.update({"observed_utc": (start - timedelta(seconds=31)).isoformat()}),
+            lambda item: item.update({"cpu_load_percent": 90}),
+            lambda item: item["build_processes"].update({"cl": 1}),
+            lambda item: item.pop("logical_processors"),
+        ):
+            candidate = deepcopy(note)
+            change(candidate)
+            with self.subTest(candidate=candidate), self.assertRaises(ValueError):
+                collect.admit_host_observation(collect.json_bytes(candidate), build_end, start)
+        with self.assertRaises(ValueError):
+            collect.admit_host_observation(raw, build_end, start + timedelta(seconds=31))
+        with self.assertRaises(ValueError):
+            collect.admit_host_observation(b"idle host confirmed", build_end, start)
+
+    def test_saved_host_and_collection_window_bind_exact_bytes(self):
+        raw = b'{"schema":"csl.geo07-port-host-observation/1"}\r\n'
+        start, end = "2026-10-16T12:00:08+00:00", "2026-10-16T12:00:10+00:00"
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory) / "attempt"
+            collect.save_host_observation(out, raw)
+            collect.save_capture(out, b'{}\r\n', b"", 0, ["driver", "--measure"],
+                                 collection_start_utc=start, collection_end_utc=end)
+            self.assertEqual((out / "host-observation.json").read_bytes(), raw)
+            capture = json.loads((out / "process-capture.json").read_bytes())
+            self.assertEqual(capture["host_observation_sha256"], hashlib.sha256(raw).hexdigest())
+            self.assertEqual((capture["collection_start_utc"], capture["collection_end_utc"]),
+                             (start, end))
+            self.assertEqual(collect.manifest(out, "test")["files"]["host-observation.json"],
+                             hashlib.sha256(raw).hexdigest())
+
     def test_frozen_source_and_report_only_delta(self):
         self.assertEqual(collect.SOURCE, "41b4b58f2ef982e75554519862afdd803e30f717")
         collect.admit_changed_paths({"CMakeLists.txt", "cmake/OptionalReports.cmake",
@@ -135,6 +224,7 @@ class PortReportAdmission(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory) / "attempt"
             stdout, stderr = b'{"bad":true}\r\n', b"fatal\r\n"
+            collect.save_host_observation(out, b'{"observed":"synthetic"}\r\n')
             collect.save_capture(out, stdout, stderr, 2,
                                  ["driver", "--measure", "7", "1", "5"])
             collect.reject(out, "synthetic rejected output")
