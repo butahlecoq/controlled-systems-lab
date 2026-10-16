@@ -40,6 +40,8 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 
 The [issue #5 feedback contract follow-up](feedback-contract-followup.md) turns the reviewed policy distinctions into a bounded robust predecessor and evidence handoff without claiming an implemented feedback solver.
 
+The [GEO-02 floating-model audit](geo02-floating-model-audit.md) separates exact hull preservation for stored binary64 candidates from error relative to an intended real-valued affine image or Minkowski sum. It proves a conditional finite-V error bound and records the H-to-V coverage proof still needed for issue #40.
+
 ## Selected first benchmark
 
 [B04 restoration](b04-restoration.md) records the owner-selected nominal scenario, its versioned historical manifest and an exact terminal-invariant audit. Source gaps and the model/result inconsistency remain explicit before implementation comparisons.

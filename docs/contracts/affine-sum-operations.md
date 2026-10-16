@@ -64,12 +64,21 @@ malformed, or numerically inconsistent dependencies do not produce a successful
 set result.
 
 The result uses `SetRelation::equivalent` with `NumericalCheck` evidence under
-the caller's tolerance. This is an algorithmic numerical relation only. It is
-not exact arithmetic, validated set inclusion, a global Hausdorff/error bound,
-or a proof of exact extreme-vertex enumeration. Candidate coordinates still
-use binary64 arithmetic, and H-to-V conversion still relies on the selected
-provider's numerical completeness assumptions. Binary64 overflow is reported
-as failure. Validated assurance is rejected.
+the caller's tolerance. This is an algorithmic numerical relation only. For a
+finite V input, the source set is the convex hull of stored binary64 vertices,
+interpreted as exact dyadics; the intended exact-real image or sum of that set
+can still differ from the hull of rounded, generated candidates. Exact
+candidate deletion preserves only that latter hull. For an H input, even the
+input-to-vertex correspondence depends on the selected converter's numerical
+coverage claim: checking each returned vertex against H rows does not prove
+that all needed vertices were found. The operation reports no bound between
+its output and either exact stored-input model or an authored pre-rounding real
+model. `NumericalCheck.max_residual` does not supply such a bound. Binary64
+overflow is reported as failure; finite underflow/cancellation can still alter
+candidate coordinates. Validated assurance is rejected. The
+[scientific audit](../research/geo02-floating-model-audit.md) gives the precise
+conditional finite-V error theorem, a counterexample, and the proof required
+before a caller can claim real-model inclusion or a global error bound.
 
 `max_candidates` is an optional admission limit on the generated cloud, not an
 intrinsic dimension restriction. Products and coordinate storage are checked
