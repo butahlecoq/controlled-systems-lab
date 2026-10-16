@@ -1,0 +1,17 @@
+{
+  "collection_end_utc": "2026-10-16T14:51:37.703130+00:00",
+  "collection_start_utc": "2026-10-16T14:51:36.008720+00:00",
+  "command": [
+    "D:\\work\\PhD\\repo\\.worktrees\\geo07-port-harness\\build\\geo07-port\\Release\\csl_geo07_port_report.exe",
+    "--measure",
+    "7",
+    "1",
+    "5000"
+  ],
+  "exit_code": 0,
+  "host_observation_sha256": "fbb1805b82ec420665e0db6a0996223d71a590d4122b55f14ff045c28a5dec69",
+  "schema": "csl.geo07-port-process-capture/1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "41649b7f4acde2c0e980b7c648358d9d217f68e3e5ec9c103f25173e7ab0d39e",
+  "timed_out": false
+}
