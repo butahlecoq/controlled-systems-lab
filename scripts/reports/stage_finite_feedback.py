@@ -25,12 +25,14 @@ _site_spec.loader.exec_module(site)
 
 KIND = "finite-feedback-registered-port"
 SCOPE = "28 verified registered-port calls, seven per four authored finite games"
-LIMITS = ("Exploratory and inconclusive single-adapter timings; concurrent builds observed; "
+LIMITS = ("Exploratory and inconclusive single-adapter timings; concurrent work not quantified; "
+          "all winning flags and selected action cells checked, other action-tensor cells unchecked; "
           "no comparator, source-mapped limiter, speedup, continuous-state, partial-observation, "
           "physical-model, or global causal minimax claim")
 FILES = report.RAW_FILES | report.RENDERED_FILES
 PUBLISHERS = ("stage_finite_feedback.py", "finite_feedback/render_saved.py",
-              "finite_feedback/collect.py", "registered_reports.py")
+              "finite_feedback/collect.py", "finite_feedback/capture.py",
+              "registered_reports.py")
 
 
 def digest(content: bytes) -> str:
@@ -55,7 +57,7 @@ def validate(bundle: Path) -> common.PublicationRecord:
                 "publisher_files": {name: publisher_digest(name) for name in PUBLISHERS}}
     public_id = "finite-feedback-registered-" + common._digest(identity)
     payload_hash = common._digest(record)
-    return common.PublicationRecord(KIND, public_id, payload_hash, report.collect.SOURCE,
+    return common.PublicationRecord(KIND, public_id, payload_hash, record["source_commit"],
                                     SCOPE, LIMITS, tuple(sorted(FILES)), record["schema"],
                                     payload_hash, bundle.name)
 

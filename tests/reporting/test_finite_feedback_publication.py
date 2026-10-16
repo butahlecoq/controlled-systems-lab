@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import stage_finite_feedback as stage
 
-BUNDLE = ROOT / "reports/algorithm-results/finite-feedback-bee7e6d32c88451d"
+BUNDLE = ROOT / "reports/algorithm-results/finite-feedback-a6e96fd96c7ac7cc"
 CATALOGUE = BUNDLE.parent / "finite-feedback-publications.json"
 
 
@@ -34,16 +34,28 @@ class Links(HTMLParser):
 class FiniteFeedbackReportTests(unittest.TestCase):
     def test_saved_numerical_work_and_timing_are_rederived_from_raw(self):
         record = stage.report.render(BUNDLE, check=True)
-        self.assertEqual(record["source_commit"], "6602f0f88a8ef2071edefbbd913f7c4bbb6201df")
+        self.assertEqual(record["source_commit"], "d0da7cb3b167f21e620b716b615e7b77cf5bd7aa")
+        self.assertEqual(record["harness_commit"], "6602f0f88a8ef2071edefbbd913f7c4bbb6201df")
         self.assertEqual(record["work"]["measured_registered_calls"], 28)
         self.assertEqual(record["work"]["failed"], 0)
         self.assertEqual({row["scenario"]: row["median_ns"] for row in record["summary"]},
-                         {"clipping": 3900, "branching": 5000, "empty-action": 3600, "nominal": 3800})
-        rows = list(csv.DictReader(io.StringIO((BUNDLE / "measure.stdout.csv").read_text(encoding="utf-8"))))
+                         {"clipping": 3500, "branching": 4700, "empty-action": 3100, "nominal": 3300})
+        rows = list(csv.DictReader(io.StringIO((BUNDLE / "measure.stdout.log").read_text(encoding="utf-8"))))
         self.assertEqual(len(rows), 32)
         self.assertEqual(sum(row["purpose"] == "warmup" for row in rows), 4)
         self.assertEqual(sum(row["purpose"] == "trial" for row in rows), 28)
         self.assertIn("inconclusive exploratory single-adapter", (BUNDLE / "index.html").read_text())
+        self.assertIn("Other action-tensor cells are not independently checked", (BUNDLE / "index.html").read_text())
+        self.assertEqual(record["oracle_scope"]["action_cells"]["nominal"], ["stage 0 state 0"])
+        pre = json.loads((BUNDLE / "prebuild-receipt.json").read_text())
+        post = json.loads((BUNDLE / "postrun-receipt.json").read_text())
+        self.assertEqual((pre["commit"], pre["tree"], pre["status_sha256"]),
+                         (post["commit"], post["tree"], post["status_sha256"]))
+        self.assertEqual(pre["tracked_count"], 1438)
+        graph = json.loads((BUNDLE / "build-graph.json").read_text())
+        self.assertEqual(graph["selected_artifact"], "Release/csl_finite_feedback_report.exe")
+        self.assertIn("csl_contracts", graph["targets"])
+        self.assertIn("src/contracts/problem.cpp", graph["targets"]["csl_contracts"]["sources"])
 
     def test_staged_route_and_offline_zip_match_saved_bytes(self):
         catalogue = json.loads(CATALOGUE.read_text(encoding="utf-8"))
@@ -56,8 +68,8 @@ class FiniteFeedbackReportTests(unittest.TestCase):
             (site / "old.txt").write_bytes(b"unchanged")
             public_id = stage.stage(CATALOGUE, site)
             self.assertEqual((site / "old.txt").read_bytes(), b"unchanged")
-            self.assertEqual((site / public_id / "measure.stdout.csv").read_bytes(),
-                             (BUNDLE / "measure.stdout.csv").read_bytes())
+            self.assertEqual((site / public_id / "measure.stdout.log").read_bytes(),
+                             (BUNDLE / "measure.stdout.log").read_bytes())
             self.assertEqual(hashlib.sha256((site / (public_id + ".zip")).read_bytes()).hexdigest(),
                              expected["zip_sha256"])
             with zipfile.ZipFile(site / (public_id + ".zip")) as archive:
@@ -77,7 +89,8 @@ class FiniteFeedbackReportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             copied = Path(temporary) / BUNDLE.name
             shutil.copytree(BUNDLE, copied)
-            for name in ("measure.stdout.csv", "build-graph.json", "records.json", "index.html"):
+            for name in ("measure.stdout.log", "prebuild-receipt.json", "postrun-receipt.json",
+                         "source-tree.txt", "build-graph.json", "records.json", "index.html"):
                 with self.subTest(name=name):
                     path = copied / name
                     original = path.read_bytes()

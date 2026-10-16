@@ -15,10 +15,8 @@ collect = importlib.util.module_from_spec(_spec)
 assert _spec.loader is not None
 _spec.loader.exec_module(collect)
 
-RAW_FILES = frozenset({"build-graph.json", "host-pre.json", "host-post.json", "manifest.json",
-                       "measure.stderr.txt", "measure.stdout.csv", "process-capture.json",
-                       "records.json", "release-build.log", "smoke.stderr.txt", "smoke.stdout.csv",
-                       "trials.jsonl"})
+RAW_FILES = frozenset(set(collect.RAW) | {"build-graph.json", "source-tree.txt",
+                                          "records.json", "trials.jsonl", "manifest.json"})
 RENDERED_FILES = frozenset({"index.html", "performance.svg", "summary.csv", "trials.csv",
                             "report-manifest.json", "bundle.zip"})
 SUMMARY_FIELDS = ("scenario", "attempts", "matches", "failures", "median_ns", "min_ns", "max_ns")
@@ -30,7 +28,7 @@ def validate(bundle: Path) -> dict:
         collect.require((bundle / name).is_file() and not (bundle / name).is_symlink(),
                         "missing or linked saved file: " + name)
     manifest = collect.read_json(bundle / "manifest.json")
-    collect.require(manifest.get("schema") == "csl.finite-feedback-source-manifest/1" and
+    collect.require(manifest.get("schema") == "csl.finite-feedback-source-manifest/2" and
                     set(manifest.get("files", {})) == RAW_FILES - {"manifest.json"},
                     "source inventory differs")
     for name, digest in manifest["files"].items():
@@ -39,38 +37,55 @@ def validate(bundle: Path) -> dict:
     record = collect.read_json(bundle / "records.json")
     unsigned = {key: value for key, value in record.items() if key not in ("report_id", "payload_sha256")}
     collect.require(record.get("schema") == collect.SCHEMA and
-                    record.get("source_commit") == record.get("harness_commit") == collect.SOURCE and
+                    record.get("harness_commit") == record.get("numerical_source_commit") == collect.NUMERICAL_SOURCE and
                     record.get("payload_sha256") == collect.sha(collect.encoded(unsigned)) and
                     record.get("report_id") == "finite-feedback-" + record["payload_sha256"][:16] and
                     manifest["report_id"] == record["report_id"] == bundle.name,
                     "saved record identity differs")
-    capture = collect.read_json(bundle / "process-capture.json")
-    collect.require(capture["source_commit"] == collect.SOURCE and
-                    capture["smoke_exit"] == capture["measure_exit"] == 0 and
-                    capture["executable_sha256"] == record["executable_sha256"] and
-                    capture["driver_sha256"] == record["source_sha256"]["benchmarks/reporting/finite_feedback/driver.cpp"],
-                    "saved process/source identity differs")
+    capture = collect.read_json(bundle / "capture-status.json")
+    pre = collect.read_json(bundle / "prebuild-receipt.json")
+    post = collect.read_json(bundle / "postrun-receipt.json")
+    collect.require(capture["state"] == "captured" and capture["failure"] is None and
+                    capture["return_codes"] == {"configure": 0, "build": 0, "smoke": 0, "measure": 0} and
+                    capture["prebuild"] == pre and capture["postrun"] == post and
+                    pre["commit"] == post["commit"] == record["source_commit"] and
+                    pre["tree"] == post["tree"] == record["source_tree"] and
+                    pre["status_sha256"] == post["status_sha256"] == collect.EMPTY_SHA and
+                    capture["executable_sha256_before"] == capture["executable_sha256_after"] ==
+                    record["executable_sha256"] and
+                    collect.sha((bundle / "prebuild-receipt.json").read_bytes()) == record["prebuild_receipt_sha256"] and
+                    collect.sha((bundle / "postrun-receipt.json").read_bytes()) == record["postrun_receipt_sha256"] and
+                    collect.sha((bundle / "source-tree.txt").read_bytes()) == record["source_inventory_sha256"],
+                    "saved clean-tree/executable ownership differs")
     graph = collect.read_json(bundle / "build-graph.json")
     collect.require(collect.sha(collect.encoded(graph)) == record["build_graph_sha256"] and
                     graph["configuration"] == "Release" and
-                    graph["generator"] == {"source": "SOURCE_ROOT", "build": "BUILD_ROOT"},
+                    graph["schema"] == "csl.finite-feedback-build-graph/2" and
+                    graph["source_root"] == "SOURCE_ROOT" and graph["build_root"] == "BUILD_ROOT" and
+                    graph["selected_artifact"] == "Release/csl_finite_feedback_report.exe",
                     "saved build graph differs")
-    group = graph["targets"]["csl_finite_feedback_report"]["compile_groups"]
-    collect.require(any(item["language"] == "CXX" and item["standard"] == "20" and
-                        "NDEBUG" in item["defines"] and
-                        any("/O2" in part for part in item["fragments"]) for item in group),
-                    "Release compilation evidence missing")
-    smoke = collect.rows((bundle / "smoke.stdout.csv").read_bytes(), "smoke")
-    attempts = collect.rows((bundle / "measure.stdout.csv").read_bytes(), "measure")
-    collect.require(collect.sha((bundle / "measure.stdout.csv").read_bytes()) ==
+    report_target = graph["targets"]["csl_finite_feedback_report"]
+    collect.require(report_target["sources"] == ["benchmarks/reporting/finite_feedback/driver.cpp"] and
+                    {"csl_finite_feedback_port", "csl_finite_feedback"} <= set(graph["targets"]) and
+                    graph["compiler"]["version"] == record["environment"]["compiler"]["version"],
+                    "linked source/compiler graph differs")
+    inventory = {line.split(b"\t", 1)[1].decode() for line in
+                 (bundle / "source-tree.txt").read_bytes().splitlines()}
+    collect.require(len(inventory) == pre["tracked_count"] and
+                    all(source in inventory for target in graph["targets"].values()
+                        for source in target["sources"] if not source.startswith("build/")),
+                    "linked sources absent from complete tree inventory")
+    smoke = collect.rows((bundle / "smoke.stdout.log").read_bytes(), "smoke")
+    attempts = collect.rows((bundle / "measure.stdout.log").read_bytes(), "measure")
+    collect.require(collect.sha((bundle / "measure.stdout.log").read_bytes()) ==
                     record["raw_csv_sha256"] and attempts == record["trials"] and
                     collect.summarize([row for row in attempts if row["purpose"] == "trial"]) ==
                     record["summary"] and len(smoke) == 4,
                     "saved raw rows or summary differ")
     jsonl = b"".join(collect.encoded(row) for row in attempts)
     collect.require((bundle / "trials.jsonl").read_bytes() == jsonl and
-                    (bundle / "smoke.stderr.txt").read_bytes() == b"" and
-                    (bundle / "measure.stderr.txt").read_bytes() == b"" and
+                    (bundle / "smoke.stderr.log").read_bytes() == b"" and
+                    (bundle / "measure.stderr.log").read_bytes() == b"" and
                     record["work"] == {"smoke_calls": 4, "warmup_calls": 4,
                                        "measured_registered_calls": 28, "matched": 28,
                                        "failed": 0, "unsupported": 0, "cancelled": 0, "missing": 0},
@@ -117,15 +132,18 @@ def generated(record: dict) -> dict[str, bytes]:
             'th{background:#eef3f8}code{overflow-wrap:anywhere}img{max-width:100%}</style></head><body>'
             '<h1>Finite feedback: verified registered-port calls</h1><p><strong>Verdict:</strong> '
             'inconclusive exploratory single-adapter timings. No comparator or speedup is claimed.</p>'
-            '<p>Source and harness commit <code>' + escape(record["source_commit"]) + '</code>; '
+            '<p>Clean build source commit <code>' + escape(record["source_commit"]) + '</code>; '
+            'unchanged numerical source and driver <code>' + escape(record["harness_commit"]) + '</code>; '
             'saved report <code>' + escape(record["report_id"]) + '</code>; executable SHA-256 '
             '<code>' + escape(record["executable_sha256"]) + '</code>.</p>'
             '<h2>Literal finite games and policy outputs</h2><table><thead><tr><th>Game</th>'
             '<th>Initial winning</th><th>Initial action indices</th><th>Observed branch actions</th>'
             '</tr></thead><tbody>' + expected + '</tbody></table>'
             '<p>Whole-successor clipping, observed-state branching, empty actions, and nominal single-disturbance '
-            'cases use exact authored transition tables. The branching row selects distinct later actions after '
-            'states 1 and 2 are observed. Every measured call passed the complete table reference comparison and literal oracle.</p>'
+            'cases use exact authored transition tables. The frozen driver compares <strong>all winning flags</strong> '
+            'and only these admissible-action cells: stage 0/state 0 in every game, plus stage 1/states 1 and 2 '
+            'in branching. Other action-tensor cells are not independently checked by this report driver. '
+            'The branching row checks distinct later actions after states 1 and 2 are observed.</p>'
             '<h2>Measured latency</h2><table><thead><tr><th>Game</th><th>Measured calls</th>'
             '<th>Failures</th><th>Median ns</th><th>Min ns</th><th>Max ns</th></tr></thead><tbody>'
             + body_rows + '</tbody></table><p><a href="performance.svg">Median and range figure (SVG)</a></p>'
@@ -133,22 +151,26 @@ def generated(record: dict) -> dict[str, bytes]:
             '(28 calls total) were verified. Median and min–max range describe these repetitions; the range is '
             'not a confidence interval.</p>'
             '<h2>Interval and environment</h2><p>The steady-clock interval begins before registry construction '
-            'and ends after registered execution, full-policy reference comparison, and literal oracle. It excludes '
+            'and ends after registered execution, all-winning-flags comparison, and selected action-cell checks. It excludes '
             'fixture construction, object destruction, CSV serialization, and process startup. It is a verified '
             'public-call interval, not native-only time or application end-to-end latency.</p>'
-            '<p>' + escape(host["cpu"]["Name"]) + '; ' + escape(host["os"]["Caption"]) + ' '
-            + escape(host["os"]["Version"]) + '; ' + str(host["cpu"]["NumberOfLogicalProcessors"]) +
+            '<p>' + escape(host["processor"]) + '; ' + escape(host["platform"]) + '; ' +
+            str(host["logical_processors"]) +
             ' logical processors; MSVC 19.44.35215.0, x64 Release /O2 /DNDEBUG /std:c++20. One requested '
             'outer worker; native OS thread count was unavailable. One process with fresh registry, prepared plan '
-            'and workspace per call; caches may be warm. Other build processes were observed during collection.</p>'
+            'and workspace per call; caches may be warm. Concurrent work was not fully quantified.</p>'
             '<h2>Evidence limits</h2><p>Single finite-table adapter, four small authored games, one host, and '
-            'one measured session. No competitor, source-mapped limiter profile, speedup, continuous-state '
+            'one measured session. Unlisted action-tensor cells were not checked. No competitor, source-mapped limiter profile, speedup, continuous-state '
             'disturbance enclosure, partial observation, physical-model correspondence, or global causal minimax '
             'claim. Internal phase and native-only counters were unavailable.</p>'
             '<h2>Saved evidence</h2><ul><li><a href="records.json">Versioned raw JSON</a></li>'
-            '<li><a href="measure.stdout.csv">Raw driver CSV</a></li>'
+            '<li><a href="measure.stdout.log">Raw driver CSV</a></li>'
             '<li><a href="trials.jsonl">Trial JSONL</a></li><li><a href="trials.csv">Measured trial CSV</a></li>'
             '<li><a href="summary.csv">Summary CSV</a></li><li><a href="build-graph.json">Release target graph</a></li>'
+            '<li><a href="source-tree.txt">Complete Git tree inventory</a></li>'
+            '<li><a href="prebuild-receipt.json">Prebuild clean receipt</a></li>'
+            '<li><a href="postrun-receipt.json">Postrun clean receipt</a></li>'
+            '<li><a href="capture-status.json">Build and run capture</a></li>'
             '<li><a href="manifest.json">Source manifest</a></li><li><a href="report-manifest.json">Report manifest</a></li>'
             '<li><a href="bundle.zip">Offline ZIP</a></li></ul></body></html>\n').encode()
     return {"index.html": html, "performance.svg": svg,

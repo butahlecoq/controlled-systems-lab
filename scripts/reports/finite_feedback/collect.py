@@ -1,7 +1,4 @@
-"""Admit a frozen finite-feedback driver run into saved, versioned records.
-
-This command reads an already completed collection. It never runs the driver.
-"""
+"""Admit a captured finite-feedback Release run; never execute numerical work."""
 from __future__ import annotations
 
 import argparse
@@ -16,8 +13,8 @@ import shutil
 import statistics
 import subprocess
 
-SOURCE = "6602f0f88a8ef2071edefbbd913f7c4bbb6201df"
-SCHEMA = "csl.finite-feedback-records/1"
+NUMERICAL_SOURCE = "6602f0f88a8ef2071edefbbd913f7c4bbb6201df"
+SCHEMA = "csl.finite-feedback-records/2"
 FIELDS = ("purpose", "scenario", "repetition", "status", "initial_winning",
           "initial_actions", "branch_actions", "elapsed_ns", "provider_id",
           "provider_version", "detail")
@@ -27,8 +24,11 @@ CASES = {
     "empty-action": ("0", "", ""),
     "nominal": ("1", "0", ""),
 }
-RAW = ("measure.stdout.csv", "measure.stderr.txt", "smoke.stdout.csv",
-       "smoke.stderr.txt", "host-pre.json", "host-post.json", "process-capture.json")
+RAW = ("capture-status.json", "prebuild-receipt.json", "postrun-receipt.json",
+       "configure.stdout.log", "configure.stderr.log", "release-build.stdout.log",
+       "release-build.stderr.log", "smoke.stdout.log", "smoke.stderr.log",
+       "measure.stdout.log", "measure.stderr.log", "host-pre.json", "host-post.json")
+EMPTY_SHA = hashlib.sha256(b"").hexdigest()
 
 
 def require(condition: bool, message: str) -> None:
@@ -68,7 +68,7 @@ def rows(content: bytes, purpose: str) -> list[dict]:
                 row["provider_id"] == "csl.reachability.finite-feedback-table" and
                 row["provider_version"] == "1.0.0" and
                 re.fullmatch(r"\d+", row["elapsed_ns"]) is not None,
-                "literal output, registered identity, status, or timing differs")
+                "checked witness cells, registered identity, status, or timing differs")
     return result
 
 
@@ -81,136 +81,218 @@ def summarize(measured: list[dict]) -> list[dict]:
             for case in CASES]
 
 
-def frozen_file(root: Path, relative: str) -> bytes:
-    result = subprocess.run(["git", "show", f"{SOURCE}:{relative}"], cwd=root,
-                            capture_output=True, check=True)
-    data = result.stdout
-    require((root / relative).read_bytes() == data, "frozen source differs: " + relative)
-    return data
+def clean_receipts(collection: Path, capture: dict) -> tuple[dict, dict]:
+    pre = read_json(collection / "prebuild-receipt.json")
+    post = read_json(collection / "postrun-receipt.json")
+    require(capture["state"] == "captured" and capture["failure"] is None and
+            capture["return_codes"] == {"configure": 0, "build": 0, "smoke": 0, "measure": 0},
+            "capture did not complete cleanly")
+    require(pre == capture["prebuild"] and post == capture["postrun"] and
+            pre["schema"] == post["schema"] == "csl.finite-feedback-clean-tree-receipt/1" and
+            pre["status_sha256"] == post["status_sha256"] == EMPTY_SHA and
+            pre["commit"] == post["commit"] == capture["source_commit"] and
+            pre["tree"] == post["tree"] == capture["source_tree"] and
+            pre["tracked_count"] == post["tracked_count"] and
+            pre["observed_utc"] <= capture["configure_start_utc"] <= capture["build_start_utc"] <=
+            capture["build_end_utc"] <= capture["measure_start_utc"] <=
+            capture["measure_end_utc"] <= post["observed_utc"],
+            "prebuild/postrun full-tree receipt differs")
+    return pre, post
 
 
-def graph(build: Path) -> dict:
+def graph(build: Path, root: Path, tracked: set[str]) -> dict:
     reply = build / ".cmake/api/v1/reply"
     indexes = list(reply.glob("index-*.json"))
-    require(len(indexes) == 1, "single CMake File API index required")
+    require(len(indexes) == 1, "one File API index required")
     index = read_json(indexes[0])
-    model = read_json(reply / index["reply"]["codemodel-v2"]["jsonFile"])
+    model_path = reply / index["reply"]["codemodel-v2"]["jsonFile"]
+    model = read_json(model_path)
+    require(Path(model["paths"]["source"]).resolve() == root and
+            Path(model["paths"]["build"]).resolve() == build,
+            "File API graph belongs to another source/build directory")
     config = next(item for item in model["configurations"] if item["name"] == "Release")
-    targets = {item["name"]: read_json(reply / item["jsonFile"]) for item in config["targets"]}
-    require("csl_finite_feedback_report" in targets, "report target missing from graph")
-    names = sorted(targets)
-    selected = {}
-    for name in names:
-        if name.startswith("csl_") or name == "ZERO_CHECK":
-            target = targets[name]
-            selected[name] = {
-                "type": target["type"],
-                "dependencies": sorted(dep["id"].split("::", 1)[0] for dep in target.get("dependencies", [])),
-                "compile_groups": [{"language": group.get("language"),
-                                    "standard": group.get("languageStandard", {}).get("standard"),
-                                    "fragments": [fragment["fragment"] for fragment in group.get("compileCommandFragments", [])],
-                                    "defines": [value["define"] for value in group.get("defines", [])]}
-                                   for group in target.get("compileGroups", [])],
-                "artifacts": [Path(item["path"]).name for item in target.get("artifacts", [])],
-            }
+    entries = {item["id"]: item for item in config["targets"]}
+    report_entries = [item for item in entries.values() if item["name"] == "csl_finite_feedback_report"]
+    require(len(report_entries) == 1, "unique registered report target required")
+    selected: dict[str, dict] = {}
+    raw_hashes = {"index": sha(indexes[0].read_bytes()), "codemodel": sha(model_path.read_bytes())}
+
+    def visit(identifier: str) -> None:
+        entry = entries[identifier]
+        name = entry["name"]
+        if name in selected:
+            return
+        target_path = reply / entry["jsonFile"]
+        target = read_json(target_path)
+        raw_hashes[name] = sha(target_path.read_bytes())
+        sources = [item["path"].replace("\\", "/") for item in target.get("sources", [])]
+        generated = {}
+        build_prefix = build.relative_to(root).as_posix() + "/"
+        for source in sources:
+            require(not Path(source).is_absolute() and ".." not in Path(source).parts,
+                    "unsafe linked target source: " + source)
+            path = root / source
+            if source in tracked:
+                require(path.is_file(), "tracked linked source missing: " + source)
+            else:
+                require(source.startswith(build_prefix) and path.is_file(),
+                        "linked target source is outside clean tracked tree/build: " + source)
+                generated[source.removeprefix(build_prefix)] = sha(path.read_bytes())
+        dependencies = [entries[item["id"]]["name"] for item in target.get("dependencies", [])]
+        selected[name] = {
+            "type": target["type"], "sources": sources, "generated_source_sha256": generated,
+            "dependencies": sorted(dependencies),
+            "artifacts": [item["path"].replace("\\", "/") for item in target.get("artifacts", [])],
+            "compile_groups": [{"language": group.get("language"),
+                                "standard": group.get("languageStandard", {}).get("standard"),
+                                "fragments": [fragment["fragment"] for fragment in group.get("compileCommandFragments", [])],
+                                "defines": [value["define"] for value in group.get("defines", [])]}
+                               for group in target.get("compileGroups", [])],
+            "link": [fragment["fragment"] for fragment in target.get("link", {}).get("commandFragments", [])],
+            "archive": [fragment["fragment"] for fragment in target.get("archive", {}).get("commandFragments", [])],
+        }
+        for dependency in target.get("dependencies", []):
+            visit(dependency["id"])
+
+    visit(report_entries[0]["id"])
     report = selected["csl_finite_feedback_report"]
-    groups = report["compile_groups"]
-    require(any(group["language"] == "CXX" and group["standard"] == "20" and
-                "NDEBUG" in group["defines"] and
-                any("/O2" in fragment for fragment in group["fragments"])
-                for group in groups), "Release C++20/NDEBUG/O2 graph required")
-    require("csl_finite_feedback_port" in report["dependencies"] and
-            "csl_finite_feedback" in report["dependencies"] and
-            "csl_finite_feedback_report.exe" in report["artifacts"],
-            "registered report dependency graph differs")
-    return {"schema": "csl.finite-feedback-build-graph/1",
-            "generator": {"source": "SOURCE_ROOT", "build": "BUILD_ROOT"},
-            "configuration": "Release", "targets": selected}
+    require(report["artifacts"] and report["artifacts"][0] == "Release/csl_finite_feedback_report.exe" and
+            report["sources"] == ["benchmarks/reporting/finite_feedback/driver.cpp"] and
+            {"csl_finite_feedback", "csl_finite_feedback_port"} <= set(selected),
+            "selected executable or linked ownership differs")
+    for name, target in selected.items():
+        if name == "ZERO_CHECK":
+            continue
+        require(all(group["language"] == "CXX" and group["standard"] == "20" and
+                    ("NDEBUG" in group["defines"] or
+                     any("NDEBUG" in fragment for fragment in group["fragments"])) and
+                    any("/O2" in fragment for fragment in group["fragments"])
+                    for group in target["compile_groups"]),
+                "linked target is not Release C++20/NDEBUG/O2: " + name)
+    compiler_files = list((build / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
+    require(len(compiler_files) == 1, "unique compiler owner file required")
+    compiler_text = compiler_files[0].read_text(encoding="utf-8", errors="replace")
+    version = re.search(r'set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)', compiler_text)
+    compiler = re.search(r'set\(CMAKE_CXX_COMPILER "([^"]+)"\)', compiler_text)
+    require(version is not None and compiler is not None and
+            Path(compiler.group(1)).is_file(), "compiler identity unavailable")
+    return {"schema": "csl.finite-feedback-build-graph/2", "source_root": "SOURCE_ROOT",
+            "build_root": "BUILD_ROOT", "configuration": "Release",
+            "selected_artifact": report["artifacts"][0], "targets": selected,
+            "file_api_sha256": raw_hashes,
+            "compiler": {"id": "MSVC", "version": version.group(1),
+                         "binary": Path(compiler.group(1)).name,
+                         "binary_sha256": sha(Path(compiler.group(1)).read_bytes()),
+                         "owner_file_sha256": sha(compiler_files[0].read_bytes())}}
+
+
+def sanitize(content: bytes, root: Path, build: Path) -> bytes:
+    value = content.decode("utf-8", errors="replace")
+    for original, replacement in ((str(build), "BUILD_ROOT"), (str(root), "SOURCE_ROOT"),
+                                  (build.as_posix(), "BUILD_ROOT"), (root.as_posix(), "SOURCE_ROOT")):
+        value = value.replace(original, replacement)
+    return value.encode()
 
 
 def collect(root: Path, build: Path, collection: Path, out: Path) -> Path:
     require(not out.exists(), "refusing to overwrite a saved bundle")
-    require(subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root).decode().strip() == SOURCE,
-            "collection worktree has different HEAD")
-    # Reporting scripts may be added later. The built source/harness bytes stay fixed.
-    checked = {name: sha(frozen_file(root, name)) for name in (
-        "benchmarks/reporting/finite_feedback/driver.cpp",
-        "src/reachability/finite_feedback.cpp",
-        "src/reachability/finite_feedback_port.cpp",
-        "include/csl/reachability/finite_feedback_port.hpp",
-        "cmake/OptionalReports.cmake")}
-    capture = read_json(collection / "process-capture.json")
-    require(capture["source_commit"] == SOURCE and capture["smoke_exit"] == 0 and
-            capture["measure_exit"] == 0 and capture["driver_sha256"] ==
-            checked["benchmarks/reporting/finite_feedback/driver.cpp"],
-            "capture exit or source identity differs")
-    executable = build / "Release/csl_finite_feedback_report.exe"
-    require(sha(executable.read_bytes()) == capture["executable_sha256"],
-            "measured executable differs")
     require(all((collection / name).is_file() for name in RAW), "raw collection incomplete")
-    require((collection / "smoke.stderr.txt").read_bytes() == b"" and
-            (collection / "measure.stderr.txt").read_bytes() == b"", "driver stderr nonempty")
-    smoke = rows((collection / "smoke.stdout.csv").read_bytes(), "smoke")
-    attempts = rows((collection / "measure.stdout.csv").read_bytes(), "measure")
+    capture = read_json(collection / "capture-status.json")
+    pre, post = clean_receipts(collection, capture)
+    source = capture["source_commit"]
+    tree = capture["source_tree"]
+    require(re.fullmatch(r"[0-9a-f]{40}", source) is not None and
+            subprocess.check_output(["git", "rev-parse", source + "^{tree}"], cwd=root).decode().strip() == tree,
+            "source commit/tree mismatch")
+    inventory = subprocess.check_output(["git", "ls-tree", "-r", source], cwd=root)
+    tracked = {line.split(b"\t", 1)[1].decode() for line in inventory.splitlines()}
+    require(len(tracked) == pre["tracked_count"], "tracked source inventory differs")
+    require(subprocess.check_output(["git", "show", f"{NUMERICAL_SOURCE}:benchmarks/reporting/finite_feedback/driver.cpp"], cwd=root) ==
+            subprocess.check_output(["git", "show", f"{source}:benchmarks/reporting/finite_feedback/driver.cpp"], cwd=root),
+            "frozen driver changed")
+    executable = build / "Release/csl_finite_feedback_report.exe"
+    exe_hash = sha(executable.read_bytes())
+    require(capture["executable_sha256_before"] == capture["executable_sha256_after"] == exe_hash,
+            "measured executable differs")
+    smoke = rows((collection / "smoke.stdout.log").read_bytes(), "smoke")
+    attempts = rows((collection / "measure.stdout.log").read_bytes(), "measure")
+    require(all((collection / name).read_bytes() == b"" for name in
+                ("smoke.stderr.log", "measure.stderr.log")), "driver stderr nonempty")
     require(Counter(row["scenario"] for row in attempts if row["purpose"] == "trial") ==
             {case: 7 for case in CASES}, "measured fixture count differs")
-    build_graph = graph(build)
+    build_graph = graph(build, root, tracked)
     cache = (build / "CMakeCache.txt").read_text(encoding="utf-8", errors="replace")
     for token in ("BUILD_TESTING:BOOL=OFF", "CSL_BUILD_FINITE_FEEDBACK_REPORT:BOOL=ON",
                   "CSL_ENABLE_HIGHS:BOOL=OFF", "CSL_ENABLE_QHULL:BOOL=OFF",
                   "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022"):
         require(token in cache, "build setting differs: " + token)
-    build_log = (build / "release-build.raw.log").read_text(encoding="utf-8", errors="replace")
-    require("0" in build_log and "/std:c++20" in build_log and "/D NDEBUG" in build_log and
+    build_log = (collection / "release-build.stdout.log").read_text(encoding="utf-8", errors="replace")
+    require("/std:c++20" in build_log and "/D NDEBUG" in build_log and
             "csl_finite_feedback_report.exe" in build_log, "verbose Release build evidence incomplete")
-    # Keep raw host/process observations and sanitized build evidence. Do not copy private paths.
-    source_path = str(root).replace("\\", "/")
-    build_path = str(build).replace("\\", "/")
-    sanitized = build_log.replace(str(root), "SOURCE_ROOT").replace(str(build), "BUILD_ROOT")
-    sanitized = sanitized.replace(source_path, "SOURCE_ROOT").replace(build_path, "BUILD_ROOT")
-    pre, post = (read_json(collection / name) for name in ("host-pre.json", "host-post.json"))
-    require(pre["observed_utc"] <= capture["measure_start_utc"] <=
-            capture["measure_end_utc"] <= post["observed_utc"], "host time order differs")
-    record = {"schema": SCHEMA, "source_commit": SOURCE, "harness_commit": SOURCE,
-              "source_sha256": checked, "executable_sha256": capture["executable_sha256"],
-              "build_graph_sha256": sha(encoded(build_graph)),
-              "raw_csv_sha256": sha((collection / "measure.stdout.csv").read_bytes()),
+    command = capture["commands"]
+    require(command["configure"][1:] == ["-S", str(root), "-B", str(build), "-G",
+                                             "Visual Studio 17 2022", "-A", "x64",
+                                             "-DCSL_BUILD_FINITE_FEEDBACK_REPORT=ON",
+                                             "-DCSL_ENABLE_HIGHS=OFF", "-DCSL_ENABLE_QHULL=OFF",
+                                             "-DBUILD_TESTING=OFF"] and
+            command["build"][0] == command["configure"][0] and
+            command["build"][1:3] == ["--build", str(build)],
+            "configure/build command identity differs")
+    require(command["measure"] == ["csl_finite_feedback_report.exe", "--measure", "7"] and
+            command["smoke"] == ["csl_finite_feedback_report.exe", "--smoke"] and
+            command["build"][-7:] == ["--config", "Release", "--target", "csl_finite_feedback_report",
+                                       "--parallel", "4", "--verbose"],
+            "capture command profile differs")
+    record = {"schema": SCHEMA, "source_commit": source, "source_tree": tree,
+              "numerical_source_commit": NUMERICAL_SOURCE, "harness_commit": NUMERICAL_SOURCE,
+              "prebuild_receipt_sha256": sha((collection / "prebuild-receipt.json").read_bytes()),
+              "postrun_receipt_sha256": sha((collection / "postrun-receipt.json").read_bytes()),
+              "source_inventory_sha256": sha(inventory), "build_graph_sha256": sha(encoded(build_graph)),
+              "executable_sha256": exe_hash, "raw_csv_sha256": sha((collection / "measure.stdout.log").read_bytes()),
               "collection_start_utc": capture["measure_start_utc"],
               "collection_end_utc": capture["measure_end_utc"],
-              "environment": {"host_pre": pre, "host_post": post,
-                              "compiler": "MSVC 19.44.35215.0", "configuration": "Release",
+              "environment": {"host_pre": capture["host_pre"], "host_post": capture["host_post"],
+                              "compiler": build_graph["compiler"], "configuration": "Release",
                               "requested_outer_workers": 1, "actual_outer_workers": 1,
-                              "requested_native_threads": 1, "observed_native_threads": None,
-                              "native_thread_unavailable_reason": "driver does not observe OS native thread count",
-                              "arithmetic": "finite integer table indices and Boolean policy; steady-clock nanoseconds",
+                              "requested_native_threads": None, "observed_native_threads": None,
+                              "native_thread_unavailable_reason": "finite-table adapter has no native solver thread setting; driver does not observe OS thread count",
                               "reuse": "one process; fresh registry, prepared plan, and workspace per call",
                               "warmup": "one excluded call per fixture; process/cache state may be warm",
                               "order": "seven round-robin repetitions with rotating first fixture"},
-              "timing": {"interval": "before registry construction through registered execution, full-policy reference comparison, and literal oracle; excludes fixture construction, destruction, CSV serialization, and process startup",
-                         "clock": "std::chrono::steady_clock", "unit": "ns",
-                         "warmups": 4, "measured_repetitions_per_fixture": 7,
-                         "internal_phases": None, "native_only_time": None,
-                         "unavailable_reason": "frozen public driver exposes only the whole verified call interval"},
-              "fixture_oracle": {name: {"initial_winning": result[0],
-                                        "initial_actions": result[1], "branch_actions": result[2]}
-                                 for name, result in CASES.items()},
+              "timing": {"interval": "before registry construction through registered execution, all winning flags and selected action-cell checks; excludes fixture construction, destruction, CSV serialization, and process startup",
+                         "clock": "std::chrono::steady_clock", "unit": "ns", "warmups": 4,
+                         "measured_repetitions_per_fixture": 7, "internal_phases": None,
+                         "native_only_time": None,
+                         "unavailable_reason": "frozen driver exposes only the whole verified call interval"},
+              "oracle_scope": {"winning_flags": "all stage/state entries per fixture",
+                               "action_cells": {"clipping": ["stage 0 state 0"],
+                                                "branching": ["stage 0 state 0", "stage 1 state 1", "stage 1 state 2"],
+                                                "empty-action": ["stage 0 state 0"],
+                                                "nominal": ["stage 0 state 0"]},
+                               "unchecked": "other admissible-action table entries are not checked by this driver"},
+              "fixture_oracle": {name: {"initial_winning": value[0],
+                                        "initial_actions": value[1], "branch_actions": value[2]}
+                                 for name, value in CASES.items()},
               "work": {"smoke_calls": len(smoke), "warmup_calls": 4,
                        "measured_registered_calls": 28, "matched": 28,
                        "failed": 0, "unsupported": 0, "cancelled": 0, "missing": 0},
               "trials": attempts, "summary": summarize([row for row in attempts
                                                          if row["purpose"] == "trial"]),
-              "interpretation": "Inconclusive exploratory single-adapter timings; no competitor, speedup, source-mapped limiter, continuous-state or physical-model claim."}
+              "interpretation": "Inconclusive exploratory single-adapter timings; checked witness cells do not certify the complete action tensor. No comparator, speedup, or source-mapped limiter claim."}
     record["payload_sha256"] = sha(encoded(record))
     record["report_id"] = "finite-feedback-" + record["payload_sha256"][:16]
     out.mkdir(parents=True)
     for name in RAW:
-        shutil.copyfile(collection / name, out / name)
+        data = (collection / name).read_bytes()
+        if name.endswith(".log") or name == "capture-status.json":
+            data = sanitize(data, root, build)
+        (out / name).write_bytes(data)
+    (out / "source-tree.txt").write_bytes(inventory)
     (out / "build-graph.json").write_bytes(encoded(build_graph))
-    (out / "release-build.log").write_text(sanitized, encoding="utf-8")
     (out / "records.json").write_bytes(encoded(record))
     (out / "trials.jsonl").write_bytes(b"".join(encoded(row) for row in attempts))
     (out / "manifest.json").write_bytes(encoded({
-        "schema": "csl.finite-feedback-source-manifest/1", "report_id": record["report_id"],
+        "schema": "csl.finite-feedback-source-manifest/2", "report_id": record["report_id"],
         "files": {path.name: sha(path.read_bytes()) for path in sorted(out.iterdir())}}))
     return out
 
