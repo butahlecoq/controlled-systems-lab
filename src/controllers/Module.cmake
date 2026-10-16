@@ -1,0 +1,4 @@
+csl_add_library(csl_controllers STATIC src/controllers/observed_replay.cpp)
+target_link_libraries(csl_controllers PUBLIC CSL::model)
+csl_install_headers(controllers)
+install(FILES docs/contracts/information-patterns.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
