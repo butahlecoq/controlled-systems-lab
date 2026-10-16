@@ -343,7 +343,7 @@ TEST_CASE("nominal guard remains capability-only for retained future information
     SUBCASE("feedback") { p.information=InformationPattern::feedback; field="information"; }
     SUBCASE("temporal") { p.temporal=TemporalConstraints{{1,3,{0,0},{},{}},{{0,0}}}; field="temporal"; }
     SUBCASE("continuous") { raw->dynamics.time_domain=TimeDomain::continuous; field="time_domain"; }
-    SUBCASE("singular inverse") { field="dynamics.inverse"; }
-    const auto errors=check_nominal_profile(p,field=="dynamics.inverse",Assurance::numerical);
+    SUBCASE("singular inverse") { field="dynamics.stages[0].A"; }
+    const auto errors=check_nominal_profile(p,field=="dynamics.stages[0].A",Assurance::numerical);
     REQUIRE(errors.size()==1); CHECK(errors[0].code==DiagnosticCode::unsupported); CHECK(errors[0].field==field);
 }

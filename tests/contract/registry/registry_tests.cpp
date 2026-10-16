@@ -120,6 +120,23 @@ public:
         throw std::logic_error("later generated LP request unexpectedly accepted");
     }
 };
+
+class TwoStageForwardWorkspace final : public SynthesisWorkspace {
+public:
+    SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
+            const ExecutionContext&) override {
+        const auto& model=problem.model();
+        const auto x0=std::get<KnownInitial>(*problem.initial().description()).point;
+        const Vector u0{2},u1{3};
+        const auto x1=std::get<Vector>(model.step({0},x0,u0,{}));
+        const auto x2=std::get<Vector>(model.step({1},x1,u1,{}));
+        const auto cost=std::get<double>(optimization::evaluate(problem.objective(),x2));
+        const auto id=problem.identity();
+        return {Termination::completed,{id,MathematicalOutcome::undetermined,Unestablished{},{}},
+            {},{},{{{id,{x0,x1,x2},{u0,u1},cost},
+                {id,SymbolicArgument{"two-stage fixture","explicit forward trajectory"}}}}, {}};
+    }
+};
 }
 
 TEST_CASE("public selector binds omitted provenance without promoting a candidate family") {
@@ -996,7 +1013,7 @@ TEST_CASE("T-M03 unsupported profiles stay capability rejection rather than infe
     REQUIRE(std::holds_alternative<PreparedStrategy>(forward));
     CHECK(std::get<SynthesisResult>(std::get<PreparedStrategy>(forward).create()->run(context())).incumbents[0].witness.original_objective == -1);
     std::vector<std::pair<StrategyRequest,std::string>> cases;
-    auto modified = request; modified.configuration.strategy = {"inverse"}; cases.push_back({modified,"dynamics.inverse"});
+    auto modified = request; modified.configuration.strategy = {"inverse"}; cases.push_back({modified,"dynamics.stages[0].A"});
     auto add_case=[&](const Problem& raw,const char* field) {
         auto resolution=csl::problem::resolve(raw,{csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}});
         if (auto* diagnostic=std::get_if<Diagnostic>(&resolution)) {
@@ -1041,6 +1058,94 @@ TEST_CASE("T-M03 unsupported profiles stay capability rejection rather than infe
         if(field=="external")
             CHECK(rejection.diagnostics[0].explanation=="External-input semantics require another capability profile");
     }
+}
+
+TEST_CASE("registered inverse-only capability identifies the singular stage while forward execution remains feasible") {
+    const LinearStage first{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}};
+    const LinearStage second{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}};
+    Problem raw{{"two-stage-singular"},std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,std::vector<LinearStage>{first,second}}, {}}),
+        {0,1,2},KnownInitial{{1}},ContinuousDomain{{Singleton{{2}},Singleton{{3}}}},
+        {Singleton{{1}},Singleton{{3}},Singleton{{3}}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{2},-1}};
+    auto publication=csl::problem::resolve(raw,
+        {csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedProblem>(publication));
+    auto resolved=std::get<csl::problem::ResolvedProblem>(std::move(publication));
+    auto request=strategy_request();
+    request.problem=resolved;
+    request.family.objective=resolved.identity();
+    request.configuration.strategy={"inverse-only"};
+
+    int factories=0;
+    const auto planner=[&factories](const StrategyRequest&,const Requirements&)
+            -> std::variant<StrategyPlan,Rejection> {
+        return compose_strategy(std::get<CheckedPipeline<>>(check_pipeline()),
+            [&factories](auto,const StrategyRequest&,const Requirements&) {
+                ++factories;
+                return std::make_unique<TwoStageForwardWorkspace>();
+            });
+    };
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add({{{"inverse-only"},"1"},
+        [](const StrategyRequest& request,const Requirements& requirements) -> Capability {
+            const auto diagnostics=check_nominal_profile(*request.problem.description(),true,
+                requirements.output.assurance);
+            if(!diagnostics.empty()) return diagnostics;
+            return Offer{};
+        },planner}).has_value());
+    REQUIRE_FALSE(strategies.add({{{"forward"},"1"},
+        [](const StrategyRequest& request,const Requirements& requirements) -> Capability {
+            const auto diagnostics=check_nominal_profile(*request.problem.description(),false,
+                requirements.output.assurance);
+            if(!diagnostics.empty()) return diagnostics;
+            return Offer{};
+        },planner}).has_value());
+
+    const auto inverse=strategies.prepare(request);
+    REQUIRE(std::holds_alternative<Rejection>(inverse));
+    const auto& rejection=std::get<Rejection>(inverse);
+    REQUIRE(rejection.diagnostics.size()==1);
+    CHECK(rejection.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics[0].field=="dynamics.stages[1].A");
+    REQUIRE(rejection.provenance.actual);
+    CHECK(rejection.provenance.actual->id==ModuleId{"inverse-only"});
+    CHECK(factories==0);
+
+    request.configuration.strategy={"forward"};
+    auto admitted=strategies.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(admitted));
+    CHECK(factories==0);
+    auto workspace=std::get<PreparedStrategy>(std::move(admitted)).create();
+    CHECK(factories==1);
+    const auto outcome=workspace->run(context());
+    REQUIRE(std::holds_alternative<SynthesisResult>(outcome));
+    const auto& answer=std::get<SynthesisResult>(outcome);
+    CHECK(answer.termination==Termination::completed);
+    CHECK(answer.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(answer.incumbents.size()==1);
+    CHECK(answer.incumbents[0].witness.states==std::vector<Vector>{{1},{3},{3}});
+    CHECK(answer.incumbents[0].witness.controls==std::vector<Vector>{{2},{3}});
+    CHECK(answer.incumbents[0].witness.original_objective==5);
+    CHECK_FALSE(answer.family);
+
+    auto unproven=raw;
+    auto nonzero_model=std::make_shared<SystemModel>(*raw.model);
+    std::get<std::vector<LinearStage>>(nonzero_model->dynamics.stages)[1].A.values[0]=1;
+    unproven.model=std::move(nonzero_model);
+    auto unproven_publication=csl::problem::resolve(unproven,
+        {csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedProblem>(unproven_publication));
+    request.problem=std::get<csl::problem::ResolvedProblem>(std::move(unproven_publication));
+    request.family.objective=request.problem.identity();
+    request.configuration.strategy={"inverse-only"};
+    const auto unproven_inverse=strategies.prepare(request);
+    REQUIRE(std::holds_alternative<Rejection>(unproven_inverse));
+    const auto& unproven_diagnostics=std::get<Rejection>(unproven_inverse).diagnostics;
+    REQUIRE(unproven_diagnostics.size()==1);
+    CHECK(unproven_diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(unproven_diagnostics[0].field=="dynamics.inverse");
+    CHECK(factories==1);
 }
 
 TEST_CASE("exact family target and equivalent relation cannot establish completeness") {
