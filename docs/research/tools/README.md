@@ -22,6 +22,8 @@ The [B08 displayed-data exact audit](../b08-displayed-exact-audit.md) adds an in
 
 The [L13 displayed-decimal criterion audit](../l13-displayed-criterion-audit.md) computes the printed Euclidean and A09 synchronization-augmented squared norms for all four non-reference Table 2 states with exact fractions. Run `python -B -O docs/research/tools/check_l13_displayed_criteria.py` and `python -B -O docs/research/tools/test_l13_displayed_criteria.py`. The literal tests check all four reported rows and an independent input. The A09 formula is a candidate comparison, not a reconstruction of the published run.
 
+The [A10 saved-workspace criterion trace](../l13-a10-saved-criterion-trace.md) checks a distinct, hash-identified private MAT file against the A08 reporting expression, A09 candidate, and L13 Eq. (16). Public tests run with an explicit private-source skip: `python -B -O docs/research/tools/test_l13_a10_saved_criterion.py`. Supply `--archive-root` to that test and to `check_l13_a10_saved_criterion.py` for a local read-only MAT check; NumPy and SciPy are then required. The saved workspace is not matched to L13's printed rows.
+
 ~~~text
 python docs/research/tools/verify_docs.py
 ~~~
