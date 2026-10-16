@@ -1,0 +1,255 @@
+{
+  "binary_sha256": "18efe090a2809c092263b99c5b87d5bdaeea8007fc848826bc64ecb2eb2c88f7",
+  "concurrent_work_note": "Other project worktrees had active local builds/tests during collection; host contention may affect batch durations.",
+  "failed_batches": 0,
+  "fixture_sha256": "9494dec664f6fed74f39886ec3ab94c576dba6cdb5349f1f19329c6c31acc85a",
+  "harness_commit": "2f915110ba42515fdc448a0c226dc1290b80f82d",
+  "harness_tree": "c3259b26fa792b5abd70919366cf8c40882e69af",
+  "measured_batches": 56,
+  "performance_conclusion": "Inconclusive: one adapter, no comparator or source-mapped limiter.",
+  "preflight": {
+    "actual_native_threads": null,
+    "actual_native_threads_reason": "No native thread count counter exposed by this public path.",
+    "arithmetic": "binary64; absolute B08 tie tolerance 1e-8; numerical assurance",
+    "binary_sha256": "18efe090a2809c092263b99c5b87d5bdaeea8007fc848826bc64ecb2eb2c88f7",
+    "build_configuration": "Release",
+    "build_graph_sha256": "ef1803a3a2a54527a866c07e527c3919f4192b052eb1c9d2651b0da70d35b72c",
+    "cmake": {
+      "generator": "Visual Studio 17 2022",
+      "version": {
+        "isDirty": false,
+        "major": 3,
+        "minor": 31,
+        "patch": 6,
+        "string": "3.31.6-msvc6",
+        "suffix": "msvc6"
+      }
+    },
+    "compiler": {
+      "compiler": {
+        "id": "MSVC",
+        "implicit": {
+          "includeDirectories": [],
+          "linkDirectories": [],
+          "linkFrameworkDirectories": [],
+          "linkLibraries": []
+        },
+        "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+        "version": "19.44.35215.0"
+      },
+      "language": "CXX",
+      "sourceFileExtensions": [
+        "C",
+        "M",
+        "c++",
+        "cc",
+        "cpp",
+        "cxx",
+        "mm",
+        "mpp",
+        "CPP",
+        "ixx",
+        "cppm",
+        "ccm",
+        "cxxm",
+        "c++m"
+      ]
+    },
+    "fixture_sha256": "9494dec664f6fed74f39886ec3ab94c576dba6cdb5349f1f19329c6c31acc85a",
+    "fresh_build_sha256": "ad01f2ca80206fccd37a20ff58336794e4efd35fe1a56d5c3f66b998fc3e7271",
+    "harness_commit": "2f915110ba42515fdc448a0c226dc1290b80f82d",
+    "harness_tree": "c3259b26fa792b5abd70919366cf8c40882e69af",
+    "logical_processors": 12,
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "requested_driver_workers": 1,
+    "schema": "csl.issue3-preflight/1",
+    "source_commit": "994f3ee4310b4087d289e2eb02adbdb9dfd97827",
+    "source_tree": "2b07e8378561b74fd763e43ca70c78cfd1145b99"
+  },
+  "raw_sha256": "b4632ce76510aa4f2bb136baa193bc78da66506336a90d048cd8495c2d7926de",
+  "report_id": "issue3-finite-catalogue-b4632ce76510aa4f",
+  "schema": "csl.issue3-finite-catalogue-records/1",
+  "source_commit": "994f3ee4310b4087d289e2eb02adbdb9dfd97827",
+  "source_tree": "2b07e8378561b74fd763e43ca70c78cfd1145b99",
+  "summary": [
+    {
+      "batch_checked_calls": 10000,
+      "failed_batches": 0,
+      "fixture": "l19",
+      "input_sha256": "f1c6097654913bd8a326370568a7d475e23bd3553b93776a98cf9acb6c9bb910",
+      "max_batch_ns": 210982000,
+      "measured_batches": 7,
+      "median_batch_ns": 196741800,
+      "min_batch_ns": 183395500,
+      "result": {
+        "evaluated_vertices": 4,
+        "maximizers": [
+          [
+            0.0
+          ],
+          [
+            2.0
+          ]
+        ],
+        "minimizing_plan_indices": [
+          0,
+          1
+        ],
+        "plan_count": 2,
+        "sampled_objective_values": [
+          1.0,
+          0.0,
+          1.0
+        ],
+        "status": "numerical_optimal",
+        "value": 1.0,
+        "worst_values": [
+          1.0,
+          1.0
+        ]
+      },
+      "status": "numerical_optimal"
+    },
+    {
+      "batch_checked_calls": 5000,
+      "failed_batches": 0,
+      "fixture": "integrator",
+      "input_sha256": "6f1b01083814fe8587d034a10362a21470f3137a44f846212e27b26f786c4206",
+      "max_batch_ns": 78382500,
+      "measured_batches": 7,
+      "median_batch_ns": 75580400,
+      "min_batch_ns": 73876900,
+      "result": {
+        "evaluated_vertices": 4,
+        "minimizing_plan_indices": [
+          0
+        ],
+        "plan_count": 2,
+        "status": "numerical_optimal",
+        "value": 1.0,
+        "worst_values": [
+          1.0,
+          4.0
+        ]
+      },
+      "status": "numerical_optimal"
+    },
+    {
+      "batch_checked_calls": 5000,
+      "failed_batches": 0,
+      "fixture": "all_infeasible",
+      "input_sha256": "27b2be0e3d8118643466531993b6df1fbcc328bcd83cda020da9f21f6b509f24",
+      "max_batch_ns": 71645500,
+      "measured_batches": 7,
+      "median_batch_ns": 69757000,
+      "min_batch_ns": 68734800,
+      "result": {
+        "rejected_plans": [
+          {
+            "action_indices": [
+              0
+            ],
+            "stage": 1,
+            "violating_successor": [
+              2.0
+            ]
+          },
+          {
+            "action_indices": [
+              1
+            ],
+            "stage": 1,
+            "violating_successor": [
+              1.0
+            ]
+          }
+        ],
+        "status": "infeasible"
+      },
+      "status": "infeasible"
+    },
+    {
+      "batch_checked_calls": 5000,
+      "failed_batches": 0,
+      "fixture": "empty_catalogue",
+      "input_sha256": "ecd876e1d4b5711861b0f6aeb44f830cc9681f301a4b004b65926650e90e9cfa",
+      "max_batch_ns": 31244200,
+      "measured_batches": 7,
+      "median_batch_ns": 30372900,
+      "min_batch_ns": 29999300,
+      "result": {
+        "status": "empty_catalogue"
+      },
+      "status": "empty_catalogue"
+    },
+    {
+      "batch_checked_calls": 5000,
+      "failed_batches": 0,
+      "fixture": "no_scenarios",
+      "input_sha256": "409b79001bbb00ca49aa1f724937b9e0b628d0e37b34a2f20ffa2f1069ed7e7a",
+      "max_batch_ns": 43869700,
+      "measured_batches": 7,
+      "median_batch_ns": 37121000,
+      "min_batch_ns": 36511800,
+      "result": {
+        "status": "no_scenarios"
+      },
+      "status": "no_scenarios"
+    },
+    {
+      "batch_checked_calls": 5000,
+      "failed_batches": 0,
+      "fixture": "unsupported",
+      "input_sha256": "6f1b01083814fe8587d034a10362a21470f3137a44f846212e27b26f786c4206",
+      "max_batch_ns": 34921900,
+      "measured_batches": 7,
+      "median_batch_ns": 34494600,
+      "min_batch_ns": 34253200,
+      "result": {
+        "field": "finite_minimax.capacity",
+        "status": "unsupported"
+      },
+      "status": "unsupported"
+    },
+    {
+      "batch_checked_calls": 5000,
+      "failed_batches": 0,
+      "fixture": "cancelled",
+      "input_sha256": "410fbcf3487259261dda4cc5d5e4aeb8966827eb584be25ed00fd73edaaf03d3",
+      "max_batch_ns": 39394600,
+      "measured_batches": 7,
+      "median_batch_ns": 37932200,
+      "min_batch_ns": 37439500,
+      "result": {
+        "reason": "cancelled",
+        "status": "stopped"
+      },
+      "status": "stopped"
+    },
+    {
+      "batch_checked_calls": 1,
+      "failed_batches": 0,
+      "fixture": "b08_rounded",
+      "input_sha256": "47ec040f5631dd1b24012318223efb73fa2bb7aa2db76c03c56cb88f2a85e733",
+      "max_batch_ns": 86382800,
+      "measured_batches": 7,
+      "median_batch_ns": 84898000,
+      "min_batch_ns": 83338500,
+      "result": {
+        "evaluated_vertices": 160000,
+        "minimizing_plan_indices": [
+          17,
+          33,
+          129
+        ],
+        "plan_count": 625,
+        "status": "numerical_optimal",
+        "value": 67.15060110140273
+      },
+      "status": "numerical_optimal"
+    }
+  ],
+  "timing_scope": "Per batch: fixture construction, fresh public finite_action_minimax calls, literal checks and result construction; excludes process startup, JSONL serialization, persistence, plotting and rendering.",
+  "warmups": 8
+}

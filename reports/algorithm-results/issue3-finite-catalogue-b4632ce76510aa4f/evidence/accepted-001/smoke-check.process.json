@@ -1,0 +1,12 @@
+{
+  "command": [
+    "C:\\Users\\f5spb\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "D:\\work\\PhD\\repo\\.worktrees\\issue3-report-harness\\scripts\\reports\\issue3\\check_smoke.py",
+    "D:\\work\\PhD\\repo\\.worktrees\\issue3-report-harness\\build\\issue3-report\\Release\\csl_issue3_finite_action_report.exe"
+  ],
+  "return_code": 0,
+  "schema": "csl.issue3-process-capture/1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timed_out": false
+}

@@ -1,0 +1,8 @@
+{
+  "attempted_utc": "2026-10-16T16:44:21.518295+00:00",
+  "return_code": 0,
+  "schema": "csl.issue3-process-capture/1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "b4632ce76510aa4f2bb136baa193bc78da66506336a90d048cd8495c2d7926de",
+  "timed_out": false
+}
