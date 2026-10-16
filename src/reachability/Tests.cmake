@@ -11,3 +11,8 @@ if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
   add_test(NAME nominal_forward_public_client COMMAND nominal_forward_public_client)
   csl_test_target(nominal_forward_public_client reachability)
 endif()
+
+add_executable(fixed_plan_disturbance_tests tests/unit/reachability/fixed_plan_disturbance_tests.cpp)
+target_link_libraries(fixed_plan_disturbance_tests PRIVATE CSL::fixed_plan_disturbance CSL::worst_case_vertex doctest::doctest)
+add_test(NAME fixed_plan_disturbance_tests COMMAND fixed_plan_disturbance_tests)
+csl_test_target(fixed_plan_disturbance_tests reachability)
