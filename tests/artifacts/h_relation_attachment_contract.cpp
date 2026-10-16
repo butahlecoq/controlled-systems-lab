@@ -11,12 +11,12 @@ namespace ar=csl::artifacts;
 namespace {
 ar::HRelationAttachmentLimits limits(){return {1'000'000,16,64,4096};}
 template<class T>T take(std::variant<T,ar::ArtifactError> value){REQUIRE(std::holds_alternative<T>(value));return std::get<T>(std::move(value));}
-sets::SetData source(EvidenceSupport evidence=SymbolicArgument{"rank-note","caller supplied"}){
+sets::SetData source(EvidenceSupport evidence=SymbolicArgument{"rank-note","caller supplied"},std::string id="relation"){
  Matrix a{2,2,{1.0,-0.0,0.0,-2.0}},e{1,2,{3.0,4.0}};Vector b{5.0,-0.0},f{6.0};
  auto av=numeric::snapshot(a);auto bv=numeric::snapshot_vector(b);auto ev=numeric::snapshot(e);auto fv=numeric::snapshot_vector(f);
  REQUIRE(std::holds_alternative<numeric::MatrixView>(av));REQUIRE(std::holds_alternative<numeric::VectorView>(bv));REQUIRE(std::holds_alternative<numeric::MatrixView>(ev));REQUIRE(std::holds_alternative<numeric::VectorView>(fv));
  sets::AffineDimensionClaim claim{sets::DimensionValue{1},std::move(evidence)};
- auto made=sets::make_h({{"relation"},2,{"x","u"}},{std::get<numeric::MatrixView>(av),std::get<numeric::VectorView>(bv),std::get<numeric::MatrixView>(ev),std::get<numeric::VectorView>(fv)},claim);
+ auto made=sets::make_h({{std::move(id)},2,{"x","u"}},{std::get<numeric::MatrixView>(av),std::get<numeric::VectorView>(bv),std::get<numeric::MatrixView>(ev),std::get<numeric::VectorView>(fv)},claim);
  REQUIRE(std::holds_alternative<sets::SetData>(made));return std::get<sets::SetData>(std::move(made));
 }
 ExactFarkasEvidence exact_farkas(){
@@ -50,7 +50,10 @@ TEST_CASE("other affine evidence variants remain recorded data"){
  const auto certificate=take(ar::encode_h_relation_attachment(source(EvidenceSupport{CertificateReference{"proof.bin","untrusted-ref"}}),limits()));
  const auto cert_record=take(ar::decode_h_relation_attachment(certificate.bytes(),limits()));const auto& c=std::get<ar::RecordedCertificateReference>(cert_record.affine_dimension->support);CHECK(c.artifact=="proof.bin");CHECK(c.verifier=="untrusted-ref");
  const auto absent=take(ar::encode_h_relation_attachment(source(EvidenceSupport{Unestablished{}}),limits()));const auto absent_record=take(ar::decode_h_relation_attachment(absent.bytes(),limits()));CHECK(std::holds_alternative<Unestablished>(absent_record.affine_dimension->support));
-}TEST_CASE("H attachment rejects digest mismatch, malformed bytes, unknown version, and resource excess"){
+}TEST_CASE("H attachment byte preflight includes metadata text before JSON construction"){
+ auto constrained=limits();constrained.max_bytes=200;const auto result=ar::encode_h_relation_attachment(source(SymbolicArgument{"r","a"},std::string(256,\'r\')),constrained);REQUIRE(std::holds_alternative<ar::ArtifactError>(result));CHECK(std::get<ar::ArtifactError>(result).code==ar::ArtifactErrorCode::limit);CHECK(std::get<ar::ArtifactError>(result).path=="attachment.bytes");
+}
+TEST_CASE("H attachment rejects digest mismatch, malformed bytes, unknown version, and resource excess"){
  const auto encoded=take(ar::encode_h_relation_attachment(source(),limits()));std::array<std::byte,3> bad{std::byte{'b'},std::byte{'a'},std::byte{'d'}};
  CHECK(std::get<ar::ArtifactError>(ar::decode_h_relation_attachment(bad,limits(),encoded.digest())).code==ar::ArtifactErrorCode::identity);
  CHECK(std::get<ar::ArtifactError>(ar::decode_h_relation_attachment(encoded.bytes(),ar::HRelationAttachmentLimits{2,16,64,4096})).code==ar::ArtifactErrorCode::limit);
