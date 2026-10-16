@@ -1,0 +1,5 @@
+fixture,attempts,successes,failures,batch,median_elapsed_ns,min_elapsed_ns,max_elapsed_ns
+l19,7,7,0,10000,45803600,45122800,57473800
+integrator_feasible,7,7,0,5000,97209600,96530900,108355200
+integrator_violation,7,7,0,5000,76543900,73668300,78145700
+b08_rounded,7,7,0,1,91284100,90217000,94758500

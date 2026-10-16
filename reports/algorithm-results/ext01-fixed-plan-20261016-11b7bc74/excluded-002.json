@@ -1,0 +1,11 @@
+{
+  "schema": "csl.ext01-excluded-collection-attempt/1",
+  "phase": "seven_round_collection",
+  "status": "process_completed_but_collector_validation_rejected",
+  "reason": "The L19 10000-call batch took 43.65-46.38 ms, below the collector's provisional 50 ms floor. That floor was a collector choice, not an EXT-01 published contract. The complete raw stdout, stderr, process status and validation error are retained under excluded-002; no timing from this attempt was promoted into records.json.",
+  "accepted": false,
+  "raw_stdout": "excluded-002.stdout.jsonl",
+  "raw_stderr": "excluded-002.stderr.txt",
+  "process_status": "excluded-002.process.json",
+  "validation_error": "excluded-002.validation-error.txt"
+}

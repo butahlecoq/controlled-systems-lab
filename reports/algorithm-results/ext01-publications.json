@@ -1,0 +1,17 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Single adapter, no comparator or speedup; displayed rounded B08 finite-action catalogue only; binary64 numerical assurance, no validated enclosure, nonlinear result or feedback optimal-family claim",
+      "measured_scope": "Four native fixed-plan and convex worst-case numerical fixtures; seven Release batch observations each",
+      "native_payload_sha256": "f4b776a569604d7613543645a17b40a5edab574b6909ad47ac7bf8d58ada29a5",
+      "payload_schema": "csl.ext01-fixed-plan-records/1",
+      "payload_sha256": "f4b776a569604d7613543645a17b40a5edab574b6909ad47ac7bf8d58ada29a5",
+      "report_id": "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54",
+      "report_kind": "ext01-fixed-plan",
+      "source_commit": "fd75a63657bc6b1d8cbd26c644bd8fb39cc1a3ec",
+      "source_report_id": "ext01-fixed-plan-20261016-11b7bc74",
+      "zip_sha256": "dbdb977b50c9e0f18bebdfe50e8ea6b01cb8c9373389a4e9f575f268058864e1"
+    }
+  ],
+  "schema": "csl.ext01-report-extension/1"
+}
