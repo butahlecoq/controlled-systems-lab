@@ -9,7 +9,7 @@ Diagnostic invalid(std::string field,std::string explanation) {
 }
 }
 
-Result solve(const Game& game) {
+std::optional<Diagnostic> validate(const Game& game) {
     const auto n=game.state_count;
     if(n==0)return invalid("feedback.state_count","At least one state is required.");
     if(game.terminal_safe.size()!=n || game.terminal_target.size()!=n)
@@ -31,6 +31,12 @@ Result solve(const Game& game) {
             }
         }
     }
+    return {};
+}
+
+Result solve(const Game& game) {
+    if(const auto error=validate(game))return *error;
+    const auto n=game.state_count;
     Policy result;
     const auto horizon=game.stages.size();
     result.winning.resize(horizon+1,std::vector<bool>(n));

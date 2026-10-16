@@ -2,6 +2,7 @@
 
 #include <csl/core/diagnostics.hpp>
 #include <cstddef>
+#include <optional>
 #include <variant>
 #include <vector>
 
@@ -33,9 +34,11 @@ struct Policy {
     // All robustly feasible actions, in authored order. The first is a
     // deterministic causal selector; this makes no cost-optimality claim.
     std::vector<std::vector<std::vector<ActionIndex>>> admissible_actions;
+    bool operator==(const Policy&) const = default;
 };
 
 using Result = std::variant<Policy,Diagnostic>;
+std::optional<Diagnostic> validate(const Game& game);
 Result solve(const Game& game);
 
 } // namespace csl::reachability::finite_feedback

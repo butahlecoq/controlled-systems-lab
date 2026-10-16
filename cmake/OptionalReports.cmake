@@ -10,6 +10,25 @@ endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
 
+if(CSL_BUILD_FINITE_FEEDBACK_REPORT)
+add_executable(csl_finite_feedback_report benchmarks/reporting/finite_feedback/driver.cpp)
+target_link_libraries(csl_finite_feedback_report PRIVATE CSL::finite_feedback_port)
+target_compile_features(csl_finite_feedback_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_finite_feedback_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+if(MSVC)
+target_compile_options(csl_finite_feedback_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_finite_feedback_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME finite_feedback_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/finite_feedback/check_smoke.py
+  $<TARGET_FILE:csl_finite_feedback_report>)
+set_tests_properties(finite_feedback_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_EXT04_REPORT)
 include(cmake/JsonDependencies.cmake)
 add_executable(csl_ext04_observed_replay_report benchmarks/reporting/ext04/observed_replay_driver.cpp)

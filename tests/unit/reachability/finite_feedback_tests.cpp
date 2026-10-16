@@ -41,6 +41,20 @@ TEST_CASE("all feasible actions are retained in catalogue order") {
     const auto& policy=std::get<Policy>(result);
     CHECK(policy.winning[0][0]);
     CHECK(policy.admissible_actions[0][0]==std::vector<ActionIndex>{ActionIndex{0},ActionIndex{1}});
+    CHECK_FALSE(policy.winning[1][0]);
+
+    auto unsafe_current=game;
+    unsafe_current.stages[0].safe_states[0]=false;
+    const auto current_result=solve(unsafe_current);
+    REQUIRE(std::holds_alternative<Policy>(current_result));
+    CHECK_FALSE(std::get<Policy>(current_result).winning[0][0]);
+
+    auto unsafe_terminal=game;
+    unsafe_terminal.terminal_safe[1]=false;
+    const auto terminal_result=solve(unsafe_terminal);
+    REQUIRE(std::holds_alternative<Policy>(terminal_result));
+    CHECK_FALSE(std::get<Policy>(terminal_result).winning[1][1]);
+    CHECK_FALSE(std::get<Policy>(terminal_result).winning[0][0]);
 }
 
 TEST_CASE("backward recursion permits a later action after observing the next state") {

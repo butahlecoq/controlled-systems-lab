@@ -21,3 +21,8 @@ add_executable(finite_feedback_tests tests/unit/reachability/finite_feedback_tes
 target_link_libraries(finite_feedback_tests PRIVATE CSL::finite_feedback doctest::doctest)
 add_test(NAME finite_feedback_tests COMMAND finite_feedback_tests)
 csl_test_target(finite_feedback_tests reachability)
+
+add_executable(finite_feedback_port_tests tests/unit/reachability/finite_feedback_port_tests.cpp)
+target_link_libraries(finite_feedback_port_tests PRIVATE CSL::finite_feedback_port doctest::doctest)
+add_test(NAME finite_feedback_port_tests COMMAND finite_feedback_port_tests)
+csl_test_target(finite_feedback_port_tests reachability)
