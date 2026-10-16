@@ -21,7 +21,7 @@ sets::SetData source(EvidenceSupport evidence=SymbolicArgument{"rank-note","call
 }
 ExactFarkasEvidence exact_farkas(){
  auto lp=optimization::make_linear_program({{{"farkas"},{"row-infeasible"}},{0},0,{2,1,{0,1,2},{0,0},{1,1}},{{{},{}}},{{1,{}},{{},0}}});
- REQUIRE(std::holds_alternative<optimization::LinearProgram>(lp));const auto& program=std::get<optimization::LinearProgram>(lp);
+ REQUIRE(std::holds_alternative<LinearProgram>(lp));const auto& program=std::get<LinearProgram>(lp);
  LinearInfeasibilityCertificate cert{program.identity(),{1,0},{0,1},{0},{0}};
  auto checked=optimization::verify_linear_infeasibility_certificate(program,cert);REQUIRE(std::holds_alternative<ExactFarkasEvidence>(checked));return std::get<ExactFarkasEvidence>(std::move(checked));
 }
