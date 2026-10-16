@@ -10,6 +10,29 @@ namespace csl {
 namespace {
 using contracts_detail::Overloaded;
 using contracts_detail::matrix_matches;
+bool exact_zero_row(const LinearStage& stage,std::size_t dimension) {
+    if(dimension==0 || !matrix_matches(stage.A,dimension,dimension)) return false;
+    if(!std::all_of(stage.A.values.begin(),stage.A.values.end(),[](double value){return std::isfinite(value);}))
+        return false;
+    for(std::size_t row=0;row<dimension;++row) {
+        const auto first=stage.A.values.begin()+row*dimension;
+        if(std::all_of(first,first+dimension,[](double value){return value==0;})) return true;
+    }
+    return false;
+}
+std::optional<std::size_t> first_obviously_singular_stage(const Problem& problem) {
+    if(problem.times.size()<2) return {};
+    const auto horizon=problem.times.size()-1;
+    const auto& dynamics=problem.model->dynamics;
+    const auto dimension=dynamics.dimensions.state;
+    if(const auto* constant=std::get_if<LinearStage>(&dynamics.stages))
+        return exact_zero_row(*constant,dimension)?std::optional<std::size_t>{0}:std::nullopt;
+    const auto& indexed=std::get<std::vector<LinearStage>>(dynamics.stages);
+    if(indexed.size()!=horizon) return {};
+    for(std::size_t stage=0;stage<horizon;++stage)
+        if(exact_zero_row(indexed[stage],dimension)) return stage;
+    return {};
+}
 }
 Diagnostics check_nominal_profile(const Problem& p, bool requires_inverse, Assurance assurance) {
     Diagnostics result;
@@ -19,8 +42,13 @@ Diagnostics check_nominal_profile(const Problem& p, bool requires_inverse, Assur
     if (!p.model) return {{DiagnosticCode::invalid_input,"model","Model snapshot is required"}};
     if (p.model->dynamics.time_domain != TimeDomain::discrete)
         unsupported("time_domain","Only supplied discrete transitions are supported");
-    if (requires_inverse)
-        unsupported("dynamics.inverse","Revision 1 supplies no invertibility proof; choose a pipeline not requiring inverse dynamics");
+    if (requires_inverse) {
+        if(const auto stage=first_obviously_singular_stage(p))
+            unsupported("dynamics.stages["+std::to_string(*stage)+"].A",
+                "A has an exact zero row at this transition; inverse-dependent strategy is unsupported");
+        else
+            unsupported("dynamics.inverse","Revision 1 supplies no invertibility proof; choose a pipeline not requiring inverse dynamics");
+    }
     if (!std::holds_alternative<KnownInitial>(p.initial))
         unsupported("initial","Known initial point required");
     if (p.information != InformationPattern::nominal_open_loop)
