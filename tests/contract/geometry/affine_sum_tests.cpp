@@ -440,6 +440,21 @@ TEST_CASE("public geometry operation preserves near-extreme support under loose 
     CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==2);
 }
 
+TEST_CASE("numerical equivalent affine result does not certify the exact dyadic input image") {
+    // The stored inputs are all exact binary64 integers. Their real-valued
+    // affine image is 10^16 + 1 - 10^16 = 1, but left-to-right binary64
+    // accumulation rounds away the one before subtracting 10^16.
+    const auto input=vertices("cancellation-singleton",3,{1e16,1,-1e16},1);
+    auto selected=dependencies(false,false);
+    selected.hull=provider(make_keep_all_hull_registration());
+    const auto completed=take(run(request(AffineImage{input,{1,3,{1,1,1}},{0}},
+        "cancellation-is-not-real-equality"),std::move(selected)));
+    CHECK(completed.relation==SetRelation::equivalent);
+    CHECK(support(completed.output,{1})==0.0);
+    CHECK(support(completed.output,{1})!=1.0);
+    CHECK_FALSE(completed.evidence.error_bound.has_value());
+}
+
 TEST_CASE("public geometry operation retains a zero endpoint despite subnormal product underflow") {
     const double tiny=std::numeric_limits<double>::denorm_min();
     const auto cloud=vertices("subnormal-candidates",1,{0,tiny,tiny},3);

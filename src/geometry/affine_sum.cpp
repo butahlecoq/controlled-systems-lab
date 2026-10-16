@@ -437,7 +437,9 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
                 "reducer retained indices applied only after exact binary64 convex-combination checks for every removal and complete acyclic dependency and partition validation" :
                 "all generated candidates retained because the complete reduction failed exact binary64 certification or structural validation",
             "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
-            "numerical equivalent relation is not exact or validated set inclusion and has no global error bound",
+            "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
+            "exact candidate deletion preserves only the hull of generated binary64 points; affine/sum rounding is not bounded by this evidence",
+            "H-to-V vertex-row residual checks do not establish global conversion coverage; no real-model error bound is reported",
             "finite and mixed action catalogues are not accepted by this SetHandle operation",
             "selected hull reducer: " + identity(dependencies_.hull.provenance()),
             "selected LP provider: " + identity(dependencies_.lp.provenance())};

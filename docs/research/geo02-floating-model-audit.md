@@ -1,0 +1,160 @@
+# GEO-02: binary64 set operations and the real-valued model
+
+Date: 2026-10-16. Scope: the merged `csl.geometry.affine-sum` implementation
+and its selected finite-V, H-to-V, hull-reduction, and LP dependencies. This is
+the scientific review requested by [GEO-02 #40](https://github.com/butahlecoq/controlled-systems-lab/issues/40),
+including the [2026-10-15 review questions](https://github.com/butahlecoq/controlled-systems-lab/issues/40#issuecomment-6189677129).
+It establishes a conditional mathematical relation, identifies the missing
+premises for a real-model guarantee, and does **not** validate the current
+floating-point pipeline against an unknown pre-rounding physical model.
+
+## Three sets that must not be conflated
+
+1. **Authored set** `P_real`: the user's intended real-valued inputs and
+   coefficients, which may predate binary64 conversion. No input-uncertainty
+   certificate currently binds those intentions to stored numbers.
+2. **Represented input** `P_64`: for a finite V input with stored vertices
+   `v_i`, this is `conv{v_i}`, interpreting each finite binary64 coordinate as
+   an exact dyadic rational. Likewise, the stored affine matrix and offset are
+   exact dyadic coefficients *for this interpretation*. For an H input, `P_64`
+   means the exact half-space/equality intersection of its stored dyadic rows;
+   it does **not** mean the polytope output by a numerical converter.
+3. **Generated and published set** `Q_64`: `conv{q_i}` or
+   `conv{q_ij}`, where the `q` coordinates are the finite binary64 results of
+   the loops in [`src/geometry/affine_sum.cpp`](../../src/geometry/affine_sum.cpp).
+   The published V representation contains either all generated candidates or
+   a subset passing structural and exact dyadic deletion checks. The latter
+   prove `conv(retained q) = conv(all q)` as exact real sets of *stored* points.
+
+`SetRelation::equivalent` plus `Assurance::numerical` is the port's algorithmic
+relation claim under its recorded assumptions. It does not assert
+`Q_64 = M P_real+b`, `Q_64 = P_real+R_real`, exact containment in either
+direction, or a finite error bound. `NumericalCheck.max_residual` describes an
+attempted reducer reconstruction residual; it is not the distance from `Q_64`
+to either real model. The operation leaves `GeometryEvidence.error_bound` empty.
+The public [affine-sum contract](../contracts/affine-sum-operations.md) and
+[`OperationResult`/`GeometryEvidence` types](../../include/csl/geometry/contracts.hpp)
+carry this distinction to callers.
+
+## What the deletion proof actually proves
+
+The candidate reducer may use a numerical LP to *find* a convex-combination
+witness. Before deleting a stored candidate `q_i`, the consumer checks the
+retained/removed partition and acyclic dependencies, then independently checks
+with exact dyadic arithmetic that nonnegative stored weights sum exactly to one
+and reconstruct `q_i` exactly from stored retained points. If any check fails,
+the complete generated cloud is materialized. Thus each deleted `q_i` lies in
+`conv(retained q)`, while every retained point was generated, proving the two
+hulls equal. This holds even if the LP misses redundant points. It says nothing
+about how accurately a candidate was generated. See
+[`valid_reduction` and the exact check](../../src/geometry/affine_sum.cpp),
+[`exact_convex_combination.hpp`](../../src/geometry/exact_convex_combination.hpp),
+and the [hull contract](../contracts/hull-reduction.md).
+
+The [GEO-02 published report](https://butahlecoq.github.io/controlled-systems-lab/geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754/index.html)
+records five small fixtures and support checks. These observations test those
+instances; they are not a bound for arbitrary dimensions, magnitudes or
+conversion inputs.
+
+## Conditional error theorem for finite V inputs
+
+For a finite nonempty V input, let `v_i`, `M`, and `b` be the stored dyadics,
+and let `y_i = M v_i+b` be evaluated *exactly as rational arithmetic*.
+The implementation instead stores binary64 `q_i`. If independently verified
+numbers `e_i >= ||q_i-y_i||` are available for a chosen norm, set
+`E = max_i e_i`. Then
+
+```text
+d_H(Q_64, M P_64+b) <= E.
+|h_Q(d)-h_(M P_64+b)(d)| <= E ||d||_*  for every direction d.
+```
+
+For a Minkowski sum, use each pair `y_ij=v_i+w_j` and the stored result
+`q_ij`. The same conclusion holds with `E=max_ij ||q_ij-y_ij||`, because
+`conv{v_i}+conv{w_j}=conv{v_i+w_j}`. These are *two-sided* statements: a point
+with barycentric coefficients `lambda` in either convex hull is paired with
+the point using the same coefficients in the other hull; their distance is at
+most `sum lambda_i e_i <= E`. Exact candidate deletion adds zero to `E`.
+For Euclidean distance, a verified coordinate bound `|q_ik-y_ik|<=e_k`
+suffices with `E=sqrt(sum_k e_k^2)`; support error is at most
+`sum_k |d_k| e_k`. Empty inputs remain empty and need a separately stated
+empty-set metric convention.
+
+This is an **a posteriori proof recipe**, not an implemented bound. Each
+`q_i-y_i` can be compared exactly as a rational difference because all stored
+finite binary64 values are dyadic. An implementation may use arbitrary-size
+integers and outward-round its final public bound. It must also verify that
+the binaries used in this audit are the same ones consumed and published, and
+that all candidate pairs were generated. This approach includes cancellation
+and gradual underflow without assuming a dimension-independent unit-roundoff
+formula. Non-finite generated coordinates currently cause an unsuccessful
+operation, so an overflowed candidate does not have a successful-result bound.
+An implementation relying instead on a forward-error formula must account for
+the exact evaluation order, multiplication and addition rounding, dimension,
+underflow/subnormals, compiler contraction/reassociation and overflow.
+
+The error is observable even with exact dyadic V inputs. Take a singleton
+`v=(10^16,1,-10^16)`, a one-row matrix `M=(1,1,1)`, and `b=0`. Every input
+number is exactly representable. The exact real image is `{1}`. The current
+left-to-right binary64 accumulation computes `10^16+1` as `10^16`, then adds
+`-10^16`, publishing `{0}`. Its `SetRelation::equivalent` label supplies no
+bound for that one-unit discrepancy. Similarly, multiplying stored
+`2^-1022` by stored `2^-53` has exact result `2^-1075`, below the smallest
+positive binary64 subnormal; a rounded zero is a finite but different
+candidate. A successful finite check cannot ignore underflow.
+
+## Why the H path needs an additional proof
+
+For H inputs the adapter first accepts a selected converter's numerical
+`equivalent` claim and `NumericalCheck`, then checks that each returned vertex
+satisfies the original H rows within the caller's row-scaled tolerance. These
+are local checks on *returned* vertices. They cannot prove every extreme point
+was returned, that the output hull covers the full H polytope, or that the H
+polytope is contained in a known expansion of the output. For example,
+`P=[0,L]` may be described by `x>=0, x<=L`. Returning only vertex `0`
+has zero row violation for any `L>0`, yet its Hausdorff distance from `P`
+is `L`. A converter's asserted numerical equivalence is not an independently
+checked coverage certificate. The [Qhull conversion contract](../contracts/polyhedral-conversion.md)
+and [upstream Qhull precision manual](https://www.qhull.org/html/qh-impre.htm)
+also distinguish empirical precision handling from a theoretical bound.
+
+If a converter later establishes `d_H(P_64, V_conv)<=E_conv` under a stated
+metric and assumptions, and candidate generation establishes `E_gen` for
+that converted V set, the real stored-H affine-image bound is at most
+`||M|| E_conv+E_gen`. For two H/V summands it is at most
+`E_conv,left+E_conv,right+E_gen`. The norm of `M` must be induced by the
+chosen point norm. These compositions are mathematical consequences of
+Lipschitz continuity and the triangle inequality, not guarantees currently
+reported by this operation. For `P_real`, add independently justified input
+and coefficient/model uncertainty. Unknown pre-rounding data admit no finite
+claimed error from the present evidence alone.
+
+## Scientific disposition and follow-up gate
+
+The represented-candidate deletion guarantee is sound for its narrow scope.
+The existing `equivalent` result remains an **unvalidated numerical algorithm
+claim** conditional on correct represented input interpretation and, for H
+inputs, the selected converter's unproved coverage. The operation does not
+currently establish equivalence or a certified distance to the authored real
+set. Callers needing that guarantee must not promote its relation enum or
+small residual to a validated inclusion/coverage result.
+
+To claim a real-model bound in a future profile:
+
+1. Specify whether each operand and coefficient is an exact stored dyadic or
+   carries a certified enclosure of authored real data. Fix the norm, output
+   metric, coordinate units and empty-set convention.
+2. For finite V inputs, verify every generated candidate against exact dyadic
+   affine/pair arithmetic and publish an outward-rounded maximum error with
+   matching request/source identity. Preserve the exact deletion check.
+3. For H inputs, obtain a **global two-sided** H/V conversion certificate or
+   separate directed bounds. Vertex-row residuals alone are insufficient.
+   Propagate this bound through the map/sum as above.
+4. Bind any final `GeometryErrorBound` to a checked verifier and explicit
+   assumptions, including overflow/underflow and upstream model uncertainty.
+   Decide whether the shared relation type needs a distinct bounded-numerical
+   result; do not silently relabel the current result as validated.
+
+Until those steps exist, this audit resolves the review question and leaves
+the stronger real-model proof as explicit future work. No historical B04 or
+other nonlinear reachability conclusion follows from GEO-02.
