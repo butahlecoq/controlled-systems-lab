@@ -29,7 +29,7 @@ ExactFarkasEvidence exact_farkas(){
 TEST_CASE("H attachment round trips ordered binary64 coefficients and metadata into an inert DTO"){
  static_assert(std::is_same_v<decltype(ar::decode_h_relation_attachment(std::span<const std::byte>{},limits())),ar::ArtifactResult<ar::RecordedHRelation>>);
  static_assert(!std::is_same_v<ar::RecordedHRelation,sets::SetData>);
- const auto encoded=take(ar::encode_h_relation_attachment(source(),limits()));const auto decoded=take(ar::decode_h_relation_attachment(encoded.bytes(),limits(),encoded.digest()));
+ const auto encoded=take(ar::encode_h_relation_attachment(source(),limits()));auto exact_size_limits=limits();exact_size_limits.max_bytes=encoded.bytes().size();CHECK(std::holds_alternative<ar::ArtifactResult<problem::ResolvedContent>>(ar::encode_h_relation_attachment(source(),exact_size_limits)));const auto decoded=take(ar::decode_h_relation_attachment(encoded.bytes(),limits(),encoded.digest()));
  CHECK(decoded.id.value=="relation");CHECK(decoded.metadata.dimension==2);CHECK(decoded.coordinate_labels==std::vector<std::string>{"x","u"});
  REQUIRE(decoded.affine_dimension.has_value());CHECK(decoded.affine_dimension->origin==sets::DimensionOrigin::supplied);CHECK(std::get<sets::DimensionValue>(decoded.affine_dimension->value).value==1);
  const auto& support=std::get<ar::RecordedSymbolicArgument>(decoded.affine_dimension->support);CHECK(support.reference=="rank-note");CHECK(support.assumptions=="caller supplied");
@@ -39,6 +39,7 @@ TEST_CASE("verified Farkas metadata round trips only as untrusted recorded certi
  const auto proof=exact_farkas();const auto encoded=take(ar::encode_h_relation_attachment(source(EvidenceSupport{proof}),limits()));const auto decoded=take(ar::decode_h_relation_attachment(encoded.bytes(),limits()));
  REQUIRE(decoded.affine_dimension.has_value());const auto* recorded=std::get_if<ar::RecordedExactFarkasEvidence>(&decoded.affine_dimension->support);REQUIRE(recorded);
  CHECK(recorded->certificate.subject==proof.subject());CHECK(recorded->certificate.row_lower==proof.certificate().row_lower);CHECK(recorded->certificate.row_upper==proof.certificate().row_upper);CHECK(recorded->certificate.variable_lower==proof.certificate().variable_lower);CHECK(recorded->certificate.variable_upper==proof.certificate().variable_upper);
+  auto decoder_row_limit=limits();decoder_row_limit.max_rows=4;const auto rejected=ar::decode_h_relation_attachment(encoded.bytes(),decoder_row_limit);REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected));CHECK(std::get<ar::ArtifactError>(rejected).code==ar::ArtifactErrorCode::limit);CHECK(std::get<ar::ArtifactError>(rejected).path=="attachment.evidence.rows");
  const auto bounded=ar::encode_h_relation_attachment(source(EvidenceSupport{proof}),ar::HRelationAttachmentLimits{1'000'000,16,3,4096});REQUIRE(std::holds_alternative<ar::ArtifactError>(bounded));CHECK(std::get<ar::ArtifactError>(bounded).code==ar::ArtifactErrorCode::limit);
  static_assert(!std::is_same_v<ar::RecordedExactFarkasEvidence,ExactFarkasEvidence>);
 }
