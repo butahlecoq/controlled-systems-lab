@@ -8,4 +8,6 @@ csl_add_library(csl_fixed_plan_disturbance STATIC src/reachability/fixed_plan_di
 
 target_link_libraries(csl_fixed_plan_disturbance PUBLIC CSL::model CSL::sets)
 
+csl_add_library(csl_finite_feedback STATIC src/reachability/finite_feedback.cpp)
+
 csl_install_headers(reachability)

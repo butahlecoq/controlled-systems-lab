@@ -16,3 +16,8 @@ add_executable(fixed_plan_disturbance_tests tests/unit/reachability/fixed_plan_d
 target_link_libraries(fixed_plan_disturbance_tests PRIVATE CSL::fixed_plan_disturbance CSL::worst_case_vertex doctest::doctest)
 add_test(NAME fixed_plan_disturbance_tests COMMAND fixed_plan_disturbance_tests)
 csl_test_target(fixed_plan_disturbance_tests reachability)
+
+add_executable(finite_feedback_tests tests/unit/reachability/finite_feedback_tests.cpp)
+target_link_libraries(finite_feedback_tests PRIVATE CSL::finite_feedback doctest::doctest)
+add_test(NAME finite_feedback_tests COMMAND finite_feedback_tests)
+csl_test_target(finite_feedback_tests reachability)
