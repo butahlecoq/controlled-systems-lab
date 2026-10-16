@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/reachability/nominal_predecessor.hpp>
+#include <csl/geometry/operation_admission.hpp>
 #include <iostream>
 #include <limits>
 #include <stop_token>
@@ -329,6 +330,49 @@ TEST_CASE("unavailable geometry operation rejects before creating a projection w
     CHECK(rejection->provenance.requested.id.value=="csl.geometry.polyhedral-projection");
     REQUIRE(rejection->provenance.actual);
     CHECK(rejection->provenance.actual->id.value=="csl.geometry.polyhedral-projection");
+    CHECK(*creations==0);
+}
+
+TEST_CASE("geometry admission binds an unsupported operation to each complete request") {
+    auto entry=geometry::polyhedral::make_projection_registration();
+    auto creations=std::make_shared<int>(0);
+    auto create=entry.factory;
+    entry.factory=[creations,create](const OperationRequest& request) {
+        ++*creations;
+        return create(request);
+    };
+    auto conditional=provider(entry,"csl.polyhedron.h");
+    Registry<GeometryPort> registry;
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
+    Requirements requirements;
+    requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.relation=SetRelation::equivalent;
+    const auto left=interval("left",-1,1).as_handle();
+    const auto right=interval("right",0,2).as_handle();
+    for(const auto& [request_id,operands]:{
+            std::pair{"intersection-a",std::array{left,right}},
+            std::pair{"intersection-b",std::array{right,left}}}) {
+        const OperationRequest request{{{"test03"},{request_id},{"intersection-reference"}},
+            {"csl.geometry.polyhedral-projection"},Intersection{operands[0],operands[1]},
+            SetRelation::equivalent,Assurance::numerical};
+        const auto check=[&](const auto& admission) {
+            const auto* rejected=std::get_if<geometry::GeometryAdmissionRejection>(&admission);
+            REQUIRE(rejected);
+            CHECK(rejected->reference.identity.problem==ProblemId{"test03"});
+            CHECK(rejected->reference.identity.request==RequestId{request_id});
+            CHECK(rejected->reference.identity.ideal_output==ReferenceId{"intersection-reference"});
+            CHECK(rejected->reference.inputs==std::vector<SetId>{operands[0].id,operands[1].id});
+            REQUIRE(rejected->provider.diagnostics.size()==1);
+            CHECK(rejected->provider.diagnostics[0].code==DiagnosticCode::unsupported);
+            CHECK(rejected->provider.diagnostics[0].field=="projection.operation");
+            CHECK(rejected->provider.provenance.requested.id==ModuleId{"csl.geometry.polyhedral-projection"});
+            REQUIRE(rejected->provider.provenance.actual);
+            CHECK(rejected->provider.provenance.actual->id==ModuleId{"csl.geometry.polyhedral-projection"});
+        };
+        check(geometry::prepare_geometry_operation(request,conditional));
+        check(geometry::prepare_geometry_operation(select(registry,
+            Method{{"csl.geometry.polyhedral-projection"},{}},request,requirements)));
+    }
     CHECK(*creations==0);
 }
 

@@ -45,6 +45,7 @@ struct OperationRequest {
     SetRelation required_relation; // set-valued operations only; query values use their own evidence
     Assurance assurance;
 };
+GeometryReference geometry_reference(const OperationRequest&);
 struct OperationResult { SetHandle output; SetRelation relation; GeometryEvidence evidence; };
 struct EmptySupport {};
 struct UnboundedSupport {};

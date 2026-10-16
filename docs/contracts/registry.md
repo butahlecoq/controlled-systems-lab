@@ -61,6 +61,18 @@ non-completed termination reason. They do not retain solver vectors.
 The runner forwards the caller's `ExecutionContext` and remains sequential; it
 does not create a nested executor.
 
+For a concrete `OperationRequest`, `<csl/geometry/operation_admission.hpp>`
+offers `geometry::prepare_geometry_operation` for both a prepared provider and
+a fixed `Selection<GeometryPort>`. Successful admission returns the usual
+`PreparedPipeline<GeometryPort>`; rejection returns
+`GeometryAdmissionRejection`, pairing the registry's provider rejection with
+the submitted `GeometryReference` (problem, request, ideal output and ordered
+operand set IDs). The reference is derived from immutable request metadata;
+neither overload creates a workspace. A missing operation remains a scoped
+`unsupported` diagnostic, never a mathematical infeasibility result. Method
+selection before a concrete request retains the registry's requestless
+`Rejection` contract.
+
 `LPWorkspaceView` remains a low-level borrowed adapter for a caller-owned
 `BoundWorkspace<LPPort>` and forwards direct solves without per-query
 `PreparedProvider` admission. It is not the registered generated-request path

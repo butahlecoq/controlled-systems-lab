@@ -57,6 +57,9 @@ Diagnostics check_operation_shape(const OperationRequest& request) {
     if (!valid) return {{DiagnosticCode::invalid_input,"geometry.operands","Operation shapes, buffer storage or coordinates do not match the input dimensions"}};
     return {};
 }
+GeometryReference geometry_reference(const OperationRequest& request) {
+    return {request.identity,operation_scope(request.operation).inputs};
+}
 Diagnostics check_geometry_evidence(const GeometryEvidence& evidence, const OperationRequest& request) {
     const auto scope = operation_scope(request.operation);
     return check_geometry_binding(evidence,{request.identity,scope.inputs},scope.claim,request.assurance);
