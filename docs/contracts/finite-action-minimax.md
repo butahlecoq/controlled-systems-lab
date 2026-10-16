@@ -57,6 +57,12 @@ at absolute tolerance `1e-8` (ordered plan indices 17, 33 and 129). This remains
 not a reproduction of the published `67.12` nonlinear trajectory or a
 validated numerical certificate.
 
+The [B08 exact-dyadic fixture audit](../research/issue3-b08-dyadic.md)
+independently replays the frozen public binary64 inputs, compares every public
+per-plan status and objective, and brackets the exact norm for this one saved
+fixture. Its a posteriori discrepancy bounds do not upgrade this port's
+`Assurance::numerical` or prove a general validated-arithmetic contract.
+
 ## Report and modular integration gates
 
 The versioned EXT-01 fixed-plan report measures direct fixed-plan and vertex

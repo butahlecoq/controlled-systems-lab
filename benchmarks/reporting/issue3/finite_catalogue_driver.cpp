@@ -309,6 +309,37 @@ bool matches(json observed,json expected,std::string_view name) {
     return observed==expected;
 }
 
+// Source-bound, untimed audit output. The immutable published collection used
+// --smoke/--measure; this mode exposes every public per-plan outcome so an
+// independent exact-dyadic checker can replay the frozen B08 input.
+json b08_audit() {
+    const auto metadata=details("b08_rounded");
+    const auto input_canonical=metadata["input"].dump();
+    const auto bytes=std::as_bytes(std::span<const char>{input_canonical.data(),input_canonical.size()});
+    const auto input_hash=problem::hex(take(problem::snapshot_content(bytes)).digest());
+    const auto outcome=finite_action_minimax(b08_request(),{625,256,1e-8});
+    if(!std::holds_alternative<FiniteMinimaxOptimal>(outcome))
+        throw std::runtime_error("B08 audit requires completed public optimal outcome");
+    const auto& result=std::get<FiniteMinimaxOptimal>(outcome);
+    json plans=json::array();
+    for(const auto& record:result.plans) {
+        if(const auto* feasible=std::get_if<FinitePlanFeasible>(&record))
+            plans.push_back({{"status","feasible"},{"action_indices",feasible->action_indices},
+                {"worst_value",feasible->worst_value},
+                {"evaluated_vertices",feasible->evaluated_vertices}});
+        else {
+            const auto& rejected=std::get<FinitePlanRejected>(record);
+            plans.push_back({{"status","rejected"},{"action_indices",rejected.action_indices},
+                {"stage",rejected.stage},{"violating_successor",rejected.violating_successor}});
+        }
+    }
+    return {{"schema","csl.issue3-b08-per-plan-audit/1"},{"source_commit",source_commit},
+        {"fixture_sha256",CSL_ISSUE3_FIXTURE_SHA256},
+        {"input_canonical",input_canonical},{"input_sha256",input_hash},
+        {"status","numerical_optimal"},{"value",result.value},
+        {"minimizing_plan_indices",result.minimizing_plan_indices},{"plans",std::move(plans)}};
+}
+
 void emit(std::string_view name,Case run,std::size_t round,bool warmup,std::size_t batch) {
     const auto metadata=details(name);
     const auto input_canonical=metadata["input"].dump();
@@ -349,6 +380,10 @@ void emit(std::string_view name,Case run,std::size_t round,bool warmup,std::size
 
 int main(int argc,char** argv) {
     try {
+        if(argc==2 && std::string_view(argv[1])=="--audit-b08") {
+            std::cout<<b08_audit().dump()<<'\n';
+            return 0;
+        }
         if(argc!=2 && argc!=3)throw std::invalid_argument("usage: driver --smoke | --measure ROUNDS");
         const std::string_view mode(argv[1]);
         std::size_t rounds=1;
