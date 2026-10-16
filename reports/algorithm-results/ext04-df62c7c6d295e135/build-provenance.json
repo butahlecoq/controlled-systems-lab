@@ -1,0 +1,108 @@
+{
+  "build_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build_stdout_sha256": "191da747a363e2f657c729a44a5d5ca56ed84ba923a52a5adf8273544e8cd3f7",
+  "cache_sha256": "148ee80e07567f39a1067b53d6cd8f808af1bd6e795812c3dc6fbf498148abdc",
+  "compiler": {
+    "architecture": "x64",
+    "exe_sha256": "a9a3a13e4d019cfc0a9d823b3ee0cc383c6f3f86b00f861ac066032d869997e5",
+    "frontend": "MSVC",
+    "generator_instance": "C:/Program Files/Microsoft Visual Studio/2022/Community",
+    "id": "MSVC",
+    "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+    "toolset": "v143",
+    "version": "19.44.35215.0"
+  },
+  "compiler_file_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+  "configuration": "Release",
+  "exe_sha256": "fe827c1517e5ebd04f0ed9ac691e02cb64273cf6ce9c0b64a632e2df3b04ffb8",
+  "harness_commit": "959755ed5f69641ae643e852c00efe718fa9eb86",
+  "schema": "csl.ext04-build-provenance/1",
+  "settings": {
+    "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+    "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+    "CMAKE_EXE_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/INCREMENTAL:NO",
+    "CMAKE_STATIC_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_STATIC_LINKER_FLAGS_RELEASE": ""
+  },
+  "source_commit": "c23aaf13c1c1e5480cc22dd5bac5cd3e79562609",
+  "targets": {
+    "controller_library": {
+      "archive": {
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64"
+      },
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\ext04-report-harness\\include;%(AdditionalIncludeDirectories)",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "configuration": {
+        "CharacterSet": "MultiByte",
+        "ConfigurationType": "StaticLibrary",
+        "PlatformToolset": "v143",
+        "UseDebugLibraries": "false"
+      },
+      "link": {},
+      "project_sha256": "58b764d664143a825caa4d2654447c67bfe130ba9179cf76dcecd1c916ab49bd"
+    },
+    "driver": {
+      "archive": {},
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\ext04-report-harness\\include;%(AdditionalIncludeDirectories)",
+        "AdditionalOptions": "%(AdditionalOptions) /external:I \"D:/work/PhD/repo/.worktrees/ext04-report-harness/build/ext04-report/_deps/csl_json-src/include\"",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "ExternalWarningLevel": "TurnOffAllWarnings",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "configuration": {
+        "CharacterSet": "MultiByte",
+        "ConfigurationType": "Application",
+        "PlatformToolset": "v143",
+        "UseDebugLibraries": "false"
+      },
+      "link": {
+        "AdditionalDependencies": "Release\\csl_controllers.lib;Release\\csl_model.lib;Release\\csl_numeric.lib;Release\\csl_contracts.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib",
+        "AdditionalLibraryDirectories": "%(AdditionalLibraryDirectories)",
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64",
+        "GenerateDebugInformation": "false",
+        "IgnoreSpecificDefaultLibraries": "%(IgnoreSpecificDefaultLibraries)",
+        "ImportLibrary": "D:/work/PhD/repo/.worktrees/ext04-report-harness/build/ext04-report/Release/csl_ext04_observed_replay_report.lib",
+        "ProgramDataBaseFile": "D:/work/PhD/repo/.worktrees/ext04-report-harness/build/ext04-report/Release/csl_ext04_observed_replay_report.pdb",
+        "SubSystem": "Console"
+      },
+      "project_sha256": "8596a905b6dbae4be4cc8c24a4c1b729f07e65b72790a3bb8ed7181b137cffcf"
+    }
+  }
+}

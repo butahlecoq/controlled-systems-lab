@@ -96,3 +96,35 @@ offline ZIP and exact-byte manifest, register the immutable site route, receive
 independent saved-record review, and verify the live Pages URL before
 publication is claimed. The later artifact commit does not change the frozen
 source/harness measurement identity.
+
+## Saved collection and publication candidate
+
+The single accepted clean Release collection is
+`ext04-df62c7c6d295e135`, from source `c23aaf13` and reviewed harness
+`959755ed`. Its 13 native files are copied byte for byte under
+`reports/algorithm-results/ext04-df62c7c6d295e135/`; the native manifest
+continues to describe those original bytes. Adjacent `host-pre.json` and
+`host-post.json` preserve the separate five-second host observations. The
+report manifest binds these observations and all saved-only outputs.
+
+Regenerate or verify the standalone page, figure, CSVs, manifest and source
+offline ZIP without invoking the C++ driver:
+
+```powershell
+python scripts/reports/ext04/render_saved.py `
+  --bundle reports/algorithm-results/ext04-df62c7c6d295e135 --check
+python -m unittest discover -s tests/reporting -p 'test_ext04_publication.py'
+python scripts/reports/site.py --catalog reports/algorithm-results/catalog.json `
+  --check --out build/ext04-site
+python scripts/reports/stage_ext04.py `
+  --catalog reports/algorithm-results/ext04-publications.json `
+  --site build/ext04-site
+```
+
+`ext04-publications.json` is a content-bound extension catalogue. Its stage
+adds one immutable route and download to the existing report index; source
+and public ZIPs each have a working root landing page and a nested report.
+The report is an exploratory, inconclusive single-path batch observation;
+there is no comparator or source-mapped limiter profile. Independent saved
+report review, main-only deployment, and live Pages/download verification
+are pending. Issue #68 stays open for the remaining algorithm acceptance.

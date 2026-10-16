@@ -1,0 +1,18 @@
+{
+  "files": {
+    "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "CMakeCache.raw.txt": "148ee80e07567f39a1067b53d6cd8f808af1bd6e795812c3dc6fbf498148abdc",
+    "build-provenance.json": "39b8dddc63c295782c055340647722aee4a260819c14fd4b60f2a881a6f343f2",
+    "build.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout.log": "191da747a363e2f657c729a44a5d5ca56ed84ba923a52a5adf8273544e8cd3f7",
+    "collection-status.json": "b82d96f5bb468c0e292f8fac8e33ad5004444ae57f963acaa1412ebf6aeabd34",
+    "driver-description.jsonl": "453dbf4e01d3c69126bc27eca0ea26b97b5bb53f8f5cae81d3fe5fbaf9c0a67b",
+    "driver.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fixture-inputs.json": "67db874c4f1fa6baabeed15c5f314ddc55cb1a9b357624a7bddd78b53722033a",
+    "process-capture.json": "bfed55ecd8428ebe749eac591ec5242f7189e5209bf8d883fc16c83281068370",
+    "records.json": "0d11f932157f0bde7d3ab605bf4bcc56a8cf8c755ad0642f9452713123ed1b70",
+    "trials.jsonl": "7c6c33024ffa93eb37065bf1a66df8a8f02827e0e0e039ec93a9090db1b900d8"
+  },
+  "report_id": "ext04-df62c7c6d295e135",
+  "schema": "csl.ext04-manifest/1"
+}
