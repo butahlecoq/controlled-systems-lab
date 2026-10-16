@@ -1,0 +1,67 @@
+# Approximation policy and evidence (APP-01 prerequisite)
+
+`CSL::approximation` exposes `geometry::approximation::run_registered` through
+`<csl/geometry/approximation.hpp>`. It selects the existing, separate
+`ApproximationPort` by method ID/version, checks the requested output
+representation and relation against the provider's offer, runs the frozen
+request, then audits the returned result. Equivalent representation changes use
+`ConversionPort`; an equivalent request to this policy is rejected.
+
+## Result admission
+
+The request identifies the problem, complete request, ideal reference set,
+input set, output representation, direction, primitive budget and assurance.
+The result must retain the requested relation, ambient dimension and output
+representation, and its evidence must bind the full request identity and input
+ID. A heuristic result is a distinct `HeuristicApproximation` and carries no
+inclusion proof. An inner or outer result is an `EnclosedApproximation` only
+when one of these independent structural checks succeeds:
+
+| Basis | Checked relation |
+| --- | --- |
+| Same immutable set handle and matching envelope | Output equals reference |
+| Native empty output, same ordered native coordinates | Output is inside reference |
+| Native universal output, same ordered native coordinates | Reference is inside output |
+
+Native V data with zero vertex rows is empty under the set contract, including
+when ray rows exist. This policy does not infer nontrivial containment from a
+provider's `SymbolicArgument`, `NumericalCheck`, certificate reference or
+declared capability. It rejects a requested enclosure when none of the checked
+bases applies. A structural basis replaces the provider's support claim in the
+returned geometry evidence; it does not claim validated arithmetic. Validated
+assurance remains unsupported by the registry.
+
+For native output, `size_budget` counts H inequality plus equality rows, V
+vertex plus ray rows, or one singleton point. Empty and universal forms count
+zero. An unknown output size is rejected because the policy cannot verify the
+budget. No finite error bound is admitted without a separate bound verifier.
+Cancellation, stops and provider rejection remain distinct outcomes.
+
+## Objective and plan claims
+
+`objective_bound_side` gives the direction for the extremum of the *same*
+objective over nested feasible sets. For minimization, an inner set gives an
+upper bound and an outer set a lower bound; for maximization, the directions
+reverse. Equivalent sets give both sides, and heuristic sets give neither.
+This is a direction rule, not a computed bound or proof that an extremum is
+finite. A caller must establish the relevant objective, set nesting, bound
+value and numerical evidence before publishing a numerical bound.
+
+An inner reachable state is not by itself an achievable plan. A concrete
+state/control history must pass the original-problem trajectory verifier before
+the caller may report a feasible plan. A reachable-set enclosure says nothing
+about enclosure or completeness of an optimizer family. The policy returns no
+family or achievable-plan claim, and the synthesis family publication gates
+remain separate.
+
+## Remaining APP-01 work
+
+This prerequisite does not close #24. It provides only elementary structural
+enclosures. A nontrivial box, parallelotope, zonotope or ellipsoid adapter needs
+an independent inclusion verifier with claim-specific evidence, a compatible
+output-size accounting method, and contract tests on analytic inner/outer cases.
+The planned APP-02/03/04 adapters must not reinterpret numerical residuals or
+provider declarations as inclusion proofs. A public flow connecting an admitted
+inner reachable state to a separately verified concrete trajectory and bound
+claim is also needed before the full achievable-plan acceptance criterion is
+met. None of this changes the current first-comparison synthesis scope.
