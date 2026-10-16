@@ -89,6 +89,37 @@ TEST_CASE("empty catalogue and absent adversarial paths have distinct statuses")
         finite_action_minimax(empty,{2,2,0})));
 }
 
+TEST_CASE("empty scenarios cannot hide invalid later inputs or cancellation") {
+    auto input=request();
+    input.initial=take(sets::make_empty({{"empty-x0"},1,{"x"}}));
+    input.disturbances[0]=take(sets::make_v({{"unbounded-w"},1,{"w"}},
+        {take(numeric::snapshot(Matrix{1,1,{0}})),
+         take(numeric::snapshot(Matrix{1,1,{1}}))}));
+    const auto rejected=finite_action_minimax(input,{2,2,0});
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    CHECK(std::get<Unsupported>(rejected).diagnostics[0].field=="fixed_plan.bounded");
+
+    input.disturbances[0]=take(sets::make_empty({{"empty-w"},1,{"w"}}));
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    ExecutionContext context{};
+    context.cancellation=cancellation.get_token();
+    const auto stopped=finite_action_minimax(input,{2,2,0},context);
+    REQUIRE(std::holds_alternative<OperationStopped>(stopped));
+    CHECK(std::get<OperationStopped>(stopped).reason==StopReason::cancelled);
+}
+
+TEST_CASE("a later empty disturbance is not masked by an earlier robust violation") {
+    auto input=request({0},0.5);
+    const SystemModel authored{{{1,1,1},TimeDomain::discrete,
+        LinearStage{{1,1,{1}},{1,1,{1}},{1,1,{1}},{0}}},{}};
+    input.system=take(model::snapshot(authored,Vector{0,1,2}));
+    input.disturbances.push_back(take(sets::make_empty({{"empty-w1"},1,{"w"}})));
+    input.admissible_states.push_back(input.admissible_states.back());
+    CHECK(std::holds_alternative<FiniteMinimaxNoScenarios>(
+        finite_action_minimax(input,{1,2,0})));
+}
+
 TEST_CASE("zero horizon has one empty action plan even with an empty catalogue") {
     auto input=request({});
     const SystemModel authored{{{1,1,1},TimeDomain::discrete,
@@ -160,7 +191,11 @@ TEST_CASE("rounded B08 catalogue yields the full numerical finite-plan reference
     const auto& result=std::get<FiniteMinimaxOptimal>(outcome);
     CHECK(result.value==doctest::Approx(67.150601101407).epsilon(1e-10));
     CHECK(result.plans.size()==625);
-    CHECK(result.minimizing_plan_indices.size()==3);
+    CHECK(result.minimizing_plan_indices==std::vector<std::size_t>{17,33,129});
+    for(const auto& record:result.plans) {
+        REQUIRE(std::holds_alternative<FinitePlanFeasible>(record));
+        CHECK(std::get<FinitePlanFeasible>(record).evaluated_vertices==256);
+    }
     for(const auto index:result.minimizing_plan_indices) {
         const auto& plan=std::get<FinitePlanFeasible>(result.plans[index]);
         CHECK(plan.evaluated_vertices==256);

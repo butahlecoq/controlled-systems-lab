@@ -38,7 +38,10 @@ independent source representation.
 robust violation. `FiniteMinimaxEmptyCatalogue` distinguishes an empty action
 catalogue at positive horizon. `FiniteMinimaxNoScenarios` distinguishes an
 empty initial or disturbance description: no terminal worst-case value is
-defined for the resulting empty trajectory product. At zero horizon, even an
+defined for the resulting empty trajectory product. The first fixed plan's
+whole-request admission and stop check run before this status is returned;
+an empty later disturbance is still recognized if propagation first finds an
+earlier safe-set violation. At zero horizon, even an
 empty catalogue has the single empty action plan. Invalid dimensions,
 unsupported representations, unbounded sets and exhausted caller capacities
 return `Unsupported`; cancellation, deadline and numerical arithmetic failure
@@ -50,6 +53,42 @@ The public tests include the L19 midpoint counterexample, duplicate-row ties,
 all-infeasible safe sets, empty and unsupported input, cancellation, and the
 displayed rounded B08 catalogue: 625 plans, each with 256 terminal disturbance
 histories, minimum approximately `67.150601101407`, with three numerical ties
-at absolute tolerance `1e-8`. This remains a discrete rounded-data reference,
+at absolute tolerance `1e-8` (ordered plan indices 17, 33 and 129). This remains a discrete rounded-data reference,
 not a reproduction of the published `67.12` nonlinear trajectory or a
 validated numerical certificate.
+
+## Report and modular integration gates
+
+The versioned EXT-01 fixed-plan report measures direct fixed-plan and vertex
+calls; it does not measure this whole-catalogue function. Before delivery of
+issue #3, prepare a separate optional `CSL_BUILD_ISSUE3_REPORT` harness,
+`benchmarks/reporting/issue3/finite_catalogue_driver.cpp`, modeled on the
+existing EXT-01 driver. Its JSONL `--smoke` route must call the public
+`finite_action_minimax` interface once per fixture and check the L19
+two-action endpoint value, all-infeasible per-plan rejection, empty/unsupported/
+cancelled statuses, and the B08 625-plan, 160,000-terminal-row reference with
+indices 17, 33 and 129. The saved rows must retain input/fixture hashes,
+identity, status, limits, objective convention, assurance, plan and row counts,
+and expected-versus-observed checks. No test elapsed time is a measurement.
+
+Review the fixed source and harness first. Then measure a **clean Release**
+commit, recording compiler/build graph, OS/hardware, numerical settings,
+warmups and raw repeated trials. For B08, time the public whole-catalogue call
+and literal result checks as one declared interval; smaller cases need recorded
+batch counts so the measured work is not dominated by the clock. Keep failures
+and unavailable counters. Use the existing report tooling separation:
+collection writes versioned raw JSONL/JSON and build evidence, rendering reads
+only saved records, and schema-3 catalogue registration stages standalone HTML,
+offline ZIP and immutable GitHub Pages paths. Review raw/HTML consistency and
+visual layout, then verify the live URL and record the measured source commit
+on PR #351 and issue #3. No measurements or publication URL are claimed by
+this source PR yet.
+
+The existing registry ports do not accept this result without changing its
+meaning. `StrategyPort` requires a `SynthesisOutcome` containing a joint
+optimal-family relation; this module returns a scalar value and per-plan
+numerical records. LP, convex and geometry ports have separate mathematical
+requests. [Issue #353](https://github.com/butahlecoq/controlled-systems-lab/issues/353)
+tracks a typed oracle port and registration with capability/provenance tests.
+An eventual complete finite optimal-plan family needs its own representation
+and verifier before any `StrategyPort` claim.

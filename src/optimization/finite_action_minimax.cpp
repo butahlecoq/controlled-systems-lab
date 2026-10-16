@@ -51,10 +51,6 @@ FiniteActionMinimaxOutcome finite_action_minimax(
     }
     if(plan_count>limits.max_plans)
         return unsupported("finite_minimax.capacity", "Action product exceeds the caller plan limit.");
-    if(empty_set(request.initial)) return FiniteMinimaxNoScenarios{};
-    for(const auto& disturbance:request.disturbances)
-        if(empty_set(disturbance)) return FiniteMinimaxNoScenarios{};
-
     std::vector<FinitePlanRecord> records;
     records.reserve(plan_count);
     std::vector<std::size_t> choices(horizon);
@@ -69,6 +65,14 @@ FiniteActionMinimaxOutcome finite_action_minimax(
         const auto propagated=reachability::fixed_plan_disturbance(plan,limits.max_points_per_stage,context);
         if(const auto* error=std::get_if<Unsupported>(&propagated)) return *error;
         if(const auto* stop=std::get_if<OperationStopped>(&propagated)) return *stop;
+        // The first fixed-plan call admits every shared stage before an empty
+        // product is classified. Scan the product even if propagation found an
+        // earlier safe-set violation before reaching an empty later stage.
+        if(plan_index==0) {
+            if(empty_set(request.initial)) return FiniteMinimaxNoScenarios{};
+            for(const auto& disturbance:request.disturbances)
+                if(empty_set(disturbance)) return FiniteMinimaxNoScenarios{};
+        }
         if(const auto* empty=std::get_if<reachability::FixedPlanEmpty>(&propagated)) {
             (void)empty;
             return FiniteMinimaxNoScenarios{};
