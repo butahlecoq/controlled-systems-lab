@@ -10,6 +10,11 @@ This sidecar instead starts from the public Issue 3 [saved B08 input](../../repo
 
 The [independent checker](tools/check_issue3_b08_dyadic.py) enumerates all 625 ordered four-action plans and all 256 disturbance-corner histories per plan using exact rational affine recurrence. Universal safe sets make every plan feasible. For each plan it computes the maximum exact squared Euclidean residual; convexity puts a maximum at a box corner. It compares every indexed plan's status, action indices, terminal-row count, and reported worst value with a new untimed `--audit-b08` route in the existing optional public driver. The route reads the same `b08_request()` as the numerical report but exposes every `FinitePlanRecord`; it neither changes the solver nor the immutable published collection.
 
+The audit row's `source_commit` names the saved numerical run, not the rebuilt
+audit executable. Its `fixture_sha256`, checked against the current driver
+file, and the sidecar's `product_driver_sha256` identify that rebuilt audit
+code separately.
+
 ## Checked result
 
 The versioned [JSON evidence](evidence/issue3-b08-dyadic.json) pins the saved raw, original fixture, current driver, input, aggregate result, and complete 625-score digest. It records:
