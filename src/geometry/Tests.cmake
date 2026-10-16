@@ -61,6 +61,11 @@ target_link_libraries(generator_adapter_tests PRIVATE CSL::generator_adapter doc
 add_test(NAME generator_adapter_tests COMMAND generator_adapter_tests)
 csl_test_target(generator_adapter_tests geometry)
 
+add_executable(r29_scalar_reference_tests tests/contract/geometry/r29_scalar_reference_tests.cpp)
+target_link_libraries(r29_scalar_reference_tests PRIVATE CSL::generator_adapter doctest::doctest)
+add_test(NAME r29_scalar_reference_tests COMMAND r29_scalar_reference_tests)
+csl_test_target(r29_scalar_reference_tests geometry)
+
 add_executable(generators_public_client tests/installed/generators_client.cpp)
 target_link_libraries(generators_public_client PRIVATE CSL::geometry_generators)
 add_test(NAME generators_public_client COMMAND generators_public_client)
