@@ -28,12 +28,15 @@ struct GeometryEvidence {
 };
 struct AffineImage { SetHandle input; Matrix map; Vector offset; }; // y=Mx+b
 struct MinkowskiSum { SetHandle left, right; };
+// Shared generator FactorIds denote one common scalar across both operands.
+// Admission requires factor-bearing representations; this is not MinkowskiSum.
+struct DependentSum { SetHandle left, right; };
 struct Intersection { SetHandle left, right; };
 struct Projection { SetHandle input; std::vector<std::size_t> coordinates; }; // ordered zero-based indices
 struct AffinePreimage { SetHandle target; Matrix map; Vector offset; }; // {x: Mx+b in target}
 struct SupportQuery { SetHandle input; Vector direction; }; // sup d'x
 struct ContainmentQuery { SetHandle subset, superset; };
-using GeometryOperation = std::variant<AffineImage, MinkowskiSum, Intersection, Projection,
+using GeometryOperation = std::variant<AffineImage, MinkowskiSum, DependentSum, Intersection, Projection,
     AffinePreimage, SupportQuery, ContainmentQuery>;
 struct OperationRequest {
     GeometryRequestIdentity identity;

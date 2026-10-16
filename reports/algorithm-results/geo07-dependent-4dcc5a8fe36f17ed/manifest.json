@@ -1,0 +1,24 @@
+{
+  "files": {
+    "build-provenance.json": "876168d4165416d9cd5edd113814e2b883ba47e29ec4c1a21517cbabd76242a0",
+    "build.capture.json": "146dbedf0fda74c4fc2e27aae90fe09f1b1236a028aba7a2f80c1779ab360706",
+    "build.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.stdout": "cf7a786da8af2fbc13f87c3050a7fed2fdeaa8d00333698d41f438abf04ea604",
+    "collection-status.json": "afa73c0f052b5972f5b49fae0cc262e617a576c673f32e02ac95d543de1b25a5",
+    "describe.capture.json": "75277ca4c9686976004760202aed4db89155b995ff68bb7f1b2f9ff1e5650f08",
+    "describe.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "describe.stdout": "aea78ddfc0faed7fe141d08f14c8cb1d256cbd680befe04072610f323470b577",
+    "fixture-inputs.json": "d815e5287b4870a5687508a2b5785f86e5fcf816738c69c2fa7c1f7bf15badd5",
+    "host-observation.json": "672272d7325e6c881028884837e117383dfda221694623da9e1f0f566805aa3b",
+    "host-observation.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "records.json": "fb4a0bab5953e679ece8e814aeb2a0fcbe68c4816fad3cc097c9e1b48774399c",
+    "smoke.capture.json": "0b123d6004a9692fd4db782f7ff1c5f0150d65ae6ecf2b379668be0fa36e9024",
+    "smoke.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke.stdout": "ad44bbfc85b0dc77d8a61292973837eaebf23f8aa6b7ce64f951a7cffe8d2bea",
+    "trials.capture.json": "fd67e44709586005d8434075d7a615da5160cff5b16a745eaded29bbfc242e09",
+    "trials.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials.stdout": "3cc538611451add4eaef7adcbb5f225bbe668eadb8c32bd9e98de298f85fbc0c"
+  },
+  "report_id": "geo07-dependent-4dcc5a8fe36f17ed",
+  "schema": "csl.geo07-dependent-manifest/1"
+}

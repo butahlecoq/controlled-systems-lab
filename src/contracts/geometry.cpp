@@ -15,6 +15,7 @@ OperationScope operation_scope(const GeometryOperation& operation) {
     return std::visit(Overloaded{
         [](const AffineImage& op) { return OperationScope{{op.input.id},GeometryClaimScope::set_relation}; },
         [](const MinkowskiSum& op) { return OperationScope{{op.left.id,op.right.id},GeometryClaimScope::set_relation}; },
+        [](const DependentSum& op) { return OperationScope{{op.left.id,op.right.id},GeometryClaimScope::set_relation}; },
         [](const Intersection& op) { return OperationScope{{op.left.id,op.right.id},GeometryClaimScope::set_relation}; },
         [](const Projection& op) { return OperationScope{{op.input.id},GeometryClaimScope::set_relation}; },
         [](const AffinePreimage& op) { return OperationScope{{op.target.id},GeometryClaimScope::set_relation}; },
@@ -41,6 +42,7 @@ Diagnostics check_operation_shape(const OperationRequest& request) {
             return matrix_matches(op.map,op.map.rows,op.input.metadata.dimension) && op.offset.size() == op.map.rows;
         },
         [](const MinkowskiSum& op) { return op.left.metadata.dimension == op.right.metadata.dimension; },
+        [](const DependentSum& op) { return op.left.metadata.dimension == op.right.metadata.dimension; },
         [](const Intersection& op) { return op.left.metadata.dimension == op.right.metadata.dimension; },
         [](const Projection& op) {
             for (const auto coordinate : op.coordinates) if (coordinate >= op.input.metadata.dimension) return false;

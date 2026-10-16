@@ -1,4 +1,14 @@
-# Native interfaces, revision 1.6
+# Native interfaces, revision 1.7
+
+Revision 1.7 (GEO-07, 2026-10-16) adds `DependentSum` as a distinct
+`GeometryOperation` request for factor-bearing set handles. It does not alter
+`MinkowskiSum`: the latter remains the independent set sum. The new request is
+defined by the operands' immutable factor IDs and constraints; adapters unable
+to read those identities reject it. `check_operation_shape` checks the two
+ambient dimensions, while a compatible adapter also checks ordered coordinate
+labels and valid factor payloads. The registered generator adapter supports the
+new request at numerical assurance. This shared source-interface change needs
+integration review; no validated binary64 equality is implied.
 
 Revision 1.6 (OBS-02, 2026-10-13) adds a trailing, default-empty
 `ExecutionContext::timing` handle to the independent timing collector. Existing
@@ -155,6 +165,7 @@ Set/operator metadata and evidence are declarations to be checked by registered 
 |---|---|---|
 | `AffineImage` | Input S in Rⁿ, row-major M in Rᵐˣⁿ, offset b in Rᵐ; ideal output {Mx+b : x in S} | Set in Rᵐ |
 | `MinkowskiSum` | Ordered S and T both in Rⁿ; ideal output {s+t : s in S, t in T} | Set in Rⁿ |
+| `DependentSum` | Ordered factor-bearing S and T in Rⁿ with matching coordinate labels; shared `FactorId`s denote the same bounded scalar, each input equality system applies to the joint factor assignment; ideal output is the sum of the two affine maps over that joint feasible factor domain | Set in Rⁿ; unsupported for handles without compatible factor identities |
 | `Intersection` | Ordered S and T both in Rⁿ; ideal output S intersect T | Set in Rⁿ |
 | `Projection` | Input S in Rⁿ and ordered zero-based coordinate indices i₀,...,iₖ₋₁ in [0,n); output order is exactly the supplied order. Repeated indices are permitted and retain equality dependencies. | Set {(x[i₀],...,x[iₖ₋₁]) : x in S} in Rᵏ |
 | `AffinePreimage` | Target T in Rᵐ, M in Rᵐˣⁿ, b in Rᵐ; no invertibility assumption | Set {x in Rⁿ : Mx+b in T} |
@@ -163,7 +174,7 @@ Set/operator metadata and evidence are declarations to be checked by registered 
 
 `OperationResult`, `SupportResult` and `ContainmentResult` each carry `GeometryEvidence`. A support maximizer must have input dimension and is absent when attainment is unestablished, empty or unbounded; absence does not prove nonattainment. A containment counterexample, if present, must belong to S outside T. Scalar/boolean result type does not establish evidence strength. `required_relation` applies to set-valued requests; queries use their support/containment scope and assurance and must use `equivalent` in this field. No inner/outer scalar-query semantics are introduced. Native execution/result validation remains downstream.
 
-`check_operation_shape` validates affine buffer shapes/storage and offset sizes, coordinate ranges, matching binary-operation dimensions and support direction size. It does not evaluate transforms, query sets, check matrix coefficient finiteness, validate payloads or establish any geometric property. Its cost is O(number of projection indices) for projection and O(1) descriptor checks for the other forms. Owning request copies cost the numerical operand size, with shared immutable payloads retained through their handles. The [contract tests](../../probes/core-01/contract_tests.cpp) express both y=x₀+2 and y=(x₁+3,x₀+4) from the same two-dimensional set, plus projections in two different coordinate orders, without backend types or hidden workspace operands.
+`check_operation_shape` validates affine buffer shapes/storage and offset sizes, coordinate ranges, matching binary-operation dimensions (including `DependentSum`) and support direction size. It does not evaluate transforms, query sets, check matrix coefficient finiteness, validate factor identities/payloads or establish any geometric property. Its cost is O(number of projection indices) for projection and O(1) descriptor checks for the other forms. Owning request copies cost the numerical operand size, with shared immutable payloads retained through their handles. The [contract tests](../../probes/core-01/contract_tests.cpp) express both y=x₀+2 and y=(x₁+3,x₀+4) from the same two-dimensional set, plus projections in two different coordinate orders, without backend types or hidden workspace operands.
 
 ### Geometry reference and evidence binding
 

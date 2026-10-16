@@ -135,7 +135,7 @@ target_link_libraries(installed_generator_adapter_client PRIVATE CSL::generator_
 set_target_properties(installed_generator_adapter_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_generator_adapter_client COMMAND installed_generator_adapter_client)
 set_tests_properties(installed_generator_adapter_client PROPERTIES
-  PASS_REGULAR_EXPRESSION "Installed generator adapter client: prepared box image and literal V conversion passed")
+  PASS_REGULAR_EXPRESSION "Installed generator adapter client: image, dependent sum and V conversion passed")
 
 add_executable(installed_objectives_client objectives_client.cpp)
 target_link_libraries(installed_objectives_client PRIVATE CSL::objectives)

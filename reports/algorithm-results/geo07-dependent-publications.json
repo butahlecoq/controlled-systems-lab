@@ -1,0 +1,17 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Exploratory and inconclusive single-adapter observations; no comparator, limiter profile, speedup, application-scale claim or validated binary64 rounding enclosure",
+      "measured_scope": "14 measured verified batches across two bounded public GeometryPort DependentSum fixtures; 2,000 fresh checked calls per batch",
+      "native_payload_sha256": "ebaad5725ed3d2e944662d7df3ce3597a40c4bc84b3c534c967316293a18d8f3",
+      "payload_schema": "csl.geo07-dependent-records/1",
+      "payload_sha256": "ebaad5725ed3d2e944662d7df3ce3597a40c4bc84b3c534c967316293a18d8f3",
+      "report_id": "geo07-dependent-registered-ee5345877b14a0ebd234a92fe30b371426cfee1e72aa8abf9ea2f9ac3454483b",
+      "report_kind": "geo07-registered-dependent-generator-sum",
+      "source_commit": "5411e37ad456f0d5b3bf775130f149622ef5ebfa",
+      "source_report_id": "geo07-dependent-4dcc5a8fe36f17ed",
+      "zip_sha256": "c046a49dea35dc3c12f77061d92b3166f994c821f9a2f14fb494354541b8fda9"
+    }
+  ],
+  "schema": "csl.geo07-dependent-report-extension/1"
+}

@@ -52,6 +52,9 @@ jobs:
             if test -f reports/algorithm-results/geo07-port-publications.json; then
               python scripts/reports/stage_geo07_port.py --catalog reports/algorithm-results/geo07-port-publications.json --site build/report-site
             fi
+            if test -f reports/algorithm-results/geo07-dependent-publications.json; then
+              python scripts/reports/stage_geo07_dependent.py --catalog reports/algorithm-results/geo07-dependent-publications.json --site build/report-site
+            fi
             if test -f reports/algorithm-results/finite-feedback-publications.json; then
               python scripts/reports/stage_finite_feedback.py --catalog reports/algorithm-results/finite-feedback-publications.json --site build/report-site
             fi

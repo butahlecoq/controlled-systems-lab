@@ -1,0 +1,119 @@
+{
+  "build_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build_stdout_sha256": "80cf8279634f3a18e02b3ff09e4f1d154689dad15b5fcf5308b7f39ae31dc633",
+  "cache_sha256": "de3a89bb61fc30c6a4185af8104474dcd39f20eb4a89740d3e2c461d6219a40d",
+  "compiler_file_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+  "compiler_version": "19.44.35215.0",
+  "configuration": "Release",
+  "exe_sha256": "ba88de3ceb9c7aa5d213c4acfadbae40ce239906b6d21f4dc82bd33d6899cd3c",
+  "harness_commit": "eef1eda3d326418a392b3cc1e8f8f4b204ca7a73",
+  "harness_tree": "555954400146134d67a4aefca19bb767106c7e5f",
+  "projects": {
+    "adapter_library": {
+      "archive": {
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64"
+      },
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\issue32-dependent-report\\include;%(AdditionalIncludeDirectories)",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "link": {},
+      "project_sha256": "48d193b2b201e855d1fc05b044d8cfb8dd62d6ae14dfd96c5ba3b20813c12035"
+    },
+    "driver": {
+      "archive": {},
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\issue32-dependent-report\\include;%(AdditionalIncludeDirectories)",
+        "AdditionalOptions": "%(AdditionalOptions) /external:I \"D:/work/PhD/repo/.worktrees/issue32-dependent-report/build/geo07-dependent-accepted/_deps/csl_json-src/include\"",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "ExternalWarningLevel": "TurnOffAllWarnings",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "link": {
+        "AdditionalDependencies": "Release\\csl_generator_adapter.lib;Release\\csl_geometry_generators.lib;Release\\csl_registry.lib;Release\\csl_verifiers.lib;Release\\csl_resolved_core.lib;Release\\csl_problem.lib;Release\\csl_sets.lib;Release\\csl_model.lib;Release\\csl_objectives.lib;Release\\csl_numeric.lib;Release\\csl_contracts.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib",
+        "AdditionalLibraryDirectories": "%(AdditionalLibraryDirectories)",
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64",
+        "GenerateDebugInformation": "false",
+        "IgnoreSpecificDefaultLibraries": "%(IgnoreSpecificDefaultLibraries)",
+        "ImportLibrary": "D:/work/PhD/repo/.worktrees/issue32-dependent-report/build/geo07-dependent-accepted/Release/csl_geo07_dependent_report.lib",
+        "ProgramDataBaseFile": "D:/work/PhD/repo/.worktrees/issue32-dependent-report/build/geo07-dependent-accepted/Release/csl_geo07_dependent_report.pdb",
+        "SubSystem": "Console"
+      },
+      "project_sha256": "ea9329792618fa4298de14c80e7767a2d02028eeeca601c364abf24214cbb388"
+    },
+    "generator_library": {
+      "archive": {
+        "AdditionalOptions": "%(AdditionalOptions) /machine:x64"
+      },
+      "compile": {
+        "AdditionalIncludeDirectories": "D:\\work\\PhD\\repo\\.worktrees\\issue32-dependent-report\\include;%(AdditionalIncludeDirectories)",
+        "AssemblerListingLocation": "$(IntDir)",
+        "BasicRuntimeChecks": "Default",
+        "ConformanceMode": "true",
+        "DebugInformationFormat": "\n      ",
+        "ExceptionHandling": "Sync",
+        "InlineFunctionExpansion": "AnySuitable",
+        "LanguageStandard": "stdcpp20",
+        "MinimalRebuild": "",
+        "ObjectFileName": "$(IntDir)",
+        "Optimization": "MaxSpeed",
+        "PrecompiledHeader": "NotUsing",
+        "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+        "RuntimeLibrary": "MultiThreadedDLL",
+        "ScanSourceForModuleDependencies": "true",
+        "SupportJustMyCode": "",
+        "TreatWarningAsError": "true",
+        "UseFullPaths": "false",
+        "WarningLevel": "Level4"
+      },
+      "link": {},
+      "project_sha256": "de6b04b85ef180c3c9de1158ae9ad2462c3f7ffc53317b2bb967362a628eaee8"
+    }
+  },
+  "review_seal_sha256": "7d79566fbd0a60ba8aa318da34956294036bd7e3e2221303f1c954fa8b75e001",
+  "reviewed_code_commit": "eaa32fdfdcf42b3f3f3221dd3031d654fe05e576",
+  "schema": "csl.geo07-dependent-build/1",
+  "settings": {
+    "CMAKE_CXX_FLAGS": "/DWIN32 /D_WINDOWS /EHsc",
+    "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG",
+    "CMAKE_EXE_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_EXE_LINKER_FLAGS_RELEASE": "/INCREMENTAL:NO",
+    "CMAKE_STATIC_LINKER_FLAGS": "/machine:x64",
+    "CMAKE_STATIC_LINKER_FLAGS_RELEASE": ""
+  },
+  "source_commit": "5411e37ad456f0d5b3bf775130f149622ef5ebfa",
+  "source_tree": "29996b5a58a1bb775cd7ea5e85b24a49cfaf7938"
+}

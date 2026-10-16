@@ -44,6 +44,27 @@ int main() {
     if(image.center()[0]-image.generators().values[0]-image.generators().values[1]!=2 ||
        image.center()[0]+image.generators().values[0]+image.generators().values[1]!=12) return 5;
 
+    const auto left=take(sets::make_generator_set({{"shared-left"},{0},{1,1,{1}},
+        {{"history.0"}},{0,1,{}},{},{}}));
+    const auto right=take(sets::make_generator_set({{"shared-right"},{0},{1,1,{-1}},
+        {{"history.0"}},{0,1,{}},{},{}}));
+    const OperationRequest dependent{{{"installed-geo07"},{"dependent"},{"origin"}},
+        {"csl.geometry.generators.operations"},DependentSum{left.as_handle(),right.as_handle()},
+        SetRelation::equivalent,Assurance::numerical};
+    auto dependent_plan=take(geometry.prepare(dependent));
+    auto [dependent_work]=dependent_plan.create();
+    const auto dependent_result=take(dependent_work->run({{},{},{},{1e-8,1e-8},"installed-geo07"}));
+    if(!check_geometry_evidence(dependent_result.evidence,dependent).empty()) return 9;
+    const auto cancellation=take(sets::from_generator_handle(dependent_result.output));
+    if(cancellation.center()!=Vector{0} || cancellation.generators().values!=Vector{0} ||
+        cancellation.factor_ids()!=std::vector<sets::FactorId>{{"history.0"}}) return 10;
+    // Literal physical H oracle: x<=0 and -x<=0.
+    if(cancellation.center()[0]>0 || -cancellation.center()[0]>0) return 11;
+    const OperationRequest independent{{{"installed-geo07"},{"independent"},{"interval"}},
+        {"csl.geometry.generators.operations"},MinkowskiSum{left.as_handle(),right.as_handle()},
+        SetRelation::equivalent,Assurance::numerical};
+    if(!std::holds_alternative<registry::Rejection>(geometry.prepare(independent))) return 12;
+
     auto converter=prepare(geometry::generators::make_v_conversion_registration(4),{"csl.polyhedron.v"});
     const ConversionRequest conversion{{{"installed-geo07"},{"convert"},{"image-v"}},
         image.as_handle(),{"csl.polyhedron.v"},Assurance::numerical};
@@ -58,6 +79,6 @@ int main() {
     std::set<double> vertices;
     for(std::size_t row=0;row<v->vertices.rows();++row) vertices.insert(v->vertices(row,0));
     if(vertices!=std::set<double>{2,6,8,12}) return 8;
-    std::cout << "Installed generator adapter client: prepared box image and literal V conversion passed\n";
+    std::cout << "Installed generator adapter client: image, dependent sum and V conversion passed\n";
     return 0;
 }

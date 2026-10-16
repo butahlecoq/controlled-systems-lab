@@ -1,0 +1,17 @@
+fixture,round,warmup,batch,checked_calls,elapsed_ns,status
+shared_cancellation,0,True,2000,2000,26335300,passed
+constrained_shared,0,True,2000,2000,31954900,passed
+shared_cancellation,0,False,2000,2000,25956800,passed
+constrained_shared,0,False,2000,2000,31589700,passed
+constrained_shared,1,False,2000,2000,32664800,passed
+shared_cancellation,1,False,2000,2000,28182000,passed
+shared_cancellation,2,False,2000,2000,25647700,passed
+constrained_shared,2,False,2000,2000,32725000,passed
+constrained_shared,3,False,2000,2000,33118200,passed
+shared_cancellation,3,False,2000,2000,28287800,passed
+shared_cancellation,4,False,2000,2000,25870200,passed
+constrained_shared,4,False,2000,2000,31826800,passed
+constrained_shared,5,False,2000,2000,32201200,passed
+shared_cancellation,5,False,2000,2000,25649700,passed
+shared_cancellation,6,False,2000,2000,26255700,passed
+constrained_shared,6,False,2000,2000,32156200,passed

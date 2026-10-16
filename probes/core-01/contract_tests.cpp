@@ -304,6 +304,17 @@ TEST_CASE("geometry: sum, intersection and affine preimage enforce operand dimen
         CHECK(check_operation_shape(request).empty());
         request.operation = MinkowskiSum{input_set(),input_set("set/b",3)};
     }
+    SUBCASE("dependent sum") {
+        request.operation = DependentSum{input_set(),input_set("set/b")};
+        CHECK(check_operation_shape(request).empty());
+        auto evidence=image_evidence();
+        evidence.reference.inputs={{"set/a"},{"set/b"}};
+        CHECK(check_geometry_evidence(evidence,request).empty());
+        auto reversed=request;
+        reversed.operation=DependentSum{input_set("set/b"),input_set()};
+        CHECK_FALSE(check_geometry_evidence(evidence,reversed).empty());
+        request.operation = DependentSum{input_set(),input_set("set/b",3)};
+    }
     SUBCASE("intersection") {
         request.operation = Intersection{input_set(),input_set("set/b")};
         CHECK(check_operation_shape(request).empty());

@@ -41,11 +41,18 @@ an ordinary zonotope through silent enclosure. Finite and mixed action
 catalogues are outside this continuous-factor contract.
 
 The registered `CSL::generator_adapter` target supplies a `GeometryPort` for
-affine images and disjoint-ID Minkowski sums of native generator handles. Its
-prepared-provider path retains IDs and equality rows in the output. A shared
-ID means the factors are dependent, so the independent-sum port rejects that
-request; use native `dependent_sum` for a synchronized sum. The adapter also
-supplies a `ConversionPort` for an explicit, bounded unconstrained zonotope to
+affine images, disjoint-ID `MinkowskiSum`, and the explicitly typed
+`DependentSum` of native generator handles. Its prepared-provider path retains
+IDs and equality rows in the output. A shared ID means the factors are
+dependent: `MinkowskiSum` rejects that request, while `DependentSum` admits it
+and calls the native synchronized algebra. The latter also accepts disjoint
+IDs, with the same set as the independent sum in that case. The `DependentSum`
+request is a factor-identity operation, not an operation on physical set points
+alone; other set representations have no implicit factor interpretation. The
+adapter checks the native handle envelope and matching ordered coordinate
+labels before a workspace is created. The registration version is `1.1.0`;
+version-pinned `1.0.0` callers must select the new version of this registration.
+The adapter also supplies a `ConversionPort` for an explicit, bounded unconstrained zonotope to
 `csl.polyhedron.v` conversion. It enumerates every factor-cube corner, maps
 each corner into ambient coordinates and returns the resulting V payload
 without vertex deduplication or reduction. The caller must set a positive
@@ -70,27 +77,24 @@ box image, the synchronized cancellation singleton, and a constrained sum.
 They also check the lifted H form, preserved factor IDs and rows, invalid inputs,
 zero-column and contradictory-factor cases. A separate `find_package(CSL CONFIG)`
 installed consumer checks both exported public targets. Prepared-provider tests
-exercise literal ambient H answers and V vertices for the registered operations
+exercise literal ambient H answers, synchronized shared-factor cancellation,
+both constrained equality systems, and V vertices for the registered operations
 and conversion. These finite cases establish behavior only for the supplied
 coordinates, not general numerical validity.
 
-## Publication gate
+## Publication gate for the registered dependent sum
 
-This algorithm produces numerical coordinates. Before this draft can merge,
-freeze and independently review its source and a public-API report harness.
-Build that commit cleanly in MSVC Release. Save warmups, at least seven
-measured repetitions for the box image, shared-factor cancellation and
-constrained diagonal fixtures, checking literal H oracle answers on **every**
-run. Record the exact interval, work count, hardware/OS/compiler settings,
-failures, unavailable counters and source commit. Keep raw records, figures,
-versioned standalone HTML, offline ZIP and exact-byte manifest. Review the
-saved bundle independently, merge and deploy from main, then open the immutable
-Pages URL and link it in the PR and issue. Report a single-adapter exploratory
-timing without a speedup or unsupported exact-arithmetic claim.
-
-Issue #32 remains open after these slices. The registered adapter adds a
-bounded subset of the requested closure and conversion surface. A separate
-fixed-source public-API report and review are required before this numerical
-adapter can merge; the native algorithm's report does not cover the new port.
-The full acceptance checklist, including broader geometry integration,
-remains to be reviewed.
+This newly registered numerical operation needs a distinct saved report; the
+published native and registered-adapter reports do not exercise this request.
+Before this source PR can merge, freeze and independently review its source and
+a public-API report harness. Build that commit cleanly in MSVC Release. Save
+warmups and at least seven measured repetitions for shared-factor cancellation
+and constrained shared-factor fixtures, checking literal H oracle answers on
+**every** run. Record the exact interval, work count, hardware/OS/compiler
+settings, failures, unavailable counters and source/harness commits. Keep raw
+records, figures, versioned standalone HTML, offline ZIP and exact-byte
+manifest. Review the saved bundle independently, merge and deploy from main,
+then open the immutable Pages URL and link it in the PR and issue. Report a
+single-adapter exploratory timing without a speedup or unsupported
+exact-arithmetic claim. The full issue #32 checklist remains open until that
+publication and an issue-level acceptance audit are complete.

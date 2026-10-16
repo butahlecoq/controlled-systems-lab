@@ -25,6 +25,11 @@ methods remain explicitly unresolved in `Rejection::provenance.actual`.
 The existing mathematical interfaces have separate `LPPort`, `ConvexPort`,
 `GeometryPort`, `ConversionPort`, `ApproximationPort`, `SelectorPort` and
 `StrategyPort` traits. Their request/workspace/result distinctions are preserved.
+`GeometryPort` admits the separately typed `DependentSum` request only for an
+adapter with factor-identity semantics; its existing `MinkowskiSum` request
+retains the independent-set meaning. See the [geometry source contract](core-interfaces.md)
+and [generator adapter](generator-sets.md).
+
 `SelectorRequest` pairs the existing family and witness request;
 `StrategyRequest` owns an immutable `ResolvedProblem`, the effective
 `FamilyRequest`, strategy configuration and selected strategy version. LP and

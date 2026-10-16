@@ -80,9 +80,19 @@ registry::Capability operation_capability(const OperationRequest& request,
             return unsupported("generators.minkowski.labels",
                 "Minkowski inputs require the same ordered coordinate labels.",DiagnosticCode::invalid_input);
         constrained=a.equalities().rows!=0 || b.equalities().rows!=0;
+    } else if(const auto* dependent=std::get_if<DependentSum>(&request.operation)) {
+        const auto left=imported(dependent->left),right=imported(dependent->right);
+        if(const auto* errors=std::get_if<Diagnostics>(&left)) return *errors;
+        if(const auto* errors=std::get_if<Diagnostics>(&right)) return *errors;
+        const auto& a=std::get<sets::GeneratorSet>(left);
+        const auto& b=std::get<sets::GeneratorSet>(right);
+        if(a.coordinate_labels()!=b.coordinate_labels())
+            return unsupported("generators.dependent.labels",
+                "Dependent summands require the same ordered coordinate labels.",DiagnosticCode::invalid_input);
+        constrained=a.equalities().rows!=0 || b.equalities().rows!=0;
     } else {
         return unsupported("generators.operation",
-            "Only affine images and independent Minkowski sums are registered.");
+            "Only affine images, independent Minkowski sums and dependent sums are registered.");
     }
     registry::Output output;
     output.representation={constrained ? "csl.constrained-zonotope" : "csl.zonotope"};
@@ -112,11 +122,18 @@ public:
             result=minkowski_sum(std::get<sets::GeneratorSet>(left),std::get<sets::GeneratorSet>(right),
                 {request_.identity.ideal_output.value});
             inputs={sum->left.id,sum->right.id};
+        } else if(const auto* dependent=std::get_if<DependentSum>(&request_.operation)) {
+            auto left=imported(dependent->left),right=imported(dependent->right);
+            if(const auto* errors=std::get_if<Diagnostics>(&left)) return Unsupported{*errors};
+            if(const auto* errors=std::get_if<Diagnostics>(&right)) return Unsupported{*errors};
+            result=dependent_sum(std::get<sets::GeneratorSet>(left),std::get<sets::GeneratorSet>(right),
+                {request_.identity.ideal_output.value});
+            inputs={dependent->left.id,dependent->right.id};
         } else return Unsupported{unsupported("generators.operation","Unsupported generator operation.")};
         if(const auto* errors=std::get_if<Diagnostics>(&result)) return Unsupported{*errors};
         if(stopped(context)) return stop(context);
         auto proof=evidence(request_.identity,std::move(inputs),
-            "Affine images retain each factor and equality; disjoint-ID Minkowski sums concatenate independent factors and equalities.");
+            "Affine images retain each factor and equality; disjoint-ID Minkowski sums concatenate independent factors; dependent sums synchronize shared factors and retain both equality systems.");
         if(auto errors=check_geometry_evidence(proof,request_);!errors.empty()) return Unsupported{std::move(errors)};
         return OperationResult{std::get<sets::GeneratorSet>(std::move(result)).as_handle(),
             SetRelation::equivalent,std::move(proof)};
@@ -208,7 +225,7 @@ public:
 } // namespace
 
 registry::Registration<registry::GeometryPort> make_operation_registration() {
-    return {{{"csl.geometry.generators.operations"},"1.0.0"},operation_capability,
+    return {{{"csl.geometry.generators.operations"},"1.1.0"},operation_capability,
         [](const OperationRequest& request) {return std::make_unique<OperationWorkspace>(request);}};
 }
 registry::Registration<registry::ConversionPort> make_v_conversion_registration(
