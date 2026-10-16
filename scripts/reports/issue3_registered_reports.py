@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
-import re
 
 from issue3 import render_saved as native
 import registered_reports as common
@@ -25,7 +24,9 @@ def adapt(bundle: Path) -> common.PublicationRecord:
     identity = {"schema": "csl.issue3-publication-identity/1",
                 "source_report_id": native.REPORT_ID,
                 "source_files": manifest["files"],
-                "source_manifest_sha256": native.sha((bundle / "manifest.json").read_bytes())}
+                "source_manifest_sha256": native.sha((bundle / "manifest.json").read_bytes()),
+                "publisher_sha256": hashlib.sha256(Path(__file__).read_bytes().replace(
+                    b"\r\n", b"\n")).hexdigest()}
     public_id = "issue3-finite-catalogue-" + common._digest(identity)
     payload_hash = common._digest(record)
     return common.PublicationRecord(KIND, public_id, payload_hash, native.SOURCE,

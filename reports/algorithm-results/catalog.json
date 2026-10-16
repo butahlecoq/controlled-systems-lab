@@ -238,7 +238,7 @@
       "zip_sha256": "3b29d56fcbc356816c725e431a215091429263080ad3f51cca1fa30e4aae98b1"
     },
     {
-      "report_id": "issue3-finite-catalogue-dbfc6f5510e8068fe64d961ef2029462c02aa7bc446b9aacf499dbcc70148443",
+      "report_id": "issue3-finite-catalogue-4ec4bbff723812da7f28e99d82a6ee931dfd5ddca7ba705074b40c889a091dc9",
       "report_kind": "issue3-finite-catalogue",
       "source_report_id": "issue3-finite-catalogue-b4632ce76510aa4f",
       "payload_schema": "csl.issue3-finite-catalogue-records/1",
@@ -247,7 +247,7 @@
       "source_commit": "994f3ee4310b4087d289e2eb02adbdb9dfd97827",
       "measured_scope": "Eight checked finite-action minimax fixtures; seven Release batch observations per fixture, with fixture-specific call counts",
       "evidence_limits": "Exploratory single-adapter batch timings with possible host contention; no comparator, speedup, source-mapped limiter, or per-call latency claim; displayed rounded B08 open-loop linear model only, binary64 numerical assurance",
-      "zip_sha256": "0402a7234fb219529c13fcdbbcd64a6a751e63737ff28b667ac8445e2867d4a2"
+      "zip_sha256": "6467b1bc20e759968578471fe9ce247ade4c5101fd18e7927f7d3028c5e4b1d8"
     }
   ]
 }

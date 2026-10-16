@@ -8,6 +8,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 import io
 
@@ -75,6 +76,18 @@ class Issue3SavedReportTests(unittest.TestCase):
             self.assertEqual(zipped.read("index.html"), files["index.html"])
         self.assertEqual(publication.catalogue_entry(BUNDLE)["zip_sha256"],
                          hashlib.sha256(archive).hexdigest())
+
+    def test_public_route_tracks_normalized_publisher_bytes(self):
+        original = publication.adapt(BUNDLE).report_id
+        publisher_lf = Path(publication.__file__).read_bytes().replace(b"\r\n", b"\n")
+        with tempfile.TemporaryDirectory() as temporary:
+            copied = Path(temporary) / "issue3_registered_reports.py"
+            copied.write_bytes(publisher_lf.replace(b"\n", b"\r\n"))
+            with patch.object(publication, "__file__", str(copied)):
+                self.assertEqual(publication.adapt(BUNDLE).report_id, original)
+            copied.write_bytes(publisher_lf + b"# changed publication source\n")
+            with patch.object(publication, "__file__", str(copied)):
+                self.assertNotEqual(publication.adapt(BUNDLE).report_id, original)
 
 
 if __name__ == "__main__":
