@@ -33,6 +33,13 @@ add_test(NAME geo05_driver_outcome_tests COMMAND geo05_driver_outcome_tests)
 endif()
 endif()
 
+if(CSL_BUILD_GEO06_REPORT)
+add_executable(csl_geo06_quickhull_report benchmarks/reporting/geo06/quickhull_driver.cpp)
+target_link_libraries(csl_geo06_quickhull_report PRIVATE CSL::quickhull_2d)
+target_compile_features(csl_geo06_quickhull_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_geo06_quickhull_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+endif()
+
 if(CSL_BUILD_GEO02_REPORT)
 add_executable(csl_geo02_affine_sum_report benchmarks/reporting/geo02/affine_sum_driver.cpp)
 target_compile_features(csl_geo02_affine_sum_report PRIVATE cxx_std_20)
