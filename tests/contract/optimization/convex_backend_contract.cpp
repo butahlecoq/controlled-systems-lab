@@ -66,8 +66,8 @@ void check_reported_original_cost(const ProgramResult& result,double independent
     REQUIRE(error==std::errc{});
     REQUIRE(parsed==number.data()+number.size());
     REQUIRE(std::isfinite(reported));
-    // The adapter uses the default stream precision for diagnostic text.
-    CHECK(std::abs(reported-independent_cost)<=1e-8+1e-5*std::abs(independent_cost));
+    // The adapter emits 17 digits; this allows arithmetic rounding in these small QPs.
+    CHECK(std::abs(reported-independent_cost)<=1e-12*(1+std::abs(independent_cost)));
 }
 }
 
