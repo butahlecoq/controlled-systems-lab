@@ -52,4 +52,6 @@ The [Works source follow-up](works-followup.md) and [supplemental W01–W14 regi
 
 [B04 saved witnesses and replay](b04-saved-witnesses.md) curates three independently checked nominal/nonlinear pairs as a distinct evidence variant, with [machine-readable facts](evidence/b04-saved-witnesses.json) and an explicit-private-source reference checker. It preserves the frozen objective mismatch, historical 99.99-second endpoint and missing canonical T16 configuration. The historical scenario remains non-executable.
 
+[Publication-to-source version matrix](publication-source-matrix.md) compares hash-identified B04, B08 and B09 publications with nearby archived scripts, notebooks and saved runs. It records field-level matches, incompatible versions and missing canonical inputs for issues #1 and #2.
+
 The [reviewed temporal-lift source audit](temporal-lift-source-audit.md) curates the complete-history proof, L01/L11 assumption crosswalk, corrected constrained recovery, saved-code limitations and unchanged first-manifest evidence for original #9. It distinguishes unique physical endpoints from lifted memory fibres and records the scoped independent review chain in [proof provenance](proof-audit-provenance.json). EXT-03 remains a separate implementation task.
