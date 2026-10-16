@@ -38,6 +38,12 @@ data and the displayed rounded B08 model. They do not reproduce unrounded
 historical MATLAB data, the published 67.12, nonlinear trajectories, validated
 rounding, feedback optimality or an optimal family.
 
-This acquisition is awaiting saved-data HTML/CSV/ZIP rendering, independent
-report review, main-only Pages publication and live URL verification. Issue
-#62 remains open.
+`index.html`, `trials.csv`, `summary.csv`, `b08-trials.svg` and `bundle.zip`
+are deterministic projections of the saved records and sidecars. `manifest.json`
+hashes every source and rendered file except its enclosing ZIP;
+`scripts/reports/ext01/render_saved.py`
+regenerates and checks them without executing the numerical driver. The
+separate Pages adapter builds a content-bound versioned route from this bundle.
+
+Independent report review, main-only Pages publication and live URL
+verification remain pending. Issue #62 remains open.
