@@ -21,6 +21,7 @@ option(CSL_BUILD_SYN02_REPORT "Build the SYN-02 terminal minimizer measurement d
 option(CSL_BUILD_SYN07_REPORT "Build the T-S01 exact-family measurement driver" OFF)
 option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driver" OFF)
 option(CSL_BUILD_EXT04_REPORT "Build the EXT-04 observed replay report driver" OFF)
+option(CSL_BUILD_FINITE_FEEDBACK_REPORT "Build the issue 5 finite feedback report driver" OFF)
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)
 option(CSL_ENABLE_HIGHS "Build the native HiGHS LP/convex adapters" ON)

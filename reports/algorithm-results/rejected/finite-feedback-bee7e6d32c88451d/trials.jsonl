@@ -1,0 +1,416 @@
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "14200",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "warmup",
+  "repetition": "0",
+  "scenario": "clipping",
+  "status": "passed"
+}
+{
+  "branch_actions": "1:0|2:1",
+  "detail": "",
+  "elapsed_ns": "9100",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "warmup",
+  "repetition": "0",
+  "scenario": "branching",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "4400",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "warmup",
+  "repetition": "0",
+  "scenario": "empty-action",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "4300",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "warmup",
+  "repetition": "0",
+  "scenario": "nominal",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "4500",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "0",
+  "scenario": "clipping",
+  "status": "passed"
+}
+{
+  "branch_actions": "1:0|2:1",
+  "detail": "",
+  "elapsed_ns": "5400",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "0",
+  "scenario": "branching",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3700",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "0",
+  "scenario": "empty-action",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "4000",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "0",
+  "scenario": "nominal",
+  "status": "passed"
+}
+{
+  "branch_actions": "1:0|2:1",
+  "detail": "",
+  "elapsed_ns": "5400",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "1",
+  "scenario": "branching",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3600",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "1",
+  "scenario": "empty-action",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3800",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "1",
+  "scenario": "nominal",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "4000",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "1",
+  "scenario": "clipping",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3900",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "2",
+  "scenario": "empty-action",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3700",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "2",
+  "scenario": "nominal",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3900",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "2",
+  "scenario": "clipping",
+  "status": "passed"
+}
+{
+  "branch_actions": "1:0|2:1",
+  "detail": "",
+  "elapsed_ns": "5000",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "2",
+  "scenario": "branching",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "6800",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "3",
+  "scenario": "nominal",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3800",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "3",
+  "scenario": "clipping",
+  "status": "passed"
+}
+{
+  "branch_actions": "1:0|2:1",
+  "detail": "",
+  "elapsed_ns": "4800",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "3",
+  "scenario": "branching",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3600",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "3",
+  "scenario": "empty-action",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "4200",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "4",
+  "scenario": "clipping",
+  "status": "passed"
+}
+{
+  "branch_actions": "1:0|2:1",
+  "detail": "",
+  "elapsed_ns": "4800",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "4",
+  "scenario": "branching",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3500",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "4",
+  "scenario": "empty-action",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3800",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "4",
+  "scenario": "nominal",
+  "status": "passed"
+}
+{
+  "branch_actions": "1:0|2:1",
+  "detail": "",
+  "elapsed_ns": "5100",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "5",
+  "scenario": "branching",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3500",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "5",
+  "scenario": "empty-action",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3900",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "5",
+  "scenario": "nominal",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3800",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "5",
+  "scenario": "clipping",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3900",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "6",
+  "scenario": "empty-action",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3800",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "6",
+  "scenario": "nominal",
+  "status": "passed"
+}
+{
+  "branch_actions": "",
+  "detail": "",
+  "elapsed_ns": "3800",
+  "initial_actions": "",
+  "initial_winning": "0",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "6",
+  "scenario": "clipping",
+  "status": "passed"
+}
+{
+  "branch_actions": "1:0|2:1",
+  "detail": "",
+  "elapsed_ns": "4800",
+  "initial_actions": "0",
+  "initial_winning": "1",
+  "provider_id": "csl.reachability.finite-feedback-table",
+  "provider_version": "1.0.0",
+  "purpose": "trial",
+  "repetition": "6",
+  "scenario": "branching",
+  "status": "passed"
+}

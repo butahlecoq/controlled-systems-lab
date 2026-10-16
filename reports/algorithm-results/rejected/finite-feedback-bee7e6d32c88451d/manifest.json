@@ -1,0 +1,17 @@
+{
+  "files": {
+    "build-graph.json": "36e14649764300d64e5c7d3b6a7f8429fa84ac6ae7c02fb4facfbd22ebcafdbf",
+    "host-post.json": "1747d4d40b564b0d82b8ce30d366506f486ca27da14e80f0f1ed10c8a2686f78",
+    "host-pre.json": "f64367bbfb9337f1209d49d47eefbc8d19836e8a82368becbd2748cdd8ebaf16",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "measure.stdout.csv": "562317b6b869250ad61a537ad09696458b3e6a5f45651dcd11227dbc48932522",
+    "process-capture.json": "f55281aa483cada277c1ee4b1abcab2d1a3731bba5519c6129cc6e7b277b03e8",
+    "records.json": "74599b826fef865ba6377219363fe0ddfb4ed6cae8db2251ef5ad9ee03b1a00d",
+    "release-build.log": "fd16b49bfdf1e4ce60790b8e9cae10da5b669363fc4e3819fc3dbe6c21ed6af1",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke.stdout.csv": "e986e03e916e3e440da19458fa1c6ccd96124ad34d412e305888f15fc8726b72",
+    "trials.jsonl": "9b088b34c62df6f4548d9b6790c588d9a8d1136c75315c715ce33b023672bac8"
+  },
+  "report_id": "finite-feedback-bee7e6d32c88451d",
+  "schema": "csl.finite-feedback-source-manifest/1"
+}
