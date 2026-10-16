@@ -167,8 +167,12 @@ class SavedReportTests(unittest.TestCase):
             synthetic_collection(collection)
             bundle = report.build(collection, root, allow_test=True)
             page = bundle / "index.html"
-            page.write_text(page.read_text(encoding="utf-8").replace(
-                "median of seven", "median of nine"), encoding="utf-8")
+            original = page.read_bytes()
+            self.assertIn(b"TEST / synthetic data", original)
+            altered = original.replace(b"TEST / synthetic data",
+                                       b"TEST / altered synthetic data", 1)
+            self.assertNotEqual(altered, original)
+            page.write_bytes(altered)
             manifest_path = bundle / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["files"]["index.html"] = report.digest(page.read_bytes())
