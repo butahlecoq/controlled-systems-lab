@@ -27,6 +27,13 @@ template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
     return std::get<T>(std::move(value));
 }
 
+template<class T> T take_artifact(artifacts::ArtifactResult<T> value, const char* operation) {
+    if (const auto* error = std::get_if<artifacts::ArtifactError>(&value))
+        INFO(operation << " failed at " << error->path << ": " << error->message);
+    REQUIRE(std::holds_alternative<T>(value));
+    return std::get<T>(std::move(value));
+}
+
 SetHandle interval(std::string id) {
     const sets::Description description{SetId{std::move(id)}, 1, {"u"}};
     const sets::HRepresentation representation{
@@ -178,10 +185,14 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
         prepared.family().target, prepared.family().representation, witnesses};
     input.selector = {{csl::synthesis::witness_selector::selector_id}, "1", {}};
     input.strategy = prepared.strategies()[strategy_index];
-    const auto configuration = take(ar::resolve_configuration(std::move(input)));
+    input.strategy.selector = input.selector.id;
+    const auto configuration = take_artifact(ar::resolve_configuration(std::move(input)),
+        "resolve_configuration");
+    CHECK(configuration.description().strategy.selector == configuration.description().selector.id);
     const ar::RunId run{"application-comparison-encoder"};
-    const auto statistics = take(ob::merge_observations(
-        take(ob::make_collection_plan({problem, configuration, run, {}, {}, 0})), {}));
+    const auto plan = take_artifact(ob::make_collection_plan({problem, configuration, run, {}, {}, 0}),
+        "make_collection_plan");
+    const auto statistics = take_artifact(ob::merge_observations(plan, {}), "merge_observations");
     const auto encoded = application::encode_strategy_run(problem, strategy_execution,
         configuration, run, statistics,
         {uninstrumented, uninstrumented, uninstrumented, uninstrumented, true,
