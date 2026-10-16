@@ -1,5 +1,8 @@
 #include <csl/geometry/approximation.hpp>
 #include <csl/sets/data.hpp>
+#include "../exact_dyadic.hpp"
+
+#include <cmath>
 
 namespace csl::geometry::approximation {
 namespace {
@@ -39,6 +42,28 @@ bool h_constraints_contained(const sets::HRepresentation& required,
            has_constraint_rows(required.equalities,required.equality_values,
                available.equalities,available.equality_values);
 }
+bool h_rows_contain_point(const numeric::MatrixView& rows,
+                          const numeric::VectorView& values,
+                          const numeric::VectorView& point,bool equality) {
+    using namespace detail::exact_detail;
+    for(std::size_t row=0;row<rows.rows();++row) {
+        Integer difference;
+        for(std::size_t column=0;column<rows.cols();++column) {
+            const double coefficient=rows(row,column),coordinate=point[column];
+            if(!std::isfinite(coefficient)||!std::isfinite(coordinate)||
+               !add_product(difference,decode(coefficient),decode(coordinate)))return false;
+        }
+        if(!std::isfinite(values[row]))return false;
+        auto bound=decode(values[row]);bound.negative=!bound.negative;
+        if(!add_dyadic(difference,bound))return false;
+        if(equality?!is_zero(difference):(!difference.negative&&!is_zero(difference)))return false;
+    }
+    return true;
+}
+bool h_contains_point(const sets::HRepresentation& h,const sets::SingletonRepresentation& point) {
+    return h_rows_contain_point(h.inequalities,h.upper_bounds,point.point,false) &&
+           h_rows_contain_point(h.equalities,h.equality_values,point.point,true);
+}
 std::optional<StructuralBasis> structural_basis(const ApproximationRequest& request,
                                                  const OperationResult& result) {
     if(request.input.id==result.output.id && request.input.payload==result.output.payload &&
@@ -53,6 +78,16 @@ std::optional<StructuralBasis> structural_basis(const ApproximationRequest& requ
         const auto* data=std::get_if<sets::SetData>(&native);
         const auto representation=data->representation();
         const auto reference_representation=source->representation();
+        if(request.direction==SetRelation::inner)
+            if(const auto* reference_h=std::get_if<sets::HRepresentation>(&reference_representation))
+                if(const auto* output_point=std::get_if<sets::SingletonRepresentation>(&representation))
+                    if(h_contains_point(*reference_h,*output_point))
+                        return StructuralBasis::h_point_containment;
+        if(request.direction==SetRelation::outer)
+            if(const auto* reference_point=std::get_if<sets::SingletonRepresentation>(&reference_representation))
+                if(const auto* output_h=std::get_if<sets::HRepresentation>(&representation))
+                    if(h_contains_point(*output_h,*reference_point))
+                        return StructuralBasis::h_point_containment;
         if(const auto* reference_h=std::get_if<sets::HRepresentation>(&reference_representation))
             if(const auto* output_h=std::get_if<sets::HRepresentation>(&representation)) {
                 const auto& required=request.direction==SetRelation::inner?*reference_h:*output_h;
@@ -128,7 +163,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     if(request.direction==SetRelation::heuristic)return HeuristicApproximation{std::move(result)};
     if(const auto basis=structural_basis(request,result)) {
         result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
-            "Same immutable set, empty subset, universal superset, or exact H constraint containment over the same ambient coordinates."};
+            "Same immutable set, empty subset, universal superset, exact H constraint retention, or exact binary64 H point containment over the same ambient coordinates."};
         return EnclosedApproximation{std::move(result),*basis};
     }
     return Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",
