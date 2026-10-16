@@ -1,0 +1,182 @@
+{
+  "schema": "csl.b08-displayed-exact-report/1",
+  "purpose": "measurement",
+  "created_utc": "2026-10-16T12:11:12Z",
+  "source": {
+    "source_commit": "78212b21d42ec3f136f0e1c72b2b0861d306792c",
+    "harness_commit": "5748952af0ce9fca7aee625e7c62f20cff1d713f",
+    "source_files_sha256": {
+      "docs/research/tools/check_b08_displayed_exact.py": "5a84edcf9a9761d5a7b8036417546d71160fe8d74eb800e651aad3edfe081866",
+      "docs/research/evidence/b08-displayed-exact.json": "dc8fbb816f359d132284fa92c8289b87a4cd7804270aa35fab926cdeb90e3e0a"
+    },
+    "source_tree_oid": "f5e1c99286c97d14a0507f60e032dc1fdac66610",
+    "harness_tree_oid": "263b79229ea8af6770bbcaff8ecbadf68a93b81e",
+    "reviewed_harness_delta": [
+      "reports/algorithm-results/tooling/b08_exact/README.md",
+      "scripts/reports/b08_exact_report.py",
+      "tests/reporting/test_b08_exact_report.py"
+    ]
+  },
+  "reference": {
+    "source_id": "L04",
+    "source_sha256": "6e07c9a2fac2d112885a495c9fe7f13acec9d990d947017b1701a4b95538cd5f",
+    "plan_count": 625,
+    "corner_histories_per_plan": 256,
+    "minimum_squared_exact": "112730080707/25000000",
+    "exact_minimizers": 3
+  },
+  "repetitions": 7,
+  "warmups": 1,
+  "timeout_seconds": 60,
+  "interval": "parent perf_counter_ns immediately before child process spawn through child exit and captured stdout/stderr return; includes CPython startup, 625x256 exact rational enumeration, literal checks and record comparison; excludes parent validation, CSV/JSON persistence, HTML rendering and ZIP creation",
+  "environment": {
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "logical_cores": 12,
+    "python_version": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "python_executable": "python.exe",
+    "python_executable_sha256": "5341746f92483a93e44c313de830f2fba2956f0759094404a16b2fed06c9a2ed",
+    "optimization": "CPython -O; -B disables bytecode writes",
+    "arithmetic": "fractions.Fraction exact rational on printed decimal inputs",
+    "configured_workers": 1,
+    "observed_threads": {
+      "available": false,
+      "reason": "not measured"
+    },
+    "peak_memory": {
+      "available": false,
+      "reason": "not measured"
+    },
+    "child_cpu_time": {
+      "available": false,
+      "reason": "not measured"
+    },
+    "cache_policy": "new interpreter each attempt; OS file and instruction caches may be warm",
+    "host_activity": "At 2026-10-16T12:10:55Z UTC, the coordinator reserved the local host for the reviewed B08 exact run. No cl, cmake, ctest, msbuild, or ninja process was active; only idle Python service processes appeared. Other agents deferred local builds, tests, and measurements during this window. This note is point-in-time host activity evidence, not continuous instrumentation.",
+    "clock": "parent time.perf_counter_ns"
+  },
+  "rows": [
+    {
+      "repetition": 0,
+      "warmup": true,
+      "status": "passed",
+      "duration_ns": 1619303200,
+      "exit_code": 0,
+      "timed_out": false,
+      "work_observed": true,
+      "stdout_sha256": "2b16fb175522800df0cef3321620c221f7aaff321a8a91d451108381a4b703ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "detail": "exact checker and saved-record comparison passed",
+      "stdout_base64": "QjA4IGV4YWN0IGRpc3BsYXllZC1kYXRhIHJlY29yZCB2ZXJpZmllZA0K",
+      "stderr_base64": ""
+    },
+    {
+      "repetition": 0,
+      "warmup": false,
+      "status": "passed",
+      "duration_ns": 1658595900,
+      "exit_code": 0,
+      "timed_out": false,
+      "work_observed": true,
+      "stdout_sha256": "2b16fb175522800df0cef3321620c221f7aaff321a8a91d451108381a4b703ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "detail": "exact checker and saved-record comparison passed",
+      "stdout_base64": "QjA4IGV4YWN0IGRpc3BsYXllZC1kYXRhIHJlY29yZCB2ZXJpZmllZA0K",
+      "stderr_base64": ""
+    },
+    {
+      "repetition": 1,
+      "warmup": false,
+      "status": "passed",
+      "duration_ns": 1658341800,
+      "exit_code": 0,
+      "timed_out": false,
+      "work_observed": true,
+      "stdout_sha256": "2b16fb175522800df0cef3321620c221f7aaff321a8a91d451108381a4b703ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "detail": "exact checker and saved-record comparison passed",
+      "stdout_base64": "QjA4IGV4YWN0IGRpc3BsYXllZC1kYXRhIHJlY29yZCB2ZXJpZmllZA0K",
+      "stderr_base64": ""
+    },
+    {
+      "repetition": 2,
+      "warmup": false,
+      "status": "passed",
+      "duration_ns": 1651407800,
+      "exit_code": 0,
+      "timed_out": false,
+      "work_observed": true,
+      "stdout_sha256": "2b16fb175522800df0cef3321620c221f7aaff321a8a91d451108381a4b703ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "detail": "exact checker and saved-record comparison passed",
+      "stdout_base64": "QjA4IGV4YWN0IGRpc3BsYXllZC1kYXRhIHJlY29yZCB2ZXJpZmllZA0K",
+      "stderr_base64": ""
+    },
+    {
+      "repetition": 3,
+      "warmup": false,
+      "status": "passed",
+      "duration_ns": 1632298200,
+      "exit_code": 0,
+      "timed_out": false,
+      "work_observed": true,
+      "stdout_sha256": "2b16fb175522800df0cef3321620c221f7aaff321a8a91d451108381a4b703ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "detail": "exact checker and saved-record comparison passed",
+      "stdout_base64": "QjA4IGV4YWN0IGRpc3BsYXllZC1kYXRhIHJlY29yZCB2ZXJpZmllZA0K",
+      "stderr_base64": ""
+    },
+    {
+      "repetition": 4,
+      "warmup": false,
+      "status": "passed",
+      "duration_ns": 1683302400,
+      "exit_code": 0,
+      "timed_out": false,
+      "work_observed": true,
+      "stdout_sha256": "2b16fb175522800df0cef3321620c221f7aaff321a8a91d451108381a4b703ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "detail": "exact checker and saved-record comparison passed",
+      "stdout_base64": "QjA4IGV4YWN0IGRpc3BsYXllZC1kYXRhIHJlY29yZCB2ZXJpZmllZA0K",
+      "stderr_base64": ""
+    },
+    {
+      "repetition": 5,
+      "warmup": false,
+      "status": "passed",
+      "duration_ns": 1644345600,
+      "exit_code": 0,
+      "timed_out": false,
+      "work_observed": true,
+      "stdout_sha256": "2b16fb175522800df0cef3321620c221f7aaff321a8a91d451108381a4b703ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "detail": "exact checker and saved-record comparison passed",
+      "stdout_base64": "QjA4IGV4YWN0IGRpc3BsYXllZC1kYXRhIHJlY29yZCB2ZXJpZmllZA0K",
+      "stderr_base64": ""
+    },
+    {
+      "repetition": 6,
+      "warmup": false,
+      "status": "passed",
+      "duration_ns": 1626761800,
+      "exit_code": 0,
+      "timed_out": false,
+      "work_observed": true,
+      "stdout_sha256": "2b16fb175522800df0cef3321620c221f7aaff321a8a91d451108381a4b703ea",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "detail": "exact checker and saved-record comparison passed",
+      "stdout_base64": "QjA4IGV4YWN0IGRpc3BsYXllZC1kYXRhIHJlY29yZCB2ZXJpZmllZA0K",
+      "stderr_base64": ""
+    }
+  ],
+  "summary": {
+    "trials": 7,
+    "median_ns": 1651407800,
+    "min_ns": 1626761800,
+    "max_ns": 1683302400
+  },
+  "publishable": true,
+  "raw_jsonl_sha256": "0bca6e1f8919de38a354e3238550a662e6094752a2c94cb3a787463e5c442014",
+  "payload_sha256": "b0d0e85d4d338f564a83180b1888d1df52ad76b292b4cfc68d2d2cdd2d5b3e00",
+  "report_id": "b08-exact-b0d0e85d4d338f56"
+}
