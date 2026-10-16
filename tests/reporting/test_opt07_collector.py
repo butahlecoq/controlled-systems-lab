@@ -43,6 +43,13 @@ class SanitizedLogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "residual absolute"):
             sanitize_build_log("unexpected E:/private/other/file.cpp", self.ROOTS)
 
+    def test_unc_paths_with_forward_or_mixed_separators_fail_closed(self):
+        for path in ("//private-host/share/build.log",
+                     "\\/private-host\\share/build.log"):
+            with self.subTest(path=path), self.assertRaisesRegex(
+                    ValueError, "residual absolute"):
+                sanitize_build_log(f"Change Dir: '{path}'", self.ROOTS)
+
 
 if __name__ == "__main__":
     unittest.main()
