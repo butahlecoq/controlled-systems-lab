@@ -31,6 +31,18 @@ def encoded(rows):
 
 
 class ReportAdmission(unittest.TestCase):
+    def test_compiler_version_from_exact_crlf_evidence(self):
+        header = b'set(CMAKE_CXX_COMPILER "C:/MSVC/cl.exe")'
+        version = b'set(CMAKE_CXX_COMPILER_VERSION "19.44.35215.0")'
+        for newline in (b"\r\n", b"\n"):
+            raw = header + newline + version + newline
+            with self.subTest(newline=newline):
+                self.assertEqual(collect.compiler_version(raw), "19.44.35215.0")
+                self.assertEqual(collect.sha(raw), hashlib.sha256(raw).hexdigest())
+        for raw in (header + b"\r\n", version + b"\r\n" + version + b"\r\n"):
+            with self.assertRaises(ValueError):
+                collect.compiler_version(raw)
+
     def test_description_admits_exact_authored_inputs_and_scope(self):
         described = {"schema": "csl.geo07-generator-driver/1", "source_commit": collect.SOURCE,
                      "module": "CSL::geometry_generators", "scalar": "binary64",

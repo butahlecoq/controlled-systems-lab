@@ -246,6 +246,15 @@ def release_project(path: Path) -> dict:
             "archive": fields("Lib"), "project_sha256": sha(path.read_bytes())}
 
 
+def compiler_version(raw: bytes) -> str:
+    # CMake writes CRLF on this MSVC host; keep raw bytes for the evidence hash.
+    matches = [match.group(1) for line in raw.decode("utf-8").splitlines()
+               if (match := re.fullmatch(r'set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)', line))]
+    if len(matches) != 1:
+        raise ValueError("unique CMake compiler version evidence unavailable")
+    return matches[0]
+
+
 def admit_release(settings: dict, targets: dict, build: Path) -> None:
     for name, expected in RELEASE_FLAGS.items():
         if settings.get(name) != expected:
@@ -342,14 +351,10 @@ def collect(args) -> str:
         if len(compiler_files) != 1:
             raise ValueError("configured compiler evidence unavailable")
         compiler_raw = compiler_files[0].read_bytes()
-        compiler_text = compiler_raw.decode("utf-8")
-        match = re.search(r'^set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)$', compiler_text, re.M)
-        if not match:
-            raise ValueError("compiler version evidence unavailable")
         provenance = {"schema": "csl.geo07-build-provenance/1", "source_commit": SOURCE,
                       "harness_commit": args.harness_commit, "configuration": "Release",
                       "settings": {name: settings[name] for name in RELEASE_FLAGS},
-                      "targets": targets, "compiler_version": match.group(1),
+                      "targets": targets, "compiler_version": compiler_version(compiler_raw),
                       "compiler_file_sha256": sha(compiler_raw), "cache_sha256": sha(cache_raw),
                       "exe_sha256": sha(exe.read_bytes()),
                       "build_stdout_sha256": sha(build_run.stdout), "build_stderr_sha256": sha(build_run.stderr)}
