@@ -1,0 +1,20 @@
+{
+  "observations": [
+    {
+      "elapsed_ns": 5126700,
+      "fixture": "valid_plan"
+    },
+    {
+      "elapsed_ns": 6817100,
+      "fixture": "invalid_plan"
+    },
+    {
+      "elapsed_ns": 3171600,
+      "fixture": "empty_inner"
+    }
+  ],
+  "pilot_batch": 1000,
+  "raw_sha256": "d9f922f24ab7e8707642857fa7a7603ce27a8b344cc9eff2f2ea1ebb99fc7d08",
+  "schema": "csl.app01-pilot/1",
+  "selected_batch": 40000
+}

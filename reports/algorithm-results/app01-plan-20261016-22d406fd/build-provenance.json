@@ -1,0 +1,39 @@
+{
+  "binary_sha256": "9514f7922d9a104c36061f2883bca67ff20f329f8dddec5e97ead316f3d2dd17",
+  "build_command": [
+    "cmake",
+    "--build",
+    "BUILD_ROOT",
+    "--config",
+    "Release",
+    "--target",
+    "csl_app01_plan_report"
+  ],
+  "clean_source_after_build": true,
+  "clean_source_before_build": true,
+  "cmake_cache_sha256": "95e2f3a64cb7c21a979cf2364b70aa731337ee55c699e081beaaab397007c3a0",
+  "compiler": {
+    "CMAKE_CXX_COMPILER_ID": "MSVC",
+    "CMAKE_CXX_COMPILER_VERSION": "19.44.35215.0"
+  },
+  "configuration": "Release",
+  "configure_command": [
+    "cmake",
+    "-S",
+    "SOURCE_ROOT",
+    "-B",
+    "BUILD_ROOT",
+    "-G",
+    "Visual Studio 17 2022",
+    "-DCSL_BUILD_APP01_REPORT=ON",
+    "-DBUILD_TESTING=OFF",
+    "-DCSL_ENABLE_HIGHS=OFF",
+    "-DCSL_ENABLE_QHULL=OFF",
+    "-A",
+    "x64"
+  ],
+  "driver_sha256": "9d8bb5c481b95e662a408d0f8ecd84c038b99ced7b3a85214a4ed3cde38fd2f4",
+  "schema": "csl.app01-build-provenance/1",
+  "source_commit": "22d406fd9ea92315ef2a4f6b5703eec74e710d47",
+  "source_tree": "b6ddb7fa23bf570bf014e319783de0567c6c8e6f"
+}

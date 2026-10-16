@@ -1,0 +1,1234 @@
+{
+  "payload": {
+    "batch": 40000,
+    "build_graph_sha256": "24cdc81915ec9e65d16bd1a4bdbde85d408d82ccc2590f5b34f5fab60df69b1b",
+    "build_log_sha256": "6457088ccc0d2fd99818a182e02c0ffbdb7739e9774c123305788896f50c3635",
+    "build_sha256": "17466238dca12c54b241bc714d729e31953647c9b0840fef6ae34842daab21c6",
+    "command_sha256": "bb89188ca3e1db416cb58a5cdc1a139009f1802f52dc86e125c1346b8fab069c",
+    "configure_log_sha256": "67cbf6d6880c0878cddc7f87b40f1ed10535e90dc3e5b26b820f0c16b8eb8f82",
+    "environment": {
+      "cache_policy": "one process, seven warmup batches then seven measured batches per fixture",
+      "collection_utc": "2026-10-16T18:15:02.225086+00:00",
+      "host_cpu_percent_after": 1.6,
+      "host_cpu_percent_before": 0.1,
+      "logical_cpus": 12,
+      "machine": "AMD64",
+      "memory_bytes": 34189107200,
+      "os": "Windows-11-10.0.22631-SP0",
+      "physical_cpus": 6,
+      "processor": "12th Gen Intel(R) Core(TM) i5-12400F",
+      "seed": null,
+      "simultaneous_work": "No intentional co-located benchmark; host may run services"
+    },
+    "fixture": {
+      "control": 3,
+      "expected_value": 3,
+      "initial": 2,
+      "objective": "x[1]",
+      "reference_interval": [
+        2,
+        4
+      ],
+      "stage": 1,
+      "state_coordinates": [
+        0
+      ],
+      "transition": "x[1] = u[0]"
+    },
+    "fixture_sha256": "259fbad5e71dac61d8d944d8cfcbfb975916c1e933b0d4424b27f61c201f18fb",
+    "input_sha256": {
+      "empty_inner": "e7285cedab0526bfb04e3f291b3ef204465be006e27b8983bc4398c0980be735",
+      "invalid_plan": "09115df78071e05645f445e0280ffb9412a314eb2718a5572b8aa3d691f969ee",
+      "valid_plan": "a3dd05d50b9cede73e1ae6f12b79720c506cdabb71227959ada8174b9acc3153"
+    },
+    "inputs": {
+      "empty_inner": {
+        "controls": [
+          [
+            3
+          ]
+        ],
+        "inner": {
+          "kind": "V",
+          "rays": [
+            [
+              1
+            ]
+          ],
+          "vertices": []
+        },
+        "reported_objective": 3,
+        "states": [
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "invalid_plan": {
+        "controls": [
+          [
+            5
+          ]
+        ],
+        "inner": {
+          "kind": "singleton",
+          "point": [
+            3
+          ]
+        },
+        "reported_objective": 3,
+        "states": [
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      },
+      "valid_plan": {
+        "controls": [
+          [
+            3
+          ]
+        ],
+        "inner": {
+          "kind": "singleton",
+          "point": [
+            3
+          ]
+        },
+        "reported_objective": 3,
+        "states": [
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ]
+      }
+    },
+    "module": {
+      "id": "csl.geometry.approximation.check_inner_state_plan",
+      "version": "1"
+    },
+    "numerical": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "pilot_sha256": "87c4f6d5f5141464bdb3a922588b1a4933df3a9ae1d7ff8da370de7cebd7b01a",
+    "profile_sha256": "18764ffe2c33c7e988fc29f504574b9b3dca174ba789f35699f7d2a93d21c521",
+    "provider": {
+      "id": "app01.literal-provider",
+      "version": "1"
+    },
+    "raw_sha256": "6635ffbbf6a9d7b8a6e4a1a330ec239e735a86bd4f47eceb9ec05d208a355a3a",
+    "repetitions": 7,
+    "residual_profiles": {
+      "empty_inner": [],
+      "invalid_plan": [
+        {
+          "field": "initial[0]",
+          "satisfied": true,
+          "scale": 2,
+          "tolerance": 3.0000000000000004e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[0].singleton[0]",
+          "satisfied": false,
+          "scale": 5,
+          "tolerance": 6e-08,
+          "violation": 2
+        },
+        {
+          "field": "dynamics[0][0]",
+          "satisfied": false,
+          "scale": 5,
+          "tolerance": 6e-08,
+          "violation": 2
+        },
+        {
+          "field": "objective",
+          "satisfied": true,
+          "scale": 3,
+          "tolerance": 4e-08,
+          "violation": 0
+        }
+      ],
+      "valid_plan": [
+        {
+          "field": "initial[0]",
+          "satisfied": true,
+          "scale": 2,
+          "tolerance": 3.0000000000000004e-08,
+          "violation": 0
+        },
+        {
+          "field": "controls[0].singleton[0]",
+          "satisfied": true,
+          "scale": 3,
+          "tolerance": 4e-08,
+          "violation": 0
+        },
+        {
+          "field": "dynamics[0][0]",
+          "satisfied": true,
+          "scale": 3,
+          "tolerance": 4e-08,
+          "violation": 0
+        },
+        {
+          "field": "objective",
+          "satisfied": true,
+          "scale": 3,
+          "tolerance": 4e-08,
+          "violation": 0
+        }
+      ]
+    },
+    "schema": "csl.app01-plan-report/1",
+    "source_commit": "22d406fd9ea92315ef2a4f6b5703eec74e710d47",
+    "status_profiles": {
+      "empty_inner": {
+        "approximation_outcome": "enclosed",
+        "basis": "empty_subset",
+        "bindings": "not_checked",
+        "completeness": "not_checked",
+        "feasibility": "not_checked",
+        "membership": "violation",
+        "numerical_achievable_value": null,
+        "objective": "not_checked",
+        "optimality": "not_checked",
+        "recomputed_objective": null,
+        "residual_count": 0,
+        "termination": "completed",
+        "trajectory_termination": null,
+        "validated": "not_checked"
+      },
+      "invalid_plan": {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "bindings": "numerical_pass",
+        "completeness": "unsupported",
+        "feasibility": "violation",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": null,
+        "objective": "numerical_pass",
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported"
+      },
+      "valid_plan": {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "bindings": "numerical_pass",
+        "completeness": "unsupported",
+        "feasibility": "numerical_pass",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": 3,
+        "objective": "numerical_pass",
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported"
+      }
+    },
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary": [
+      {
+        "batch": 40000,
+        "checked_calls": 280000,
+        "failures": 0,
+        "fixture": "valid_plan",
+        "max_elapsed_ns": 194168900,
+        "median_elapsed_ns": 189260900,
+        "min_elapsed_ns": 188594600,
+        "trials": 7
+      },
+      {
+        "batch": 40000,
+        "checked_calls": 280000,
+        "failures": 0,
+        "fixture": "invalid_plan",
+        "max_elapsed_ns": 196353800,
+        "median_elapsed_ns": 190658800,
+        "min_elapsed_ns": 188401400,
+        "trials": 7
+      },
+      {
+        "batch": 40000,
+        "checked_calls": 280000,
+        "failures": 0,
+        "fixture": "empty_inner",
+        "max_elapsed_ns": 134408100,
+        "median_elapsed_ns": 127618800,
+        "min_elapsed_ns": 125651800,
+        "trials": 7
+      }
+    ],
+    "timing_scope": "registered public plan check, per-call literal checks, report assignment and consumption; prebuilt problem and fixtures",
+    "trials": [
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 188630100,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": 3,
+        "objective": "numerical_pass",
+        "observation_token": 5181247907442015552,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 7,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 189540600,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": 3,
+        "objective": "numerical_pass",
+        "observation_token": 5181247907442015552,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 8,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 194168900,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": 3,
+        "objective": "numerical_pass",
+        "observation_token": 5181247907442015552,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 9,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 188594600,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": 3,
+        "objective": "numerical_pass",
+        "observation_token": 5181247907442015552,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 10,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 189260900,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": 3,
+        "objective": "numerical_pass",
+        "observation_token": 5181247907442015552,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 11,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 191802600,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": 3,
+        "objective": "numerical_pass",
+        "observation_token": 5181247907442015552,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 12,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 188597500,
+        "failures": 0,
+        "feasibility": "numerical_pass",
+        "fixture": "valid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": 3,
+        "objective": "numerical_pass",
+        "observation_token": 5181247907442015552,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 13,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 192883000,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "invalid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": null,
+        "objective": "numerical_pass",
+        "observation_token": 9045336393896115520,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 7,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 190658800,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "invalid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": null,
+        "objective": "numerical_pass",
+        "observation_token": 9045336393896115520,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 8,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 189712000,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "invalid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": null,
+        "objective": "numerical_pass",
+        "observation_token": 9045336393896115520,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 9,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 196353800,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "invalid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": null,
+        "objective": "numerical_pass",
+        "observation_token": 9045336393896115520,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 10,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 188401400,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "invalid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": null,
+        "objective": "numerical_pass",
+        "observation_token": 9045336393896115520,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 11,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 188459100,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "invalid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": null,
+        "objective": "numerical_pass",
+        "observation_token": 9045336393896115520,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 12,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "h_point_containment",
+        "batch": 40000,
+        "bindings": "numerical_pass",
+        "checked_calls": 40000,
+        "completeness": "unsupported",
+        "elapsed_ns": 191019700,
+        "failures": 0,
+        "feasibility": "violation",
+        "fixture": "invalid_plan",
+        "membership": "numerical_pass",
+        "numerical_achievable_value": null,
+        "objective": "numerical_pass",
+        "observation_token": 9045336393896115520,
+        "optimality": "unsupported",
+        "recomputed_objective": 3,
+        "residual_count": 4,
+        "residuals": [
+          {
+            "field": "initial[0]",
+            "satisfied": true,
+            "scale": 2,
+            "tolerance": 3.0000000000000004e-08,
+            "violation": 0
+          },
+          {
+            "field": "controls[0].singleton[0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "dynamics[0][0]",
+            "satisfied": false,
+            "scale": 5,
+            "tolerance": 6e-08,
+            "violation": 2
+          },
+          {
+            "field": "objective",
+            "satisfied": true,
+            "scale": 3,
+            "tolerance": 4e-08,
+            "violation": 0
+          }
+        ],
+        "round": 13,
+        "termination": "completed",
+        "trajectory_termination": "completed",
+        "validated": "unsupported",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "empty_subset",
+        "batch": 40000,
+        "bindings": "not_checked",
+        "checked_calls": 40000,
+        "completeness": "not_checked",
+        "elapsed_ns": 125651800,
+        "failures": 0,
+        "feasibility": "not_checked",
+        "fixture": "empty_inner",
+        "membership": "violation",
+        "numerical_achievable_value": null,
+        "objective": "not_checked",
+        "observation_token": 1870970308404804864,
+        "optimality": "not_checked",
+        "recomputed_objective": null,
+        "residual_count": 0,
+        "residuals": [],
+        "round": 7,
+        "termination": "completed",
+        "trajectory_termination": null,
+        "validated": "not_checked",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "empty_subset",
+        "batch": 40000,
+        "bindings": "not_checked",
+        "checked_calls": 40000,
+        "completeness": "not_checked",
+        "elapsed_ns": 126152900,
+        "failures": 0,
+        "feasibility": "not_checked",
+        "fixture": "empty_inner",
+        "membership": "violation",
+        "numerical_achievable_value": null,
+        "objective": "not_checked",
+        "observation_token": 1870970308404804864,
+        "optimality": "not_checked",
+        "recomputed_objective": null,
+        "residual_count": 0,
+        "residuals": [],
+        "round": 8,
+        "termination": "completed",
+        "trajectory_termination": null,
+        "validated": "not_checked",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "empty_subset",
+        "batch": 40000,
+        "bindings": "not_checked",
+        "checked_calls": 40000,
+        "completeness": "not_checked",
+        "elapsed_ns": 134408100,
+        "failures": 0,
+        "feasibility": "not_checked",
+        "fixture": "empty_inner",
+        "membership": "violation",
+        "numerical_achievable_value": null,
+        "objective": "not_checked",
+        "observation_token": 1870970308404804864,
+        "optimality": "not_checked",
+        "recomputed_objective": null,
+        "residual_count": 0,
+        "residuals": [],
+        "round": 9,
+        "termination": "completed",
+        "trajectory_termination": null,
+        "validated": "not_checked",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "empty_subset",
+        "batch": 40000,
+        "bindings": "not_checked",
+        "checked_calls": 40000,
+        "completeness": "not_checked",
+        "elapsed_ns": 129008100,
+        "failures": 0,
+        "feasibility": "not_checked",
+        "fixture": "empty_inner",
+        "membership": "violation",
+        "numerical_achievable_value": null,
+        "objective": "not_checked",
+        "observation_token": 1870970308404804864,
+        "optimality": "not_checked",
+        "recomputed_objective": null,
+        "residual_count": 0,
+        "residuals": [],
+        "round": 10,
+        "termination": "completed",
+        "trajectory_termination": null,
+        "validated": "not_checked",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "empty_subset",
+        "batch": 40000,
+        "bindings": "not_checked",
+        "checked_calls": 40000,
+        "completeness": "not_checked",
+        "elapsed_ns": 131987300,
+        "failures": 0,
+        "feasibility": "not_checked",
+        "fixture": "empty_inner",
+        "membership": "violation",
+        "numerical_achievable_value": null,
+        "objective": "not_checked",
+        "observation_token": 1870970308404804864,
+        "optimality": "not_checked",
+        "recomputed_objective": null,
+        "residual_count": 0,
+        "residuals": [],
+        "round": 11,
+        "termination": "completed",
+        "trajectory_termination": null,
+        "validated": "not_checked",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "empty_subset",
+        "batch": 40000,
+        "bindings": "not_checked",
+        "checked_calls": 40000,
+        "completeness": "not_checked",
+        "elapsed_ns": 127618800,
+        "failures": 0,
+        "feasibility": "not_checked",
+        "fixture": "empty_inner",
+        "membership": "violation",
+        "numerical_achievable_value": null,
+        "objective": "not_checked",
+        "observation_token": 1870970308404804864,
+        "optimality": "not_checked",
+        "recomputed_objective": null,
+        "residual_count": 0,
+        "residuals": [],
+        "round": 12,
+        "termination": "completed",
+        "trajectory_termination": null,
+        "validated": "not_checked",
+        "warmup": false
+      },
+      {
+        "approximation_outcome": "enclosed",
+        "basis": "empty_subset",
+        "batch": 40000,
+        "bindings": "not_checked",
+        "checked_calls": 40000,
+        "completeness": "not_checked",
+        "elapsed_ns": 126480000,
+        "failures": 0,
+        "feasibility": "not_checked",
+        "fixture": "empty_inner",
+        "membership": "violation",
+        "numerical_achievable_value": null,
+        "objective": "not_checked",
+        "observation_token": 1870970308404804864,
+        "optimality": "not_checked",
+        "recomputed_objective": null,
+        "residual_count": 0,
+        "residuals": [],
+        "round": 13,
+        "termination": "completed",
+        "trajectory_termination": null,
+        "validated": "not_checked",
+        "warmup": false
+      }
+    ],
+    "unavailable_timings": [
+      "problem resolution",
+      "setup",
+      "rendering",
+      "end-to-end",
+      "internal phases"
+    ],
+    "verifier": {
+      "id": "csl.trajectory.original",
+      "version": "1"
+    },
+    "warmups": 7,
+    "workers": {
+      "actual": 1,
+      "native_threads": 1,
+      "requested": 1
+    }
+  },
+  "payload_sha256": "da8aa16d74dce2ae25e884ee09c13020d1213826fa81f69afb0acd9d9ff96911",
+  "report_id": "app01-plan-20261016-22d406fd",
+  "schema": "csl.app01-plan-report/1"
+}
