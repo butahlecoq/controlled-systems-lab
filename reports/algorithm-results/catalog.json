@@ -248,6 +248,18 @@
       "measured_scope": "Eight checked finite-action minimax fixtures; seven Release batch observations per fixture, with fixture-specific call counts",
       "evidence_limits": "Exploratory single-adapter batch timings with possible host contention; no comparator, speedup, source-mapped limiter, or per-call latency claim; displayed rounded B08 open-loop linear model only, binary64 numerical assurance",
       "zip_sha256": "9aae736df5a135fee948cf48e25685fb9901a3c9a84dd822524280091641b90e"
+    },
+    {
+      "report_id": "opt07-6e77b298e159fa0b80d5d69ccd8c14233eb8830513a5d060f98ee76d8e414c96",
+      "report_kind": "opt07-ordered-hull",
+      "source_report_id": "opt07-bbb4aee749d643ff",
+      "payload_schema": "csl.opt07-ordered-hull-report/1",
+      "payload_sha256": "590f6e4b5fe2241b0cba680cab30f971def11a32e1a83ea48045a3fd2c533e2b",
+      "native_payload_sha256": "bbb4aee749d643ffe76fd02fdc9b7c4fb9dcfafcb3bba35b485721fb212f0fa4",
+      "source_commit": "52444e305684c0b59c049cce9f9de7ea09eb4a4a",
+      "measured_scope": "21 verified measured 100-call batches across three fixed ordered-hull clouds; performance interpretation inconclusive",
+      "evidence_limits": "Three fixed small binary64 clouds; independent exact-dyadic deletion certificates and literal support checks apply only to represented inputs; single-adapter 100-call batches with no comparator, speedup, source-mapped limiter profile, or scalability claim",
+      "zip_sha256": "287ac701e0c1f2d19d36f31747bde732fefa548398e8632738065e1b85bc167d"
     }
   ]
 }

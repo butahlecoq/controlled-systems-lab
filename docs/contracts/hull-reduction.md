@@ -66,3 +66,40 @@ removed point is proven to lie in the convex hull of the final retained points
 for the represented input cloud. A backend that cannot provide an exact
 verifiable witness causes conservative retention, never tolerance-authorized
 deletion.
+
+## Ordered hull strategy (OPT-07 bounded adapter)
+
+`make_ordered_hull_reducer_registration()` registers `csl.hull.ordered-membership`;
+`reduce_ordered_hull()` provides the direct call. This is a hull-level candidate
+ordering strategy. It uses the same LP dependency, exact dyadic deletion check,
+original point IDs, removal certificates and final retained-cloud verification
+as `reduce_hull()`. The LP pivot rule is unchanged. This adapter does not
+implement grouping or recursive QuickHull.
+
+The source anchor is `Scientific Research/QLPHULL.m:7–19` (A29): its active
+preprocessing deduplicates points and sorts them by decreasing
+`abs(max((p-d)./r))`, where `d` is the bounding-box midpoint and `r` its full
+coordinate width. We preserve original IDs and leave duplicates for certified
+LP deletion. Equal scores keep original input order. Zero-width coordinates
+contribute no score. If a finite input has a width or normalized score that
+cannot be represented finitely in binary64, the adapter uses input order.
+Neither sorting nor fallback authorizes deletion. The separate Constrained
+`QLPHULL.m:6–18` (A33) uses `max(abs((p-d)./r))`, which can rank signed points
+differently. The A29 grouping block at lines 44–64 is commented out; its active
+filter and final reduction at lines 23–36 and 65–76 differ from this bounded
+adapter's existing certified scan. The archived code is evidence for the score,
+not evidence that the C++ adapter reproduces its historical runtime behavior.
+
+### Contract revision and integration note
+
+`HullReduction` now has an optional `ordered` member. Existing reducers leave
+it empty. For this adapter, `processing_order` is the full permutation of
+original point IDs before LP calls, `ordered_candidates` equals its length,
+`zero_width_coordinates` counts coordinate axes whose finite minimum equals
+maximum, and `used_identity_fallback` identifies unsafe normalization. The
+existing `lp_calls` counts calls to the supplied `LPWorkspace`; `attempts`
+records candidates actually tried, in processing order until a stop. These
+counts include no grouping or pivot metric. A successful compilation of the
+baseline and ordered reducer tests checks the shared result layout and public
+registry adapter. The supported finite input and LP outcome limitations above
+apply equally to this strategy; no runtime or speedup is claimed.

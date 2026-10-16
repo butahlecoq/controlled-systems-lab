@@ -1,6 +1,9 @@
 # Target and installation ownership for geometry. Included from the project root.
 
-csl_add_library(csl_hull STATIC src/geometry/hull_reducer.cpp src/geometry/basis_reuse_reducer.cpp)
+csl_add_library(csl_hull STATIC
+  src/geometry/hull_reducer.cpp
+  src/geometry/basis_reuse_reducer.cpp
+  src/geometry/hull/ordered_reducer.cpp)
 
 target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry PRIVATE CSL::phase_one)
 

@@ -1,0 +1,1161 @@
+Change Dir: '$BUILD_ROOT'
+
+Run Clean Command: "$PROGRAM_FILES/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" CSLOPT07ReportHarness.sln /t:Clean /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:4 /v:n
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+Сборка начата 16.10.2026 23:21:31.
+
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" в узле 1 (целевые объекты Clean).
+     1>ValidateSolutionConfiguration:
+         Создание конфигурации решения "Release|x64".
+       ValidateProjects:
+         Проект"INSTALL" не выбран для сборки в конфигурации решения "Release|x64".
+         Проект"PACKAGE" не выбран для сборки в конфигурации решения "Release|x64".
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\ZERO_CHECK.vcxproj" (20) в узле 2 (целевые объекты Clean).
+    20>CoreClean:
+         Создание каталога "x64\Release\ZERO_CHECK\".
+    20>Сборка проекта "$BUILD_ROOT\ZERO_CHECK.vcxproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_worst_case_vertex.vcxproj.metaproj" (3) в узле 1 (целевые объекты Clean).
+     3>Проект "$BUILD_ROOT\csl\csl_worst_case_vertex.vcxproj.metaproj" (3) выполняет сборку "$BUILD_ROOT\csl\csl_sets.vcxproj.metaproj" (4) в узле 1 (целевые объекты Clean).
+     4>Проект "$BUILD_ROOT\csl\csl_sets.vcxproj.metaproj" (4) выполняет сборку "$BUILD_ROOT\csl\csl_numeric.vcxproj.metaproj" (5) в узле 1 (целевые объекты Clean).
+     5>Проект "$BUILD_ROOT\csl\csl_numeric.vcxproj.metaproj" (5) выполняет сборку "$BUILD_ROOT\csl\csl_contracts.vcxproj.metaproj" (6) в узле 1 (целевые объекты Clean).
+     6>Проект "$BUILD_ROOT\csl\csl_contracts.vcxproj.metaproj" (6) выполняет сборку "$BUILD_ROOT\csl\csl_contracts.vcxproj" (29) в узле 2 (целевые объекты Clean).
+    29>CoreClean:
+         Создание каталога "csl_contracts.dir\Release\".
+    29>Сборка проекта "$BUILD_ROOT\csl\csl_contracts.vcxproj" завершена (целевые объекты Clean).
+     6>Сборка проекта "$BUILD_ROOT\csl\csl_contracts.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_quickhull_2d.vcxproj.metaproj" (28) в узле 1 (целевые объекты Clean).
+    28>Проект "$BUILD_ROOT\csl\csl_quickhull_2d.vcxproj.metaproj" (28) выполняет сборку "$BUILD_ROOT\csl\csl_quickhull_2d.vcxproj" (43) в узле 4 (целевые объекты Clean).
+    43>CoreClean:
+         Создание каталога "csl_quickhull_2d.dir\Release\".
+     5>Проект "$BUILD_ROOT\csl\csl_numeric.vcxproj.metaproj" (5) выполняет сборку "$BUILD_ROOT\csl\csl_numeric.vcxproj" (46) в узле 2 (целевые объекты Clean).
+    46>CoreClean:
+         Создание каталога "csl_numeric.dir\Release\".
+    43>Сборка проекта "$BUILD_ROOT\csl\csl_quickhull_2d.vcxproj" завершена (целевые объекты Clean).
+    46>Сборка проекта "$BUILD_ROOT\csl\csl_numeric.vcxproj" завершена (целевые объекты Clean).
+    28>Сборка проекта "$BUILD_ROOT\csl\csl_quickhull_2d.vcxproj.metaproj" завершена (целевые объекты Clean).
+     5>Сборка проекта "$BUILD_ROOT\csl\csl_numeric.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj.metaproj" (2) в узле 1 (целевые объекты Clean).
+     2>Проект "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj.metaproj" (2) выполняет сборку "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj" (50) в узле 3 (целевые объекты Clean).
+    50>CoreClean:
+         Создание каталога "highs.dir\Release\".
+    50>Сборка проекта "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_finite_feedback_port.vcxproj.metaproj" (39) в узле 1 (целевые объекты Clean).
+    39>Проект "$BUILD_ROOT\csl\csl_finite_feedback_port.vcxproj.metaproj" (39) выполняет сборку "$BUILD_ROOT\csl\csl_finite_feedback.vcxproj.metaproj" (40) в узле 1 (целевые объекты Clean).
+    40>Проект "$BUILD_ROOT\csl\csl_finite_feedback.vcxproj.metaproj" (40) выполняет сборку "$BUILD_ROOT\csl\csl_finite_feedback.vcxproj" (51) в узле 4 (целевые объекты Clean).
+    51>CoreClean:
+         Создание каталога "csl_finite_feedback.dir\Release\".
+     4>Проект "$BUILD_ROOT\csl\csl_sets.vcxproj.metaproj" (4) выполняет сборку "$BUILD_ROOT\csl\csl_sets.vcxproj" (52) в узле 2 (целевые объекты Clean).
+    52>CoreClean:
+         Создание каталога "csl_sets.dir\Release\".
+    52>Сборка проекта "$BUILD_ROOT\csl\csl_sets.vcxproj" завершена (целевые объекты Clean).
+    51>Сборка проекта "$BUILD_ROOT\csl\csl_finite_feedback.vcxproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_witness_selector.vcxproj.metaproj" (8) в узле 1 (целевые объекты Clean).
+     8>Проект "$BUILD_ROOT\csl\csl_witness_selector.vcxproj.metaproj" (8) выполняет сборку "$BUILD_ROOT\csl\csl_verifiers.vcxproj.metaproj" (9) в узле 1 (целевые объекты Clean).
+     9>Проект "$BUILD_ROOT\csl\csl_verifiers.vcxproj.metaproj" (9) выполняет сборку "$BUILD_ROOT\csl\csl_resolved_core.vcxproj.metaproj" (10) в узле 1 (целевые объекты Clean).
+    10>Проект "$BUILD_ROOT\csl\csl_resolved_core.vcxproj.metaproj" (10) выполняет сборку "$BUILD_ROOT\csl\csl_problem.vcxproj.metaproj" (11) в узле 1 (целевые объекты Clean).
+    11>Проект "$BUILD_ROOT\csl\csl_problem.vcxproj.metaproj" (11) выполняет сборку "$BUILD_ROOT\csl\csl_model.vcxproj.metaproj" (12) в узле 1 (целевые объекты Clean).
+    12>Проект "$BUILD_ROOT\csl\csl_model.vcxproj.metaproj" (12) выполняет сборку "$BUILD_ROOT\csl\csl_model.vcxproj" (53) в узле 3 (целевые объекты Clean).
+    53>CoreClean:
+         Создание каталога "csl_model.dir\Release\".
+     8>Проект "$BUILD_ROOT\csl\csl_witness_selector.vcxproj.metaproj" (8) выполняет сборку "$BUILD_ROOT\csl\csl_optimization.vcxproj.metaproj" (16) в узле 1 (целевые объекты Clean).
+    16>Проект "$BUILD_ROOT\csl\csl_optimization.vcxproj.metaproj" (16) выполняет сборку "$BUILD_ROOT\csl\csl_optimization.vcxproj" (54) в узле 2 (целевые объекты Clean).
+    54>CoreClean:
+         Создание каталога "csl_optimization.dir\Release\".
+    53>Сборка проекта "$BUILD_ROOT\csl\csl_model.vcxproj" завершена (целевые объекты Clean).
+    54>Сборка проекта "$BUILD_ROOT\csl\csl_optimization.vcxproj" завершена (целевые объекты Clean).
+     3>Проект "$BUILD_ROOT\csl\csl_worst_case_vertex.vcxproj.metaproj" (3) выполняет сборку "$BUILD_ROOT\csl\csl_objectives.vcxproj.metaproj" (7) в узле 1 (целевые объекты Clean).
+     7>Проект "$BUILD_ROOT\csl\csl_objectives.vcxproj.metaproj" (7) выполняет сборку "$BUILD_ROOT\csl\csl_objectives.vcxproj" (55) в узле 1 (целевые объекты Clean).
+    55>CoreClean:
+         Создание каталога "csl_objectives.dir\Release\".
+    55>Сборка проекта "$BUILD_ROOT\csl\csl_objectives.vcxproj" завершена (целевые объекты Clean).
+     2>Сборка проекта "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj.metaproj" завершена (целевые объекты Clean).
+     4>Сборка проекта "$BUILD_ROOT\csl\csl_sets.vcxproj.metaproj" завершена (целевые объекты Clean).
+    40>Сборка проекта "$BUILD_ROOT\csl\csl_finite_feedback.vcxproj.metaproj" завершена (целевые объекты Clean).
+    12>Сборка проекта "$BUILD_ROOT\csl\csl_model.vcxproj.metaproj" завершена (целевые объекты Clean).
+    16>Сборка проекта "$BUILD_ROOT\csl\csl_optimization.vcxproj.metaproj" завершена (целевые объекты Clean).
+     7>Сборка проекта "$BUILD_ROOT\csl\csl_objectives.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_geometry_generators.vcxproj.metaproj" (36) в узле 1 (целевые объекты Clean).
+    36>Проект "$BUILD_ROOT\csl\csl_geometry_generators.vcxproj.metaproj" (36) выполняет сборку "$BUILD_ROOT\csl\csl_geometry_generators.vcxproj" (56) в узле 3 (целевые объекты Clean).
+    56>CoreClean:
+         Создание каталога "csl_geometry_generators.dir\Release\".
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_fixed_plan_disturbance.vcxproj.metaproj" (38) в узле 1 (целевые объекты Clean).
+    38>Проект "$BUILD_ROOT\csl\csl_fixed_plan_disturbance.vcxproj.metaproj" (38) выполняет сборку "$BUILD_ROOT\csl\csl_fixed_plan_disturbance.vcxproj" (57) в узле 4 (целевые объекты Clean).
+    57>CoreClean:
+         Создание каталога "csl_fixed_plan_disturbance.dir\Release\".
+    56>Сборка проекта "$BUILD_ROOT\csl\csl_geometry_generators.vcxproj" завершена (целевые объекты Clean).
+    57>Сборка проекта "$BUILD_ROOT\csl\csl_fixed_plan_disturbance.vcxproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_terminal_minimizers.vcxproj.metaproj" (18) в узле 1 (целевые объекты Clean).
+    18>Проект "$BUILD_ROOT\csl\csl_terminal_minimizers.vcxproj.metaproj" (18) выполняет сборку "$BUILD_ROOT\csl\csl_convex.vcxproj.metaproj" (19) в узле 1 (целевые объекты Clean).
+    19>Проект "$BUILD_ROOT\csl\csl_convex.vcxproj.metaproj" (19) выполняет сборку "$BUILD_ROOT\csl\csl_convex.vcxproj" (58) в узле 1 (целевые объекты Clean).
+    58>CoreClean:
+         Создание каталога "csl_convex.dir\Release\".
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_controllers.vcxproj.metaproj" (44) в узле 1 (целевые объекты Clean).
+    44>Проект "$BUILD_ROOT\csl\csl_controllers.vcxproj.metaproj" (44) выполняет сборку "$BUILD_ROOT\csl\csl_controllers.vcxproj" (59) в узле 2 (целевые объекты Clean).
+    59>CoreClean:
+         Создание каталога "csl_controllers.dir\Release\".
+    58>Сборка проекта "$BUILD_ROOT\csl\csl_convex.vcxproj" завершена (целевые объекты Clean).
+    36>Сборка проекта "$BUILD_ROOT\csl\csl_geometry_generators.vcxproj.metaproj" завершена (целевые объекты Clean).
+    38>Сборка проекта "$BUILD_ROOT\csl\csl_fixed_plan_disturbance.vcxproj.metaproj" завершена (целевые объекты Clean).
+    19>Сборка проекта "$BUILD_ROOT\csl\csl_convex.vcxproj.metaproj" завершена (целевые объекты Clean).
+    59>Сборка проекта "$BUILD_ROOT\csl\csl_controllers.vcxproj" завершена (целевые объекты Clean).
+    44>Сборка проекта "$BUILD_ROOT\csl\csl_controllers.vcxproj.metaproj" завершена (целевые объекты Clean).
+     3>Проект "$BUILD_ROOT\csl\csl_worst_case_vertex.vcxproj.metaproj" (3) выполняет сборку "$BUILD_ROOT\csl\csl_worst_case_vertex.vcxproj" (60) в узле 3 (целевые объекты Clean).
+    60>CoreClean:
+         Создание каталога "csl_worst_case_vertex.dir\Release\".
+    60>Сборка проекта "$BUILD_ROOT\csl\csl_worst_case_vertex.vcxproj" завершена (целевые объекты Clean).
+    11>Проект "$BUILD_ROOT\csl\csl_problem.vcxproj.metaproj" (11) выполняет сборку "$BUILD_ROOT\csl\csl_problem.vcxproj" (61) в узле 4 (целевые объекты Clean).
+    61>CoreClean:
+         Создание каталога "csl_problem.dir\Release\".
+     3>Сборка проекта "$BUILD_ROOT\csl\csl_worst_case_vertex.vcxproj.metaproj" завершена (целевые объекты Clean).
+    61>Сборка проекта "$BUILD_ROOT\csl\csl_problem.vcxproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_finite_action_minimax_port.vcxproj.metaproj" (41) в узле 1 (целевые объекты Clean).
+    41>Проект "$BUILD_ROOT\csl\csl_finite_action_minimax_port.vcxproj.metaproj" (41) выполняет сборку "$BUILD_ROOT\csl\csl_finite_action_minimax.vcxproj.metaproj" (42) в узле 1 (целевые объекты Clean).
+    42>Проект "$BUILD_ROOT\csl\csl_finite_action_minimax.vcxproj.metaproj" (42) выполняет сборку "$BUILD_ROOT\csl\csl_finite_action_minimax.vcxproj" (62) в узле 1 (целевые объекты Clean).
+    62>CoreClean:
+         Создание каталога "csl_finite_action_minimax.dir\Release\".
+    62>Сборка проекта "$BUILD_ROOT\csl\csl_finite_action_minimax.vcxproj" завершена (целевые объекты Clean).
+    11>Сборка проекта "$BUILD_ROOT\csl\csl_problem.vcxproj.metaproj" завершена (целевые объекты Clean).
+    42>Сборка проекта "$BUILD_ROOT\csl\csl_finite_action_minimax.vcxproj.metaproj" завершена (целевые объекты Clean).
+    10>Проект "$BUILD_ROOT\csl\csl_resolved_core.vcxproj.metaproj" (10) выполняет сборку "$BUILD_ROOT\csl\csl_resolved_core.vcxproj" (63) в узле 3 (целевые объекты Clean).
+    63>CoreClean:
+         Создание каталога "csl_resolved_core.dir\Release\".
+    63>Сборка проекта "$BUILD_ROOT\csl\csl_resolved_core.vcxproj" завершена (целевые объекты Clean).
+    10>Сборка проекта "$BUILD_ROOT\csl\csl_resolved_core.vcxproj.metaproj" завершена (целевые объекты Clean).
+     9>Проект "$BUILD_ROOT\csl\csl_verifiers.vcxproj.metaproj" (9) выполняет сборку "$BUILD_ROOT\csl\csl_verifiers.vcxproj" (64) в узле 1 (целевые объекты Clean).
+    64>CoreClean:
+         Создание каталога "csl_verifiers.dir\Release\".
+    64>Сборка проекта "$BUILD_ROOT\csl\csl_verifiers.vcxproj" завершена (целевые объекты Clean).
+     9>Сборка проекта "$BUILD_ROOT\csl\csl_verifiers.vcxproj.metaproj" завершена (целевые объекты Clean).
+     8>Проект "$BUILD_ROOT\csl\csl_witness_selector.vcxproj.metaproj" (8) выполняет сборку "$BUILD_ROOT\csl\csl_strategy_ts01.vcxproj.metaproj" (13) в узле 1 (целевые объекты Clean).
+    13>Проект "$BUILD_ROOT\csl\csl_strategy_ts01.vcxproj.metaproj" (13) выполняет сборку "$BUILD_ROOT\csl\csl_resolved_problem.vcxproj.metaproj" (14) в узле 1 (целевые объекты Clean).
+    14>Проект "$BUILD_ROOT\csl\csl_resolved_problem.vcxproj.metaproj" (14) выполняет сборку "$BUILD_ROOT\csl\csl_registry.vcxproj.metaproj" (15) в узле 1 (целевые объекты Clean).
+    15>Проект "$BUILD_ROOT\csl\csl_registry.vcxproj.metaproj" (15) выполняет сборку "$BUILD_ROOT\csl\csl_registry.vcxproj" (65) в узле 1 (целевые объекты Clean).
+    65>CoreClean:
+         Создание каталога "csl_registry.dir\Release\".
+    65>Сборка проекта "$BUILD_ROOT\csl\csl_registry.vcxproj" завершена (целевые объекты Clean).
+    15>Сборка проекта "$BUILD_ROOT\csl\csl_registry.vcxproj.metaproj" завершена (целевые объекты Clean).
+    14>Проект "$BUILD_ROOT\csl\csl_resolved_problem.vcxproj.metaproj" (14) выполняет сборку "$BUILD_ROOT\csl\csl_resolved_problem.vcxproj" (66) в узле 4 (целевые объекты Clean).
+    66>CoreClean:
+         Создание каталога "csl_resolved_problem.dir\Release\".
+    41>Проект "$BUILD_ROOT\csl\csl_finite_action_minimax_port.vcxproj.metaproj" (41) выполняет сборку "$BUILD_ROOT\csl\csl_finite_action_minimax_port.vcxproj" (67) в узле 3 (целевые объекты Clean).
+    67>CoreClean:
+         Создание каталога "csl_finite_action_minimax_port.dir\Release\".
+    39>Проект "$BUILD_ROOT\csl\csl_finite_feedback_port.vcxproj.metaproj" (39) выполняет сборку "$BUILD_ROOT\csl\csl_finite_feedback_port.vcxproj" (68) в узле 2 (целевые объекты Clean).
+    68>CoreClean:
+         Создание каталога "csl_finite_feedback_port.dir\Release\".
+    66>Сборка проекта "$BUILD_ROOT\csl\csl_resolved_problem.vcxproj" завершена (целевые объекты Clean).
+    67>Сборка проекта "$BUILD_ROOT\csl\csl_finite_action_minimax_port.vcxproj" завершена (целевые объекты Clean).
+    68>Сборка проекта "$BUILD_ROOT\csl\csl_finite_feedback_port.vcxproj" завершена (целевые объекты Clean).
+    18>Проект "$BUILD_ROOT\csl\csl_terminal_minimizers.vcxproj.metaproj" (18) выполняет сборку "$BUILD_ROOT\csl\csl_terminal_minimizers.vcxproj" (69) в узле 1 (целевые объекты Clean).
+    69>CoreClean:
+         Создание каталога "csl_terminal_minimizers.dir\Release\".
+    69>Сборка проекта "$BUILD_ROOT\csl\csl_terminal_minimizers.vcxproj" завершена (целевые объекты Clean).
+    14>Сборка проекта "$BUILD_ROOT\csl\csl_resolved_problem.vcxproj.metaproj" завершена (целевые объекты Clean).
+    41>Сборка проекта "$BUILD_ROOT\csl\csl_finite_action_minimax_port.vcxproj.metaproj" завершена (целевые объекты Clean).
+    39>Сборка проекта "$BUILD_ROOT\csl\csl_finite_feedback_port.vcxproj.metaproj" завершена (целевые объекты Clean).
+    18>Сборка проекта "$BUILD_ROOT\csl\csl_terminal_minimizers.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_strategy_b.vcxproj.metaproj" (21) в узле 1 (целевые объекты Clean).
+    21>Проект "$BUILD_ROOT\csl\csl_strategy_b.vcxproj.metaproj" (21) выполняет сборку "$BUILD_ROOT\csl\csl_execution.vcxproj.metaproj" (22) в узле 1 (целевые объекты Clean).
+    22>Проект "$BUILD_ROOT\csl\csl_execution.vcxproj.metaproj" (22) выполняет сборку "$BUILD_ROOT\csl\csl_execution.vcxproj" (71) в узле 4 (целевые объекты Clean).
+    71>CoreClean:
+         Создание каталога "csl_execution.dir\Release\".
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_phase_one.vcxproj.metaproj" (30) в узле 1 (целевые объекты Clean).
+    30>Проект "$BUILD_ROOT\csl\csl_phase_one.vcxproj.metaproj" (30) выполняет сборку "$BUILD_ROOT\csl\csl_phase_one.vcxproj" (70) в узле 2 (целевые объекты Clean).
+    70>CoreClean:
+         Создание каталога "csl_phase_one.dir\Release\".
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_strategy_a.vcxproj.metaproj" (24) в узле 1 (целевые объекты Clean).
+    24>Проект "$BUILD_ROOT\csl\csl_strategy_a.vcxproj.metaproj" (24) выполняет сборку "$BUILD_ROOT\csl\csl_polyhedral.vcxproj.metaproj" (25) в узле 1 (целевые объекты Clean).
+    25>Проект "$BUILD_ROOT\csl\csl_polyhedral.vcxproj.metaproj" (25) выполняет сборку "$BUILD_ROOT\csl\csl_polyhedral.vcxproj" (72) в узле 3 (целевые объекты Clean).
+    72>CoreClean:
+         Создание каталога "csl_polyhedral.dir\Release\".
+    71>Сборка проекта "$BUILD_ROOT\csl\csl_execution.vcxproj" завершена (целевые объекты Clean).
+    72>Сборка проекта "$BUILD_ROOT\csl\csl_polyhedral.vcxproj" завершена (целевые объекты Clean).
+    70>Сборка проекта "$BUILD_ROOT\csl\csl_phase_one.vcxproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_verification.vcxproj.metaproj" (17) в узле 1 (целевые объекты Clean).
+    17>Проект "$BUILD_ROOT\csl\csl_verification.vcxproj.metaproj" (17) выполняет сборку "$BUILD_ROOT\csl\csl_verification.vcxproj" (73) в узле 1 (целевые объекты Clean).
+    73>CoreClean:
+         Создание каталога "csl_verification.dir\Release\".
+    73>Сборка проекта "$BUILD_ROOT\csl\csl_verification.vcxproj" завершена (целевые объекты Clean).
+    22>Сборка проекта "$BUILD_ROOT\csl\csl_execution.vcxproj.metaproj" завершена (целевые объекты Clean).
+    25>Сборка проекта "$BUILD_ROOT\csl\csl_polyhedral.vcxproj.metaproj" завершена (целевые объекты Clean).
+    30>Сборка проекта "$BUILD_ROOT\csl\csl_phase_one.vcxproj.metaproj" завершена (целевые объекты Clean).
+    24>Проект "$BUILD_ROOT\csl\csl_strategy_a.vcxproj.metaproj" (24) выполняет сборку "$BUILD_ROOT\csl\csl_control_recovery.vcxproj.metaproj" (27) в узле 1 (целевые объекты Clean).
+    27>Проект "$BUILD_ROOT\csl\csl_control_recovery.vcxproj.metaproj" (27) выполняет сборку "$BUILD_ROOT\csl\csl_control_recovery.vcxproj" (74) в узле 4 (целевые объекты Clean).
+    74>CoreClean:
+         Создание каталога "csl_control_recovery.dir\Release\".
+    17>Сборка проекта "$BUILD_ROOT\csl\csl_verification.vcxproj.metaproj" завершена (целевые объекты Clean).
+    13>Проект "$BUILD_ROOT\csl\csl_strategy_ts01.vcxproj.metaproj" (13) выполняет сборку "$BUILD_ROOT\csl\csl_strategy_ts01.vcxproj" (75) в узле 2 (целевые объекты Clean).
+    75>CoreClean:
+         Создание каталога "csl_strategy_ts01.dir\Release\".
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_input.vcxproj.metaproj" (34) в узле 1 (целевые объекты Clean).
+    34>Проект "$BUILD_ROOT\csl\csl_input.vcxproj.metaproj" (34) выполняет сборку "$BUILD_ROOT\csl\csl_input.vcxproj" (76) в узле 3 (целевые объекты Clean).
+    76>CoreClean:
+         Создание каталога "csl_input.dir\Release\".
+    74>Сборка проекта "$BUILD_ROOT\csl\csl_control_recovery.vcxproj" завершена (целевые объекты Clean).
+    75>Сборка проекта "$BUILD_ROOT\csl\csl_strategy_ts01.vcxproj" завершена (целевые объекты Clean).
+    76>Сборка проекта "$BUILD_ROOT\csl\csl_input.vcxproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_approximation.vcxproj.metaproj" (45) в узле 1 (целевые объекты Clean).
+    45>Проект "$BUILD_ROOT\csl\csl_approximation.vcxproj.metaproj" (45) выполняет сборку "$BUILD_ROOT\csl\csl_approximation.vcxproj" (77) в узле 1 (целевые объекты Clean).
+    77>CoreClean:
+         Создание каталога "csl_approximation.dir\Release\".
+    77>Сборка проекта "$BUILD_ROOT\csl\csl_approximation.vcxproj" завершена (целевые объекты Clean).
+    27>Сборка проекта "$BUILD_ROOT\csl\csl_control_recovery.vcxproj.metaproj" завершена (целевые объекты Clean).
+    13>Сборка проекта "$BUILD_ROOT\csl\csl_strategy_ts01.vcxproj.metaproj" завершена (целевые объекты Clean).
+    34>Сборка проекта "$BUILD_ROOT\csl\csl_input.vcxproj.metaproj" завершена (целевые объекты Clean).
+    45>Сборка проекта "$BUILD_ROOT\csl\csl_approximation.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl_opt07_measure.vcxproj.metaproj" (31) в узле 1 (целевые объекты Clean).
+    31>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj.metaproj" (31) выполняет сборку "$BUILD_ROOT\csl\csl_hull.vcxproj.metaproj" (32) в узле 1 (целевые объекты Clean).
+    32>Проект "$BUILD_ROOT\csl\csl_hull.vcxproj.metaproj" (32) выполняет сборку "$BUILD_ROOT\csl\csl_hull.vcxproj" (78) в узле 4 (целевые объекты Clean).
+    78>CoreClean:
+         Создание каталога "csl_hull.dir\Release\".
+    21>Проект "$BUILD_ROOT\csl\csl_strategy_b.vcxproj.metaproj" (21) выполняет сборку "$BUILD_ROOT\csl\csl_artifacts.vcxproj.metaproj" (23) в узле 1 (целевые объекты Clean).
+    23>Проект "$BUILD_ROOT\csl\csl_artifacts.vcxproj.metaproj" (23) выполняет сборку "$BUILD_ROOT\csl\csl_artifacts.vcxproj" (79) в узле 3 (целевые объекты Clean).
+    79>CoreClean:
+         Создание каталога "csl_artifacts.dir\Release\".
+    24>Проект "$BUILD_ROOT\csl\csl_strategy_a.vcxproj.metaproj" (24) выполняет сборку "$BUILD_ROOT\csl\csl_nominal_forward.vcxproj.metaproj" (26) в узле 1 (целевые объекты Clean).
+    26>Проект "$BUILD_ROOT\csl\csl_nominal_forward.vcxproj.metaproj" (26) выполняет сборку "$BUILD_ROOT\csl\csl_nominal_forward.vcxproj" (80) в узле 2 (целевые объекты Clean).
+    80>CoreClean:
+         Создание каталога "csl_nominal_forward.dir\Release\".
+    78>Сборка проекта "$BUILD_ROOT\csl\csl_hull.vcxproj" завершена (целевые объекты Clean).
+    79>Сборка проекта "$BUILD_ROOT\csl\csl_artifacts.vcxproj" завершена (целевые объекты Clean).
+    80>Сборка проекта "$BUILD_ROOT\csl\csl_nominal_forward.vcxproj" завершена (целевые объекты Clean).
+     8>Проект "$BUILD_ROOT\csl\csl_witness_selector.vcxproj.metaproj" (8) выполняет сборку "$BUILD_ROOT\csl\csl_witness_selector.vcxproj" (81) в узле 1 (целевые объекты Clean).
+    81>CoreClean:
+         Создание каталога "csl_witness_selector.dir\Release\".
+    81>Сборка проекта "$BUILD_ROOT\csl\csl_witness_selector.vcxproj" завершена (целевые объекты Clean).
+    32>Сборка проекта "$BUILD_ROOT\csl\csl_hull.vcxproj.metaproj" завершена (целевые объекты Clean).
+    23>Сборка проекта "$BUILD_ROOT\csl\csl_artifacts.vcxproj.metaproj" завершена (целевые объекты Clean).
+    26>Сборка проекта "$BUILD_ROOT\csl\csl_nominal_forward.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_generator_adapter.vcxproj.metaproj" (37) в узле 1 (целевые объекты Clean).
+    37>Проект "$BUILD_ROOT\csl\csl_generator_adapter.vcxproj.metaproj" (37) выполняет сборку "$BUILD_ROOT\csl\csl_generator_adapter.vcxproj" (82) в узле 2 (целевые объекты Clean).
+    82>CoreClean:
+         Создание каталога "csl_generator_adapter.dir\Release\".
+    31>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj.metaproj" (31) выполняет сборку "$BUILD_ROOT\csl\csl_highs_lp.vcxproj.metaproj" (33) в узле 1 (целевые объекты Clean).
+    33>Проект "$BUILD_ROOT\csl\csl_highs_lp.vcxproj.metaproj" (33) выполняет сборку "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" (83) в узле 4 (целевые объекты Clean).
+    83>CoreClean:
+         Создание каталога "csl_highs_lp.dir\Release\".
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_highs_convex.vcxproj.metaproj" (35) в узле 1 (целевые объекты Clean).
+    35>Проект "$BUILD_ROOT\csl\csl_highs_convex.vcxproj.metaproj" (35) выполняет сборку "$BUILD_ROOT\csl\csl_highs_convex.vcxproj" (84) в узле 3 (целевые объекты Clean).
+    84>CoreClean:
+         Создание каталога "csl_highs_convex.dir\Release\".
+     8>Сборка проекта "$BUILD_ROOT\csl\csl_witness_selector.vcxproj.metaproj" завершена (целевые объекты Clean).
+    82>Сборка проекта "$BUILD_ROOT\csl\csl_generator_adapter.vcxproj" завершена (целевые объекты Clean).
+    83>Сборка проекта "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" завершена (целевые объекты Clean).
+    84>Сборка проекта "$BUILD_ROOT\csl\csl_highs_convex.vcxproj" завершена (целевые объекты Clean).
+    24>Проект "$BUILD_ROOT\csl\csl_strategy_a.vcxproj.metaproj" (24) выполняет сборку "$BUILD_ROOT\csl\csl_strategy_a.vcxproj" (85) в узле 1 (целевые объекты Clean).
+    85>CoreClean:
+         Создание каталога "csl_strategy_a.dir\Release\".
+    21>Проект "$BUILD_ROOT\csl\csl_strategy_b.vcxproj.metaproj" (21) выполняет сборку "$BUILD_ROOT\csl\csl_strategy_b.vcxproj" (86) в узле 4 (целевые объекты Clean).
+    86>CoreClean:
+         Создание каталога "csl_strategy_b.dir\Release\".
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_affine_sum.vcxproj.metaproj" (48) в узле 1 (целевые объекты Clean).
+    48>Проект "$BUILD_ROOT\csl\csl_affine_sum.vcxproj.metaproj" (48) выполняет сборку "$BUILD_ROOT\csl\csl_affine_sum.vcxproj" (87) в узле 3 (целевые объекты Clean).
+    87>CoreClean:
+         Создание каталога "csl_affine_sum.dir\Release\".
+    85>Сборка проекта "$BUILD_ROOT\csl\csl_strategy_a.vcxproj" завершена (целевые объекты Clean).
+    33>Сборка проекта "$BUILD_ROOT\csl\csl_highs_lp.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\csl\csl_application.vcxproj.metaproj" (47) в узле 1 (целевые объекты Clean).
+    47>Проект "$BUILD_ROOT\csl\csl_application.vcxproj.metaproj" (47) выполняет сборку "$BUILD_ROOT\csl\csl_application.vcxproj" (88) в узле 2 (целевые объекты Clean).
+    88>CoreClean:
+         Создание каталога "csl_application.dir\Release\".
+    37>Сборка проекта "$BUILD_ROOT\csl\csl_generator_adapter.vcxproj.metaproj" завершена (целевые объекты Clean).
+    35>Сборка проекта "$BUILD_ROOT\csl\csl_highs_convex.vcxproj.metaproj" завершена (целевые объекты Clean).
+    24>Сборка проекта "$BUILD_ROOT\csl\csl_strategy_a.vcxproj.metaproj" завершена (целевые объекты Clean).
+    87>Сборка проекта "$BUILD_ROOT\csl\csl_affine_sum.vcxproj" завершена (целевые объекты Clean).
+    86>Сборка проекта "$BUILD_ROOT\csl\csl_strategy_b.vcxproj" завершена (целевые объекты Clean).
+    88>Сборка проекта "$BUILD_ROOT\csl\csl_application.vcxproj" завершена (целевые объекты Clean).
+    31>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj.metaproj" (31) выполняет сборку "$BUILD_ROOT\csl_opt07_measure.vcxproj" (89) в узле 1 (целевые объекты Clean).
+    89>CoreClean:
+         Создание каталога "csl_opt07_measure.dir\Release\".
+    89>Сборка проекта "$BUILD_ROOT\csl_opt07_measure.vcxproj" завершена (целевые объекты Clean).
+    21>Сборка проекта "$BUILD_ROOT\csl\csl_strategy_b.vcxproj.metaproj" завершена (целевые объекты Clean).
+    48>Сборка проекта "$BUILD_ROOT\csl\csl_affine_sum.vcxproj.metaproj" завершена (целевые объекты Clean).
+    47>Сборка проекта "$BUILD_ROOT\csl\csl_application.vcxproj.metaproj" завершена (целевые объекты Clean).
+    31>Сборка проекта "$BUILD_ROOT\csl_opt07_measure.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Проект "$BUILD_ROOT\CSLOPT07ReportHarness.sln" (1) выполняет сборку "$BUILD_ROOT\ALL_BUILD.vcxproj.metaproj" (49) в узле 1 (целевые объекты Clean).
+    49>Проект "$BUILD_ROOT\ALL_BUILD.vcxproj.metaproj" (49) выполняет сборку "$BUILD_ROOT\ALL_BUILD.vcxproj" (90) в узле 4 (целевые объекты Clean).
+    90>CoreClean:
+         Создание каталога "x64\Release\ALL_BUILD\".
+    90>Сборка проекта "$BUILD_ROOT\ALL_BUILD.vcxproj" завершена (целевые объекты Clean).
+    49>Сборка проекта "$BUILD_ROOT\ALL_BUILD.vcxproj.metaproj" завершена (целевые объекты Clean).
+     1>Сборка проекта "$BUILD_ROOT\CSLOPT07ReportHarness.sln" завершена (целевые объекты Clean).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:00.63
+
+Run Build Command(s): "$PROGRAM_FILES/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" csl_opt07_measure.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:4 /v:n
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+Сборка начата 16.10.2026 23:21:31.
+
+     1>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj" в узле 1 (целевые объекты по умолчанию).
+     1>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj" (1) выполняет сборку "$BUILD_ROOT\ZERO_CHECK.vcxproj" (2) в узле 1 (целевые объекты по умолчанию).
+     2>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\".
+       InitializeBuildStatus:
+         Создание "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild".
+       CustomBuild:
+         1>Checking Build System
+       FinalizeBuildStatus:
+         Файл "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate".
+     2>Сборка проекта "$BUILD_ROOT\ZERO_CHECK.vcxproj" завершена (целевые объекты по умолчанию).
+     1>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj" (1) выполняет сборку "$BUILD_ROOT\csl\csl_contracts.vcxproj" (3) в узле 1 (целевые объекты по умолчанию).
+     3>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "$BUILD_ROOT\csl\Release\".
+         Создание каталога "csl_contracts.dir\Release\csl_contracts.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         Создание каталога "csl_contracts.dir\Release\csl_contracts_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+     1>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj" (1) выполняет сборку "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" (6) в узле 3 (целевые объекты по умолчанию).
+     6>Проект "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" (6) выполняет сборку "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj" (16) в узле 3 (целевые объекты по умолчанию).
+    16>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "$BUILD_ROOT\Release\bin\".
+         Создание каталога "highs.dir\Release\highs.tlog\".
+       InitializeBuildStatus:
+         Создание "highs.dir\Release\highs.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "highs.dir\Release\highs.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $BUILD_ROOT/_deps/csl_highs-src/highs/CMakeLists.txt
+     3>SetModuleDependencies:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\execution.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\geometry.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\outcomes.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\problem.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\synthesis.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /scanDependencies "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\model.cpp"
+         problem.cpp
+         synthesis.cpp
+         execution.cpp
+         geometry.cpp
+         outcomes.cpp
+         model.cpp
+    16>MakeDirsForCl:
+         Создание каталога "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.dir\Release\qpsolver".
+         Создание каталога "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.dir\Release\ipm\ipx".
+         Создание каталога "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.dir\Release\ipm\basiclu".
+       ClCompile:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$BUILD_ROOT\_deps\csl_highs-src\extern" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\filereader" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\pdqsort" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\zstr" /I"$BUILD_ROOT\_deps\csl_highs-src\highs" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\interfaces" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\io" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\mip" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\model" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\parallel" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\presolve" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\simplex" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\util" /I"$BUILD_ROOT\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\\" /Fd"$BUILD_ROOT\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "$BUILD_ROOT\_deps\csl_highs-src\extern\filereaderlp\reader.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\interfaces\highs_c_api.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\io\Filereader.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\io\FilereaderEms.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\io\FilereaderLp.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\io\FilereaderMps.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\io\HighsIO.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\io\HMpsFF.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\io\HMPSIO.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\io\LoadOptions.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\IpxWrapper.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\Highs.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsCallback.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsDebug.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsIis.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsInfo.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsInfoDebug.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsDeprecated.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsInterface.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsLp.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsLpUtils.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsModelUtils.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsOptions.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsRanging.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsSolution.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsSolutionDebug.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsSolve.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data\HighsStatus.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsCliqueTable.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsConflictPool.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsCutGeneration.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsCutPool.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsDebugSol.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsDomain.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsDynamicRowMatrix.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsFeasibilityJump.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsGFkSolve.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsImplications.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsLpAggregator.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsLpRelaxation.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsMipAnalysis.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsMipSolver.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsMipSolverData.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsModkSeparator.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsNodeQueue.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsObjectiveFunction.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsPathSeparator.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsPrimalHeuristics.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsPseudocost.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsRedcostFixing.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsSearch.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsSeparation.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsSeparator.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsTableauSeparator.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\mip\HighsTransformedLp.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\model\HighsHessian.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\model\HighsHessianUtils.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\model\HighsModel.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\parallel\HighsTaskExecutor.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\CupdlpWrapper.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\presolve\HighsPostsolveStack.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\presolve\HighsSymmetry.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\presolve\HPresolve.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\presolve\HPresolveAnalysis.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\presolve\ICrash.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\presolve\ICrashUtil.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\presolve\ICrashX.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\presolve\PresolveComponent.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver\a_asm.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver\a_quass.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver\perturbation.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver\quass.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver\ratiotest.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver\scaling.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkk.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkkControl.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkkDebug.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkkDual.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkkDualMulti.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkkDualRHS.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkkDualRow.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkkInterface.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HEkkPrimal.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HighsSimplexAnalysis.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HSimplex.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HSimplexDebug.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HSimplexNla.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HSimplexNlaDebug.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HSimplexNlaFreeze.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HSimplexNlaProductForm.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\simplex\HSimplexReport.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt\KktCh2.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt\DevKkt.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HFactor.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HFactorDebug.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HFactorExtend.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HFactorRefactor.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HFactorUtils.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HighsHash.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HighsLinearSumBounds.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HighsMatrixPic.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HighsMatrixUtils.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HighsSort.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HighsSparseMatrix.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HighsUtils.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HSet.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\HVectorBase.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\util\stringutil.cpp" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\basiclu_kernel.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\basiclu_wrapper.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\conjugate_residuals.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\control.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\crossover.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\diagonal_precond.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\forrest_tomlin.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\guess_basis.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\indexed_vector.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\info.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\ipm.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\ipx_c.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\iterate.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver_basis.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver_diag.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\kkt_solver.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\linear_operator.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\lp_solver.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\lu_factorization.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\maxvolume.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\model.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\normal_matrix.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\sparse_matrix.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\sparse_utils.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\splitted_normal_matrix.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\starting_basis.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\symbolic_invert.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\timer.cc" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\utils.cc"
+         reader.cpp
+         highs_c_api.cpp
+         Filereader.cpp
+         FilereaderEms.cpp
+         FilereaderLp.cpp
+         FilereaderMps.cpp
+         HighsIO.cpp
+         HMpsFF.cpp
+         HMPSIO.cpp
+         LoadOptions.cpp
+         IpxWrapper.cpp
+         Highs.cpp
+     3>ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\problem.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\geometry.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\model.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\outcomes.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\execution.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_contracts.dir\Release\\" /Fo"csl_contracts.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_contracts.pdb" /sourceDependencies "csl_contracts.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\contracts\synthesis.cpp"
+         synthesis.cpp
+         geometry.cpp
+         model.cpp
+         problem.cpp
+         outcomes.cpp
+         execution.cpp
+    16>ClCompile:
+         HighsCallback.cpp
+         HighsDebug.cpp
+         HighsIis.cpp
+         HighsInfo.cpp
+         HighsInfoDebug.cpp
+         HighsDeprecated.cpp
+         HighsInterface.cpp
+         HighsLp.cpp
+         HighsLpUtils.cpp
+         HighsModelUtils.cpp
+         HighsOptions.cpp
+         HighsRanging.cpp
+         HighsSolution.cpp
+         HighsSolutionDebug.cpp
+         HighsSolve.cpp
+         HighsStatus.cpp
+         HighsCliqueTable.cpp
+         HighsConflictPool.cpp
+         HighsCutGeneration.cpp
+         HighsCutPool.cpp
+         HighsDebugSol.cpp
+         HighsDomain.cpp
+         HighsDynamicRowMatrix.cpp
+         HighsFeasibilityJump.cpp
+     3>Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_contracts.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_contracts.dir\Release\model.obj
+         csl_contracts.dir\Release\problem.obj
+         csl_contracts.dir\Release\geometry.obj
+         csl_contracts.dir\Release\outcomes.obj
+         csl_contracts.dir\Release\execution.obj
+         csl_contracts.dir\Release\synthesis.obj
+    16>ClCompile:
+         HighsGFkSolve.cpp
+         HighsImplications.cpp
+     3>Lib:
+         csl_contracts.vcxproj -> $BUILD_ROOT\csl\Release\csl_contracts.lib
+       FinalizeBuildStatus:
+         Файл "csl_contracts.dir\Release\csl_contracts.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_contracts.dir\Release\csl_contracts.tlog\csl_contracts.lastbuildstate".
+     3>Сборка проекта "$BUILD_ROOT\csl\csl_contracts.vcxproj" завершена (целевые объекты по умолчанию).
+    16>ClCompile:
+         HighsLpAggregator.cpp
+         HighsLpRelaxation.cpp
+     1>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj" (1) выполняет сборку "$BUILD_ROOT\csl\csl_model.vcxproj" (4) в узле 2 (целевые объекты по умолчанию).
+     4>Проект "$BUILD_ROOT\csl\csl_model.vcxproj" (4) выполняет сборку "$BUILD_ROOT\csl\csl_numeric.vcxproj" (7) в узле 2 (целевые объекты по умолчанию).
+     7>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_numeric.dir\Release\csl_numeric.tlog\".
+    16>ClCompile:
+         HighsMipAnalysis.cpp
+     7>InitializeBuildStatus:
+         Создание "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild".
+    16>ClCompile:
+         HighsMipSolver.cpp
+     7>CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+    16>ClCompile:
+         HighsMipSolverData.cpp
+     7>SetModuleDependencies:
+         Создание каталога "csl_numeric.dir\Release\csl_numeric_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /scanDependencies "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_numeric.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\numeric\data.cpp"
+         data.cpp
+    16>ClCompile:
+         HighsModkSeparator.cpp
+     7>ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_numeric.dir\Release\\" /Fo"csl_numeric.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_numeric.pdb" /sourceDependencies "csl_numeric.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\numeric\data.cpp"
+    16>ClCompile:
+         HighsNodeQueue.cpp
+     7>ClCompile:
+         data.cpp
+    16>ClCompile:
+         HighsObjectiveFunction.cpp
+         HighsPathSeparator.cpp
+         HighsPrimalHeuristics.cpp
+         HighsPseudocost.cpp
+         HighsRedcostFixing.cpp
+         HighsSearch.cpp
+         HighsSeparation.cpp
+         HighsSeparator.cpp
+     7>Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_numeric.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_numeric.dir\Release\data.obj
+    16>ClCompile:
+         HighsTableauSeparator.cpp
+     7>Lib:
+         csl_numeric.vcxproj -> $BUILD_ROOT\csl\Release\csl_numeric.lib
+       FinalizeBuildStatus:
+         Файл "csl_numeric.dir\Release\csl_numeric.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_numeric.dir\Release\csl_numeric.tlog\csl_numeric.lastbuildstate".
+     7>Сборка проекта "$BUILD_ROOT\csl\csl_numeric.vcxproj" завершена (целевые объекты по умолчанию).
+    16>ClCompile:
+         HighsTransformedLp.cpp
+     4>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_model.dir\Release\csl_model.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+     6>Проект "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" (6) выполняет сборку "$BUILD_ROOT\csl\csl_optimization.vcxproj" (9) в узле 3 (целевые объекты по умолчанию).
+     9>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_optimization.dir\Release\csl_optimization.tlog\".
+     1>Проект "$BUILD_ROOT\csl_opt07_measure.vcxproj" (1) выполняет сборку "$BUILD_ROOT\csl\csl_hull.vcxproj" (5) в узле 4 (целевые объекты по умолчанию).
+     5>Проект "$BUILD_ROOT\csl\csl_hull.vcxproj" (5) выполняет сборку "$BUILD_ROOT\csl\csl_objectives.vcxproj" (8) в узле 4 (целевые объекты по умолчанию).
+     8>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_objectives.dir\Release\csl_objectives.tlog\".
+     4>SetModuleDependencies:
+         Создание каталога "csl_model.dir\Release\csl_model_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /scanDependencies "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_model.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\model\linear_system.cpp"
+     9>InitializeBuildStatus:
+         Создание "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild".
+     8>InitializeBuildStatus:
+         Создание "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild".
+    16>ClCompile:
+         HighsHessian.cpp
+         HighsHessianUtils.cpp
+     4>SetModuleDependencies:
+         linear_system.cpp
+    16>ClCompile:
+         HighsModel.cpp
+     9>CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+     8>CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+    16>ClCompile:
+         HighsTaskExecutor.cpp
+         CupdlpWrapper.cpp
+     4>ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_model.dir\Release\\" /Fo"csl_model.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_model.pdb" /sourceDependencies "csl_model.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\model\linear_system.cpp"
+    16>ClCompile:
+         HighsPostsolveStack.cpp
+         HighsSymmetry.cpp
+     4>ClCompile:
+         linear_system.cpp
+    16>ClCompile:
+         HPresolve.cpp
+         HPresolveAnalysis.cpp
+         ICrash.cpp
+         ICrashUtil.cpp
+         ICrashX.cpp
+     9>SetModuleDependencies:
+         Создание каталога "csl_optimization.dir\Release\csl_optimization_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /scanDependencies "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_optimization.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\optimization\lp_backend.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /scanDependencies "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_optimization.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\optimization\linear_infeasibility_certificate.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /scanDependencies "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_optimization.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\optimization\linear_program.cpp"
+    16>ClCompile:
+         PresolveComponent.cpp
+     9>SetModuleDependencies:
+         linear_infeasibility_certificate.cpp
+         linear_program.cpp
+         lp_backend.cpp
+    16>ClCompile:
+         a_asm.cpp
+     8>SetModuleDependencies:
+         Создание каталога "csl_objectives.dir\Release\csl_objectives_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_objectives.dir\Release\\" /scanDependencies "csl_objectives.dir\Release\\" /Fo"csl_objectives.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_objectives.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "$BUILD_ROOT/_deps/csl_objectives_eigen-src" "$SOURCE_ROOT\src\optimization\objective_reformulation.cpp"
+     6>Проект "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" (6) выполняет сборку "$BUILD_ROOT\csl\csl_registry.vcxproj" (11) в узле 4 (целевые объекты по умолчанию).
+    11>Проект "$BUILD_ROOT\csl\csl_registry.vcxproj" (11) выполняет сборку "$BUILD_ROOT\csl\csl_sets.vcxproj" (13) в узле 4 (целевые объекты по умолчанию).
+    13>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_sets.dir\Release\csl_sets.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild".
+    16>ClCompile:
+         a_quass.cpp
+         perturbation.cpp
+     8>SetModuleDependencies:
+         objective_reformulation.cpp
+     9>ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_optimization.pdb" /sourceDependencies "csl_optimization.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\optimization\linear_infeasibility_certificate.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_optimization.pdb" /sourceDependencies "csl_optimization.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\optimization\lp_backend.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_optimization.dir\Release\\" /Fo"csl_optimization.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_optimization.pdb" /sourceDependencies "csl_optimization.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\optimization\linear_program.cpp"
+    16>ClCompile:
+         quass.cpp
+         ratiotest.cpp
+         scaling.cpp
+    13>CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+     9>ClCompile:
+         linear_program.cpp
+         lp_backend.cpp
+         linear_infeasibility_certificate.cpp
+    16>ClCompile:
+         HEkk.cpp
+         HEkkControl.cpp
+         HEkkDebug.cpp
+         HEkkDual.cpp
+         HEkkDualMulti.cpp
+         HEkkDualRHS.cpp
+         HEkkDualRow.cpp
+         HEkkInterface.cpp
+     4>Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_model.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_model.dir\Release\linear_system.obj
+    13>SetModuleDependencies:
+         Создание каталога "csl_sets.dir\Release\csl_sets_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_sets.dir\Release\\" /scanDependencies "csl_sets.dir\Release\\" /Fo"csl_sets.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_sets.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\sets\data.cpp"
+     8>ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_objectives.dir\Release\\" /Fo"csl_objectives.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_objectives.pdb" /sourceDependencies "csl_objectives.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "$BUILD_ROOT/_deps/csl_objectives_eigen-src" "$SOURCE_ROOT\src\optimization\objective_reformulation.cpp"
+    16>ClCompile:
+         HEkkPrimal.cpp
+    13>SetModuleDependencies:
+         data.cpp
+    16>ClCompile:
+         HighsSimplexAnalysis.cpp
+         HSimplex.cpp
+     4>Lib:
+         csl_model.vcxproj -> $BUILD_ROOT\csl\Release\csl_model.lib
+     8>ClCompile:
+         objective_reformulation.cpp
+    16>ClCompile:
+         HSimplexDebug.cpp
+     4>FinalizeBuildStatus:
+         Файл "csl_model.dir\Release\csl_model.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_model.dir\Release\csl_model.tlog\csl_model.lastbuildstate".
+     4>Сборка проекта "$BUILD_ROOT\csl\csl_model.vcxproj" завершена (целевые объекты по умолчанию).
+    16>ClCompile:
+         HSimplexNla.cpp
+         HSimplexNlaDebug.cpp
+         HSimplexNlaFreeze.cpp
+         HSimplexNlaProductForm.cpp
+         HSimplexReport.cpp
+         KktCh2.cpp
+         DevKkt.cpp
+         HFactor.cpp
+         HFactorDebug.cpp
+         HFactorExtend.cpp
+         HFactorRefactor.cpp
+         HFactorUtils.cpp
+         HighsHash.cpp
+         HighsLinearSumBounds.cpp
+         HighsMatrixPic.cpp
+         HighsMatrixUtils.cpp
+         HighsSort.cpp
+         HighsSparseMatrix.cpp
+         HighsUtils.cpp
+         HSet.cpp
+         HVectorBase.cpp
+         stringutil.cpp
+     9>Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_optimization.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_optimization.dir\Release\linear_program.obj
+         csl_optimization.dir\Release\lp_backend.obj
+         csl_optimization.dir\Release\linear_infeasibility_certificate.obj
+    16>ClCompile:
+         basiclu_kernel.cc
+         basiclu_wrapper.cc
+         conjugate_residuals.cc
+         control.cc
+         crossover.cc
+         diagonal_precond.cc
+         forrest_tomlin.cc
+         guess_basis.cc
+         indexed_vector.cc
+         info.cc
+         ipm.cc
+         ipx_c.cc
+         iterate.cc
+         kkt_solver_basis.cc
+     9>Lib:
+         csl_optimization.vcxproj -> $BUILD_ROOT\csl\Release\csl_optimization.lib
+       FinalizeBuildStatus:
+         Файл "csl_optimization.dir\Release\csl_optimization.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_optimization.dir\Release\csl_optimization.tlog\csl_optimization.lastbuildstate".
+     9>Сборка проекта "$BUILD_ROOT\csl\csl_optimization.vcxproj" завершена (целевые объекты по умолчанию).
+    16>ClCompile:
+         kkt_solver_diag.cc
+         kkt_solver.cc
+         linear_operator.cc
+         lp_solver.cc
+         lu_factorization.cc
+         maxvolume.cc
+         model.cc
+         normal_matrix.cc
+         sparse_matrix.cc
+         sparse_utils.cc
+         splitted_normal_matrix.cc
+         starting_basis.cc
+         symbolic_invert.cc
+         timer.cc
+         utils.cc
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$BUILD_ROOT\_deps\csl_highs-src\extern" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\filereader" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\pdqsort" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\zstr" /I"$BUILD_ROOT\_deps\csl_highs-src\highs" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\interfaces" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\io" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\mip" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\model" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\parallel" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\presolve" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\simplex" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\util" /I"$BUILD_ROOT\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/qpsolver/basis.cpp.obj" /Fd"$BUILD_ROOT\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver\basis.cpp"
+         basis.cpp
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$BUILD_ROOT\_deps\csl_highs-src\extern" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\filereader" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\pdqsort" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\zstr" /I"$BUILD_ROOT\_deps\csl_highs-src\highs" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\interfaces" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\io" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\mip" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\model" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\parallel" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\presolve" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\simplex" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\util" /I"$BUILD_ROOT\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\\" /Fd"$BUILD_ROOT\Release\bin\highs.pdb" /external:W1 /Gd /TC /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_cs.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_linalg.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_proj.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_restart.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_scaling.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_solver.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_step.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp\cupdlp_utils.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_factorize.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_get_factors.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_initialize.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_object.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_dense.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_for_update.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_solve_sparse.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\basiclu_update.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_build_factors.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_condest.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_dfs.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_factorize_bump.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_file.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_garbage_perm.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_initialize.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_internal.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_markowitz.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_matrix_norm.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_pivot.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_residual_test.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_setup_bump.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_singletons.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_dense.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_for_update.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_sparse.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_symbolic.c" "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_solve_triangular.c"
+         cupdlp_cs.c
+         cupdlp_linalg.c
+         cupdlp_proj.c
+         cupdlp_restart.c
+         cupdlp_scaling.c
+         cupdlp_solver.c
+         cupdlp_step.c
+         cupdlp_utils.c
+         basiclu_factorize.c
+         basiclu_get_factors.c
+         basiclu_initialize.c
+         basiclu_object.c
+         basiclu_solve_dense.c
+         basiclu_solve_for_update.c
+         basiclu_solve_sparse.c
+         basiclu_update.c
+         lu_build_factors.c
+         lu_condest.c
+         lu_dfs.c
+         lu_factorize_bump.c
+         lu_file.c
+         lu_garbage_perm.c
+         lu_initialize.c
+         lu_internal.c
+         lu_markowitz.c
+         lu_matrix_norm.c
+         lu_pivot.c
+         lu_residual_test.c
+         lu_setup_bump.c
+         lu_singletons.c
+         lu_solve_dense.c
+         lu_solve_for_update.c
+         lu_solve_sparse.c
+         lu_solve_symbolic.c
+         lu_solve_triangular.c
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$BUILD_ROOT\_deps\csl_highs-src\extern" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\filereader" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\pdqsort" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\zstr" /I"$BUILD_ROOT\_deps\csl_highs-src\highs" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\interfaces" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\io" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\mip" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\model" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\parallel" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\presolve" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\simplex" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\util" /I"$BUILD_ROOT\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/ipx/basis.cc.obj" /Fd"$BUILD_ROOT\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\basis.cc"
+         basis.cc
+    13>ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_sets.dir\Release\\" /Fo"csl_sets.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_sets.pdb" /sourceDependencies "csl_sets.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\sets\data.cpp"
+     8>Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_objectives.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_objectives.dir\Release\objective_reformulation.obj
+    13>ClCompile:
+         data.cpp
+     8>Lib:
+         csl_objectives.vcxproj -> $BUILD_ROOT\csl\Release\csl_objectives.lib
+       FinalizeBuildStatus:
+         Файл "csl_objectives.dir\Release\csl_objectives.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_objectives.dir\Release\csl_objectives.tlog\csl_objectives.lastbuildstate".
+     8>Сборка проекта "$BUILD_ROOT\csl\csl_objectives.vcxproj" завершена (целевые объекты по умолчанию).
+    16>ClCompile:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$BUILD_ROOT\_deps\csl_highs-src\extern" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\filereader" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\pdqsort" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\zstr" /I"$BUILD_ROOT\_deps\csl_highs-src\highs" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\interfaces" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\io" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\mip" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\model" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\parallel" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\presolve" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\simplex" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\util" /I"$BUILD_ROOT\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/ipx/lu_update.cc.obj" /Fd"$BUILD_ROOT\Release\bin\highs.pdb" /external:W1 /Gd /TP /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx\lu_update.cc"
+         lu_update.cc
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$BUILD_ROOT\_deps\csl_highs-src\extern" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\filereader" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\pdqsort" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\zstr" /I"$BUILD_ROOT\_deps\csl_highs-src\highs" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\interfaces" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\io" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\mip" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\model" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\parallel" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\presolve" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\simplex" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\util" /I"$BUILD_ROOT\_deps\csl_highs-build" /Z7 /nologo /W1 /WX- /diagnostics:column /MP /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\"Release\"" /Zc:preprocessor /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"highs.dir\Release\/ipm/basiclu/lu_update.c.obj" /Fd"$BUILD_ROOT\Release\bin\highs.pdb" /external:W1 /Gd /TC /wd4005 /wd4018 /wd4065 /wd4068 /wd4101 /wd4146 /wd4200 /wd4244 /wd4251 /wd4267 /wd4305 /wd4307 /wd4309 /wd4334 /wd4355 /wd4477 /wd4506 /wd4715 /wd4800 /wd4996 /errorReport:queue  /bigobj "$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu\lu_update.c"
+         lu_update.c
+       ResourceCompile:
+         $PROGRAM_FILES_X86\Windows Kits\10\bin\10.0.26100.0\x64\rc.exe /D WIN32 /D _WINDOWS /D NDEBUG /D _CRT_SECURE_NO_WARNINGS /D NOMINMAX /D WIN32_LEAN_AND_MEAN=1 /D _CRT_SECURE_NO_DEPRECATE /D "CMAKE_INTDIR=\\\"Release\\\"" /l"0x0409" /I"$BUILD_ROOT\_deps\csl_highs-src\extern" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\filereader" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\pdqsort" /I"$BUILD_ROOT\_deps\csl_highs-src\extern\zstr" /I"$BUILD_ROOT\_deps\csl_highs-src\highs" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\interfaces" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\io" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\ipx" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\ipm\basiclu" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\lp_data" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\mip" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\model" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\parallel" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\pdlp\cupdlp" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\presolve" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\qpsolver" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\simplex" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\test_kkt" /I"$BUILD_ROOT\_deps\csl_highs-src\highs\util" /I"$BUILD_ROOT\_deps\csl_highs-build" /nologo /fo"highs.dir\Release\version.res" "$BUILD_ROOT\_deps\csl_highs-build\version.rc" 
+       Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\Release\bin\highs.lib" /NOLOGO /MACHINE:X64  /machine:x64 highs.dir\Release\version.res
+         highs.dir\Release\reader.obj
+         highs.dir\Release\highs_c_api.obj
+         highs.dir\Release\Filereader.obj
+         highs.dir\Release\FilereaderEms.obj
+         highs.dir\Release\FilereaderLp.obj
+         highs.dir\Release\FilereaderMps.obj
+         highs.dir\Release\HighsIO.obj
+         highs.dir\Release\HMpsFF.obj
+         highs.dir\Release\HMPSIO.obj
+         highs.dir\Release\LoadOptions.obj
+         highs.dir\Release\IpxWrapper.obj
+         highs.dir\Release\Highs.obj
+         highs.dir\Release\HighsCallback.obj
+         highs.dir\Release\HighsDebug.obj
+         highs.dir\Release\HighsIis.obj
+         highs.dir\Release\HighsInfo.obj
+         highs.dir\Release\HighsInfoDebug.obj
+         highs.dir\Release\HighsDeprecated.obj
+         highs.dir\Release\HighsInterface.obj
+         highs.dir\Release\HighsLp.obj
+         highs.dir\Release\HighsLpUtils.obj
+         highs.dir\Release\HighsModelUtils.obj
+         highs.dir\Release\HighsOptions.obj
+         highs.dir\Release\HighsRanging.obj
+         highs.dir\Release\HighsSolution.obj
+         highs.dir\Release\HighsSolutionDebug.obj
+         highs.dir\Release\HighsSolve.obj
+         highs.dir\Release\HighsStatus.obj
+         highs.dir\Release\HighsCliqueTable.obj
+         highs.dir\Release\HighsConflictPool.obj
+         highs.dir\Release\HighsCutGeneration.obj
+         highs.dir\Release\HighsCutPool.obj
+         highs.dir\Release\HighsDebugSol.obj
+         highs.dir\Release\HighsDomain.obj
+         highs.dir\Release\HighsDynamicRowMatrix.obj
+         highs.dir\Release\HighsFeasibilityJump.obj
+         highs.dir\Release\HighsGFkSolve.obj
+         highs.dir\Release\HighsImplications.obj
+         highs.dir\Release\HighsLpAggregator.obj
+         highs.dir\Release\HighsLpRelaxation.obj
+         highs.dir\Release\HighsMipAnalysis.obj
+         highs.dir\Release\HighsMipSolver.obj
+         highs.dir\Release\HighsMipSolverData.obj
+         highs.dir\Release\HighsModkSeparator.obj
+         highs.dir\Release\HighsNodeQueue.obj
+         highs.dir\Release\HighsObjectiveFunction.obj
+         highs.dir\Release\HighsPathSeparator.obj
+         highs.dir\Release\HighsPrimalHeuristics.obj
+         highs.dir\Release\HighsPseudocost.obj
+         highs.dir\Release\HighsRedcostFixing.obj
+         highs.dir\Release\HighsSearch.obj
+         highs.dir\Release\HighsSeparation.obj
+         highs.dir\Release\HighsSeparator.obj
+         highs.dir\Release\HighsTableauSeparator.obj
+         highs.dir\Release\HighsTransformedLp.obj
+         highs.dir\Release\HighsHessian.obj
+         highs.dir\Release\HighsHessianUtils.obj
+         highs.dir\Release\HighsModel.obj
+         highs.dir\Release\HighsTaskExecutor.obj
+         highs.dir\Release\CupdlpWrapper.obj
+         highs.dir\Release\HighsPostsolveStack.obj
+         highs.dir\Release\HighsSymmetry.obj
+         highs.dir\Release\HPresolve.obj
+         highs.dir\Release\HPresolveAnalysis.obj
+         highs.dir\Release\ICrash.obj
+         highs.dir\Release\ICrashUtil.obj
+         highs.dir\Release\ICrashX.obj
+         highs.dir\Release\PresolveComponent.obj
+         highs.dir\Release\a_asm.obj
+         highs.dir\Release\a_quass.obj
+         highs.dir\Release\perturbation.obj
+         highs.dir\Release\quass.obj
+         highs.dir\Release\ratiotest.obj
+         highs.dir\Release\scaling.obj
+         highs.dir\Release\HEkk.obj
+         highs.dir\Release\HEkkControl.obj
+         highs.dir\Release\HEkkDebug.obj
+         highs.dir\Release\HEkkDual.obj
+         highs.dir\Release\HEkkDualMulti.obj
+         highs.dir\Release\HEkkDualRHS.obj
+         highs.dir\Release\HEkkDualRow.obj
+         highs.dir\Release\HEkkInterface.obj
+         highs.dir\Release\HEkkPrimal.obj
+         highs.dir\Release\HighsSimplexAnalysis.obj
+         highs.dir\Release\HSimplex.obj
+         highs.dir\Release\HSimplexDebug.obj
+         highs.dir\Release\HSimplexNla.obj
+         highs.dir\Release\HSimplexNlaDebug.obj
+         highs.dir\Release\HSimplexNlaFreeze.obj
+         highs.dir\Release\HSimplexNlaProductForm.obj
+         highs.dir\Release\HSimplexReport.obj
+         highs.dir\Release\KktCh2.obj
+         highs.dir\Release\DevKkt.obj
+         highs.dir\Release\HFactor.obj
+         highs.dir\Release\HFactorDebug.obj
+         highs.dir\Release\HFactorExtend.obj
+         highs.dir\Release\HFactorRefactor.obj
+         highs.dir\Release\HFactorUtils.obj
+         highs.dir\Release\HighsHash.obj
+         highs.dir\Release\HighsLinearSumBounds.obj
+         highs.dir\Release\HighsMatrixPic.obj
+         highs.dir\Release\HighsMatrixUtils.obj
+         highs.dir\Release\HighsSort.obj
+         highs.dir\Release\HighsSparseMatrix.obj
+         highs.dir\Release\HighsUtils.obj
+         highs.dir\Release\HSet.obj
+         highs.dir\Release\HVectorBase.obj
+         highs.dir\Release\stringutil.obj
+         highs.dir\Release\cupdlp_cs.obj
+         highs.dir\Release\cupdlp_linalg.obj
+         highs.dir\Release\cupdlp_proj.obj
+         highs.dir\Release\cupdlp_restart.obj
+         highs.dir\Release\cupdlp_scaling.obj
+         highs.dir\Release\cupdlp_solver.obj
+         highs.dir\Release\cupdlp_step.obj
+         highs.dir\Release\cupdlp_utils.obj
+         highs.dir\Release\basiclu_kernel.obj
+         highs.dir\Release\basiclu_wrapper.obj
+         highs.dir\Release\conjugate_residuals.obj
+         highs.dir\Release\control.obj
+         highs.dir\Release\crossover.obj
+         highs.dir\Release\diagonal_precond.obj
+         highs.dir\Release\forrest_tomlin.obj
+         highs.dir\Release\guess_basis.obj
+         highs.dir\Release\indexed_vector.obj
+         highs.dir\Release\info.obj
+         highs.dir\Release\ipm.obj
+         highs.dir\Release\ipx_c.obj
+         highs.dir\Release\iterate.obj
+         highs.dir\Release\kkt_solver_basis.obj
+         highs.dir\Release\kkt_solver_diag.obj
+         highs.dir\Release\kkt_solver.obj
+         highs.dir\Release\linear_operator.obj
+         highs.dir\Release\lp_solver.obj
+         highs.dir\Release\lu_factorization.obj
+         highs.dir\Release\maxvolume.obj
+         highs.dir\Release\model.obj
+         highs.dir\Release\normal_matrix.obj
+         highs.dir\Release\sparse_matrix.obj
+         highs.dir\Release\sparse_utils.obj
+         highs.dir\Release\splitted_normal_matrix.obj
+         highs.dir\Release\starting_basis.obj
+         highs.dir\Release\symbolic_invert.obj
+         highs.dir\Release\timer.obj
+         highs.dir\Release\utils.obj
+         highs.dir\Release\basiclu_factorize.obj
+         highs.dir\Release\basiclu_get_factors.obj
+         highs.dir\Release\basiclu_initialize.obj
+         highs.dir\Release\basiclu_object.obj
+         highs.dir\Release\basiclu_solve_dense.obj
+         highs.dir\Release\basiclu_solve_for_update.obj
+         highs.dir\Release\basiclu_solve_sparse.obj
+         highs.dir\Release\basiclu_update.obj
+         highs.dir\Release\lu_build_factors.obj
+         highs.dir\Release\lu_condest.obj
+         highs.dir\Release\lu_dfs.obj
+         highs.dir\Release\lu_factorize_bump.obj
+         highs.dir\Release\lu_file.obj
+         highs.dir\Release\lu_garbage_perm.obj
+         highs.dir\Release\lu_initialize.obj
+         highs.dir\Release\lu_internal.obj
+         highs.dir\Release\lu_markowitz.obj
+         highs.dir\Release\lu_matrix_norm.obj
+         highs.dir\Release\lu_pivot.obj
+         highs.dir\Release\lu_residual_test.obj
+         highs.dir\Release\lu_setup_bump.obj
+         highs.dir\Release\lu_singletons.obj
+         highs.dir\Release\lu_solve_dense.obj
+         highs.dir\Release\lu_solve_for_update.obj
+         highs.dir\Release\lu_solve_sparse.obj
+         highs.dir\Release\lu_solve_symbolic.obj
+         highs.dir\Release\lu_solve_triangular.obj
+         highs.dir\Release\/qpsolver/basis.cpp.obj
+         highs.dir\Release\/ipm/ipx/basis.cc.obj
+         highs.dir\Release\/ipm/ipx/lu_update.cc.obj
+         highs.dir\Release\/ipm/basiclu/lu_update.c.obj
+    13>Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_sets.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_sets.dir\Release\data.obj
+         csl_sets.vcxproj -> $BUILD_ROOT\csl\Release\csl_sets.lib
+       FinalizeBuildStatus:
+         Файл "csl_sets.dir\Release\csl_sets.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_sets.dir\Release\csl_sets.tlog\csl_sets.lastbuildstate".
+    13>Сборка проекта "$BUILD_ROOT\csl\csl_sets.vcxproj" завершена (целевые объекты по умолчанию).
+     6>Проект "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" (6) выполняет сборку "$BUILD_ROOT\csl\csl_problem.vcxproj" (10) в узле 2 (целевые объекты по умолчанию).
+    10>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_problem.dir\Release\csl_problem.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         Создание каталога "csl_problem.dir\Release\csl_problem_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\constraints.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\domains.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /scanDependencies "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_problem.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\initial_information.cpp"
+         constraints.cpp
+         initial_information.cpp
+         domains.cpp
+       ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\constraints.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\initial_information.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_problem.dir\Release\\" /Fo"csl_problem.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_problem.pdb" /sourceDependencies "csl_problem.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\domains.cpp"
+    16>Lib:
+         highs.vcxproj -> $BUILD_ROOT\Release\bin\highs.lib
+       FinalizeBuildStatus:
+         Файл "highs.dir\Release\highs.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "highs.dir\Release\highs.tlog\highs.lastbuildstate".
+    16>Сборка проекта "$BUILD_ROOT\_deps\csl_highs-build\highs\highs.vcxproj" завершена (целевые объекты по умолчанию).
+    10>ClCompile:
+         domains.cpp
+         initial_information.cpp
+         constraints.cpp
+       Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_problem.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_problem.dir\Release\domains.obj
+         csl_problem.dir\Release\constraints.obj
+         csl_problem.dir\Release\initial_information.obj
+         csl_problem.vcxproj -> $BUILD_ROOT\csl\Release\csl_problem.lib
+       FinalizeBuildStatus:
+         Файл "csl_problem.dir\Release\csl_problem.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_problem.dir\Release\csl_problem.tlog\csl_problem.lastbuildstate".
+    10>Сборка проекта "$BUILD_ROOT\csl\csl_problem.vcxproj" завершена (целевые объекты по умолчанию).
+     6>Проект "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" (6) выполняет сборку "$BUILD_ROOT\csl\csl_resolved_core.vcxproj" (12) в узле 3 (целевые объекты по умолчанию).
+    12>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_resolved_core.dir\Release\csl_reso.72CB32A9.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_resolved_core.dir\Release\csl_reso.72CB32A9.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_resolved_core.dir\Release\csl_reso.72CB32A9.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         Создание каталога "csl_resolved_core.dir\Release\csl_reso.72CB32A9_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /scanDependencies "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_resolved_core.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\resolved.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /scanDependencies "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_resolved_core.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\identity.cpp"
+         identity.cpp
+         resolved.cpp
+       ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_resolved_core.pdb" /sourceDependencies "csl_resolved_core.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\resolved.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_resolved_core.dir\Release\\" /Fo"csl_resolved_core.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_resolved_core.pdb" /sourceDependencies "csl_resolved_core.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\problem\identity.cpp"
+         resolved.cpp
+         identity.cpp
+       Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_resolved_core.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_resolved_core.dir\Release\identity.obj
+         csl_resolved_core.dir\Release\resolved.obj
+         csl_resolved_core.vcxproj -> $BUILD_ROOT\csl\Release\csl_resolved_core.lib
+       FinalizeBuildStatus:
+         Файл "csl_resolved_core.dir\Release\csl_reso.72CB32A9.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_resolved_core.dir\Release\csl_reso.72CB32A9.tlog\csl_resolved_core.lastbuildstate".
+    12>Сборка проекта "$BUILD_ROOT\csl\csl_resolved_core.vcxproj" завершена (целевые объекты по умолчанию).
+    11>Проект "$BUILD_ROOT\csl\csl_registry.vcxproj" (11) выполняет сборку "$BUILD_ROOT\csl\csl_verifiers.vcxproj" (14) в узле 2 (целевые объекты по умолчанию).
+    14>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_verifiers.dir\Release\csl_verifiers.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_verifiers.dir\Release\csl_verifiers.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_verifiers.dir\Release\csl_verifiers.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         Создание каталога "csl_verifiers.dir\Release\csl_verifiers_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_verifiers.dir\Release\\" /scanDependencies "csl_verifiers.dir\Release\\" /Fo"csl_verifiers.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_verifiers.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\registry\compiled_verifiers.cpp"
+         compiled_verifiers.cpp
+       ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_verifiers.dir\Release\\" /Fo"csl_verifiers.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_verifiers.pdb" /sourceDependencies "csl_verifiers.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\registry\compiled_verifiers.cpp"
+         compiled_verifiers.cpp
+       Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_verifiers.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_verifiers.dir\Release\compiled_verifiers.obj
+         csl_verifiers.vcxproj -> $BUILD_ROOT\csl\Release\csl_verifiers.lib
+       FinalizeBuildStatus:
+         Файл "csl_verifiers.dir\Release\csl_verifiers.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_verifiers.dir\Release\csl_verifiers.tlog\csl_verifiers.lastbuildstate".
+    14>Сборка проекта "$BUILD_ROOT\csl\csl_verifiers.vcxproj" завершена (целевые объекты по умолчанию).
+    11>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_registry.dir\Release\csl_registry.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         Создание каталога "csl_registry.dir\Release\csl_registry_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_registry.dir\Release\\" /scanDependencies "csl_registry.dir\Release\\" /Fo"csl_registry.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_registry.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\registry\registry.cpp"
+         registry.cpp
+       ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_registry.dir\Release\\" /Fo"csl_registry.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_registry.pdb" /sourceDependencies "csl_registry.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\registry\registry.cpp"
+         registry.cpp
+       Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_registry.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_registry.dir\Release\registry.obj
+         csl_registry.vcxproj -> $BUILD_ROOT\csl\Release\csl_registry.lib
+       FinalizeBuildStatus:
+         Файл "csl_registry.dir\Release\csl_registry.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_registry.dir\Release\csl_registry.tlog\csl_registry.lastbuildstate".
+    11>Сборка проекта "$BUILD_ROOT\csl\csl_registry.vcxproj" завершена (целевые объекты по умолчанию).
+     5>Проект "$BUILD_ROOT\csl\csl_hull.vcxproj" (5) выполняет сборку "$BUILD_ROOT\csl\csl_phase_one.vcxproj" (15) в узле 4 (целевые объекты по умолчанию).
+    15>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_phase_one.dir\Release\csl_phase_one.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild".
+     6>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_highs_lp.dir\Release\csl_highs_lp.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild".
+    15>CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+     6>CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         Создание каталога "csl_highs_lp.dir\Release\csl_highs_lp_MD.tlog\".
+    15>SetModuleDependencies:
+         Создание каталога "csl_phase_one.dir\Release\csl_phase_one_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+     6>SetModuleDependencies:
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\"" /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_highs_lp.dir\Release\\" /scanDependencies "csl_highs_lp.dir\Release\\" /Fo"csl_highs_lp.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_highs_lp.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "$BUILD_ROOT/_deps/csl_highs-src" /external:I "$BUILD_ROOT/_deps/csl_highs-src/highs" /external:I "$BUILD_ROOT/_deps/csl_highs-build" "$SOURCE_ROOT\src\adapters\lp\highs.cpp"
+    15>SetModuleDependencies:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /scanDependencies "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_phase_one.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "$BUILD_ROOT/_deps/csl_objectives_eigen-src" "$SOURCE_ROOT\src\optimization\phase_one\simplex.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /scanDependencies "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_phase_one.pdb" /external:W0 /Gd /TP /errorReport:queue  /external:I "$BUILD_ROOT/_deps/csl_objectives_eigen-src" "$SOURCE_ROOT\src\optimization\phase_one\program.cpp"
+         simplex.cpp
+     6>SetModuleDependencies:
+         highs.cpp
+    15>SetModuleDependencies:
+         program.cpp
+     6>ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\"" /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_highs_lp.dir\Release\\" /Fo"csl_highs_lp.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_highs_lp.pdb" /sourceDependencies "csl_highs_lp.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "$BUILD_ROOT/_deps/csl_highs-src" /external:I "$BUILD_ROOT/_deps/csl_highs-src/highs" /external:I "$BUILD_ROOT/_deps/csl_highs-build" "$SOURCE_ROOT\src\adapters\lp\highs.cpp"
+    15>ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_phase_one.pdb" /sourceDependencies "csl_phase_one.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "$BUILD_ROOT/_deps/csl_objectives_eigen-src" "$SOURCE_ROOT\src\optimization\phase_one\simplex.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D EIGEN_MPL2_ONLY /D EIGEN_DONT_PARALLELIZE /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_phase_one.dir\Release\\" /Fo"csl_phase_one.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_phase_one.pdb" /sourceDependencies "csl_phase_one.dir\Release\.d.json" /external:W0 /Gd /TP /errorReport:queue  /external:I "$BUILD_ROOT/_deps/csl_objectives_eigen-src" "$SOURCE_ROOT\src\optimization\phase_one\program.cpp"
+     6>ClCompile:
+         highs.cpp
+    15>ClCompile:
+         program.cpp
+         simplex.cpp
+     6>Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_highs_lp.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_highs_lp.dir\Release\highs.obj
+         csl_highs_lp.vcxproj -> $BUILD_ROOT\csl\Release\csl_highs_lp.lib
+       FinalizeBuildStatus:
+         Файл "csl_highs_lp.dir\Release\csl_highs_lp.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_highs_lp.dir\Release\csl_highs_lp.tlog\csl_highs_lp.lastbuildstate".
+     6>Сборка проекта "$BUILD_ROOT\csl\csl_highs_lp.vcxproj" завершена (целевые объекты по умолчанию).
+    15>Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_phase_one.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_phase_one.dir\Release\program.obj
+         csl_phase_one.dir\Release\simplex.obj
+         csl_phase_one.vcxproj -> $BUILD_ROOT\csl\Release\csl_phase_one.lib
+       FinalizeBuildStatus:
+         Файл "csl_phase_one.dir\Release\csl_phase_one.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_phase_one.dir\Release\csl_phase_one.tlog\csl_phase_one.lastbuildstate".
+    15>Сборка проекта "$BUILD_ROOT\csl\csl_phase_one.vcxproj" завершена (целевые объекты по умолчанию).
+     5>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_hull.dir\Release\csl_hull.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/CMakeLists.txt
+       SetModuleDependencies:
+         Создание каталога "csl_hull.dir\Release\csl_hull_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_hull.dir\Release\\" /scanDependencies "csl_hull.dir\Release\\" /Fo"csl_hull.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_hull.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\geometry\hull\ordered_reducer.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_hull.dir\Release\\" /scanDependencies "csl_hull.dir\Release\\" /Fo"csl_hull.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_hull.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\geometry\basis_reuse_reducer.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_hull.dir\Release\\" /scanDependencies "csl_hull.dir\Release\\" /Fo"csl_hull.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_hull.pdb" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\geometry\hull_reducer.cpp"
+         ordered_reducer.cpp
+         hull_reducer.cpp
+         basis_reuse_reducer.cpp
+       ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_hull.dir\Release\\" /Fo"csl_hull.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_hull.pdb" /sourceDependencies "csl_hull.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\geometry\hull\ordered_reducer.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_hull.dir\Release\\" /Fo"csl_hull.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_hull.pdb" /sourceDependencies "csl_hull.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\geometry\basis_reuse_reducer.cpp"
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W4 /WX /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /permissive- /ifcOutput "csl_hull.dir\Release\\" /Fo"csl_hull.dir\Release\\" /Fd"$BUILD_ROOT\csl\Release\csl_hull.pdb" /sourceDependencies "csl_hull.dir\Release\.d.json" /external:W4 /Gd /TP /errorReport:queue "$SOURCE_ROOT\src\geometry\hull_reducer.cpp"
+         hull_reducer.cpp
+         basis_reuse_reducer.cpp
+         ordered_reducer.cpp
+       Lib:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\Lib.exe /OUT:"$BUILD_ROOT\csl\Release\csl_hull.lib" /NOLOGO /MACHINE:X64  /machine:x64 csl_hull.dir\Release\hull_reducer.obj
+         csl_hull.dir\Release\basis_reuse_reducer.obj
+         csl_hull.dir\Release\ordered_reducer.obj
+         csl_hull.vcxproj -> $BUILD_ROOT\csl\Release\csl_hull.lib
+       FinalizeBuildStatus:
+         Файл "csl_hull.dir\Release\csl_hull.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_hull.dir\Release\csl_hull.tlog\csl_hull.lastbuildstate".
+     5>Сборка проекта "$BUILD_ROOT\csl\csl_hull.vcxproj" завершена (целевые объекты по умолчанию).
+     1>PrepareForBuild:
+         Структурированный вывод включен. Форматирование диагностики компилятора будет отражать иерархию ошибок. Подробнее см. https://aka.ms/cpp/structured-output.
+         Создание каталога "csl_opt07_measure.dir\Release\csl_opt0.E89C352C.tlog\".
+       InitializeBuildStatus:
+         Создание "csl_opt07_measure.dir\Release\csl_opt0.E89C352C.tlog\unsuccessfulbuild", так как было задано "AlwaysCreate".
+         Обращение к "csl_opt07_measure.dir\Release\csl_opt0.E89C352C.tlog\unsuccessfulbuild".
+       CustomBuild:
+         Building Custom Rule $SOURCE_ROOT/reports/algorithm-results/tooling/opt07/CMakeLists.txt
+       SetModuleDependencies:
+         Создание каталога "csl_opt07_measure.dir\Release\csl_opt0.E89C352C_MD.tlog\".
+         Проверка источников на наличие зависимостей модуля…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CSL_OPT07_SOURCE_COMMIT=\"52444e305684c0b59c049cce9f9de7ea09eb4a4a\"" /D "CSL_OPT07_HARNESS_SHA256=\"fef873dc4594d31c1161fd71b427b3be0f64571d051b90a3d4189859d2c79091\"" /D "CSL_OPT07_CONFIG=\"Release\"" /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "csl_opt07_measure.dir\Release\\" /scanDependencies "csl_opt07_measure.dir\Release\\" /Fo"csl_opt07_measure.dir\Release\\" /Fd"csl_opt07_measure.dir\Release\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "$SOURCE_ROOT\reports\algorithm-results\tooling\opt07\ordered_hull_driver.cpp"
+         ordered_hull_driver.cpp
+       ClCompile:
+         Компиляция…
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\CL.exe /c /I"$SOURCE_ROOT\include" /nologo /W1 /WX- /diagnostics:column /O2 /Ob2 /D _MBCS /D WIN32 /D _WINDOWS /D NDEBUG /D "CSL_OPT07_SOURCE_COMMIT=\"52444e305684c0b59c049cce9f9de7ea09eb4a4a\"" /D "CSL_OPT07_HARNESS_SHA256=\"fef873dc4594d31c1161fd71b427b3be0f64571d051b90a3d4189859d2c79091\"" /D "CSL_OPT07_CONFIG=\"Release\"" /D "CMAKE_INTDIR=\"Release\"" /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 /ifcOutput "csl_opt07_measure.dir\Release\\" /Fo"csl_opt07_measure.dir\Release\\" /Fd"csl_opt07_measure.dir\Release\vc143.pdb" /sourceDependencies "csl_opt07_measure.dir\Release\.d.json" /external:W1 /Gd /TP /errorReport:queue "$SOURCE_ROOT\reports\algorithm-results\tooling\opt07\ordered_hull_driver.cpp"
+         ordered_hull_driver.cpp
+       Link:
+         $PROGRAM_FILES\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"$BUILD_ROOT\Release\csl_opt07_measure.exe" /INCREMENTAL:NO /NOLOGO csl\Release\csl_hull.lib csl\Release\csl_highs_lp.lib csl\Release\csl_phase_one.lib csl\Release\csl_optimization.lib csl\Release\csl_registry.lib csl\Release\csl_verifiers.lib csl\Release\csl_resolved_core.lib csl\Release\csl_problem.lib csl\Release\csl_sets.lib csl\Release\csl_model.lib csl\Release\csl_objectives.lib csl\Release\csl_numeric.lib csl\Release\csl_contracts.lib Release\bin\highs.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"$BUILD_ROOT/Release/csl_opt07_measure.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"$BUILD_ROOT/Release/csl_opt07_measure.lib" /MACHINE:X64  /machine:x64 csl_opt07_measure.dir\Release\ordered_hull_driver.obj
+         csl_opt07_measure.vcxproj -> $BUILD_ROOT\Release\csl_opt07_measure.exe
+       FinalizeBuildStatus:
+         Файл "csl_opt07_measure.dir\Release\csl_opt0.E89C352C.tlog\unsuccessfulbuild" удаляется.
+         Обращение к "csl_opt07_measure.dir\Release\csl_opt0.E89C352C.tlog\csl_opt07_measure.lastbuildstate".
+     1>Сборка проекта "$BUILD_ROOT\csl_opt07_measure.vcxproj" завершена (целевые объекты по умолчанию).
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:01:00.65
+

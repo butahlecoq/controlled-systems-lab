@@ -1,0 +1,16 @@
+{
+  "files": {
+    "collection.json": "0392d56e262f41f6cf11e42e74db2776df63418483ef7ee400b0abdb45fe782c",
+    "functional-validation.json": "88fd9f9c696cda4e9e36ea22fde9b98735030afc5d26869087061f0dc0e3b11f",
+    "index.html": "f72c860d3cbabbe6cc867c4434eb7920a6e2746f12a8b81ec43cb494d320d91e",
+    "latency.svg": "bd4e75a8500f0c76e9fba7c25810cc675f6df3932988b21e58ba70bfb35ab792",
+    "raw-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw-stdout.jsonl": "1321a3480d197bb890b21ee32687501ccc41af388c42ade187134a90b9df6974",
+    "records.json": "d17f36766d7006ac943543e796315376b2a87b89169e3b97d9dd4a96c9881a1b",
+    "release-build-log-sanitized.txt": "bfdbd654d520c4cc2441aaf4aec1a183526fae6b5e2449f7c738871c9e8db0b3",
+    "summary.csv": "6767cfce638efe12b63ea00d93a1ff9098f07a888fcd15efcf5541f7f1f812ff",
+    "trials.csv": "6455f389c4eb490bde97579a34b53e2e6b1c769c80744a61f275e0dc67e7abed"
+  },
+  "report_id": "opt07-bbb4aee749d643ff",
+  "schema": "csl.opt07-report-manifest/1"
+}

@@ -20,6 +20,21 @@ Keep execution, measurement collection, scientific saved records, HTML rendering
 
 Independent review checks mathematical/evidence labels, measurement validity and module boundaries. Verify raw-record/HTML consistency and regeneration, visually inspect the page, and open the deployed URL before claiming publication. The orchestrator publishes the reviewed artifact. Private historical source code and raw archives remain unchanged and are not copied into the report site.
 
+## OPT-07 ordered hull membership report
+
+The reviewed native bundle
+[`opt07-bbb4aee749d643ff`](../../reports/algorithm-results/opt07-bbb4aee749d643ff/)
+records source commit `52444e305684c0b59c049cce9f9de7ea09eb4a4a`.
+It contains three fixed binary64 clouds, 2,400 independently verified calls,
+and 21 measured 100-call batches after one excluded warmup per cloud. Original
+point IDs, exact dyadic deletion certificates and literal support checks are
+saved with the raw observations. These single-adapter timings are descriptive;
+there is no comparator, speedup, source-mapped limiter or scalability claim.
+The native bundle and source ZIP passed independent saved-data and scientific
+review. Main-only Pages deployment and live exact-byte verification remain
+publication gates. OPT-07 issue #38 remains open for grouped and streaming
+reduction work.
+
 ## GEO-07 registered dependent generator sum report
 
 The bounded GEO-07 dependent-sum bundle
