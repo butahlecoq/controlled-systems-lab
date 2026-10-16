@@ -1,0 +1,8 @@
+{
+  "concurrent_work": "Other repository work may be active; single-session timings are exploratory.",
+  "logical_processors": 12,
+  "observed_utc": "2026-10-16T16:41:50.517017+00:00",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+  "schema": "csl.finite-feedback-host-observation/2"
+}
