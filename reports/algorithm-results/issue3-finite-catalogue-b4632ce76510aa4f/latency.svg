@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="410" viewBox="0 0 900 410" role="img" aria-label="Median verified batch duration by fixture; batches have different call counts">
+<title>Verified batch durations (not comparable per-call latency)</title>
+<rect width="900" height="410" fill="white"/>
+<text x="20" y="26" font-size="18">Median verified batch duration, ms</text>
+<text x="20" y="69" font-size="12">l19 (10000 calls)</text>
+<rect x="330" y="52" width="447.60" height="24" fill="#28688b"/>
+<text x="792.60" y="69" font-size="12">196.742 ms</text>
+<text x="20" y="112" font-size="12">integrator (5000 calls)</text>
+<rect x="330" y="95" width="171.95" height="24" fill="#28688b"/>
+<text x="516.95" y="112" font-size="12">75.580 ms</text>
+<text x="20" y="155" font-size="12">all_infeasible (5000 calls)</text>
+<rect x="330" y="138" width="158.70" height="24" fill="#28688b"/>
+<text x="503.70" y="155" font-size="12">69.757 ms</text>
+<text x="20" y="198" font-size="12">empty_catalogue (5000 calls)</text>
+<rect x="330" y="181" width="69.10" height="24" fill="#28688b"/>
+<text x="414.10" y="198" font-size="12">30.373 ms</text>
+<text x="20" y="241" font-size="12">no_scenarios (5000 calls)</text>
+<rect x="330" y="224" width="84.45" height="24" fill="#28688b"/>
+<text x="429.45" y="241" font-size="12">37.121 ms</text>
+<text x="20" y="284" font-size="12">unsupported (5000 calls)</text>
+<rect x="330" y="267" width="78.48" height="24" fill="#28688b"/>
+<text x="423.48" y="284" font-size="12">34.495 ms</text>
+<text x="20" y="327" font-size="12">cancelled (5000 calls)</text>
+<rect x="330" y="310" width="86.30" height="24" fill="#28688b"/>
+<text x="431.30" y="327" font-size="12">37.932 ms</text>
+<text x="20" y="370" font-size="12">b08_rounded (1 calls)</text>
+<rect x="330" y="353" width="193.15" height="24" fill="#28688b"/>
+<text x="538.15" y="370" font-size="12">84.898 ms</text>
+<text x="20" y="400" font-size="12">Different batch sizes; no cross-fixture speed comparison or single-call latency inference.</text>
+</svg>

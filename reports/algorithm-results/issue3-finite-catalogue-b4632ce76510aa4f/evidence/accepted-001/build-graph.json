@@ -1,0 +1,761 @@
+{
+  "cmake": {
+    "generator": "Visual Studio 17 2022",
+    "version": {
+      "isDirty": false,
+      "major": 3,
+      "minor": 31,
+      "patch": 6,
+      "string": "3.31.6-msvc6",
+      "suffix": "msvc6"
+    }
+  },
+  "compiler": {
+    "compiler": {
+      "id": "MSVC",
+      "implicit": {
+        "includeDirectories": [],
+        "linkDirectories": [],
+        "linkFrameworkDirectories": [],
+        "linkLibraries": []
+      },
+      "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+      "version": "19.44.35215.0"
+    },
+    "language": "CXX",
+    "sourceFileExtensions": [
+      "C",
+      "M",
+      "c++",
+      "cc",
+      "cpp",
+      "cxx",
+      "mm",
+      "mpp",
+      "CPP",
+      "ixx",
+      "cppm",
+      "ccm",
+      "cxxm",
+      "c++m"
+    ]
+  },
+  "dependency_targets": [
+    "ZERO_CHECK",
+    "csl_contracts",
+    "csl_finite_action_minimax",
+    "csl_fixed_plan_disturbance",
+    "csl_issue3_finite_action_report",
+    "csl_model",
+    "csl_numeric",
+    "csl_objectives",
+    "csl_problem",
+    "csl_resolved_core",
+    "csl_sets",
+    "csl_worst_case_vertex"
+  ],
+  "file_api_paths": {
+    "build": "BUILD_ROOT",
+    "source": "SOURCE_ROOT"
+  },
+  "targets": [
+    {
+      "artifacts": [
+        {
+          "path": "Release/csl_issue3_finite_action_report.exe"
+        },
+        {
+          "path": "Release/csl_issue3_finite_action_report.pdb"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 18,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 18,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 18,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 19,
+              "define": "CSL_ISSUE3_FIXTURE_SHA256=\"9494dec664f6fed74f39886ec3ab94c576dba6cdb5349f1f19329c6c31acc85a\""
+            },
+            {
+              "backtrace": 19,
+              "define": "CSL_ISSUE3_HARNESS_COMMIT=\"2f915110ba42515fdc448a0c226dc1290b80f82d\""
+            },
+            {
+              "backtrace": 19,
+              "define": "NDEBUG"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 4,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 20,
+              "isSystem": true,
+              "path": "BUILD_ROOT/_deps/csl_json-src/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              21
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "link": {
+        "commandFragments": [
+          {
+            "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -MD",
+            "role": "flags"
+          },
+          {
+            "fragment": "/machine:x64 /INCREMENTAL:NO /subsystem:console",
+            "role": "flags"
+          },
+          {
+            "backtrace": 4,
+            "fragment": "Release\\csl_finite_action_minimax.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 4,
+            "fragment": "Release\\csl_resolved_core.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 7,
+            "fragment": "Release\\csl_fixed_plan_disturbance.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 7,
+            "fragment": "Release\\csl_worst_case_vertex.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 10,
+            "fragment": "Release\\csl_problem.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 13,
+            "fragment": "Release\\csl_model.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 13,
+            "fragment": "Release\\csl_sets.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 10,
+            "fragment": "Release\\csl_objectives.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 14,
+            "fragment": "Release\\csl_numeric.lib",
+            "role": "libraries"
+          },
+          {
+            "backtrace": 17,
+            "fragment": "Release\\csl_contracts.lib",
+            "role": "libraries"
+          },
+          {
+            "fragment": "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+            "role": "libraries"
+          }
+        ],
+        "language": "CXX"
+      },
+      "name": "csl_issue3_finite_action_report",
+      "type": "EXECUTABLE"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_finite_action_minimax.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 10,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_finite_action_minimax",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_numeric.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 10,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_numeric",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_contracts.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 8,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 9,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              10
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "name": "csl_contracts",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "name": "ZERO_CHECK",
+      "type": "UTILITY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_worst_case_vertex.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 10,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_worst_case_vertex",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_objectives.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "defines": [
+            {
+              "backtrace": 12,
+              "define": "EIGEN_MPL2_ONLY"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 13,
+              "path": "SOURCE_ROOT/include"
+            },
+            {
+              "backtrace": 14,
+              "isSystem": true,
+              "path": "BUILD_ROOT/_deps/csl_objectives_eigen-src"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              15
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_objectives",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_sets.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 10,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_sets",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_model.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 10,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_model",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_fixed_plan_disturbance.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 10,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0
+          ]
+        }
+      ],
+      "name": "csl_fixed_plan_disturbance",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_problem.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 10,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1,
+            2
+          ]
+        }
+      ],
+      "name": "csl_problem",
+      "type": "STATIC_LIBRARY"
+    },
+    {
+      "archive": {
+        "commandFragments": [
+          {
+            "fragment": "/machine:x64",
+            "role": "flags"
+          }
+        ]
+      },
+      "artifacts": [
+        {
+          "path": "Release/csl_resolved_core.lib"
+        }
+      ],
+      "compileGroups": [
+        {
+          "compileCommandFragments": [
+            {
+              "fragment": "/DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++20 -MD"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/W4"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/WX"
+            },
+            {
+              "backtrace": 9,
+              "fragment": "/permissive-"
+            }
+          ],
+          "includes": [
+            {
+              "backtrace": 10,
+              "path": "SOURCE_ROOT/include"
+            }
+          ],
+          "language": "CXX",
+          "languageStandard": {
+            "backtraces": [
+              11
+            ],
+            "standard": "20"
+          },
+          "sourceIndexes": [
+            0,
+            1
+          ]
+        }
+      ],
+      "name": "csl_resolved_core",
+      "type": "STATIC_LIBRARY"
+    }
+  ]
+}
