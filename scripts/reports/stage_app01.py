@@ -8,6 +8,7 @@ from html import escape
 import importlib.util
 import io
 import json
+import math
 from pathlib import Path
 import re
 import statistics
@@ -24,8 +25,11 @@ SCOPE = "Registered inner state-plan check and original-problem trajectory verif
 LIMITS = ("Binary64 supplied examples only; value 3 is conditional on original-problem verification. "
           "No validated inclusion, optimality, reachable-set completeness, comparator, speedup, or established performance limiter")
 FIELDS = ("fixture", "round", "warmup", "batch", "elapsed_ns", "checked_calls", "failures",
-          "basis", "membership", "bindings", "feasibility", "objective", "validated",
-          "recomputed_objective", "numerical_achievable_value", "residual_count", "observation_token")
+          "termination", "approximation_outcome", "basis", "membership", "trajectory_termination",
+          "bindings", "feasibility", "objective", "optimality", "completeness", "validated",
+          "recomputed_objective", "numerical_achievable_value", "residual_count", "residuals",
+          "observation_token")
+CSV_FIELDS = tuple(field for field in FIELDS if field != "residuals")
 SUMMARY = ("fixture", "trials", "checked_calls", "failures", "batch", "median_elapsed_ns", "min_elapsed_ns", "max_elapsed_ns")
 FILES = frozenset({"README.md", "build-graph.json", "build-log.txt", "build-provenance.json",
                    "configure-log.txt", "index.html", "latency.svg", "measurement-command.txt",
@@ -75,24 +79,67 @@ def read_json(path: Path) -> dict:
 
 def expected_profile(name: str) -> dict:
     if name == "valid_plan":
-        return dict(basis="h_point_containment", membership="numerical_pass", bindings="numerical_pass",
-                    feasibility="numerical_pass", objective="numerical_pass", validated="unsupported",
+        return dict(termination="completed", approximation_outcome="enclosed", basis="h_point_containment",
+                    membership="numerical_pass", trajectory_termination="completed", bindings="numerical_pass",
+                    feasibility="numerical_pass", objective="numerical_pass", optimality="unsupported",
+                    completeness="unsupported", validated="unsupported",
                     recomputed_objective=3, numerical_achievable_value=3, residual_count=4)
     if name == "invalid_plan":
-        return dict(basis="h_point_containment", membership="numerical_pass", bindings="numerical_pass",
-                    feasibility="violation", objective="numerical_pass", validated="unsupported",
+        return dict(termination="completed", approximation_outcome="enclosed", basis="h_point_containment",
+                    membership="numerical_pass", trajectory_termination="completed", bindings="numerical_pass",
+                    feasibility="violation", objective="numerical_pass", optimality="unsupported",
+                    completeness="unsupported", validated="unsupported",
                     recomputed_objective=3, numerical_achievable_value=None, residual_count=4)
     if name == "empty_inner":
-        return dict(basis="empty_subset", membership="violation", bindings="not_checked",
-                    feasibility="not_checked", objective="not_checked", validated="not_checked",
+        return dict(termination="completed", approximation_outcome="enclosed", basis="empty_subset",
+                    membership="violation", trajectory_termination=None, bindings="not_checked",
+                    feasibility="not_checked", objective="not_checked", optimality="not_checked",
+                    completeness="not_checked", validated="not_checked",
                     recomputed_objective=None, numerical_achievable_value=None, residual_count=0)
     raise ValueError("unknown APP-01 fixture")
+
+
+def fixture_inputs() -> dict:
+    return {
+        "valid_plan": {"states": [[2], [3]], "controls": [[3]], "reported_objective": 3,
+                       "inner": {"kind": "singleton", "point": [3]}},
+        "invalid_plan": {"states": [[2], [3]], "controls": [[5]], "reported_objective": 3,
+                         "inner": {"kind": "singleton", "point": [3]}},
+        "empty_inner": {"states": [[2], [3]], "controls": [[3]], "reported_objective": 3,
+                        "inner": {"kind": "V", "vertices": [], "rays": [[1]]}},
+    }
+
+
+def expected_residuals(name: str) -> list[dict]:
+    if name == "empty_inner":
+        return []
+    rows = [("initial[0]", 0, 2),
+            ("controls[0].singleton[0]", 2 if name == "invalid_plan" else 0,
+             5 if name == "invalid_plan" else 3),
+            ("dynamics[0][0]", 2 if name == "invalid_plan" else 0,
+             5 if name == "invalid_plan" else 3),
+            ("objective", 0, 3)]
+    return [{"field": field, "violation": violation, "scale": scale,
+             "tolerance": 1e-8 + 1e-8 * scale, "satisfied": violation <= 1e-8 + 1e-8 * scale}
+            for field, violation, scale in rows]
+
+
+def check_residuals(actual: object, name: str) -> None:
+    expected = expected_residuals(name)
+    require(isinstance(actual, list) and len(actual) == len(expected), "APP-01 residual count differs")
+    for row, literal in zip(actual, expected):
+        require(isinstance(row, dict) and set(row) == set(literal) and
+                all(row[field] == literal[field] for field in ("field", "violation", "scale", "satisfied")) and
+                type(row["tolerance"]) in (int, float) and math.isfinite(row["tolerance"]) and
+                math.isclose(row["tolerance"], literal["tolerance"], rel_tol=0, abs_tol=1e-20),
+                "APP-01 named residual differs from literal original problem")
 
 
 def raw_projection(raw: bytes, batch: int, warmups: int, repetitions: int) -> list[dict]:
     events = [report_data.parse_json(line) for line in raw.decode("utf-8").splitlines()]
     require(len(events) == 1 + len(FIXTURES) * (warmups + repetitions), "APP-01 raw event count differs")
-    require(events[0] == {"event": "header", "schema": "csl.app01-plan-raw/1", "batch": batch,
+    require(events[0] == {"event": "header", "schema": "csl.app01-plan-raw/2",
+                          "provider_id": "app01.literal-provider", "provider_version": "1", "batch": batch,
                           "warmups": warmups, "repetitions": repetitions}, "APP-01 raw header differs")
     measured = []
     tokens = {}
@@ -107,6 +154,7 @@ def raw_projection(raw: bytes, batch: int, warmups: int, repetitions: int) -> li
                 all(event.get(key) == value for key, value in expected_profile(name).items()) and
                 type(event["observation_token"]) is int and event["observation_token"] >= 0,
                 "APP-01 raw result differs from literal fixture")
+        check_residuals(event["residuals"], name)
         if round_index >= warmups:
             measured.append({field: event[field] for field in FIELDS})
             tokens.setdefault(name, set()).add(event["observation_token"])
@@ -143,6 +191,8 @@ def svg(summary: list[dict]) -> str:
 
 def page(record: dict, figure: str) -> str:
     payload = record["payload"]
+    input_hashes = ''.join('<li>' + escape(name) + ': <code>' + escape(payload["input_sha256"][name]) +
+                           '</code></li>' for name in FIXTURES)
     timings = ''.join('<tr><td>' + escape(row["fixture"]) + '</td><td>' + str(row["trials"]) +
                       '</td><td>' + str(row["checked_calls"]) + '</td><td>' + str(row["failures"]) +
                       '</td><td>' + f'{row["median_elapsed_ns"]/row["batch"]:.2f}' + '</td><td>' +
@@ -150,23 +200,35 @@ def page(record: dict, figure: str) -> str:
                       f'{row["max_elapsed_ns"]/row["batch"]:.2f}' + '</td></tr>' for row in payload["summary"])
     statuses = ''.join('<tr><td>' + escape(name) + '</td>' + ''.join(
         '<td>' + escape(str(payload["status_profiles"][name][field])) + '</td>'
-        for field in ("basis", "membership", "bindings", "feasibility", "objective", "validated",
+        for field in ("termination", "approximation_outcome", "basis", "membership", "trajectory_termination",
+                      "bindings", "feasibility", "objective", "optimality", "completeness", "validated",
                       "recomputed_objective", "numerical_achievable_value")) + '</tr>' for name in FIXTURES)
+    residuals = ''.join('<tr><td>' + escape(name) + '</td><td>' + escape(row["field"]) + '</td><td>' +
+                        str(row["violation"]) + '</td><td>' + str(row["scale"]) + '</td><td>' +
+                        format(row["tolerance"], '.17g') + '</td><td>' + str(row["satisfied"]).lower() +
+                        '</td></tr>' for name in FIXTURES for row in payload["residual_profiles"][name])
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>APP-01 plan check results</title>'
             '</head><body><h1>APP-01 registered inner state-plan check</h1><p>Clean source commit <code>' +
-            escape(payload["source_commit"]) + '</code>. ' + escape(SCOPE) + '.</p><p>' + escape(LIMITS) +
-            '.</p><h2>Saved Release observations</h2><p>Seven measured batches of ' + str(payload["batch"]) +
+            escape(payload["source_commit"]) + '</code>. Module ' + escape(payload["module"]["id"]) +
+            ' v' + escape(payload["module"]["version"]) + '; provider ' + escape(payload["provider"]["id"]) +
+            ' v' + escape(payload["provider"]["version"]) + '. ' + escape(SCOPE) + '.</p><p>' + escape(LIMITS) +
+            '.</p><p>Scenario SHA-256 <code>' + escape(payload["fixture_sha256"]) +
+            '</code>. Literal input SHA-256:</p><ul>' + input_hashes +
+            '</ul><h2>Saved Release observations</h2><p>Seven measured batches of ' + str(payload["batch"]) +
             ' calls per fixture after seven warmup batches. Each interval includes the registered public check, '
             'literal result checks, report assignment and consumption. Problem and fixture construction are outside. '
             'Values are batch elapsed time divided by calls. No comparator or speedup is claimed; source-level '
             'limiter is unestablished.</p><table><thead><tr><th>Fixture</th><th>Trials</th><th>Checked calls</th>'
             '<th>Failures</th><th>Median ns/call</th><th>Min ns/call</th><th>Max ns/call</th></tr></thead><tbody>' +
             timings + '</tbody></table><figure aria-label="APP-01 plan check timings">' + figure +
-            '</figure><h2>Observed claims</h2><table><thead><tr><th>Fixture</th><th>Basis</th>'
-            '<th>Membership</th><th>Bindings</th><th>Feasibility</th><th>Objective</th><th>Validated</th>'
+            '</figure><h2>Observed claims</h2><table><thead><tr><th>Fixture</th><th>Termination</th>'
+            '<th>Approximation</th><th>Basis</th><th>Membership</th><th>Trajectory termination</th>'
+            '<th>Bindings</th><th>Feasibility</th><th>Objective</th><th>Optimality</th><th>Completeness</th><th>Validated</th>'
             '<th>Original objective</th><th>Numerical achievable value</th></tr></thead><tbody>' + statuses +
-            '</tbody></table><p>The valid witness has original terminal objective 3. The changed control fails '
-            'original feasibility and yields no achievable value. The zero-vertex V inner set fails membership '
+            '</tbody></table><h2>Named original-problem residuals</h2><table><thead><tr><th>Fixture</th>'
+            '<th>Field</th><th>Violation</th><th>Scale</th><th>Tolerance</th><th>Satisfied</th>'
+            '</tr></thead><tbody>' + residuals + '</tbody></table><p>The valid witness has original terminal objective 3. The altered witness '
+            'violates original feasibility and yields no achievable value. The zero-vertex V inner set fails membership '
             'before trajectory verification. All inclusion observations use supplied binary64 data.</p>'
             '<p>Hardware, compiler, build graph, commands, raw events and separate process profile are retained. '
             'The separate profile does not establish a source-level limiter. Setup, rendering, end-to-end use and '
@@ -197,10 +259,20 @@ def validate(bundle: Path) -> registered.PublicationRecord:
             record.get("report_id") == bundle.name and payload.get("schema") == record["schema"] and
             record.get("payload_sha256") == digest(payload), "APP-01 record envelope differs")
     source = payload.get("source_commit")
+    fixture = {"initial": 2, "transition": "x[1] = u[0]", "control": 3,
+               "reference_interval": [2, 4], "objective": "x[1]", "expected_value": 3,
+               "stage": 1, "state_coordinates": [0]}
+    inputs = fixture_inputs()
     require(isinstance(source, str) and re.fullmatch(r"[0-9a-f]{40}", source) and
-            bundle.name.endswith(source[:8]) and payload.get("module") == "csl.geometry.approximation.check_inner_state_plan" and
+            bundle.name.endswith(source[:8]) and
+            payload.get("module") == {"id": "csl.geometry.approximation.check_inner_state_plan", "version": "1"} and
+            payload.get("provider") == {"id": "app01.literal-provider", "version": "1"} and
+            payload.get("verifier") == {"id": "csl.trajectory.original", "version": "1"} and
+            payload.get("fixture_sha256") == digest(fixture) and payload.get("inputs") == inputs and
+            payload.get("input_sha256") == {name: digest(value) for name, value in inputs.items()} and
             payload.get("fixture") == {"initial": 2, "transition": "x[1] = u[0]", "control": 3,
-                                        "reference_interval": [2, 4], "objective": "x[1]", "expected_value": 3} and
+                                        "reference_interval": [2, 4], "objective": "x[1]", "expected_value": 3,
+                                        "stage": 1, "state_coordinates": [0]} and
             payload.get("numerical") == {"absolute": 1e-8, "relative": 1e-8} and
             payload.get("workers") == {"requested": 1, "actual": 1, "native_threads": 1},
             "APP-01 source or literal contract differs")
@@ -213,8 +285,10 @@ def validate(bundle: Path) -> registered.PublicationRecord:
     summary = summarize(trials, batch)
     require(payload.get("raw_sha256") == sha(raw) and payload.get("trials") == trials and
             payload.get("summary") == summary and payload.get("status_profiles") ==
-            {name: expected_profile(name) for name in FIXTURES}, "APP-01 saved projection differs")
-    require(local(bundle, "trials.csv").read_bytes() == csv_bytes(FIELDS, trials) and
+            {name: expected_profile(name) for name in FIXTURES} and
+            payload.get("residual_profiles") == {name: expected_residuals(name) for name in FIXTURES},
+            "APP-01 saved projection differs")
+    require(local(bundle, "trials.csv").read_bytes() == csv_bytes(CSV_FIELDS, trials) and
             local(bundle, "summary.csv").read_bytes() == csv_bytes(SUMMARY, summary), "APP-01 CSV differs")
     for name, key in (("build-provenance.json", "build_sha256"), ("build-graph.json", "build_graph_sha256"),
                       ("configure-log.txt", "configure_log_sha256"), ("build-log.txt", "build_log_sha256"),

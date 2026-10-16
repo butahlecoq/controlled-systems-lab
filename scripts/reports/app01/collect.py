@@ -23,6 +23,11 @@ def git(*args: str) -> str:
                           text=True).stdout.strip()
 
 
+def require_clean_source(source: str) -> None:
+    report.require(git("rev-parse", "HEAD") == source and not git("status", "--porcelain"),
+                   "collector source changed after fixed-source check")
+
+
 class Journal:
     def __init__(self, path: Path):
         self.path = path
@@ -148,9 +153,9 @@ def profile_run(executable: Path, batch: int, source: str, journal: Journal) -> 
 
 def collect(build: Path, source: str, cmake: Path, generator: str,
             architecture: str, evidence: Path) -> Path:
-    report.require(re.fullmatch(r"[0-9a-f]{40}", source) is not None and
-                   git("rev-parse", "HEAD") == source and not git("status", "--porcelain"),
-                   "collector requires the exact clean fixed harness commit")
+    report.require(re.fullmatch(r"[0-9a-f]{40}", source) is not None,
+                   "collector requires a full fixed harness commit")
+    require_clean_source(source)
     report.require(cmake.is_file() and not build.exists() and not evidence.exists() and
                    build.is_relative_to(ROOT) and evidence.is_relative_to(ROOT),
                    "fresh in-worktree build and evidence destinations required")
@@ -168,14 +173,13 @@ def collect(build: Path, source: str, cmake: Path, generator: str,
         build_stdout, build_stderr = journal.capture("build", [str(cmake), "--build", str(build),
                                                             "--config", "Release", "--target", "csl_app01_plan_report"])
         graph, executable = build_graph(build, source)
-        report.require(git("rev-parse", "HEAD") == source and not git("status", "--porcelain"),
-                       "source changed during APP-01 configure/build")
+        require_clean_source(source)
         pilot_batch = 1000
         pilot_raw, pilot_stderr = journal.capture("pilot", [str(executable), str(pilot_batch), "1", "1"])
         report.require(not pilot_stderr, "APP-01 pilot emitted stderr")
         pilot_trials = report.raw_projection(pilot_raw, pilot_batch, 1, 1)
-        slowest = max(row["elapsed_ns"] / pilot_batch for row in pilot_trials)
-        batch = min(1000000, max(1000, math.ceil(125000000 / slowest / 1000) * 1000))
+        fastest = min(row["elapsed_ns"] / pilot_batch for row in pilot_trials)
+        batch = min(1000000, max(1000, math.ceil(125000000 / fastest / 1000) * 1000))
         pilot = {"schema": "csl.app01-pilot/1", "pilot_batch": pilot_batch,
                  "selected_batch": batch, "raw_sha256": report.sha(pilot_raw),
                  "observations": [{"fixture": row["fixture"], "elapsed_ns": row["elapsed_ns"]}
@@ -185,21 +189,24 @@ def collect(build: Path, source: str, cmake: Path, generator: str,
         raw, stderr = journal.capture("measurement", [str(executable), str(batch), "7", "7"])
         cpu_after = psutil.cpu_percent(interval=1.0)
         report.require(not stderr, "APP-01 measurement emitted stderr")
+        require_clean_source(source)
         trials = report.raw_projection(raw, batch, 7, 7)
         summary = report.summarize(trials, batch)
         report.require(all(row["min_elapsed_ns"] >= 50000000 for row in summary),
                        "APP-01 measured batch under 50 ms")
         source_id = f"app01-plan-{datetime.now(timezone.utc):%Y%m%d}-{source[:8]}"
         bundle = ROOT / "reports" / "algorithm-results" / source_id
-        bundle.mkdir(exist_ok=False)
+        report.require(not bundle.exists(), "APP-01 source bundle already exists")
         driver = ROOT / "benchmarks/reporting/app01/plan_driver.cpp"
+        driver_bytes = driver.read_bytes()
+        require_clean_source(source)
         configure_log = sanitize(configure_stdout + configure_stderr, build)
         build_log = sanitize(build_stdout + build_stderr, build)
         graph_bytes = report.json_bytes(graph)
         provenance = {"schema": "csl.app01-build-provenance/1", "source_commit": source,
                       "source_tree": graph["source_tree"], "configuration": "Release",
                       "clean_source_before_build": True, "clean_source_after_build": True,
-                      "driver_sha256": report.sha(driver.read_bytes()),
+                      "driver_sha256": report.sha(driver_bytes),
                       "binary_sha256": graph["binary_sha256"],
                       "cmake_cache_sha256": report.sha((build / "CMakeCache.txt").read_bytes()),
                       "compiler": compiler_info(build),
@@ -223,14 +230,20 @@ def collect(build: Path, source: str, cmake: Path, generator: str,
                  "pilot.json": report.json_bytes(pilot), "pilot-raw.jsonl": pilot_raw,
                  "profile.json": report.json_bytes(profile), "profile-raw.jsonl": profile_raw,
                  "process-stderr.txt": stderr, "raw-events.jsonl": raw,
-                 "trials.csv": report.csv_bytes(report.FIELDS, trials),
+                 "trials.csv": report.csv_bytes(report.CSV_FIELDS, trials),
                  "summary.csv": report.csv_bytes(report.SUMMARY, summary),
                  "latency.svg": report.svg(summary).encode(),
-                 "plan_driver.cpp": driver.read_bytes(), "plan-driver.bin": executable.read_bytes()}
+                 "plan_driver.cpp": driver_bytes, "plan-driver.bin": executable.read_bytes()}
+        fixture = {"initial": 2, "transition": "x[1] = u[0]", "control": 3,
+                   "reference_interval": [2, 4], "objective": "x[1]", "expected_value": 3,
+                   "stage": 1, "state_coordinates": [0]}
+        inputs = report.fixture_inputs()
         payload = {"schema": "csl.app01-plan-report/1", "source_commit": source,
-                   "module": "csl.geometry.approximation.check_inner_state_plan",
-                   "fixture": {"initial": 2, "transition": "x[1] = u[0]", "control": 3,
-                               "reference_interval": [2, 4], "objective": "x[1]", "expected_value": 3},
+                   "module": {"id": "csl.geometry.approximation.check_inner_state_plan", "version": "1"},
+                   "provider": {"id": "app01.literal-provider", "version": "1"},
+                   "verifier": {"id": "csl.trajectory.original", "version": "1"},
+                   "fixture": fixture, "fixture_sha256": report.digest(fixture),
+                   "inputs": inputs, "input_sha256": {name: report.digest(value) for name, value in inputs.items()},
                    "numerical": {"absolute": 1e-8, "relative": 1e-8},
                    "workers": {"requested": 1, "actual": 1, "native_threads": 1},
                    "environment": environment, "batch": batch, "warmups": 7, "repetitions": 7,
@@ -238,6 +251,7 @@ def collect(build: Path, source: str, cmake: Path, generator: str,
                    "unavailable_timings": ["problem resolution", "setup", "rendering", "end-to-end", "internal phases"],
                    "trials": trials, "summary": summary,
                    "status_profiles": {name: report.expected_profile(name) for name in report.FIXTURES},
+                   "residual_profiles": {name: report.expected_residuals(name) for name in report.FIXTURES},
                    "raw_sha256": report.sha(raw), "build_sha256": report.sha(files["build-provenance.json"]),
                    "build_graph_sha256": report.sha(graph_bytes),
                    "configure_log_sha256": report.sha(configure_log), "build_log_sha256": report.sha(build_log),
@@ -252,8 +266,9 @@ def collect(build: Path, source: str, cmake: Path, generator: str,
                               f"Clean fixed Release harness source: `{source}`. The original scalar model has "
                               "initial state 2, transition x[1] = u[0], singleton control 3, terminal objective "
                               "x[1], and analytic value 3. The valid witness returns numerical achievable value "
-                              "3 only after original-problem verification. Invalid control 5 and a zero-vertex V "
-                              "inner set retain violations and no value. Supplied binary64 membership is not a "
+                              "3 only after original-problem verification. The altered witness with control 5 "
+                              "and state 3 fails original feasibility. A zero-vertex V inner set fails membership. "
+                              "Both retain no value. Supplied binary64 membership is not a "
                               "validated real-model inclusion proof. No optimal-family or completeness claim.\n\n"
                               "`records.json` and `raw-events.jsonl` retain seven accepted Release observations "
                               "per fixture. `pilot.json` and `profile.json` are separate unreported observations. "
@@ -261,6 +276,7 @@ def collect(build: Path, source: str, cmake: Path, generator: str,
                               "placeholders. Regenerate from saved records with `stage_app01.py --source`; "
                               "staging requires a typed catalogue.\n").encode()
         report.require(set(files) == report.FILES, "APP-01 collector inventory differs")
+        bundle.mkdir(exist_ok=False)
         for name, content in files.items():
             (bundle / name).write_bytes(content)
         (bundle / "manifest.json").write_bytes(report.json_bytes({

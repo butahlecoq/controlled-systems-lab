@@ -8,6 +8,7 @@
 #include <exception>
 #include <iostream>
 #include <memory>
+#include <iomanip>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -110,6 +111,28 @@ const char* status(CheckStatus value) {
     throw std::logic_error("unknown status");
 }
 
+const char* termination(Termination value) {
+    switch(value) {
+    case Termination::completed:return "completed";
+    case Termination::cancelled:return "cancelled";
+    case Termination::resource_limit:return "resource_limit";
+    case Termination::numerical_failure:return "numerical_failure";
+    case Termination::operation_rejected:return "operation_rejected";
+    case Termination::contract_rejected:return "contract_rejected";
+    }
+    throw std::logic_error("unknown termination");
+}
+
+const char* outcome(const PlanCheck& report) {
+    if(!report.approximation)return "none";
+    if(std::holds_alternative<EnclosedApproximation>(*report.approximation))return "enclosed";
+    if(std::holds_alternative<HeuristicApproximation>(*report.approximation))return "heuristic";
+    if(std::holds_alternative<registry::Rejection>(*report.approximation))return "rejection";
+    if(std::holds_alternative<OperationStopped>(*report.approximation))return "stopped";
+    if(std::holds_alternative<Unsupported>(*report.approximation))return "unsupported";
+    throw std::logic_error("unknown approximation outcome");
+}
+
 const char* basis(const PlanCheck& report) {
     if(!report.approximation)return "none";
     const auto* enclosed=std::get_if<EnclosedApproximation>(&*report.approximation);
@@ -126,6 +149,7 @@ const char* basis(const PlanCheck& report) {
 
 bool expected(const PlanCheck& report,std::string_view name) {
     if(report.termination!=Termination::completed || report.diagnostics.size()>(name=="empty_inner"?1u:0u))return false;
+    if(std::string_view(outcome(report))!="enclosed")return false;
     if(name=="empty_inner")return std::string_view(basis(report))=="empty_subset" &&
         report.membership==CheckStatus::violation && !report.trajectory &&
         !report.numerical_achievable_value;
@@ -133,10 +157,22 @@ bool expected(const PlanCheck& report,std::string_view name) {
        report.membership!=CheckStatus::numerical_pass || !report.trajectory ||
        report.trajectory->bindings!=CheckStatus::numerical_pass ||
        report.trajectory->objective!=CheckStatus::numerical_pass ||
+       report.trajectory->termination!=Termination::completed ||
        report.trajectory->recomputed_objective!=3.0 ||
        report.trajectory->optimality!=CheckStatus::unsupported ||
        report.trajectory->completeness!=CheckStatus::unsupported ||
        report.trajectory->validated!=CheckStatus::unsupported)return false;
+    const auto& residuals=report.trajectory->residuals;
+    if(residuals.size()!=4)return false;
+    const bool invalid=name=="invalid_plan";
+    const std::string_view fields[]={"initial[0]","controls[0].singleton[0]","dynamics[0][0]","objective"};
+    const double violations[]={0,invalid?2.0:0.0,invalid?2.0:0.0,0};
+    const double scales[]={2,invalid?5.0:3.0,invalid?5.0:3.0,3};
+    for(std::size_t i=0;i<residuals.size();++i)
+        if(residuals[i].field!=fields[i] || residuals[i].measure.violation!=violations[i] ||
+           residuals[i].measure.scale!=scales[i] ||
+           residuals[i].tolerance!=1e-8+1e-8*scales[i] ||
+           residuals[i].satisfied!=(violations[i]<=1e-8+1e-8*scales[i]))return false;
     if(name=="valid_plan")return report.trajectory->feasibility==CheckStatus::numerical_pass &&
         report.numerical_achievable_value==3.0;
     return report.trajectory->feasibility==CheckStatus::violation && !report.numerical_achievable_value;
@@ -174,19 +210,39 @@ bool run(const problem::ResolvedProblem& problem,const Fixture& input,
             <<"\",\"round\":"<<round<<",\"warmup\":"<<(round<warmups?"true":"false")
             <<",\"batch\":"<<batch<<",\"elapsed_ns\":"<<elapsed
             <<",\"checked_calls\":"<<checked<<",\"failures\":"<<failures
-            <<",\"basis\":\""<<basis(last)<<"\",\"membership\":\""<<status(last.membership)
+            <<",\"termination\":\""<<termination(last.termination)
+            <<"\",\"approximation_outcome\":\""<<outcome(last)
+            <<"\",\"basis\":\""<<basis(last)<<"\",\"membership\":\""<<status(last.membership)
             <<"\",\"bindings\":\""<<(trajectory?status(trajectory->bindings):"not_checked")
             <<"\",\"feasibility\":\""<<(trajectory?status(trajectory->feasibility):"not_checked")
             <<"\",\"objective\":\""<<(trajectory?status(trajectory->objective):"not_checked")
+            <<"\",\"optimality\":\""<<(trajectory?status(trajectory->optimality):"not_checked")
+            <<"\",\"completeness\":\""<<(trajectory?status(trajectory->completeness):"not_checked")
             <<"\",\"validated\":\""<<(trajectory?status(trajectory->validated):"not_checked")
-            <<"\",\"recomputed_objective\":";
+            <<"\",\"trajectory_termination\":";
+        if(trajectory)std::cout<<'"'<<termination(trajectory->termination)<<'"';
+        else std::cout<<"null";
+        std::cout<<",\"recomputed_objective\":";
         if(trajectory && trajectory->recomputed_objective)std::cout<<*trajectory->recomputed_objective;
         else std::cout<<"null";
         std::cout<<",\"numerical_achievable_value\":";
         if(last.numerical_achievable_value)std::cout<<*last.numerical_achievable_value;
         else std::cout<<"null";
         std::cout<<",\"residual_count\":"<<(trajectory?trajectory->residuals.size():0)
-            <<",\"observation_token\":"<<token<<"}\n";
+            <<",\"residuals\":[";
+        if(trajectory) {
+            bool first=true;
+            for(const auto& residual:trajectory->residuals) {
+                if(!first)std::cout<<',';
+                first=false;
+                std::cout<<"{\"field\":"<<std::quoted(residual.field)
+                    <<",\"violation\":"<<residual.measure.violation
+                    <<",\"scale\":"<<residual.measure.scale
+                    <<",\"tolerance\":"<<residual.tolerance
+                    <<",\"satisfied\":"<<(residual.satisfied?"true":"false")<<'}';
+            }
+        }
+        std::cout<<"],\"observation_token\":"<<token<<"}\n";
         std::cout.flush();
         if(failures || checked!=batch || elapsed<=0)return false;
     }
@@ -200,7 +256,8 @@ int main(int argc,char** argv) {
         const auto batch=count(argv[1]),warmups=count(argv[2]),repetitions=count(argv[3]);
         const auto problem=original();
         const auto reference=interval(),point=singleton(),empty=empty_v();
-        std::cout<<"{\"event\":\"header\",\"schema\":\"csl.app01-plan-raw/1\",\"batch\":"<<batch
+        std::cout.precision(17);
+        std::cout<<"{\"event\":\"header\",\"schema\":\"csl.app01-plan-raw/2\",\"provider_id\":\"app01.literal-provider\",\"provider_version\":\"1\",\"batch\":"<<batch
             <<",\"warmups\":"<<warmups<<",\"repetitions\":"<<repetitions<<"}\n";
         for(const auto name:{"valid_plan","invalid_plan","empty_inner"})
             if(!run(problem,fixture(problem,name,reference,point,empty),batch,warmups,repetitions))return 2;
