@@ -1,0 +1,10 @@
+{
+  "schema": "csl.finite-feedback-process-capture/1",
+  "source_commit": "6602f0f88a8ef2071edefbbd913f7c4bbb6201df",
+  "smoke_exit": 0,
+  "measure_exit": 0,
+  "measure_start_utc": "2026-10-16T16:32:31.8664759Z",
+  "measure_end_utc": "2026-10-16T16:32:31.8731271Z",
+  "executable_sha256": "5c1fce3255fd0c900c366ff2c60cd1fc76f5aa6fefaf2a76f43e1604f2888859",
+  "driver_sha256": "51d5576831d3e6109bd830026240423c15a0d2db89de41e7f9725f21aee4fea9"
+}

@@ -1,0 +1,8 @@
+{
+  "measured_count": 56,
+  "raw_sha256": "b4632ce76510aa4f2bb136baa193bc78da66506336a90d048cd8495c2d7926de",
+  "schema": "csl.issue3-collection-status/1",
+  "status": "complete",
+  "trial_count": 64,
+  "warmup_count": 8
+}

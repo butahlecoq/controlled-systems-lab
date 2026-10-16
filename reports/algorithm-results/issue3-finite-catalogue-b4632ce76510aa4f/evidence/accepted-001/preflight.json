@@ -1,0 +1,60 @@
+{
+  "actual_native_threads": null,
+  "actual_native_threads_reason": "No native thread count counter exposed by this public path.",
+  "arithmetic": "binary64; absolute B08 tie tolerance 1e-8; numerical assurance",
+  "binary_sha256": "18efe090a2809c092263b99c5b87d5bdaeea8007fc848826bc64ecb2eb2c88f7",
+  "build_configuration": "Release",
+  "build_graph_sha256": "ef1803a3a2a54527a866c07e527c3919f4192b052eb1c9d2651b0da70d35b72c",
+  "cmake": {
+    "generator": "Visual Studio 17 2022",
+    "version": {
+      "isDirty": false,
+      "major": 3,
+      "minor": 31,
+      "patch": 6,
+      "string": "3.31.6-msvc6",
+      "suffix": "msvc6"
+    }
+  },
+  "compiler": {
+    "compiler": {
+      "id": "MSVC",
+      "implicit": {
+        "includeDirectories": [],
+        "linkDirectories": [],
+        "linkFrameworkDirectories": [],
+        "linkLibraries": []
+      },
+      "path": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+      "version": "19.44.35215.0"
+    },
+    "language": "CXX",
+    "sourceFileExtensions": [
+      "C",
+      "M",
+      "c++",
+      "cc",
+      "cpp",
+      "cxx",
+      "mm",
+      "mpp",
+      "CPP",
+      "ixx",
+      "cppm",
+      "ccm",
+      "cxxm",
+      "c++m"
+    ]
+  },
+  "fixture_sha256": "9494dec664f6fed74f39886ec3ab94c576dba6cdb5349f1f19329c6c31acc85a",
+  "fresh_build_sha256": "ad01f2ca80206fccd37a20ff58336794e4efd35fe1a56d5c3f66b998fc3e7271",
+  "harness_commit": "2f915110ba42515fdc448a0c226dc1290b80f82d",
+  "harness_tree": "c3259b26fa792b5abd70919366cf8c40882e69af",
+  "logical_processors": 12,
+  "os": "Windows-11-10.0.22631-SP0",
+  "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+  "requested_driver_workers": 1,
+  "schema": "csl.issue3-preflight/1",
+  "source_commit": "994f3ee4310b4087d289e2eb02adbdb9dfd97827",
+  "source_tree": "2b07e8378561b74fd763e43ca70c78cfd1145b99"
+}

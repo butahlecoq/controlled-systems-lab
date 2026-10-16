@@ -1,0 +1,3 @@
+# Rejected finite-feedback collection
+
+`finite-feedback-bee7e6d32c88451d/` is the original PR #355 collection. It is retained for audit, not listed in the publication catalogue or Pages workflow. Independent [scientific](https://github.com/butahlecoq/controlled-systems-lab/pull/355#issuecomment-6220186987) and [standards](https://github.com/butahlecoq/controlled-systems-lab/pull/355#issuecomment-6220187314) reviews rejected its clean-source provenance and its claim of a complete action-tensor oracle. The replacement collection uses full-tree prebuild and postrun receipts and limits its oracle claim to the cells the frozen driver checks.

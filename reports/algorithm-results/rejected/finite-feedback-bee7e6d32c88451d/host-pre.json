@@ -1,0 +1,33 @@
+{
+  "schema": "csl.finite-feedback-host-observation/1",
+  "observed_utc": "2026-10-16T16:32:30.6817302Z",
+  "cpu": {
+    "Name": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "NumberOfCores": 6,
+    "NumberOfLogicalProcessors": 12
+  },
+  "os": {
+    "Caption": "Майкрософт Windows 11 Домашняя",
+    "Version": "10.0.22631",
+    "TotalVisibleMemorySize": 33387800,
+    "FreePhysicalMemory": 15087364
+  },
+  "concurrent_build_processes": [
+    {
+      "ProcessName": "MSBuild",
+      "Id": 816,
+      "CPU": 12.84375
+    },
+    {
+      "ProcessName": "MSBuild",
+      "Id": 8996,
+      "CPU": 11.25
+    },
+    {
+      "ProcessName": "MSBuild",
+      "Id": 12692,
+      "CPU": 10.640625
+    }
+  ],
+  "note": "Other repository agents were active; concurrent build processes observed. Timings are descriptive and inconclusive."
+}

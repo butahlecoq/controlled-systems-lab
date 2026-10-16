@@ -1,0 +1,5 @@
+scenario,attempts,matches,failures,median_ns,min_ns,max_ns
+clipping,7,7,0,3900,3800,4500
+branching,7,7,0,5000,4800,5400
+empty-action,7,7,0,3600,3500,3900
+nominal,7,7,0,3800,3700,6800

@@ -78,6 +78,13 @@ add_executable(installed_model_client model_client.cpp)
 target_link_libraries(installed_model_client PRIVATE CSL::model)
 set_target_properties(installed_model_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_model_client COMMAND installed_model_client)
+
+add_executable(installed_finite_feedback_client finite_feedback_client.cpp)
+target_link_libraries(installed_finite_feedback_client PRIVATE CSL::finite_feedback_port)
+set_target_properties(installed_finite_feedback_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_finite_feedback_client COMMAND installed_finite_feedback_client)
+set_tests_properties(installed_finite_feedback_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed finite feedback client: registered winning action passed")
 set_tests_properties(installed_model_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed model client: immutable LTI/LTV and scheduled observation literals passed")
 add_executable(installed_public_client public_client.cpp)

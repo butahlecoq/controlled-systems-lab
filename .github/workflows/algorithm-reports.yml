@@ -29,6 +29,8 @@ jobs:
         env:
           MPLCONFIGDIR: ${{ github.workspace }}/build/report-mpl-config
         run: python -m unittest discover -s tests/reporting -p 'test_*.py'
+      - name: Validate frozen issue 3 saved measurement and projections
+        run: python scripts/reports/issue3/render_saved.py --bundle reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f --check
       - name: Check reviewed catalogue and stage only allowlisted files
         id: catalog
         shell: bash
@@ -52,6 +54,9 @@ jobs:
             fi
             if test -f reports/algorithm-results/geo07-dependent-publications.json; then
               python scripts/reports/stage_geo07_dependent.py --catalog reports/algorithm-results/geo07-dependent-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/finite-feedback-publications.json; then
+              python scripts/reports/stage_finite_feedback.py --catalog reports/algorithm-results/finite-feedback-publications.json --site build/report-site
             fi
             if test -d reports/algorithm-results/perf03-ts01-single-process-correlation-20261014; then
               python scripts/reports/stage_perf03.py \

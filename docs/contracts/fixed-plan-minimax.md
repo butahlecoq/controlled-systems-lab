@@ -4,8 +4,9 @@ EXT-01 / issue #62. The public interfaces are
 [`fixed_plan_disturbance.hpp`](../../include/csl/reachability/fixed_plan_disturbance.hpp)
 and [`worst_case_vertex.hpp`](../../include/csl/optimization/worst_case_vertex.hpp).
 They are native numerical references for a **fixed control plan**, not a
-finite-action search, causal feedback policy, optimal-family publisher, or
-validated-arithmetic certificate.
+causal feedback policy, optimal-family publisher, or validated-arithmetic
+certificate. The separate [finite-action minimax reference](finite-action-minimax.md)
+composes them for exhaustive fixed-plan catalogue search.
 
 ## Admission and result
 

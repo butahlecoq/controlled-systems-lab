@@ -1,0 +1,18 @@
+{
+  "command": [
+    "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "--build",
+    "D:\\work\\PhD\\repo\\.worktrees\\issue3-report-harness\\build\\issue3-report",
+    "--config",
+    "Release",
+    "--target",
+    "csl_issue3_finite_action_report",
+    "--clean-first",
+    "--verbose"
+  ],
+  "return_code": 0,
+  "schema": "csl.issue3-process-capture/1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "95ab7811b38939047a9f943b2442c6c7e9cbe9a7a21cc4105da90acce451b7ab",
+  "timed_out": false
+}

@@ -1,0 +1,17 @@
+{
+  "reports": [
+    {
+      "evidence_limits": "Exploratory and inconclusive single-adapter timings; concurrent work not quantified; all winning flags and selected action cells checked, other action-tensor cells unchecked; no comparator, source-mapped limiter, speedup, continuous-state, partial-observation, physical-model, or global causal minimax claim",
+      "measured_scope": "28 verified registered-port calls, seven per four authored finite games",
+      "native_payload_sha256": "8dc893b5640bc56f6844d021e19671710b38d138fba528818a8054ac9e9f39fb",
+      "payload_schema": "csl.finite-feedback-records/2",
+      "payload_sha256": "8dc893b5640bc56f6844d021e19671710b38d138fba528818a8054ac9e9f39fb",
+      "report_id": "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f",
+      "report_kind": "finite-feedback-registered-port",
+      "source_commit": "d0da7cb3b167f21e620b716b615e7b77cf5bd7aa",
+      "source_report_id": "finite-feedback-a6e96fd96c7ac7cc",
+      "zip_sha256": "38aae20a086e9497d1f948ac43a9bec5410402533777536059efb6f65ab17538"
+    }
+  ],
+  "schema": "csl.finite-feedback-report-extension/1"
+}
