@@ -26,7 +26,7 @@ The decimal norm columns below are square roots shown for comparison; the fracti
 
 For example, the simplified open-loop row has `2.5*(-22.2)-47.7=-103.2`; adding its square to `5536289/2000` gives `26836769/2000`. Neither expression exactly equals the reported criterion at the displayed coordinates. The augmented expression is closer for every row, especially the simplified open-loop row, but proximity does not identify the historical implementation.
 
-Printed coordinates are rounded. These exact fractions describe those decimals only; they do not enclose results from unprinted higher-precision coordinates or justify an explanation of any remaining difference. The original numerical arrays, nonlinear trajectory, criterion implementation used for Table 2, and mapping from A09 to each publication row remain unresolved. Issue [#1](https://github.com/butahlecoq/controlled-systems-lab/issues/1) therefore remains open.
+Printed coordinates are rounded. These exact fractions describe those decimals only; they do not enclose results from unprinted higher-precision coordinates or justify an explanation of any remaining difference. The separate [rounding-box audit](l13-rounding-box-audit.md) tests a conditional nearest-decimal interpretation. The original numerical arrays, nonlinear trajectory, criterion implementation used for Table 2, and mapping from A09 to each publication row remain unresolved. Issue [#1](https://github.com/butahlecoq/controlled-systems-lab/issues/1) therefore remains open.
 
 Run the standard-library [checker](tools/check_l13_displayed_criteria.py) and [literal behavioral tests](tools/test_l13_displayed_criteria.py) from the repository root:
 
