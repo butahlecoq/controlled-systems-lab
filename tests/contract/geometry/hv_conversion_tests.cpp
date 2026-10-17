@@ -6,7 +6,9 @@
 #include "../../../src/adapters/polyhedral/exact_h_interval.hpp"
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 
 using namespace csl;
@@ -87,8 +89,9 @@ TEST_CASE("ambient-one H conversion publishes a global stored-dyadic interval bo
     CHECK(check_geometry_evidence(result.evidence,req).empty());
     REQUIRE(result.evidence.error_bound.has_value());
     CHECK(result.evidence.error_bound->metric.value=="csl.geometry.metric.l-infinity");
-    CHECK(result.evidence.error_bound->bound>0.0);
-    CHECK(result.evidence.error_bound->bound<1e-15);
+    // The exact distance is 1/3 - 6004799503160661/2^54 = 1/(3*2^54).
+    // This literal is its least outward-rounded binary64 representation.
+    CHECK(std::bit_cast<std::uint64_t>(result.evidence.error_bound->bound)==0x3c75555555555556ULL);
 }
 
 TEST_CASE("independent ambient-one checker detects a missing H endpoint despite zero row residual") {
