@@ -1,6 +1,6 @@
 # Proposal: recorded complete-family claims in run artifacts
 
-**Status:** Proposal for architecture and scientific review. This document defines no enabled behavior and does not relax the current fail-closed encoder or decoder. It is tied to [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [INP-02 #75](https://github.com/butahlecoq/controlled-systems-lab/issues/75), [SYN-07 #155](https://github.com/butahlecoq/controlled-systems-lab/issues/155), and the architecture concern in [#140](https://github.com/butahlecoq/controlled-systems-lab/issues/140).
+**Status:** Proposed implementation contract for architecture review. No behavior is enabled by this document; the current fail-closed run encoder and decoder remain authoritative until an implementation PR passes integration review. This contract is tied to [OBS-04 #83](https://github.com/butahlecoq/controlled-systems-lab/issues/83), [INP-02 #75](https://github.com/butahlecoq/controlled-systems-lab/issues/75), [SYN-07 #155](https://github.com/butahlecoq/controlled-systems-lab/issues/155), and the architecture concern in [#140](https://github.com/butahlecoq/controlled-systems-lab/issues/140).
 
 ## Problem and decision requested
 
@@ -69,7 +69,20 @@ Even after a replay operation succeeds, only the fresh in-process result receive
 - v5 decode never grants runtime authority, even when all digests, schema checks, and identity fields match.
 - A future replay operation is versioned independently from artifact parsing. Retiring a verifier or replay implementation makes the claim unsupported for replay; it does not invalidate the fact that the historical artifact recorded that claim.
 
-Whether to replace the current `decode_run` result type, add a separate `decode_artifact` API, and increment the wire schema are public API/migration decisions. This proposal recommends the separate recorded DTO and schema v5, but does not authorize implementing it before review.
+## Proposed first implementation boundary
+
+The first implementation may persist and import recorded claims without implementing replay. This is an archival feature, not a relaxation of the proof boundary.
+
+- Keep `encode_run` and `decode_run` behavior for v1-v4 unchanged. Add an explicit v5 recorded-artifact API and a distinct imported DTO. The imported DTO retains canonical run data and recorded family fields, but has no conversion to `RunStatistics`, `OptimalFamily`, `FamilyRecord`, or selector input. A caller-supplied `ResolvedProblem` can check problem identity and source binding; it cannot promote the claim.
+- Permit v5 export only from a published live run whose family is registry-verified in the current process. Persist the exact registered verifier ID/version and opaque payload that the runtime result contains. Never synthesize lineage, verifier fields, support, or payload text from profile names.
+- Obtain relation bytes only through an explicit exporter for the concrete supported relation payload. The exporter may use the bounded `csl.h-relation-attachment/1` codec and its exact binary64 representation. Record attachment schema, byte count, digest, and reference in the family claim. The importer returns only inert `RecordedHRelation` data. A missing exporter or unsupported payload produces a typed export error; it does not emit a complete-family claim with an omitted relation.
+- For archival identity, bind the attachment digest and schema exactly. Equality means byte-for-byte encoding equality under that schema, not mathematical set equivalence. No comparison or replay operation may infer equality of mathematical relations from this binding. Replay remains typed unsupported until a separately reviewed authority and relation comparison contract exist.
+- A paired comparison bundle stores its normalized specification identity and the complete ordered list of run references. Each reference binds the run ID, repetition identity, and digest of the canonical v5 run bytes. Failed, unsupported, cancelled, resource-limited, and incomplete attempts remain in the list. Bundle import verifies framing, canonical bytes, digest, and ordering, while retaining each run as recorded data.
+- Write both run artifacts and the comparison bundle atomically at the application boundary. If any requested run cannot be represented, return the typed error and publish no partial bundle. The CLI can then report the failure without implying that a comparison artifact was saved.
+
+This boundary enables versioned persistence and round-trip of claims as untrusted data. It does not complete OBS-04: instrumentation-on/off repetitions, phase-specific timing, overhead analysis, environment capture, and the independent analytic agreement oracle remain separate acceptance work.
+
+The proposed first implementation resolves those API choices in favor of a separate recorded-artifact API and schema v5, preserving the existing `decode_run` result type and v1-v4 behavior. This proposed contract still requires architecture approval and integration review before implementation; it does not enable code behavior by itself.
 
 ## Required adversarial and round-trip tests
 
