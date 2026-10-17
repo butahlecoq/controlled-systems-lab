@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:csl:comparison-spec:1",
+  "title": "CSL immutable comparison specification identity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "problem_id", "request_digest", "strategies", "repetitions"],
+  "properties": {
+    "schema": {"const": "csl.comparison-spec/1"},
+    "problem_id": {"type": "string", "minLength": 1},
+    "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Digest of the immutable effective request descriptor."},
+    "strategies": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "repetitions": {"type": "integer", "minimum": 1, "maximum": 4294967295}
+  }
+}

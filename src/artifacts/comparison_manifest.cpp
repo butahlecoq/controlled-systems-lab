@@ -57,6 +57,19 @@ AttemptStatus parse_status(const std::string& value) {
     if (value == "incomplete") return AttemptStatus::incomplete;
     throw std::invalid_argument("Unknown attempt status");
 }
+bool status_matches(AttemptStatus status, const Json& run) {
+    const auto& final=run.at("final");
+    const auto kind=final.at("kind").get<std::string>();
+    if(kind=="synthesis"||kind=="program")return status==AttemptStatus::completed;
+    if(kind=="unsupported")return status==AttemptStatus::unsupported;
+    if(kind=="failed")return status==AttemptStatus::failed;
+    if(kind!="skipped")return false;
+    const auto reason=final.at("value").at("reason").get<std::string>();
+    if(reason=="cancelled")return status==AttemptStatus::cancelled;
+    if(reason=="deadline"||reason=="task_limit"||reason=="reservation_exceeds_budget")
+        return status==AttemptStatus::resource_limited;
+    return reason=="batch_failed"&&status==AttemptStatus::incomplete;
+}
 std::string bytes_to_string(std::span<const std::byte> bytes) {
     std::string out; out.reserve(bytes.size());
     for (auto b : bytes) out.push_back(static_cast<char>(std::to_integer<unsigned char>(b)));
@@ -74,7 +87,7 @@ std::pair<std::uint32_t,std::uint32_t> validate_spec(const Json& spec) {
     const auto& strategies=spec.at("strategies");
     if(!strategies.is_array()||strategies.empty()||strategies.size()>std::numeric_limits<std::uint32_t>::max())
         throw std::invalid_argument("Comparison spec strategy list is invalid");
-    for(const auto& strategy:strategies)if(!valid_digest(strategy))throw std::invalid_argument("Strategy identity digest is malformed");
+    for(const auto& strategy:strategies)if(!strategy.is_string()||strategy.get<std::string>().empty())throw std::invalid_argument("Strategy identity is malformed");
     const auto repetitions=spec.at("repetitions").get<std::uint32_t>();
     if(repetitions==0)throw std::invalid_argument("Repetition count must be positive");
     return {static_cast<std::uint32_t>(strategies.size()),repetitions};
@@ -96,7 +109,7 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
         if (spec.bytes().size() > limits.bytes) return error(ArtifactErrorCode::limit, "spec", "Spec exceeds byte budget");
         const auto spec_text = bytes_to_string(spec.bytes());
         std::uint64_t payload_bytes=spec.bytes().size();
-        auto spec_json = parse_bounded(spec_text, DecodeLimits{limits.bytes, 1000000, 64, limits.bytes});
+        auto spec_json = parse_bounded(spec_text, DecodeLimits{limits.bytes, 1000000, 64, limits.string_bytes});
         if (spec_json.dump() != spec_text) return error(ArtifactErrorCode::invalid_input, "spec", "Spec must be canonical JSON");
         const auto [strategy_count,repetition_count]=validate_spec(spec_json);
         if (attempts.size()!=static_cast<std::uint64_t>(strategy_count)*repetition_count)
@@ -119,23 +132,26 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
                 return error(ArtifactErrorCode::limit, "attempts", "Attempt payloads exceed byte budget");
             payload_bytes+=run_bytes.size();
             const auto run_text = bytes_to_string(run_bytes);
-            auto validated = decode_recorded_run(run_text, DecodeLimits{limits.bytes, 1000000, 64, limits.bytes});
+            auto validated = decode_recorded_run(run_text, DecodeLimits{limits.bytes, 1000000, 64, limits.string_bytes});
             if (std::holds_alternative<ArtifactError>(validated))
                 return error(ArtifactErrorCode::reference, "attempts[" + std::to_string(i) + "].run", "Attempt does not contain a valid recorded run");
-            const auto run_json = parse_bounded(run_text, DecodeLimits{limits.bytes, 1000000, 64, limits.bytes});
+            const auto run_json = parse_bounded(run_text, DecodeLimits{limits.bytes, 1000000, 64, limits.string_bytes});
             if (run_json.at("run").get<std::string>() != attempt.reference.run.value ||
-                problem::hex(attempt.run.content().digest()) != attempt.reference.content_digest ||
-                run_json.at("problem").get<std::string>()!=spec_json.at("problem_id").get<std::string>())
+                attempt.run.content().digest() != attempt.reference.content_digest ||
+                run_json.at("problem").get<std::string>()!=spec_json.at("problem_id").get<std::string>() ||
+                run_json.at("configuration").at("value").at("strategy").at("strategy").get<std::string>()!=
+                    spec_json.at("strategies").at(attempt.strategy_index).get<std::string>() ||
+                !status_matches(attempt.reported_status,run_json))
                 return error(ArtifactErrorCode::identity, "attempts[" + std::to_string(i) + "].reference", "Run reference identity or content digest mismatch");
             records.push_back({{"strategy_index", attempt.strategy_index}, {"repetition_index", attempt.repetition_index},
                 {"reported_status", status_name(attempt.reported_status)}, {"run_id", attempt.reference.run.value},
-                {"run_digest", attempt.reference.content_digest}, {"run", run_text}});
+                {"run_digest", problem::hex(attempt.reference.content_digest)}, {"run", run_text}});
         }
         Json wire{{"schema", "csl.comparison/1"}, {"spec", spec_text}, {"spec_digest", problem::hex(spec.digest())}, {"attempts", records}};
         const auto text = wire.dump();
         if (text.size() > limits.bytes) return error(ArtifactErrorCode::limit, "comparison.bytes", "Encoded comparison exceeds byte limit");
         auto content = own(text);
-        if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) return RecordedComparisonArtifact(*owned);
+        if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) return RecordedComparisonArtifact(*owned,{spec.digest()});
         return std::get<ArtifactError>(std::move(content));
     } catch (const ArtifactError& failure) { return failure; }
       catch (const std::bad_alloc&) { return error(ArtifactErrorCode::allocation, "comparison", "Allocation failed"); }
@@ -154,8 +170,7 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
         if (wire.at("schema") != "csl.comparison/1") return error(ArtifactErrorCode::unsupported, "comparison.schema", "Unknown comparison schema");
         const auto spec_text = wire.at("spec").get<std::string>();
         if (spec_text.size() > limits.string_bytes) return error(ArtifactErrorCode::limit, "comparison.spec", "Spec exceeds string capacity");
-        auto inner_limits=limits; inner_limits.string_bytes=limits.bytes;
-        auto spec = parse_bounded(spec_text,inner_limits);
+        auto spec = parse_bounded(spec_text,limits);
         if (spec.dump() != spec_text) return error(ArtifactErrorCode::invalid_input, "comparison.spec", "Spec is not canonical JSON");
         const auto [strategy_count,repetition_count]=validate_spec(spec);
         auto owned_spec = own(spec_text);
@@ -181,17 +196,20 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
             previous = key; (void)parse_status(item.at("reported_status").get<std::string>());
             const auto run_text = item.at("run").get<std::string>();
             if (run_text.size() > limits.bytes) return error(ArtifactErrorCode::limit, "comparison.attempts", "Run record exceeds byte capacity");
-            const auto run_content=decode_recorded_run(run_text,inner_limits);
+            const auto run_content=decode_recorded_run(run_text,limits);
             if (std::holds_alternative<ArtifactError>(run_content)) return error(ArtifactErrorCode::reference,"comparison.attempts.run","Invalid recorded run");
-            const auto run_json=parse_bounded(run_text,inner_limits);
+            const auto run_json=parse_bounded(run_text,limits);
             const auto& content=std::get<RecordedRunArtifact>(run_content).content();
             if (run_json.at("run").get<std::string>()!=item.at("run_id").get<std::string>() ||
                 problem::hex(content.digest())!=item.at("run_digest").get<std::string>() ||
-                run_json.at("problem").get<std::string>()!=spec.at("problem_id").get<std::string>())
+                run_json.at("problem").get<std::string>()!=spec.at("problem_id").get<std::string>() ||
+                run_json.at("configuration").at("value").at("strategy").at("strategy").get<std::string>()!=
+                    spec.at("strategies").at(key.first).get<std::string>() ||
+                !status_matches(parse_status(item.at("reported_status").get<std::string>()),run_json))
                 return error(ArtifactErrorCode::identity,"comparison.attempts.reference","Run reference identity or digest mismatch");
         }
         auto content = own(text);
-        if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) return RecordedComparisonArtifact(*owned);
+        if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) return RecordedComparisonArtifact(*owned,{std::get<problem::ResolvedContent>(owned_spec).digest()});
         return std::get<ArtifactError>(std::move(content));
     } catch (const ArtifactError& failure) { return failure; }
       catch (const std::bad_alloc&) { return error(ArtifactErrorCode::allocation, "comparison", "Allocation failed"); }

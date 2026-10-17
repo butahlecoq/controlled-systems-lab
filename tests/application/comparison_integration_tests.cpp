@@ -208,16 +208,24 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
     const auto spec_text=std::string{"{\"problem_id\":\""+problem.identity().value+
         "\",\"repetitions\":1,\"request_digest\":\""+std::string(64,'1')+
-        "\",\"schema\":\"csl.comparison-spec/1\",\"strategies\":[\""+std::string(64,'2')+"\"]}"};
+        "\",\"schema\":\"csl.comparison-spec/1\",\"strategies\":[\""+
+        prepared.strategies()[strategy_index].strategy.value+"\"]}"};
     const auto spec=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
         std::span<const std::byte>{reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()}));
-    const ar::RunRecordRef run_ref{run, csl::problem::hex(imported.content().digest())};
+    const ar::RunRecordRef run_ref{run, imported.content().digest()};
     const std::vector<ar::ComparisonAttempt> attempts{{0,0,
         ar::AttemptStatus::completed,run_ref,imported}};
     const auto bundle=take_artifact(ar::encode_recorded_comparison(spec,attempts),"encode_recorded_comparison");
+    auto mislabeled=attempts;
+    mislabeled.front().reported_status=ar::AttemptStatus::failed;
+    const auto status_mismatch=ar::encode_recorded_comparison(spec,mislabeled);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(status_mismatch));
+    CHECK(std::get<ar::ArtifactError>(status_mismatch).code==ar::ArtifactErrorCode::identity);
     const auto bundle_wire=std::string(reinterpret_cast<const char*>(bundle.content().bytes().data()),bundle.content().bytes().size());
     const auto restored_bundle=take_artifact(ar::decode_recorded_comparison(bundle_wire),"decode_recorded_comparison");
     CHECK(restored_bundle.content().digest()==bundle.content().digest());
+    CHECK(restored_bundle.spec_id().digest==spec.digest());
+    CHECK(restored_bundle.identity().digest==bundle.content().digest());
     CHECK(bundle_wire.find("csl.comparison/1")!=std::string::npos);
     CHECK(bundle_wire.find("csl.run-statistics/5")!=std::string::npos);
     const auto expected_content=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(

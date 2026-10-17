@@ -9,7 +9,9 @@
 namespace csl::artifacts {
 
 enum class AttemptStatus { completed, failed, unsupported, cancelled, resource_limited, incomplete };
-struct RunRecordRef { RunId run; std::string content_digest; };
+struct ComparisonSpecId { problem::ContentDigest digest; };
+struct ComparisonRunId { problem::ContentDigest digest; };
+struct RunRecordRef { RunId run; problem::ContentDigest content_digest; };
 
 struct ComparisonAttempt {
     std::uint32_t strategy_index{};
@@ -26,9 +28,13 @@ public:
     RecordedComparisonArtifact(const RecordedComparisonArtifact&) = default;
     RecordedComparisonArtifact& operator=(const RecordedComparisonArtifact&) = default;
     const problem::ResolvedContent& content() const noexcept { return content_; }
+    ComparisonSpecId spec_id() const noexcept { return spec_id_; }
+    ComparisonRunId identity() const noexcept { return {content_.digest()}; }
 private:
-    explicit RecordedComparisonArtifact(problem::ResolvedContent content) : content_(std::move(content)) {}
+    explicit RecordedComparisonArtifact(problem::ResolvedContent content, ComparisonSpecId spec_id)
+        : content_(std::move(content)), spec_id_(spec_id) {}
     problem::ResolvedContent content_;
+    ComparisonSpecId spec_id_;
     friend ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
         const problem::ResolvedContent&, const std::vector<ComparisonAttempt>&, EncodeLimits);
     friend ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::string_view, DecodeLimits);
