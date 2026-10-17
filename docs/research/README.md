@@ -40,6 +40,8 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 
 The [issue #5 feedback contract follow-up](feedback-contract-followup.md) turns the reviewed policy distinctions into a bounded robust predecessor and evidence handoff without claiming an implemented feedback solver.
 
+The [exact finite policy-class reference](finite-policy-class-reference.md) independently enumerates an authored two-step counterexample's fixed plans, executed replanning selector and globally causal value. Its three-point disturbance catalogue checks decision order but does not certify L13's continuous model or historical program.
+
 The [GEO-02 floating-model audit](geo02-floating-model-audit.md) separates exact hull preservation for stored binary64 candidates from error relative to an intended real-valued affine image or Minkowski sum. It proves a conditional finite-V error bound and records the H-to-V coverage proof still needed for issue #40.
 
 ## Selected first benchmark

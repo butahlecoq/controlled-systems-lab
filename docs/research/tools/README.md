@@ -62,6 +62,8 @@ The tests run the checker subprocess under optimized Python and compare actual c
 
 ## Proof-audit literal reference checks
 
+The separate [finite policy-class reference](../finite-policy-class-reference.md) uses standard-library exact rational arithmetic to enumerate the reviewed two-step counterexample's fixed plans, remaining-plan replanning, executed whole-history costs and globally causal recursion. Run `python -B -O docs/research/tools/test_finite_policy_classes.py`; its seven behavioral checks include the strict causal gap, strict replanning improvement in a second scalar fixture, interior disturbance, current-action timing, whole-successor safety and nominal equality. Its finite catalogues are audit examples, not continuous or historical solvers.
+
 [check_proof_counterexamples.py](check_proof_counterexamples.py) requires Python 3 and its standard library only. It needs no private source, product solver or numeric package and writes no files.
 
 ~~~text
