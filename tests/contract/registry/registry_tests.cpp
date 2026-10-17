@@ -295,8 +295,18 @@ TEST_CASE("direct strategy admission rejects malformed effective requests before
     CHECK(policy_failure.diagnostics[0].code==DiagnosticCode::invalid_input);
     CHECK(policy_failure.diagnostics[0].field=="family.numerical");
     CHECK(policy_mismatch.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(policy_failure.retained.lower_bound);
+    CHECK_FALSE(policy_failure.retained.upper_bound);
+    CHECK(policy_failure.retained.incumbents==0);
+    CHECK_FALSE(policy_failure.retained.partial_or_candidate_family);
+    CHECK_FALSE(policy_mismatch.objective.lower.has_value());
+    CHECK_FALSE(policy_mismatch.objective.upper.has_value());
     CHECK_FALSE(policy_mismatch.family.has_value());
     CHECK(policy_mismatch.incumbents.empty());
+    CHECK(policy_mismatch.spans.empty());
+    const SynthesisIdentityExpectation expected{request.problem.identity(),request.family,
+        request.problem.constraints().coordinates(),request.configuration.strategy,request.strategy_version,std::nullopt};
+    CHECK(check_synthesis_result(policy_mismatch,expected).empty());
     CHECK(workspace.attempts==0);
     const auto accepted=StrategyPort::run(workspace,request,execution);
     REQUIRE(std::holds_alternative<SynthesisResult>(accepted));
