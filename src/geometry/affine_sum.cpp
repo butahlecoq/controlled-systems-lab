@@ -4,6 +4,7 @@
 #include <csl/sets/data.hpp>
 #include "exact_dyadic.hpp"
 #include "exact_convex_combination.hpp"
+#include "conversion/exact_h_interval.hpp"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -50,7 +51,9 @@ struct FiniteSet {
     std::vector<std::string> labels;
     std::vector<Vector> points;
     std::vector<std::string> assumptions;
-    bool has_exact_input_vertices = true;
+    // Hausdorff L-infinity distance from the represented input set to the
+    // hull of these stored vertices. Zero means the input itself was finite V.
+    std::optional<double> input_to_vertices_error = 0.0;
 };
 
 bool candidate_error(const AffineImage& image, std::span<const double> point,
@@ -217,8 +220,15 @@ std::variant<FiniteSet, OperationOutcome> finite_vertices(const SetHandle& handl
         return operation_error(unsupported("affine-sum.conversion.residual",
             "H-to-V vertices or reported maximum residual exceed the caller-compatible row-scaled policy."));
     result.assumptions = transformed.evidence.assumptions;
-    result.has_exact_input_vertices = false;
+    result.input_to_vertices_error.reset();
+    if (input_h->inequalities.cols() == 1) {
+        const auto coverage = detail::certify_h_interval(*input_h, *converted_v);
+        if (const auto* bound = std::get_if<double>(&coverage))
+            result.input_to_vertices_error = *bound;
+    }
     result.assumptions.emplace_back("H-to-V conversion evidence is numerical and conditional on the selected converter");
+    if (result.input_to_vertices_error)
+        result.assumptions.emplace_back("ambient-one H/V coverage was independently checked against exact stored-dyadic rows");
     return result;
 }
 
@@ -377,8 +387,8 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         Vector candidates;
         candidates.reserve(candidate_count * output_dimension);
         const std::size_t result_id_dimension = output_dimension;
-        const bool exact_bound_applicable = left.has_exact_input_vertices &&
-            (!right || right->has_exact_input_vertices);
+        const bool exact_bound_applicable = left.input_to_vertices_error.has_value() &&
+            (!right || right->input_to_vertices_error.has_value());
         detail::exact_detail::Integer maximum_candidate_error;
         if (const auto* image = std::get_if<AffineImage>(&request_.operation)) {
             for (const auto& point : left.points) {
@@ -488,8 +498,8 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
             "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
             exact_bound_applicable ?
-                "published L-infinity error bound encloses exact represented-dyadic affine/sum candidates against generated binary64 candidates; exact deletion preserves the generated hull" :
-                "H-to-V vertex-row residual checks do not establish global conversion coverage; no operation error bound is reported",
+                "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one H/V coverage; exact deletion preserves the generated hull" :
+                "no independently checked global H/V coverage bound is available for every converted operand; no operation error bound is reported",
             "finite and mixed action catalogues are not accepted by this SetHandle operation",
             "selected hull reducer: " + identity(dependencies_.hull.provenance()),
             "selected LP provider: " + identity(dependencies_.lp.provenance())};
@@ -508,7 +518,28 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
                 max_residual,{"csl.geometry.affine-sum"}},
             std::move(assumptions),{}};
         if (exact_bound_applicable) {
-            const auto outward = detail::exact_detail::outward_binary64(maximum_candidate_error);
+            using namespace detail::exact_detail;
+            Integer propagated_input_error;
+            if (const auto* image = std::get_if<AffineImage>(&request_.operation)) {
+                const double input_error = *left.input_to_vertices_error;
+                for (std::size_t row = 0; row < output_dimension; ++row) {
+                    Integer row_error;
+                    for (std::size_t col = 0; col < left.dimension; ++col) {
+                        auto coefficient = decode(image->map.values[row * left.dimension + col]);
+                        coefficient.negative = false;
+                        if (!add_product(row_error, coefficient, decode(input_error)))
+                            return unsupported("affine-sum.error_bound", "Exact affine conversion-bound propagation exceeded its checked arithmetic range.");
+                    }
+                    retain_maximum_error(row_error, propagated_input_error);
+                }
+            } else {
+                if (!add_dyadic(propagated_input_error, decode(*left.input_to_vertices_error)) ||
+                    !add_dyadic(propagated_input_error, decode(*right->input_to_vertices_error)))
+                    return unsupported("affine-sum.error_bound", "Exact Minkowski conversion-bound composition exceeded its checked arithmetic range.");
+            }
+            if (!add_signed(propagated_input_error, maximum_candidate_error))
+                return unsupported("affine-sum.error_bound", "Exact composed geometry error exceeded its checked arithmetic range.");
+            const auto outward = outward_binary64(propagated_input_error);
             if (!outward)
                 return unsupported("affine-sum.error_bound", "Exact dyadic candidate error has no finite binary64 outward bound.");
             evidence.error_bound = GeometryErrorBound{{"csl.geometry.metric.l-infinity"}, *outward,

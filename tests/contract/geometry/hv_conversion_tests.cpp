@@ -3,7 +3,7 @@
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/sets/data.hpp>
-#include "../../../src/adapters/polyhedral/exact_h_interval.hpp"
+#include "../../../src/geometry/conversion/exact_h_interval.hpp"
 #include <algorithm>
 #include <array>
 #include <bit>
@@ -99,7 +99,7 @@ TEST_CASE("independent ambient-one checker detects a missing H endpoint despite 
     const auto omitted=make_v_handle("omitted-endpoint",1,Matrix{1,1,{0}});
     const auto original=take(sets::from_handle(h));
     const auto converted=take(sets::from_handle(omitted));
-    const auto certificate=adapters::polyhedral::detail::certify_h_interval(
+    const auto certificate=geometry::detail::certify_h_interval(
         std::get<sets::HRepresentation>(original.representation()),
         std::get<sets::VRepresentation>(converted.representation()));
     REQUIRE(std::holds_alternative<double>(certificate));
@@ -127,7 +127,7 @@ TEST_CASE("ambient-one checker fails closed when exact H coverage exceeds finite
     const auto zero=make_v_handle("incorrect-singleton",1,Matrix{1,1,{0}});
     const auto original=take(sets::from_handle(h));
     const auto converted=take(sets::from_handle(zero));
-    const auto certificate=adapters::polyhedral::detail::certify_h_interval(
+    const auto certificate=geometry::detail::certify_h_interval(
         std::get<sets::HRepresentation>(original.representation()),
         std::get<sets::VRepresentation>(converted.representation()));
     CHECK(std::holds_alternative<std::string>(certificate));

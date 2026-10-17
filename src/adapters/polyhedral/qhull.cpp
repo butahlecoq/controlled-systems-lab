@@ -3,7 +3,7 @@
 #include <csl/registry/provider.hpp>
 #include <csl/sets/data.hpp>
 #include "../../geometry/conversion/affine_coordinates.hpp"
-#include "exact_h_interval.hpp"
+#include "../../geometry/conversion/exact_h_interval.hpp"
 #include <Eigen/Core>
 #include <Eigen/SVD>
 #include <algorithm>
@@ -548,7 +548,7 @@ public:
                 const auto* vertices=std::get_if<sets::VRepresentation>(&converted_rep);
                 if (!vertices)
                     return finish(unsupported("conversion.coverage", "Converted output is not a finite V set."));
-                const auto bound=detail::certify_h_interval(
+                const auto bound=geometry::detail::certify_h_interval(
                     std::get<sets::HRepresentation>(rep),*vertices);
                 if (const auto* failure=std::get_if<std::string>(&bound))
                     return finish(unsupported("conversion.coverage",*failure));
