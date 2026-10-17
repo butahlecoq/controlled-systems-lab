@@ -85,10 +85,18 @@ contribute no score. If a finite input has a width or normalized score that
 cannot be represented finitely in binary64, the adapter uses input order.
 Neither sorting nor fallback authorizes deletion. The separate Constrained
 `QLPHULL.m:6–18` (A33) uses `max(abs((p-d)./r))`, which can rank signed points
-differently. The A29 grouping block at lines 44–64 is commented out; its active
-filter and final reduction at lines 23–36 and 65–76 differ from this bounded
-adapter's existing certified scan. The archived code is evidence for the score,
-not evidence that the C++ adapter reproduces its historical runtime behavior.
+differently. The A29 grouping block at lines 44–64 is commented out. A33's
+active grouping at lines 50–72 fixes all current C points as Ck, accumulates
+nearby Cj points, and uses the constrained `Modified_SM` sibling before
+restoring Ck; its final reduction is at lines 73–87. The C++ grouped adapter
+below uses the A33 signed max-absolute score, then forms deterministic groups
+around the first unassigned point in score order. A point joins a center when
+its normalized coordinate distance is at most 0.05 on every nonzero-width
+axis. It runs the common certified LP scan over that grouped order. It does not
+transcribe the historical trigger or separate `Modified_SM` tableau: grouping
+changes query order only, and exact dyadic certificates remain the sole
+deletion authority. The archived code is evidence for the ordering/grouping
+family, not evidence that the C++ adapter reproduces its historical runtime.
 
 ### Contract revision and integration note
 
@@ -103,3 +111,15 @@ counts include no grouping or pivot metric. A successful compilation of the
 baseline and ordered reducer tests checks the shared result layout and public
 registry adapter. The supported finite input and LP outcome limitations above
 apply equally to this strategy; no runtime or speedup is claimed.
+
+### Grouped hull strategy
+
+`make_grouped_hull_reducer_registration()` registers
+`csl.hull.grouped-membership`; `reduce_grouped_hull()` is its direct call.
+`GroupedReductionMetrics::processing_order` is the full permutation sent to
+the shared LP scan. `groups` counts fixed centers and `grouped_candidates`
+counts noncenter points assigned to those groups. `zero_width_coordinates`
+and `used_identity_fallback` describe ordering arithmetic. `lp_calls` and
+`attempts` retain their shared meanings. No LP pivot or recursive QuickHull
+counter is reported. Nonfinite, mismatched, or overflow-unsafe input falls
+back to input order and is still validated by the shared reducer.

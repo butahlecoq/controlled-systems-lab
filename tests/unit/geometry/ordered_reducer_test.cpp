@@ -168,3 +168,61 @@ TEST_CASE("unsafe binary64 range falls back to input order without altering dele
     CHECK(reduction.lp_calls == 1);
     CHECK(reduction.attempts.front().candidate == 0);
 }
+
+TEST_CASE("grouped reducer clusters nearby points and certifies the same hull for every permutation") {
+    const std::vector<Vector> fixture{{0.0, 0.0}, {2.0, 0.0}, {0.0, 2.0},
+        {0.5, 0.5}, {0.5, 0.5}};
+    std::vector<std::size_t> permutation(fixture.size());
+    std::iota(permutation.begin(), permutation.end(), 0);
+    do {
+        geometry::PointCloud cloud{{"grouped-permutation"}, {}};
+        for (auto id : permutation) cloud.points.push_back(fixture[id]);
+        auto grouped_lp = highs_workspace();
+        auto baseline_lp = highs_workspace();
+        auto grouped_result = geometry::reduce_grouped_hull(cloud, *grouped_lp, {});
+        auto grouped = completed(grouped_result);
+        auto baseline = completed(geometry::reduce_hull(cloud, *baseline_lp, {}));
+        REQUIRE(grouped.grouped.has_value());
+        CHECK_FALSE(grouped.ordered.has_value());
+        CHECK(grouped.grouped->processing_order.size() == cloud.points.size());
+        CHECK(grouped.grouped->groups > 0);
+        CHECK(grouped.grouped->grouped_candidates + grouped.grouped->groups == cloud.points.size());
+        CHECK(grouped.lp_calls == grouped.attempts.size());
+        check_exact_removals(cloud, grouped);
+        check_exact_removals(cloud, baseline);
+        for (const auto direction : std::array<Vector, 4>{{{1.0, 0.0}, {-1.0, 0.0},
+                 {0.0, 1.0}, {0.0, -1.0}}})
+            CHECK(support(cloud, grouped, direction) == support(cloud, baseline, direction));
+    } while (std::next_permutation(permutation.begin(), permutation.end()));
+}
+
+TEST_CASE("grouped reducer registration and degenerate coordinates expose honest metrics") {
+    geometry::PointCloud cloud{{"grouped-flat"}, {{-1.0, 3.0}, {0.0, 3.0}, {1.0, 3.0}, {0.0, 3.0}}};
+    const auto registration = geometry::make_grouped_hull_reducer_registration();
+    CHECK(registration.identity.id.value == "csl.hull.grouped-membership");
+    auto reducer = registration.factory(cloud);
+    auto lp = highs_workspace();
+    auto result = completed(reducer->reduce(cloud, *lp, {}));
+    REQUIRE(result.grouped.has_value());
+    CHECK(result.grouped->zero_width_coordinates == 1);
+    CHECK(result.grouped->ordered_candidates == 4);
+    CHECK(result.grouped->groups == 3);
+    CHECK(result.grouped->grouped_candidates == 1);
+    CHECK(support(cloud, result, {1.0, 0.0}) == 1.0);
+    CHECK(support(cloud, result, {-1.0, 0.0}) == 1.0);
+    check_exact_removals(cloud, result);
+}
+
+TEST_CASE("grouped ordering falls back to input order when box width overflows") {
+    geometry::PointCloud cloud{{"grouped-overflow"}, {{-1e308}, {1e308}, {0.0}}};
+    StopWorkspace stop;
+    auto result = geometry::reduce_grouped_hull(cloud, stop, {});
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& reduction = std::get<geometry::HullReduction>(result);
+    REQUIRE(reduction.grouped.has_value());
+    CHECK(reduction.grouped->used_identity_fallback);
+    CHECK(reduction.grouped->processing_order == std::vector<std::size_t>{0, 1, 2});
+    CHECK(reduction.grouped->groups == 3);
+    CHECK(reduction.grouped->grouped_candidates == 0);
+    CHECK(reduction.attempts.front().candidate == 0);
+}

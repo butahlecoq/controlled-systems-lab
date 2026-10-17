@@ -52,6 +52,16 @@ struct OrderedReductionMetrics {
     bool used_identity_fallback{};
 };
 
+struct GroupedReductionMetrics {
+    // Original PointCloud IDs, grouped after deterministic outer-box ordering.
+    std::vector<std::size_t> processing_order;
+    std::size_t ordered_candidates{};
+    std::size_t groups{};
+    std::size_t grouped_candidates{};
+    std::size_t zero_width_coordinates{};
+    bool used_identity_fallback{};
+};
+
 struct ConvexCombination {
     std::size_t point;
     double weight;
@@ -81,6 +91,9 @@ struct HullReduction {
     std::optional<BasisReuseMetrics> basis_reuse{};
     // Present only for a reducer that sorts candidates before certified LP reduction.
     std::optional<OrderedReductionMetrics> ordered{};
+    // Present only for the grouped hull-level strategy. Grouping changes LP
+    // query order; exact membership certificates remain the removal authority.
+    std::optional<GroupedReductionMetrics> grouped{};
 };
 
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;
@@ -101,6 +114,11 @@ HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
 // Applies the archived Scientific Research bounding-box score as a deterministic
 // candidate order, then runs the same certified LP reduction over original IDs.
 HullReductionResult reduce_ordered_hull(const PointCloud&, LPWorkspace&,
+                                        const ExecutionContext&);
+
+// Groups nearby candidates after the archived Constrained QLPHULL signed
+// max-absolute box ordering, then uses the shared certificate-checking LP pass.
+HullReductionResult reduce_grouped_hull(const PointCloud&, LPWorkspace&,
                                         const ExecutionContext&);
 
 
@@ -124,4 +142,5 @@ namespace csl::geometry {
 // behind HullReducerPort. The LP workspace remains a separate dependency.
 registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_ordered_hull_reducer_registration();
+registry::Registration<registry::HullReducerPort> make_grouped_hull_reducer_registration();
 } // namespace csl::geometry
