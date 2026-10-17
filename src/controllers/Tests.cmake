@@ -2,3 +2,7 @@ add_executable(observed_replay_tests tests/unit/controllers/observed_replay_test
 target_link_libraries(observed_replay_tests PRIVATE CSL::controllers CSL::model doctest::doctest)
 add_test(NAME observed_replay_tests COMMAND observed_replay_tests)
 csl_test_target(observed_replay_tests controllers)
+add_executable(finite_policy_tests tests/unit/controllers/finite_policy_tests.cpp)
+target_link_libraries(finite_policy_tests PRIVATE CSL::controllers CSL::model doctest::doctest)
+add_test(NAME finite_policy_tests COMMAND finite_policy_tests)
+csl_test_target(finite_policy_tests controllers)

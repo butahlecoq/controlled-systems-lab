@@ -40,7 +40,7 @@ include(cmake/ModulePolicy.cmake)
 
 # Include module-owned declarations in the project scope so dependency pins and
 # package state remain shared. The same order is used for focused test ownership.
-set(csl_modules contracts numeric optimization registry sets model controllers geometry problem
+set(csl_modules contracts numeric optimization registry sets model geometry problem controllers
   reachability synthesis verification input execution artifacts adapters/highs adapters/polyhedral application)
 foreach(module IN LISTS csl_modules)
   include(src/${module}/Module.cmake)
