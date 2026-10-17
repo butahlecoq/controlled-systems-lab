@@ -212,19 +212,18 @@ TEST_CASE("registered affine image preserves the literal shifted reversed interv
 TEST_CASE("fixed-seed integer rectangles have independently enumerated affine supports") {
     constexpr std::uint32_t seed = 0x5EED08U;
     std::mt19937 generator(seed);
-    std::uniform_int_distribution<int> origin(-4, 4);
-    std::uniform_int_distribution<int> extent(1, 4);
-    std::uniform_int_distribution<int> coefficient(-2, 2);
-    std::uniform_int_distribution<int> offset(-3, 3);
+    const auto draw = [&generator](int low, int high) {
+        return low + static_cast<int>(generator() % static_cast<std::uint32_t>(high - low + 1));
+    };
     const std::array<Vector, 3> directions{Vector{1, 0}, Vector{0, 1}, Vector{1, -1}};
     INFO("fixed seed: " << seed);
 
     for (int case_index = 0; case_index < 8; ++case_index) {
         INFO("case index: " << case_index);
-        const int x0 = origin(generator);
-        const int y0 = origin(generator);
-        const int x1 = x0 + extent(generator);
-        const int y1 = y0 + extent(generator);
+        const int x0 = draw(-4, 4);
+        const int y0 = draw(-4, 4);
+        const int x1 = x0 + draw(1, 4);
+        const int y1 = y0 + draw(1, 4);
         const std::array<std::array<int, 2>, 4> corners{{
             {{x0, y0}}, {{x1, y0}}, {{x1, y1}}, {{x0, y1}}}};
         Vector coordinates;
@@ -234,11 +233,11 @@ TEST_CASE("fixed-seed integer rectangles have independently enumerated affine su
         }
         const auto input = vertices("seeded-rectangle-" + std::to_string(case_index), 2,
             std::move(coordinates), corners.size());
-        Matrix map{2, 2, {static_cast<double>(coefficient(generator)),
-            static_cast<double>(coefficient(generator)),
-            static_cast<double>(coefficient(generator)),
-            static_cast<double>(coefficient(generator))}};
-        Vector shift{static_cast<double>(offset(generator)), static_cast<double>(offset(generator))};
+        Matrix map{2, 2, {static_cast<double>(draw(-2, 2)),
+            static_cast<double>(draw(-2, 2)),
+            static_cast<double>(draw(-2, 2)),
+            static_cast<double>(draw(-2, 2))}};
+        Vector shift{static_cast<double>(draw(-3, 3)), static_cast<double>(draw(-3, 3))};
 
         // The oracle enumerates the four rational rectangle corners and applies
         // the integer map directly, without using production geometry helpers.
