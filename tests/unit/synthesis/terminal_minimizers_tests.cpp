@@ -47,7 +47,18 @@ synthesis::TerminalMinimizers solve(TerminalObjective objective,Vector anchor={0
     for(std::size_t i=0;i<h.equalities.rows();++i) {double a=0;for(std::size_t j=0;j<x.size();++j)a+=h.equalities(i,j)*x[j];if(std::abs(a-h.equality_values[i])>1e-6)return false;}
     return true;
 }
-sets::SetData box2() { return accepted(sets::make_h({{"terminal-box-2"},2,{}},{matrix({4,2,{1,0,-1,0,0,1,0,-1}}),vector({2,0,2,0}),matrix({0,2,{}}),vector({})})); }
+sets::SetData box_0_2() { return accepted(sets::make_h({{"terminal-box-0-2"},2,{}},{matrix({4,2,{1,0,-1,0,0,1,0,-1}}),vector({2,0,2,0}),matrix({0,2,{}}),vector({})})); }
+std::pair<problem::ResolvedProblem,FamilyRequest> linear_setup() {
+    auto p=resolved(LinearTerminal{{1,0},0});FamilyRequest q;q.objective=p.identity();return {std::move(p),std::move(q)};
+}
+std::pair<FamilyRequest,ExecutionContext> polyhedral_context(problem::ResolvedProblem& p) {
+    FamilyRequest q;q.objective=p.identity();q.profile="nominal-polyhedral";q.representation={"polyhedral-h"};
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    return {std::move(q),std::move(context)};
+}
+void check_edge_x0(const sets::SetData& relation) {
+    CHECK(contains(relation,{0,0}));CHECK(contains(relation,{0,1}));CHECK_FALSE(contains(relation,{0.5,0}));
+}
 }
 TEST_CASE("linear optimal face retains both ends and interior") {
     auto r=solve(LinearTerminal{{1,0},7},{0,0},7);for(const auto& d:r.diagnostics) MESSAGE(d.field,": ",d.explanation); REQUIRE(r.relation);CHECK(contains(*r.relation,{0,0}));CHECK(contains(*r.relation,{0,0.5}));CHECK(contains(*r.relation,{0,1}));CHECK_FALSE(contains(*r.relation,{1,0}));
@@ -122,9 +133,8 @@ TEST_CASE("linear cost x on [0,1]^2 gives the whole edge x=0") {
     // Every point with x=0 is optimal; no point with x>0 is optimal.
     auto r=solve(LinearTerminal{{1,0},0},{0,0},0);
     REQUIRE(r.relation);
-    CHECK(contains(*r.relation,{0,0}));
+    check_edge_x0(*r.relation);
     CHECK(contains(*r.relation,{0,0.5}));
-    CHECK(contains(*r.relation,{0,1}));
     CHECK_FALSE(contains(*r.relation,{0.5,0}));
     CHECK_FALSE(contains(*r.relation,{1,1}));
     CHECK(r.outcome==MathematicalOutcome::optimal);
@@ -147,9 +157,8 @@ TEST_CASE("rank-deficient quadratic (x+y-1)^2 on [0,2]^2 gives segment x+y=1") {
     // The minimizer set is the segment {(x,y): x+y=1, 0<=x<=1, 0<=y<=1}.
     Vector linear{-2,-2};
     auto p=resolved(QuadraticTerminal{{2,2,{1,1,1,1}},linear,1});
-    FamilyRequest req;req.objective=p.identity();req.profile="nominal-polyhedral";req.representation={"polyhedral-h"};
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    auto r=analytic_optimizer({0,1},0).solve(p,req,{p.identity(),box2()},context);
+    auto [req,context]=polyhedral_context(p);
+    auto r=analytic_optimizer({0,1},0).solve(p,req,{p.identity(),box_0_2()},context);
     REQUIRE(r.relation);
     CHECK(contains(*r.relation,{0,1}));
     CHECK(contains(*r.relation,{1,0}));
@@ -174,7 +183,7 @@ TEST_CASE("strictly convex quadratic has analytically unique minimizer") {
 
 TEST_CASE("unbounded attainment result is retained without a relation") {
     // Analytic oracle: unbounded outcome on a bounded slice must not produce a relation.
-    auto p=resolved(LinearTerminal{{1,0},0});FamilyRequest q;q.objective=p.identity();
+    auto [p,q]=linear_setup();
     auto r=analytic_optimizer({0,0},0,false,MathematicalOutcome::unbounded).solve(p,q,{p.identity(),box()},{});
     CHECK(r.outcome==MathematicalOutcome::unbounded);
     CHECK_FALSE(r.relation);
@@ -182,7 +191,7 @@ TEST_CASE("unbounded attainment result is retained without a relation") {
 
 TEST_CASE("undetermined attainment result is retained without a relation") {
     // Analytic oracle: undetermined outcome must not produce a relation.
-    auto p=resolved(LinearTerminal{{1,0},0});FamilyRequest q;q.objective=p.identity();
+    auto [p,q]=linear_setup();
     auto r=analytic_optimizer({0,0},0,false,MathematicalOutcome::undetermined).solve(p,q,{p.identity(),box()},{});
     CHECK(r.outcome==MathematicalOutcome::undetermined);
     CHECK_FALSE(r.relation);
@@ -192,23 +201,61 @@ TEST_CASE("objective tolerance does not change exact level-set construction") {
     // The exact level-set {x: c'x=c'a} is independent of numerical tolerances.
     // A relaxed sublevel would be a relaxation, not the exact minimizer relation.
     auto p=resolved(LinearTerminal{{1,0},0});
-    FamilyRequest q;q.objective=p.identity();q.profile="nominal-polyhedral";q.representation={"polyhedral-h"};
+    auto [q,context]=polyhedral_context(p);
     q.numerical.absolute_tolerance=1e-3;
-    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     auto r=analytic_optimizer({0,0},0).solve(p,q,{p.identity(),box()},context);
     REQUIRE(r.relation);
-    CHECK(contains(*r.relation,{0,0}));
-    CHECK(contains(*r.relation,{0,1}));
-    CHECK_FALSE(contains(*r.relation,{0.5,0}));
+    check_edge_x0(*r.relation);
     CHECK(std::holds_alternative<Unestablished>(r.construction.support));
 }
 
 TEST_CASE("infeasible terminal slice is rejected") {
     // An empty terminal reachability slice must yield infeasible, not an empty relation.
-    auto p=resolved(LinearTerminal{{1,0},0});FamilyRequest q;q.objective=p.identity();
+    auto [p,q]=linear_setup();
     // Create an empty box (infeasible): x <= 1 and -x <= -2 (i.e. x >= 2)
     auto empty_box=accepted(sets::make_h({{"empty-box"},2,{}},{matrix({4,2,{1,0,-1,0,0,1,0,-1}}),vector({1,-2,1,0}),matrix({0,2,{}}),vector({})}));
     auto r=analytic_optimizer({0,0},0,false,MathematicalOutcome::infeasible).solve(p,q,{p.identity(),empty_box},{});
     CHECK(r.outcome==MathematicalOutcome::infeasible);
     CHECK_FALSE(r.relation);
+}
+
+// ---- Issue #69 [TEST-11]: coverage-gap additions from code review ----
+
+TEST_CASE("solver bounds do not change exact level-set construction") {
+    // The exact level-set {x: c'x=c'a} is independent of solver bounds
+    // such as materialization limits and deadlines.
+    auto p=resolved(LinearTerminal{{1,0},0});
+    auto [q,context]=polyhedral_context(p);
+    q.materialization_limit=1;
+    context.deadline=std::chrono::steady_clock::now()+std::chrono::seconds(1);
+    auto r=analytic_optimizer({0,0},0).solve(p,q,{p.identity(),box()},context);
+    REQUIRE(r.relation);
+    check_edge_x0(*r.relation);
+}
+
+TEST_CASE("unique terminal minimizer is a singleton relation, not a unique control history") {
+    // A strictly convex terminal objective has a unique terminal-state minimizer.
+    // This uniqueness is about the terminal state, not the control history:
+    // multiple control sequences may achieve the same terminal state.
+    // The relation must be a singleton set over terminal states.
+    Vector linear{-0.6,-1.4};
+    auto r=solve(QuadraticTerminal{{2,2,{2,0,0,2}},linear,0.58},{0.3,0.7},0.58);
+    REQUIRE(r.relation);
+    CHECK(contains(*r.relation,{0.3,0.7}));
+    for(Vector x:std::vector<Vector>{{0,0},{1,1},{0,1},{1,0},{0.3,0.8},{0.2,0.7}})
+        CHECK_FALSE(contains(*r.relation,x));
+    CHECK(r.outcome==MathematicalOutcome::optimal);
+}
+
+TEST_CASE("stop does not become infeasibility or undetermined attainment by itself") {
+    // A solver stop (e.g., resource limit) must not flip the outcome to
+    // infeasible or undetermined by itself. The outcome is determined by the
+    // mathematical evidence, not by the execution termination.
+    auto [p,q]=linear_setup();
+    auto r=analytic_optimizer({0,0},0,false,MathematicalOutcome::optimal,Termination::resource_limit).solve(p,q,{p.identity(),box()},{});
+    CHECK(r.termination==Termination::resource_limit);
+    CHECK(r.outcome==MathematicalOutcome::optimal);
+    CHECK(r.outcome!=MathematicalOutcome::infeasible);
+    CHECK(r.outcome!=MathematicalOutcome::undetermined);
+    REQUIRE(r.relation);
 }
