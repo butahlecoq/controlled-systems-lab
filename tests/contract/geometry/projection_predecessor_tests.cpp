@@ -149,6 +149,23 @@ TEST_CASE("H projection preserves surviving equalities and coordinate ordering")
     CHECK(check_geometry_evidence(result.evidence,request).empty());
 }
 
+TEST_CASE("projection of the unit-square slice x+y=1 is the exact interval [0,1]") {
+    auto slice=h("unit-square-diagonal",2,
+        {4,2,{1,0,-1,0,0,1,0,-1}},{1,0,1,0},
+        {1,2,{1,1}},{1});
+    auto result=take(project(projection(slice.as_handle(),{0}),
+        geometry::polyhedral::ProjectionOutput::h));
+    // Rational parameterization (x,y)=(t,1-t), 0<=t<=1.
+    CHECK(contains(result.output,{0}));
+    CHECK(contains(result.output,{0.5}));
+    CHECK(contains(result.output,{1}));
+    CHECK_FALSE(contains(result.output,{-0.25}));
+    CHECK_FALSE(contains(result.output,{1.25}));
+    const auto representation=take(sets::from_handle(result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    CHECK(std::get<sets::HRepresentation>(representation).equalities.rows()==0);
+}
+
 TEST_CASE("V projection preserves rays including directions annihilated by selection") {
     auto joint=take(sets::make_v({{"V"},2,{"x","y"}},
         {take(numeric::snapshot(Matrix{1,2,{2,3}})),take(numeric::snapshot(Matrix{2,2,{1,0,0,-1}}))}));

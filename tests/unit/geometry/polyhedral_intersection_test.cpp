@@ -131,6 +131,41 @@ TEST_CASE("H intersection discovers new vertices when no input corner is feasibl
     for (const bool found : matched) CHECK(found);
 }
 
+TEST_CASE("unit square intersected with x+y<=1 matches the independent rational triangle") {
+    const auto square=hset("rational-unit-square",
+        {4,2,{1,0,-1,0,0,1,0,-1}},{1,0,1,0});
+    const auto lower_triangle=hset("rational-x-plus-y-halfspace",
+        {3,2,{1,1,-1,0,0,-1}},{1,0,0});
+    const auto result=take(geometry::polyhedral::intersect_h(square,lower_triangle,
+        {"rational-unit-triangle"}));
+    const auto rep=result.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(rep));
+    const auto& h=std::get<sets::HRepresentation>(rep);
+    // Independently enumerated vertices are (0,0), (1,0), and (0,1).
+    // Check interior, edges, and excluded points against the returned rows.
+    for (const auto point : {std::array<double,2>{0,0}, {1,0}, {0,1},
+             {0.25,0.25}, {0.5,0.5}, {0.25,0.75}}) {
+        bool accepted=true;
+        for (std::size_t row=0;row<h.inequalities.rows();++row)
+            accepted=accepted && h.inequalities(row,0)*point[0]
+                +h.inequalities(row,1)*point[1]<=h.upper_bounds[row];
+        for (std::size_t row=0;row<h.equalities.rows();++row)
+            accepted=accepted && h.equalities(row,0)*point[0]
+                +h.equalities(row,1)*point[1]==h.equality_values[row];
+        CHECK(accepted);
+    }
+    for (const auto point : {std::array<double,2>{0.75,0.75}, {1,1}, {-0.25,0.25}}) {
+        bool accepted=true;
+        for (std::size_t row=0;row<h.inequalities.rows();++row)
+            accepted=accepted && h.inequalities(row,0)*point[0]
+                +h.inequalities(row,1)*point[1]<=h.upper_bounds[row];
+        for (std::size_t row=0;row<h.equalities.rows();++row)
+            accepted=accepted && h.equalities(row,0)*point[0]
+                +h.equalities(row,1)*point[1]==h.equality_values[row];
+        CHECK_FALSE(accepted);
+    }
+}
+
 TEST_CASE("H intersection retains empty results and affine equalities") {
     const auto left = hset("left", {1,2,{1,0}}, {0});
     const auto right = hset("right", {1,2,{-1,0}}, {-1});
