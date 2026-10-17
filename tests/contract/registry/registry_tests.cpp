@@ -295,11 +295,16 @@ TEST_CASE("direct strategy admission rejects malformed effective requests before
     CHECK(workspace.attempts==1);
 }
 
-TEST_CASE("prepared strategy rejects a mismatched execution policy and preserves matching solve evidence") {
+TEST_CASE("prepared strategy reports a mismatched execution policy as pre-execution contract rejection") {
+    auto solve_count=std::make_shared<std::size_t>();
     class PolicyObservingWorkspace final : public SynthesisWorkspace {
+        std::shared_ptr<std::size_t> solve_count_;
     public:
+        explicit PolicyObservingWorkspace(std::shared_ptr<std::size_t> solve_count)
+            : solve_count_(std::move(solve_count)) {}
         SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,
             const ExecutionContext& context) override {
+            ++*solve_count_;
             const auto id=problem.identity();
             SynthesisResult result{Termination::completed,
                 {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{}};
@@ -312,14 +317,15 @@ TEST_CASE("prepared strategy rejects a mismatched execution policy and preserves
     StrategyRegistry strategies;
     REQUIRE_FALSE(strategies.add({{{"policy-observer"},"1"},
         [](const StrategyRequest&,const Requirements&) -> Capability { return Offer{}; },
-        [](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
+        [solve_count](const StrategyRequest&,const Requirements&) -> std::variant<StrategyPlan,Rejection> {
             return compose_strategy(std::get<0>(check_pipeline()),
-                [](auto,const StrategyRequest&,const Requirements&) {
-                    return std::make_unique<PolicyObservingWorkspace>();
+                [solve_count](auto,const StrategyRequest&,const Requirements&) {
+                    return std::make_unique<PolicyObservingWorkspace>(solve_count);
                 });
         }}));
     auto request=strategy_request();
     request.configuration.strategy={"policy-observer"};
+    request.strategy_version="1";
     request.family.numerical={0.125,0.25};
     auto prepared=strategies.prepare(request);
     REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
@@ -328,10 +334,27 @@ TEST_CASE("prepared strategy rejects a mismatched execution policy and preserves
     auto mismatched=context();
     mismatched.numerical={0.5,0.25};
     const auto rejected=workspace->run(mismatched);
-    REQUIRE(std::holds_alternative<Unsupported>(rejected));
-    REQUIRE(std::get<Unsupported>(rejected).diagnostics.size()==1);
-    CHECK(std::get<Unsupported>(rejected).diagnostics[0].code==DiagnosticCode::invalid_input);
-    CHECK(std::get<Unsupported>(rejected).diagnostics[0].field=="family.numerical");
+    REQUIRE(std::holds_alternative<SynthesisResult>(rejected));
+    const auto& rejected_result=std::get<SynthesisResult>(rejected);
+    CHECK(rejected_result.termination==Termination::contract_rejected);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(rejected_result.stop));
+    const auto& failure=std::get<ContractValidationFailure>(rejected_result.stop);
+    REQUIRE(failure.diagnostics.size()==1);
+    CHECK(failure.diagnostics[0].code==DiagnosticCode::invalid_input);
+    CHECK(failure.diagnostics[0].field=="family.numerical");
+    CHECK_FALSE(failure.retained.lower_bound);
+    CHECK_FALSE(failure.retained.upper_bound);
+    CHECK(failure.retained.incumbents==0);
+    CHECK_FALSE(failure.retained.partial_or_candidate_family);
+    CHECK(rejected_result.objective.lower==std::nullopt);
+    CHECK(rejected_result.objective.upper==std::nullopt);
+    CHECK_FALSE(rejected_result.family.has_value());
+    CHECK(rejected_result.incumbents.empty());
+    CHECK(rejected_result.spans.empty());
+    const FamilyIdentity expected{request.problem.identity(),request.family,
+        request.problem.constraints().coordinates(),request.configuration.strategy,request.strategy_version,request.lineage};
+    CHECK(check_synthesis_result(rejected_result,expected).empty());
+    CHECK(*solve_count==0);
 
     auto matching=context();
     matching.numerical={0.125,0.25};
@@ -345,6 +368,7 @@ TEST_CASE("prepared strategy rejects a mismatched execution policy and preserves
     CHECK(observed->relative_tolerance==0.25);
     CHECK(observed->max_residual==0);
     CHECK(observed->verifier.value=="policy-observer");
+    CHECK(*solve_count==1);
 }
 
 TEST_CASE("scoped provider provenance is checked without erasing retained evidence") {

@@ -121,8 +121,13 @@ StrategyRequest StrategyPort::snapshot(const Request& request) {
 SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,const ExecutionContext& context) {
     auto admission=check_family_request(request.family,request.problem.identity());
     if (!admission.empty()) return Unsupported{std::move(admission)};
-    if (!(request.family.numerical==context.numerical))
-        return Unsupported{{{DiagnosticCode::invalid_input,"family.numerical","ExecutionContext numerical policy differs from the prepared family request"}}};
+    if (!(request.family.numerical==context.numerical)) {
+        Diagnostics diagnostics{{DiagnosticCode::invalid_input,"family.numerical",
+            "ExecutionContext numerical policy differs from the prepared family request"}};
+        return SynthesisResult{Termination::contract_rejected,
+            {request.problem.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
+            {},{},{},{},ContractValidationFailure{std::move(diagnostics),{},{}}};
+    }
     if (request.family.assurance==Assurance::validated)
         return Unsupported{{{DiagnosticCode::unsupported,"family.assurance","No validated family verifier is implemented"}}};
     const auto id=request.problem.identity();
