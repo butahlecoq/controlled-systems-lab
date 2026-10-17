@@ -1148,6 +1148,46 @@ TEST_CASE("registered inverse-only capability identifies the singular stage whil
     CHECK(factories==1);
 }
 
+TEST_CASE("finite control catalogue is not admitted through its feasible convex hull") {
+    Registry<LPPort> lp;
+    std::size_t workspace_creations=0;
+    auto registration=endpoint_registration();
+    registration.factory=[&](const LinearProgram&) {
+        ++workspace_creations;
+        return std::make_unique<EndpointWorkspace>();
+    };
+    REQUIRE_FALSE(lp.add(std::move(registration)));
+    StrategyRegistry strategies;
+    strategies.add(forward_registration(lp));
+
+    auto request=strategy_request();
+    auto authored=*request.problem.description();
+    authored.controls=FiniteDomain{1,{{-1},{1}}};
+    authored.states={UniversalSet{1},Singleton{{0}}};
+    authored.objective=LinearTerminal{{1},0};
+    auto resolved=csl::problem::resolve(authored,
+        {csl::problem::UncertaintyStructure::stage_product_uncoupled,{},{}});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedProblem>(resolved));
+    request.problem=std::get<csl::problem::ResolvedProblem>(std::move(resolved));
+    request.family.objective=request.problem.identity();
+
+    // x1 = u and the terminal requirement is x1 = 0. Neither catalogue action
+    // is feasible, although their convex hull contains u = 0.
+    const auto& catalogue=std::get<FiniteDomain>(*request.problem.controls().description());
+    REQUIRE(catalogue.catalogue==std::vector<Vector>{{-1},{1}});
+    CHECK(catalogue.catalogue[0][0]!=0);
+    CHECK(catalogue.catalogue[1][0]!=0);
+    CHECK((catalogue.catalogue[0][0]+catalogue.catalogue[1][0])/2==0);
+
+    const auto prepared=strategies.prepare(request);
+    REQUIRE(std::holds_alternative<Rejection>(prepared));
+    const auto& rejection=std::get<Rejection>(prepared);
+    REQUIRE_FALSE(rejection.diagnostics.empty());
+    CHECK(rejection.diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(rejection.diagnostics[0].field=="controls");
+    CHECK(workspace_creations==0);
+}
+
 TEST_CASE("exact family target and equivalent relation cannot establish completeness") {
     Registry<LPPort> registry;
     auto entry = endpoint_registration();
