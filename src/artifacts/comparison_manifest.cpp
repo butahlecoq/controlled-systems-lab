@@ -180,7 +180,7 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
         return std::get<ArtifactError>(std::move(content));
     } catch (const ArtifactError& failure) { return failure; }
       catch (const std::bad_alloc&) { return error(ArtifactErrorCode::allocation, "comparison", "Allocation failed"); }
-      catch (const std::exception&) { return error(ArtifactErrorCode::invalid_input, "comparison", "Invalid spec or attempt data"); }
+      catch (const std::exception& failure) { return error(ArtifactErrorCode::invalid_input, "comparison", std::string("Invalid spec or attempt data: ") + failure.what()); }
 }
 
 ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::string_view text, DecodeLimits limits) {
