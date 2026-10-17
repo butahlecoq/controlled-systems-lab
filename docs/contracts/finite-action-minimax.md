@@ -63,6 +63,20 @@ per-plan status and objective, and brackets the exact norm for this one saved
 fixture. Its a posteriori discrepancy bounds do not upgrade this port's
 `Assurance::numerical` or prove a general validated-arithmetic contract.
 
+`worst_case_interval` is a separate bound query for a compact native V set or
+singleton. It interprets stored binary64 vertices and objective coefficients
+as exact real inputs, obtains a coordinate box for the convex hull, and applies
+outward interval evaluation to the objective over that box. A lower bound is
+the largest lower endpoint from evaluating authored vertices; an upper bound
+encloses every objective value on the coordinate box. The box may make bounds
+loose, especially for quadratic objectives with repeated coordinates. The
+result binds the caller's problem/request IDs and source `SetId`; it is an
+outward range for that stored-set/objective query, not a certificate that
+binary64 reachability or a geometry conversion produced the intended source
+set. Empty input has its own outcome; unbounded, unsupported and over-capacity
+inputs do not publish bounds. This function does not replace the numerical
+`worst_case_vertex` or upgrade finite-action feasibility and minimizer claims.
+
 ## Report and modular integration gates
 
 The versioned EXT-01 fixed-plan report measures direct fixed-plan and vertex
