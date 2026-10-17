@@ -56,6 +56,26 @@ here. The checked result does not establish a historical implementation match,
 global optimality, a complete optimal family, binary64 enclosure, or a
 performance comparison.
 
+## Native geometry-port replay
+
+The [C++ contract test](../../tests/contract/geometry/r29_scalar_reference_tests.cpp)
+replays this *inferred* case through the registered
+`csl.geometry.generators.operations@1.1.0` port. At each of 16 transitions it
+applies `A` to the current zonotope, applies `B` to a fresh scalar factor
+`u.t`, then forms an independent Minkowski sum. It checks all 17 stage centers,
+generator counts and ordered factor identities, plus every terminal generator
+column and the four coordinate intervals against the separately saved
+exact-rational reference. The regression uses the public operation/evidence
+boundary, with numerical assurance and no reduction or vertex conversion.
+
+The printed coefficients and all checked intermediate results in this
+particular recurrence are exactly representable in binary64. Exact equality
+in this test is a property of this fixture; the adapter's general binary64
+operations have no validated rounding enclosure or global error bound. This
+replay also supplies no objective, optimal-family coverage evidence, historical
+run match, or timing comparison. Issue #8 remains open for those separate
+questions and broader interchangeable geometry acceptance.
+
 ## Reproduce
 
 From the repository root:
@@ -63,6 +83,9 @@ From the repository root:
 ```powershell
 python -B docs/research/tools/check_r29_reference.py --verify-record docs/research/evidence/r29-corrected-scalar-reference.json
 python -B -m unittest docs/research/tools/test_r29_reference.py
+# After configuring a native build as documented in the repository README:
+python -m cmake --build build/dev --config Release --target r29_scalar_reference_tests
+ctest --test-dir build/dev -C Release -R '^r29_scalar_reference_tests$' --output-on-failure
 ```
 
 The scenario has its own ID. Do not substitute it for R29's printed
