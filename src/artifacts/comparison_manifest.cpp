@@ -198,7 +198,7 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
         if (spec.dump() != spec_text) return error(ArtifactErrorCode::invalid_input, "comparison.spec", "Spec is not canonical JSON");
         const auto [strategy_count,repetition_count]=validate_spec(spec);
         auto owned_spec = own(spec_text);
-        if (std::holds_alternative<ArtifactError>(owned_spec) || problem::hex(std::get<problem::ResolvedContent>(owned_spec).digest()) != wire.at("spec_digest"))
+        if (std::holds_alternative<ArtifactError>(owned_spec) || problem::hex(std::get<problem::ResolvedContent>(owned_spec).digest()) != wire.at("spec_digest").get<std::string>())
             return error(ArtifactErrorCode::identity, "comparison.spec_digest", "Spec digest mismatch");
         const auto& attempts = wire.at("attempts");
         if (!attempts.is_array() || attempts.empty()) return error(ArtifactErrorCode::invalid_input, "comparison.attempts", "At least one attempt is required");
