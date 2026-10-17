@@ -293,6 +293,23 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         return 2;
     }
 
+    const auto lock_directory = directory / ".scenario-cli-publish.lock";
+    if (!std::filesystem::create_directory(lock_directory, ec)) {
+        std::cerr << "Output rejected: cannot acquire paired publication lock "
+                  << lock_directory.string();
+        if (ec) std::cerr << ": " << ec.message();
+        else std::cerr << ": another publication may be in progress";
+        std::cerr << '\n';
+        return 2;
+    }
+    struct PublicationLock {
+        std::filesystem::path path;
+        ~PublicationLock() {
+            std::error_code ignored;
+            std::filesystem::remove(path, ignored);
+        }
+    } publication_lock{lock_directory};
+
     constexpr std::array<std::string_view, 2> names{"reach-back", "strategy-b"};
     std::array<std::filesystem::path, 2> targets{
         directory / "reach-back.run.json", directory / "strategy-b.run.json"};
