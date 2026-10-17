@@ -183,6 +183,39 @@ TEST_CASE("projection of the unit-square slice x+y=1 is the exact interval [0,1]
     CHECK(has_upper);
 }
 
+TEST_CASE("projection of the rational unit-square triangle is the exact interval [0,1]") {
+    // The triangle has vertices (0,0), (1,0), and (0,1). Its x projection is [0,1].
+    auto triangle=h("unit-square-lower-triangle",2,
+        {5,2,{1,0,-1,0,0,1,0,-1,1,1}},{1,0,1,0,1},
+        {0,2,{}},{});
+    const auto request=projection(triangle.as_handle(),{0});
+    const auto result=take(project(request,geometry::polyhedral::ProjectionOutput::h));
+    CHECK(contains(result.output,{0}));
+    CHECK(contains(result.output,{0.5}));
+    CHECK(contains(result.output,{1}));
+    CHECK_FALSE(contains(result.output,{-0.25}));
+    CHECK_FALSE(contains(result.output,{1.25}));
+    const auto representation=take(sets::from_handle(result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& projected=std::get<sets::HRepresentation>(representation);
+    CHECK(projected.equalities.rows()==0);
+    REQUIRE(projected.inequalities.rows()>=2);
+    bool has_lower=false;
+    bool has_upper=false;
+    for(std::size_t row=0;row<projected.inequalities.rows();++row) {
+        const double coefficient=projected.inequalities(row,0);
+        const double bound=projected.upper_bounds[row];
+        const bool lower=coefficient==-1.0 && bound==0.0;
+        const bool upper=coefficient==1.0 && bound==1.0;
+        CHECK((lower || upper));
+        has_lower=has_lower || lower;
+        has_upper=has_upper || upper;
+    }
+    CHECK(has_lower);
+    CHECK(has_upper);
+    CHECK(check_geometry_evidence(result.evidence,request).empty());
+}
+
 TEST_CASE("V projection preserves rays including directions annihilated by selection") {
     auto joint=take(sets::make_v({{"V"},2,{"x","y"}},
         {take(numeric::snapshot(Matrix{1,2,{2,3}})),take(numeric::snapshot(Matrix{2,2,{1,0,0,-1}}))}));
