@@ -8,9 +8,11 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <iostream>
 #include <numeric>
+#include <random>
 #include <type_traits>
 
 using namespace csl;
@@ -205,6 +207,61 @@ TEST_CASE("registered affine image preserves the literal shifted reversed interv
     REQUIRE(result.evidence.error_bound.has_value());
     CHECK(result.evidence.error_bound->bound==0.0);
     CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
+TEST_CASE("fixed-seed integer rectangles have independently enumerated affine supports") {
+    constexpr std::uint32_t seed = 0x5EED08U;
+    std::mt19937 generator(seed);
+    std::uniform_int_distribution<int> origin(-4, 4);
+    std::uniform_int_distribution<int> extent(1, 4);
+    std::uniform_int_distribution<int> coefficient(-2, 2);
+    std::uniform_int_distribution<int> offset(-3, 3);
+    const std::array<Vector, 3> directions{Vector{1, 0}, Vector{0, 1}, Vector{1, -1}};
+    INFO("fixed seed: " << seed);
+
+    for (int case_index = 0; case_index < 8; ++case_index) {
+        INFO("case index: " << case_index);
+        const int x0 = origin(generator);
+        const int y0 = origin(generator);
+        const int x1 = x0 + extent(generator);
+        const int y1 = y0 + extent(generator);
+        const std::array<std::array<int, 2>, 4> corners{{
+            {{x0, y0}}, {{x1, y0}}, {{x1, y1}}, {{x0, y1}}}};
+        Vector coordinates;
+        for (const auto& point : corners) {
+            coordinates.push_back(static_cast<double>(point[0]));
+            coordinates.push_back(static_cast<double>(point[1]));
+        }
+        const auto input = vertices("seeded-rectangle-" + std::to_string(case_index), 2,
+            std::move(coordinates), corners.size());
+        Matrix map{2, 2, {static_cast<double>(coefficient(generator)),
+            static_cast<double>(coefficient(generator)),
+            static_cast<double>(coefficient(generator)),
+            static_cast<double>(coefficient(generator))}};
+        Vector shift{static_cast<double>(offset(generator)), static_cast<double>(offset(generator))};
+
+        // The oracle enumerates the four rational rectangle corners and applies
+        // the integer map directly, without using production geometry helpers.
+        std::array<std::array<int, 2>, 4> image{};
+        for (std::size_t i = 0; i < corners.size(); ++i) {
+            image[i][0] = static_cast<int>(map(0, 0)) * corners[i][0] +
+                static_cast<int>(map(0, 1)) * corners[i][1] + static_cast<int>(shift[0]);
+            image[i][1] = static_cast<int>(map(1, 0)) * corners[i][0] +
+                static_cast<int>(map(1, 1)) * corners[i][1] + static_cast<int>(shift[1]);
+        }
+
+        const auto result = take(run(request(AffineImage{input, map, shift},
+            "seeded-affine-" + std::to_string(case_index)), dependencies()));
+        for (const auto& direction : directions) {
+            int expected = std::numeric_limits<int>::min();
+            for (const auto& point : image) {
+                const int value = static_cast<int>(direction[0]) * point[0] +
+                    static_cast<int>(direction[1]) * point[1];
+                expected = std::max(expected, value);
+            }
+            CHECK(support(result.output, direction) == static_cast<double>(expected));
+        }
+    }
 }
 
 TEST_CASE("affine reflection and translation of the unit box match rational support oracles") {
