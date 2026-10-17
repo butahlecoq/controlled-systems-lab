@@ -67,7 +67,8 @@ bool status_matches(AttemptStatus status, const Json& run) {
         if(termination=="completed")return status==AttemptStatus::completed;
         if(termination=="cancelled")return status==AttemptStatus::cancelled;
         if(termination=="resource_limit")return status==AttemptStatus::resource_limited;
-        if(termination=="operation_rejected"||termination=="contract_rejected")return status==AttemptStatus::unsupported;
+        if(termination=="operation_rejected")return status==AttemptStatus::unsupported;
+        if(termination=="contract_rejected")return status==AttemptStatus::failed;
         return termination=="numerical_failure"&&status==AttemptStatus::failed;
     }
     if(kind=="unsupported")return status==AttemptStatus::unsupported;
