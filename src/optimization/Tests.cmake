@@ -75,3 +75,10 @@ add_executable(finite_action_minimax_port_tests tests/unit/optimization/finite_a
 target_link_libraries(finite_action_minimax_port_tests PRIVATE CSL::finite_action_minimax_port doctest::doctest)
 add_test(NAME finite_action_minimax_port_tests COMMAND finite_action_minimax_port_tests)
 csl_test_target(finite_action_minimax_port_tests optimization)
+
+if(TARGET CSL::highs_lp AND TARGET CSL::highs_convex)
+  add_executable(zoutendijk_projection_tests tests/unit/optimization/zoutendijk_projection_tests.cpp)
+  target_link_libraries(zoutendijk_projection_tests PRIVATE CSL::zoutendijk_projection CSL::highs_lp CSL::highs_convex doctest::doctest)
+  add_test(NAME zoutendijk_projection_tests COMMAND zoutendijk_projection_tests)
+  csl_test_target(zoutendijk_projection_tests optimization)
+endif()

@@ -16,6 +16,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/problem_client.cpp" DESTINATION "${
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/resolved_problem_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/execution_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/optimization_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/zoutendijk_projection_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/registry_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/application_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/provider_client.cpp" DESTINATION "${work}/source")
