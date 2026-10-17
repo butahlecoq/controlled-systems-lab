@@ -52,6 +52,19 @@ endif()
 if(NOT EXISTS "${notices_root}/nlohmann-json-3.11.3/LICENSE.MIT")
   message(FATAL_ERROR "Installed input dependency notice is missing")
 endif()
+if(NOT EXISTS "${notices_root}/Eigen-3.4.0/COPYING.README")
+  message(FATAL_ERROR "Installed Eigen dependency notice is missing")
+endif()
+if(CSL_EXPECT_HIGHS)
+  foreach(highs_notice IN ITEMS
+      "${notices_root}/HiGHS-1.11.0/LICENSE.txt"
+      "${notices_root}/HiGHS-1.11.0/extern/filereaderlp/LICENSE"
+      "${notices_root}/HiGHS-1.11.0/extern/pdqsort/license.txt")
+    if(NOT EXISTS "${highs_notice}")
+      message(FATAL_ERROR "Installed HiGHS dependency notice is missing: ${highs_notice}")
+    endif()
+  endforeach()
+endif()
 if(CSL_EXPECT_QHULL AND NOT EXISTS
     "${notices_root}/Qhull-8.0.2/COPYING.txt")
   message(FATAL_ERROR "Installed Qhull dependency notice is missing")
