@@ -62,6 +62,18 @@ Capability admission returns `Unsupported` for nonempty V ray sets, unbounded H 
 
 This selection does not implement the general polyhedral operation algebra. Affine images, Minkowski sums, intersections, set projections, and nominal predecessor operations still require separate `GeometryPort` adapters and operation-specific guarantee rules; they remain open in #40/#41/#51. Conversion residual checks are numerical evidence only and do not prove global set equality. A successful `equivalent` result is the adapter's numerical algorithm claim under its recorded assumptions, not exact arithmetic or a validated certificate.
 
+## 2026-10-18 update: bounded Qhull integration review
+
+The source-backed [Qhull 8.0.2 integration review](../../research/qhull-8.0.2-integration-review.md)
+records the supported bounded H/V profile, numeric-only evidence, signed-integer
+and caller-capacity limits, boundary-only cancellation, and the evidence gap for
+independent-instance concurrency. It also checks the upstream notice against
+the configured install path; the installed-package script now asserts the
+Qhull notice when that optional integration is enabled. This closes only the
+source-scope and notice-presence-test subgate. It does not establish a global
+memory/facet cap, interruptible Qhull calls, a verified thread-safety guarantee,
+or downstream package completeness; issue #7 remains open.
+
 ## 2026-10-17 update: bounded HiGHS LP/QP integration review
 
 The [pinned HiGHS 1.11.0 integration review](../../research/highs-1.11-integration-review.md) ties the selected static build and narrow downstream initialization patch to upstream source, the current adapters, concurrent-workspace and preexecution-stop tests, and the three-file notice inventory. It supports only the adapters' one-thread, separate-workspace Windows profile. Simplex cancellation is cooperative; the QP path has no prompt stop-token callback. No process-wide thread or memory cap, hard deadline, general thread-safety claim, or final distribution-license approval follows from this check. This ADR remains **pending integration review** for the other selected dependencies, Qhull's bounded conversion profile, cross-platform/race coverage, and packaging; architecture issue #7 remains open.

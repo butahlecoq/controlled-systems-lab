@@ -102,7 +102,7 @@ struct Facets { std::vector<Eigen::VectorXd> normals; std::vector<double> offset
 Facets hull_facets(const Eigen::MatrixXd& points) {
     Facets result;
     if (points.cols()<2||points.rows()<=points.cols()) { result.error="Qhull needs more than dimension+1 points."; return result; }
-    if (points.cols()>std::numeric_limits<int>::max()||points.rows()>std::numeric_limits<int>::max()) {
+    if (points.cols()>std::numeric_limits<int>::max()||points.rows()>qh_POINTSmax) {
         result.error="Qhull's signed-int point or dimension limit is exceeded."; return result;
     }
     std::vector<coordT> coordinates;

@@ -47,6 +47,10 @@ execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
 if(NOT EXISTS "${prefix}/share/CSL/notices/nlohmann-json-3.11.3/LICENSE.MIT")
   message(FATAL_ERROR "Installed input dependency notice is missing")
 endif()
+if(CSL_EXPECT_QHULL AND NOT EXISTS
+    "${prefix}/share/CSL/notices/Qhull-8.0.2/COPYING.txt")
+  message(FATAL_ERROR "Installed Qhull dependency notice is missing")
+endif()
 file(READ "${prefix}/lib/cmake/CSL/CSLTargets.cmake" input_export)
 if(input_export MATCHES "nlohmann|csl_json")
   message(FATAL_ERROR "Private input JSON dependency leaked into exports")
