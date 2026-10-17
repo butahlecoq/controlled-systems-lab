@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://controlled-systems-lab.example/schemas/comparison-v1.schema.json",
+  "title": "CSL inert recorded comparison",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "spec", "spec_digest", "attempts"],
+  "properties": {
+    "schema": {"const": "csl.comparison/1"},
+    "spec": {"type": "string", "description": "Canonical JSON bytes for the immutable caller-authored comparison spec."},
+    "spec_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "attempts": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["strategy_index", "repetition_index", "reported_status", "run"],
+        "properties": {
+          "strategy_index": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+          "repetition_index": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+          "reported_status": {"enum": ["completed", "failed", "unsupported", "cancelled", "resource_limited", "incomplete"], "description": "Caller-reported label; importing it does not authenticate that it matches the inert run record."},
+          "run": {"type": "string", "description": "Canonical csl.run-statistics/5 JSON; always imported as unverified recorded data."}
+        }
+      }
+    }
+  }
+}

@@ -6,6 +6,7 @@
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/application/comparison.hpp>
 #include <csl/artifacts/run_statistics.hpp>
+#include <csl/artifacts/comparison_manifest.hpp>
 #include <csl/execution/observability.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/problem/validator.hpp>
@@ -205,6 +206,16 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
     CHECK(wire.find("registered_verifier")!=std::string::npos);
     static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
+    const auto spec=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>("{}"),2}));
+    const std::vector<ar::ComparisonAttempt> attempts{{static_cast<std::uint32_t>(strategy_index),0,
+        ar::AttemptStatus::completed,imported}};
+    const auto bundle=take_artifact(ar::encode_recorded_comparison(spec,attempts),"encode_recorded_comparison");
+    const auto bundle_wire=std::string(reinterpret_cast<const char*>(bundle.content().bytes().data()),bundle.content().bytes().size());
+    const auto restored_bundle=take_artifact(ar::decode_recorded_comparison(bundle_wire),"decode_recorded_comparison");
+    CHECK(restored_bundle.content().digest()==bundle.content().digest());
+    CHECK(bundle_wire.find("csl.comparison/1")!=std::string::npos);
+    CHECK(bundle_wire.find("csl.run-statistics/5")!=std::string::npos);
     const auto expected_content=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
         std::span<const std::byte>{reinterpret_cast<const std::byte*>(wire.data()),wire.size()}));
     CHECK(imported.content().digest()==expected_content.digest());
