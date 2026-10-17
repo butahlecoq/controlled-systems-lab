@@ -592,13 +592,16 @@ ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics& own
     catch(const Json::exception&) { return ArtifactError{ArtifactErrorCode::invalid_input,"recorded.json","Invalid portable recorded data"}; }
     catch(const std::bad_alloc&) { return ArtifactError{ArtifactErrorCode::allocation,{},{}}; }
 }
-ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view text,DecodeLimits limits) {
+ArtifactResult<RecordedRunArtifact> decode_recorded_run_impl(std::string_view text,DecodeLimits limits,
+    const problem::ProblemId* expected_problem) {
     try {
         auto wire=parse_document(text,limits);
         closed(wire,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection","recorded_state"});
         require(wire.at("schema")=="csl.run-statistics/5","schema","Unsupported recorded run schema");
         require(wire.at("recorded_state")=="unverified_recorded_data","recorded_state","Recorded claims are always untrusted");
         require(wire.dump()==text,"recorded.canonical","Recorded artifact is not in canonical form or contains trailing bytes");
+        if(expected_problem&&get<ProblemId>(wire.at("problem"))!=*expected_problem)
+            return ArtifactError{ArtifactErrorCode::identity,"run.problem","Recorded run does not match the supplied resolved problem"};
         const auto attachments=get<std::vector<Attachment>>(wire.at("attachments"));
         std::set<std::string> ids;
         for(const auto& attachment:attachments) {
@@ -641,18 +644,12 @@ ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view text,De
     catch(const Json::exception&) { return ArtifactError{ArtifactErrorCode::invalid_input,"recorded.json","Malformed recorded artifact"}; }
     catch(const std::bad_alloc&) { return ArtifactError{ArtifactErrorCode::allocation,{},{}}; }
 }
+ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view text,DecodeLimits limits) {
+    return decode_recorded_run_impl(text,limits,nullptr);
+}
 ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view text,const problem::ResolvedProblem& problem,DecodeLimits limits) {
-    auto recorded=decode_recorded_run(text,limits);
-    if(const auto* error=std::get_if<ArtifactError>(&recorded))return *error;
-    try {
-        const auto wire=parse_document(text,limits);
-        if(get<ProblemId>(wire.at("problem"))!=problem.identity())
-            return ArtifactError{ArtifactErrorCode::identity,"run.problem","Recorded run does not match the supplied resolved problem"};
-        return std::get<RecordedRunArtifact>(std::move(recorded));
-    } catch(const ArtifactError& error) { return error; }
-    catch(const Invalid& error) { return ArtifactError{ArtifactErrorCode::invalid_input,error.path,error.message}; }
-    catch(const Json::exception&) { return ArtifactError{ArtifactErrorCode::invalid_input,"recorded.json","Malformed recorded artifact"}; }
-    catch(const std::bad_alloc&) { return ArtifactError{ArtifactErrorCode::allocation,{},{}}; }
+    const auto expected_problem=problem.identity();
+    return decode_recorded_run_impl(text,limits,&expected_problem);
 }
 ArtifactResult<std::string> check_record_portability(const RunRecord& record) {
     try {return run_json(record).dump();}
