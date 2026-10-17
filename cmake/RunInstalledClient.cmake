@@ -44,11 +44,16 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/farkas_factory_forge_client.cpp" DE
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
-if(NOT EXISTS "${prefix}/share/CSL/notices/nlohmann-json-3.11.3/LICENSE.MIT")
+if(IS_ABSOLUTE "${CSL_INSTALL_DATADIR}")
+  set(notices_root "${CSL_INSTALL_DATADIR}/CSL/notices")
+else()
+  set(notices_root "${prefix}/${CSL_INSTALL_DATADIR}/CSL/notices")
+endif()
+if(NOT EXISTS "${notices_root}/nlohmann-json-3.11.3/LICENSE.MIT")
   message(FATAL_ERROR "Installed input dependency notice is missing")
 endif()
 if(CSL_EXPECT_QHULL AND NOT EXISTS
-    "${prefix}/share/CSL/notices/Qhull-8.0.2/COPYING.txt")
+    "${notices_root}/Qhull-8.0.2/COPYING.txt")
   message(FATAL_ERROR "Installed Qhull dependency notice is missing")
 endif()
 file(READ "${prefix}/lib/cmake/CSL/CSLTargets.cmake" input_export)
