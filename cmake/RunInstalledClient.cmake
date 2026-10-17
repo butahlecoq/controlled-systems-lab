@@ -92,6 +92,8 @@ foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp registered_synthesis_comparison.cpp scenario_cli.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()
+file(COPY "${CSL_SOURCE_DIR}/examples/scenario_cli_export_check.cmake"
+  DESTINATION "${example_source}")
 file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
   DESTINATION "${example_source}/scenarios")
 execute_process(COMMAND "${CMAKE_COMMAND}" -S "${example_source}" -B "${work}/examples-build"
