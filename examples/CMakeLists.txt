@@ -160,6 +160,11 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unsupported-representation.json" "${unsu
 example_check(scenario_cli_run_unsupported_representation scenario_cli
   "--run;${CMAKE_CURRENT_BINARY_DIR}/unsupported-representation.json" 2
   "Input unsupported: path=/run/backends/representation observed=csl.polyhedron.v.*expected csl.polyhedron.h")
+string(JSON explicit_h_representation_scenario SET "${validation_scenario}" run "{\"backends\":{\"representation\":\"csl.polyhedron.h\"}}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" "${explicit_h_representation_scenario}")
+example_check(scenario_cli_run_explicit_h_representation scenario_cli
+  "--run;${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" 0
+  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=31 threads=1.*verification=numerical_pass")
 example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.0.0.highs.1.11.0")
