@@ -64,18 +64,28 @@ malformed, or numerically inconsistent dependencies do not produce a successful
 set result.
 
 The result uses `SetRelation::equivalent` with `NumericalCheck` evidence under
-the caller's tolerance. This is an algorithmic numerical relation only. For a
-finite V input, the source set is the convex hull of stored binary64 vertices,
-interpreted as exact dyadics; the intended exact-real image or sum of that set
-can still differ from the hull of rounded, generated candidates. Exact
-candidate deletion preserves only that latter hull. For an H input, even the
-input-to-vertex correspondence depends on the selected converter's numerical
-coverage claim: checking each returned vertex against H rows does not prove
-that all needed vertices were found. The operation reports no bound between
-its output and either exact stored-input model or an authored pre-rounding real
-model. `NumericalCheck.max_residual` does not supply such a bound. Binary64
-overflow is reported as failure; finite underflow/cancellation can still alter
-candidate coordinates. Validated assurance is rejected. The
+the caller's tolerance. This is an algorithmic numerical relation only. For
+direct finite V, singleton, and empty inputs, the operation also reports an
+outward-rounded `GeometryEvidence.error_bound` when exact dyadic arithmetic
+can represent the post-hoc discrepancy. Its metric is L-infinity Hausdorff
+distance on output coordinates, and its units are maximum absolute
+output-coordinate units. It is the maximum coordinate error between every
+generated binary64 candidate and the corresponding exact affine image or
+Minkowski pair sum of the stored input dyadics. The public bound is rounded up
+to a representable binary64 value, so it may be larger than the exact discrepancy. Under this
+bound, exact candidate deletion adds zero error because deletion preserves the
+generated hull exactly. For an empty result, the bound is zero under the
+empty-to-empty distance convention stated in the evidence units.
+
+This bound says nothing about authored pre-rounding real values or uncertainty
+in how input coordinates and coefficients were obtained. H inputs receive no
+operation error bound: checking returned converted vertices against H rows
+does not prove that all needed vertices were found. If exact arithmetic cannot
+produce a finite outward binary64 bound, the operation fails closed instead of
+returning an unbounded or rounded-down value. `NumericalCheck.max_residual`
+remains a reducer diagnostic and does not supply this bound. Binary64 overflow
+is reported as failure; finite underflow and cancellation are included by the
+exact post-hoc comparison. Validated assurance is rejected. The
 [scientific audit](../research/geo02-floating-model-audit.md) gives the precise
 conditional finite-V error theorem, a counterexample, and the proof required
 before a caller can claim real-model inclusion or a global error bound.

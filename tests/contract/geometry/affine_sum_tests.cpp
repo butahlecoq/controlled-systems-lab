@@ -202,6 +202,8 @@ TEST_CASE("registered affine image preserves the literal shifted reversed interv
     const auto result=take(run(req,dependencies()));
     CHECK(support(result.output,{1})==doctest::Approx(5));
     CHECK(support(result.output,{-1})==doctest::Approx(1));
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
     CHECK(check_geometry_evidence(result.evidence,req).empty());
 }
 
@@ -400,6 +402,7 @@ TEST_CASE("selected H conversion preserves explicit equalities and infeasible em
     const auto result=take(run(req,dependencies()));
     CHECK(support(result.output,{1})==doctest::Approx(5));
     CHECK(support(result.output,{-1})==doctest::Approx(1));
+    CHECK_FALSE(result.evidence.error_bound.has_value());
     CHECK(std::holds_alternative<Unsupported>(run(req,dependencies(false,false))));
     h=take(sets::make_h({{"contradiction"},1,{}},
         {take(numeric::snapshot(Matrix{2,1,{1,-1}})),take(numeric::snapshot_vector(Vector{0,-1})),
@@ -480,7 +483,7 @@ TEST_CASE("public geometry operation preserves near-extreme support under loose 
     CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==2);
 }
 
-TEST_CASE("numerical equivalent affine result does not certify the exact dyadic input image") {
+TEST_CASE("affine-image evidence outwardly bounds cancellation against exact stored-dyadic inputs") {
     // The stored inputs are all exact binary64 integers. Their real-valued
     // affine image is 10^16 + 1 - 10^16 = 1, but left-to-right binary64
     // accumulation rounds away the one before subtracting 10^16.
@@ -492,7 +495,68 @@ TEST_CASE("numerical equivalent affine result does not certify the exact dyadic 
     CHECK(completed.relation==SetRelation::equivalent);
     CHECK(support(completed.output,{1})==0.0);
     CHECK(support(completed.output,{1})!=1.0);
-    CHECK_FALSE(completed.evidence.error_bound.has_value());
+    REQUIRE(completed.evidence.error_bound.has_value());
+    CHECK(completed.evidence.error_bound->metric.value=="csl.geometry.metric.l-infinity");
+    CHECK(completed.evidence.error_bound->bound==1.0);
+    CHECK(completed.evidence.error_bound->units==
+        "maximum absolute output-coordinate units; empty-to-empty distance is defined as zero");
+}
+
+TEST_CASE("affine-image evidence rounds a subnormal underflow error outward") {
+    const auto input=take(sets::make_singleton({{"subnormal-underflow-input"},1,{}},
+        take(numeric::snapshot_vector(Vector{std::ldexp(1.0,-1022)})))).as_handle();
+    const double coefficient=std::ldexp(1.0,-53);
+    auto selected=dependencies(false,false);
+    selected.hull=provider(make_keep_all_hull_registration());
+    const auto completed=take(run(request(AffineImage{input,{1,1,{coefficient}},{0}},
+        "subnormal-underflow-bound"),std::move(selected)));
+    CHECK(support(completed.output,{1})==0.0);
+    REQUIRE(completed.evidence.error_bound.has_value());
+    CHECK(completed.evidence.error_bound->bound==std::numeric_limits<double>::denorm_min());
+}
+
+TEST_CASE("affine-image evidence rounds a nonrepresentable error to the next binary64") {
+    const auto input=take(sets::make_singleton({{"outward-round-input"},3,{}},
+        take(numeric::snapshot_vector(Vector{1.0,std::ldexp(1.0,-53),
+            std::numeric_limits<double>::denorm_min()})))).as_handle();
+    auto selected=dependencies(false,false);
+    selected.hull=provider(make_keep_all_hull_registration());
+    const auto completed=take(run(request(AffineImage{input,{1,3,{1,1,1}},{0}},
+        "outward-round-nonrepresentable-error"),std::move(selected)));
+    CHECK(support(completed.output,{1})==1.0);
+    REQUIRE(completed.evidence.error_bound.has_value());
+    CHECK(completed.evidence.error_bound->bound==0x1.0000000000001p-53);
+}
+
+TEST_CASE("affine and Minkowski operations publish zero for exact ordinary candidates") {
+    auto selected=dependencies(false,false);
+    selected.hull=provider(make_keep_all_hull_registration());
+    const auto interval=vertices("exact-bound-interval",1,{0,1},2);
+    const auto image=take(run(request(AffineImage{interval,{1,1,{1}},{0}},
+        "exact-affine-bound"),selected));
+    REQUIRE(image.evidence.error_bound.has_value());
+    CHECK(image.evidence.error_bound->bound==0.0);
+
+    const auto left=vertices("exact-bound-left",1,{0,1},2);
+    const auto right=vertices("exact-bound-right",1,{2,3},2);
+    const auto sum=take(run(request(MinkowskiSum{left,right},"exact-minkowski-bound"),
+        std::move(selected)));
+    REQUIRE(sum.evidence.error_bound.has_value());
+    CHECK(sum.evidence.error_bound->bound==0.0);
+}
+
+TEST_CASE("Minkowski evidence bounds rounded singleton addition") {
+    const auto left=take(sets::make_singleton({{"large-summand"},1,{}},
+        take(numeric::snapshot_vector(Vector{1e16})))).as_handle();
+    const auto right=take(sets::make_singleton({{"unit-summand"},1,{}},
+        take(numeric::snapshot_vector(Vector{1.0})))).as_handle();
+    auto selected=dependencies(false,false);
+    selected.hull=provider(make_keep_all_hull_registration());
+    const auto completed=take(run(request(MinkowskiSum{left,right},"minkowski-cancellation-bound"),
+        std::move(selected)));
+    CHECK(support(completed.output,{1})==1e16);
+    REQUIRE(completed.evidence.error_bound.has_value());
+    CHECK(completed.evidence.error_bound->bound==1.0);
 }
 
 TEST_CASE("public geometry operation retains a zero endpoint despite subnormal product underflow") {
@@ -516,17 +580,25 @@ TEST_CASE("empty singleton and R0 definitions survive image and sum") {
     const auto point=take(sets::make_singleton({{"point"},1,{}},take(numeric::snapshot_vector(Vector{3})))).as_handle();
     auto result=take(run(request(MinkowskiSum{empty,point}),dependencies()));
     CHECK(support(result.output,{1})==-std::numeric_limits<double>::infinity());
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
     result=take(run(request(MinkowskiSum{point,point}),dependencies()));
     CHECK(support(result.output,{1})==doctest::Approx(6));
     const auto r0=take(sets::make_universal({{"r0"},0,{}})).as_handle();
     result=take(run(request(AffineImage{r0,{2,0,{}},{2,5}}),dependencies()));
     CHECK(support(result.output,{1,1})==doctest::Approx(7));
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
     result=take(run(request(AffineImage{point,{0,1,{}},{}}),dependencies()));
     CHECK(result.output.metadata.dimension==0);
     CHECK(support(result.output,{})==0);
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
     result=take(run(request(MinkowskiSum{r0,r0}),dependencies()));
     CHECK(result.output.metadata.dimension==0);
     CHECK(support(result.output,{})==0);
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
 }
 
 TEST_CASE("admission rejects wrong dimensions labels assurance foreign payloads and rays") {
