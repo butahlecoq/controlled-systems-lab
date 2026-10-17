@@ -1,5 +1,7 @@
 # Repository agent practices
 
+When finding or implementing GitHub work, follow the live discovery, claim and dependency-verification protocol in [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md). For comparison-program tickets, also read [the comparison-program contract](docs/architecture/comparison-program.md); it is a planning spec, not authorization to run benchmarks.
+
 ## Worktree and disk hygiene
 
 At the end of a session that creates worktrees or local build directories, and before starting another large local build:

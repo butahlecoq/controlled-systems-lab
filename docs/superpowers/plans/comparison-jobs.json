@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "repository": "butahlecoq/controlled-systems-lab",
+  "spec": "docs/architecture/comparison-program.md",
+  "tasks": [
+    { "key": "INP-04", "issue": 421, "blocked_by": [72, 83] },
+    { "key": "EXP-05", "issue": 422, "blocked_by": [3, 83] },
+    { "key": "EXP-06", "issue": 423, "blocked_by": [83, 94, 424, 426] },
+    { "key": "OPT-13", "issue": 424, "blocked_by": [] },
+    { "key": "OPT-14", "issue": 425, "blocked_by": [] },
+    { "key": "TEST-25", "issue": 426, "blocked_by": [] }
+  ]
+}
