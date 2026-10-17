@@ -1,0 +1,128 @@
+# Hull and V↔H coverage audit for the comparison program
+
+Date: 2026-10-17. Scope: wayfinder research ticket [#391](https://github.com/butahlecoq/controlled-systems-lab/issues/391) — what the current plan already covers for the **convex hull / vertex-finding** and **V↔H transition** families, and what is missing before the family can be compared old-vs-new on speed and quality. This note is a fact audit: it records coverage, gaps, candidate backlog titles and scope challenges; it does not decide inclusion, fixture design or porting policy. Those decisions belong to [#399](https://github.com/butahlecoq/controlled-systems-lab/issues/399) (ladder fixtures) and [#403](https://github.com/butahlecoq/controlled-systems-lab/issues/403) (V↔H unbounded/ray scope), which this ticket blocks.
+
+Evidence here is file/issue inspection only; no legacy or product program was executed for this audit. Per-ticket files live under `docs/superpowers/plans/tickets/`, not `docs/superpowers/tickets/` as the ticket text says.
+
+## 1. What the old side actually contains
+
+Archive reads are static and hash-pinned in [archive-selected-sources.json](archive-selected-sources.json) (A-register) and [source map](source-map.md) (L-register). The 2026-10-17 existence check confirmed the MATLAB files below still exist under `D:/work/PhD/PhD`; none was re-read or executed for this note.
+
+| Old-side element | Register | What the audit says it is |
+|---|---|---|
+| `Main_Hull.m` + `Simplex_Hull.m` | A26, A27 | Smaller distinct modification: deletes additional columns from basis coordinates but does not front-move/skip ([algorithm-module-inventory.md](algorithm-module-inventory.md):48) |
+| `Main_Hull_mod.m` + `Simplex_Hull_mod.m` | A15, A16 | Completed-basis bulk classification: delete additional `sum(abs(N))<1+eps` columns, move basis points to front, advance driver ([algorithm-module-inventory.md](algorithm-module-inventory.md):47). Within-solve only; no cross-query warm start (:51) |
+| `Main_Hull_Shor.m` + `Simplex_Hull_Shor.m` | A24, A25 | Fresh artificial identity basis per tested point, largest reduced-cost/ratio pivoting, delete only that point on auxiliary-residual vanishing ([algorithm-module-inventory.md](algorithm-module-inventory.md):26; [phase-one-lineage.md](phase-one-lineage.md):16) |
+| `LPHULL.m` | A28 | Inventory entry only (path/hash in [archive-selected-sources.json](archive-selected-sources.json):198–203); **no behavioural reading exists in the repo docs** |
+| `QLPHULL.m` (Scientific Research) | A29 | Dedup + decreasing `abs(max((p-d)./r))` sort, sequential `Modified_SM` test, grouping Step 3 at lines 44–64 entirely commented out, final LP reduction; no recursive splitting ([algorithm-module-inventory.md](algorithm-module-inventory.md):65) |
+| `QLPHULL.m` (Minimax/Constrained) | A33 | Different metric `max(abs((p-d)./r))`, 10-consecutive-redundant stop, active grouping at 50–72; its `itrt` pivot counter is discarded/commented — "not trustworthy instrumentation" ([algorithm-module-inventory.md](algorithm-module-inventory.md):66) |
+| `Main_Hull_mods.m` (ИТиС 2019) | A34 | Sorted streaming candidate strategy with the baseline predicate plus final reduction; function name differs from filename; not recursive divide-and-conquer ([algorithm-module-inventory.md](algorithm-module-inventory.md):67) |
+| `SMLP.m`, `Modified_SM.m` | A31, A30 | Tableau-updating auxiliary LP experiment and an alternate inverse-basis membership predicate; explicitly not synonymous with A16's bulk classification ([algorithm-module-inventory.md](algorithm-module-inventory.md):49) |
+| `quickhull.m` | A32 | 2D-only geometric recursion with plotting mixed in, slope divisions (vertical lines problematic) and unsafe empty-subset indexing; no simplex calls ([algorithm-module-inventory.md](algorithm-module-inventory.md):84; [quickhull-2d contract](../contracts/quickhull-2d.md):11–21) |
+| `ReachableSet.py` hull machinery | L26 | Python 2 reachable-set code (`RedundancyRemoval`, `SimplexAlgorithm`, double description); `SyntaxError` at line 17 when parsed under Python 3 ([legacy-audit.md](legacy-audit.md):14); hash `98aa51db…cedc4e` ([inventory.json](inventory.json):738–746) |
+| Works Python variants | W05/W06 | Related Python variants of A15/A16/A24/A25 with algebra/tolerance differences: appended sum omits A25's plus-one, ratio filter `<0` vs `<eps`, explicit basis inversion vs `B\M` ([works-followup.md](works-followup.md):35) |
+| Homogeneous width variants | W12/W14 | Empty affine-equality matrix width `d` (W14) vs `d−1` (W12) discrepancy requiring independent characterization ([works-followup.md](works-followup.md):37) |
+
+Published old-side number baselines ([baselines.md](baselines.md):5 labels all as **reported**, not re-measured):
+
+- **B02** (L05 Table 1, PDF p.10): dimension 2/T60 general 0.05 s, 120 vertices, volume 4.62 vs modified 0.01 s, 16 vertices, volume 4.34; dimension 4/T8 general 4.19 s, 756 vertices, 40808.17 vs modified 0.76 s, 153 vertices, 34764.47 ([baselines.md](baselines.md):25–38). Initial-state/coordinate and approximation semantics require clarification (:12, :38).
+- **B03** (L07 Table 3.1, PDF p.53): at t=15 baseline 5.466993 s / 158399 simplex iterations vs modified 3.583817 s / 116497; hull construction for 5000 points from Normal, Uniform and Sphere sampling in dimensions 2–5 (PDF p.54); MATLAB R2014a, i7 2.7 GHz; seeds and full numerical arrays absent ([baselines.md](baselines.md):40–44).
+
+The report's volume comparisons are explicitly **not** inclusion evidence: unequal volumes/vertex counts cannot certify hull equality, and volume is zero for lower-dimensional sets ([reachability-proof-audit.md](reachability-proof-audit.md):193, :195).
+
+## 2. What the current plan has delivered
+
+### 2.1 Adapters, contracts and code
+
+| Module | Registration / entry point | Source | Contract | Ticket (state 2026-10-17) |
+|---|---|---|---|---|
+| LP-membership hull reducer (baseline) | `csl.hull.lp-membership` @1.0.0 (`src/geometry/hull_reducer.cpp`:302) | per-candidate zero-objective barycentric LP, exact-dyadic deletion proof | [hull-reduction.md](../contracts/hull-reduction.md):16–68 | OPT-05 [#30](https://github.com/butahlecoq/controlled-systems-lab/issues/30) — CLOSED |
+| Basis-reuse bulk classifier | `csl.hull.phase-one-basis-bulk` @1.0.0 (`src/geometry/basis_reuse_reducer.cpp`:211) | one completed Phase-I solve, basis coordinate queries, exact-certified bulk deletion, LP fallback | [hull-reduction.md](../contracts/hull-reduction.md):16–68 (shared) | OPT-06 [#37](https://github.com/butahlecoq/controlled-systems-lab/issues/37) — CLOSED |
+| Ordered hull adapter (A29 score) | `csl.hull.ordered-membership` @1.0.0 (`src/geometry/hull/ordered_reducer.cpp`:90) | deterministic A29 preprocessing + certified LP reduction; no grouping | [hull-reduction.md](../contracts/hull-reduction.md):70–105 | OPT-07 [#38](https://github.com/butahlecoq/controlled-systems-lab/issues/38) — OPEN, ordered slice merged |
+| Qhull H/V conversion | `csl.conversion.qhull` `1.0.0+qhull.8.0.2` (`src/adapters/polyhedral/qhull.cpp`:574) | bounded binary64 H/V only; explicit `Unsupported` for nonempty V rays, unbounded H, ambiguous rank, validated assurance | [polyhedral-conversion.md](../contracts/polyhedral-conversion.md):11–45 | GEO-03 [#31](https://github.com/butahlecoq/controlled-systems-lab/issues/31) — CLOSED |
+| 2D geometric QuickHull | `CSL::quickhull_2d` standalone function (`include/csl/geometry/quickhull_2d.hpp`:26) | no LP; rejects non-2D points; exact orientation on supplied binary64 | [quickhull-2d.md](../contracts/quickhull-2d.md):3–38 | GEO-06 [#23](https://github.com/butahlecoq/controlled-systems-lab/issues/23) — CLOSED |
+| Recursive split-and-merge | — none — | `hull(hull(P1) ∪ hull(P2))` is a **new extension**; no archived implementation claimed | — | OPT-11 [#45](https://github.com/butahlecoq/controlled-systems-lab/issues/45) — OPEN |
+| Grouped/streaming reduction | — none (`grouped_reducer.cpp` absent) — | A33 active grouping not implemented | — | OPT-07 [#38](https://github.com/butahlecoq/controlled-systems-lab/issues/38) — OPEN |
+| Cross-query LP warm starts | — none — | verbatim not an archived feature; separate from A16 within-solve reuse | — | OPT-12 [#46](https://github.com/butahlecoq/controlled-systems-lab/issues/46) — OPEN |
+| Phase-I feasibility kernel | `src/optimization/phase_one/` (Bland rules, finite cap) | independently derived; deliberately differs from A25 pivoting | [phase-one-lineage.md](phase-one-lineage.md):26–42 | OPT-04 [#29](https://github.com/butahlecoq/controlled-systems-lab/issues/29) — CLOSED |
+| Exact dyadic certificate machinery | `src/geometry/exact_convex_combination.hpp`, `src/geometry/exact_dyadic.hpp` | exact check of represented binary64 weights; conservative retention | [hull-reduction.md](../contracts/hull-reduction.md):24–31; [geo02-floating-model-audit.md](geo02-floating-model-audit.md):39–52 | GEO-02 [#40](https://github.com/butahlecoq/controlled-systems-lab/issues/40) — OPEN (scientific review remains); GEO-02-R [#184](https://github.com/butahlecoq/controlled-systems-lab/issues/184) — CLOSED |
+
+Architecture/status summaries: [class-level-system-architecture.md](../superpowers/specs/2026-10-12-class-level-system-architecture.md):520 (LP reducer), :522 (adapter families), :525 (Qhull limits), :557–560 (lineage statuses), :573–574 (strategy composition still missing); [framework-composition.md](../architecture/framework-composition.md):61 (geometry target list); [ADR 0002](../architecture/decisions/0002-native-integrations.md):51–63 (Qhull selection narrowed to bounded binary64 conversion; numerical residual checks are not certificates).
+
+### 2.2 Published measured records (all single-adapter, no comparator)
+
+| Record | Method | Scope | Trials | Source commit | Catalogue limits |
+|---|---|---|---|---|---|
+| `opt05-hull-20261012-d6d328…` | OPT-05 baseline reducer | 5×5, 9×9, 13×13 2D square lattices (25/81/169 points); medians 2.1357/7.9319/18.9077 ms; LP calls = point count | 21 measured (3 warmups) | `d1c211c2763989a9cf3e39a8acaf609c5cf33a07` | no comparator; binary64 numerical checks; not validated global certificates ([opt05 README](../../reports/algorithm-results/opt05-hull-20261012-d1c211c2/README.md):3, :9–17) |
+| `opt06-basis-reuse-20261014-ef70e8c5-57c666a4…` | OPT-06 basis reuse vs LP baseline | three 2D clouds (10/7/5 points), alternating method order; per-fixture medians 0.0506/0.0442/0.0543 ms (basis) vs 0.6446/0.4747/0.9174 ms (baseline); 1 Phase-I solve, 4 pivots, exact-certified bulk removals | 42 measured (6 warmups) | `ef70e8c580a9556b0f5d96e49070d33221bf5b64` | descriptive paired timings; no speedup claim or limiter profile ([opt06 README](../../reports/algorithm-results/opt06-basis-reuse-20261014-ef70e8c5-r2/README.md):3, :7–20) |
+| `opt07-6e77b298e159fa0b80d5d69ccd8c14233eb8830513a5d060f98ee76d8e414c96` | OPT-07 ordered adapter | three fixed clouds (signed 2D, zero-width duplicate, late 1D exterior); 21 × 100-call batches after warmups; medians 52.1162/35.8861/36.1848 ms; 2,400 independently validated calls | 21 batches | `52444e305684c0b59c049cce9f9de7ea09eb4a4a` | single adapter; no comparator, limiter or scalability claim ([tooling/opt07 README](../../reports/algorithm-results/tooling/opt07/README.md):13–20; [published-algorithm-results.md](../architecture/published-algorithm-results.md):23–36) |
+| `geo03-20261012-30157d9ac59…` | GEO-03 Qhull conversion | four bounded 2D fixtures (square, simplex, embedded segment, singleton), H→V and V→H, 7 trials each; zero failures | 56 measured | runtime `d72c583…`, measurement `ba83547…` | bounded H/V only; no competing adapter; numerical checks not validated certificates; A17/A18 lineage only ([geo03 tooling README](../../scripts/reports/geo03/README.md):3, :38–40; [summary.csv](../../reports/algorithm-results/geo03-20261012-3c12ca125831/summary.csv)) |
+| `geo06-f8bee6d8f950…` | GEO-06 QuickHull | three analytic 2D clouds (`square_duplicates`, `collinear_endpoints`, `skinny_triangle`), 21 × 1000-call batches; medians 2.494/0.7901/2.2631 ms | 21 batches | `ce63bff5a0face88c3c5e977f7d96337e8cbe948` | single adapter; no comparator/speedup/limiter; orientation exact only for represented coordinates ([records.json](../../reports/algorithm-results/geo06-b010fb3df212604b/records.json); [published-algorithm-results.md](../architecture/published-algorithm-results.md):55–69) |
+
+Public IDs and evidence limits are the catalogue entries in [catalog.json](../../reports/algorithm-results/catalog.json); the OPT-05/GEO-03 records were published through the shared four-kind pipeline of REPORTS [#148](https://github.com/butahlecoq/controlled-systems-lab/issues/148) (CLOSED). OPT-06 and OPT-07 reports are live; exact URLs and hashes are recorded on [#37](https://github.com/butahlecoq/controlled-systems-lab/issues/37) and [#38](https://github.com/butahlecoq/controlled-systems-lab/issues/38).
+
+## 3. Coverage matrix
+
+| Initial-idea element | Covered by (ticket/doc/code) | Measured evidence | Status |
+|---|---|---|---|
+| Per-point barycentric membership LP as the hull baseline | OPT-05 #30; `csl.hull.lp-membership`; [hull-reduction.md](../contracts/hull-reduction.md):16–68 | opt05 report | Covered (bounded fixture scale) |
+| Phase-I kernel in the professor-associated lineage | OPT-04 #29; `src/optimization/phase_one/`; [phase-one-lineage.md](phase-one-lineage.md) | — | Covered as an independent rewrite; not a port of A25/A06 pivoting rules |
+| A15/A16 modified simplex / completed-basis bulk classification | OPT-06 #37; `csl.hull.phase-one-basis-bulk`; [hull-reduction.md](../contracts/hull-reduction.md) | opt06 report | Covered within-solve; cross-query warm start is a distinct open feature (#46) |
+| A29/A33/A34 ordered/grouped filtering | OPT-07 #38; `csl.hull.ordered-membership`; [hull-reduction.md](../contracts/hull-reduction.md):70–105 | opt07 report | **Partial**: ordering delivered; grouped/streaming and A33 adapter not implemented |
+| Literal recursive split-and-merge | OPT-11 #45 (nothing merged; no `recursive_reducer.cpp`) | — | Missing (new extension; old side has no counterpart) |
+| 2D geometric QuickHull (A32) | GEO-06 #23; `CSL::quickhull_2d`; [quickhull-2d.md](../contracts/quickhull-2d.md) | geo06 report | Covered for 2D; higher dimensions rejected by design |
+| H/V conversion (double description / enumeration lineage) | GEO-03 #31; `csl.conversion.qhull`; [polyhedral-conversion.md](../contracts/polyhedral-conversion.md) | geo03 report | **Partial**: bounded binary64 only; rays/unbounded/ambiguous rank refused; no global coverage certificate; no old-side converter port |
+| Exact-dyadic deletion evidence | [hull-reduction.md](../contracts/hull-reduction.md):24–31; `exact_convex_combination.hpp`; GEO-02 audit | opt06/opt07 certificates | Covered for represented binary64 clouds; real-valued model bound unproved ([geo02-floating-model-audit.md](geo02-floating-model-audit.md):142–156) |
+| B03 runtime/iteration comparator (general vs modified, dims 2–5, 5000 points) | [baselines.md](baselines.md):40–44; EXP-02 #94 (strategy-level, prerequisites only) | — | **Missing**: inputs/seeds absent; no old-side port; no modern run at this size |
+| B02 dims 2/4 reachability-approximation hull comparison | [baselines.md](baselines.md):25–38; [reachability-proof-audit.md](reachability-proof-audit.md):195 | — | **Missing**: input/coordinate semantics unresolved; volumes not equality evidence |
+| L26 `ReachableSet.py` hull machinery and Works variants | [legacy-audit.md](legacy-audit.md):14, :24–27; [works-followup.md](works-followup.md):35, :37, :56 | — | **Missing**: no port ticket; Python 2 syntax; W12/W14 width discrepancy |
+| 3·4·8·16 dimension ladder (+2D QuickHull parity) | [#399](https://github.com/butahlecoq/controlled-systems-lab/issues/399) (decide); no fixtures exist | all reports are 2D/1D | **Missing**: decision open; no fixture or measured cell at dims 3/4/8/16 |
+| Hull-reduction quality criteria | [reachability-proof-audit.md](reachability-proof-audit.md):191–193 (support/Hausdorff metrics; volume not a certificate); #390 evidence policy (containment/inclusion, never volume alone); per-report oracles | opt05–opt07, geo03 oracles | Method-level criteria exist; per-ladder-cell check methods belong to #399; two-sided comparison report contract not yet specified |
+| Old-vs-new comparison run contract | EXP-02 #94 (synthesis-strategy substitutions); OBS-04 #83; #390 "two-sided comparisons" explicitly not yet specified | — | **Missing** for geometry families |
+
+## 4. Gaps
+
+1. **Dimension-ladder fixtures.** No HullA/V↔H fixture or measured report exercises dimensions 3, 4, 8 or 16. Measured hull/conversion records are 2D (OPT-05 lattices, OPT-06 clouds, GEO-03 fixtures, GEO-06 clouds); OPT-07 adds a 1D cloud. Unit/contract tests cover empty, singleton, R¹, 2D, a flat segment in R³ and zero-dimensional cases ([hull_reducer_test.cpp](../../tests/unit/geometry/hull_reducer_test.cpp):601–630) but no 4/8/16 cells. Fixture design (generators, sizes, seeds, structural polytopes, timeouts) is the open decision ticket #399, whose settled scope says dims {3,4,8,16} plus 2D QuickHull parity.
+2. **Old-side ports.** The comparison program's settled old-side fairness requires faithful ports into a common runtime (map #390 Notes), but no repo ticket implements ports of A15/A16/A24–A27, A29/A33/A34, A28, A30/A31, A32 or L26/W05/W06. The current plan only *audits* them and implements independent modern adapters. A33 additionally lacks trustworthy pivot counters, so any old-side speed comparison needs instrumentation added during porting.
+3. **Unbounded/ray honesty in V↔H.** The delivered Qhull adapter rejects nonempty V rays, unbounded H, ambiguous rank and validated-assurance requests ([polyhedral-conversion.md](../contracts/polyhedral-conversion.md):21–27; [ADR 0002](../architecture/decisions/0002-native-integrations.md):61). The GEO-03 ticket title promises "equality and ray support" and its acceptance criteria demand honest translation of unbounded/ray outcomes; the shipped bounded-only profile meets the "honest rejection" reading but not ray support. Decision ticket #403 records this divergence and asks whether the comparison scores bounded cases only. The H-path coverage proof is separately missing: returned-vertex row residuals cannot prove the output covers the full H polytope ([geo02-floating-model-audit.md](geo02-floating-model-audit.md):106–119).
+4. **QuickHull parity is 2D-only.** `quickhull_2d` rejects any point without exactly two finite coordinates ([quickhull-2d.md](../contracts/quickhull-2d.md):27) and is a standalone utility, not an LP alias ([framework-composition.md](../architecture/framework-composition.md):61). #399 settles "+2D for QuickHull parity"; no higher-dimensional QuickHull exists, and the inventory treats higher-dimensional QuickHull or library integration as another scope decision ([algorithm-module-inventory.md](algorithm-module-inventory.md):86).
+5. **Hull-reduction quality criteria.** The repo has the metrics to compare hull outputs soundly — finite membership certificates forward, complete generators or support bounds in reverse, directed distances/Hausdorff, no volume-only claims ([reachability-proof-audit.md](reachability-proof-audit.md):191–193) — and every delivered report runs an independent per-fixture oracle. What is missing is the comparison-program-level contract: which checks apply per ladder cell (decision #399), and how two-sided old-vs-new reports extend the current single-adapter published-report contract ([published-algorithm-results.md](../architecture/published-algorithm-results.md):15 already fixes the ≥5 alternating tuned Release repetitions and limiter-profile policy; the two-sided extension is listed as not yet specified on map #390).
+6. **Sparse old-side readings.** `LPHULL.m` (A28) has no behavioural reading; `SMLP.m`/`Modified_SM.m` (A30/A31) have one paragraph each; no repo note characterizes B03's actual input generator beyond "Normal, Uniform, Sphere, 5000 points, dims 2–5" ([baselines.md](baselines.md):42–44).
+7. **Report/artifact notes that constrain reuse.** GEO-03's saved report cannot authenticate two historical build-log digests from retained log bytes ([scripts/reports/geo03/README.md](../../scripts/reports/geo03/README.md):38); the OPT-05 timed executable is not bundled ([opt05 README](../../reports/algorithm-results/opt05-hull-20261012-d1c211c2/README.md):24). These limit byte-level re-verification of the existing records, not their recorded claims.
+
+## 5. Candidate backlog items (titles only; not created)
+
+Where a gap already has an open ticket, that ticket is named instead of a new item.
+
+1. Port the archived MATLAB hull-reduction driver/routine variants (A15, A16, A24–A27, A34) into the comparison runtime
+2. Port the archived `QLPHULL.m` ordered/grouped variants (A29, A33) with trustworthy instrumentation
+3. Port the archived 2D `quickhull.m` (A32) as an old-side geometric comparator
+4. Port `ReachableSet.py` (L26) hull machinery and the W05/W06 Works variants to the comparison runtime
+5. Restore B03 hull-benchmark generators (Normal/Uniform/Sphere, 5000 points, dims 2–5) and seeds
+6. Restore B02 dims 2/4 horizon inputs and resolve coordinate/approximation semantics
+7. Build the hull/V↔H ladder fixture harness for dims 3/4/8/16 plus 2D QuickHull parity (follows decision #399)
+8. Implement ray/unbounded V↔H support (A18-style double description) or an explicit recorded-refusal pathway (follows decision #403)
+9. Decide and record higher-dimensional QuickHull scope beyond the 2D parity cells
+10. Extend the published-report contract to two-sided old-vs-new geometry comparisons
+11. Decide whether `LPHULL.m`, `SMLP.m` and `Modified_SM.m` enter the old-side comparator set or are explicitly excluded
+12. Define old-side counter parity (LP calls, pivots, iterations) for hull comparators
+
+Existing open tickets that cover parts of the family without new items: OPT-07 #38 (grouped/streaming), OPT-11 #45 (recursive split-and-merge), OPT-12 #46 (warm starts), GEO-02 #40 (H-path scientific review), TEST-19 #57 (hull-variant differential tests), EXP-02 #94 / OBS-04 #83 (substitution benchmarks and comparison records), and decision tickets #399/#403.
+
+## 6. Challenges to settled scope (facts only)
+
+- **No archived recursive split-and-merge exists.** The L03/L07/QlPHULL "divide-and-conquer" descriptions are sorted/grouped filters ending in final LP reduction; A29's grouping block is commented out and no active code performs recursive splitting ([algorithm-module-inventory.md](algorithm-module-inventory.md):65–67, :73; [class-level-system-architecture.md](../superpowers/specs/2026-10-12-class-level-system-architecture.md):560). OPT-11 already frames its strategy as a new extension, so no plan change is implied — any future "reproduce the archived recursive method" claim would be unsupported.
+- **A16's basis reuse is within one solve**, not a cross-query warm start ([algorithm-module-inventory.md](algorithm-module-inventory.md):51). OPT-06 vs OPT-12 already separates the two.
+- **The GEO-03 ticket title overstates delivered ray support** relative to the merged bounded-only adapter; #403 records the divergence ([#403](https://github.com/butahlecoq/controlled-systems-lab/issues/403) body; [polyhedral-conversion.md](../contracts/polyhedral-conversion.md):21–27).
+- **B03's numbers cannot be reproduced from the repo evidence alone**: model inputs, seeds and arrays are absent, and the historical hardware differs ([baselines.md](baselines.md):44). A33's saved pivot counts are not usable instrumentation ([algorithm-module-inventory.md](algorithm-module-inventory.md):66).
+- **The Python side is not currently executable as an old-side comparator**: L26 fails Python 3 parsing ([legacy-audit.md](legacy-audit.md):14), and W05/W06 differ from the MATLAB variants in the augmented row, tolerance comparisons and basis handling ([works-followup.md](works-followup.md):35). The plan itself records that Python/MATLAB hull differences must be characterized before performance comparison ([works-followup.md](works-followup.md):56).
+- **The exact-dyadic certificate does not cover the real-valued model**: it applies to the stored binary64 candidate cloud and explicitly leaves H-input coverage and pre-rounding data unproved ([geo02-floating-model-audit.md](geo02-floating-model-audit.md):39–52, :106–130, :142–156).
+- **All five published records are single-adapter with no comparator**, so none of them can currently serve as an old-vs-new speed or quality datum ([catalog.json](../../reports/algorithm-results/catalog.json) evidence-limit strings; report READMEs cited in §2.2).
+
+## 7. Unverifiable or locally scoped items
+
+- No legacy program was executed for this audit; all old-side statements are the repo's existing static readings, hash-pinned in the A/W registers.
+- `LPHULL.m` (A28) behaviour: not read anywhere in the repo; only inventoried.
+- B03/B02 input generation, seeds and complete arrays: not recoverable from the current public evidence ([baselines.md](baselines.md):13, :44).
+- Local archive paths were re-checked for existence only on 2026-10-17 (`D:/work/PhD/PhD/Scientific Research/...`, `Публикации/Минимакс/Constrained/QLPHULL.m`, `Конференция/ИТиС 2019/2/Main_Hull_mods.m`); file contents were not re-hashed in this audit beyond the recorded register digests.
+- Live report URLs and ZIP hashes were verified by the issue-tracked publication work; this note does not re-fetch them.
