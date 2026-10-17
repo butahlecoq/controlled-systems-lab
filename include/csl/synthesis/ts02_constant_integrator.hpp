@@ -18,6 +18,7 @@ public:
     explicit Ts02ConstantIntegratorRelation(sets::SetData h_polyhedron)
         : h_polyhedron_(std::move(h_polyhedron)) {}
     const sets::SetData& h_polyhedron() const noexcept { return h_polyhedron_; }
+    const sets::SetData* h_relation_for_recording() const noexcept override { return &h_polyhedron_; }
 };
 
 } // namespace csl::synthesis

@@ -145,9 +145,13 @@ example_check(scenario_cli_run_unknown_backend scenario_cli
 example_check(scenario_cli_run_unsupported_profile scenario_cli
   "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--profile;unsupported-profile" 2
   "Unsupported profile.*unsupported-profile")
-example_check(scenario_cli_run_export_boundary scenario_cli
-  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--output-dir;${CMAKE_CURRENT_BINARY_DIR}/scenario-cli-export" 3
-  "Artifact export rejected.*run.final.family.completeness.support")
+add_test(NAME scenario_cli_run_export_roundtrip
+  COMMAND ${CMAKE_COMMAND}
+    "-DSCENARIO_CLI=$<TARGET_FILE:scenario_cli>"
+    "-DSCENARIO_INPUT=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json"
+    "-DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/scenario-cli-export-roundtrip"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/scenario_cli_export_check.cmake")
+set_tests_properties(scenario_cli_run_export_roundtrip PROPERTIES TIMEOUT 30)
 example_check(scenario_cli_malformed scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/malformed.json" 2
   "Input rejected: category=syntax.*expected")
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" validation_scenario)

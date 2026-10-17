@@ -1,11 +1,12 @@
 # Portable run statistics
 
 `CSL::artifacts` publishes immutable scenario records and reads/writes the closed
-`csl.run-statistics/4` JSON format. Include `csl/artifacts/run_statistics.hpp` for
+`csl.run-statistics/4` format plus the separate inert `csl.run-statistics/5`
+recorded-artifact format. Include `csl/artifacts/run_statistics.hpp` for
 records and `csl/execution/observability.hpp` for bounded collection and RUN01
 projection. These additions preserve source contract 1.5 and mathematical identity
-version 1. No solver, estimator, mathematical verifier, family exporter, timer
-instrumentation, or scenario planner is introduced.
+version 1. No solver, estimator, mathematical verifier, timer instrumentation, or
+scenario planner is introduced.
 
 ## Publication and identity
 
@@ -56,10 +57,10 @@ reproduction.
 
 A family record retains the source `FamilyIdentity` (resolved problem, effective
 family request, joint coordinates, strategy/version and ordered transformation
-lineage) and exactly one typed complete, partial or candidate product. The
-opaque live relation payload is never serialized. With no exporter its external
-family attachment is `unavailable_no_exporter`, while relation metadata and
-evidence survive. Ordinarily `project_final` drops the live payload. For the
+lineage) and exactly one typed complete, partial or candidate product. The v4
+run codec does not serialize the opaque live relation payload. With no exporter
+its external family attachment is `unavailable_no_exporter`, while relation
+metadata and evidence survive. Ordinarily `project_final` drops the live payload. For the
 T-S01 profile it retains the exact relation object in the in-memory owner
 because the typed capability binds that object; `encode_run` then refuses the
 record under the v4 wire contract.
@@ -80,6 +81,26 @@ This is a wire-contract limitation, not a mathematical rejection. The decoder
 never reconstructs trusted proof capability from text; the future generic
 versioned verifier seam remains tracked in
 [issue #202](https://github.com/butahlecoq/controlled-systems-lab/issues/202).
+
+### Inert recorded artifacts v5
+
+`encode_recorded_run` is a separate v5 archival path. For a live complete family
+carrying registered completeness evidence, it requires the current-process
+registry-verified family state and an owned, digest-checked
+`csl.h-relation-attachment/1` family attachment. The concrete relation payload
+exposes an optional inert H-data view for this exporter; it does not prove the
+attachment is mathematically equivalent to the family claim. Schema, digest and
+bytes establish archival encoding identity only. Unsupported payloads fail with
+a typed error.
+
+`decode_recorded_run` returns `RecordedRunArtifact`, an opaque owning v5 byte
+value. It cannot convert to `RunStatistics`, `OptimalFamily`, `FamilyRecord` or
+selector input. Import checks bounded canonical JSON, attachment content
+integrity and, when supplied, the resolved problem identity. Its exact state
+marker `unverified_recorded_data` is data, not a trust bit. Existing `encode_run`
+and `decode_run` keep their v1-v4 behavior and reject v5 input. No replay
+authority is implemented, so decoded claims remain archival data even when all
+digests match.
 Candidate feasibility is scoped to the whole relation, a named full-history
 witness, or unknown; an outer enclosure with one feasible witness does not
 claim whole-relation feasibility. Feasible incumbents retain their own

@@ -33,6 +33,7 @@ public:
     std::optional<registry::Provenance> provider;
     Diagnostics diagnostics;
     DirectJointPayload(JointProgram, sets::SetData);
+    const sets::SetData* h_relation_for_recording() const noexcept override { return &relation; }
 };
 class DirectJointWorkspace final : public SynthesisWorkspace {
     registry::PreparedProvider<registry::LPPort> lp_;

@@ -1,4 +1,5 @@
 #include <csl/application/comparison.hpp>
+#include <csl/artifacts/h_relation_attachment.hpp>
 
 #include <algorithm>
 #include <string_view>
@@ -148,12 +149,41 @@ artifacts::ArtifactResult<std::string> encode_strategy_run(
     std::optional<WitnessSelection> selection;
     if (const auto* selected = std::get_if<WitnessSelection>(&execution.selection))
         selection = *selected;
+    auto final=execution.final_projection;
+    std::vector<artifacts::Attachment> attachments;
+    if(auto* synthesis=std::get_if<artifacts::SynthesisFinal>(&final);synthesis&&synthesis->family) {
+        auto& family=*synthesis->family;
+        const auto* complete=std::get_if<CompleteOptimalFamily>(&family.family.outcome());
+        if(complete&&std::holds_alternative<RegisteredCompletenessEvidence>(complete->completeness.support)) {
+            if(!family.family.registry_verified())
+                return artifacts::ArtifactError{artifacts::ArtifactErrorCode::unsupported,"run.final.family",
+                    "Only a current-process registry-verified family can be exported"};
+            const auto* relation=std::visit([](const auto& value)->const JointRelation*{return &value.relation;},family.family.outcome());
+            const auto* data=relation->payload?relation->payload->h_relation_for_recording():nullptr;
+            if(!data)
+                return artifacts::ArtifactError{artifacts::ArtifactErrorCode::unsupported,"run.final.family.attachment",
+                    "The concrete family relation has no H-relation recording exporter"};
+            auto encoded=artifacts::encode_h_relation_attachment(*data,{16*1024*1024,100000,1000000,1024*1024});
+            if(const auto* error=std::get_if<artifacts::ArtifactError>(&encoded))return *error;
+            const auto content=std::get<problem::ResolvedContent>(std::move(encoded));
+            const artifacts::AttachmentId attachment_id{"family-relation"};
+            attachments.push_back({attachment_id,artifacts::AttachmentRole::family,content.digest(),
+                static_cast<std::uint64_t>(content.bytes().size()),"application/vnd.csl.h-relation+json",
+                "csl.h-relation-attachment/1",{},content});
+            family.payload=artifacts::ExternalFamilyPayload{attachment_id};
+        }
+    }
     artifacts::RunRecord record{problem.identity(), description->model->dynamics.dimensions,
         static_cast<std::uint64_t>(description->times.size() - 1), std::move(configuration),
-        std::move(run), execution.final_projection, std::move(statistics), std::move(resources),
-        {}, {}, artifacts::ProblemProvenance::problem_revalidated, std::move(selection)};
+        std::move(run), std::move(final), std::move(statistics), std::move(resources),
+        {}, std::move(attachments), artifacts::ProblemProvenance::problem_revalidated, std::move(selection)};
     auto published = artifacts::publish_run({problem, std::move(record)});
     if (auto* error = std::get_if<artifacts::ArtifactError>(&published)) return *error;
-    return artifacts::encode_run(std::get<artifacts::RunStatistics>(published));
+    auto encoded=artifacts::encode_recorded_run(std::get<artifacts::RunStatistics>(published));
+    if(const auto* error=std::get_if<artifacts::ArtifactError>(&encoded))return *error;
+    const auto& bytes=std::get<artifacts::RecordedRunArtifact>(encoded).content().bytes();
+    std::string text;text.reserve(bytes.size());
+    for(const auto byte:bytes)text.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
+    return text;
 }
 } // namespace csl::application
