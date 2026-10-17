@@ -395,6 +395,28 @@ TEST_CASE("rectangular and singular affine maps retain their actual ambient spac
     REQUIRE(std::holds_alternative<sets::VRepresentation>(singular_rep));
     const auto& segment=std::get<sets::VRepresentation>(singular_rep);
     REQUIRE(segment.vertices.rows()>=2);
+    const double origin_x=segment.vertices(0,0);
+    const double origin_y=segment.vertices(0,1);
+    std::optional<std::size_t> observed_affine_rank;
+    for(std::size_t row=1;row<segment.vertices.rows();++row) {
+        const double dx=segment.vertices(row,0)-origin_x;
+        const double dy=segment.vertices(row,1)-origin_y;
+        if(dx==0.0 && dy==0.0) continue;
+        observed_affine_rank=1;
+        for(std::size_t candidate=1;candidate<segment.vertices.rows();++candidate) {
+            const double candidate_x=segment.vertices(candidate,0)-origin_x;
+            const double candidate_y=segment.vertices(candidate,1)-origin_y;
+            if(dx*candidate_y-dy*candidate_x!=0.0) observed_affine_rank=2;
+        }
+        break;
+    }
+    REQUIRE(observed_affine_rank.has_value());
+    constexpr std::size_t expected_affine_rank=1; // (x,y) -> (x,0) maps the square to a segment.
+    CHECK(*observed_affine_rank==expected_affine_rank);
+    const auto singular_data=take(sets::from_handle(result.output));
+    // Affine-dimension metadata is intentionally absent: missing claims mean
+    // unknown by the set-data contract, so rank is derived from returned points.
+    CHECK_FALSE(singular_data.metadata()->affine_dimension.has_value());
     bool has_left=false;
     bool has_right=false;
     for(std::size_t row=0;row<segment.vertices.rows();++row) {
