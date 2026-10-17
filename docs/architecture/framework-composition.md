@@ -8,21 +8,58 @@ the wider mathematical requirements.
 
 ## Modules and public seams
 
-| Responsibility | Public targets / interface | Owning implementation |
-| --- | --- | --- |
-| Immutable numeric/model/set data | `CSL::numeric`, `CSL::model`, `CSL::sets` | `src/numeric`, `src/model`, `src/sets` |
-| Domains, objectives, resolved identity | `CSL::problem`, `CSL::objectives`, `CSL::resolved_problem` | `src/problem`, `src/optimization` |
-| JSON scenario intake | `CSL::input`, `load_scenario_file` | `src/input` |
-| Capability selection and retained providers | `CSL::registry`, `StrategyRegistry` | `src/registry` |
-| LP / convex programs and native adapters | `CSL::optimization`, `CSL::convex`, `CSL::highs_lp`, `CSL::highs_convex`, `CSL::phase_one` | `src/optimization`, `src/adapters` |
-| Geometry and conversion | `CSL::hull`, `CSL::polyhedral`, `CSL::affine_sum`, `CSL::qhull_conversion` | `src/geometry`, `src/adapters/polyhedral` |
-| Forward reachability, terminal minimizers, recovery | `CSL::nominal_forward`, `CSL::terminal_minimizers`, `CSL::control_recovery` | `src/reachability`, `src/synthesis` |
-| Strategy A / B and analytic profile | `CSL::strategy_a`, `CSL::strategy_b`, `CSL::strategy_ts01` | `src/synthesis/strategy_a`, `strategy_b`, `strategy_ts01` |
-| Directional witness selection | `CSL::witness_selector`, registered `SelectorPort` | `src/synthesis/witness_selector.cpp` |
-| Original-problem trajectory checks | `CSL::verification`, `verify_trajectory` | `src/verification` |
-| Execution and portable records | `CSL::execution`, `CSL::artifacts` | `src/execution`, `src/artifacts` |
-| Guarded paired application flow | `CSL::application`, `prepare_comparison`, `run_comparison` | `src/application` |
-| Numerical report tooling | saved record validation and rendering | `benchmarks/reporting`, `scripts/reports` |
+The arrows below point from a caller to the module it depends on. Solid paths
+are implemented; dashed paths are still missing or limited to the exact
+analytic profiles documented below.
+
+```mermaid
+flowchart LR
+    SC[Scenario file] --> IN[Input loader]
+    IN --> PR[Resolved problem]
+    EX[Installed examples] --> AP[Application composition]
+    PR --> AP
+    AP --> SR[Strategy registry]
+    SR --> A[Strategy A: reachability and recovery]
+    SR --> B[Strategy B: joint optimization]
+    A --> GEO[Geometry operations]
+    B --> LP[LP and convex ports]
+    GEO --> LP
+    GEO --> CV[Conversion port]
+    A --> F[Typed family outcome]
+    B --> F
+    F --> WS[Witness selector]
+    WS --> LP
+    WS --> V[Independent verifier]
+    PR --> V
+    AP --> ART[Run artifact interface]
+    ART -. paired comparison and proof export .-> RP[Paired comparison artifact bundle]
+    ART --> R[Saved-record renderer]
+```
+
+| Responsibility | Public targets / interface | Owning implementation | Depends on / replaceable seam |
+| --- | --- | --- | --- |
+| Immutable numeric, model and set data | `CSL::numeric`, `CSL::model`, `CSL::sets` | `src/numeric`, `src/model`, `src/sets` | Value contracts compose upward; alternative storage is not currently an exposed adapter seam. |
+| Domains, objectives and resolved identity | `CSL::problem`, `CSL::objectives`, `CSL::resolved_problem` | `src/problem`, `src/optimization` | Uses model/set values; `ResolvedProblem` is the immutable handoff to input and application callers. |
+| JSON scenario intake | `CSL::input`, `load_scenario_file` | `src/input` | Produces the same problem value consumed by examples and application code; schema-versioned loader is the input-format seam. |
+| Capability selection and retained providers | `CSL::registry`, `StrategyRegistry`, provider ports | `src/registry` | Strategies declare port requirements; registered implementations are selected by identity/version and retained through prepared handles. |
+| LP / convex programs and native adapters | `CSL::optimization`, `CSL::convex`, `CSL::highs_lp`, `CSL::highs_convex`, `CSL::phase_one` | `src/optimization`, `src/adapters` | `LPPort` and `ConvexPort`; backend changes are registry selections and keep caller-owned problem requests unchanged. |
+| Geometry and conversion | `CSL::hull`, `CSL::polyhedral`, `CSL::affine_sum`, `CSL::qhull_conversion` | `src/geometry`, `src/adapters/polyhedral` | `GeometryPort` and `ConversionPort`; selected operations consume the registered LP provider where needed. |
+| Forward reachability and terminal minimizers | `CSL::nominal_forward`, `CSL::terminal_minimizers` | `src/reachability`, `src/synthesis` | Consume immutable problem data and registered geometry/optimization ports; profile capability admission is explicit. |
+| Backward recovery and direct joint solve | `CSL::control_recovery`, `CSL::strategy_a`, `CSL::strategy_b` | `src/synthesis/strategy_a`, `strategy_b` | Two replaceable `StrategyPort` registrations share the application request; A composes reachability/recovery, B builds the joint program. |
+| Analytic exact-profile strategy | `CSL::strategy_ts01` | `src/synthesis/strategy_ts01` | Separate narrow `StrategyPort` registration for the reviewed T-S01 relation; not a general fallback. |
+| Directional witness selection | `CSL::witness_selector`, registered `SelectorPort` | `src/synthesis/witness_selector.cpp` | `SelectorPort` plus selected membership `LPPort`; accepts only admitted complete families and returns source-bound witnesses. |
+| Original-problem trajectory checks | `CSL::verification`, `verify_trajectory` | `src/verification` | Consumes original immutable problem and witness values, independent of the strategy's solver result. |
+| Execution and portable records | `CSL::execution`, `CSL::artifacts` | `src/execution`, `src/artifacts` | Task/executor policy is the resource and cancellation seam; versioned artifact codecs own persisted record contracts. |
+| Guarded paired application flow | `CSL::application`, `prepare_comparison`, `run_comparison` | `src/application` | Composes strategy, selector and verification interfaces; both strategy preparations must be admitted before execution. |
+| Numerical report tooling | saved-record validation and rendering | `benchmarks/reporting`, `scripts/reports` | Reads saved records and renders without solver calls; no strategy-specific serialization logic belongs in the renderer. |
+
+The diagram and table describe current code, not a target microservice layout.
+Solid strategy and verifier paths are exercised by the registered synthesis
+comparison example on the exact T-S01 fixture. The dashed artifact path marks a
+specific gap: paired comparison records and registered complete-family proof
+payloads do not yet round-trip through the current run-statistics-v4 interface.
+That is why the runnable comparison example reports its result honestly but
+does not claim to save a paired proof-bearing result.
 
 Headers live under `include/csl`. Authoritative contracts cover
 [resolved problems](../contracts/resolved-problems.md), [registry](../contracts/registry.md),
