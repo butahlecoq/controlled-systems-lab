@@ -419,6 +419,92 @@ TEST_CASE("published candidate and claimed optimum never establish family covera
     CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
     q.family.reset();q.outcome->subject={"wrong"};CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
 }
+TEST_CASE("sampled relaxed and symbolic candidate metadata never establish family coverage") {
+    const auto p=resolve(scalar());auto q=request(p);
+    const ClaimEvidence numerical{p.identity(),NumericalCheck{0,0,0,{"candidate backend"}}};
+    const auto coordinates=p.constraints().coordinates();
+    const FamilyRequest effective{"nominal",p.identity(),FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{"candidate-family"},{}};
+    const ModuleId strategy{"candidate-strategy"};
+    q.expected_synthesis=ExpectedSynthesisBinding{effective,strategy,"1",{}};
+    const auto publish=[&](FamilyRelationToTarget relation_evidence) {
+        const FamilyIdentity identity{p.identity(),effective,coordinates,strategy,"1",{}};
+        const JointRelation relation{coordinates,effective.representation,{}};
+        return accepted(FamilyPublisher::publish(identity,CandidateFamily{relation,
+            std::move(relation_evidence),WitnessFeasibilityEvidence{q.witness,numerical}}));
+    };
+    q.outcome=SynthesisOutcomeClaim{p.identity(),MathematicalOutcome::optimal,
+        SymbolicArgument{"floating-point-completeness-claim","unvalidated symbolic argument"},
+        {"backend success metadata"}};
+    q.backend_bounds={ProgramObjectiveEvidence{ProgramObjectiveBound{3,
+        {{p.identity(),{"original-program"}},SymbolicArgument{"backend-bound","floating-point"},{}}},{}}};
+
+    const auto check_nonpromotion=[&]() {
+        const auto report=verify_trajectory(p,q);
+        CHECK(report.bindings==CheckStatus::numerical_pass);
+        CHECK(report.feasibility==CheckStatus::numerical_pass);
+        CHECK(report.optimality==CheckStatus::unsupported);
+        CHECK(report.completeness==CheckStatus::unsupported);
+        CHECK(report.validated==CheckStatus::unsupported);
+        REQUIRE(report.input.family);
+        CHECK(report.input.family->target()==FamilyTarget::candidate_relaxation);
+        REQUIRE(report.input.outcome);
+        CHECK(std::holds_alternative<SymbolicArgument>(report.input.outcome->support));
+        REQUIRE(report.input.backend_bounds.size()==1);
+        REQUIRE(report.input.backend_bounds[0].lower);
+        CHECK(std::holds_alternative<SymbolicArgument>(report.input.backend_bounds[0].lower->evidence.support));
+        return report;
+    };
+
+    q.family=publish(HeuristicRelationEvidence{"finite sampled witness cloud"});
+    const auto sampled_report=check_nonpromotion();
+    CHECK(std::get<HeuristicRelationEvidence>(std::get<CandidateFamily>(sampled_report.input.family->outcome()).relation_to_target).method
+        =="finite sampled witness cloud");
+
+    q.family=publish(OuterCandidateEvidence{numerical});
+    const auto relaxed_report=check_nonpromotion();
+    const auto& relaxed_evidence=std::get<OuterCandidateEvidence>(
+        std::get<CandidateFamily>(relaxed_report.input.family->outcome()).relation_to_target).enclosure;
+    CHECK(relaxed_evidence.problem==numerical.problem);
+    REQUIRE(std::holds_alternative<NumericalCheck>(relaxed_evidence.support));
+    CHECK(std::get<NumericalCheck>(relaxed_evidence.support).absolute_tolerance==0);
+    CHECK(std::get<NumericalCheck>(relaxed_evidence.support).relative_tolerance==0);
+    CHECK(std::get<NumericalCheck>(relaxed_evidence.support).max_residual==0);
+    CHECK(std::get<NumericalCheck>(relaxed_evidence.support).verifier.value=="candidate backend");
+
+    const ClaimEvidence symbolic{p.identity(),SymbolicArgument{"symbolic-relaxation","floating-point only"}};
+    q.family=publish(OuterCandidateEvidence{symbolic});
+    const auto symbolic_report=check_nonpromotion();
+    const auto& symbolic_evidence=std::get<SymbolicArgument>(std::get<OuterCandidateEvidence>(
+        std::get<CandidateFamily>(symbolic_report.input.family->outcome()).relation_to_target).enclosure.support);
+    CHECK(symbolic_evidence.reference=="symbolic-relaxation");
+    CHECK(symbolic_evidence.assumptions=="floating-point only");
+}
+TEST_CASE("validated verification cannot promote numerical candidate completeness claims") {
+    const auto p=resolve(scalar());auto q=request(p);
+    const ClaimEvidence numerical{p.identity(),NumericalCheck{0,0,0,{"numerical candidate"}}};
+    const auto coordinates=p.constraints().coordinates();
+    const FamilyRequest effective{"nominal",p.identity(),FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{"candidate-family"},{}};
+    const ModuleId strategy{"candidate-strategy"};
+    const FamilyIdentity identity{p.identity(),effective,coordinates,strategy,"1",{}};
+    const JointRelation relation{coordinates,effective.representation,{}};
+    q.expected_synthesis=ExpectedSynthesisBinding{effective,strategy,"1",{}};
+    q.family=accepted(FamilyPublisher::publish(identity,CandidateFamily{relation,
+        OuterCandidateEvidence{numerical},WitnessFeasibilityEvidence{q.witness,numerical}}));
+    q.verification=VerificationRequest{{1e-8,1e-8},Assurance::validated};
+
+    const auto report=verify_trajectory(p,q);
+    CHECK(report.bindings==CheckStatus::numerical_pass);
+    CHECK(report.verification==*q.verification);
+    CHECK(report.feasibility==CheckStatus::unsupported);
+    CHECK(report.objective==CheckStatus::unsupported);
+    CHECK(report.optimality==CheckStatus::unsupported);
+    CHECK(report.completeness==CheckStatus::unsupported);
+    CHECK(report.validated==CheckStatus::unsupported);
+    REQUIRE(report.input.family);
+    CHECK(report.input.family->target()==FamilyTarget::candidate_relaxation);
+}
 TEST_CASE("published synthesis family bindings match only an independent expected synthesis identity") {
     auto p=resolve(scalar());
     auto q=request(p);
@@ -541,9 +627,44 @@ TEST_CASE("malformed or ambiguous membership evidence cannot pass and stopped qu
     for(int mode:{1,2,4,5,6}) {auto r=verify_trajectory(p,q,{},provider(mode));INFO("mode ",mode);CHECK(r.feasibility==CheckStatus::unsupported);CHECK(r.membership_queries.size()==1);}
     auto r=verify_trajectory(p,q,{},provider(3));CHECK(r.termination==Termination::resource_limit);CHECK(r.feasibility!=CheckStatus::numerical_pass);
     q.bounds.lower=ObjectiveBound{0,{p.identity(),CertificateReference{"retained-bound","unverified"}}};
+    const ClaimEvidence family_claim{p.identity(),NumericalCheck{0,0,0,{"retained candidate"}}};
+    const FamilyRequest family_request{"nominal",p.identity(),FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{"retained-candidate-family"},{}};
+    const auto coordinates=p.constraints().coordinates();
+    const ModuleId strategy{"candidate-strategy"};
+    const FamilyIdentity family_identity{p.identity(),family_request,coordinates,strategy,"1",{}};
+    const JointRelation family_relation{coordinates,family_request.representation,{}};
+    q.expected_synthesis=ExpectedSynthesisBinding{family_request,strategy,"1",{}};
+    q.family=accepted(FamilyPublisher::publish(family_identity,CandidateFamily{family_relation,
+        HeuristicRelationEvidence{"retained candidate relation"},WitnessFeasibilityEvidence{q.witness,family_claim}}));
     auto count=std::make_shared<int>(0);r=verify_trajectory(p,q,{},provider(7,count));
     CHECK(r.termination==Termination::completed);CHECK(r.feasibility==CheckStatus::unsupported);CHECK(*count==0);
+    CHECK(r.bindings==CheckStatus::numerical_pass);
     REQUIRE(r.input.bounds.lower);CHECK(r.input.bounds.lower->value==0);
+    REQUIRE(std::holds_alternative<CertificateReference>(r.input.bounds.lower->evidence.support));
+    CHECK(std::get<CertificateReference>(r.input.bounds.lower->evidence.support).artifact=="retained-bound");
+    REQUIRE(r.input.family);CHECK(r.input.family->identity()==family_identity);
+    CHECK(r.input.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK(std::holds_alternative<CandidateFamily>(r.input.family->outcome()));
+    const auto& retained_candidate=std::get<CandidateFamily>(r.input.family->outcome());
+    CHECK(std::get<HeuristicRelationEvidence>(retained_candidate.relation_to_target).method=="retained candidate relation");
+    REQUIRE(std::holds_alternative<WitnessFeasibilityEvidence>(retained_candidate.feasibility));
+    const auto& retained_witness=std::get<WitnessFeasibilityEvidence>(retained_candidate.feasibility);
+    CHECK(retained_witness.witness.problem==q.witness.problem);
+    CHECK(retained_witness.witness.states==q.witness.states);
+    CHECK(retained_witness.witness.controls==q.witness.controls);
+    CHECK(retained_witness.witness.original_objective==q.witness.original_objective);
+    CHECK(retained_witness.support.problem==p.identity());
+    REQUIRE(std::holds_alternative<NumericalCheck>(retained_witness.support.support));
+    const auto& retained_check=std::get<NumericalCheck>(retained_witness.support.support);
+    CHECK(retained_check.absolute_tolerance==0);
+    CHECK(retained_check.relative_tolerance==0);
+    CHECK(retained_check.max_residual==0);
+    CHECK(retained_check.verifier.value=="retained candidate");
+    CHECK(r.optimality==CheckStatus::unsupported);CHECK(r.completeness==CheckStatus::unsupported);
+    CHECK(r.validated==CheckStatus::unsupported);
+    REQUIRE(r.membership_queries.size()==1);
+    CHECK(std::holds_alternative<registry::LPQueryRejected>(r.membership_queries[0]));
     CHECK(residual(r,"initial[0]").satisfied);
     q.limits.membership_queries=0;r=verify_trajectory(p,q,{},provider(0));CHECK(r.termination==Termination::resource_limit);CHECK(r.membership_queries.empty());
 }
