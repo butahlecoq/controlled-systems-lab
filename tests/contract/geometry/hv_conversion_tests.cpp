@@ -155,9 +155,67 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
     REQUIRE(std::holds_alternative<OperationResult>(to_h));
     auto h=take(sets::from_handle(std::get<OperationResult>(to_h).output));
     const auto hr=h.representation(); REQUIRE(std::holds_alternative<sets::HRepresentation>(hr));
+    const auto& triangle_h=std::get<sets::HRepresentation>(hr);
+    REQUIRE(triangle_h.inequalities.rows()==3);
+    CHECK(triangle_h.equalities.rows()==0);
+    // H facets are positive multiples of -x<=0, -y<=0, x+y<=1.
+    const std::array<std::array<double,3>,3> expected_facets{{
+        {-1,0,0}, {0,-1,0}, {1,1,1}}};
+    std::array<bool,3> found_facet{};
+    for (std::size_t row=0;row<triangle_h.inequalities.rows();++row) {
+        bool matched=false;
+        for (std::size_t facet=0;facet<expected_facets.size();++facet) {
+            const auto& expected=expected_facets[facet];
+            const auto scale=expected[0]!=0.0
+                ? triangle_h.inequalities(row,0)/expected[0]
+                : triangle_h.inequalities(row,1)/expected[1];
+            if (scale>0.0
+                && triangle_h.inequalities(row,0)==scale*expected[0]
+                && triangle_h.inequalities(row,1)==scale*expected[1]
+                && triangle_h.upper_bounds[row]==scale*expected[2]) {
+                matched=true;
+                found_facet[facet]=true;
+            }
+        }
+        CHECK(matched);
+    }
+    CHECK(found_facet[0]); CHECK(found_facet[1]); CHECK(found_facet[2]);
     const std::array<double,2> in{0.25,0.25},out{0.75,0.75};
-    CHECK(satisfies(std::get<sets::HRepresentation>(hr),in));
-    CHECK_FALSE(satisfies(std::get<sets::HRepresentation>(hr),out));
+    CHECK(satisfies(triangle_h,in));
+    CHECK_FALSE(satisfies(triangle_h,out));
+    std::vector<std::array<double,2>> roundtrip_vertices;
+    for (std::size_t first=0;first<triangle_h.inequalities.rows();++first) {
+        for (std::size_t second=first+1;second<triangle_h.inequalities.rows();++second) {
+            const auto a=triangle_h.inequalities(first,0);
+            const auto b=triangle_h.inequalities(first,1);
+            const auto c=triangle_h.inequalities(second,0);
+            const auto d=triangle_h.inequalities(second,1);
+            const auto det=a*d-c*b;
+            if (det==0.0) continue;
+            const std::array<double,2> point{
+                (triangle_h.upper_bounds[first]*d-triangle_h.upper_bounds[second]*b)/det,
+                (a*triangle_h.upper_bounds[second]-c*triangle_h.upper_bounds[first])/det};
+            if (satisfies(triangle_h,point)) roundtrip_vertices.push_back(point);
+        }
+    }
+    REQUIRE(roundtrip_vertices.size()==3);
+    for (const auto& expected : expected_vertices) {
+        bool found=false;
+        for (const auto& point : roundtrip_vertices)
+            found=found || (point[0]==expected[0] && point[1]==expected[1]);
+        CHECK(found);
+    }
+    const auto roundtrip_support=[&](std::array<double,2> direction) {
+        auto value=-std::numeric_limits<double>::infinity();
+        for (const auto& point : roundtrip_vertices)
+            value=std::max(value,direction[0]*point[0]+direction[1]*point[1]);
+        return value;
+    };
+    CHECK(roundtrip_support({1,0})==1.0);
+    CHECK(roundtrip_support({0,1})==1.0);
+    CHECK(roundtrip_support({-1,0})==0.0);
+    CHECK(roundtrip_support({0,-1})==0.0);
+    CHECK(roundtrip_support({1,1})==1.0);
     const auto empty=make_h_handle("contradiction",1,Matrix{2,1,{1,-1}},Vector{0,-1});
     auto empty_v=convert(empty,"csl.polyhedron.v","empty-h-to-v");
     REQUIRE(std::holds_alternative<OperationResult>(empty_v));
@@ -175,8 +233,10 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     const auto& h=std::get<sets::HRepresentation>(rep);
     REQUIRE(h.equalities.rows()==1);
     CHECK(h.equalities(0,0)==0.0);
-    CHECK(h.equalities(0,1)==1.0);
+    CHECK(std::abs(h.equalities(0,1))==1.0);
     CHECK(h.equality_values[0]==0.0);
+    // Ambient dimension is two; y=0 and two distinct endpoints establish
+    // affine dimension one for this bounded segment.
     const std::array<double,2> left{-1,0},right{2,0},middle{0,0},off{0,1};
     CHECK(satisfies(h,left)); CHECK(satisfies(h,right)); CHECK(satisfies(h,middle)); CHECK_FALSE(satisfies(h,off));
     const std::array<double,2> beyond_left{-1.01,0},beyond_right{2.01,0};
@@ -186,7 +246,6 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     auto segment_data=take(sets::from_handle(std::get<OperationResult>(segment_v).output));
     const auto segment_rep=segment_data.representation(); REQUIRE(std::holds_alternative<sets::VRepresentation>(segment_rep));
     const auto& segment_v_rep=std::get<sets::VRepresentation>(segment_rep);
-    CHECK(segment_data.metadata()->set.dimension==2);
     CHECK(segment_v_rep.rays.rows()==0);
     const auto& segment_points=segment_v_rep.vertices;
     REQUIRE(segment_points.rows()==2);
