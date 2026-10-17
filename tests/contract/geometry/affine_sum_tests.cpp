@@ -584,6 +584,13 @@ TEST_CASE("affine and Minkowski error bounds compose independently checked 1D H 
     REQUIRE(image.evidence.error_bound.has_value());
     CHECK(image.evidence.error_bound->bound==2.0);
 
+    const auto rounded_image=take(run(
+        request(AffineImage{h1,{1,1,{0.1}},{0}},"compose-affine-generation-rounding"),
+        selected_converter()));
+    CHECK(support(rounded_image.output,{1})==doctest::Approx(0.9));
+    REQUIRE(rounded_image.evidence.error_bound.has_value());
+    CHECK(rounded_image.evidence.error_bound->bound>0.1);
+
     const auto sum=take(run(request(MinkowskiSum{h1,h2},"compose-sum-h-coverage"),
         selected_converter()));
     CHECK(support(sum.output,{1})==18.0);
