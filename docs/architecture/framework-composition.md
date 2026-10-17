@@ -173,9 +173,10 @@ strategy order. Selection and witness verification for each strategy also finish
 before the next strategy starts. This describes concurrency inside one call
 only; independent callers can still overlap. The paired application does not
 route these calls through `Executor`, and it provides no process-wide scheduler
-or aggregate CPU, memory, or wall-time cap. A caller's stop token is cooperative
-at the boundaries documented by each adapter, so a native call can return after
-a stop request.
+or aggregate CPU or memory cap. One caller-supplied `ExecutionContext` is shared
+by both sequential strategy calls, so its deadline and stop token apply across
+the invocation; these remain cooperative, and a native call can return after a
+stop request.
 
 Resource declarations and accounting made by an `Executor` apply only to that
 executor's batch. Declared compute-thread reservations and active memory
