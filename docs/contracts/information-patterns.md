@@ -99,6 +99,13 @@ observed. Malformed measurement-error shape returns a diagnostic before any
 positive record. These are distinct scenario variants, not a claim about all
 possible observations or disturbances.
 
+The finite-policy contract test separately enumerates two runs with the same
+two-dimensional initial state and one partial pre-decision sensor, but with
+measurement errors `-1` and `+1`. The released first-coordinate readings are
+`0` and `2`, so the policy may select different actions using those noisy
+readings. Its universal result covers only those two supplied rows; it does
+not bound observation noise or certify unlisted disturbances.
+
 The algorithm can produce numerical replay records. Its fixed-source harness
 and versioned HTML/raw report are published at
 [the observed-replay result](https://butahlecoq.github.io/controlled-systems-lab/ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34/index.html).
