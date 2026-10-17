@@ -53,4 +53,12 @@ TEST_CASE("malformed status and forged evidence are refused by record contract")
     smoke.input_digest.reset();
     CHECK(std::holds_alternative<artifacts::ArtifactError>(
         artifacts::encode_bounded_hull_check(smoke)));
+
+    const std::vector<Vector> square{{0,0}, {2,0}, {2,2}, {0,2}, {1,1}};
+    auto incorrect = geometry::check_source_index_hull(square,
+        {std::get<geometry::HullInputDigest>(geometry::digest_hull_input(square)), {0,1,2}});
+    REQUIRE(incorrect.status == geometry::HullCheckStatus::incorrect);
+    incorrect.input_digest.reset();
+    CHECK(std::holds_alternative<artifacts::ArtifactError>(
+        artifacts::encode_bounded_hull_check(incorrect)));
 }

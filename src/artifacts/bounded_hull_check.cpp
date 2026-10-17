@@ -52,7 +52,7 @@ void validate(const geometry::HullCheckRecord& record) {
     if (status_name(record.status).empty() || record.budget.wall.count() < 0 ||
         record.elapsed.count() < 0 || record.reason.empty() || record.reason.size() > 512 ||
         record.evidence_scope != "exact represented binary64 2D finite hull" ||
-        (record.status == geometry::HullCheckStatus::verified && !record.input_digest) ||
+        (record.status != geometry::HullCheckStatus::inconclusive && !record.input_digest) ||
         (record.status == geometry::HullCheckStatus::verified && record.counterexample_index) ||
         (record.status != geometry::HullCheckStatus::incorrect && record.counterexample_index))
         throw std::invalid_argument("Inconsistent checker fields");
