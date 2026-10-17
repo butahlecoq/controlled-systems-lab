@@ -165,6 +165,28 @@ The [saved paired T-S01 report](../../reports/algorithm-results/syn-ts01-paired-
 delivers measured records and standalone HTML for this fixture, with an
 inconclusive performance conclusion and no general strategy ranking.
 
+### Resource scope of the initial paired application
+
+`run_comparison` in [`src/application/comparison.cpp`](../../src/application/comparison.cpp)
+creates the two admitted workspaces and executes them one at a time in its fixed
+strategy order. Selection and witness verification for each strategy also finish
+before the next strategy starts. This describes concurrency inside one call
+only; independent callers can still overlap. The paired application does not
+route these calls through `Executor`, and it provides no process-wide scheduler
+or aggregate CPU, memory, or wall-time cap. A caller's stop token is cooperative
+at the boundaries documented by each adapter, so a native call can return after
+a stop request.
+
+Resource declarations and accounting made by an `Executor` apply only to that
+executor's batch. Declared compute-thread reservations and active memory
+reservations do not constrain native thread pools, the process heap, or RSS;
+they are not OS-level hard caps. Per-attempt resource observations in saved
+records must retain their accounting scope and must not be presented as a
+process-wide limit. Independent sweep scheduling and any suite-level budget
+belong to [RUN-02 #80](https://github.com/butahlecoq/controlled-systems-lab/issues/80).
+The implemented comparison flow makes no concurrent-sweep scalability claim
+until that separate resource scope is enforced and measured.
+
 The installed scenario_cli --run command adapts user-authored JSON to the
 paired application API for the guarded T-S01/T-S02 profiles. It carries optional
 LP/convex ID, seed, resource and profile overrides, and reports per-strategy
@@ -180,10 +202,11 @@ preserve metadata; decoding does not mint trusted complete-family authority.
 The synthesis-to-report adapter remains missing glue. Saved LP/convex reports and the paired T-S01 fixture report do not supply a
 general synthesis comparison.
 
-Applications compose existing strategy preparation, `make_task` and
-`Executor::run`, retain immutable resolved owners and actual provider provenance,
-and pass original problems and witnesses to independent verification. Export
-must consume saved owning results and verification records; rendering must not
-invoke solvers. Future numerical algorithms follow the
+Applications that dispatch registry tasks compose existing strategy preparation,
+`make_task` and `Executor::run`, retain immutable resolved owners and actual
+provider provenance, and pass original problems and witnesses to independent
+verification. The initial paired application has the narrower sequential path
+described above. Export must consume saved owning results and verification
+records; rendering must not invoke solvers. Future numerical algorithms follow the
 [published-results process](published-algorithm-results.md). Historical fuel-model
 restoration remains unresolved.
