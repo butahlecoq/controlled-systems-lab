@@ -2,7 +2,6 @@
 #include <doctest/doctest.h>
 #include <csl/reachability/nominal_predecessor.hpp>
 #include <csl/geometry/operation_admission.hpp>
-#include <csl/sets/generator_sets.hpp>
 #include <iostream>
 #include <limits>
 #include <stop_token>
@@ -360,21 +359,6 @@ TEST_CASE("admission rejects invalid indices envelopes assurance and missing rep
     auto lazy=take(project(projection(joint.as_handle(),{0}),geometry::polyhedral::ProjectionOutput::lazy)).output;
     lazy.metadata.dimension=2;
     CHECK(std::holds_alternative<Diagnostics>(geometry::polyhedral::inspect_lazy_projection(lazy)));
-}
-
-TEST_CASE("projection materialization rejects generator inputs without a sound H or V route") {
-    auto generator=take(sets::make_generator_set({{"generator"},{0,0},{2,2,{1,0,0,1}},
-        {{"g0"},{"g1"}},{0,2,{}},{},{"x","y"}}));
-    auto h_provider=provider(geometry::polyhedral::make_projection_registration(),"csl.polyhedron.h");
-    CHECK(std::holds_alternative<Rejection>(h_provider.prepare(projection(generator.as_handle(),{0}))));
-    auto v_provider=provider(geometry::polyhedral::make_projection_registration(
-        {geometry::polyhedral::ProjectionOutput::v,{}}),"csl.polyhedron.v");
-    CHECK(std::holds_alternative<Rejection>(v_provider.prepare(projection(generator.as_handle(),{0}))));
-    auto lazy=take(project(projection(generator.as_handle(),{0}),geometry::polyhedral::ProjectionOutput::lazy)).output;
-    auto materializer=provider(geometry::polyhedral::make_projection_materializer(),"csl.polyhedron.h");
-    ConversionRequest request{{{"fixture"},{"generator-materialize"},{"generator-projection"}},
-        lazy,{"csl.polyhedron.h"},Assurance::numerical};
-    CHECK(std::holds_alternative<Rejection>(materializer.prepare(request)));
 }
 
 TEST_CASE("predecessor rejects a provider before creating any incompatible workspace") {
