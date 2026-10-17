@@ -103,14 +103,26 @@ std::pair<std::uint32_t,std::uint32_t> validate_spec(const Json& spec) {
         !spec.contains("problem_id") || !spec.contains("request_digest") ||
         !spec.contains("strategies") || !spec.contains("repetitions"))
         throw std::invalid_argument("Comparison spec fields do not match schema");
-    const auto valid_digest=[](const Json& value){return value.is_string()&&value.get<std::string>().size()==64&&
-        std::all_of(value.get<std::string>().begin(),value.get<std::string>().end(),[](unsigned char c){return std::isxdigit(c)!=0&&!(c>='A'&&c<='F');});};
+    const auto valid_digest=[](const Json& value){
+        if(!value.is_string())return false;
+        const auto& text=value.get_ref<const std::string&>();
+        return text.size()==64&&std::all_of(text.begin(),text.end(),
+            [](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});
+    };
+    const auto valid_config_id=[](const Json& value){
+        constexpr std::string_view prefix="csl.config.v1.sha256:";
+        if(!value.is_string())return false;
+        const auto& text=value.get_ref<const std::string&>();
+        return text.starts_with(prefix)&&text.size()==prefix.size()+64&&
+            std::all_of(text.begin()+static_cast<std::ptrdiff_t>(prefix.size()),text.end(),
+                [](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});
+    };
     if(!spec.at("problem_id").is_string()||spec.at("problem_id").get<std::string>().empty()||!valid_digest(spec.at("request_digest")))
         throw std::invalid_argument("Comparison spec digest is malformed");
     const auto& strategies=spec.at("strategies");
     if(!strategies.is_array()||strategies.empty()||strategies.size()>std::numeric_limits<std::uint32_t>::max())
         throw std::invalid_argument("Comparison spec strategy list is invalid");
-    for(const auto& strategy:strategies)if(!valid_digest(strategy))throw std::invalid_argument("Strategy configuration identity is malformed");
+    for(const auto& strategy:strategies)if(!valid_config_id(strategy))throw std::invalid_argument("Strategy configuration identity is malformed");
     const auto repetitions=spec.at("repetitions").get<std::uint32_t>();
     if(repetitions==0)throw std::invalid_argument("Repetition count must be positive");
     return {static_cast<std::uint32_t>(strategies.size()),repetitions};
