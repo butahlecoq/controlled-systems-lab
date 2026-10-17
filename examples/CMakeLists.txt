@@ -72,11 +72,13 @@ if(DEFINED EXAMPLE_EXE)
   endif()
   execute_process(COMMAND "${EXAMPLE_EXE}" ${EXAMPLE_ARGUMENT}
     RESULT_VARIABLE status OUTPUT_VARIABLE output ERROR_VARIABLE error)
+  set(combined_output "${output}${error}")
+  string(REGEX REPLACE "[\r\n]+" " " combined_output "${combined_output}")
   if(NOT "${status}" STREQUAL "${EXPECTED_STATUS}")
-    message(FATAL_ERROR "Expected exit ${EXPECTED_STATUS}, got ${status}: ${output}${error}")
+    message(FATAL_ERROR "Expected exit ${EXPECTED_STATUS}, got ${status}: ${combined_output}")
   endif()
-  if(NOT "${output}${error}" MATCHES "${EXPECTED_OUTPUT}")
-    message(FATAL_ERROR "Expected ${EXPECTED_OUTPUT}, got: ${output}${error}")
+  if(NOT "${combined_output}" MATCHES "${EXPECTED_OUTPUT}")
+    message(FATAL_ERROR "Expected ${EXPECTED_OUTPUT}, got: ${combined_output}")
   endif()
   message(STATUS "${output}${error}")
   return()
@@ -108,7 +110,9 @@ csl_example(registered_lp CSL::highs_lp)
 csl_example(registered_convex CSL::highs_convex)
 csl_example(resolved_scenario CSL::resolved_problem)
 csl_example(scenario_file CSL::input)
-csl_example(scenario_cli CSL::input)
+csl_example(scenario_cli CSL::input CSL::application CSL::strategy_a CSL::strategy_b
+  CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex
+  CSL::qhull_conversion CSL::affine_sum)
 csl_example(backend_substitution CSL::highs_lp CSL::phase_one)
 csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::strategy_b
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
@@ -131,6 +135,19 @@ example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_S
   "validation=valid.*schema=csl.scenario/1.*requested=comparison.*mode=validate_only solvers=not_invoked")
 example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
+example_check(scenario_cli_run_ts01 scenario_cli "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--seed;42;--threads;2" 0
+  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=42 threads=2.*verification=numerical_pass")
+example_check(scenario_cli_run_missing scenario_cli "--run;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
+  "Input rejected: category=io.*expected")
+example_check(scenario_cli_run_unknown_backend scenario_cli
+  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--lp;missing-backend" 1
+  "Strategy preparation rejected.*missing-backend")
+example_check(scenario_cli_run_unsupported_profile scenario_cli
+  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--profile;unsupported-profile" 2
+  "Unsupported profile.*unsupported-profile")
+example_check(scenario_cli_run_export_boundary scenario_cli
+  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--output-dir;${CMAKE_CURRENT_BINARY_DIR}/scenario-cli-export" 3
+  "Artifact export rejected.*run.final.family.completeness.support")
 example_check(scenario_cli_malformed scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/malformed.json" 2
   "Input rejected: category=syntax.*expected")
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" validation_scenario)
@@ -138,6 +155,16 @@ string(JSON unsupported_validation_scenario SET "${validation_scenario}" tempora
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unsupported-validation.json" "${unsupported_validation_scenario}")
 example_check(scenario_cli_unsupported scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/unsupported-validation.json" 2
   "Input unsupported: path=/temporal feature=temporal")
+string(JSON unsupported_representation_scenario SET "${validation_scenario}" run "{\"backends\":{\"representation\":\"csl.polyhedron.v\"}}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unsupported-representation.json" "${unsupported_representation_scenario}")
+example_check(scenario_cli_run_unsupported_representation scenario_cli
+  "--run;${CMAKE_CURRENT_BINARY_DIR}/unsupported-representation.json" 2
+  "Input unsupported: path=/run/backends/representation observed=csl.polyhedron.v.*expected csl.polyhedron.h")
+string(JSON explicit_h_representation_scenario SET "${validation_scenario}" run "{\"backends\":{\"representation\":\"csl.polyhedron.h\"}}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" "${explicit_h_representation_scenario}")
+example_check(scenario_cli_run_explicit_h_representation scenario_cli
+  "--run;${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" 0
+  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=31 threads=1.*verification=numerical_pass")
 example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.0.0.highs.1.11.0")
