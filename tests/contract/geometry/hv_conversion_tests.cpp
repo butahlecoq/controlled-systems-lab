@@ -270,8 +270,8 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     CHECK(found_left); CHECK(found_right);
     CHECK(support_x==doctest::Approx(2));
     CHECK(support_negative_x==doctest::Approx(1));
-    CHECK(support_y==0.0);
-    CHECK(support_negative_y==0.0);
+    CHECK(near(support_y,0.0));
+    CHECK(near(support_negative_y,0.0));
     auto equality_h=make_h_handle("segment-explicit-equality",2,Matrix{2,2,{1,0,-1,0}},Vector{2,1},Matrix{1,2,{0,1}},Vector{0});
     auto equality_v=convert(equality_h,"csl.polyhedron.v","segment-equality-to-v");
     REQUIRE(std::holds_alternative<OperationResult>(equality_v));
