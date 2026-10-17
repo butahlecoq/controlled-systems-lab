@@ -48,6 +48,12 @@ class FixedControl final : public LPWorkspace {
         return ProgramResult{Termination::completed,{p.identity(),MathematicalOutcome::optimal,Unestablished{},{}},Vector{3},{},"literal fixed control"};
     }
 };
+class BoundControl final : public LPWorkspace {
+    ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext&) override {
+        const auto value=*p.variables().at(0).lower;
+        return ProgramResult{Termination::completed,{p.identity(),MathematicalOutcome::optimal,Unestablished{},{}},Vector{value},{} ,"singleton bound provider"};
+    }
+};
 class Forward final : public SynthesisWorkspace {
     std::unique_ptr<BoundWorkspace<LPPort>> control_;
 public:
@@ -70,9 +76,10 @@ struct Strategies {
     StrategyRegistry strategies;
     std::shared_ptr<int> factories=std::make_shared<int>(0);
     Strategies() {
-        for(const char* id:{"endpoint-a","endpoint-b"}) lp.add({{{id},"1"},
-            [](const LinearProgram&,const Requirements&) -> Capability {return Offer{};},
+        lp.add({{{"endpoint-a"},"1"},[](const LinearProgram&,const Requirements&) -> Capability {return Offer{};},
             [count=factories](const LinearProgram&) {++*count;return std::make_unique<FixedControl>();}});
+        lp.add({{{"endpoint-b"},"1"},[](const LinearProgram&,const Requirements&) -> Capability {return Offer{};},
+            [count=factories](const LinearProgram&) {++*count;return std::make_unique<BoundControl>();}});
         for(const std::string profile:{"forward","inverse","compact","full-dimensional","nominal","stagewise","square-safe"}) strategies.add({{{profile},"1"},
             [profile](const StrategyRequest& request,const Requirements& requirements) -> Capability {
                 const auto& p=*request.problem.description();
@@ -126,6 +133,11 @@ StrategyConfiguration configuration(const char* strategy="forward",const char* l
 void edit_model(Problem& p,const std::function<void(SystemModel&)>& edit) {
     auto model=std::make_shared<SystemModel>(*p.model);edit(*model);p.model=std::move(model);
 }
+Problem nonfuel_affine_substitution() {
+    auto p=scalar();
+    edit_model(p,[](SystemModel& model) {auto& stage=std::get<LinearStage>(model.dynamics.stages);stage.A.values[0]=2;stage.offset={1};});
+    return p;
+}
 ResolvedProblem published(const Problem& p) {return accepted(resolve(p,context()));}
 void diagnostic(const Problem& p,DiagnosticCode code) {
     const auto result=resolve(p,context());REQUIRE(std::holds_alternative<Diagnostic>(result));CHECK(std::get<Diagnostic>(result).code==code);
@@ -176,6 +188,21 @@ TEST_CASE("actual strategy admission rejects inverse assumptions without changin
         CHECK(answer.incumbents[0].witness.original_objective==3);CHECK(answer.incumbents[0].witness.problem==p.identity());CHECK_FALSE(answer.family);
     }
     CHECK(p.identity().value=="csl.problem.v1.sha256:"+scalar_digest);
+}
+TEST_CASE("nonfuel affine problem substitutes independent LP providers through the public strategy path") {
+    const auto p=accepted(resolve(nonfuel_affine_substitution(),context()));Strategies registry;
+    for(const char* backend:{"endpoint-a","endpoint-b"}) {
+        auto plan=accepted(prepare_strategy(p,registry.strategies,configuration("forward",backend)));
+        CHECK(plan.problem().identity()==p.identity());
+        CHECK(plan.preparation().provenance()[1].actual->id.value==backend);
+        const auto answer=accepted(plan.preparation().create()->run({}));
+        REQUIRE(answer.incumbents.size()==1);
+        CHECK(answer.incumbents[0].witness.controls==std::vector<Vector>{{3}});
+        CHECK(answer.incumbents[0].witness.states==std::vector<Vector>{{2},{8}});
+        CHECK(answer.incumbents[0].witness.original_objective==8);
+        CHECK(answer.incumbents[0].witness.problem==p.identity());
+        CHECK_FALSE(answer.family);
+    }
 }
 TEST_CASE("uncertain initial quantifiers retain identity and reject before workspace creation") {
     Strategies registry;
