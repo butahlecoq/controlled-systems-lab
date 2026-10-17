@@ -52,9 +52,16 @@ endif()
 if(NOT EXISTS "${notices_root}/nlohmann-json-3.11.3/LICENSE.MIT")
   message(FATAL_ERROR "Installed input dependency notice is missing")
 endif()
-if(NOT EXISTS "${notices_root}/Eigen-3.4.0/COPYING.README")
-  message(FATAL_ERROR "Installed Eigen dependency notice is missing")
-endif()
+foreach(eigen_notice IN ITEMS
+    "${notices_root}/Eigen-3.4.0/COPYING.README"
+    "${notices_root}/Eigen-3.4.0/COPYING.MPL2"
+    "${notices_root}/Eigen-3.4.0/COPYING.BSD"
+    "${notices_root}/Eigen-3.4.0/COPYING.APACHE"
+    "${notices_root}/Eigen-3.4.0/COPYING.MINPACK")
+  if(NOT EXISTS "${eigen_notice}")
+    message(FATAL_ERROR "Installed Eigen dependency notice is missing: ${eigen_notice}")
+  endif()
+endforeach()
 if(CSL_EXPECT_HIGHS)
   foreach(highs_notice IN ITEMS
       "${notices_root}/HiGHS-1.11.0/LICENSE.txt"
