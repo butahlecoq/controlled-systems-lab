@@ -42,5 +42,10 @@ inline std::vector<TransformStepIdentity> expected_ts02_lineage(const ProblemId&
     // proof authority; only this expected-lineage name is profile-specific.
     return expected_ts01_lineage(problem);
 }
+inline std::vector<TransformStepIdentity> expected_ts03_lineage(const ProblemId& problem) {
+    // T-S03 uses the same two-transition Strategy A operation sequence as
+    // T-S01; keep a profile-specific name at admission and receipt boundaries.
+    return expected_ts01_lineage(problem);
+}
 
 } // namespace csl::synthesis::strategy_a::detail
