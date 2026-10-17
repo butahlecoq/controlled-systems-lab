@@ -155,6 +155,11 @@ string(JSON unsupported_validation_scenario SET "${validation_scenario}" tempora
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unsupported-validation.json" "${unsupported_validation_scenario}")
 example_check(scenario_cli_unsupported scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/unsupported-validation.json" 2
   "Input unsupported: path=/temporal feature=temporal")
+string(JSON unsupported_representation_scenario SET "${validation_scenario}" run "{\"backends\":{\"representation\":\"csl.polyhedron.v\"}}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unsupported-representation.json" "${unsupported_representation_scenario}")
+example_check(scenario_cli_run_unsupported_representation scenario_cli
+  "--run;${CMAKE_CURRENT_BINARY_DIR}/unsupported-representation.json" 2
+  "Input unsupported: path=/run/backends/representation observed=csl.polyhedron.v.*expected csl.polyhedron.h")
 example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.0.0.highs.1.11.0")

@@ -472,6 +472,11 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
         std::cerr << "Unsupported profile: " << profile << "; expected ts01_exact_integrator or ts02_constant_integrator\n";
         return 2;
     }
+    if (requested->representation && requested->representation->value != "csl.polyhedron.h") {
+        std::cerr << "Input unsupported: path=/run/backends/representation observed="
+                  << requested->representation->value << "; expected csl.polyhedron.h\n";
+        return 2;
+    }
 
     const auto problem = scenario.problem();
     FamilyRequest family;
