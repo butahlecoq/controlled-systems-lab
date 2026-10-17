@@ -360,6 +360,13 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
     }
 
     std::array<std::filesystem::path, 2> temporary{targets[0].string() + ".tmp", targets[1].string() + ".tmp"};
+    for (const auto& path : temporary) {
+        if (std::filesystem::exists(path, ec) || ec) {
+            std::cerr << "Output rejected: refusing to replace existing temporary file "
+                      << path.string() << '\n';
+            return 2;
+        }
+    }
     for (std::size_t index = 0; index < encoded.size(); ++index) {
         std::ofstream file(temporary[index], std::ios::binary | std::ios::out);
         if (!file || !(file << encoded[index]) || !file.flush()) {
@@ -375,6 +382,14 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
                       << ": " << ec.message() << '\n';
             for (std::size_t remaining = index; remaining < temporary.size(); ++remaining)
                 std::filesystem::remove(temporary[remaining], ec);
+            if (index > 0) {
+                std::error_code rollback_error;
+                std::filesystem::remove(targets[index - 1], rollback_error);
+                if (rollback_error)
+                    std::cerr << "Output rollback failed: cannot remove "
+                              << targets[index - 1].string() << ": "
+                              << rollback_error.message() << '\n';
+            }
             return 2;
         }
     }
