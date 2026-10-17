@@ -175,7 +175,7 @@ TEST_CASE("projection of the unit-square slice x+y=1 is the exact interval [0,1]
         // endpoint inequalities defining [0,1].
         const bool lower=coefficient==-1.0 && bound==0.0;
         const bool upper=coefficient==1.0 && bound==1.0;
-        CHECK(lower || upper);
+        CHECK((lower || upper));
         has_lower=has_lower || lower;
         has_upper=has_upper || upper;
     }
