@@ -29,9 +29,13 @@ floating-point pipeline against an unknown pre-rounding physical model.
 `SetRelation::equivalent` plus `Assurance::numerical` is the port's algorithmic
 relation claim under its recorded assumptions. It does not assert
 `Q_64 = M P_real+b`, `Q_64 = P_real+R_real`, exact containment in either
-direction, or a finite error bound. `NumericalCheck.max_residual` describes an
-attempted reducer reconstruction residual; it is not the distance from `Q_64`
-to either real model. The operation leaves `GeometryEvidence.error_bound` empty.
+direction, or a bound to either authored real model. `NumericalCheck.max_residual`
+describes an attempted reducer reconstruction residual; it is not the distance
+from `Q_64` to either real model. For direct finite V, singleton, and empty
+inputs, the operation now publishes an exact-post-hoc outward L-infinity bound
+from the stored dyadic operation to `Q_64`. It leaves `error_bound` empty
+whenever any input uses H-to-V conversion, whose global coverage remains
+uncertified.
 The public [affine-sum contract](../contracts/affine-sum-operations.md) and
 [`OperationResult`/`GeometryEvidence` types](../../include/csl/geometry/contracts.hpp)
 carry this distinction to callers.
@@ -80,28 +84,32 @@ suffices with `E=sqrt(sum_k e_k^2)`; support error is at most
 `sum_k |d_k| e_k`. Empty inputs remain empty and need a separately stated
 empty-set metric convention.
 
-This is an **a posteriori proof recipe**, not an implemented bound. Each
-`q_i-y_i` can be compared exactly as a rational difference because all stored
-finite binary64 values are dyadic. An implementation may use arbitrary-size
-integers and outward-round its final public bound. It must also verify that
-the binaries used in this audit are the same ones consumed and published, and
-that all candidate pairs were generated. This approach includes cancellation
-and gradual underflow without assuming a dimension-independent unit-roundoff
-formula. Non-finite generated coordinates currently cause an unsuccessful
-operation, so an overflowed candidate does not have a successful-result bound.
-An implementation relying instead on a forward-error formula must account for
-the exact evaluation order, multiplication and addition rounding, dimension,
-underflow/subnormals, compiler contraction/reassociation and overflow.
+The operation implements this post-hoc proof for direct finite V inputs. It
+uses checked exact dyadic accumulators to compare every generated binary64
+coordinate with the exact operation on stored input dyadics, tracks the
+maximum absolute coordinate discrepancy, and rounds that value upward to a
+representable binary64 value using integer bits. The bound uses the output-coordinate units
+and L-infinity Hausdorff metric. Exact candidate deletion then adds zero error.
+Empty output uses distance zero from empty to empty. Checked-range failure or
+an exact error too large for finite binary64 fails closed. The implementation
+compares the same candidate values that it passes to materialization, so
+cancellation and gradual underflow are covered without a dimension-dependent
+unit-roundoff formula. Non-finite generated coordinates cause an unsuccessful
+operation. An implementation relying instead on a forward-error formula must
+account for the exact evaluation order, multiplication and addition rounding,
+dimension, underflow/subnormals, compiler contraction/reassociation and
+overflow.
 
 The error is observable even with exact dyadic V inputs. Take a singleton
 `v=(10^16,1,-10^16)`, a one-row matrix `M=(1,1,1)`, and `b=0`. Every input
 number is exactly representable. The exact real image is `{1}`. The current
 left-to-right binary64 accumulation computes `10^16+1` as `10^16`, then adds
-`-10^16`, publishing `{0}`. Its `SetRelation::equivalent` label supplies no
-bound for that one-unit discrepancy. Similarly, multiplying stored
+`-10^16`, publishing `{0}`. The post-hoc evidence reports an L-infinity
+bound of 1 for that one-unit discrepancy. Similarly, multiplying stored
 `2^-1022` by stored `2^-53` has exact result `2^-1075`, below the smallest
 positive binary64 subnormal; a rounded zero is a finite but different
-candidate. A successful finite check cannot ignore underflow.
+candidate. The operation reports `2^-1074`, the smallest positive subnormal,
+as an outward bound for that underflow.
 
 ## Why the H path needs an additional proof
 
@@ -144,16 +152,20 @@ To claim a real-model bound in a future profile:
 1. Specify whether each operand and coefficient is an exact stored dyadic or
    carries a certified enclosure of authored real data. Fix the norm, output
    metric, coordinate units and empty-set convention.
-2. For finite V inputs, verify every generated candidate against exact dyadic
-   affine/pair arithmetic and publish an outward-rounded maximum error with
-   matching request/source identity. Preserve the exact deletion check.
+2. For direct finite V inputs, verify every generated candidate against exact
+   dyadic affine/pair arithmetic and publish an outward-rounded maximum error
+   with matching request/source identity. **Implemented** by the current
+   finite-V affine-sum path; preserve the exact deletion check.
 3. For H inputs, obtain a **global two-sided** H/V conversion certificate or
    separate directed bounds. Vertex-row residuals alone are insufficient.
    Propagate this bound through the map/sum as above.
-4. Bind any final `GeometryErrorBound` to a checked verifier and explicit
-   assumptions, including overflow/underflow and upstream model uncertainty.
-   Decide whether the shared relation type needs a distinct bounded-numerical
-   result; do not silently relabel the current result as validated.
+4. Bind any broader `GeometryErrorBound` to a checked verifier and explicit
+   assumptions, including upstream model uncertainty. The current finite-V
+   bound is computed by the operation's exact dyadic post-hoc check, includes
+   underflow and cancellation, and fails closed on overflow/range failure; it
+   does not cover H conversion or authored-input uncertainty. Decide whether
+   the shared relation type needs a distinct bounded-numerical result; do not
+   silently relabel the current result as validated.
 
 Until those steps exist, this audit resolves the review question and leaves
 the stronger real-model proof as explicit future work. No historical B04 or

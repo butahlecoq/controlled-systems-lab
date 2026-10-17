@@ -4,9 +4,17 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <optional>
 
 namespace csl::geometry::detail {
 namespace exact_detail {
+
+static_assert(std::numeric_limits<double>::is_iec559 &&
+    std::numeric_limits<double>::digits == 53 &&
+    std::numeric_limits<double>::max_exponent == 1024 &&
+    std::numeric_limits<double>::min_exponent == -1021,
+    "Exact geometry dyadic arithmetic requires IEEE-754 binary64 double");
 
 // A binary64 significand has at most 53 bits. A finite binary64 value has
 // exponent at most 971 in this representation and at least -1074, so a
@@ -142,6 +150,60 @@ inline bool add_product(Integer& target, Dyadic lhs, Dyadic rhs) noexcept {
         else if (offset && (static_cast<std::uint64_t>(product[i]) >> (64 - offset))) return false;
     }
     return add_signed(target, term);
+}
+
+// Return the least finite binary64 no smaller than the exact nonnegative value
+// magnitude * 2^common_exponent. Integer shifts inspect discarded bits, so the
+// conversion is outward even below the normal range without floating estimates.
+inline std::uint64_t shifted_low_bits(const Integer& value, std::size_t shift) noexcept {
+    const auto limb = shift / 64;
+    const auto offset = static_cast<unsigned>(shift % 64);
+    if (limb >= limb_count) return 0;
+    std::uint64_t result = value.limbs[limb] >> offset;
+    if (offset && limb + 1 < limb_count) result |= value.limbs[limb + 1] << (64 - offset);
+    return result;
+}
+
+inline bool has_bits_below(const Integer& value, std::size_t bit) noexcept {
+    const auto full_limbs = bit / 64;
+    for (std::size_t i = 0; i < full_limbs; ++i)
+        if (value.limbs[i]) return true;
+    const auto offset = static_cast<unsigned>(bit % 64);
+    return offset != 0 && full_limbs < limb_count &&
+        (value.limbs[full_limbs] & ((std::uint64_t{1} << offset) - 1)) != 0;
+}
+
+inline std::optional<double> outward_binary64(const Integer& magnitude) noexcept {
+    if (magnitude.negative) return std::nullopt;
+    std::size_t highest = limb_count * 64;
+    for (std::size_t limb = limb_count; limb-- > 0;) {
+        if (!magnitude.limbs[limb]) continue;
+        highest = limb * 64 + (63U - static_cast<unsigned>(std::countl_zero(magnitude.limbs[limb])));
+        break;
+    }
+    if (highest == limb_count * 64) return 0.0;
+
+    const int exact_exponent = static_cast<int>(highest) + common_exponent;
+    if (exact_exponent < -1074) return std::numeric_limits<double>::denorm_min();
+    if (exact_exponent < -1022) {
+        constexpr std::size_t subnormal_shift = 1074;
+        auto units = shifted_low_bits(magnitude, subnormal_shift);
+        if (has_bits_below(magnitude, subnormal_shift)) ++units;
+        if (units == (std::uint64_t{1} << 52))
+            return std::bit_cast<double>(std::uint64_t{1} << 52); // smallest normal
+        return std::bit_cast<double>(units);
+    }
+    const auto shift = highest - 52;
+    auto significand = shifted_low_bits(magnitude, shift);
+    int exponent = exact_exponent;
+    if (has_bits_below(magnitude, shift) && ++significand == (std::uint64_t{1} << 53)) {
+        significand >>= 1;
+        ++exponent;
+    }
+    if (exponent > 1023) return std::nullopt;
+    const auto exponent_bits = static_cast<std::uint64_t>(exponent + 1023);
+    const auto fraction = significand - (std::uint64_t{1} << 52);
+    return std::bit_cast<double>((exponent_bits << 52) | fraction);
 }
 
 } // namespace exact_detail
