@@ -18,7 +18,6 @@
 #include <type_traits>
 #include <utility>
 #include <memory>
-#include <source_location>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -26,18 +25,16 @@
 using namespace csl;
 
 namespace {
-template<class T, class... Rest> T take(std::variant<T, Rest...> value,
-    const std::source_location location = std::source_location::current()) {
-    if (!std::holds_alternative<T>(value))
-        throw std::runtime_error("generic take failed at line " + std::to_string(location.line())
-            + " with variant index " + std::to_string(value.index()));
+template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
+    REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
 
 template<class T> T take_artifact(artifacts::ArtifactResult<T> value, const char* operation) {
     if (const auto* error = std::get_if<artifacts::ArtifactError>(&value))
-        INFO(operation << " failed at " << error->path << ": " << error->message);
-    REQUIRE(std::holds_alternative<T>(value));
+        throw std::runtime_error(std::string(operation) + " failed at " + error->path + ": " + error->message);
+    if (!std::holds_alternative<T>(value))
+        throw std::runtime_error(std::string(operation) + " returned an unexpected artifact result");
     return std::get<T>(std::move(value));
 }
 
