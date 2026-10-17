@@ -520,22 +520,24 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         if (exact_bound_applicable) {
             using namespace detail::exact_detail;
             Integer propagated_input_error;
-            if (const auto* image = std::get_if<AffineImage>(&request_.operation)) {
-                const double input_error = *left.input_to_vertices_error;
-                for (std::size_t row = 0; row < output_dimension; ++row) {
-                    Integer row_error;
-                    for (std::size_t col = 0; col < left.dimension; ++col) {
-                        auto coefficient = decode(image->map.values[row * left.dimension + col]);
-                        coefficient.negative = false;
-                        if (!add_product(row_error, coefficient, decode(input_error)))
-                            return unsupported("affine-sum.error_bound", "Exact affine conversion-bound propagation exceeded its checked arithmetic range.");
+            if (candidate_count != 0) {
+                if (const auto* image = std::get_if<AffineImage>(&request_.operation)) {
+                    const double input_error = *left.input_to_vertices_error;
+                    for (std::size_t row = 0; row < output_dimension; ++row) {
+                        Integer row_error;
+                        for (std::size_t col = 0; col < left.dimension; ++col) {
+                            auto coefficient = decode(image->map.values[row * left.dimension + col]);
+                            coefficient.negative = false;
+                            if (!add_product(row_error, coefficient, decode(input_error)))
+                                return unsupported("affine-sum.error_bound", "Exact affine conversion-bound propagation exceeded its checked arithmetic range.");
+                        }
+                        retain_maximum_error(row_error, propagated_input_error);
                     }
-                    retain_maximum_error(row_error, propagated_input_error);
+                } else {
+                    if (!add_dyadic(propagated_input_error, decode(*left.input_to_vertices_error)) ||
+                        !add_dyadic(propagated_input_error, decode(*right->input_to_vertices_error)))
+                        return unsupported("affine-sum.error_bound", "Exact Minkowski conversion-bound composition exceeded its checked arithmetic range.");
                 }
-            } else {
-                if (!add_dyadic(propagated_input_error, decode(*left.input_to_vertices_error)) ||
-                    !add_dyadic(propagated_input_error, decode(*right->input_to_vertices_error)))
-                    return unsupported("affine-sum.error_bound", "Exact Minkowski conversion-bound composition exceeded its checked arithmetic range.");
             }
             if (!add_signed(propagated_input_error, maximum_candidate_error))
                 return unsupported("affine-sum.error_bound", "Exact composed geometry error exceeded its checked arithmetic range.");

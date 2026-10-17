@@ -596,6 +596,12 @@ TEST_CASE("affine and Minkowski error bounds compose independently checked 1D H 
     CHECK(support(sum.output,{1})==18.0);
     REQUIRE(sum.evidence.error_bound.has_value());
     CHECK(sum.evidence.error_bound->bound==2.0);
+
+    const auto empty=take(sets::make_empty({{"empty-affine-sum-input"},1,{}})).as_handle();
+    const auto empty_sum=take(run(request(MinkowskiSum{empty,h2},"compose-empty-h-coverage"),
+        selected_converter()));
+    REQUIRE(empty_sum.evidence.error_bound.has_value());
+    CHECK(empty_sum.evidence.error_bound->bound==0.0);
 }
 
 TEST_CASE("public geometry operation rejects an H-to-V vertex outside H rows despite zero reported residual") {
