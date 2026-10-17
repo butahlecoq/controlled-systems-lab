@@ -76,4 +76,22 @@ or downstream package completeness; issue #7 remains open.
 
 ## 2026-10-17 update: bounded HiGHS LP/QP integration review
 
-The [pinned HiGHS 1.11.0 integration review](../../research/highs-1.11-integration-review.md) ties the selected static build and narrow downstream initialization patch to upstream source, the current adapters, concurrent-workspace and preexecution-stop tests, and the three-file notice inventory. It supports only the adapters' one-thread, separate-workspace Windows profile. Simplex cancellation is cooperative; the QP path has no prompt stop-token callback. No process-wide thread or memory cap, hard deadline, general thread-safety claim, or final distribution-license approval follows from this check. This ADR remains **pending integration review** for the other selected dependencies, Qhull's bounded conversion profile, cross-platform/race coverage, and packaging; architecture issue #7 remains open.
+The [pinned HiGHS 1.11.0 integration review](../../research/highs-1.11-integration-review.md) ties the selected static build and narrow downstream initialization patch to upstream source, the current adapters, concurrent-workspace and preexecution-stop tests, and the three-file notice inventory. It supports only the adapters' one-thread, separate-workspace Windows profile. Simplex cancellation is cooperative; the QP path has no prompt stop-token callback. No process-wide thread or memory cap, hard deadline, general thread-safety claim, or final distribution-license approval follows from this check.
+
+## 2026-10-18 update: bounded Eigen integration review
+
+The [pinned Eigen 3.4.0 integration review](../../research/eigen-3.4-integration-review.md)
+maps the production headers and operations used by objectives, Phase I, and
+Qhull conversion; the neutral matrix boundary and local index guards; target
+compile definitions; configured notice installation; and the checked-in
+behavior-test surface. It supports only those source-level findings. No tests
+were run as part of that review, and it does not establish numerical
+conditioning guarantees, a process-wide thread policy, universal index safety,
+independent-instance thread safety, or downstream packaging compliance.
+
+This ADR remains **pending integration review** for nlohmann JSON, doctest,
+CMake/package behavior, cross-platform and race coverage, and final notice
+collection. The Eigen, HiGHS, and Qhull reviews are bounded component evidence;
+they do not settle the broader scientific numerical profile, geometry operation
+algebra, or capacity policy tracked by architecture issue #7, which remains
+open.
