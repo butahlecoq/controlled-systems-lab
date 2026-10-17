@@ -6,6 +6,7 @@
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/application/comparison.hpp>
 #include <csl/artifacts/run_statistics.hpp>
+#include <csl/artifacts/comparison_manifest.hpp>
 #include <csl/execution/observability.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/problem/validator.hpp>
@@ -13,9 +14,11 @@
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/witness_selector.hpp>
 
+#include <algorithm>
 #include <type_traits>
 #include <utility>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -29,8 +32,9 @@ template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
 
 template<class T> T take_artifact(artifacts::ArtifactResult<T> value, const char* operation) {
     if (const auto* error = std::get_if<artifacts::ArtifactError>(&value))
-        INFO(operation << " failed at " << error->path << ": " << error->message);
-    REQUIRE(std::holds_alternative<T>(value));
+        throw std::runtime_error(std::string(operation) + " failed at " + error->path + ": " + error->message);
+    if (!std::holds_alternative<T>(value))
+        throw std::runtime_error(std::string(operation) + " returned an unexpected artifact result");
     return std::get<T>(std::move(value));
 }
 
@@ -163,7 +167,7 @@ application::ComparisonRequest request_for(const problem::ResolvedProblem& probl
     return {problem, family, {reach_back, direct_joint}};
 }
 
-void check_complete_family_encoder_boundary(const problem::ResolvedProblem& problem,
+csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const problem::ResolvedProblem& problem,
     const application::PreparedComparison& prepared, const application::StrategyExecution& strategy_execution,
     std::size_t strategy_index, const WitnessRequest& witnesses) {
     namespace ar = artifacts;
@@ -189,7 +193,7 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
     const auto configuration = take_artifact(ar::resolve_configuration(std::move(input)),
         "resolve_configuration");
     CHECK(configuration.description().strategy.selector == configuration.description().selector.id);
-    const ar::RunId run{"application-comparison-encoder"};
+    const ar::RunId run{"application-comparison-encoder-"+std::to_string(strategy_index)};
     const auto plan = take_artifact(ob::make_collection_plan({problem, configuration, run, {}, {}, 0}),
         "make_collection_plan");
     const auto statistics = take_artifact(ob::merge_observations(plan, {}), "merge_observations");
@@ -205,10 +209,9 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
     CHECK(wire.find("registered_verifier")!=std::string::npos);
     static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
-    const auto expected_content=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(wire.data()),wire.size()}));
-    CHECK(imported.content().digest()==expected_content.digest());
     CHECK(imported.content().bytes().size()==wire.size());
+    CHECK(std::equal(imported.content().bytes().begin(), imported.content().bytes().end(),
+        reinterpret_cast<const std::byte*>(wire.data())));
     const auto other_profile=prepared.family().profile=="ts01_exact_integrator"
         ?"ts02_constant_integrator":"ts01_exact_integrator";
     const auto problem_mismatch=ar::decode_recorded_run(wire,source(other_profile));
@@ -226,9 +229,11 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
     const auto state_result=ar::decode_recorded_run(self_asserted);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(state_result));
     CHECK(std::get<ar::ArtifactError>(state_result).path=="recorded_state");
+    return imported;
 }
 
 void compare_profile(const std::string& profile) {
+    namespace ar=artifacts;
     const auto problem = source(profile);
     const auto request = request_for(problem, profile);
     auto registered = modules();
@@ -280,10 +285,50 @@ void compare_profile(const std::string& profile) {
             CHECK(report.validated == verification::CheckStatus::unsupported);
         }
     }
-    check_complete_family_encoder_boundary(problem, prepared, execution.strategies[0],
+    auto run_a=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[0],
         0, witness_request);
-    check_complete_family_encoder_boundary(problem, prepared, execution.strategies[1],
+    auto run_b=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[1],
         1, witness_request);
+    const auto request_a=take_artifact(ar::comparison_request_digest(run_a),"comparison_request_digest A");
+    const auto request_b=take_artifact(ar::comparison_request_digest(run_b),"comparison_request_digest B");
+    REQUIRE(request_a==request_b);
+    const auto config_a=take_artifact(ar::comparison_configuration_id(run_a),"comparison_configuration_id A");
+    const auto config_b=take_artifact(ar::comparison_configuration_id(run_b),"comparison_configuration_id B");
+    const auto request_digest=csl::problem::hex(request_a);
+    std::string spec_text="{\"problem_id\":\"";
+    spec_text+=problem.identity().value;
+    spec_text+="\",\"repetitions\":1,\"request_digest\":\"";
+    spec_text+=request_digest;
+    spec_text+="\",\"schema\":\"csl.comparison-spec/1\",\"strategies\":[\"";
+    spec_text+=config_a.value;
+    spec_text+="\",\"";
+    spec_text+=config_b.value;
+    spec_text+="\"]}";
+    const auto spec_result=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()});
+    REQUIRE_MESSAGE(std::holds_alternative<csl::problem::ResolvedContent>(spec_result),
+        std::get<csl::Diagnostic>(spec_result).explanation);
+    const auto spec=std::get<csl::problem::ResolvedContent>(spec_result);
+    const std::vector<ar::ComparisonAttempt> attempts{
+        {0,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0"},run_a.content().digest()},run_a},
+        {1,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-1"},run_b.content().digest()},run_b}};
+    const auto bundle=take_artifact(ar::encode_recorded_comparison(spec,attempts),"encode_recorded_comparison");
+    auto mislabeled=attempts;
+    mislabeled.front().reported_status=ar::AttemptStatus::failed;
+    const auto status_mismatch=ar::encode_recorded_comparison(spec,mislabeled);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(status_mismatch));
+    CHECK(std::get<ar::ArtifactError>(status_mismatch).code==ar::ArtifactErrorCode::identity);
+    mislabeled.front().reported_status=ar::AttemptStatus::unsupported;
+    const auto unsupported_mismatch=ar::encode_recorded_comparison(spec,mislabeled);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(unsupported_mismatch));
+    CHECK(std::get<ar::ArtifactError>(unsupported_mismatch).code==ar::ArtifactErrorCode::identity);
+    const auto bundle_wire=std::string(reinterpret_cast<const char*>(bundle.content().bytes().data()),bundle.content().bytes().size());
+    const auto restored_bundle=take_artifact(ar::decode_recorded_comparison(bundle_wire),"decode_recorded_comparison");
+    CHECK(restored_bundle.content().digest()==bundle.content().digest());
+    CHECK(restored_bundle.spec_id().digest==spec.digest());
+    CHECK(restored_bundle.identity().digest==bundle.content().digest());
+    CHECK(bundle_wire.find("csl.comparison/1")!=std::string::npos);
+    CHECK(bundle_wire.find("csl.run-statistics/5")!=std::string::npos);
 }
 }
 
