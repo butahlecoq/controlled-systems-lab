@@ -9,7 +9,7 @@ the wider mathematical requirements.
 ## Modules and public seams
 
 The arrows below point from a module to a dependency. Solid edges are current
-dependencies; the dashed box is a planned composition seam. Strategy behavior
+dependencies; dashed edges mark a planned composition seam. Strategy behavior
 is still profile-bounded as described below.
 
 ```mermaid
