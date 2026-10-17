@@ -76,8 +76,14 @@ bool supports(const LazyProjectionDescription& data,ProjectionOutput output) {
     auto native=sets::from_handle(data.source);
     if(!std::holds_alternative<sets::SetData>(native)) return false;
     auto rep=std::get<sets::SetData>(native).representation();
-    if(output==ProjectionOutput::h) return !std::holds_alternative<sets::VRepresentation>(rep);
-    return !std::holds_alternative<sets::HRepresentation>(rep) && !std::holds_alternative<sets::UniversalRepresentation>(rep);
+    if(output==ProjectionOutput::h)
+        return std::holds_alternative<sets::HRepresentation>(rep) ||
+            std::holds_alternative<sets::EmptyRepresentation>(rep) ||
+            std::holds_alternative<sets::SingletonRepresentation>(rep) ||
+            std::holds_alternative<sets::UniversalRepresentation>(rep);
+    return std::holds_alternative<sets::VRepresentation>(rep) ||
+        std::holds_alternative<sets::EmptyRepresentation>(rep) ||
+        std::holds_alternative<sets::SingletonRepresentation>(rep);
 }
 template<class T> T take(std::variant<T,Diagnostic> value) {
     if(auto* failure=std::get_if<Diagnostic>(&value)) throw std::logic_error(failure->explanation);
@@ -317,8 +323,9 @@ registry::Registration<registry::ConversionPort> make_projection_materializer(st
                 return error("projection.representation","Only native H or V materialization is supported.");
             auto data=inspect_lazy_projection(request.input);
             if(auto* failure=std::get_if<Diagnostics>(&data)) return *failure;
-            if(!supports(std::get<LazyProjectionDescription>(data),request.output.value=="csl.polyhedron.h"?ProjectionOutput::h:ProjectionOutput::v))
-                return error("projection.representation","Cross H/V materialization requires a separate converter.");
+            const auto output=request.output.value=="csl.polyhedron.h"?ProjectionOutput::h:ProjectionOutput::v;
+            if(!supports(std::get<LazyProjectionDescription>(data),output))
+                return error("projection.representation","Lazy source cannot be materialized to the requested H or V representation.");
             registry::Output output;output.representation=request.output;output.relation=SetRelation::equivalent;
             return registry::Offer{output};
         },[limit](const ConversionRequest&) {return std::make_unique<MaterializerWorkspace>(limit);}};
