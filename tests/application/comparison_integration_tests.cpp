@@ -231,6 +231,7 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
 }
 
 void compare_profile(const std::string& profile) {
+    namespace ar=artifacts;
     const auto problem = source(profile);
     const auto request = request_for(problem, profile);
     auto registered = modules();
@@ -292,10 +293,15 @@ void compare_profile(const std::string& profile) {
     const auto config_a=take_artifact(ar::comparison_configuration_id(run_a),"comparison_configuration_id A");
     const auto config_b=take_artifact(ar::comparison_configuration_id(run_b),"comparison_configuration_id B");
     const auto request_digest=csl::problem::hex(request_a);
-    const auto spec_text=std::string{"{\"problem_id\":\""+problem.identity().value+
-        "\",\"repetitions\":1,\"request_digest\":\""+request_digest+
-        "\",\"schema\":\"csl.comparison-spec/1\",\"strategies\":[\""+
-        config_a.value+"\",\""+config_b.value+"\"]}"};
+    std::string spec_text="{\"problem_id\":\"";
+    spec_text+=problem.identity().value;
+    spec_text+="\",\"repetitions\":1,\"request_digest\":\"";
+    spec_text+=request_digest;
+    spec_text+="\",\"schema\":\"csl.comparison-spec/1\",\"strategies\":[\"";
+    spec_text+=config_a.value;
+    spec_text+="\",\"";
+    spec_text+=config_b.value;
+    spec_text+="\"]}";
     const auto spec=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
         std::span<const std::byte>{reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()}));
     const std::vector<ar::ComparisonAttempt> attempts{
