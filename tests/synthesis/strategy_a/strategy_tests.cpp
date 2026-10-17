@@ -1058,12 +1058,28 @@ TEST_CASE("registered Strategy A preserves its prepared numerical policy in the 
     ExecutionContext mismatched_context;
     mismatched_context.numerical={1e-6,2e-7};
     mismatched_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
-    const auto& unsupported=alternative<Unsupported>(mismatched_workspace->run(mismatched_context));
-    REQUIRE(unsupported.diagnostics.size()==1);
-    CHECK(unsupported.diagnostics.front().code==DiagnosticCode::invalid_input);
-    CHECK(unsupported.diagnostics.front().field=="family.numerical");
-    CHECK(unsupported.diagnostics.front().explanation==
+    const auto mismatch=mismatched_workspace->run(mismatched_context);
+    REQUIRE(std::holds_alternative<SynthesisResult>(mismatch));
+    const auto& rejected=std::get<SynthesisResult>(mismatch);
+    CHECK(rejected.termination==Termination::contract_rejected);
+    CHECK(rejected.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(rejected.stop));
+    const auto& failure=std::get<ContractValidationFailure>(rejected.stop);
+    REQUIRE(failure.diagnostics.size()==1);
+    CHECK(failure.diagnostics.front().code==DiagnosticCode::invalid_input);
+    CHECK(failure.diagnostics.front().field=="family.numerical");
+    CHECK(failure.diagnostics.front().explanation==
         "ExecutionContext numerical policy differs from the prepared family request");
+    CHECK_FALSE(failure.retained.lower_bound);
+    CHECK_FALSE(failure.retained.upper_bound);
+    CHECK(failure.retained.incumbents==0);
+    CHECK_FALSE(failure.retained.partial_or_candidate_family);
+    CHECK_FALSE(rejected.objective.lower);
+    CHECK_FALSE(rejected.objective.upper);
+    CHECK_FALSE(rejected.family);
+    CHECK(rejected.incumbents.empty());
+    CHECK(rejected.spans.empty());
+    CHECK(check_synthesis_result(rejected,prepared.expected_synthesis_identity()).empty());
 }
 TEST_CASE("stage constraints restrict the joint locus without separating histories") {
     auto source=*integrator().description();source.states[1]=interval("restricted-X1",0,.5);
