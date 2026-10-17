@@ -93,6 +93,24 @@ registry::StrategyRegistration proposal_only_strategy(CompleteFamilyProposal pro
     };
     return registration;
 }
+registry::StrategyRegistration proposal_only_ts02_strategy(CompleteFamilyProposal proposal) {
+    registry::StrategyRegistration registration;
+    registration.identity={{"csl.synthesis.strategy-b"},"1"};
+    registration.capabilities=[](const registry::StrategyRequest&,const registry::Requirements& requirements)->registry::Capability {
+        return registry::Offer{requirements.output};
+    };
+    registration.planner=[proposal=std::move(proposal)](const registry::StrategyRequest&,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
+        auto checked=registry::check_pipeline();
+        return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(std::move(checked)),[proposal](auto,const registry::StrategyRequest&,const registry::Requirements&) {
+            return std::make_unique<ProposalOnlyWorkspace>(proposal);
+        });
+    };
+    registration.complete_family_verifier={{synthesis::ts02_constant_integrator_verifier},"1"};
+    registration.expected_lineage=[](const registry::StrategyRequest& request) {
+        return detail::expected_ts02_lineage(request.problem.identity());
+    };
+    return registration;
+}
 template<class T, class... R> T accepted(std::variant<T,R...> value) {
     REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
 }
@@ -1245,6 +1263,59 @@ TEST_CASE("Strategy B registers the exact T-S02 constant-objective history famil
     candidate_requirements.output.completeness=registry::Completeness::unestablished;
     CHECK(std::holds_alternative<registry::Rejection>(strategies.prepare({p,configuration,candidate_profile,"1"},candidate_requirements)));
 }
+TEST_CASE("Strategy B rejects unsupported completeness support at the public strategy boundary") {
+    const auto p=resolve(integrator(LinearTerminal{{0},3}));
+    auto exact=request(p);exact.profile=synthesis::ts02_constant_integrator_profile;
+    exact.target=FamilyTarget::exact_optimal_relation;
+    const auto trusted=registered_prepared(p,exact);
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.numerical=exact.numerical;
+    const auto trusted_result=accepted(trusted.create()->run(context));
+    REQUIRE(trusted_result.family);
+    REQUIRE(trusted_result.family->registry_verified());
+    const auto& verified=std::get<CompleteOptimalFamily>(trusted_result.family->outcome());
+    CompleteFamilyProposal proposal{trusted_result.family->identity(),verified};
+
+    // Preserve the valid problem/request/strategy binding and mutate only the support variant.
+    const std::vector<CompletenessSupport> unsupported_supports{
+        Unestablished{},
+        SymbolicArgument{"problem:"+p.identity().value, "unchecked symbolic assertion"},
+        CertificateReference{"problem:"+p.identity().value+"/certificate", "unselected verifier"},
+        NumericalCheck{0,0,0,{"unselected numerical verifier"}}};
+    const std::vector<std::string> names{
+        "unestablished", "symbolic argument", "unchecked certificate reference", "residual-only numerical check"};
+    REQUIRE(unsupported_supports.size()==names.size());
+    for(std::size_t i=0;i<unsupported_supports.size();++i) {
+        CAPTURE(names[i]);
+        auto forged=proposal;
+        forged.family.completeness.support=unsupported_supports[i];
+
+        registry::StrategyRegistry strategies;
+        REQUIRE_FALSE(strategies.add(proposal_only_ts02_strategy(std::move(forged))));
+        StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
+        configuration.representation={"csl.polyhedron.h"};
+        registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
+        requirements.output.assurance=Assurance::numerical;
+        requirements.output.family=FamilyTarget::exact_optimal_relation;
+        requirements.output.completeness=registry::Completeness::established;
+        const registry::StrategyRequest strategy_request{p,configuration,exact,"1",
+            detail::expected_ts02_lineage(p.identity())};
+        const auto prepared=strategies.prepare(strategy_request,requirements);
+        REQUIRE(std::holds_alternative<registry::PreparedStrategy>(prepared));
+        const auto result=accepted(std::get<registry::PreparedStrategy>(prepared).create()->run(context));
+        CHECK(result.termination==Termination::contract_rejected);
+        CHECK_FALSE(result.family);
+        CHECK_FALSE(result.complete_proposal);
+        CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+        REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
+        const auto& diagnostics=std::get<ContractValidationFailure>(result.stop).diagnostics;
+        CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& diagnostic) {
+            return diagnostic.code==DiagnosticCode::evidence_mismatch&&
+                diagnostic.field=="family.proposal.verifier";
+        }));
+    }
+}
+
 TEST_CASE("registered Strategy B reports a completed unbounded objective without a finite lower bound") {
     auto input=integrator(LinearTerminal{{-1},0});
     input.controls=ContinuousDomain{{UniversalSet{1},UniversalSet{1}}};
