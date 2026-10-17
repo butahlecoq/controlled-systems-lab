@@ -81,6 +81,11 @@ StrategyARuntimeLineageReceipt::StrategyARuntimeLineageReceipt(const StrategyReq
 
 bool StrategyARuntimeLineageReceipt::matches(const StrategyRequest& request,const FamilyIdentity& identity,
     const StrategyRegistration::CompleteFamilyVerifierKey& verifier_binding) const {
+    const bool ts03=strategy_a_ts03_profile_valid(binding_.problem,binding_);
+    const bool ts01=strategy_a_ts01_profile_valid(binding_.problem,binding_);
+    const auto expected_profile_lineage=ts03?
+        synthesis::strategy_a::detail::expected_ts03_lineage(binding_.problem.identity()):
+        synthesis::strategy_a::detail::expected_ts01_lineage(binding_.problem.identity());
     if(verifier_binding_.id.value.empty()||verifier_binding_.version.empty()||
         verifier_binding_.id!=verifier_binding.id||verifier_binding_.version!=verifier_binding.version||
         !forward_||!feasible_terminal_||!feasible_recovery_||!terminal_||!optimal_recovery_)return false;
@@ -95,9 +100,7 @@ bool StrategyARuntimeLineageReceipt::matches(const StrategyRequest& request,cons
         identity.coordinates!=prepared.problem.constraints().coordinates()||
         identity.strategy!=ModuleId{"csl.synthesis.reach-back"}||identity.strategy_version!="1"||
         prepared.configuration.strategy!=identity.strategy||prepared.strategy_version!=identity.strategy_version||
-        (!strategy_a_ts01_profile_valid(prepared.problem,prepared)&&
-         !strategy_a_ts03_profile_valid(prepared.problem,prepared))||
-        prepared.lineage!=synthesis::strategy_a::detail::expected_ts01_lineage(prepared.problem.identity())||
+        (!ts01&&!ts03)||prepared.lineage!=expected_profile_lineage||
         identity.lineage!=prepared.lineage)
         return false;
 
@@ -285,7 +288,7 @@ bool ts03_case_valid(const ::csl::problem::ResolvedProblem& problem,const Family
 bool strategy_a_ts03_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
     return ts03_case_valid(problem,request.family,request.configuration.representation)&&
         request.configuration.strategy.value=="csl.synthesis.reach-back"&&request.strategy_version=="1"&&
-        request.lineage==synthesis::strategy_a::detail::expected_ts01_lineage(problem.identity());
+        request.lineage==synthesis::strategy_a::detail::expected_ts03_lineage(problem.identity());
 }
 
 }

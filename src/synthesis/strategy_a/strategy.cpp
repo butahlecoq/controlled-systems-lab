@@ -402,7 +402,7 @@ registry::StrategyRegistration make_registration(Providers providers) {
                 return detail::expected_ts02_lineage(request.problem.identity());
             if(request.strategy_version==version&&request.configuration.strategy==strategy&&
                 registry::detail::ts03_case_valid(request.problem,request.family,request.configuration.representation))
-                return detail::expected_ts01_lineage(request.problem.identity());
+                return detail::expected_ts03_lineage(request.problem.identity());
             return std::vector<TransformStepIdentity>{};
         }};
     registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
