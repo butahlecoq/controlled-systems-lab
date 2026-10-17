@@ -15,6 +15,11 @@ target_link_libraries(quickhull_2d_test PRIVATE CSL::quickhull_2d doctest::docte
 add_test(NAME quickhull_2d_test COMMAND quickhull_2d_test)
 csl_test_target(quickhull_2d_test geometry)
 
+add_executable(bounded_hull_checker_test tests/contract/geometry/bounded_hull_checker_test.cpp)
+target_link_libraries(bounded_hull_checker_test PRIVATE CSL::bounded_hull_checker doctest::doctest)
+add_test(NAME bounded_hull_checker_test COMMAND bounded_hull_checker_test)
+csl_test_target(bounded_hull_checker_test geometry)
+
 if(TARGET CSL::highs_lp)
   add_executable(quickhull_2d_lp_test tests/unit/geometry/quickhull_2d_lp_test.cpp)
   target_link_libraries(quickhull_2d_lp_test PRIVATE CSL::quickhull_2d CSL::hull CSL::highs_lp doctest::doctest)

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:csl:bounded-hull-check:1",
+  "title": "Inert bounded exact 2D source-index hull checker observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "status", "input_digest", "budget_ms", "max_points", "elapsed_ns", "evidence_scope", "reason", "counterexample_index"],
+  "properties": {
+    "schema": {"const": "csl.bounded-hull-check/1"},
+    "status": {"enum": ["verified", "incorrect", "inconclusive"]},
+    "input_digest": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "budget_ms": {"type": "integer", "minimum": 0},
+    "max_points": {"type": "integer", "minimum": 0},
+    "elapsed_ns": {"type": "integer", "minimum": 0},
+    "evidence_scope": {"const": "exact represented binary64 2D finite hull"},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 512},
+    "counterexample_index": {"type": ["integer", "null"], "minimum": 0}
+  }
+}
