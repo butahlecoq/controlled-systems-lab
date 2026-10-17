@@ -67,25 +67,37 @@ The result uses `SetRelation::equivalent` with `NumericalCheck` evidence under
 the caller's tolerance. This is an algorithmic numerical relation only. For
 direct finite V, singleton, and empty inputs, the operation also reports an
 outward-rounded `GeometryEvidence.error_bound` when exact dyadic arithmetic
-can represent the post-hoc discrepancy. Its metric is L-infinity Hausdorff
-distance on output coordinates, and its units are maximum absolute
-output-coordinate units. It is the maximum coordinate error between every
-generated binary64 candidate and the corresponding exact affine image or
-Minkowski pair sum of the stored input dyadics. The public bound is rounded up
-to a representable binary64 value, so it may be larger than the exact discrepancy. Under this
-bound, exact candidate deletion adds zero error because deletion preserves the
-generated hull exactly. For an empty result, the bound is zero under the
-empty-to-empty distance convention stated in the evidence units.
+can represent the post-hoc discrepancy. It also composes that candidate bound
+with an independently recomputed coverage bound for bounded ambient-one H
+inputs when every converted operand has a verifiable exact stored-dyadic
+interval. Its metric is L-infinity Hausdorff distance on output coordinates,
+and its units are maximum absolute output-coordinate units. For candidate
+generation, the bound compares every generated binary64 point with the exact
+affine image or Minkowski pair operation on the stored (possibly converted)
+binary64 vertices. If `E_gen` is the largest such coordinate discrepancy and
+`E_H` is an ambient-one H-to-V coverage bound, the affine-image bound includes
+`max_row(sum_col(abs(M[row,col]))) * E_H + E_gen`. The Minkowski bound includes
+`E_H,left + E_H,right + E_gen`; direct finite V operands contribute zero
+conversion error. These compositions use exact dyadic accumulation and are
+rounded up to representable binary64. They follow by pairing convex
+combinations and by the induced L-infinity operator norm / Minkowski sum
+inequality. Exact candidate deletion adds zero error because deletion
+preserves the generated hull exactly. For an empty result, the bound is zero
+under the empty-to-empty distance convention stated in the evidence units.
 
 This bound says nothing about authored pre-rounding real values or uncertainty
-in how input coordinates and coefficients were obtained. H inputs receive no
-operation error bound: checking returned converted vertices against H rows
-does not prove that all needed vertices were found. If exact arithmetic cannot
-produce a finite outward binary64 bound, the operation fails closed instead of
-returning an unbounded or rounded-down value. `NumericalCheck.max_residual`
-remains a reducer diagnostic and does not supply this bound. Binary64 overflow
-is reported as failure; finite underflow and cancellation are included by the
-exact post-hoc comparison. Validated assurance is rejected. The
+in how input coordinates and coefficients were obtained. H inputs outside the
+bounded ambient-one profile receive no operation error bound: checking returned
+converted vertices against H rows does not prove that all needed vertices were
+found. For ambient-one inputs, affine-sum independently recomputes exact H
+interval coverage against the returned V extrema; it does not trust a
+converter's numerical relation or residual as global coverage evidence. If
+exact arithmetic cannot produce a finite outward binary64 bound, the operation
+fails closed instead of returning an unbounded or rounded-down value.
+`NumericalCheck.max_residual` remains a reducer diagnostic and does not supply
+this bound. Binary64 overflow is reported as failure; finite underflow and
+cancellation are included by the exact post-hoc comparison. Validated
+assurance is rejected. The
 [scientific audit](../research/geo02-floating-model-audit.md) gives the precise
 conditional finite-V error theorem, a counterexample, and the proof required
 before a caller can claim real-model inclusion or a global error bound.

@@ -121,6 +121,13 @@ Registration<ConversionPort> make_inaccurate_conversion_registration() {
         [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
         [](const ConversionRequest& request) { return std::make_unique<HighResidualConversionWorkspace>(request,2.0,0.0); }};
 }
+Registration<ConversionPort> make_one_unit_undercoverage_registration() {
+    return {{{"test.conversion.one-unit-undercoverage"},"1"},
+        [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
+        [](const ConversionRequest& request) {
+            return std::make_unique<HighResidualConversionWorkspace>(request,9.0,0.0);
+        }};
+}
 Registration<ConversionPort> make_duplicate_row_residual_registration() {
     return {{{"test.conversion.duplicate-row-residual"},"1"},
         [](const ConversionRequest&,const Requirements& requirements) -> Capability { return Offer{requirements.output}; },
@@ -552,6 +559,49 @@ TEST_CASE("public geometry operation rejects valid H-to-V vertices with excessiv
     selected.conversion=provider(make_high_residual_conversion_registration(),conversion_requirements);
     const auto result=run(request(AffineImage{h,{1,1,{1}},{0}},"high-residual-conversion"),std::move(selected));
     CHECK(std::holds_alternative<Unsupported>(result));
+}
+
+TEST_CASE("affine and Minkowski error bounds compose independently checked 1D H coverage") {
+    const auto h1=take(sets::make_h({{"h-undercovered-left"},1,{}},
+        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,10})),
+         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    const auto h2=take(sets::make_h({{"h-undercovered-right"},1,{}},
+        {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,10})),
+         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    const auto selected_converter = [&] {
+        auto selected=dependencies(false,false);
+        Requirements requirements;
+        requirements.output.representation={"csl.polyhedron.v"};
+        requirements.output.relation=SetRelation::equivalent;
+        selected.conversion=provider(make_one_unit_undercoverage_registration(),requirements);
+        selected.hull=provider(make_keep_all_hull_registration());
+        return selected;
+    };
+
+    const auto image=take(run(request(AffineImage{h1,{1,1,{2}},{0}},"compose-affine-h-coverage"),
+        selected_converter()));
+    CHECK(support(image.output,{1})==18.0);
+    REQUIRE(image.evidence.error_bound.has_value());
+    CHECK(image.evidence.error_bound->bound==2.0);
+
+    const auto rounded_image=take(run(
+        request(AffineImage{h1,{1,1,{0.1}},{0}},"compose-affine-generation-rounding"),
+        selected_converter()));
+    CHECK(support(rounded_image.output,{1})==doctest::Approx(0.9));
+    REQUIRE(rounded_image.evidence.error_bound.has_value());
+    CHECK(rounded_image.evidence.error_bound->bound>0.1);
+
+    const auto sum=take(run(request(MinkowskiSum{h1,h2},"compose-sum-h-coverage"),
+        selected_converter()));
+    CHECK(support(sum.output,{1})==18.0);
+    REQUIRE(sum.evidence.error_bound.has_value());
+    CHECK(sum.evidence.error_bound->bound==2.0);
+
+    const auto empty=take(sets::make_empty({{"empty-affine-sum-input"},1,{}})).as_handle();
+    const auto empty_sum=take(run(request(MinkowskiSum{empty,h2},"compose-empty-h-coverage"),
+        selected_converter()));
+    REQUIRE(empty_sum.evidence.error_bound.has_value());
+    CHECK(empty_sum.evidence.error_bound->bound==0.0);
 }
 
 TEST_CASE("public geometry operation rejects an H-to-V vertex outside H rows despite zero reported residual") {

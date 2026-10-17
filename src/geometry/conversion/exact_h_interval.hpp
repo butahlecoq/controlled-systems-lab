@@ -1,7 +1,7 @@
 #pragma once
 
 #include <csl/sets/data.hpp>
-#include "../../geometry/exact_dyadic.hpp"
+#include "../exact_dyadic.hpp"
 #include <algorithm>
 #include <bit>
 #include <cmath>
@@ -11,7 +11,7 @@
 #include <string>
 #include <variant>
 
-namespace csl::adapters::polyhedral::detail {
+namespace csl::geometry::detail {
 namespace dyadic = csl::geometry::detail::exact_detail;
 
 // This checks the original ambient-one H rows, independently of the LP and
@@ -131,4 +131,4 @@ inline std::variant<double, std::string> certify_h_interval(
     if (const auto* error = std::get_if<std::string>(&high_error)) return *error;
     return std::max(std::get<double>(low_error), std::get<double>(high_error));
 }
-} // namespace csl::adapters::polyhedral::detail
+} // namespace csl::geometry::detail
