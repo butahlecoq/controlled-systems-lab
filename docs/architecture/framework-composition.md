@@ -8,32 +8,39 @@ the wider mathematical requirements.
 
 ## Modules and public seams
 
-The arrows below point from a caller to the module it depends on. Solid paths
-are implemented; dashed paths are still missing or limited to the exact
-analytic profiles documented below.
+The arrows below point from a module to a dependency. Solid edges are current
+dependencies; the dashed box is a planned composition seam. Strategy behavior
+is still profile-bounded as described below.
 
 ```mermaid
 flowchart LR
-    SC[Scenario file] --> IN[Input loader]
-    IN --> PR[Resolved problem]
-    EX[Installed examples] --> AP[Application composition]
-    PR --> AP
+    EX[Installed callers] --> IN[Input loader]
+    EX --> AP[Application composition]
+    IN --> PR[Resolved problem contract]
+    AP --> PR
     AP --> SR[Strategy registry]
+    AP --> WS[Witness selector]
+    AP --> V[Independent verifier]
+    AP --> EXEC[Execution policy]
+    AP --> ART[Run artifact interface]
     SR --> A[Strategy A: reachability and recovery]
     SR --> B[Strategy B: joint optimization]
-    A --> GEO[Geometry operations]
-    B --> LP[LP and convex ports]
+    A --> GEO[Geometry port]
+    A --> F[Typed family outcome contract]
+    B --> LP[LP port]
+    B --> CVX[Convex port]
+    B --> F
     GEO --> LP
     GEO --> CV[Conversion port]
-    A --> F[Typed family outcome]
-    B --> F
-    F --> WS[Witness selector]
+    WS --> F
     WS --> LP
-    WS --> V[Independent verifier]
-    PR --> V
-    AP --> ART[Run artifact interface]
-    ART -. paired comparison and proof export .-> RP[Paired comparison artifact bundle]
-    ART --> R[Saved-record renderer]
+    V --> PR
+    V --> F
+    ART --> PR
+    ART --> RECORD[Versioned run record]
+    R[Saved-record renderer] --> RECORD
+    PAIR[Paired comparison codec] -. planned dependency .-> ART
+    PAIR -. consumes .-> F
 ```
 
 | Responsibility | Public targets / interface | Owning implementation | Depends on / replaceable seam |
