@@ -1,4 +1,5 @@
 #pragma once
+#include <csl/execution/contracts.hpp>
 #include <csl/problem/validator.hpp>
 #include <csl/registry/provider.hpp>
 
@@ -16,6 +17,13 @@ struct ExpectedSynthesisBinding {
     std::string strategy_version;
     std::vector<TransformStepIdentity> lineage;
 };
+// Independent verifier policy. Its numerical tolerances and assurance are
+// requested for verification only and do not alter the prepared solve claim.
+struct VerificationRequest {
+    NumericalPolicy numerical{1e-8,1e-8};
+    Assurance assurance{Assurance::numerical};
+    bool operator==(const VerificationRequest&) const = default;
+};
 struct TrajectoryRequest {
     Witness witness;
     Assurance assurance{Assurance::numerical};
@@ -28,6 +36,9 @@ struct TrajectoryRequest {
     // Appended to preserve positional aggregate initialization of prior fields.
     // Required when family is supplied; omitted for witness-only verification.
     std::optional<ExpectedSynthesisBinding> expected_synthesis;
+    // Appended to preserve positional aggregate initialization of prior fields.
+    // When omitted, legacy assurance and ExecutionContext tolerances are used.
+    std::optional<VerificationRequest> verification;
 };
 struct NamedResidual {
     std::string field;
@@ -39,6 +50,7 @@ struct TrajectoryReport {
     ProblemId problem;
     TrajectoryRequest input;
     Verifier verifier{{"csl.trajectory.original"},"1"};
+    // Compatibility view of verification.numerical in returned reports.
     NumericalPolicy numerical{};
     Termination termination{Termination::completed};
     // numerical_pass means all available caller-supplied identity bindings and
@@ -54,6 +66,8 @@ struct TrajectoryReport {
     std::vector<NamedResidual> residuals;
     std::vector<registry::LPQueryRecord> membership_queries;
     Diagnostics diagnostics;
+    // Appended to preserve positional aggregate initialization of prior fields.
+    VerificationRequest verification{};
 };
 // Synchronous borrows; the report owns the witness and supplied evidence. Known
 // external inputs are prescribed by the problem, never read from witness.controls.

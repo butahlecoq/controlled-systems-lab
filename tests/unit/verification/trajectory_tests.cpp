@@ -31,7 +31,8 @@ TEST_CASE("literal original trajectory passes without a solver success flag") {
 }
 TEST_CASE("wrong original transition control and cost each have named residuals") {
     auto p=resolve(scalar());auto q=request(p);q.witness.states[1][0]=4;q.witness.controls[0][0]=5;q.witness.original_objective=9;
-    ExecutionContext c;c.numerical={0.125,0.03125};
+    q.verification=VerificationRequest{{0.125,0.03125},Assurance::numerical};
+    ExecutionContext c;
     auto r=verify_trajectory(p,q,c);CHECK(r.feasibility==CheckStatus::violation);CHECK(r.objective==CheckStatus::violation);
     CHECK(residual(r,"dynamics[0][0]").measure.violation==1);
     CHECK(residual(r,"dynamics[0][0]").tolerance==0.28125);
@@ -110,7 +111,8 @@ TEST_CASE("two-control unit-box oracle checks each original history without clai
     input.states={Singleton{{0}},UniversalSet{1},Singleton{{1}}};
     auto p=resolve(input);TrajectoryRequest q;
     q.witness={p.identity(),{{0},{0.25},{1}},{{0.25},{0.75}},1};
-    ExecutionContext c;c.numerical={0.125,0.03125};
+    q.verification=VerificationRequest{{0.125,0.03125},Assurance::numerical};
+    ExecutionContext c;
     auto result=verify_trajectory(p,q,c);
     CHECK(result.feasibility==CheckStatus::numerical_pass);
     CHECK(result.objective==CheckStatus::numerical_pass);
@@ -256,18 +258,18 @@ TEST_CASE("empty universal singleton zero ports and zero horizon preserve their 
 }
 TEST_CASE("explicit numerical thresholds and finite arithmetic do not certify validated accuracy") {
     auto p=resolve(scalar());auto q=request(p);q.witness.original_objective=3.125;
-    ExecutionContext c;c.numerical={0.125,0};auto r=verify_trajectory(p,q,c);
+    q.verification=VerificationRequest{{0.125,0},Assurance::numerical};auto r=verify_trajectory(p,q);
     CHECK(r.objective==CheckStatus::numerical_pass);CHECK(residual(r,"objective").tolerance==0.125);
-    c.numerical={0.124,0};CHECK(verify_trajectory(p,q,c).objective==CheckStatus::violation);
-    c.numerical={-1,0};CHECK(verify_trajectory(p,q,c).feasibility==CheckStatus::invalid_input);
-    q.assurance=Assurance::validated;r=verify_trajectory(p,q);CHECK(r.feasibility==CheckStatus::unsupported);
+    q.verification=VerificationRequest{{0.124,0},Assurance::numerical};CHECK(verify_trajectory(p,q).objective==CheckStatus::violation);
+    q.verification=VerificationRequest{{-1,0},Assurance::numerical};CHECK(verify_trajectory(p,q).feasibility==CheckStatus::invalid_input);
+    q.verification=VerificationRequest{{1e-8,1e-8},Assurance::validated};r=verify_trajectory(p,q);CHECK(r.feasibility==CheckStatus::unsupported);
     CHECK(r.validated==CheckStatus::unsupported);
     q=request(p);q.witness.states[0][0]=std::numeric_limits<double>::quiet_NaN();CHECK(verify_trajectory(p,q).feasibility==CheckStatus::invalid_input);
 }
 TEST_CASE("unknown assurance values are rejected instead of downgraded to numerical verification") {
     const auto p=resolve(scalar());
     auto q=request(p);
-    q.assurance=static_cast<Assurance>(127);
+    q.verification=VerificationRequest{{1e-8,1e-8},static_cast<Assurance>(127)};
 
     const auto report=verify_trajectory(p,q);
     CHECK(report.termination==Termination::completed);
@@ -403,6 +405,41 @@ TEST_CASE("published synthesis family bindings match only an independent expecte
     CHECK(verify_trajectory(p,q).optimality==CheckStatus::unsupported);
     CHECK(verify_trajectory(p,q).completeness==CheckStatus::unsupported);
 }
+TEST_CASE("separate verification policy leaves the prepared solve family identity unchanged") {
+    auto p=resolve(scalar());auto q=request(p);
+    q.witness.original_objective=3.125;
+    ClaimEvidence claim{p.identity(),NumericalCheck{0,0,0,{"backend"}}};
+    auto solve_request=FamilyRequest{"nominal",p.identity(),FamilyTarget::candidate_relaxation,
+        {1e-7,2e-7},Assurance::numerical,{"opaque-family"},{}};
+    const auto coordinates=p.constraints().coordinates();
+    const ModuleId strategy{"candidate-strategy"};
+    q.expected_synthesis=ExpectedSynthesisBinding{solve_request,strategy,"1",{}};
+    const FamilyIdentity family_identity{p.identity(),solve_request,coordinates,strategy,"1",{}};
+    const JointRelation relation{coordinates,solve_request.representation,{}};
+    q.family=accepted(FamilyPublisher::publish(family_identity,CandidateFamily{relation,
+        HeuristicRelationEvidence{"literal candidate"},WitnessFeasibilityEvidence{q.witness,claim}}));
+
+    const VerificationRequest verification{{0.1,0},Assurance::numerical};
+    q.verification=verification;
+    ExecutionContext context;context.numerical={0.5,0};
+    const auto report=verify_trajectory(p,q,context);
+    const NumericalPolicy solve_policy{1e-7,2e-7};
+
+    CHECK(report.bindings==CheckStatus::numerical_pass);
+    CHECK(report.feasibility==CheckStatus::numerical_pass);
+    CHECK(report.objective==CheckStatus::violation);
+    CHECK(residual(report,"objective").measure.violation==0.125);
+    CHECK(residual(report,"objective").tolerance==0.1);
+    CHECK(report.verification==verification);
+    CHECK(report.input.verification==verification);
+    CHECK(report.numerical==verification.numerical);
+    REQUIRE(report.input.family.has_value());
+    CHECK(report.input.family->identity().request.numerical==solve_policy);
+    REQUIRE(report.input.expected_synthesis.has_value());
+    CHECK(report.input.expected_synthesis->request.numerical==solve_policy);
+    CHECK(q.family->identity().request.numerical==solve_policy);
+    CHECK(q.expected_synthesis->request.numerical==solve_policy);
+}
 TEST_CASE("legacy positional trajectory request aggregate remains source compatible") {
     auto p=resolve(scalar());
     const auto witness=request(p).witness;
@@ -412,6 +449,12 @@ TEST_CASE("legacy positional trajectory request aggregate remains source compati
     CHECK(report.feasibility==CheckStatus::numerical_pass);
     CHECK(report.optimality==CheckStatus::unsupported);
     CHECK(report.completeness==CheckStatus::unsupported);
+}
+TEST_CASE("legacy positional trajectory report aggregate remains source compatible") {
+    const auto p=resolve(scalar());
+    const NumericalPolicy legacy_policy{0.125,0.25};
+    const TrajectoryReport report{p.identity(),request(p),Verifier{{"csl.trajectory.original"},"1"},legacy_policy};
+    CHECK(report.numerical==legacy_policy);
 }
 TEST_CASE("V membership checks actual original rows and retains registered provenance") {
     auto input=scalar();input.states[1]=segment_v();auto p=resolve(input);auto q=request(p);

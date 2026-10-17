@@ -48,8 +48,8 @@ public:
         boundary();
         if(report_.residuals.size()>=report_.input.limits.residuals)
             stop(Termination::resource_limit,"residual count limit reached");
-        const auto tolerance=number(context_.numerical.absolute_tolerance+
-            product(context_.numerical.relative_tolerance,number(scale)));
+        const auto tolerance=number(report_.verification.numerical.absolute_tolerance+
+            product(report_.verification.numerical.relative_tolerance,number(scale)));
         const bool satisfied=number(violation)<=tolerance;
         report_.residuals.push_back({std::move(field),{violation,scale},tolerance,satisfied});
         if(feasibility&&!satisfied)violated_=true;
@@ -274,7 +274,7 @@ public:
     }
     void run() {
         bindings();if(report_.bindings!=CheckStatus::numerical_pass)return;
-        if(!finite_nonnegative(context_.numerical.absolute_tolerance)||!finite_nonnegative(context_.numerical.relative_tolerance)) {
+        if(!finite_nonnegative(report_.verification.numerical.absolute_tolerance)||!finite_nonnegative(report_.verification.numerical.relative_tolerance)) {
             report_.feasibility=CheckStatus::invalid_input;report_.objective=CheckStatus::invalid_input;
             diagnose(DiagnosticCode::invalid_input,"numerical","tolerances must be finite and nonnegative");return;
         }
@@ -282,7 +282,7 @@ public:
             report_.feasibility=CheckStatus::invalid_input;report_.objective=CheckStatus::invalid_input;
             diagnose(DiagnosticCode::invalid_input,"assurance","unknown trajectory verification assurance");return;
         }
-        if(report_.input.assurance==Assurance::validated) {
+        if(report_.verification.assurance==Assurance::validated) {
             report_.feasibility=CheckStatus::unsupported;report_.objective=CheckStatus::unsupported;
             diagnose(DiagnosticCode::unsupported,"assurance","validated trajectory verification is not implemented");return;
         }
@@ -336,7 +336,11 @@ public:
 }
 TrajectoryReport verify_trajectory(const problem::ResolvedProblem& p,const TrajectoryRequest& input,
     const ExecutionContext& context,std::optional<registry::PreparedProvider<registry::LPPort>> provider) {
-    TrajectoryReport report;report.problem=p.identity();report.input=input;report.numerical=context.numerical;
+    TrajectoryReport report;report.problem=p.identity();report.input=input;
+    report.verification=input.verification.value_or(VerificationRequest{context.numerical,input.assurance});
+    report.input.verification=report.verification;
+    report.input.assurance=report.verification.assurance;
+    report.numerical=report.verification.numerical;
     Check check(p,context,report,std::move(provider));
     try {check.run();}catch(const Stopped&) {} // termination is separate from every mathematical scope
     check.finish();return report;
