@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import numpy as np
@@ -56,13 +57,29 @@ class A33PortTests(unittest.TestCase):
         self.assertEqual(oracle.check(points, result["output"])["status"], "verified")
 
     def test_grouping_retains_late_outside_point_and_accumulates_nearby(self):
-        points = [[-1, 0], [1, 0], [0, -1], [0, 1],
-                  [0.6875, 0.75], [0.75, 0.75]] + [[k / 64, 0] for k in range(49, 64)]
-        result = port.run(points)
+        points = ([[-1, 0], [1, 0], [0, -1], [0, 1]]
+                  + [[x, 0.75] for x in (0.61, 0.66, 0.70)]
+                  + [[k / 64, 0] for k in range(49, 64)])
+        original = port.modified_sm
+        nearby_sizes = {}
+
+        def observe_group(group, candidate):
+            key = tuple(candidate.tolist())
+            if key in {(0.61, 0.75), (0.66, 0.75), (0.70, 0.75)}:
+                nearby_sizes[key] = group.shape[1] - 4  # fixed Ck has four points
+            return original(group, candidate)
+
+        with mock.patch.object(port, "modified_sm", side_effect=observe_group):
+            result = port.run(points)
         self.assertEqual(result["algorithm_status"], "completed")
         self.assertTrue(result["grouping_triggered"])
-        self.assertGreater(result["group_nearby_appends"], 0)
-        self.assertIn([0.75, 0.75], result["output"])
+        self.assertEqual(result["group_nearby_appends"], 3)
+        self.assertEqual(nearby_sizes, {
+            (0.61, 0.75): 0,
+            (0.66, 0.75): 1,
+            (0.70, 0.75): 3,
+        })
+        self.assertIn([0.7, 0.75], result["output"])
         self.assertEqual(oracle.check(points, result["output"])["status"], "verified")
 
     def test_tenth_redundant_at_last_column_is_checked_again_in_group(self):
