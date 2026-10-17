@@ -210,7 +210,7 @@ These paths are planning proposals, not existing APIs. CORE-01/02 settle names. 
 | TEST-05 | `tests/contract/optimization/lp_backend_contract.cpp`, `tests/fixtures/optimization/analytic_lp_cases.json` |
 | TEST-06 | `tests/contract/optimization/convex_backend_contract.cpp`, `tests/fixtures/optimization/analytic_convex_cases.json` |
 | OPT-06 | `src/geometry/hull/basis_reuse_reducer.cpp` |
-| OPT-07 | `src/geometry/hull/ordered_reducer.cpp`, `src/geometry/hull/grouped_reducer.cpp` |
+| OPT-07 | `src/geometry/hull/ordered_reducer.cpp`, `src/geometry/hull/grouped_reducer.cpp`, `src/geometry/hull/reducer_internal.hpp`, `src/geometry/hull_reducer.cpp`, `include/csl/geometry/hull_reducer.hpp` |
 | OPT-09 | `src/optimization/zoutendijk/projection.cpp`, `docs/research/zoutendijk-derivation.md` |
 | GEO-02 | `src/geometry/polyhedral/affine_sum.cpp` |
 | GEO-04 | `src/geometry/polyhedral/intersection.cpp`, `src/geometry/polyhedral/halfspace_reducer.cpp` |

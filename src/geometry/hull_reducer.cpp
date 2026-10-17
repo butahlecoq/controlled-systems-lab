@@ -209,6 +209,28 @@ void restore_certificates_outside_policy(const PointCloud& cloud, HullReduction&
 }
 } // namespace
 
+detail::CandidateClassification detail::classify_candidate(const PointCloud& cloud,
+        const std::vector<std::size_t>& support, std::size_t candidate,
+        LPWorkspace& lp, const ExecutionContext& context) {
+    auto program = membership_program(cloud, support, candidate);
+    if (!program) return {{candidate, MembershipOutcome::malformed_result}, {}, 0};
+    auto outcome = lp.solve(*program, context);
+    if (std::holds_alternative<Unsupported>(outcome))
+        return {{candidate, MembershipOutcome::unsupported}, {}, 1};
+    const auto& result = std::get<ProgramResult>(outcome);
+    if (result.termination == Termination::completed && result.outcome.subject != program->identity())
+        return {{candidate, MembershipOutcome::malformed_result}, {}, 1};
+    if (auto proof = certificate(cloud, support, candidate, *program, result, context))
+        return {{candidate, MembershipOutcome::feasible}, std::move(proof), 1};
+    if (completed_infeasibility(result))
+        return {{candidate, MembershipOutcome::infeasible}, {}, 1};
+    const auto stopped = result.termination == Termination::cancelled ||
+        result.termination == Termination::resource_limit;
+    return {{candidate, stopped ? MembershipOutcome::stopped :
+        (result.termination == Termination::completed ? MembershipOutcome::malformed_result :
+         MembershipOutcome::numerical_failure)}, {}, 1};
+}
+
 namespace {
 class LPHullReducerWorkspace final : public HullReducerWorkspace {
 public:
@@ -220,7 +242,8 @@ public:
 } // namespace
 
 HullReductionResult detail::reduce_hull_in_order(const PointCloud& cloud, LPWorkspace& lp,
-        const ExecutionContext& context, const std::vector<std::size_t>& order) {
+        const ExecutionContext& context, const std::vector<std::size_t>& order,
+        std::vector<RemovalCertificate> prior_certificates) {
     if (cloud.problem.value.empty()) return invalid("point_cloud.problem", "Problem identity is required");
     if (!std::isfinite(context.numerical.absolute_tolerance) || context.numerical.absolute_tolerance < 0 ||
         !std::isfinite(context.numerical.relative_tolerance) || context.numerical.relative_tolerance < 0 ||
@@ -237,6 +260,7 @@ HullReductionResult detail::reduce_hull_in_order(const PointCloud& cloud, LPWork
 
     HullReduction output{ReductionStatus::complete, {}, {}, 0, {}};
     output.retained = order;
+    output.removed = std::move(prior_certificates);
     if (output.retained.size() < 2) return output;
 
     std::size_t position = 0;
@@ -286,6 +310,33 @@ HullReductionResult detail::reduce_hull_in_order(const PointCloud& cloud, LPWork
         output.status = ReductionStatus::incomplete;
         if (stopped) break;
         ++position;
+    }
+    restore_certificates_outside_policy(cloud, output, context.numerical);
+    return output;
+}
+
+HullReductionResult detail::reduce_hull_in_order(const PointCloud& cloud, LPWorkspace& lp,
+        const ExecutionContext& context, const std::vector<std::size_t>& order) {
+    return detail::reduce_hull_in_order(cloud, lp, context, order, {});
+}
+
+HullReductionResult detail::finish_grouped_hull(const PointCloud& cloud, LPWorkspace& lp,
+        const ExecutionContext& context, const std::vector<std::size_t>& retained,
+        std::vector<RemovalCertificate> prior_certificates,
+        std::vector<MembershipAttempt> attempts, std::size_t lp_calls,
+        bool staged_incomplete, bool stop_after_staging) {
+    HullReduction output{staged_incomplete ? ReductionStatus::incomplete : ReductionStatus::complete,
+        retained, std::move(prior_certificates), lp_calls, std::move(attempts)};
+    if (!stop_after_staging) {
+        auto result = detail::reduce_hull_in_order(cloud, lp, context, retained,
+            std::move(output.removed));
+        if (auto* reduction = std::get_if<HullReduction>(&result)) {
+            reduction->lp_calls += output.lp_calls;
+            reduction->attempts.insert(reduction->attempts.begin(), output.attempts.begin(), output.attempts.end());
+            if (staged_incomplete) reduction->status = ReductionStatus::incomplete;
+            return result;
+        }
+        return result;
     }
     restore_certificates_outside_policy(cloud, output, context.numerical);
     return output;
