@@ -1,6 +1,6 @@
 # B04 T=16 source audit in the supplied research corpus
 
-Date: 2026-10-18. Scope: focused, read-only follow-up for the live [issue #10 acceptance criteria](https://github.com/butahlecoq/controlled-systems-lab/issues/10), limited to the already supplied research corpus. Goal: locate the canonical T=16 control rows, first-action convention, stage bounds and generating revision. This is a bounded search, not proof that the owner's wider archive contains no such source.
+Date: 2026-10-18. Scope: focused, read-only follow-up for the live [issue #10 acceptance criteria](https://github.com/butahlecoq/controlled-systems-lab/issues/10), limited to the already supplied corpus C01. Goal: locate the canonical T=16 control rows, first-action convention, stage bounds and generating revision. This is a bounded search, not proof that the owner's wider archive contains no such source.
 
 ## Finding
 
@@ -10,7 +10,9 @@ The publisher's [article PDF](https://sciencejournals.ru/issues/teorsist/2019/vo
 
 ## Focused inspection and source anchors
 
-I searched source/configuration text under the permitted tree for the displayed B04 initial-state signature (`1216.904`, `119500`, `438.787`, `45300`), coefficients (`17`, `-12` in context), horizon/timing clues, and flow-box values. This produced no matching B04 project. The few relevant candidate sources below were read or parsed as inert data; no MATLAB, Simulink, MEX, archive payload, or other historical code was executed.
+I searched source/configuration text under corpus C01 for the displayed B04 initial-state signature (`1216.904`, `119500`, `438.787`, `45300`), coefficients (`17`, `-12` in context), horizon/timing clues, and flow-box values. This produced no matching B04 project. The few relevant candidate sources below were read or parsed as inert data; no MATLAB, Simulink, MEX, archive payload, or other historical code was executed.
+
+Original filenames and local paths are omitted because the repository keeps archival listings and personal source metadata local. Corpus C01 is the stable opaque identifier for the inspected tree; R1–R6 and their SHA-256 hashes identify the candidate files. A reader with the same local corpus can locate each candidate by matching its raw-byte hash. This report does not provide public path-level lookup into the private corpus.
 
 | Audit ID | Identity and observation | Relevance |
 |---|---|---|
@@ -25,7 +27,7 @@ A numeric match or shared author/subject vocabulary alone is not provenance. The
 
 ## Search boundaries and exclusions
 
-- The scan was restricted to the supplied research corpus. I did not rescan other archive packages, search the web for an unpublished project, or infer content from file names outside this corpus.
+- The scan was restricted to corpus C01. I did not rescan other archive packages, search the web for an unpublished project, or infer content from file names outside this corpus.
 - The broader extension-based text search included `.m`, `.txt`, `.mdl`, and `.slx` files in the tree; vendor/library matches were not treated as project evidence. Opaque or non-text content was not converted into source text.
 - I did not unpack bundled third-party archives; inspect native MEX/binary code; exhaustively parse all MAT/FIG/Office/Simulink binary internals; inspect every image; or recover data from external drives/cloud. The inspected SLX file was read as a ZIP/XML container only, not loaded in Simulink. The inspected MAT file was checked by its variable table and numeric content only.
 - Prior bounded searches and exclusions remain as recorded in [archive-followup.md](archive-followup.md) and [b04-saved-witnesses.md#remaining-authority-and-bounded-recovery](b04-saved-witnesses.md#remaining-authority-and-bounded-recovery), including opaque MCOS/polyhedral MAT data and embedded Office equations.
