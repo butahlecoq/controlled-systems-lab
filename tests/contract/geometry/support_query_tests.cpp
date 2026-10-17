@@ -21,7 +21,7 @@ template<class T, class... Alternatives> T take(std::variant<T, Alternatives...>
 }
 
 SetHandle v_set(std::string id, Matrix vertices, Matrix rays) {
-    return take(sets::make_v({{std::move(id)}, vertices.cols(), {}},
+    return take(sets::make_v({{std::move(id)}, vertices.cols, {}},
         {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))})).as_handle();
 }
 
@@ -36,8 +36,10 @@ OperationOutcome run_support(const OperationRequest& request, const ExecutionCon
     auto entry = geometry::polyhedral::make_support_registration();
     const Method method{entry.identity.id, entry.identity.version};
     REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
-    auto prepared = take(prepare_provider(select_provider(registry, method)));
-    return std::get<0>(prepared.create())->run(context);
+    auto provider = take(prepare_provider(select_provider(registry, method)));
+    auto pipeline = take(provider.prepare(request));
+    auto [workspace] = pipeline.create();
+    return workspace->run(context);
 }
 
 void check_support_evidence(const SupportResult& result, const OperationRequest& request) {
