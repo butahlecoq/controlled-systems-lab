@@ -39,10 +39,28 @@ not a validated inclusion certificate. The residual audit checks the returned
 vertices against the authored H rows/equalities, or the authored V points against
 the returned H rows/equalities. Those finite checks do not independently prove
 global set equality. Qhull documents empirical floating-point precision
-handling; this module makes no exact-arithmetic, validated containment, or
-universal error-bound claim. A successful `equivalent` relation is the adapter's
+handling; outside the bounded ambient-one H profile below, this module makes
+no exact-arithmetic or universal error-bound claim. It makes no validated
+containment claim in any profile. A successful `equivalent` relation is the adapter's
 numerical algorithm claim under its recorded assumptions, not a proof promoted
 by `check_geometry_evidence`.
+
+For **ambient dimension one** H-to-V conversions, an additional independent
+checker interprets each stored finite binary64 H coefficient and bound as an
+exact dyadic rational. It derives the exact interval from all original
+inequalities and equalities, then compares its two endpoints with the minimum
+and maximum of the returned finite V vertices. Successful bounded nonempty
+conversions publish an outward-rounded L-infinity Hausdorff bound in
+`GeometryEvidence.error_bound`, measured in input-coordinate units. An exact
+empty H set paired with an empty V output has bound zero by the empty-to-empty
+convention. Contradictory nonempty/empty outputs, unbounded exact H inputs,
+nonfinite vertices and arithmetic range failures do not publish this bound;
+a successful numerical conversion is rejected if its purported one-dimensional
+coverage cannot be checked. A returned vertex's small H-row residual alone
+cannot hide a missing endpoint. This certificate covers the stored H rows,
+not pre-rounding authored real coefficients. It is unavailable for ambient
+dimension greater than one, including lines embedded in a higher-dimensional
+space, and it does not change validated-assurance admission.
 
 `QhullOptions::observe` receives an owning `ConversionObservation` after each
 attempt. It records request identity, converter and LP backend identities,
