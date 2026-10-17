@@ -157,6 +157,13 @@ add_test(NAME installed_optimization_client COMMAND installed_optimization_clien
 set_tests_properties(installed_optimization_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed optimization client: immutable program, literal checks and exclusive attempts passed")
 
+add_executable(installed_zoutendijk_projection_client zoutendijk_projection_client.cpp)
+target_link_libraries(installed_zoutendijk_projection_client PRIVATE CSL::zoutendijk_projection)
+set_target_properties(installed_zoutendijk_projection_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_zoutendijk_projection_client COMMAND installed_zoutendijk_projection_client)
+set_tests_properties(installed_zoutendijk_projection_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed Zoutendijk client: success and stopped result types are distinct")
+
 if(TARGET CSL::highs_lp)
 add_executable(installed_highs_client highs_client.cpp)
 target_link_libraries(installed_highs_client PRIVATE CSL::highs_lp)
@@ -318,6 +325,7 @@ set(installed_contract_headers
   problem/contracts.hpp
   execution/contracts.hpp
   optimization/contracts.hpp
+  optimization/zoutendijk/projection.hpp
   geometry/contracts.hpp
   synthesis/contracts.hpp
   numeric/data.hpp
