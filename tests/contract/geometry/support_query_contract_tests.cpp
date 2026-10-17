@@ -19,7 +19,7 @@ template<class T,class... Alternatives> T take(std::variant<T,Alternatives...> r
 }
 }
 
-TEST_CASE("support query on a positive ray is rejected instead of reporting finite support") {
+TEST_CASE("admission rejects an unsupported ray SupportQuery") {
     // V={0}+cone{1}=[0,+infinity), so its support in direction +1 is +infinity.
     const auto ray=take(sets::make_v({{"positive-ray"},1,{"x"}},
         {take(numeric::snapshot(Matrix{1,1,{0}})),
