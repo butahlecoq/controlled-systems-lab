@@ -23,6 +23,17 @@
 #include <type_traits>
 #include <variant>
 
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#else
+#include <fcntl.h>
+#include <sys/file.h>
+#include <unistd.h>
+#endif
+
 namespace {
 using namespace csl;
 using namespace csl::registry;
@@ -294,30 +305,57 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         return 2;
     }
 
-    const auto lock_directory = directory / ".scenario-cli-publish.lock";
-    bool lock_acquired = std::filesystem::create_directory(lock_directory, ec);
-    if (!lock_acquired && !ec && std::filesystem::exists(lock_directory, ec) && !ec) {
-        const auto modified = std::filesystem::last_write_time(lock_directory, ec);
-        if (!ec && std::filesystem::file_time_type::clock::now() - modified > std::chrono::minutes(10)) {
-            std::filesystem::remove_all(lock_directory, ec);
-            if (!ec) lock_acquired = std::filesystem::create_directory(lock_directory, ec);
+    struct PublicationLock {
+#if defined(_WIN32)
+        HANDLE handle{INVALID_HANDLE_VALUE};
+        OVERLAPPED overlap{};
+#else
+        int descriptor{-1};
+#endif
+        bool acquire(const std::filesystem::path& directory) {
+            const auto path = directory / ".scenario-cli-publish.lock";
+#if defined(_WIN32)
+            handle = CreateFileW(path.c_str(), GENERIC_READ | GENERIC_WRITE,
+                FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_ALWAYS,
+                FILE_ATTRIBUTE_NORMAL, nullptr);
+            if (handle == INVALID_HANDLE_VALUE) return false;
+            if (!LockFileEx(handle, LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY,
+                    0, MAXDWORD, MAXDWORD, &overlap)) {
+                CloseHandle(handle);
+                handle = INVALID_HANDLE_VALUE;
+                return false;
+            }
+            return true;
+#else
+            descriptor = ::open(path.string().c_str(), O_CREAT | O_RDWR, 0666);
+            if (descriptor < 0) return false;
+            if (::flock(descriptor, LOCK_EX | LOCK_NB) != 0) {
+                ::close(descriptor);
+                descriptor = -1;
+                return false;
+            }
+            return true;
+#endif
         }
-    }
-    if (!lock_acquired) {
-        std::cerr << "Output rejected: cannot acquire paired publication lock "
-                  << lock_directory.string();
-        if (ec) std::cerr << ": " << ec.message();
-        else std::cerr << ": another publication may be in progress";
-        std::cerr << '\n';
+        ~PublicationLock() {
+#if defined(_WIN32)
+            if (handle != INVALID_HANDLE_VALUE) {
+                UnlockFileEx(handle, 0, MAXDWORD, MAXDWORD, &overlap);
+                CloseHandle(handle);
+            }
+#else
+            if (descriptor >= 0) {
+                ::flock(descriptor, LOCK_UN);
+                ::close(descriptor);
+            }
+#endif
+        }
+    } publication_lock;
+    if (!publication_lock.acquire(directory)) {
+        std::cerr << "Output rejected: cannot acquire paired publication lock in "
+                  << directory.string() << ": another publication may be in progress\n";
         return 2;
     }
-    struct PublicationLock {
-        std::filesystem::path path;
-        ~PublicationLock() {
-            std::error_code ignored;
-            std::filesystem::remove(path, ignored);
-        }
-    } publication_lock{lock_directory};
 
     constexpr std::array<std::string_view, 2> names{"reach-back", "strategy-b"};
     std::array<std::filesystem::path, 2> targets{
