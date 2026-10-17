@@ -11,6 +11,7 @@
 
 #include <array>
 #include <charconv>
+#include <chrono>
 #include <stdexcept>
 #include <filesystem>
 #include <fstream>
@@ -294,7 +295,15 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
     }
 
     const auto lock_directory = directory / ".scenario-cli-publish.lock";
-    if (!std::filesystem::create_directory(lock_directory, ec)) {
+    bool lock_acquired = std::filesystem::create_directory(lock_directory, ec);
+    if (!lock_acquired && !ec && std::filesystem::exists(lock_directory, ec) && !ec) {
+        const auto modified = std::filesystem::last_write_time(lock_directory, ec);
+        if (!ec && std::filesystem::file_time_type::clock::now() - modified > std::chrono::minutes(10)) {
+            std::filesystem::remove_all(lock_directory, ec);
+            if (!ec) lock_acquired = std::filesystem::create_directory(lock_directory, ec);
+        }
+    }
+    if (!lock_acquired) {
         std::cerr << "Output rejected: cannot acquire paired publication lock "
                   << lock_directory.string();
         if (ec) std::cerr << ": " << ec.message();
