@@ -31,7 +31,8 @@ Json parse_bounded(std::string_view text, const DecodeLimits& limits) {
     return Json::parse(text.begin(),text.end(),[&](int,Json::parse_event_t event,Json& parsed){
         if(event==Json::parse_event_t::object_start)keys.emplace_back();
         else if(event==Json::parse_event_t::key){if(keys.empty()||!keys.back().insert(parsed.get<std::string>()).second)throw ArtifactError{ArtifactErrorCode::invalid_input,"comparison.duplicate_key","Duplicate object key"};}
-        else if(event==Json::parse_event_t::object_end)keys.pop_back(); return true;
+        else if(event==Json::parse_event_t::object_end) keys.pop_back();
+        return true;
     });
 }
 ArtifactError error(ArtifactErrorCode code, std::string path, std::string message) {
