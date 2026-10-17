@@ -39,6 +39,16 @@ LinearSystem partial_sensor() {
     return std::get<LinearSystem>(std::move(result));
 }
 
+LinearSystem partial_noisy_sensor() {
+    SystemModel authored{{{2, 1, 0}, TimeDomain::discrete,
+        LinearStage{{2,2,{1,0,0,1}}, {2,1,{0,0}}, {2,0,{}}, {0,0}}},
+        {{ObservationStage{{1,2,{1,0}}, {1,1,{0}}, {1,0,{}}, {1,1,{1}}, {0}},
+            {{{0}, before(0), before(0), std::nullopt}}}}};
+    auto result = snapshot(authored, Vector{0,1});
+    REQUIRE(std::holds_alternative<LinearSystem>(result));
+    return std::get<LinearSystem>(std::move(result));
+}
+
 ReplayInputs scenario(Vector initial) {
     return {std::move(initial), {{}}, {{{}}}};
 }
@@ -92,6 +102,31 @@ TEST_CASE("finite policy may branch after a released observation distinguishes s
     const auto& evidence = std::get<FinitePolicyFamilyEvidence>(result);
     CHECK(evidence.initial_quantifier == SetQuantifier::universal);
     REQUIRE(evidence.scenarios.size() == 2);
+    CHECK(evidence.scenarios[0].decisions[0].action == Vector{-2});
+    CHECK(evidence.scenarios[1].decisions[0].action == Vector{7});
+}
+
+TEST_CASE("finite policy branches on noisy partial observations from enumerated scenarios") {
+    const auto system = partial_noisy_sensor();
+    auto built = make_finite_observation_policy({
+        {{0}, {observed(0, 0, 0, {0})}, {-2}},
+        {{0}, {observed(0, 0, 0, {2})}, {7}}
+    });
+    REQUIRE(std::holds_alternative<FiniteObservationPolicy>(built));
+
+    const ReplayInputs low_reading{{1, 2}, {{}}, {{{-1}}}};
+    const ReplayInputs high_reading{{1, 2}, {{}}, {{{1}}}};
+    const FinitePolicyFamilyRequest request{SetQuantifier::universal,
+        {low_reading, high_reading}};
+    const auto result = replay_finite_policy_family(system, request,
+        std::get<FiniteObservationPolicy>(built));
+    REQUIRE(std::holds_alternative<FinitePolicyFamilyEvidence>(result));
+    const auto& evidence = std::get<FinitePolicyFamilyEvidence>(result);
+    REQUIRE(evidence.scenarios.size() == 2);
+    CHECK(evidence.scenarios[0].inputs.measurement_errors[0][0] == Vector{-1});
+    CHECK(evidence.scenarios[1].inputs.measurement_errors[0][0] == Vector{1});
+    CHECK(evidence.scenarios[0].decisions[0].available[0].value.values == Vector{0});
+    CHECK(evidence.scenarios[1].decisions[0].available[0].value.values == Vector{2});
     CHECK(evidence.scenarios[0].decisions[0].action == Vector{-2});
     CHECK(evidence.scenarios[1].decisions[0].action == Vector{7});
 }
