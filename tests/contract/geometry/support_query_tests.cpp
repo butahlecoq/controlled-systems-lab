@@ -149,7 +149,9 @@ TEST_CASE("support provider rejects representations outside its V and empty prof
     auto entry = geometry::polyhedral::make_support_registration();
     const Method method{entry.identity.id, entry.identity.version};
     REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
-    const auto prepared = prepare_provider(select_provider(registry, method));
+    auto provider = prepare_provider(select_provider(registry, method));
+    REQUIRE(std::holds_alternative<PreparedProvider<GeometryPort>>(provider));
+    const auto prepared = std::get<PreparedProvider<GeometryPort>>(std::move(provider)).prepare(request);
     CHECK(std::holds_alternative<Rejection>(prepared));
     REQUIRE(std::holds_alternative<Rejection>(prepared));
     REQUIRE_FALSE(std::get<Rejection>(prepared).diagnostics.empty());
