@@ -157,3 +157,39 @@ TEST_CASE("support provider rejects representations outside its V and empty prof
     REQUIRE_FALSE(std::get<Rejection>(prepared).diagnostics.empty());
     CHECK(std::get<Rejection>(prepared).diagnostics.front().field == "support.representation");
 }
+
+TEST_CASE("support provider rejects non-equivalent relation requests") {
+    const auto interval = v_set("relation-interval", {2, 1, {0, 1}}, {0, 1, {}});
+    const auto make_provider = [] {
+        Registry<GeometryPort> registry;
+        auto entry = geometry::polyhedral::make_support_registration();
+        const Method method{entry.identity.id, entry.identity.version};
+        REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
+        return std::pair{std::move(registry), method};
+    };
+
+    auto request_relation = support_request(interval, {1}, "inner-support-request");
+    request_relation.required_relation = SetRelation::inner;
+    {
+        auto [registry, method] = make_provider();
+        auto provider = take(prepare_provider(select_provider(registry, method)));
+        const auto prepared = provider.prepare(request_relation);
+        REQUIRE(std::holds_alternative<Rejection>(prepared));
+        const auto& diagnostics = std::get<Rejection>(prepared).diagnostics;
+        REQUIRE_FALSE(diagnostics.empty());
+        CHECK(diagnostics.front().field == "support.relation");
+    }
+
+    auto requirements = Requirements{};
+    requirements.output.relation = SetRelation::outer;
+    const auto equivalent_request = support_request(interval, {1}, "outer-support-output");
+    {
+        auto [registry, method] = make_provider();
+        auto provider = take(prepare_provider(select_provider(registry, method, requirements)));
+        const auto prepared = provider.prepare(equivalent_request);
+        REQUIRE(std::holds_alternative<Rejection>(prepared));
+        const auto& diagnostics = std::get<Rejection>(prepared).diagnostics;
+        REQUIRE_FALSE(diagnostics.empty());
+        CHECK(diagnostics.front().field == "support.relation");
+    }
+}

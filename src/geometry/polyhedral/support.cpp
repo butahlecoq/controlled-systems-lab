@@ -185,6 +185,9 @@ registry::Capability capabilities(const OperationRequest& request,
         return error("support.operation", "Only SupportQuery is implemented.");
     if (request.assurance != Assurance::numerical || requirements.output.assurance != Assurance::numerical)
         return error("support.assurance", "Validated support evidence is not implemented.");
+    if (request.required_relation != SetRelation::equivalent ||
+        (requirements.output.relation && *requirements.output.relation != SetRelation::equivalent))
+        return error("support.relation", "Support queries require equivalent relation semantics.");
     if (!valid_identity(request.identity))
         return error("support.identity", "Complete immutable request identity required.", DiagnosticCode::invalid_input);
     if (const auto shape = check_operation_shape(request); !shape.empty()) return shape;
