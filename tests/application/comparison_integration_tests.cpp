@@ -24,6 +24,7 @@ using namespace csl;
 
 namespace {
 template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
+    if (!std::holds_alternative<T>(value)) INFO("generic take failed with variant index " << value.index());
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
