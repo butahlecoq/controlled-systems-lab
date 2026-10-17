@@ -45,5 +45,9 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
     EncodeLimits limits = {});
 ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(
     std::string_view, DecodeLimits limits = {});
+// Hashes the common request portion of one recorded run's resolved configuration,
+// excluding implementation modules and strategy-specific adapter identities.
+ArtifactResult<problem::ContentDigest> comparison_request_digest(
+    const RecordedRunArtifact&, DecodeLimits limits = {});
 
 } // namespace csl::artifacts

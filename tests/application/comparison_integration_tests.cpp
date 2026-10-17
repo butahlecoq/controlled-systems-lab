@@ -206,10 +206,11 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
     CHECK(wire.find("registered_verifier")!=std::string::npos);
     static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
+    const auto request_digest=csl::problem::hex(take_artifact(ar::comparison_request_digest(imported),"comparison_request_digest"));
     const auto spec_text=std::string{"{\"problem_id\":\""+problem.identity().value+
-        "\",\"repetitions\":1,\"request_digest\":\""+std::string(64,'1')+
+        "\",\"repetitions\":1,\"request_digest\":\""+request_digest+
         "\",\"schema\":\"csl.comparison-spec/1\",\"strategies\":[\""+
-        prepared.strategies()[strategy_index].strategy.value+"\"]}"};
+        configuration.identity().value+"\"]}"};
     const auto spec=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
         std::span<const std::byte>{reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()}));
     const ar::RunRecordRef run_ref{run, imported.content().digest()};

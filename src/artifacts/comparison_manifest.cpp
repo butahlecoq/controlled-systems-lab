@@ -61,7 +61,15 @@ AttemptStatus parse_status(const std::string& value) {
 bool status_matches(AttemptStatus status, const Json& run) {
     const auto& final=run.at("final");
     const auto kind=final.at("kind").get<std::string>();
-    if(kind=="synthesis"||kind=="program")return status==AttemptStatus::completed;
+    if(kind=="synthesis"||kind=="program") {
+        const auto& result=kind=="synthesis"?final.at("value"):final.at("value").at("result");
+        const auto termination=result.at("termination").get<std::string>();
+        if(termination=="completed")return status==AttemptStatus::completed;
+        if(termination=="cancelled")return status==AttemptStatus::cancelled;
+        if(termination=="resource_limit")return status==AttemptStatus::resource_limited;
+        if(termination=="operation_rejected"||termination=="contract_rejected")return status==AttemptStatus::unsupported;
+        return termination=="numerical_failure"&&status==AttemptStatus::failed;
+    }
     if(kind=="unsupported")return status==AttemptStatus::unsupported;
     if(kind=="failed")return status==AttemptStatus::failed;
     if(kind!="skipped")return false;
@@ -76,6 +84,20 @@ std::string bytes_to_string(std::span<const std::byte> bytes) {
     for (auto b : bytes) out.push_back(static_cast<char>(std::to_integer<unsigned char>(b)));
     return out;
 }
+ArtifactResult<problem::ResolvedContent> own(std::string_view text);
+Json common_request(const Json& run) {
+    auto request=run.at("configuration").at("value");
+    request.erase("modules");
+    const auto strategy=request.at("strategy");
+    request["strategy"]={{"selector",strategy.at("selector")},{"representation",strategy.at("representation")}};
+    return request;
+}
+problem::ContentDigest request_digest(const Json& run) {
+    const auto text=common_request(run).dump();
+    auto content=own(text);
+    if(const auto* value=std::get_if<problem::ResolvedContent>(&content))return value->digest();
+    throw std::bad_alloc();
+}
 std::pair<std::uint32_t,std::uint32_t> validate_spec(const Json& spec) {
     if (!spec.is_object() || spec.size()!=5 || spec.value("schema",std::string{})!="csl.comparison-spec/1" ||
         !spec.contains("problem_id") || !spec.contains("request_digest") ||
@@ -88,7 +110,7 @@ std::pair<std::uint32_t,std::uint32_t> validate_spec(const Json& spec) {
     const auto& strategies=spec.at("strategies");
     if(!strategies.is_array()||strategies.empty()||strategies.size()>std::numeric_limits<std::uint32_t>::max())
         throw std::invalid_argument("Comparison spec strategy list is invalid");
-    for(const auto& strategy:strategies)if(!strategy.is_string()||strategy.get<std::string>().empty())throw std::invalid_argument("Strategy identity is malformed");
+    for(const auto& strategy:strategies)if(!valid_digest(strategy))throw std::invalid_argument("Strategy configuration identity is malformed");
     const auto repetitions=spec.at("repetitions").get<std::uint32_t>();
     if(repetitions==0)throw std::invalid_argument("Repetition count must be positive");
     return {static_cast<std::uint32_t>(strategies.size()),repetitions};
@@ -140,8 +162,9 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
             if (run_json.at("run").get<std::string>() != attempt.reference.run.value ||
                 attempt.run.content().digest() != attempt.reference.content_digest ||
                 run_json.at("problem").get<std::string>()!=spec_json.at("problem_id").get<std::string>() ||
-                run_json.at("configuration").at("value").at("strategy").at("strategy").get<std::string>()!=
+                run_json.at("configuration").at("id").get<std::string>()!=
                     spec_json.at("strategies").at(attempt.strategy_index).get<std::string>() ||
+                problem::hex(request_digest(run_json))!=spec_json.at("request_digest").get<std::string>() ||
                 !status_matches(attempt.reported_status,run_json))
                 return error(ArtifactErrorCode::identity, "attempts[" + std::to_string(i) + "].reference", "Run reference identity or content digest mismatch");
             records.push_back({{"strategy_index", attempt.strategy_index}, {"repetition_index", attempt.repetition_index},
@@ -204,8 +227,9 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
             if (run_json.at("run").get<std::string>()!=item.at("run_id").get<std::string>() ||
                 problem::hex(content.digest())!=item.at("run_digest").get<std::string>() ||
                 run_json.at("problem").get<std::string>()!=spec.at("problem_id").get<std::string>() ||
-                run_json.at("configuration").at("value").at("strategy").at("strategy").get<std::string>()!=
+                run_json.at("configuration").at("id").get<std::string>()!=
                     spec.at("strategies").at(key.first).get<std::string>() ||
+                problem::hex(request_digest(run_json))!=spec.at("request_digest").get<std::string>() ||
                 !status_matches(parse_status(item.at("reported_status").get<std::string>()),run_json))
                 return error(ArtifactErrorCode::identity,"comparison.attempts.reference","Run reference identity or digest mismatch");
         }
@@ -215,5 +239,18 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
     } catch (const ArtifactError& failure) { return failure; }
       catch (const std::bad_alloc&) { return error(ArtifactErrorCode::allocation, "comparison", "Allocation failed"); }
       catch (const std::exception&) { return error(ArtifactErrorCode::invalid_input, "comparison", "Malformed comparison artifact"); }
+}
+
+ArtifactResult<problem::ContentDigest> comparison_request_digest(
+    const RecordedRunArtifact& run, DecodeLimits limits) {
+    try {
+        const auto text=bytes_to_string(run.content().bytes());
+        auto decoded=decode_recorded_run(text,limits);
+        if(std::holds_alternative<ArtifactError>(decoded))return std::get<ArtifactError>(decoded);
+        auto json=parse_bounded(text,limits);
+        return request_digest(json);
+    } catch(const ArtifactError& failure){return failure;}
+      catch(const std::bad_alloc&){return error(ArtifactErrorCode::allocation,"comparison.request_digest","Allocation failed");}
+      catch(const std::exception&){return error(ArtifactErrorCode::invalid_input,"comparison.request_digest","Invalid run configuration");}
 }
 }
