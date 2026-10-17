@@ -318,6 +318,10 @@ void compare_profile(const std::string& profile) {
     const auto status_mismatch=ar::encode_recorded_comparison(spec,mislabeled);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(status_mismatch));
     CHECK(std::get<ar::ArtifactError>(status_mismatch).code==ar::ArtifactErrorCode::identity);
+    mislabeled.front().reported_status=ar::AttemptStatus::unsupported;
+    const auto unsupported_mismatch=ar::encode_recorded_comparison(spec,mislabeled);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(unsupported_mismatch));
+    CHECK(std::get<ar::ArtifactError>(unsupported_mismatch).code==ar::ArtifactErrorCode::identity);
     const auto bundle_wire=std::string(reinterpret_cast<const char*>(bundle.content().bytes().data()),bundle.content().bytes().size());
     const auto restored_bundle=take_artifact(ar::decode_recorded_comparison(bundle_wire),"decode_recorded_comparison");
     CHECK(restored_bundle.content().digest()==bundle.content().digest());
