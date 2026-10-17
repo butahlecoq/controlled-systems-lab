@@ -131,6 +131,39 @@ TEST_CASE("H intersection discovers new vertices when no input corner is feasibl
     for (const bool found : matched) CHECK(found);
 }
 
+TEST_CASE("unit square intersected with x+y<=1 matches the independent rational triangle") {
+    const auto square=hset("rational-unit-square",
+        {4,2,{1,0,-1,0,0,1,0,-1}},{1,0,1,0});
+    const auto lower_triangle=hset("rational-x-plus-y-halfspace",
+        {3,2,{1,1,-1,0,0,-1}},{1,0,0});
+    const auto result=take(geometry::polyhedral::intersect_h(square,lower_triangle,
+        {"rational-unit-triangle"}));
+    const auto rep=result.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(rep));
+    const auto& h=std::get<sets::HRepresentation>(rep);
+    const auto inside=[&](const std::array<double,2>& point) {
+        for (std::size_t row=0;row<h.inequalities.rows();++row)
+            if (h.inequalities(row,0)*point[0]+h.inequalities(row,1)*point[1]
+                >h.upper_bounds[row]) return false;
+        for (std::size_t row=0;row<h.equalities.rows();++row)
+            if (h.equalities(row,0)*point[0]+h.equalities(row,1)*point[1]
+                !=h.equality_values[row]) return false;
+        return true;
+    };
+    // Independently enumerated vertices are (0,0), (1,0), and (0,1).
+    // Check interior, edges, and excluded points against the returned rows.
+    const std::array<std::array<double,2>,6> inside_points{{
+        {0,0}, {1,0}, {0,1}, {0.25,0.25}, {0.5,0.5}, {0.25,0.75}}};
+    for (const auto& point : inside_points) {
+        CHECK(inside(point));
+    }
+    const std::array<std::array<double,2>,3> outside_points{{
+        {0.75,0.75}, {1,1}, {-0.25,0.25}}};
+    for (const auto& point : outside_points) {
+        CHECK_FALSE(inside(point));
+    }
+}
+
 TEST_CASE("H intersection retains empty results and affine equalities") {
     const auto left = hset("left", {1,2,{1,0}}, {0});
     const auto right = hset("right", {1,2,{-1,0}}, {-1});

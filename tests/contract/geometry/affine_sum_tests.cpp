@@ -6,6 +6,7 @@
 #include <csl/optimization/phase_one.hpp>
 #include <csl/sets/data.hpp>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <iostream>
@@ -201,6 +202,45 @@ TEST_CASE("registered affine image preserves the literal shifted reversed interv
     const auto result=take(run(req,dependencies()));
     CHECK(support(result.output,{1})==doctest::Approx(5));
     CHECK(support(result.output,{-1})==doctest::Approx(1));
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
+TEST_CASE("affine reflection and translation of the unit box match rational support oracles") {
+    const auto box=vertices("unit-box-rational-oracle",2,{0,0,1,0,0,1,1,1},4,{"x","y"});
+    // (x,y) -> (2-x, y-1), so the image is [1,2] x [-1,0].
+    const auto req=request(AffineImage{box,{2,2,{-1,0,0,1}},{2,-1}},
+        "reflected-translated-unit-box");
+    const auto result=take(run(req,dependencies()));
+    const auto data=take(sets::from_handle(result.output));
+    const auto representation=data.representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
+    const auto& image=std::get<sets::VRepresentation>(representation);
+    REQUIRE(image.vertices.rows()==4);
+    const std::array<std::array<double,2>,4> expected{{
+        {1,-1}, {1,0}, {2,-1}, {2,0}}};
+    for (const auto& point : expected) {
+        bool found=false;
+        for (std::size_t row=0;row<image.vertices.rows();++row)
+            found=found || (image.vertices(row,0)==point[0]
+                && image.vertices(row,1)==point[1]);
+        CHECK(found);
+    }
+    CHECK(support(result.output,{1,0})==2);
+    CHECK(support(result.output,{-1,0})==-1);
+    CHECK(support(result.output,{0,1})==0);
+    CHECK(support(result.output,{0,-1})==1);
+    CHECK(result.output.metadata.dimension==2);
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
+TEST_CASE("interval Minkowski sum matches independent rational endpoint oracles") {
+    const auto lhs=vertices("first-rational-interval",1,{0,1},2,{"x"});
+    const auto rhs=vertices("second-rational-interval",1,{2,3},2,{"x"});
+    const auto req=request(MinkowskiSum{lhs,rhs},"interval-sum-[2,4]");
+    const auto result=take(run(req,dependencies()));
+    CHECK(support(result.output,{1})==4);
+    CHECK(support(result.output,{-1})==-2);
+    CHECK(result.output.metadata.dimension==1);
     CHECK(check_geometry_evidence(result.evidence,req).empty());
 }
 
