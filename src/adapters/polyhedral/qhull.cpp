@@ -3,6 +3,7 @@
 #include <csl/registry/provider.hpp>
 #include <csl/sets/data.hpp>
 #include "../../geometry/conversion/affine_coordinates.hpp"
+#include "exact_h_interval.hpp"
 #include <Eigen/Core>
 #include <Eigen/SVD>
 #include <algorithm>
@@ -537,6 +538,29 @@ public:
         SetTransformOutcome result=std::holds_alternative<sets::HRepresentation>(rep)
             ? (want_h ? publish(*input_,context,0,{"same-representation identity transform"}) : h_to_v(std::get<sets::HRepresentation>(rep),context))
             : (want_h ? v_to_h(std::get<sets::VRepresentation>(rep),context) : publish(*input_,context,0,{"same-representation identity transform"}));
+        if (!want_h && request.input.metadata.dimension == 1 &&
+            std::holds_alternative<sets::HRepresentation>(rep)) {
+            if (auto* completed=std::get_if<OperationResult>(&result)) {
+                auto converted=sets::from_handle(completed->output);
+                if (!std::holds_alternative<sets::SetData>(converted))
+                    return finish(unsupported("conversion.coverage", "Converted V output cannot be inspected."));
+                const auto converted_rep=std::get<sets::SetData>(converted).representation();
+                const auto* vertices=std::get_if<sets::VRepresentation>(&converted_rep);
+                if (!vertices)
+                    return finish(unsupported("conversion.coverage", "Converted output is not a finite V set."));
+                const auto bound=detail::certify_h_interval(
+                    std::get<sets::HRepresentation>(rep),*vertices);
+                if (const auto* failure=std::get_if<std::string>(&bound))
+                    return finish(unsupported("conversion.coverage",*failure));
+                completed->evidence.error_bound=GeometryErrorBound{
+                    {"csl.geometry.metric.l-infinity"},std::get<double>(bound),
+                    "maximum absolute coordinate units; empty-to-empty distance is zero"};
+                completed->evidence.assumptions.emplace_back(
+                    "global ambient-one H/V coverage checked against exact stored binary64 H rows");
+                if (auto errors=check_geometry_evidence(completed->evidence,request);!errors.empty())
+                    return finish(Unsupported{std::move(errors)});
+            }
+        }
         if (stopped(context,reason)) return finish(OperationStopped{reason,"Stopped before publishing conversion output."});
         return finish(std::move(result));
     }

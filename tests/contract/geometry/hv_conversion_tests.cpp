@@ -3,9 +3,11 @@
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/sets/data.hpp>
+#include "../../../src/adapters/polyhedral/exact_h_interval.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 
 using namespace csl;
 using namespace csl::registry;
@@ -76,6 +78,56 @@ bool satisfies(const sets::HRepresentation& h,std::span<const double> x,double t
 }
 bool within_tolerance(double actual,double expected,double tolerance=conversion_tolerance) {
     return std::abs(actual-expected)<=tolerance;
+}
+
+TEST_CASE("ambient-one H conversion publishes a global stored-dyadic interval bound") {
+    const auto h=make_h_handle("third-interval",1,Matrix{2,1,{-1,3}},Vector{0,1});
+    const auto req=request(h,"csl.polyhedron.v","third-coverage");
+    const auto result=take(convert(h,"csl.polyhedron.v","third-coverage"));
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->metric.value=="csl.geometry.metric.l-infinity");
+    CHECK(result.evidence.error_bound->bound>0.0);
+    CHECK(result.evidence.error_bound->bound<1e-15);
+}
+
+TEST_CASE("independent ambient-one checker detects a missing H endpoint despite zero row residual") {
+    const auto h=make_h_handle("full-interval",1,Matrix{2,1,{-1,1}},Vector{0,4});
+    const auto omitted=make_v_handle("omitted-endpoint",1,Matrix{1,1,{0}});
+    const auto original=take(sets::from_handle(h));
+    const auto converted=take(sets::from_handle(omitted));
+    const auto certificate=adapters::polyhedral::detail::certify_h_interval(
+        std::get<sets::HRepresentation>(original.representation()),
+        std::get<sets::VRepresentation>(converted.representation()));
+    REQUIRE(std::holds_alternative<double>(certificate));
+    CHECK(std::get<double>(certificate)==4.0);
+}
+
+TEST_CASE("ambient-one checker distinguishes empty equality and unbounded H inputs") {
+    const auto empty=make_h_handle("empty-h",1,Matrix{2,1,{1,-1}},Vector{0,-1});
+    const auto empty_result=take(convert(empty,"csl.polyhedron.v","empty-coverage"));
+    REQUIRE(empty_result.evidence.error_bound.has_value());
+    CHECK(empty_result.evidence.error_bound->bound==0.0);
+    const auto singleton=make_h_handle("equality-h",1,Matrix{0,1,{}},Vector{},
+        Matrix{1,1,{3}},Vector{1});
+    const auto singleton_result=take(convert(singleton,"csl.polyhedron.v","equality-coverage"));
+    REQUIRE(singleton_result.evidence.error_bound.has_value());
+    CHECK(singleton_result.evidence.error_bound->bound>0.0);
+    const auto unbounded=make_h_handle("unbounded-h",1,Matrix{1,1,{-1}},Vector{0});
+    CHECK(std::holds_alternative<Unsupported>(convert(unbounded,"csl.polyhedron.v","unbounded-coverage")));
+}
+
+TEST_CASE("ambient-one checker fails closed when exact H coverage exceeds finite binary64") {
+    const auto h=make_h_handle("huge-endpoint",1,
+        Matrix{2,1,{-1,std::numeric_limits<double>::denorm_min()}},
+        Vector{0,std::numeric_limits<double>::max()});
+    const auto zero=make_v_handle("incorrect-singleton",1,Matrix{1,1,{0}});
+    const auto original=take(sets::from_handle(h));
+    const auto converted=take(sets::from_handle(zero));
+    const auto certificate=adapters::polyhedral::detail::certify_h_interval(
+        std::get<sets::HRepresentation>(original.representation()),
+        std::get<sets::VRepresentation>(converted.representation()));
+    CHECK(std::holds_alternative<std::string>(certificate));
 }
 class WrongSizeLpWorkspace final : public LPWorkspace {
 protected:
