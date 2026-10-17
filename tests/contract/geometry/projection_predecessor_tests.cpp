@@ -431,6 +431,8 @@ TEST_CASE("projection provider rejects the unbounded preimage of y=0 instead of 
     CHECK(rejection->provider.diagnostics.front().code==DiagnosticCode::unsupported);
     CHECK(rejection->provider.diagnostics.front().field=="projection.operation");
     CHECK(rejection->provider.provenance.requested.id==ModuleId{"csl.geometry.polyhedral-projection"});
+    REQUIRE(rejection->provider.provenance.actual);
+    CHECK(rejection->provider.provenance.actual->id==ModuleId{"csl.geometry.polyhedral-projection"});
     CHECK(*creations==0);
 }
 
