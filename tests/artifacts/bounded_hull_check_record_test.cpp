@@ -10,6 +10,19 @@
 using csl::Vector;
 using namespace csl;
 
+namespace {
+std::string replace_json_field(std::string text, const std::string& field,
+                               const std::string& value) {
+    const auto key = text.find("\"" + field + "\":");
+    REQUIRE(key != std::string::npos);
+    const auto begin = key + field.size() + 3;
+    const auto end = text.find_first_of(",}", begin);
+    REQUIRE(end != std::string::npos);
+    text.replace(begin, end - begin, value);
+    return text;
+}
+} // namespace
+
 TEST_CASE("bounded checker statuses and evidence survive canonical record encoding") {
     const std::vector<Vector> square{{0,0}, {2,0}, {2,2}, {0,2}, {1,1}};
     const auto digest = std::get<geometry::HullInputDigest>(geometry::digest_hull_input(square));
@@ -61,4 +74,18 @@ TEST_CASE("malformed status and forged evidence are refused by record contract")
     incorrect.input_digest.reset();
     CHECK(std::holds_alternative<artifacts::ArtifactError>(
         artifacts::encode_bounded_hull_check(incorrect)));
+}
+
+TEST_CASE("record decoder rejects negative and fractional integer fields") {
+    auto checked = geometry::run_bounded_square_smoke().checker;
+    const auto encoded = artifacts::encode_bounded_hull_check(checked);
+    REQUIRE(std::holds_alternative<std::string>(encoded));
+    const auto& base = std::get<std::string>(encoded);
+    for (const auto& [field, bad_value] : std::vector<std::pair<std::string, std::string>>{
+             {"max_points", "-1"}, {"max_points", "1.5"}, {"budget_ms", "1.5"},
+             {"elapsed_ns", "-1"}, {"elapsed_ns", "0.5"}}) {
+        const auto malformed = replace_json_field(base, field, bad_value);
+        CHECK(std::holds_alternative<artifacts::ArtifactError>(
+            artifacts::decode_bounded_hull_check(malformed)));
+    }
 }

@@ -74,6 +74,13 @@ TEST_CASE("budget and unsupported input preserve inconclusive status") {
     CHECK(unsupported.reason == "unsupported dimension");
 }
 
+TEST_CASE("maximum representable wall budget does not overflow its deadline") {
+    const auto result = check_source_index_hull(square, hull({0,1,2,3}),
+        {std::chrono::milliseconds::max(), 64});
+    CHECK(result.status == HullCheckStatus::verified);
+    CHECK(result.reason == "every source point is in the exact convex hull of reported source points");
+}
+
 TEST_CASE("modern-only square smoke records algorithm and independent checker") {
     const auto smoke = run_bounded_square_smoke();
     CHECK(smoke.algorithm == "modern QuickHull2D");

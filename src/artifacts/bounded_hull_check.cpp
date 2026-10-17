@@ -32,6 +32,33 @@ geometry::HullCheckStatus parse_status(const std::string& text) {
     throw std::invalid_argument("Unknown checker status");
 }
 
+std::int64_t parse_nonnegative_i64(const Json& value, const char* field) {
+    if (!value.is_number_integer()) throw std::invalid_argument(std::string{field} + " must be an integer");
+    if (value.is_number_unsigned()) {
+        const auto parsed = value.get<std::uint64_t>();
+        if (parsed > static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()))
+            throw std::invalid_argument(std::string{field} + " exceeds signed storage");
+        return static_cast<std::int64_t>(parsed);
+    }
+    const auto parsed = value.get<std::int64_t>();
+    if (parsed < 0) throw std::invalid_argument(std::string{field} + " must be nonnegative");
+    return parsed;
+}
+
+std::size_t parse_nonnegative_size(const Json& value, const char* field) {
+    if (!value.is_number_integer()) throw std::invalid_argument(std::string{field} + " must be an integer");
+    std::uint64_t parsed = 0;
+    if (value.is_number_unsigned()) parsed = value.get<std::uint64_t>();
+    else {
+        const auto signed_value = value.get<std::int64_t>();
+        if (signed_value < 0) throw std::invalid_argument(std::string{field} + " must be nonnegative");
+        parsed = static_cast<std::uint64_t>(signed_value);
+    }
+    if (parsed > std::numeric_limits<std::size_t>::max())
+        throw std::invalid_argument(std::string{field} + " exceeds platform size");
+    return static_cast<std::size_t>(parsed);
+}
+
 std::optional<problem::ContentDigest> parse_digest(const Json& value) {
     if (value.is_null()) return std::nullopt;
     const auto text = value.get<std::string>();
@@ -90,20 +117,15 @@ ArtifactResult<geometry::HullCheckRecord> decode_bounded_hull_check(std::string_
         geometry::HullCheckRecord record;
         record.status = parse_status(wire.at("status").get<std::string>());
         record.input_digest = parse_digest(wire.at("input_digest"));
-        const auto budget_ms = wire.at("budget_ms").get<std::int64_t>();
-        const auto max_points = wire.at("max_points").get<std::uint64_t>();
-        const auto elapsed_ns = wire.at("elapsed_ns").get<std::int64_t>();
-        if (max_points > std::numeric_limits<std::size_t>::max())
-            return invalid("Checker point capacity exceeds platform size");
-        record.budget = {std::chrono::milliseconds{budget_ms}, static_cast<std::size_t>(max_points)};
+        const auto budget_ms = parse_nonnegative_i64(wire.at("budget_ms"), "budget_ms");
+        const auto max_points = parse_nonnegative_size(wire.at("max_points"), "max_points");
+        const auto elapsed_ns = parse_nonnegative_i64(wire.at("elapsed_ns"), "elapsed_ns");
+        record.budget = {std::chrono::milliseconds{budget_ms}, max_points};
         record.elapsed = std::chrono::nanoseconds{elapsed_ns};
         record.evidence_scope = wire.at("evidence_scope").get<std::string>();
         record.reason = wire.at("reason").get<std::string>();
         if (!wire.at("counterexample_index").is_null()) {
-            const auto index = wire.at("counterexample_index").get<std::uint64_t>();
-            if (index > std::numeric_limits<std::size_t>::max())
-                return invalid("Counterexample index exceeds platform size");
-            record.counterexample_index = static_cast<std::size_t>(index);
+            record.counterexample_index = parse_nonnegative_size(wire.at("counterexample_index"), "counterexample_index");
         }
         validate(record);
         return record;
