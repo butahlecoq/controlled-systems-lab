@@ -592,8 +592,8 @@ ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics& own
     catch(const Json::exception&) { return ArtifactError{ArtifactErrorCode::invalid_input,"recorded.json","Invalid portable recorded data"}; }
     catch(const std::bad_alloc&) { return ArtifactError{ArtifactErrorCode::allocation,{},{}}; }
 }
-static ArtifactResult<RecordedRunArtifact> decode_recorded_run_impl(std::string_view text,DecodeLimits limits,
-    const problem::ProblemId* expected_problem) {
+static ArtifactResult<problem::ResolvedContent> decode_recorded_run_impl(std::string_view text,DecodeLimits limits,
+    const ProblemId* expected_problem) {
     try {
         auto wire=parse_document(text,limits);
         closed(wire,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection","recorded_state"});
@@ -637,7 +637,7 @@ static ArtifactResult<RecordedRunArtifact> decode_recorded_run_impl(std::string_
         std::vector<std::byte> bytes;bytes.reserve(text.size());
         for(const unsigned char value:text)bytes.push_back(static_cast<std::byte>(value));
         auto content=problem::snapshot_content(bytes);
-        if(const auto* owned=std::get_if<problem::ResolvedContent>(&content))return RecordedRunArtifact{*owned};
+        if(const auto* owned=std::get_if<problem::ResolvedContent>(&content))return *owned;
         return ArtifactError{ArtifactErrorCode::allocation,"recorded.content","Could not own imported artifact bytes"};
     } catch(const ArtifactError& error) { return error; }
     catch(const Invalid& error) { return ArtifactError{ArtifactErrorCode::invalid_input,error.path,error.message}; }
@@ -645,11 +645,15 @@ static ArtifactResult<RecordedRunArtifact> decode_recorded_run_impl(std::string_
     catch(const std::bad_alloc&) { return ArtifactError{ArtifactErrorCode::allocation,{},{}}; }
 }
 ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view text,DecodeLimits limits) {
-    return decode_recorded_run_impl(text,limits,nullptr);
+    auto content=decode_recorded_run_impl(text,limits,nullptr);
+    if(const auto* error=std::get_if<ArtifactError>(&content))return *error;
+    return RecordedRunArtifact{std::get<problem::ResolvedContent>(std::move(content))};
 }
 ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view text,const problem::ResolvedProblem& problem,DecodeLimits limits) {
     const auto expected_problem=problem.identity();
-    return decode_recorded_run_impl(text,limits,&expected_problem);
+    auto content=decode_recorded_run_impl(text,limits,&expected_problem);
+    if(const auto* error=std::get_if<ArtifactError>(&content))return *error;
+    return RecordedRunArtifact{std::get<problem::ResolvedContent>(std::move(content))};
 }
 ArtifactResult<std::string> check_record_portability(const RunRecord& record) {
     try {return run_json(record).dump();}

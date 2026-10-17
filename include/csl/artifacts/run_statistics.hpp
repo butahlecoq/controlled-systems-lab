@@ -240,6 +240,7 @@ private:
     problem::ResolvedContent content_;
     friend ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics&,EncodeLimits);
     friend ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view,DecodeLimits);
+    friend ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view,const problem::ResolvedProblem&,DecodeLimits);
 };
 ArtifactResult<RunStatistics> publish_run(RunInput);
 ArtifactResult<RunStatistics> decode_run(std::string_view,DecodeLimits={});
