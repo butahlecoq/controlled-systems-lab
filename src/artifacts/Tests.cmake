@@ -16,3 +16,8 @@ add_executable(h_relation_attachment_contract tests/artifacts/h_relation_attachm
 target_link_libraries(h_relation_attachment_contract PRIVATE CSL::artifacts CSL::optimization doctest::doctest)
 add_test(NAME h_relation_attachment_contract COMMAND h_relation_attachment_contract)
 csl_test_target(h_relation_attachment_contract artifacts)
+
+add_executable(bounded_hull_check_record_test tests/artifacts/bounded_hull_check_record_test.cpp)
+target_link_libraries(bounded_hull_check_record_test PRIVATE CSL::artifacts doctest::doctest)
+add_test(NAME bounded_hull_check_record_test COMMAND bounded_hull_check_record_test)
+csl_test_target(bounded_hull_check_record_test artifacts)

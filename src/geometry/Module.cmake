@@ -9,6 +9,9 @@ target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry PRIVATE CS
 
 csl_add_library(csl_quickhull_2d STATIC src/geometry/hull/quickhull_2d.cpp)
 
+csl_add_library(csl_bounded_hull_checker STATIC src/geometry/bounded_hull_checker.cpp)
+target_link_libraries(csl_bounded_hull_checker PUBLIC CSL::resolved_problem PRIVATE CSL::quickhull_2d)
+
 csl_add_library(csl_polyhedral STATIC
   src/geometry/polyhedral/intersection.cpp
   src/geometry/polyhedral/halfspace_reducer.cpp
@@ -37,6 +40,7 @@ install(FILES docs/contracts/polyhedral-intersection.md DESTINATION ${CMAKE_INST
 install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/quickhull-2d.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
+install(FILES docs/contracts/bounded-hull-checker.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/approximation.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
