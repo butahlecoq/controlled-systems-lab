@@ -314,16 +314,24 @@ TEST_CASE("grouped reducer preserves flat and duplicate hulls across every permu
     } while (std::next_permutation(permutation.begin(), permutation.end()));
 }
 
-TEST_CASE("grouped ordering falls back to input order when box width overflows") {
-    geometry::PointCloud cloud{{"grouped-overflow"}, {{-1e308}, {1e308}, {0.0}}};
-    StopWorkspace stop;
-    auto result = geometry::reduce_grouped_hull(cloud, stop, {});
-    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
-    const auto& reduction = std::get<geometry::HullReduction>(result);
-    REQUIRE(reduction.grouped.has_value());
-    CHECK(reduction.grouped->used_identity_fallback);
-    CHECK(reduction.grouped->processing_order == std::vector<std::size_t>{0, 1, 2});
-    CHECK(reduction.grouped->grouping_passes == 0);
-    CHECK(reduction.grouped->grouped_candidates == 0);
-    CHECK(reduction.attempts.front().candidate == 2);
+TEST_CASE("grouped overflow fallback preserves hull extrema across every permutation") {
+    const std::vector<Vector> fixture{{-1e308}, {1e308}, {0.0}};
+    std::vector<std::size_t> permutation{0, 1, 2};
+    do {
+        geometry::PointCloud cloud{{"grouped-overflow"}, {}};
+        for (const auto id : permutation) cloud.points.push_back(fixture[id]);
+        auto lp = highs_workspace();
+        const auto result = geometry::reduce_grouped_hull(cloud, *lp, {});
+        REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+        const auto& reduction = std::get<geometry::HullReduction>(result);
+        REQUIRE(reduction.grouped.has_value());
+        CHECK(reduction.grouped->used_identity_fallback);
+        CHECK(reduction.grouped->processing_order == std::vector<std::size_t>{0, 1, 2});
+        CHECK(reduction.grouped->grouping_passes == 0);
+        CHECK(reduction.grouped->grouped_candidates == 0);
+        check_exact_removals(cloud, reduction);
+        // In one dimension, equality at both support directions proves hull equality.
+        CHECK(support(cloud, reduction, {1.0}) == 1e308);
+        CHECK(support(cloud, reduction, {-1.0}) == 1e308);
+    } while (std::next_permutation(permutation.begin(), permutation.end()));
 }
