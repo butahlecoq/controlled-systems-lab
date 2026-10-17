@@ -243,10 +243,10 @@ TEST_CASE("fixed-seed integer rectangles have independently enumerated affine su
         // the integer map directly, without using production geometry helpers.
         std::array<std::array<int, 2>, 4> image{};
         for (std::size_t i = 0; i < corners.size(); ++i) {
-            image[i][0] = static_cast<int>(map(0, 0)) * corners[i][0] +
-                static_cast<int>(map(0, 1)) * corners[i][1] + static_cast<int>(shift[0]);
-            image[i][1] = static_cast<int>(map(1, 0)) * corners[i][0] +
-                static_cast<int>(map(1, 1)) * corners[i][1] + static_cast<int>(shift[1]);
+            image[i][0] = static_cast<int>(map.values[0]) * corners[i][0] +
+                static_cast<int>(map.values[1]) * corners[i][1] + static_cast<int>(shift[0]);
+            image[i][1] = static_cast<int>(map.values[2]) * corners[i][0] +
+                static_cast<int>(map.values[3]) * corners[i][1] + static_cast<int>(shift[1]);
         }
 
         const auto result = take(run(request(AffineImage{input, map, shift},
