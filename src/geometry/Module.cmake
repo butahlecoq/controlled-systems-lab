@@ -16,6 +16,7 @@ csl_add_library(csl_polyhedral STATIC
   src/geometry/polyhedral/intersection.cpp
   src/geometry/polyhedral/halfspace_reducer.cpp
   src/geometry/polyhedral/projection.cpp
+  src/geometry/polyhedral/support.cpp
   src/reachability/nominal_predecessor.cpp)
 
 target_link_libraries(csl_polyhedral PUBLIC CSL::sets CSL::optimization CSL::registry)
@@ -36,6 +37,7 @@ target_link_libraries(csl_approximation PUBLIC CSL::sets CSL::registry CSL::veri
 install(FILES docs/contracts/projection-and-predecessor.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/polyhedral-intersection.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
+install(FILES docs/contracts/polyhedral-support.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
