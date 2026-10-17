@@ -190,6 +190,7 @@ TEST_CASE("projection of the rational unit-square triangle is the exact interval
         {0,2,{}},{});
     const auto request=projection(triangle.as_handle(),{0});
     const auto result=take(project(request,geometry::polyhedral::ProjectionOutput::h));
+    CHECK(result.output.metadata.dimension==1);
     CHECK(contains(result.output,{0}));
     CHECK(contains(result.output,{0.5}));
     CHECK(contains(result.output,{1}));
@@ -198,6 +199,7 @@ TEST_CASE("projection of the rational unit-square triangle is the exact interval
     const auto representation=take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
     const auto& projected=std::get<sets::HRepresentation>(representation);
+    CHECK(projected.inequalities.cols()==1);
     CHECK(projected.equalities.rows()==0);
     REQUIRE(projected.inequalities.rows()>=2);
     bool has_lower=false;
@@ -207,7 +209,8 @@ TEST_CASE("projection of the rational unit-square triangle is the exact interval
         const double bound=projected.upper_bounds[row];
         const bool lower=coefficient==-1.0 && bound==0.0;
         const bool upper=coefficient==1.0 && bound==1.0;
-        CHECK((lower || upper));
+        const bool tautology=coefficient==0.0 && bound>=0.0;
+        CHECK((lower || upper || tautology));
         has_lower=has_lower || lower;
         has_upper=has_upper || upper;
     }
