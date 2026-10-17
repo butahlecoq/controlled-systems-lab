@@ -126,16 +126,27 @@ checked coverage certificate. The [Qhull conversion contract](../contracts/polyh
 and [upstream Qhull precision manual](https://www.qhull.org/html/qh-impre.htm)
 also distinguish empirical precision handling from a theoretical bound.
 
-If a converter later establishes `d_H(P_64, V_conv)<=E_conv` under a stated
+When a converter establishes `d_H(P_64, V_conv)<=E_conv` under a stated
 metric and assumptions, and candidate generation establishes `E_gen` for
 that converted V set, the real stored-H affine-image bound is at most
 `||M|| E_conv+E_gen`. For two H/V summands it is at most
 `E_conv,left+E_conv,right+E_gen`. The norm of `M` must be induced by the
 chosen point norm. These compositions are mathematical consequences of
 Lipschitz continuity and the triangle inequality, not guarantees currently
-reported by this operation. For `P_real`, add independently justified input
+reported by the affine-sum operation for H inputs. For `P_real`, add independently justified input
 and coefficient/model uncertainty. Unknown pre-rounding data admit no finite
 claimed error from the present evidence alone.
+
+The converter now independently certifies the bounded **ambient-one** H-to-V
+case against the original stored dyadic rows. Exact rational endpoint bounds
+and the returned finite V extrema give the two-sided L-infinity Hausdorff
+distance; it is rounded upward into the conversion evidence. Empty-to-empty
+distance is zero. This is a global coverage check for that one-dimensional
+represented-input profile, including equality singletons. It does not apply
+to embedded lines in higher ambient dimension, higher-dimensional polytopes,
+or pre-rounding authored-real values. The affine-image/Minkowski adapter does
+not yet compose a converter bound with its candidate-generation bound, so its
+H-input operation evidence still omits `error_bound`.
 
 ## Scientific disposition and follow-up gate
 
@@ -157,8 +168,10 @@ To claim a real-model bound in a future profile:
    with matching request/source identity. **Implemented** by the current
    finite-V affine-sum path; preserve the exact deletion check.
 3. For H inputs, obtain a **global two-sided** H/V conversion certificate or
-   separate directed bounds. Vertex-row residuals alone are insufficient.
-   Propagate this bound through the map/sum as above.
+   separate directed bounds. The ambient-one bounded interval profile has
+   such a stored-dyadic certificate; other H profiles do not. Vertex-row
+   residuals alone are insufficient. Propagate a verified bound through the
+   map/sum as above; that consumer step is still open.
 4. Bind any broader `GeometryErrorBound` to a checked verifier and explicit
    assumptions, including upstream model uncertainty. The current finite-V
    bound is computed by the operation's exact dyadic post-hoc check, includes
