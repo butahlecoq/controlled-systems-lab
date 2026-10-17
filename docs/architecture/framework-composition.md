@@ -99,6 +99,14 @@ The [saved paired T-S01 report](../../reports/algorithm-results/syn-ts01-paired-
 delivers measured records and standalone HTML for this fixture, with an
 inconclusive performance conclusion and no general strategy ranking.
 
+The installed scenario_cli --run command adapts user-authored JSON to the
+paired application API for the guarded T-S01/T-S02 profiles. It carries optional
+LP/convex ID, seed, resource and profile overrides, and reports per-strategy
+outcomes plus independent witness checks. With --output-dir, it asks the
+versioned run artifact API to persist both attempts. Registered complete-family
+proof payloads still return a typed unsupported artifact error under the current
+schema, so the CLI does not publish an ad hoc comparison file. A claim-only
+family artifact and paired run bundle remain follow-up work.
 A general scenario-to-family-to-export application remains pending. General
 family proofs, broader selector profiles, CLI behavior and trusted proof
 serialization/replay retain their feature-ticket ownership. JSON run records

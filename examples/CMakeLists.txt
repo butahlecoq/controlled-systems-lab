@@ -108,7 +108,9 @@ csl_example(registered_lp CSL::highs_lp)
 csl_example(registered_convex CSL::highs_convex)
 csl_example(resolved_scenario CSL::resolved_problem)
 csl_example(scenario_file CSL::input)
-csl_example(scenario_cli CSL::input)
+csl_example(scenario_cli CSL::input CSL::application CSL::strategy_a CSL::strategy_b
+  CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex
+  CSL::qhull_conversion CSL::affine_sum)
 csl_example(backend_substitution CSL::highs_lp CSL::phase_one)
 csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::strategy_b
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
@@ -131,6 +133,19 @@ example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_S
   "validation=valid.*schema=csl.scenario/1.*requested=comparison.*mode=validate_only solvers=not_invoked")
 example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
+example_check(scenario_cli_run_ts01 scenario_cli "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--seed;42;--threads;2" 0
+  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=42 threads=2 verification=numerical_pass")
+example_check(scenario_cli_run_missing scenario_cli "--run;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
+  "Input rejected: category=io.*expected")
+example_check(scenario_cli_run_unknown_backend scenario_cli
+  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--lp;missing-backend" 1
+  "Strategy preparation rejected.*missing-backend")
+example_check(scenario_cli_run_unsupported_profile scenario_cli
+  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--profile;unsupported-profile" 2
+  "Unsupported profile.*unsupported-profile")
+example_check(scenario_cli_run_export_boundary scenario_cli
+  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--output-dir;${CMAKE_CURRENT_BINARY_DIR}/scenario-cli-export" 3
+  "Artifact export rejected.*run.final.family.completeness.support")
 example_check(scenario_cli_malformed scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/malformed.json" 2
   "Input rejected: category=syntax.*expected")
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" validation_scenario)
