@@ -84,16 +84,44 @@ TEST_CASE("finite policy may branch after a released observation distinguishes s
     });
     REQUIRE(std::holds_alternative<FiniteObservationPolicy>(built));
 
-    const FinitePolicyFamilyRequest request{SetQuantifier::existential,
+    const FinitePolicyFamilyRequest request{SetQuantifier::universal,
         {scenario({1}), scenario({5})}};
     const auto result = replay_finite_policy_family(system, request,
         std::get<FiniteObservationPolicy>(built));
     REQUIRE(std::holds_alternative<FinitePolicyFamilyEvidence>(result));
     const auto& evidence = std::get<FinitePolicyFamilyEvidence>(result);
-    CHECK(evidence.initial_quantifier == SetQuantifier::existential);
+    CHECK(evidence.initial_quantifier == SetQuantifier::universal);
     REQUIRE(evidence.scenarios.size() == 2);
     CHECK(evidence.scenarios[0].decisions[0].action == Vector{-2});
     CHECK(evidence.scenarios[1].decisions[0].action == Vector{7});
+}
+
+TEST_CASE("existential finite policy evaluates one caller-selected witness") {
+    const auto system = scalar_sensor();
+    auto built = make_finite_observation_policy({
+        {{0}, {observed(0, 0, 0, {5})}, {7}}
+    });
+    REQUIRE(std::holds_alternative<FiniteObservationPolicy>(built));
+    const FinitePolicyFamilyRequest request{SetQuantifier::existential, {scenario({5})}};
+    const auto result = replay_finite_policy_family(system, request,
+        std::get<FiniteObservationPolicy>(built));
+    REQUIRE(std::holds_alternative<FinitePolicyFamilyEvidence>(result));
+    const auto& evidence = std::get<FinitePolicyFamilyEvidence>(result);
+    CHECK(evidence.initial_quantifier == SetQuantifier::existential);
+    REQUIRE(evidence.scenarios.size() == 1);
+    CHECK(evidence.scenarios[0].decisions[0].action == Vector{7});
+}
+
+TEST_CASE("existential finite policy rejects multiple candidate rows") {
+    const auto system = scalar_sensor();
+    auto built = make_finite_observation_policy({});
+    REQUIRE(std::holds_alternative<FiniteObservationPolicy>(built));
+    const FinitePolicyFamilyRequest request{SetQuantifier::existential,
+        {scenario({1}), scenario({5})}};
+    const auto result = replay_finite_policy_family(system, request,
+        std::get<FiniteObservationPolicy>(built));
+    REQUIRE(std::holds_alternative<Diagnostic>(result));
+    CHECK(std::get<Diagnostic>(result).field == "controllers.policy.existential_scenario_count");
 }
 
 TEST_CASE("finite policy evaluation rejects unspecified quantifiers and uncovered histories") {

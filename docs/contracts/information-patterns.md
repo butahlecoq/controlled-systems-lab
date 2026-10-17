@@ -77,8 +77,10 @@ or every disturbance/observation error.
 initial quantifier and a nonempty finite list of `ReplayInputs`. Each row keeps
 its initial state, external sequence, and measurement errors together, so the
 enumeration can preserve authored correlation among those values. The
-quantifier is recorded as requested; universal scope is exactly the listed
-rows. The type does not accept a continuous `InitialSet`, does not establish
+For existential scope, the caller supplies exactly one selected witness row;
+the evaluator checks that row and does not search for a feasible witness. For
+universal scope, the evaluator checks every listed row. The type does not
+accept a continuous `InitialSet`, does not establish
 that the rows cover one, and does not quantify over unlisted external inputs or
 measurement errors. The evaluator checks that the table supplies every action
 needed by every row and that every table rule is exercised. Its returned

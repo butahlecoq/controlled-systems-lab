@@ -34,8 +34,8 @@ using FinitePolicyBuildResult = std::variant<FiniteObservationPolicy, Diagnostic
 FinitePolicyBuildResult make_finite_observation_policy(std::vector<FinitePolicyRule> rules);
 
 struct FinitePolicyFamilyRequest {
-    // The quantifier is mandatory. Its scope is exactly the enumerated rows
-    // below; this request cannot represent a continuous initial set.
+    // Existential requests contain exactly one caller-selected witness row;
+    // universal requests cover every enumerated row. Neither searches a set.
     SetQuantifier initial_quantifier{SetQuantifier::unspecified};
     std::vector<ReplayInputs> scenarios;
 };
@@ -61,8 +61,9 @@ struct FinitePolicyFamilyEvidence {
 using FinitePolicyFamilyResult =
     std::variant<FinitePolicyFamilyEvidence, Diagnostic, OperationStopped>;
 
-// Replays one finite table policy over every listed scenario. Equal released
-// histories at a stage have one table entry and therefore one action. The
+// Replays a finite table policy over its quantifier scope. Existential scope
+// requires exactly one selected witness row; universal scope replays all rows.
+// Equal released histories at a stage have one table entry and therefore one action. The
 // evidence covers only these authored scenarios; it proves no constraint,
 // optimality, continuous-set, or unlisted-disturbance claim.
 FinitePolicyFamilyResult replay_finite_policy_family(const model::LinearSystem&,

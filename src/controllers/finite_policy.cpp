@@ -98,6 +98,10 @@ FinitePolicyFamilyResult replay_finite_policy_family(const model::LinearSystem& 
             "Finite policy evaluation requires an explicit existential or universal initial quantifier.");
     if (request.scenarios.empty())
         return invalid("controllers.policy.scenarios", "At least one finite scenario is required.");
+    if (request.initial_quantifier == SetQuantifier::existential
+        && request.scenarios.size() != 1)
+        return invalid("controllers.policy.existential_scenario_count",
+            "Existential evaluation requires exactly one caller-selected witness scenario.");
 
     std::vector<bool> used(policy.rules().size(), false);
     FinitePolicyFamilyEvidence evidence{request.initial_quantifier, {}};
