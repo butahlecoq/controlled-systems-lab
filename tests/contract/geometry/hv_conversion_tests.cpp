@@ -40,7 +40,8 @@ Requirements conversion_requirements(std::string output) {
     r.output.relation = SetRelation::equivalent;
     return r;
 }
-ExecutionContext context() { return {{}, {}, {}, {1e-8,1e-8}, "geo03-tests"}; }
+constexpr double conversion_tolerance=1e-8;
+ExecutionContext context() { return {{}, {}, {}, {conversion_tolerance,conversion_tolerance}, "geo03-tests"}; }
 SetHandle make_h_handle(std::string id,std::size_t n,Matrix a,Vector b,Matrix e={},Vector f={}) {
     if (e.rows==0&&e.cols==0) e={0,n,{}};
     return take(sets::make_h({{std::move(id)},n,{}},
@@ -73,7 +74,7 @@ bool satisfies(const sets::HRepresentation& h,std::span<const double> x,double t
     }
     return true;
 }
-bool near(double actual,double expected,double tolerance=1e-7) {
+bool near(double actual,double expected,double tolerance=conversion_tolerance) {
     return std::abs(actual-expected)<=tolerance;
 }
 class WrongSizeLpWorkspace final : public LPWorkspace {
