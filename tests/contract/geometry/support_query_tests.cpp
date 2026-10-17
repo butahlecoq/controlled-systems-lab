@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <limits>
+#include <stop_token>
 #include <variant>
 
 using namespace csl;
@@ -30,13 +31,13 @@ OperationRequest support_request(SetHandle input, Vector direction, std::string 
         SetRelation::equivalent, Assurance::numerical};
 }
 
-OperationOutcome run_support(const OperationRequest& request) {
+OperationOutcome run_support(const OperationRequest& request, const ExecutionContext& context = {}) {
     Registry<GeometryPort> registry;
     auto entry = geometry::polyhedral::make_support_registration();
     const Method method{entry.identity.id, entry.identity.version};
     REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
     auto prepared = take(prepare_provider(select_provider(registry, method)));
-    return std::get<0>(prepared.create())->run({});
+    return std::get<0>(prepared.create())->run(context);
 }
 
 void check_support_evidence(const SupportResult& result, const OperationRequest& request) {
@@ -59,6 +60,16 @@ TEST_CASE("V support provider returns finite interval maximum and a maximizer") 
     REQUIRE(result.maximizer);
     CHECK(*result.maximizer == Vector{1.0});
     check_support_evidence(result, request);
+}
+
+TEST_CASE("finite support values round to nearest binary64 with ties to even") {
+    const auto singleton = v_set("rounding-tie", {1, 2, {1.0, std::ldexp(1.0, -53)}}, {0, 2, {}});
+    const auto request = support_request(singleton, {1, 1}, "support-rounding-tie");
+    const auto outcome = run_support(request);
+    REQUIRE(std::holds_alternative<SupportResult>(outcome));
+    REQUIRE(std::holds_alternative<double>(std::get<SupportResult>(outcome).value));
+    CHECK(std::get<double>(std::get<SupportResult>(outcome).value) == 1.0);
+    CHECK(std::get<SupportResult>(outcome).maximizer == Vector{1.0, std::ldexp(1.0, -53)});
 }
 
 TEST_CASE("V support provider distinguishes the empty set") {
@@ -104,6 +115,25 @@ TEST_CASE("exact ray dot signs detect positive support hidden by rounded cancell
     CHECK(std::holds_alternative<UnboundedSupport>(std::get<SupportResult>(outcome).value));
     CHECK_FALSE(std::get<SupportResult>(outcome).maximizer);
     check_support_evidence(std::get<SupportResult>(outcome), request);
+}
+
+TEST_CASE("support provider honors cancellation and expired deadlines before publishing") {
+    const auto interval = v_set("stopped-interval", {2, 1, {0, 1}}, {0, 1, {}});
+    const auto request = support_request(interval, {1}, "stopped-support");
+
+    std::stop_source source;
+    source.request_stop();
+    ExecutionContext cancelled_context;
+    cancelled_context.cancellation = source.get_token();
+    const auto cancelled = run_support(request, cancelled_context);
+    REQUIRE(std::holds_alternative<OperationStopped>(cancelled));
+    CHECK(std::get<OperationStopped>(cancelled).reason == StopReason::cancelled);
+
+    ExecutionContext deadline_context;
+    deadline_context.deadline = std::chrono::steady_clock::now() - std::chrono::milliseconds{1};
+    const auto expired = run_support(request, deadline_context);
+    REQUIRE(std::holds_alternative<OperationStopped>(expired));
+    CHECK(std::get<OperationStopped>(expired).reason == StopReason::deadline_expired);
 }
 
 TEST_CASE("support provider rejects representations outside its V and empty profile") {

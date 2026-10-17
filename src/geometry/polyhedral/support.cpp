@@ -126,6 +126,7 @@ public:
             const auto proof = evidence("Empty set has no support maximizer.");
             if (const auto errors = check_geometry_evidence(proof, request_); !errors.empty())
                 return Unsupported{errors};
+            if (stopped(context)) return stop(context);
             return SupportResult{EmptySupport{}, {}, proof};
         }
         const auto* v = std::get_if<sets::VRepresentation>(&representation);
@@ -134,6 +135,7 @@ public:
             const auto proof = evidence("V={ }+cone(R) is empty because it has no vertices.");
             if (const auto errors = check_geometry_evidence(proof, request_); !errors.empty())
                 return Unsupported{errors};
+            if (stopped(context)) return stop(context);
             return SupportResult{EmptySupport{}, {}, proof};
         }
 
@@ -147,6 +149,7 @@ public:
                     "A ray has strictly positive exact dyadic direction dot product, so support is unbounded.");
                 if (const auto errors = check_geometry_evidence(proof, request_); !errors.empty())
                     return Unsupported{errors};
+                if (stopped(context)) return stop(context);
                 return SupportResult{UnboundedSupport{}, {}, proof};
             }
         }
@@ -171,6 +174,7 @@ public:
             maximizer[column] = v->vertices(maximizer_index, column);
         const auto proof = evidence("The exact maximum of vertex dot products is returned rounded to nearest binary64; every ray has nonpositive exact dyadic direction dot product, so this maximum is attained and finite.");
         if (const auto errors = check_geometry_evidence(proof, request_); !errors.empty()) return Unsupported{errors};
+        if (stopped(context)) return stop(context);
         return SupportResult{*scalar, std::move(maximizer), proof};
     }
 };
