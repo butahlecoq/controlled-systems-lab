@@ -11,7 +11,6 @@
 
 #include <array>
 #include <charconv>
-#include <chrono>
 #include <stdexcept>
 #include <filesystem>
 #include <fstream>
