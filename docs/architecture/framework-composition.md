@@ -16,15 +16,19 @@ is still profile-bounded as described below.
 flowchart LR
     EX[Installed callers] --> IN[Input loader]
     EX --> AP[Application composition]
+    EX --> SR[Strategy registry]
+    EX --> A[Strategy A: reachability and recovery]
+    EX --> B[Strategy B: joint optimization]
+    EX --> WS[Witness selector implementation]
     IN --> PR[Resolved problem contract]
     AP --> PR
     AP --> SR[Strategy registry]
-    AP --> WS[Witness selector]
+    AP --> SELPORT[SelectorPort contract]
     AP --> V[Independent verifier]
-    AP --> EXEC[Execution policy]
     AP --> ART[Run artifact interface]
-    SR --> A[Strategy A: reachability and recovery]
-    SR --> B[Strategy B: joint optimization]
+    SR --> STRATPORT[StrategyPort contract]
+    A --> STRATPORT
+    B --> STRATPORT
     A --> GEO[Geometry port]
     A --> TERM[Terminal minimizers]
     TERM --> LP
@@ -35,6 +39,7 @@ flowchart LR
     B --> F
     GEO --> LP
     GEO --> CV[Conversion port]
+    WS --> SELPORT
     WS --> F
     WS --> LP
     V --> PR
