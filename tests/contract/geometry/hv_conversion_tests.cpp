@@ -40,7 +40,8 @@ Requirements conversion_requirements(std::string output) {
     r.output.relation = SetRelation::equivalent;
     return r;
 }
-ExecutionContext context() { return {{}, {}, {}, {1e-8,1e-8}, "geo03-tests"}; }
+constexpr double conversion_tolerance=1e-8;
+ExecutionContext context() { return {{}, {}, {}, {conversion_tolerance,conversion_tolerance}, "geo03-tests"}; }
 SetHandle make_h_handle(std::string id,std::size_t n,Matrix a,Vector b,Matrix e={},Vector f={}) {
     if (e.rows==0&&e.cols==0) e={0,n,{}};
     return take(sets::make_h({{std::move(id)},n,{}},
@@ -72,6 +73,9 @@ bool satisfies(const sets::HRepresentation& h,std::span<const double> x,double t
         if (std::abs(value-h.equality_values[i])>tolerance) return false;
     }
     return true;
+}
+bool within_tolerance(double actual,double expected,double tolerance=conversion_tolerance) {
+    return std::abs(actual-expected)<=tolerance;
 }
 class WrongSizeLpWorkspace final : public LPWorkspace {
 protected:
@@ -132,16 +136,90 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
     const auto vr=vertices.representation(); REQUIRE(std::holds_alternative<sets::VRepresentation>(vr));
     const auto& v=std::get<sets::VRepresentation>(vr);
     CHECK(v.vertices.rows()==3); CHECK(v.rays.rows()==0);
+    CHECK(vertices.metadata()->set.dimension==2);
+    const std::array<std::array<double,2>,3> expected_vertices{{{0,0},{1,0},{0,1}}};
+    for (const auto& expected : expected_vertices) {
+        bool found=false;
+        for (std::size_t row=0;row<v.vertices.rows();++row)
+            found=found || (within_tolerance(v.vertices(row,0),expected[0])
+                && within_tolerance(v.vertices(row,1),expected[1]));
+        CHECK(found);
+    }
     double support= -std::numeric_limits<double>::infinity();
     for (std::size_t i=0;i<v.vertices.rows();++i) support=std::max(support,v.vertices(i,0)+2*v.vertices(i,1));
     CHECK(support==doctest::Approx(2));
+    const auto support_x=std::max({v.vertices(0,0),v.vertices(1,0),v.vertices(2,0)});
+    const auto support_y=std::max({v.vertices(0,1),v.vertices(1,1),v.vertices(2,1)});
+    const auto support_negative_x=std::max({-v.vertices(0,0),-v.vertices(1,0),-v.vertices(2,0)});
+    CHECK(within_tolerance(support_x,1.0));
+    CHECK(within_tolerance(support_y,1.0));
+    CHECK(within_tolerance(support_negative_x,0.0));
+    // Three non-collinear literal vertices establish affine dimension two.
     auto to_h=convert(std::get<OperationResult>(to_v).output,"csl.polyhedron.h","simplex-v-to-h");
     REQUIRE(std::holds_alternative<OperationResult>(to_h));
     auto h=take(sets::from_handle(std::get<OperationResult>(to_h).output));
     const auto hr=h.representation(); REQUIRE(std::holds_alternative<sets::HRepresentation>(hr));
+    const auto& triangle_h=std::get<sets::HRepresentation>(hr);
+    REQUIRE(triangle_h.inequalities.rows()==3);
+    CHECK(triangle_h.equalities.rows()==0);
+    // H facets are positive multiples of -x<=0, -y<=0, x+y<=1.
+    const std::array<std::array<double,3>,3> expected_facets{{
+        {-1,0,0}, {0,-1,0}, {1,1,1}}};
+    std::array<bool,3> found_facet{};
+    for (std::size_t row=0;row<triangle_h.inequalities.rows();++row) {
+        bool matched=false;
+        for (std::size_t facet=0;facet<expected_facets.size();++facet) {
+            const auto& expected=expected_facets[facet];
+            const auto scale=expected[0]!=0.0
+                ? triangle_h.inequalities(row,0)/expected[0]
+                : triangle_h.inequalities(row,1)/expected[1];
+            if (scale>0.0
+                && within_tolerance(triangle_h.inequalities(row,0),scale*expected[0])
+                && within_tolerance(triangle_h.inequalities(row,1),scale*expected[1])
+                && within_tolerance(triangle_h.upper_bounds[row],scale*expected[2])) {
+                matched=true;
+                found_facet[facet]=true;
+            }
+        }
+        CHECK(matched);
+    }
+    CHECK(found_facet[0]); CHECK(found_facet[1]); CHECK(found_facet[2]);
     const std::array<double,2> in{0.25,0.25},out{0.75,0.75};
-    CHECK(satisfies(std::get<sets::HRepresentation>(hr),in));
-    CHECK_FALSE(satisfies(std::get<sets::HRepresentation>(hr),out));
+    CHECK(satisfies(triangle_h,in));
+    CHECK_FALSE(satisfies(triangle_h,out));
+    std::vector<std::array<double,2>> roundtrip_vertices;
+    for (std::size_t first=0;first<triangle_h.inequalities.rows();++first) {
+        for (std::size_t second=first+1;second<triangle_h.inequalities.rows();++second) {
+            const auto a=triangle_h.inequalities(first,0);
+            const auto b=triangle_h.inequalities(first,1);
+            const auto c=triangle_h.inequalities(second,0);
+            const auto d=triangle_h.inequalities(second,1);
+            const auto det=a*d-c*b;
+            if (det==0.0) continue;
+            const std::array<double,2> point{
+                (triangle_h.upper_bounds[first]*d-triangle_h.upper_bounds[second]*b)/det,
+                (a*triangle_h.upper_bounds[second]-c*triangle_h.upper_bounds[first])/det};
+            if (satisfies(triangle_h,point)) roundtrip_vertices.push_back(point);
+        }
+    }
+    REQUIRE(roundtrip_vertices.size()==3);
+    for (const auto& expected : expected_vertices) {
+        bool found=false;
+        for (const auto& point : roundtrip_vertices)
+            found=found || (within_tolerance(point[0],expected[0]) && within_tolerance(point[1],expected[1]));
+        CHECK(found);
+    }
+    const auto roundtrip_support=[&](std::array<double,2> direction) {
+        auto value=-std::numeric_limits<double>::infinity();
+        for (const auto& point : roundtrip_vertices)
+            value=std::max(value,direction[0]*point[0]+direction[1]*point[1]);
+        return value;
+    };
+    CHECK(within_tolerance(roundtrip_support({1,0}),1.0));
+    CHECK(within_tolerance(roundtrip_support({0,1}),1.0));
+    CHECK(within_tolerance(roundtrip_support({-1,0}),0.0));
+    CHECK(within_tolerance(roundtrip_support({0,-1}),0.0));
+    CHECK(within_tolerance(roundtrip_support({1,1}),1.0));
     const auto empty=make_h_handle("contradiction",1,Matrix{2,1,{1,-1}},Vector{0,-1});
     auto empty_v=convert(empty,"csl.polyhedron.v","empty-h-to-v");
     REQUIRE(std::holds_alternative<OperationResult>(empty_v));
@@ -157,6 +235,12 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     auto data=take(sets::from_handle(std::get<OperationResult>(segment_h).output));
     const auto rep=data.representation(); REQUIRE(std::holds_alternative<sets::HRepresentation>(rep));
     const auto& h=std::get<sets::HRepresentation>(rep);
+    REQUIRE(h.equalities.rows()==1);
+    CHECK(h.equalities(0,0)==0.0);
+    CHECK(std::abs(h.equalities(0,1))==1.0);
+    CHECK(h.equality_values[0]==0.0);
+    // Ambient dimension is two; y=0 and two distinct endpoints establish
+    // affine dimension one for this bounded segment.
     const std::array<double,2> left{-1,0},right{2,0},middle{0,0},off{0,1};
     CHECK(satisfies(h,left)); CHECK(satisfies(h,right)); CHECK(satisfies(h,middle)); CHECK_FALSE(satisfies(h,off));
     const std::array<double,2> beyond_left{-1.01,0},beyond_right{2.01,0};
@@ -165,22 +249,30 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     REQUIRE(std::holds_alternative<OperationResult>(segment_v));
     auto segment_data=take(sets::from_handle(std::get<OperationResult>(segment_v).output));
     const auto segment_rep=segment_data.representation(); REQUIRE(std::holds_alternative<sets::VRepresentation>(segment_rep));
-    const auto& segment_points=std::get<sets::VRepresentation>(segment_rep).vertices;
+    const auto& segment_v_rep=std::get<sets::VRepresentation>(segment_rep);
+    CHECK(segment_v_rep.rays.rows()==0);
+    const auto& segment_points=segment_v_rep.vertices;
     REQUIRE(segment_points.rows()==2);
     double support_x=-std::numeric_limits<double>::infinity();
     double support_negative_x=-std::numeric_limits<double>::infinity();
+    double support_y=-std::numeric_limits<double>::infinity();
+    double support_negative_y=-std::numeric_limits<double>::infinity();
     bool found_left=false,found_right=false;
     for (std::size_t i=0;i<segment_points.rows();++i) {
         const std::array<double,2> point{segment_points(i,0),segment_points(i,1)};
         CHECK(satisfies(h,point));
         support_x=std::max(support_x,point[0]);
         support_negative_x=std::max(support_negative_x,-point[0]);
-        found_left=found_left||std::abs(point[0]+1)<1e-7;
-        found_right=found_right||std::abs(point[0]-2)<1e-7;
+        support_y=std::max(support_y,point[1]);
+        support_negative_y=std::max(support_negative_y,-point[1]);
+        found_left=found_left||within_tolerance(point[0],-1.0);
+        found_right=found_right||within_tolerance(point[0],2.0);
     }
     CHECK(found_left); CHECK(found_right);
     CHECK(support_x==doctest::Approx(2));
     CHECK(support_negative_x==doctest::Approx(1));
+    CHECK(within_tolerance(support_y,0.0));
+    CHECK(within_tolerance(support_negative_y,0.0));
     auto equality_h=make_h_handle("segment-explicit-equality",2,Matrix{2,2,{1,0,-1,0}},Vector{2,1},Matrix{1,2,{0,1}},Vector{0});
     auto equality_v=convert(equality_h,"csl.polyhedron.v","segment-equality-to-v");
     REQUIRE(std::holds_alternative<OperationResult>(equality_v));
