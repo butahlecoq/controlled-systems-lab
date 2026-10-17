@@ -44,8 +44,37 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/farkas_factory_forge_client.cpp" DE
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
-if(NOT EXISTS "${prefix}/share/CSL/notices/nlohmann-json-3.11.3/LICENSE.MIT")
+if(IS_ABSOLUTE "${CSL_INSTALL_DATADIR}")
+  set(notices_root "${CSL_INSTALL_DATADIR}/CSL/notices")
+else()
+  set(notices_root "${prefix}/${CSL_INSTALL_DATADIR}/CSL/notices")
+endif()
+if(NOT EXISTS "${notices_root}/nlohmann-json-3.11.3/LICENSE.MIT")
   message(FATAL_ERROR "Installed input dependency notice is missing")
+endif()
+foreach(eigen_notice IN ITEMS
+    "${notices_root}/Eigen-3.4.0/COPYING.README"
+    "${notices_root}/Eigen-3.4.0/COPYING.MPL2"
+    "${notices_root}/Eigen-3.4.0/COPYING.BSD"
+    "${notices_root}/Eigen-3.4.0/COPYING.APACHE"
+    "${notices_root}/Eigen-3.4.0/COPYING.MINPACK")
+  if(NOT EXISTS "${eigen_notice}")
+    message(FATAL_ERROR "Installed Eigen dependency notice is missing: ${eigen_notice}")
+  endif()
+endforeach()
+if(CSL_EXPECT_HIGHS)
+  foreach(highs_notice IN ITEMS
+      "${notices_root}/HiGHS-1.11.0/LICENSE.txt"
+      "${notices_root}/HiGHS-1.11.0/extern/filereaderlp/LICENSE"
+      "${notices_root}/HiGHS-1.11.0/extern/pdqsort/license.txt")
+    if(NOT EXISTS "${highs_notice}")
+      message(FATAL_ERROR "Installed HiGHS dependency notice is missing: ${highs_notice}")
+    endif()
+  endforeach()
+endif()
+if(CSL_EXPECT_QHULL AND NOT EXISTS
+    "${notices_root}/Qhull-8.0.2/COPYING.txt")
+  message(FATAL_ERROR "Installed Qhull dependency notice is missing")
 endif()
 file(READ "${prefix}/lib/cmake/CSL/CSLTargets.cmake" input_export)
 if(input_export MATCHES "nlohmann|csl_json")
