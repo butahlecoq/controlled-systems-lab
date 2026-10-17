@@ -27,6 +27,7 @@ flowchart LR
     SR --> B[Strategy B: joint optimization]
     A --> GEO[Geometry port]
     A --> TERM[Terminal minimizers]
+    TERM --> LP
     TERM --> CVX[Convex port]
     A --> F[Typed family outcome contract]
     B --> LP[LP port]
