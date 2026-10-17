@@ -122,6 +122,7 @@ TEST_CASE("finite policy branches on noisy partial observations from enumerated 
         std::get<FiniteObservationPolicy>(built));
     REQUIRE(std::holds_alternative<FinitePolicyFamilyEvidence>(result));
     const auto& evidence = std::get<FinitePolicyFamilyEvidence>(result);
+    CHECK(evidence.initial_quantifier == SetQuantifier::universal);
     REQUIRE(evidence.scenarios.size() == 2);
     CHECK(evidence.scenarios[0].inputs.measurement_errors[0][0] == Vector{-1});
     CHECK(evidence.scenarios[1].inputs.measurement_errors[0][0] == Vector{1});
