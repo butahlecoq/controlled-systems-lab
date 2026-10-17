@@ -253,4 +253,15 @@ ArtifactResult<problem::ContentDigest> comparison_request_digest(
       catch(const std::bad_alloc&){return error(ArtifactErrorCode::allocation,"comparison.request_digest","Allocation failed");}
       catch(const std::exception&){return error(ArtifactErrorCode::invalid_input,"comparison.request_digest","Invalid run configuration");}
 }
+ArtifactResult<ConfigId> comparison_configuration_id(const RecordedRunArtifact& run, DecodeLimits limits) {
+    try {
+        const auto text=bytes_to_string(run.content().bytes());
+        auto decoded=decode_recorded_run(text,limits);
+        if(std::holds_alternative<ArtifactError>(decoded))return std::get<ArtifactError>(decoded);
+        const auto json=parse_bounded(text,limits);
+        return ConfigId{json.at("configuration").at("id").get<std::string>()};
+    } catch(const ArtifactError& failure){return failure;}
+      catch(const std::bad_alloc&){return error(ArtifactErrorCode::allocation,"comparison.configuration_id","Allocation failed");}
+      catch(const std::exception&){return error(ArtifactErrorCode::invalid_input,"comparison.configuration_id","Invalid run configuration");}
+}
 }

@@ -49,5 +49,7 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(
 // excluding implementation modules and strategy-specific adapter identities.
 ArtifactResult<problem::ContentDigest> comparison_request_digest(
     const RecordedRunArtifact&, DecodeLimits limits = {});
+ArtifactResult<ConfigId> comparison_configuration_id(
+    const RecordedRunArtifact&, DecodeLimits limits = {});
 
 } // namespace csl::artifacts
