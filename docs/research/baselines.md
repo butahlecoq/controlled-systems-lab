@@ -12,7 +12,7 @@ All numbers below are **reported**, unless explicitly labelled computed in this 
 | B02 | L05, PDF pp. 9–10 | Two nonlinear reachability approximations, dimensions 2 and 4 | Vertex counts, volumes and runtimes below | Initial-state/coordinate and approximation semantics require clarification |
 | B03 | L07, PDF pp. 52–55 | Reachability and convex-hull algorithm comparisons | Runtime/iteration data below | Recover complete model/input generation and random seeds |
 | B04 | L11, PDF pp. 12–14 | Nominal convex terminal control, n=4, T=16 | Objective 30.899, runtime 0.4 s | Selected first; missing canonical bounds/histories and a proved displayed-model/result inconsistency |
-| B05 | L08, numerical-example section and Table 2 | Optimal adaptive vs open-loop, T=16 | Nine tabulated outcomes; 0.4 s open-loop, 10 s adaptive | Equation objects/control labels missing from DOC extraction; use published PDF counterpart |
+| B05 | L08, numerical-example section and Table 2 | Optimal adaptive vs open-loop, T=16 | Nine tabulated outcomes; 0.4 s open-loop, 10 s adaptive | Table 2 policy labels cross-checked to the published PDF; canonical run inputs and provenance remain unresolved |
 | B06 | L09, PDF pp. 10–12 | Unconstrained finite-action minimax, n=4, T=5 | Worst-case 10.11, nonlinear trajectory 9.049, runtime 300 s | Disturbance specification and exact sign of extracted control vector require original inspection |
 | B07 | L10, PDF pp. 10–13 | State-constrained finite-action minimax, n=4, T=5 | 3125 candidates, 365 feasible; worst-case 9.77, runtime 66 s | Disturbance set and full physical-model parameters to recover |
 | B08 | L04, PDF pp. 11–13 | Finite-action minimax, n=4, T=4 | 625 plans, worst-case 67.12, runtime 37 s | Independent discrete floating reference computed; nonlinear cost/table inconsistency |
@@ -69,7 +69,7 @@ The physical meaning of negative working-stock balances must be retained from th
 
 ## B05: adaptive optimal control
 
-L08's Table 2 contains the following extracted rows. Equation objects carry the control labels, so **row-to-policy assignment is provisional** until comparison with the [published Part II PDF](https://vestnik.susu.ru/ctcr/article/download/8019/7026).
+L08's Table 2 contains the following extracted rows. The [bounded embedded-equation audit](l08-embedded-equations.md) maps the ten policy-label streams to the draft rows and cross-checks their grouping and terminal-coordinate/objective tuples against the [published Part II PDF](https://vestnik.susu.ru/ctcr/article/download/8019/7026). This resolves the table's row-to-policy assignment, not the canonical optimizer source, historical inputs, or run provenance.
 
 | Extracted order | Model grouping | Terminal state | Reported criterion |
 |---|---|---|---:|
