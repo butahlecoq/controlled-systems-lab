@@ -305,8 +305,11 @@ void compare_profile(const std::string& profile) {
     spec_text+="\",\"";
     spec_text+=config_b.value;
     spec_text+="\"]}";
-    const auto spec=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()}));
+    const auto spec_result=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()});
+    REQUIRE_MESSAGE(std::holds_alternative<csl::problem::ResolvedContent>(spec_result),
+        std::get<csl::Diagnostic>(spec_result).explanation);
+    const auto spec=std::get<csl::problem::ResolvedContent>(spec_result);
     const std::vector<ar::ComparisonAttempt> attempts{
         {0,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0"},run_a.content().digest()},run_a},
         {1,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-1"},run_b.content().digest()},run_b}};
