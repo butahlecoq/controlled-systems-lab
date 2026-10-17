@@ -46,6 +46,11 @@ target_link_libraries(support_query_tests PRIVATE CSL::polyhedral doctest::docte
 add_test(NAME support_query_tests COMMAND support_query_tests)
 csl_test_target(support_query_tests geometry)
 
+add_executable(support_query_contract_tests tests/contract/geometry/support_query_contract_tests.cpp)
+target_link_libraries(support_query_contract_tests PRIVATE CSL::polyhedral doctest::doctest)
+add_test(NAME support_query_contract_tests COMMAND support_query_contract_tests)
+csl_test_target(support_query_contract_tests geometry)
+
 add_executable(approximation_policy_tests tests/contract/geometry/approximation_policy_tests.cpp)
 target_link_libraries(approximation_policy_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
 add_test(NAME approximation_policy_tests COMMAND approximation_policy_tests)

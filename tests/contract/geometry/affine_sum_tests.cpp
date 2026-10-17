@@ -243,6 +243,22 @@ TEST_CASE("interval Minkowski sum matches independent rational endpoint oracles"
     CHECK(support(result.output,{1})==4);
     CHECK(support(result.output,{-1})==-2);
     CHECK(result.output.metadata.dimension==1);
+    const auto representation=take(sets::from_handle(result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
+    const auto& sum=std::get<sets::VRepresentation>(representation);
+    REQUIRE(sum.vertices.cols()==1);
+    REQUIRE(sum.vertices.rows()>=2);
+    bool has_lower=false;
+    bool has_upper=false;
+    for(std::size_t row=0;row<sum.vertices.rows();++row) {
+        const double x=sum.vertices(row,0);
+        CHECK(x>=2.0);
+        CHECK(x<=4.0);
+        has_lower=has_lower || x==2.0;
+        has_upper=has_upper || x==4.0;
+    }
+    CHECK(has_lower);
+    CHECK(has_upper);
     CHECK(check_geometry_evidence(result.evidence,req).empty());
 }
 
