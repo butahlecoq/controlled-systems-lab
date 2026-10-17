@@ -9,11 +9,13 @@
 namespace csl::artifacts {
 
 enum class AttemptStatus { completed, failed, unsupported, cancelled, resource_limited, incomplete };
+struct RunRecordRef { RunId run; std::string content_digest; };
 
 struct ComparisonAttempt {
     std::uint32_t strategy_index{};
     std::uint32_t repetition_index{};
     AttemptStatus reported_status{};
+    RunRecordRef reference;
     RecordedRunArtifact run;
 };
 
