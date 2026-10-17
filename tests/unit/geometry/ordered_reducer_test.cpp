@@ -42,6 +42,22 @@ protected:
     }
 };
 
+class UncertainThenInfeasibleWorkspace final : public LPWorkspace {
+public:
+    std::size_t calls{};
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext&) override {
+        ++calls;
+        if (calls == 1)
+            return ProgramResult{Termination::numerical_failure,
+                {program.identity(), MathematicalOutcome::undetermined, Unestablished{}, {}},
+                {}, {}, "scripted numerical uncertainty", {}};
+        return ProgramResult{Termination::completed,
+            {program.identity(), MathematicalOutcome::infeasible, Unestablished{}, {}},
+            {}, {}, "scripted completed infeasibility", {}};
+    }
+};
+
 geometry::HullReduction completed(const geometry::HullReductionResult& result) {
     REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
     const auto& reduction = std::get<geometry::HullReduction>(result);
@@ -103,6 +119,24 @@ TEST_CASE("grouped reducer stops after unsupported staging and preserves incompl
     CHECK(reduction.retained.size() == cloud.points.size());
     REQUIRE(reduction.attempts.size() == 1);
     CHECK(reduction.attempts.front().outcome == geometry::MembershipOutcome::unsupported);
+}
+
+TEST_CASE("grouped reducer keeps staged uncertainty incomplete after a successful retry") {
+    geometry::PointCloud cloud{{"uncertain-grouped"}, {{0.0, 0.0}, {1.0, 0.0}, {0.5, 0.5}}};
+    UncertainThenInfeasibleWorkspace lp;
+    const auto result = geometry::reduce_grouped_hull(cloud, lp, {});
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& reduction = std::get<geometry::HullReduction>(result);
+    CHECK(reduction.status == geometry::ReductionStatus::incomplete);
+    CHECK(lp.calls == cloud.points.size() + 1);
+    CHECK(reduction.lp_calls == lp.calls);
+    CHECK(reduction.retained.size() == cloud.points.size());
+    REQUIRE(reduction.attempts.size() == lp.calls);
+    CHECK(reduction.attempts.front().outcome == geometry::MembershipOutcome::numerical_failure);
+    CHECK(std::all_of(reduction.attempts.begin() + 1, reduction.attempts.end(),
+        [](const geometry::MembershipAttempt& attempt) {
+            return attempt.outcome == geometry::MembershipOutcome::infeasible;
+        }));
 }
 
 TEST_CASE("ordered and baseline reducers preserve literal support through permutations and degeneracies") {
