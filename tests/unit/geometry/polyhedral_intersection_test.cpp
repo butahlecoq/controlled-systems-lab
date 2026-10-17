@@ -152,11 +152,14 @@ TEST_CASE("unit square intersected with x+y<=1 matches the independent rational 
     };
     // Independently enumerated vertices are (0,0), (1,0), and (0,1).
     // Check interior, edges, and excluded points against the returned rows.
-    for (const auto point : {std::array<double,2>{0,0}, {1,0}, {0,1},
-             {0.25,0.25}, {0.5,0.5}, {0.25,0.75}}) {
+    const std::array<std::array<double,2>,6> inside_points{{
+        {0,0}, {1,0}, {0,1}, {0.25,0.25}, {0.5,0.5}, {0.25,0.75}}};
+    for (const auto& point : inside_points) {
         CHECK(inside(point));
     }
-    for (const auto point : {std::array<double,2>{0.75,0.75}, {1,1}, {-0.25,0.25}}) {
+    const std::array<std::array<double,2>,3> outside_points{{
+        {0.75,0.75}, {1,1}, {-0.25,0.25}}};
+    for (const auto& point : outside_points) {
         CHECK_FALSE(inside(point));
     }
 }
