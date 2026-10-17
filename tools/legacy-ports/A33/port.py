@@ -87,7 +87,7 @@ def simplex_hull_mod(points: np.ndarray, column: int) -> HelperResult:
     original = np.vstack((original, np.sum(original, axis=0) + 1))
     tableau = original.copy()
     basis_matrix = np.eye(dimensions + 2)
-    basis_columns = np.full(dimensions + 1, -1, dtype=int)
+    basis_columns = np.full(dimensions + 2, -1, dtype=int)
     pivots = 0
     while True:
         other = np.ones(count, dtype=bool)
