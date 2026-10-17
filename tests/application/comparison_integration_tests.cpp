@@ -14,20 +14,18 @@
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/witness_selector.hpp>
 
+#include <algorithm>
 #include <type_traits>
 #include <utility>
 #include <memory>
-#include <source_location>
 #include <string>
 #include <vector>
 
 using namespace csl;
 
 namespace {
-template<class T, class... Rest> T take(std::variant<T, Rest...> value,
-    const std::source_location location = std::source_location::current()) {
-    REQUIRE_MESSAGE(std::holds_alternative<T>(value), "generic take at "
-        << location.file_name() << ':' << location.line() << " variant index " << value.index());
+template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
+    REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
 
@@ -209,10 +207,9 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
     CHECK(wire.find("registered_verifier")!=std::string::npos);
     static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
-    const auto expected_content=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
-        std::span<const std::byte>{reinterpret_cast<const std::byte*>(wire.data()),wire.size()}));
-    CHECK(imported.content().digest()==expected_content.digest());
     CHECK(imported.content().bytes().size()==wire.size());
+    CHECK(std::equal(imported.content().bytes().begin(), imported.content().bytes().end(),
+        reinterpret_cast<const std::byte*>(wire.data())));
     const auto other_profile=prepared.family().profile=="ts01_exact_integrator"
         ?"ts02_constant_integrator":"ts01_exact_integrator";
     const auto problem_mismatch=ar::decode_recorded_run(wire,source(other_profile));
