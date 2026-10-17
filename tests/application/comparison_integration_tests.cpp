@@ -18,7 +18,6 @@
 #include <utility>
 #include <memory>
 #include <source_location>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -27,10 +26,8 @@ using namespace csl;
 namespace {
 template<class T, class... Rest> T take(std::variant<T, Rest...> value,
     const std::source_location location = std::source_location::current()) {
-    if (!std::holds_alternative<T>(value))
-        std::cerr << "generic take failed at " << location.file_name() << ':' << location.line()
-            << " with variant index " << value.index() << '\n';
-    REQUIRE(std::holds_alternative<T>(value));
+    REQUIRE_MESSAGE(std::holds_alternative<T>(value), "generic take at "
+        << location.file_name() << ':' << location.line() << " variant index " << value.index());
     return std::get<T>(std::move(value));
 }
 
