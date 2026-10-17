@@ -5,13 +5,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from port import SOURCE_SHA256
+
 EXPECTED = {
-    "A29": ("Scientific Research/QLPHULL.m", 1619,
-            "663625d206758ad80a56dc0ef9f3ea66cbb18b3d374d46b4fc90c4bf19d95a65"),
-    "A30": ("Scientific Research/Modified_SM.m", 1150,
-            "5e0f29b0bed8a87f8ec477cb0f3fae55c66f0e3e3b28021c032b9891afa9ea6a"),
+    "A29": ("Scientific Research/QLPHULL.m", 1619, SOURCE_SHA256["A29"]),
+    "A30": ("Scientific Research/Modified_SM.m", 1150, SOURCE_SHA256["A30"]),
 }
 
 
