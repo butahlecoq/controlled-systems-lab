@@ -1473,9 +1473,17 @@ TEST_CASE("registered Strategy B candidate identity mismatches are rejected by t
 
     auto wrong_problem=expected;wrong_problem.problem.value+="-foreign";expect_identity_rejection(wrong_problem);
     auto wrong_request=expected;wrong_request.request.profile+="-foreign";expect_identity_rejection(wrong_request);
+    auto wrong_objective=expected;
+    wrong_objective.request.objective=resolve(integrator(LinearTerminal{{0},3})).identity();
+    expect_identity_rejection(wrong_objective);
     auto wrong_coordinates=expected;++wrong_coordinates.coordinates.horizon;expect_identity_rejection(wrong_coordinates);
     auto wrong_strategy=expected;wrong_strategy.strategy={"csl.synthesis.foreign"};expect_identity_rejection(wrong_strategy);
     auto wrong_version=expected;wrong_version.strategy_version+="-foreign";expect_identity_rejection(wrong_version);
+    auto wrong_lineage=expected;
+    wrong_lineage.lineage=std::vector<TransformStepIdentity>{{
+        RequestId{"foreign-generated-request"},SetId{"foreign-input"},SetId{"foreign-output"},
+        ModuleId{"csl.geometry.foreign"},"1"}};
+    expect_identity_rejection(wrong_lineage);
 }
 
 TEST_CASE("synthetic Strategy B registration preserves inner-feasible candidate without optimal-family promotion") {
