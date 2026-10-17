@@ -132,9 +132,25 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
     const auto vr=vertices.representation(); REQUIRE(std::holds_alternative<sets::VRepresentation>(vr));
     const auto& v=std::get<sets::VRepresentation>(vr);
     CHECK(v.vertices.rows()==3); CHECK(v.rays.rows()==0);
+    CHECK(vertices.metadata()->set.dimension==2);
+    const std::array<std::array<double,2>,3> expected_vertices{{{0,0},{1,0},{0,1}}};
+    for (const auto& expected : expected_vertices) {
+        bool found=false;
+        for (std::size_t row=0;row<v.vertices.rows();++row)
+            found=found || (v.vertices(row,0)==expected[0]
+                && v.vertices(row,1)==expected[1]);
+        CHECK(found);
+    }
     double support= -std::numeric_limits<double>::infinity();
     for (std::size_t i=0;i<v.vertices.rows();++i) support=std::max(support,v.vertices(i,0)+2*v.vertices(i,1));
     CHECK(support==doctest::Approx(2));
+    const auto support_x=std::max({v.vertices(0,0),v.vertices(1,0),v.vertices(2,0)});
+    const auto support_y=std::max({v.vertices(0,1),v.vertices(1,1),v.vertices(2,1)});
+    const auto support_negative_x=std::max({-v.vertices(0,0),-v.vertices(1,0),-v.vertices(2,0)});
+    CHECK(support_x==1.0);
+    CHECK(support_y==1.0);
+    CHECK(support_negative_x==0.0);
+    // Three non-collinear literal vertices establish affine dimension two.
     auto to_h=convert(std::get<OperationResult>(to_v).output,"csl.polyhedron.h","simplex-v-to-h");
     REQUIRE(std::holds_alternative<OperationResult>(to_h));
     auto h=take(sets::from_handle(std::get<OperationResult>(to_h).output));
@@ -157,6 +173,10 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     auto data=take(sets::from_handle(std::get<OperationResult>(segment_h).output));
     const auto rep=data.representation(); REQUIRE(std::holds_alternative<sets::HRepresentation>(rep));
     const auto& h=std::get<sets::HRepresentation>(rep);
+    REQUIRE(h.equalities.rows()==1);
+    CHECK(h.equalities(0,0)==0.0);
+    CHECK(h.equalities(0,1)==1.0);
+    CHECK(h.equality_values[0]==0.0);
     const std::array<double,2> left{-1,0},right{2,0},middle{0,0},off{0,1};
     CHECK(satisfies(h,left)); CHECK(satisfies(h,right)); CHECK(satisfies(h,middle)); CHECK_FALSE(satisfies(h,off));
     const std::array<double,2> beyond_left{-1.01,0},beyond_right{2.01,0};
@@ -165,22 +185,31 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
     REQUIRE(std::holds_alternative<OperationResult>(segment_v));
     auto segment_data=take(sets::from_handle(std::get<OperationResult>(segment_v).output));
     const auto segment_rep=segment_data.representation(); REQUIRE(std::holds_alternative<sets::VRepresentation>(segment_rep));
-    const auto& segment_points=std::get<sets::VRepresentation>(segment_rep).vertices;
+    const auto& segment_v_rep=std::get<sets::VRepresentation>(segment_rep);
+    CHECK(segment_data.metadata()->set.dimension==2);
+    CHECK(segment_v_rep.rays.rows()==0);
+    const auto& segment_points=segment_v_rep.vertices;
     REQUIRE(segment_points.rows()==2);
     double support_x=-std::numeric_limits<double>::infinity();
     double support_negative_x=-std::numeric_limits<double>::infinity();
+    double support_y=-std::numeric_limits<double>::infinity();
+    double support_negative_y=-std::numeric_limits<double>::infinity();
     bool found_left=false,found_right=false;
     for (std::size_t i=0;i<segment_points.rows();++i) {
         const std::array<double,2> point{segment_points(i,0),segment_points(i,1)};
         CHECK(satisfies(h,point));
         support_x=std::max(support_x,point[0]);
         support_negative_x=std::max(support_negative_x,-point[0]);
-        found_left=found_left||std::abs(point[0]+1)<1e-7;
-        found_right=found_right||std::abs(point[0]-2)<1e-7;
+        support_y=std::max(support_y,point[1]);
+        support_negative_y=std::max(support_negative_y,-point[1]);
+        found_left=found_left||point[0]==-1.0;
+        found_right=found_right||point[0]==2.0;
     }
     CHECK(found_left); CHECK(found_right);
     CHECK(support_x==doctest::Approx(2));
     CHECK(support_negative_x==doctest::Approx(1));
+    CHECK(support_y==0.0);
+    CHECK(support_negative_y==0.0);
     auto equality_h=make_h_handle("segment-explicit-equality",2,Matrix{2,2,{1,0,-1,0}},Vector{2,1},Matrix{1,2,{0,1}},Vector{0});
     auto equality_v=convert(equality_h,"csl.polyhedron.v","segment-equality-to-v");
     REQUIRE(std::holds_alternative<OperationResult>(equality_v));
