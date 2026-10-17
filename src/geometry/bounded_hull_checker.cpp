@@ -123,6 +123,13 @@ HullCheckRecord check_source_index_hull(std::span<const Vector> input,
         record.elapsed = Clock::now() - start;
         return record;
     };
+    const auto check_budget = [&]() -> bool {
+        if (budget_expired(start, budget.wall)) {
+            record.reason = "checker timeout";
+            return true;
+        }
+        return false;
+    };
     try {
         if (budget.wall <= std::chrono::milliseconds::zero()) {
             record.reason = "checker timeout"; return finish();
@@ -136,13 +143,13 @@ HullCheckRecord check_source_index_hull(std::span<const Vector> input,
                 record.reason = "nonfinite input; exact evidence unavailable"; return finish();
             }
         }
-        if (budget_expired(start, budget.wall)) { record.reason = "checker timeout"; return finish(); }
+        if (check_budget()) return finish();
         const auto digest = digest_hull_input(input);
         if (const auto* failure = std::get_if<std::string>(&digest)) {
             record.reason = *failure; return finish();
         }
         record.input_digest = std::get<HullInputDigest>(digest);
-        if (budget_expired(start, budget.wall)) { record.reason = "checker timeout"; return finish(); }
+        if (check_budget()) return finish();
         if (std::get<HullInputDigest>(digest) != output.input_digest) {
             record.status = HullCheckStatus::incorrect;
             record.reason = "output input digest does not match the exact ordered input manifest";
@@ -150,7 +157,7 @@ HullCheckRecord check_source_index_hull(std::span<const Vector> input,
         }
         std::vector<bool> seen(input.size());
         for (const auto index : output.indices) {
-            if (budget_expired(start, budget.wall)) { record.reason = "checker timeout"; return finish(); }
+            if (check_budget()) return finish();
             if (index >= input.size() || seen[index]) {
                 record.status = HullCheckStatus::incorrect;
                 record.reason = index >= input.size() ? "source index out of range" : "duplicate source index";
@@ -173,7 +180,7 @@ HullCheckRecord check_source_index_hull(std::span<const Vector> input,
                 return finish();
             }
         }
-        if (budget_expired(start, budget.wall)) { record.reason = "checker timeout"; return finish(); }
+        if (check_budget()) return finish();
         record.status = HullCheckStatus::verified;
         record.reason = "every source point is in the exact convex hull of reported source points";
         return finish();
@@ -212,9 +219,9 @@ HullSmokeRecord run_bounded_square_smoke(HullCheckBudget budget) {
     const auto digest = digest_hull_input(square);
     if (const auto* failure = std::get_if<std::string>(&digest))
         return record_bounded_hull_attempt(square, *failure, "modern QuickHull2D", budget);
+    const auto& hull = std::get<QuickHull2D>(output);
     return record_bounded_hull_attempt(square,
-        SourceIndexHull{std::get<HullInputDigest>(digest),
-            std::get<QuickHull2D>(output).vertex_indices}, "modern QuickHull2D", budget);
+        SourceIndexHull{std::get<HullInputDigest>(digest), hull.vertex_indices}, "modern QuickHull2D", budget);
 }
 
 } // namespace csl::geometry
