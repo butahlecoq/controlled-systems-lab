@@ -328,9 +328,10 @@ TEST_CASE("infinite witness values and numerical tolerances are invalid inputs")
         return diagnostic.field=="witness.original_objective"&&diagnostic.code==DiagnosticCode::invalid_input;
     }));
 
-    q=request(p);ExecutionContext context;context.numerical={std::numeric_limits<double>::infinity(),0};
-    report=verify_trajectory(p,q,context);
+    q=request(p);q.verification=VerificationRequest{{std::numeric_limits<double>::infinity(),0},Assurance::numerical};
+    report=verify_trajectory(p,q);
     CHECK(report.feasibility==CheckStatus::invalid_input);
+    CHECK(report.verification==*q.verification);
     CHECK(std::any_of(report.diagnostics.begin(),report.diagnostics.end(),[](const auto& diagnostic) {
         return diagnostic.field=="numerical"&&diagnostic.code==DiagnosticCode::invalid_input;
     }));
