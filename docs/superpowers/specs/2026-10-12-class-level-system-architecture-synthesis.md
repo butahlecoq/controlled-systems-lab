@@ -56,7 +56,9 @@ Minkowski semantics review also remains open under #40. These are design and
 scientific review gates; the existing tests and small analytic profiles do not
 resolve them or authorize benchmark execution. Continue with the open #66/#67
 strategy work only within the already reviewed fail-closed contracts and
-admitted operation profiles, then use T-X01/T-X02 for equal-scope comparison
-and saved-attempt evidence. This checkpoint changes ticket sequencing only; it
-does not approve numerical thresholds, general geometry support, or benchmark
-readiness.
+admitted operation profiles. Once those prerequisites are met, advance #71
+witness extraction before T-X01/T-X02, which need comparable caller-selected
+witnesses as well as the complete family claims. Then use T-X01/T-X02 for
+equal-scope comparison and saved-attempt evidence. This checkpoint changes
+ticket sequencing only; it does not approve numerical thresholds, general
+geometry support, or benchmark readiness.
