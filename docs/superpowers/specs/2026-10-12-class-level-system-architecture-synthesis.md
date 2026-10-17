@@ -36,3 +36,27 @@ The review verdict was "provisional base, not yet ticket-ready." The revisions s
 The first-workflow gates are scientific numerical-coverage policy and review of the candidate exact-operation fixture and its capacity policy in the class-level architecture. The fixture proposal uses the existing T-S01 `[0,1]` family oracle, a separate stage-intersection regression, and TEST-08 rational geometry cases; its test dimensions/counts do not settle global hard caps or caller-budget policy. Historical B04 restoration is a separate archival task and does not block newly authored nominal-baseline experiments. The nominal solver profile is confirmed. Future feedback, uncertainty, hybrid/discrete, approximation, and validated profiles remain separate work.
 
 First implement the coordinated #155/#157 public contract and tests, then the private relation/publisher path against T-S01/02/03 and the admitted #53/#51 operations. T-V01/02, T-X01, and T-X02 connect that work to independent verification, two-strategy acceptance, and saved artifacts. No interface is declared implemented by this synthesis.
+
+## 2026-10-18 implementation checkpoint
+
+The sequence above records the state when this synthesis was drafted. The
+current GitHub issue state has moved: #43, #51, #53, #61, #155, and #157 are
+closed; #66 (Strategy A), #67 (Strategy B), and #71 (witness extraction) remain
+open, while #7 and #8 remain open architecture reviews. The current
+[class-level architecture status map](2026-10-12-class-level-system-architecture.md#ticket-alignment-and-review-gates)
+records the #155/#157 public contract and its exact-main CI evidence. The
+closed prerequisite issues and their delivered operation profiles are the
+starting point for the remaining strategy work; do not schedule #155/#157 or
+#53/#51 as unstarted tasks.
+
+The two first-workflow architecture gates stated above are still open: agree on
+the scientific numerical-coverage policy, and review the exact-operation test
+fixture together with capacity behavior. The floating-point affine-image and
+Minkowski semantics review also remains open under #40. These are design and
+scientific review gates; the existing tests and small analytic profiles do not
+resolve them or authorize benchmark execution. Continue with the open #66/#67
+strategy work only within the already reviewed fail-closed contracts and
+admitted operation profiles, then use T-X01/T-X02 for equal-scope comparison
+and saved-attempt evidence. This checkpoint changes ticket sequencing only; it
+does not approve numerical thresholds, general geometry support, or benchmark
+readiness.
