@@ -163,7 +163,24 @@ TEST_CASE("projection of the unit-square slice x+y=1 is the exact interval [0,1]
     CHECK_FALSE(contains(result.output,{1.25}));
     const auto representation=take(sets::from_handle(result.output)).representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
-    CHECK(std::get<sets::HRepresentation>(representation).equalities.rows()==0);
+    const auto& projected=std::get<sets::HRepresentation>(representation);
+    CHECK(projected.equalities.rows()==0);
+    REQUIRE(projected.inequalities.rows()>=2);
+    bool has_lower=false;
+    bool has_upper=false;
+    for (std::size_t row=0;row<projected.inequalities.rows();++row) {
+        const auto coefficient=projected.inequalities(row,0);
+        const auto bound=projected.upper_bounds[row];
+        // Duplicate rows are allowed; every row must be one of the exact
+        // endpoint inequalities defining [0,1].
+        const bool lower=coefficient==-1.0 && bound==0.0;
+        const bool upper=coefficient==1.0 && bound==1.0;
+        CHECK(lower || upper);
+        has_lower=has_lower || lower;
+        has_upper=has_upper || upper;
+    }
+    CHECK(has_lower);
+    CHECK(has_upper);
 }
 
 TEST_CASE("V projection preserves rays including directions annihilated by selection") {

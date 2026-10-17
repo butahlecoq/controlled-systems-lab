@@ -141,28 +141,23 @@ TEST_CASE("unit square intersected with x+y<=1 matches the independent rational 
     const auto rep=result.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(rep));
     const auto& h=std::get<sets::HRepresentation>(rep);
+    const auto inside=[&](const std::array<double,2>& point) {
+        for (std::size_t row=0;row<h.inequalities.rows();++row)
+            if (h.inequalities(row,0)*point[0]+h.inequalities(row,1)*point[1]
+                >h.upper_bounds[row]) return false;
+        for (std::size_t row=0;row<h.equalities.rows();++row)
+            if (h.equalities(row,0)*point[0]+h.equalities(row,1)*point[1]
+                !=h.equality_values[row]) return false;
+        return true;
+    };
     // Independently enumerated vertices are (0,0), (1,0), and (0,1).
     // Check interior, edges, and excluded points against the returned rows.
     for (const auto point : {std::array<double,2>{0,0}, {1,0}, {0,1},
              {0.25,0.25}, {0.5,0.5}, {0.25,0.75}}) {
-        bool accepted=true;
-        for (std::size_t row=0;row<h.inequalities.rows();++row)
-            accepted=accepted && h.inequalities(row,0)*point[0]
-                +h.inequalities(row,1)*point[1]<=h.upper_bounds[row];
-        for (std::size_t row=0;row<h.equalities.rows();++row)
-            accepted=accepted && h.equalities(row,0)*point[0]
-                +h.equalities(row,1)*point[1]==h.equality_values[row];
-        CHECK(accepted);
+        CHECK(inside(point));
     }
     for (const auto point : {std::array<double,2>{0.75,0.75}, {1,1}, {-0.25,0.25}}) {
-        bool accepted=true;
-        for (std::size_t row=0;row<h.inequalities.rows();++row)
-            accepted=accepted && h.inequalities(row,0)*point[0]
-                +h.inequalities(row,1)*point[1]<=h.upper_bounds[row];
-        for (std::size_t row=0;row<h.equalities.rows();++row)
-            accepted=accepted && h.equalities(row,0)*point[0]
-                +h.equalities(row,1)*point[1]==h.equality_values[row];
-        CHECK_FALSE(accepted);
+        CHECK_FALSE(inside(point));
     }
 }
 

@@ -6,6 +6,7 @@
 #include <csl/optimization/phase_one.hpp>
 #include <csl/sets/data.hpp>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <iostream>
@@ -210,6 +211,20 @@ TEST_CASE("affine reflection and translation of the unit box match rational supp
     const auto req=request(AffineImage{box,{2,2,{-1,0,0,1}},{2,-1}},
         "reflected-translated-unit-box");
     const auto result=take(run(req,dependencies()));
+    const auto data=take(sets::from_handle(result.output));
+    const auto representation=data.representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
+    const auto& image=std::get<sets::VRepresentation>(representation);
+    REQUIRE(image.vertices.rows()==4);
+    const std::array<std::array<double,2>,4> expected{{
+        {1,-1}, {1,0}, {2,-1}, {2,0}}};
+    for (const auto& point : expected) {
+        bool found=false;
+        for (std::size_t row=0;row<image.vertices.rows();++row)
+            found=found || (image.vertices(row,0)==point[0]
+                && image.vertices(row,1)==point[1]);
+        CHECK(found);
+    }
     CHECK(support(result.output,{1,0})==2);
     CHECK(support(result.output,{-1,0})==-1);
     CHECK(support(result.output,{0,1})==0);
