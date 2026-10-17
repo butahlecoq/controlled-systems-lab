@@ -185,8 +185,8 @@ TEST_CASE("grouped reducer clusters nearby points and certifies the same hull fo
         REQUIRE(grouped.grouped.has_value());
         CHECK_FALSE(grouped.ordered.has_value());
         CHECK(grouped.grouped->processing_order.size() == cloud.points.size());
-        CHECK(grouped.grouped->groups > 0);
-        CHECK(grouped.grouped->grouped_candidates + grouped.grouped->groups == cloud.points.size());
+        CHECK(grouped.grouped->grouping_passes == 0);
+        CHECK(grouped.grouped->grouped_candidates == 0);
         CHECK(grouped.lp_calls == grouped.attempts.size());
         check_exact_removals(cloud, grouped);
         check_exact_removals(cloud, baseline);
@@ -206,11 +206,88 @@ TEST_CASE("grouped reducer registration and degenerate coordinates expose honest
     REQUIRE(result.grouped.has_value());
     CHECK(result.grouped->zero_width_coordinates == 1);
     CHECK(result.grouped->ordered_candidates == 4);
-    CHECK(result.grouped->groups == 3);
-    CHECK(result.grouped->grouped_candidates == 1);
+    CHECK_FALSE(result.grouped->grouping_triggered);
+    CHECK(result.grouped->grouped_candidates == 0);
     CHECK(support(cloud, result, {1.0, 0.0}) == 1.0);
     CHECK(support(cloud, result, {-1.0, 0.0}) == 1.0);
     check_exact_removals(cloud, result);
+}
+
+TEST_CASE("grouped reducer streams ten certified redundancies then checks the grouped remainder") {
+    std::vector<Vector> corners{{0.0, 0.0}, {2.0, 0.0}, {2.0, 2.0}, {0.0, 2.0}};
+    std::vector<std::size_t> permutation(corners.size());
+    std::iota(permutation.begin(), permutation.end(), 0);
+    do {
+        geometry::PointCloud cloud{{"grouped-stream"}, {}};
+        for (const auto id : permutation) cloud.points.push_back(corners[id]);
+        for (int duplicate = 0; duplicate < 10; ++duplicate) cloud.points.push_back({1.0, 1.0});
+        auto lp = highs_workspace();
+        auto result = completed(geometry::reduce_grouped_hull(cloud, *lp, {}));
+        REQUIRE(result.grouped.has_value());
+        CHECK(result.grouped->grouping_triggered);
+        CHECK(result.grouped->grouping_passes == 1);
+        CHECK(result.grouped->streamed_candidates == 12);
+        CHECK(result.grouped->grouped_candidates == 1);
+        CHECK(result.grouped->certified_stream_removals == 10);
+        CHECK(result.lp_calls == result.attempts.size());
+        check_exact_removals(cloud, result);
+        CHECK(support(cloud, result, {1.0, 0.0}) == 2.0);
+        CHECK(support(cloud, result, {-1.0, 0.0}) == 0.0);
+        CHECK(support(cloud, result, {0.0, 1.0}) == 2.0);
+        CHECK(support(cloud, result, {0.0, -1.0}) == 0.0);
+    } while (std::next_permutation(permutation.begin(), permutation.end()));
+}
+
+TEST_CASE("grouped remainder adds a nearby outside point as certified support across tied-axis permutations") {
+    const std::vector<Vector> axis_extremes{{0.0, 0.5, 0.5}, {1.0, 0.5, 0.5},
+        {0.5, 0.0, 0.5}, {0.5, 1.0, 0.5}, {0.5, 0.5, 0.0}, {0.5, 0.5, 1.0}};
+    std::vector<std::size_t> permutation(axis_extremes.size());
+    std::iota(permutation.begin(), permutation.end(), 0);
+    do {
+        geometry::PointCloud cloud{{"grouped-nearby-support"}, {}};
+        for (const auto id : permutation) cloud.points.push_back(axis_extremes[id]);
+        for (int duplicate = 0; duplicate < 10; ++duplicate) cloud.points.push_back({0.9, 0.5, 0.5});
+        cloud.points.push_back({0.75, 0.75, 0.75});
+        cloud.points.push_back({0.7421875, 0.7421875, 0.7421875});
+
+        auto lp = highs_workspace();
+        auto result = completed(geometry::reduce_grouped_hull(cloud, *lp, {}));
+        REQUIRE(result.grouped.has_value());
+        CHECK(result.grouped->grouping_triggered);
+        CHECK(result.grouped->streamed_candidates == 14);
+        CHECK(result.grouped->grouped_candidates == 3);
+        CHECK(result.grouped->nearby_supports == 1);
+        CHECK(result.grouped->certified_stream_removals == 10);
+        CHECK(result.lp_calls == result.attempts.size());
+        check_exact_removals(cloud, result);
+        CHECK(support(cloud, result, {1.0, 0.0, 0.0}) == 1.0);
+        CHECK(support(cloud, result, {-1.0, 0.0, 0.0}) == 0.0);
+        CHECK(support(cloud, result, {0.0, 1.0, 0.0}) == 1.0);
+        CHECK(support(cloud, result, {0.0, 0.0, 1.0}) == 1.0);
+        CHECK(support(cloud, result, {1.0, 1.0, 1.0}) == 2.25);
+        CHECK(support(cloud, result, {-1.0, -1.0, -1.0}) == -1.0);
+    } while (std::next_permutation(permutation.begin(), permutation.end()));
+}
+
+TEST_CASE("grouped reducer preserves flat and duplicate hulls across every permutation") {
+    const std::vector<Vector> fixture{{-1.0, 3.0}, {0.0, 3.0}, {1.0, 3.0}, {0.0, 3.0}};
+    std::vector<std::size_t> permutation(fixture.size());
+    std::iota(permutation.begin(), permutation.end(), 0);
+    do {
+        geometry::PointCloud cloud{{"grouped-flat-permutation"}, {}};
+        for (auto id : permutation) cloud.points.push_back(fixture[id]);
+        auto grouped_lp = highs_workspace();
+        auto baseline_lp = highs_workspace();
+        auto grouped = completed(geometry::reduce_grouped_hull(cloud, *grouped_lp, {}));
+        auto baseline = completed(geometry::reduce_hull(cloud, *baseline_lp, {}));
+        REQUIRE(grouped.grouped.has_value());
+        CHECK(grouped.grouped->used_identity_fallback);
+        CHECK(grouped.grouped->zero_width_coordinates == 1);
+        check_exact_removals(cloud, grouped);
+        check_exact_removals(cloud, baseline);
+        CHECK(support(cloud, grouped, {1.0, 0.0}) == support(cloud, baseline, {1.0, 0.0}));
+        CHECK(support(cloud, grouped, {-1.0, 0.0}) == support(cloud, baseline, {-1.0, 0.0}));
+    } while (std::next_permutation(permutation.begin(), permutation.end()));
 }
 
 TEST_CASE("grouped ordering falls back to input order when box width overflows") {
@@ -222,7 +299,7 @@ TEST_CASE("grouped ordering falls back to input order when box width overflows")
     REQUIRE(reduction.grouped.has_value());
     CHECK(reduction.grouped->used_identity_fallback);
     CHECK(reduction.grouped->processing_order == std::vector<std::size_t>{0, 1, 2});
-    CHECK(reduction.grouped->groups == 3);
+    CHECK(reduction.grouped->grouping_passes == 0);
     CHECK(reduction.grouped->grouped_candidates == 0);
-    CHECK(reduction.attempts.front().candidate == 0);
+    CHECK(reduction.attempts.front().candidate == 2);
 }

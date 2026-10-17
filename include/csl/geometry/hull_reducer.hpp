@@ -53,11 +53,16 @@ struct OrderedReductionMetrics {
 };
 
 struct GroupedReductionMetrics {
-    // Original PointCloud IDs, grouped after deterministic outer-box ordering.
+    // Original PointCloud IDs after deterministic outer-box ordering.
     std::vector<std::size_t> processing_order;
     std::size_t ordered_candidates{};
-    std::size_t groups{};
+    std::size_t streamed_candidates{};
+    // Candidates retested in the grouped remainder, including the trigger point.
+    std::size_t grouping_passes{};
     std::size_t grouped_candidates{};
+    std::size_t nearby_supports{};
+    std::size_t certified_stream_removals{};
+    bool grouping_triggered{};
     std::size_t zero_width_coordinates{};
     bool used_identity_fallback{};
 };
@@ -116,8 +121,9 @@ HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
 HullReductionResult reduce_ordered_hull(const PointCloud&, LPWorkspace&,
                                         const ExecutionContext&);
 
-// Groups nearby candidates after the archived Constrained QLPHULL signed
-// max-absolute box ordering, then uses the shared certificate-checking LP pass.
+// Streams candidates in the archived Constrained QLPHULL signed max-absolute
+// box order; after ten certified redundant outcomes, filters the remainder
+// against a fixed retained group plus nearby candidates, then certifies its hull.
 HullReductionResult reduce_grouped_hull(const PointCloud&, LPWorkspace&,
                                         const ExecutionContext&);
 

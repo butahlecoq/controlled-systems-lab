@@ -28,9 +28,10 @@ Ship meaningful unit/contract tests with the implementation, using the named ind
 
 Use the plan ownership map to claim files before editing. Later-phase tickets do not expand the first-release scope. Do not alter source transcriptions or label a witness sample as a complete optimal family.
 
-Implementation note: the native grouped adapter uses the Constrained source's
-signed max-absolute score and a deterministic 5%-of-box-width neighborhood
-grouping pass. It sends every original point to the common LP reducer; only the
-shared exact dyadic removal verifier can authorize deletion. It does not claim
-to port the historical ten-redundant trigger or constrained `Modified_SM`
-tableau.
+Implementation note: the native grouped adapter follows the Constrained
+source's signed max-absolute score, ten-consecutive-redundancy streaming
+trigger, fixed support group and accumulated nearby outside candidates. It
+replaces the historical simplex helper tableaus with the shared LP membership
+query; only the exact dyadic removal verifier can authorize deletion. The
+implementation contract revision records this boundary and the supported
+fallbacks.
