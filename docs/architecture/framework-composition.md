@@ -168,7 +168,7 @@ inconclusive performance conclusion and no general strategy ranking.
 ### Resource scope of the initial paired application
 
 `run_comparison` in [`src/application/comparison.cpp`](../../src/application/comparison.cpp)
-creates the two admitted workspaces and executes them one at a time in its fixed
+creates the two prepared workspaces and executes them one at a time in its fixed
 strategy order. Selection and witness verification for each strategy also finish
 before the next strategy starts. This describes concurrency inside one call
 only; independent callers can still overlap. The paired application does not
