@@ -463,14 +463,22 @@ TEST_CASE("sampled relaxed and symbolic candidate metadata never establish famil
 
     q.family=publish(OuterCandidateEvidence{numerical});
     const auto relaxed_report=check_nonpromotion();
-    CHECK(std::holds_alternative<OuterCandidateEvidence>(
-        std::get<CandidateFamily>(relaxed_report.input.family->outcome()).relation_to_target));
+    const auto& relaxed_evidence=std::get<OuterCandidateEvidence>(
+        std::get<CandidateFamily>(relaxed_report.input.family->outcome()).relation_to_target).enclosure;
+    CHECK(relaxed_evidence.problem==numerical.problem);
+    REQUIRE(std::holds_alternative<NumericalCheck>(relaxed_evidence.support));
+    CHECK(std::get<NumericalCheck>(relaxed_evidence.support).absolute_tolerance==0);
+    CHECK(std::get<NumericalCheck>(relaxed_evidence.support).relative_tolerance==0);
+    CHECK(std::get<NumericalCheck>(relaxed_evidence.support).max_residual==0);
+    CHECK(std::get<NumericalCheck>(relaxed_evidence.support).verifier.value=="candidate backend");
 
     const ClaimEvidence symbolic{p.identity(),SymbolicArgument{"symbolic-relaxation","floating-point only"}};
     q.family=publish(OuterCandidateEvidence{symbolic});
     const auto symbolic_report=check_nonpromotion();
-    CHECK(std::holds_alternative<SymbolicArgument>(std::get<OuterCandidateEvidence>(
-        std::get<CandidateFamily>(symbolic_report.input.family->outcome()).relation_to_target).enclosure.support));
+    const auto& symbolic_evidence=std::get<SymbolicArgument>(std::get<OuterCandidateEvidence>(
+        std::get<CandidateFamily>(symbolic_report.input.family->outcome()).relation_to_target).enclosure.support);
+    CHECK(symbolic_evidence.reference=="symbolic-relaxation");
+    CHECK(symbolic_evidence.assumptions=="floating-point only");
 }
 TEST_CASE("validated verification cannot promote numerical candidate completeness claims") {
     const auto p=resolve(scalar());auto q=request(p);
@@ -647,6 +655,12 @@ TEST_CASE("malformed or ambiguous membership evidence cannot pass and stopped qu
     CHECK(retained_witness.witness.controls==q.witness.controls);
     CHECK(retained_witness.witness.original_objective==q.witness.original_objective);
     CHECK(retained_witness.support.problem==p.identity());
+    REQUIRE(std::holds_alternative<NumericalCheck>(retained_witness.support.support));
+    const auto& retained_check=std::get<NumericalCheck>(retained_witness.support.support);
+    CHECK(retained_check.absolute_tolerance==0);
+    CHECK(retained_check.relative_tolerance==0);
+    CHECK(retained_check.max_residual==0);
+    CHECK(retained_check.verifier.value=="retained candidate");
     CHECK(r.optimality==CheckStatus::unsupported);CHECK(r.completeness==CheckStatus::unsupported);
     CHECK(r.validated==CheckStatus::unsupported);
     REQUIRE(r.membership_queries.size()==1);
