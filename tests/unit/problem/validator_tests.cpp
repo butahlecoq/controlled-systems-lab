@@ -50,7 +50,11 @@ class FixedControl final : public LPWorkspace {
 };
 class BoundControl final : public LPWorkspace {
     ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext&) override {
-        const auto value=*p.variables().at(0).lower;
+        REQUIRE(p.variables().size()==1);
+        REQUIRE(p.variables()[0].lower.has_value());
+        REQUIRE(p.variables()[0].upper.has_value());
+        REQUIRE(*p.variables()[0].lower==*p.variables()[0].upper);
+        const auto value=*p.variables()[0].lower;
         return ProgramResult{Termination::completed,{p.identity(),MathematicalOutcome::optimal,Unestablished{},{}},Vector{value},{} ,"singleton bound provider"};
     }
 };
