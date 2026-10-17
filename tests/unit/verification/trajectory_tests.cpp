@@ -286,24 +286,29 @@ TEST_CASE("explicit numerical thresholds and finite arithmetic do not certify va
     q=request(p);q.witness.states[0][0]=std::numeric_limits<double>::quiet_NaN();CHECK(verify_trajectory(p,q).feasibility==CheckStatus::invalid_input);
 }
 TEST_CASE("relative tolerances use the reported objective scale at exact boundaries") {
-    auto p=resolve(scalar());auto q=request(p);ExecutionContext context;
-    context.numerical={0.5,0.125};q.witness.original_objective=4;
-    auto report=verify_trajectory(p,q,context);
+    auto p=resolve(scalar());auto q=request(p);
+    q.verification=VerificationRequest{{0.5,0.125},Assurance::numerical};
+    q.witness.original_objective=4;
+    auto report=verify_trajectory(p,q);
     CHECK(report.objective==CheckStatus::numerical_pass);
+    CHECK(report.verification==*q.verification);
+    CHECK(report.numerical==q.verification->numerical);
     CHECK(residual(report,"objective").measure.scale==4);
     CHECK(residual(report,"objective").measure.violation==1);
     CHECK(residual(report,"objective").tolerance==1);
 
-    context.numerical={0.5,0.0625};report=verify_trajectory(p,q,context);
+    q.verification=VerificationRequest{{0.5,0.0625},Assurance::numerical};report=verify_trajectory(p,q);
     CHECK(report.objective==CheckStatus::violation);
     CHECK(residual(report,"objective").tolerance==0.75);
 
-    q.witness.original_objective=8;context.numerical={0.5,0.5625};report=verify_trajectory(p,q,context);
+    q.witness.original_objective=8;
+    q.verification=VerificationRequest{{0.5,0.5625},Assurance::numerical};report=verify_trajectory(p,q);
     CHECK(report.objective==CheckStatus::numerical_pass);
+    CHECK(report.verification==*q.verification);
     CHECK(residual(report,"objective").measure.scale==8);
     CHECK(residual(report,"objective").measure.violation==5);
     CHECK(residual(report,"objective").tolerance==5);
-    context.numerical={0.5,0.5};report=verify_trajectory(p,q,context);
+    q.verification=VerificationRequest{{0.5,0.5},Assurance::numerical};report=verify_trajectory(p,q);
     CHECK(report.objective==CheckStatus::violation);
     CHECK(residual(report,"objective").tolerance==4.5);
 }
