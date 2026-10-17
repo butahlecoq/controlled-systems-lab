@@ -56,7 +56,7 @@ The [Works source follow-up](works-followup.md) and [supplemental W01–W14 regi
 
 [B04 numerical tables](b04-tables.md) transcribe the owner-identified table document and record the provisional [-1,1] control-interval recollection.
 
-[B04 saved witnesses and replay](b04-saved-witnesses.md) curates three independently checked nominal/nonlinear pairs as a distinct evidence variant, with [machine-readable facts](evidence/b04-saved-witnesses.json) and an explicit-private-source reference checker. It preserves the frozen objective mismatch, historical 99.99-second endpoint and missing canonical T16 configuration. The historical scenario remains non-executable.
+[B04 saved witnesses and replay](b04-saved-witnesses.md) curates three independently checked nominal/nonlinear pairs as a distinct evidence variant, with [machine-readable facts](evidence/b04-saved-witnesses.json) and an explicit-private-source reference checker. A [focused FIG/MAT workspace inspection](b04-saved-witnesses.md#focused-fig-workspace-inspection-2026-10-17) narrows the search for missing U rows without recovering the canonical T16 configuration. The report preserves the frozen objective mismatch and historical 99.99-second endpoint. The historical scenario remains non-executable.
 
 [Publication-to-source version matrix](publication-source-matrix.md) compares hash-identified B04, B08 and B09 publications with nearby archived scripts, notebooks and saved runs. It records field-level matches, incompatible versions and missing canonical inputs for issues #1 and #2.
 
