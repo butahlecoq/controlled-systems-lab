@@ -74,7 +74,7 @@ bool satisfies(const sets::HRepresentation& h,std::span<const double> x,double t
     }
     return true;
 }
-bool near(double actual,double expected,double tolerance=conversion_tolerance) {
+bool within_tolerance(double actual,double expected,double tolerance=conversion_tolerance) {
     return std::abs(actual-expected)<=tolerance;
 }
 class WrongSizeLpWorkspace final : public LPWorkspace {
@@ -141,8 +141,8 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
     for (const auto& expected : expected_vertices) {
         bool found=false;
         for (std::size_t row=0;row<v.vertices.rows();++row)
-            found=found || (near(v.vertices(row,0),expected[0])
-                && near(v.vertices(row,1),expected[1]));
+            found=found || (within_tolerance(v.vertices(row,0),expected[0])
+                && within_tolerance(v.vertices(row,1),expected[1]));
         CHECK(found);
     }
     double support= -std::numeric_limits<double>::infinity();
@@ -151,9 +151,9 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
     const auto support_x=std::max({v.vertices(0,0),v.vertices(1,0),v.vertices(2,0)});
     const auto support_y=std::max({v.vertices(0,1),v.vertices(1,1),v.vertices(2,1)});
     const auto support_negative_x=std::max({-v.vertices(0,0),-v.vertices(1,0),-v.vertices(2,0)});
-    CHECK(near(support_x,1.0));
-    CHECK(near(support_y,1.0));
-    CHECK(near(support_negative_x,0.0));
+    CHECK(within_tolerance(support_x,1.0));
+    CHECK(within_tolerance(support_y,1.0));
+    CHECK(within_tolerance(support_negative_x,0.0));
     // Three non-collinear literal vertices establish affine dimension two.
     auto to_h=convert(std::get<OperationResult>(to_v).output,"csl.polyhedron.h","simplex-v-to-h");
     REQUIRE(std::holds_alternative<OperationResult>(to_h));
@@ -174,9 +174,9 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
                 ? triangle_h.inequalities(row,0)/expected[0]
                 : triangle_h.inequalities(row,1)/expected[1];
             if (scale>0.0
-                && near(triangle_h.inequalities(row,0),scale*expected[0])
-                && near(triangle_h.inequalities(row,1),scale*expected[1])
-                && near(triangle_h.upper_bounds[row],scale*expected[2])) {
+                && within_tolerance(triangle_h.inequalities(row,0),scale*expected[0])
+                && within_tolerance(triangle_h.inequalities(row,1),scale*expected[1])
+                && within_tolerance(triangle_h.upper_bounds[row],scale*expected[2])) {
                 matched=true;
                 found_facet[facet]=true;
             }
@@ -206,7 +206,7 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
     for (const auto& expected : expected_vertices) {
         bool found=false;
         for (const auto& point : roundtrip_vertices)
-            found=found || (near(point[0],expected[0]) && near(point[1],expected[1]));
+            found=found || (within_tolerance(point[0],expected[0]) && within_tolerance(point[1],expected[1]));
         CHECK(found);
     }
     const auto roundtrip_support=[&](std::array<double,2> direction) {
@@ -215,11 +215,11 @@ TEST_CASE("simplex H/V conversions preserve literal membership, support, and emp
             value=std::max(value,direction[0]*point[0]+direction[1]*point[1]);
         return value;
     };
-    CHECK(near(roundtrip_support({1,0}),1.0));
-    CHECK(near(roundtrip_support({0,1}),1.0));
-    CHECK(near(roundtrip_support({-1,0}),0.0));
-    CHECK(near(roundtrip_support({0,-1}),0.0));
-    CHECK(near(roundtrip_support({1,1}),1.0));
+    CHECK(within_tolerance(roundtrip_support({1,0}),1.0));
+    CHECK(within_tolerance(roundtrip_support({0,1}),1.0));
+    CHECK(within_tolerance(roundtrip_support({-1,0}),0.0));
+    CHECK(within_tolerance(roundtrip_support({0,-1}),0.0));
+    CHECK(within_tolerance(roundtrip_support({1,1}),1.0));
     const auto empty=make_h_handle("contradiction",1,Matrix{2,1,{1,-1}},Vector{0,-1});
     auto empty_v=convert(empty,"csl.polyhedron.v","empty-h-to-v");
     REQUIRE(std::holds_alternative<OperationResult>(empty_v));
@@ -265,14 +265,14 @@ TEST_CASE("embedded segments, singleton and explicit equality rows retain their 
         support_negative_x=std::max(support_negative_x,-point[0]);
         support_y=std::max(support_y,point[1]);
         support_negative_y=std::max(support_negative_y,-point[1]);
-        found_left=found_left||near(point[0],-1.0);
-        found_right=found_right||near(point[0],2.0);
+        found_left=found_left||within_tolerance(point[0],-1.0);
+        found_right=found_right||within_tolerance(point[0],2.0);
     }
     CHECK(found_left); CHECK(found_right);
     CHECK(support_x==doctest::Approx(2));
     CHECK(support_negative_x==doctest::Approx(1));
-    CHECK(near(support_y,0.0));
-    CHECK(near(support_negative_y,0.0));
+    CHECK(within_tolerance(support_y,0.0));
+    CHECK(within_tolerance(support_negative_y,0.0));
     auto equality_h=make_h_handle("segment-explicit-equality",2,Matrix{2,2,{1,0,-1,0}},Vector{2,1},Matrix{1,2,{0,1}},Vector{0});
     auto equality_v=convert(equality_h,"csl.polyhedron.v","segment-equality-to-v");
     REQUIRE(std::holds_alternative<OperationResult>(equality_v));
