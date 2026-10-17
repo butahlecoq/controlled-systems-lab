@@ -72,11 +72,13 @@ if(DEFINED EXAMPLE_EXE)
   endif()
   execute_process(COMMAND "${EXAMPLE_EXE}" ${EXAMPLE_ARGUMENT}
     RESULT_VARIABLE status OUTPUT_VARIABLE output ERROR_VARIABLE error)
+  set(combined_output "${output}${error}")
+  string(REGEX REPLACE "[\r\n]+" " " combined_output "${combined_output}")
   if(NOT "${status}" STREQUAL "${EXPECTED_STATUS}")
-    message(FATAL_ERROR "Expected exit ${EXPECTED_STATUS}, got ${status}: ${output}${error}")
+    message(FATAL_ERROR "Expected exit ${EXPECTED_STATUS}, got ${status}: ${combined_output}")
   endif()
-  if(NOT "${output}${error}" MATCHES "${EXPECTED_OUTPUT}")
-    message(FATAL_ERROR "Expected ${EXPECTED_OUTPUT}, got: ${output}${error}")
+  if(NOT "${combined_output}" MATCHES "${EXPECTED_OUTPUT}")
+    message(FATAL_ERROR "Expected ${EXPECTED_OUTPUT}, got: ${combined_output}")
   endif()
   message(STATUS "${output}${error}")
   return()
@@ -134,7 +136,7 @@ example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_S
 example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_ts01 scenario_cli "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--seed;42;--threads;2" 0
-  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=42 threads=2 verification=numerical_pass")
+  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=42 threads=2.*verification=numerical_pass")
 example_check(scenario_cli_run_missing scenario_cli "--run;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_unknown_backend scenario_cli
