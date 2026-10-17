@@ -20,8 +20,9 @@ Evidence is bound to the complete request identity, ordered input ID, and
 binary64 data. `Assurance::validated` is unsupported; no claim is made about
 authored real values or a real-valued model.
 
-The provider checks cancellation and deadlines before admission, before each
-ray and vertex dot product, and immediately before publishing a successful
-result. A dot product is one native operation and is not interrupted midway;
-its latency is bounded by the input dimension and fixed-width exact dyadic
-arithmetic.
+The workspace checks cancellation and deadlines at the start of execution,
+before each ray and vertex dot product, and immediately before publishing a
+successful result. Provider admission and workspace creation do not receive
+the execution context and are not skipped for a stopped request. A dot product
+is one native operation and is not interrupted midway; its latency is bounded
+by the input dimension and fixed-width exact dyadic arithmetic.
