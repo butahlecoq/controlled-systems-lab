@@ -592,7 +592,7 @@ ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics& own
     catch(const Json::exception&) { return ArtifactError{ArtifactErrorCode::invalid_input,"recorded.json","Invalid portable recorded data"}; }
     catch(const std::bad_alloc&) { return ArtifactError{ArtifactErrorCode::allocation,{},{}}; }
 }
-ArtifactResult<RecordedRunArtifact> decode_recorded_run_impl(std::string_view text,DecodeLimits limits,
+static ArtifactResult<RecordedRunArtifact> decode_recorded_run_impl(std::string_view text,DecodeLimits limits,
     const problem::ProblemId* expected_problem) {
     try {
         auto wire=parse_document(text,limits);
