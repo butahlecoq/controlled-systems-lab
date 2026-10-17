@@ -382,10 +382,32 @@ TEST_CASE("rectangular and singular affine maps retain their actual ambient spac
     CHECK(support(result.output,{1,2})==doctest::Approx(7));
     CHECK(support(result.output,{1,0})==doctest::Approx(5));
     const auto square=vertices("square",2,{0,0,1,0,1,1,0,1},4);
-    auto singular=request(AffineImage{square,{2,2,{1,1,0,0}},{-1,4}});
+    // The rational map (x,y) -> (x,0) sends the unit square to the
+    // one-dimensional segment [(0,0),(1,0)] in a two-dimensional ambient space.
+    auto singular=request(AffineImage{square,{2,2,{1,0,0,0}},{0,0}});
     result=take(run(singular,dependencies()));
-    CHECK(support(result.output,{1,3})==doctest::Approx(13));
-    CHECK(support(result.output,{-1,-3})==doctest::Approx(-11));
+    CHECK(result.output.metadata.dimension==2);
+    CHECK(support(result.output,{1,0})==1.0);
+    CHECK(support(result.output,{-1,0})==0.0);
+    CHECK(support(result.output,{0,1})==0.0);
+    CHECK(support(result.output,{0,-1})==0.0);
+    const auto singular_rep=take(sets::from_handle(result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(singular_rep));
+    const auto& segment=std::get<sets::VRepresentation>(singular_rep);
+    REQUIRE(segment.vertices.rows()>=2);
+    bool has_left=false;
+    bool has_right=false;
+    for(std::size_t row=0;row<segment.vertices.rows();++row) {
+        const double x=segment.vertices(row,0);
+        const double y=segment.vertices(row,1);
+        CHECK(y==0.0);
+        CHECK(x>=0.0);
+        CHECK(x<=1.0);
+        has_left=has_left || (x==0.0 && y==0.0);
+        has_right=has_right || (x==1.0 && y==0.0);
+    }
+    CHECK(has_left);
+    CHECK(has_right);
     auto zero=request(AffineImage{square,{1,2,{0,0}},{7}});
     result=take(run(zero,dependencies()));
     CHECK(support(result.output,{1})==doctest::Approx(7));
