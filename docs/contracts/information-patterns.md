@@ -28,8 +28,11 @@ truth from them.
 The replay API accepts a single concrete initial vector. It cannot be passed
 an `InitialSet` or a `Problem` and never returns a plan for a set. Existing
 nominal synthesis strategies still reject unsupported initial uncertainty and
-feedback requests. General initial-set synthesis, correlated initial/external
-information, and policy-family evidence remain future work under #68.
+feedback requests. The finite replay module below provides auditable
+policy-family evidence for an explicit scenario list. General initial-set
+synthesis, continuous-set policy-family evidence, and correlated
+initial/external information beyond the supplied scenario rows remain open
+under #68.
 
 ## Event and callback contract
 
@@ -47,11 +50,15 @@ The estimator's vector is a *hypothesis*, not a verified reconstruction.
 `ReleasedObservation` contains measured values, channel/sample identity and
 the model's metadata, not the hidden physical state. The callback signatures
 receive only released history and the estimate. As ordinary in-process C++
-callbacks, they can close over other caller data; the API does not enforce
-nonanticipativity against arbitrary captures. The intended policy contract is
-that callbacks depend only on the supplied data and their explicitly managed
-state. A later policy representation must make that restriction auditable for
-universal claims.
+callbacks, they can close over other caller data; the sampled callback API does
+not enforce nonanticipativity against arbitrary captures.
+`FiniteObservationPolicy` provides a separate table representation: each
+action is keyed by its stage and complete released observation history, and
+construction rejects conflicting actions for the same key. The finite family
+evaluator applies that table to each supplied scenario and returns its inputs,
+trajectory, released observations, and per-step actions. Histories that are
+equal under channel/sample identity, release event, and measured values
+necessarily use the same table entry.
 
 `ReplayInputs` owns one concrete initial state, one external vector per
 transition, and measurement-error vectors indexed by channel and authored
@@ -63,6 +70,21 @@ It is evidence for this one evaluated trajectory under
 these exact inputs, not feasibility against problem constraints, state
 reconstruction accuracy, optimality, family completeness, validated arithmetic,
 or every disturbance/observation error.
+
+## Finite policy-family scope
+
+`FinitePolicyFamilyRequest` requires an explicit existential or universal
+initial quantifier and a nonempty finite list of `ReplayInputs`. Each row keeps
+its initial state, external sequence, and measurement errors together, so the
+enumeration can preserve authored correlation among those values. The
+quantifier is recorded as requested; universal scope is exactly the listed
+rows. The type does not accept a continuous `InitialSet`, does not establish
+that the rows cover one, and does not quantify over unlisted external inputs or
+measurement errors. The evaluator checks that the table supplies every action
+needed by every row and that every table rule is exercised. Its returned
+evidence establishes nonanticipativity and model replay only on that finite
+enumeration; it does not establish constraint feasibility, optimality, or a
+continuous all-initial-states/all-disturbances guarantee.
 
 ## Supported variants and checks
 
@@ -83,5 +105,7 @@ verified against the reviewed artifact hashes (page SHA-256
 `ab8f2e3b5039d3c52e73e8d7f6b052c891cf099a45845257f23e2258c0dd22e1`). The
 report covers the configured sampled replay only and does not establish an
 all-initial-states policy, universal disturbance coverage, or validated
-guarantees. General initial-set synthesis, correlated initial/external
-information, and auditable policy-family evidence remain open work under #68.
+guarantees. This report does not measure or validate the finite policy-family
+evaluator. General initial-set synthesis, continuous-set policy-family
+evidence, and correlated initial/external information beyond the supplied
+scenario rows remain open work under #68.
