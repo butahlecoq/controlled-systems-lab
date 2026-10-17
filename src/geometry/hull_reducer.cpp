@@ -320,6 +320,28 @@ HullReductionResult detail::reduce_hull_in_order(const PointCloud& cloud, LPWork
     return detail::reduce_hull_in_order(cloud, lp, context, order, {});
 }
 
+HullReductionResult detail::finish_grouped_hull(const PointCloud& cloud, LPWorkspace& lp,
+        const ExecutionContext& context, const std::vector<std::size_t>& retained,
+        std::vector<RemovalCertificate> prior_certificates,
+        std::vector<MembershipAttempt> attempts, std::size_t lp_calls,
+        bool staged_incomplete, bool stop_after_staging) {
+    HullReduction output{staged_incomplete ? ReductionStatus::incomplete : ReductionStatus::complete,
+        retained, std::move(prior_certificates), lp_calls, std::move(attempts)};
+    if (!stop_after_staging) {
+        auto result = detail::reduce_hull_in_order(cloud, lp, context, retained,
+            std::move(output.removed));
+        if (auto* reduction = std::get_if<HullReduction>(&result)) {
+            reduction->lp_calls += output.lp_calls;
+            reduction->attempts.insert(reduction->attempts.begin(), output.attempts.begin(), output.attempts.end());
+            if (staged_incomplete) reduction->status = ReductionStatus::incomplete;
+            return result;
+        }
+        return result;
+    }
+    restore_certificates_outside_policy(cloud, output, context.numerical);
+    return output;
+}
+
 HullReductionResult reduce_hull(const PointCloud& cloud, LPWorkspace& lp,
         const ExecutionContext& context) {
     std::vector<std::size_t> order(cloud.points.size());

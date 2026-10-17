@@ -32,6 +32,16 @@ protected:
     }
 };
 
+class UnsupportedWorkspace final : public LPWorkspace {
+public:
+    std::size_t calls{};
+protected:
+    ProgramOutcome do_solve(const LinearProgram&, const ExecutionContext&) override {
+        ++calls;
+        return Unsupported{Diagnostics{}};
+    }
+};
+
 geometry::HullReduction completed(const geometry::HullReductionResult& result) {
     REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
     const auto& reduction = std::get<geometry::HullReduction>(result);
@@ -79,6 +89,20 @@ TEST_CASE("ordered adapter uses the active Scientific Research score, retaining 
     CHECK(reduction.lp_calls == 1);
     REQUIRE(reduction.attempts.size() == 1);
     CHECK(reduction.attempts.front().candidate == 0);
+}
+
+TEST_CASE("grouped reducer stops after unsupported staging and preserves incomplete status") {
+    geometry::PointCloud cloud{{"unsupported-grouped"}, {{0.0, 0.0}, {1.0, 0.0}, {0.5, 0.5}}};
+    UnsupportedWorkspace lp;
+    const auto result = geometry::reduce_grouped_hull(cloud, lp, {});
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+    const auto& reduction = std::get<geometry::HullReduction>(result);
+    CHECK(reduction.status == geometry::ReductionStatus::incomplete);
+    CHECK(lp.calls == 1);
+    CHECK(reduction.lp_calls == 1);
+    CHECK(reduction.retained.size() == cloud.points.size());
+    REQUIRE(reduction.attempts.size() == 1);
+    CHECK(reduction.attempts.front().outcome == geometry::MembershipOutcome::unsupported);
 }
 
 TEST_CASE("ordered and baseline reducers preserve literal support through permutations and degeneracies") {

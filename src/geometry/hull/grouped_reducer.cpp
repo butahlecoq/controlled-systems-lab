@@ -110,6 +110,8 @@ HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp
     std::vector<RemovalCertificate> prior_certificates;
     std::vector<MembershipAttempt> stage_attempts;
     std::size_t stage_lp_calls = 0;
+    bool staged_incomplete = false;
+    bool stop_after_staging = false;
     std::size_t position = 2;
     std::size_t redundant_streak = 0;
 
@@ -119,6 +121,9 @@ HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp
         ++metrics.streamed_candidates;
         stage_lp_calls += classified.lp_calls;
         stage_attempts.push_back(classified.attempt);
+        if (classified.attempt.outcome != MembershipOutcome::feasible &&
+            classified.attempt.outcome != MembershipOutcome::infeasible)
+            staged_incomplete = true;
         if (classified.certificate) {
             prior_certificates.push_back(std::move(*classified.certificate));
             ++metrics.certified_stream_removals;
@@ -128,6 +133,7 @@ HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp
             redundant_streak = 0;
         }
         if (stop_outcome(classified.attempt.outcome)) {
+            stop_after_staging = true;
             ++position;
             break;
         }
@@ -161,9 +167,13 @@ HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp
             ++metrics.grouped_candidates;
             stage_lp_calls += classified.lp_calls;
             stage_attempts.push_back(classified.attempt);
+            if (classified.attempt.outcome != MembershipOutcome::feasible &&
+                classified.attempt.outcome != MembershipOutcome::infeasible)
+                staged_incomplete = true;
             if (classified.certificate) prior_certificates.push_back(std::move(*classified.certificate));
             else outside_group.push_back(candidate);
             if (stop_outcome(classified.attempt.outcome)) {
+                stop_after_staging = true;
                 ++position;
                 break;
             }
@@ -178,13 +188,10 @@ HullReductionResult reduce_grouped_hull(const PointCloud& cloud, LPWorkspace& lp
         retained.insert(retained.end(), order.begin() + static_cast<std::ptrdiff_t>(position), order.end());
     }
 
-    auto result = detail::reduce_hull_in_order(cloud, lp, context, retained,
-        std::move(prior_certificates));
+    auto result = detail::finish_grouped_hull(cloud, lp, context, retained,
+        std::move(prior_certificates), std::move(stage_attempts), stage_lp_calls,
+        staged_incomplete, stop_after_staging);
     if (auto* reduction = std::get_if<HullReduction>(&result)) {
-        stage_lp_calls += reduction->lp_calls;
-        stage_attempts.insert(stage_attempts.end(), reduction->attempts.begin(), reduction->attempts.end());
-        reduction->lp_calls = stage_lp_calls;
-        reduction->attempts = std::move(stage_attempts);
         reduction->grouped = std::move(metrics);
     }
     return result;
