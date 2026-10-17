@@ -228,8 +228,28 @@ struct DecodeLimits {
     std::uint64_t bytes{16*1024*1024},nodes{1000000},depth{64},string_bytes{1024*1024};
 };
 struct EncodeLimits { std::uint64_t bytes{16*1024*1024}; };
+// Opaque v5 archival bytes. This type has no conversion to RunStatistics and
+// therefore cannot be passed to a strategy, selector, or live-family API.
+class RecordedRunArtifact {
+public:
+    RecordedRunArtifact(const RecordedRunArtifact&)=default;
+    RecordedRunArtifact& operator=(const RecordedRunArtifact&)=default;
+    const problem::ResolvedContent& content() const noexcept { return content_; }
+private:
+    explicit RecordedRunArtifact(problem::ResolvedContent content) : content_(std::move(content)) {}
+    problem::ResolvedContent content_;
+    friend ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics&,EncodeLimits);
+    friend ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view,DecodeLimits);
+    friend ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view,const problem::ResolvedProblem&,DecodeLimits);
+};
 ArtifactResult<RunStatistics> publish_run(RunInput);
 ArtifactResult<RunStatistics> decode_run(std::string_view,DecodeLimits={});
 ArtifactResult<RunStatistics> decode_run(std::string_view,const problem::ResolvedProblem&,DecodeLimits={});
 ArtifactResult<std::string> encode_run(const RunStatistics&,EncodeLimits={});
+// Writes/reads an inert v5 record. Registered complete-family claims are
+// exportable only from a current-process verified family with an embedded
+// bounded H-relation attachment; import never publishes a live family.
+ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics&,EncodeLimits={});
+ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view,DecodeLimits={});
+ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view,const problem::ResolvedProblem&,DecodeLimits={});
 }

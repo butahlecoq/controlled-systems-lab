@@ -197,10 +197,35 @@ void check_complete_family_encoder_boundary(const problem::ResolvedProblem& prob
         configuration, run, statistics,
         {uninstrumented, uninstrumented, uninstrumented, uninstrumented, true,
             ar::MemoryAccounting::unlimited});
-    REQUIRE(std::holds_alternative<ar::ArtifactError>(encoded));
-    const auto& error = std::get<ar::ArtifactError>(encoded);
-    CHECK(error.code == ar::ArtifactErrorCode::unsupported);
-    CHECK(error.path == "run.final.family.completeness.support");
+    REQUIRE(std::holds_alternative<std::string>(encoded));
+    const auto& wire=std::get<std::string>(encoded);
+    CHECK(wire.find("csl.run-statistics/5")!=std::string::npos);
+    CHECK(wire.find("unverified_recorded_data")!=std::string::npos);
+    CHECK(wire.find("csl.h-relation-attachment/1")!=std::string::npos);
+    CHECK(wire.find("registered_verifier")!=std::string::npos);
+    static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
+    const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
+    const auto expected_content=take<csl::problem::ResolvedContent>(csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(wire.data()),wire.size()}));
+    CHECK(imported.content().digest()==expected_content.digest());
+    CHECK(imported.content().bytes().size()==wire.size());
+    const auto other_profile=prepared.family().profile=="ts01_exact_integrator"
+        ?"ts02_constant_integrator":"ts01_exact_integrator";
+    const auto problem_mismatch=ar::decode_recorded_run(wire,source(other_profile));
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(problem_mismatch));
+    CHECK(std::get<ar::ArtifactError>(problem_mismatch).path=="run.problem");
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::decode_run(wire)));
+    auto trailing=wire+" ";
+    const auto trailing_result=ar::decode_recorded_run(trailing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(trailing_result));
+    CHECK(std::get<ar::ArtifactError>(trailing_result).path=="recorded.canonical");
+    auto self_asserted=wire;
+    const auto state=self_asserted.find("unverified_recorded_data");
+    REQUIRE(state!=std::string::npos);
+    self_asserted.replace(state,std::string_view("unverified_recorded_data").size(),"registry_verified");
+    const auto state_result=ar::decode_recorded_run(self_asserted);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(state_result));
+    CHECK(std::get<ar::ArtifactError>(state_result).path=="recorded_state");
 }
 
 void compare_profile(const std::string& profile) {
@@ -257,6 +282,8 @@ void compare_profile(const std::string& profile) {
     }
     check_complete_family_encoder_boundary(problem, prepared, execution.strategies[0],
         0, witness_request);
+    check_complete_family_encoder_boundary(problem, prepared, execution.strategies[1],
+        1, witness_request);
 }
 }
 

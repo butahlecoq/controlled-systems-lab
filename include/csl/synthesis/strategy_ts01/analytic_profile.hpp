@@ -19,6 +19,7 @@ class ExactJointRelation final : public JointRelationPayload {
 public:
     static std::variant<std::shared_ptr<const ExactJointRelation>,Diagnostics> canonical();
     const sets::SetData& h_polyhedron() const noexcept { return h_polyhedron_; }
+    const sets::SetData* h_relation_for_recording() const noexcept override { return &h_polyhedron_; }
     bool contains(std::span<const double> canonical_history) const noexcept;
 };
 
@@ -29,6 +30,7 @@ class MidpointJointRelation final : public JointRelationPayload {
 public:
     static std::variant<std::shared_ptr<const MidpointJointRelation>,Diagnostics> canonical();
     const sets::SetData& h_polyhedron() const noexcept { return h_polyhedron_; }
+    const sets::SetData* h_relation_for_recording() const noexcept override { return &h_polyhedron_; }
 };
 
 registry::StrategyRegistration make_registration();

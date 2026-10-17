@@ -1,4 +1,5 @@
 #include <csl/artifacts/run_statistics.hpp>
+#include <csl/artifacts/h_relation_attachment.hpp>
 #include <nlohmann/json.hpp>
 #include <algorithm>
 #include <array>
@@ -548,6 +549,111 @@ ArtifactResult<std::string> encode_run(const RunStatistics& owner,EncodeLimits l
     catch(const Invalid& e){return ArtifactError{ArtifactErrorCode::invalid_input,e.path,e.message};}
     catch(const Json::exception&){return ArtifactError{ArtifactErrorCode::invalid_input,"json","Invalid portable data"};}
     catch(const std::bad_alloc&){return ArtifactError{ArtifactErrorCode::allocation,{},{}};}
+}
+ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics& owner,EncodeLimits limits) {
+    try {
+        const auto& record=owner.description();
+        const auto* synthesis=std::get_if<SynthesisFinal>(&record.final);
+        const CompleteOptimalFamily* complete=nullptr;
+        const FamilyRecord* family_record=nullptr;
+        bool registered_claim=false;
+        if(synthesis&&synthesis->family) {
+            family_record=&*synthesis->family;
+            complete=std::get_if<CompleteOptimalFamily>(&family_record->family.outcome());
+            registered_claim=complete&&std::holds_alternative<RegisteredCompletenessEvidence>(complete->completeness.support);
+        }
+        if(registered_claim) {
+            if(!family_record->family.registry_verified())
+                return ArtifactError{ArtifactErrorCode::unsupported,"run.final.family","Only a current-process registry-verified family can be recorded"};
+            const auto* external=std::get_if<ExternalFamilyPayload>(&family_record->payload);
+            if(!external)return ArtifactError{ArtifactErrorCode::unsupported,"run.final.family.attachment","Registered family claim requires an exported relation attachment"};
+            const auto attachment=std::find_if(record.attachments.begin(),record.attachments.end(),[&](const auto& item){return item.id==external->attachment;});
+            if(attachment==record.attachments.end()||attachment->role!=AttachmentRole::family||!attachment->content||
+                attachment->schema!="csl.h-relation-attachment/1"||attachment->content->digest()!=attachment->digest||
+                attachment->content->bytes().size()!=attachment->byte_count)
+                return ArtifactError{ArtifactErrorCode::reference,"run.final.family.attachment","Registered family claim requires an owned, integrity-checked H-relation attachment"};
+            const HRelationAttachmentLimits relation_limits{limits.bytes,100000,1000000,limits.bytes};
+            const auto decoded=decode_h_relation_attachment(attachment->content->bytes(),relation_limits,attachment->digest);
+            if(const auto* error=std::get_if<ArtifactError>(&decoded))return *error;
+        }
+        auto wire=Json::parse(recorded_json(owner));
+        require(wire.at("schema")=="csl.run-statistics/4","schema","Live run is not in the current v4 wire form");
+        wire["schema"]="csl.run-statistics/5";
+        wire["recorded_state"]="unverified_recorded_data";
+        const auto text=wire.dump();
+        if(text.size()>limits.bytes)return ArtifactError{ArtifactErrorCode::limit,"json.bytes","Encoded recorded artifact exceeds byte limit"};
+        std::vector<std::byte> bytes;bytes.reserve(text.size());
+        for(const unsigned char value:text)bytes.push_back(static_cast<std::byte>(value));
+        auto content=problem::snapshot_content(bytes);
+        if(const auto* owned=std::get_if<problem::ResolvedContent>(&content))return RecordedRunArtifact{*owned};
+        return ArtifactError{ArtifactErrorCode::allocation,"recorded.content","Could not own recorded artifact bytes"};
+    } catch(const ArtifactError& error) { return error; }
+    catch(const Invalid& error) { return ArtifactError{ArtifactErrorCode::invalid_input,error.path,error.message}; }
+    catch(const Json::exception&) { return ArtifactError{ArtifactErrorCode::invalid_input,"recorded.json","Invalid portable recorded data"}; }
+    catch(const std::bad_alloc&) { return ArtifactError{ArtifactErrorCode::allocation,{},{}}; }
+}
+static ArtifactResult<problem::ResolvedContent> decode_recorded_run_impl(std::string_view text,DecodeLimits limits,
+    const ProblemId* expected_problem) {
+    try {
+        auto wire=parse_document(text,limits);
+        closed(wire,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection","recorded_state"});
+        require(wire.at("schema")=="csl.run-statistics/5","schema","Unsupported recorded run schema");
+        require(wire.at("recorded_state")=="unverified_recorded_data","recorded_state","Recorded claims are always untrusted");
+        require(wire.dump()==text,"recorded.canonical","Recorded artifact is not in canonical form or contains trailing bytes");
+        if(expected_problem&&get<ProblemId>(wire.at("problem"))!=*expected_problem)
+            return ArtifactError{ArtifactErrorCode::identity,"run.problem","Recorded run does not match the supplied resolved problem"};
+        const auto attachments=get<std::vector<Attachment>>(wire.at("attachments"));
+        std::set<std::string> ids;
+        for(const auto& attachment:attachments) {
+            require(!attachment.id.value.empty()&&ids.insert(attachment.id.value).second,"attachment.id","Empty or duplicate attachment ID");
+            if(attachment.content)require(attachment.content->digest()==attachment.digest&&attachment.content->bytes().size()==attachment.byte_count,
+                "attachment.content","Attachment digest or byte count mismatch");
+            if(attachment.role==AttachmentRole::family&&attachment.schema=="csl.h-relation-attachment/1") {
+                require(attachment.content.has_value(),"attachment.content","H-relation attachment bytes are required for import");
+                const HRelationAttachmentLimits relation_limits{limits.bytes,100000,1000000,limits.string_bytes};
+                const auto decoded=decode_h_relation_attachment(attachment.content->bytes(),relation_limits,attachment.digest);
+                if(const auto* error=std::get_if<ArtifactError>(&decoded))throw *error;
+            }
+        }
+        const auto is_registered_claim=[&]() {
+            if(wire.at("final").at("kind")!="synthesis")return false;
+            const auto& synthesis=wire.at("final").at("value");
+            if(synthesis.at("family").is_null())return false;
+            const auto& family=synthesis.at("family").at("family");
+            return family.at("outcome").at("kind")=="complete"&&
+                family.at("outcome").at("value").at("completeness").at("support").at("kind")=="registered_verifier";
+        };
+        if(is_registered_claim()) {
+            const auto& synthesis=wire.at("final").at("value");
+            const auto& family_record=synthesis.at("family");
+            const auto& payload=family_record.at("payload");
+            require(payload.at("kind")=="external_reference","run.final.family.payload",
+                "Recorded complete-family claim requires an external relation attachment");
+            const auto attachment_id=get<AttachmentId>(payload.at("value").at("attachment"));
+            const auto attachment=std::find_if(attachments.begin(),attachments.end(),[&](const auto& item){return item.id==attachment_id;});
+            require(attachment!=attachments.end()&&attachment->role==AttachmentRole::family&&attachment->schema=="csl.h-relation-attachment/1"&&
+                attachment->content.has_value(),"run.final.family.attachment","Registered family claim has no owned H-relation attachment");
+        }
+        std::vector<std::byte> bytes;bytes.reserve(text.size());
+        for(const unsigned char value:text)bytes.push_back(static_cast<std::byte>(value));
+        auto content=problem::snapshot_content(bytes);
+        if(const auto* owned=std::get_if<problem::ResolvedContent>(&content))return *owned;
+        return ArtifactError{ArtifactErrorCode::allocation,"recorded.content","Could not own imported artifact bytes"};
+    } catch(const ArtifactError& error) { return error; }
+    catch(const Invalid& error) { return ArtifactError{ArtifactErrorCode::invalid_input,error.path,error.message}; }
+    catch(const Json::exception&) { return ArtifactError{ArtifactErrorCode::invalid_input,"recorded.json","Malformed recorded artifact"}; }
+    catch(const std::bad_alloc&) { return ArtifactError{ArtifactErrorCode::allocation,{},{}}; }
+}
+ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view text,DecodeLimits limits) {
+    auto content=decode_recorded_run_impl(text,limits,nullptr);
+    if(const auto* error=std::get_if<ArtifactError>(&content))return *error;
+    return RecordedRunArtifact{std::get<problem::ResolvedContent>(std::move(content))};
+}
+ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view text,const problem::ResolvedProblem& problem,DecodeLimits limits) {
+    const auto expected_problem=problem.identity();
+    auto content=decode_recorded_run_impl(text,limits,&expected_problem);
+    if(const auto* error=std::get_if<ArtifactError>(&content))return *error;
+    return RecordedRunArtifact{std::get<problem::ResolvedContent>(std::move(content))};
 }
 ArtifactResult<std::string> check_record_portability(const RunRecord& record) {
     try {return run_json(record).dump();}

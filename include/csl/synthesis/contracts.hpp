@@ -18,8 +18,16 @@
 
 namespace csl {
 namespace problem { class ResolvedProblem; }
+namespace sets { class SetData; }
 namespace registry { class StrategyRegistry; namespace detail { class VerifiedFamilyAuthority; class VerifiedPartialFamilyAuthority; } }
-class JointRelationPayload { public: virtual ~JointRelationPayload() = default; };
+class JointRelationPayload {
+public:
+    virtual ~JointRelationPayload() = default;
+
+    // Optional inert export seam for persistence adapters. Returning ordinary
+    // set data does not validate relation equivalence or grant family authority.
+    virtual const sets::SetData* h_relation_for_recording() const noexcept { return nullptr; }
+};
 struct JointRelation { JointCoordinates coordinates; RepresentationId representation; std::shared_ptr<const JointRelationPayload> payload; };
 enum class FamilyTarget { exact_optimal_relation, candidate_relaxation, partial_relation };
 struct FamilyRequest {
