@@ -75,7 +75,13 @@ observed. Malformed measurement-error shape returns a diagnostic before any
 positive record. These are distinct scenario variants, not a claim about all
 possible observations or disturbances.
 
-The algorithm can produce numerical replay records. Under the repository's
-[published-result policy](../architecture/published-algorithm-results.md), a
-versioned HTML/raw measurement report and verified live URL are pending before
-this algorithm slice can be considered fully delivered.
+The algorithm can produce numerical replay records. Its fixed-source harness
+and versioned HTML/raw report are published at
+[the observed-replay result](https://butahlecoq.github.io/controlled-systems-lab/ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34/index.html).
+Main Pages run 38921719235 succeeded; the published page and raw downloads were
+verified against the reviewed artifact hashes (page SHA-256
+`ab8f2e3b5039d3c52e73e8d7f6b052c891cf099a45845257f23e2258c0dd22e1`). The
+report covers the configured sampled replay only and does not establish an
+all-initial-states policy, universal disturbance coverage, or validated
+guarantees. General initial-set synthesis, correlated initial/external
+information, and auditable policy-family evidence remain open work under #68.
