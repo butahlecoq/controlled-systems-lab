@@ -127,12 +127,13 @@ ArtifactResult<problem::ResolvedContent> own(std::string_view text) {
 ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
     const problem::ResolvedContent& spec, const std::vector<ComparisonAttempt>& attempts, EncodeLimits limits) {
     try {
+        const DecodeLimits validation_limits{limits.bytes, 1000000, 64, std::min<std::uint64_t>(limits.bytes, 1024*1024)};
         if (attempts.empty()) return error(ArtifactErrorCode::invalid_input, "attempts", "At least one attempt is required");
         if (attempts.size() > limits.bytes / 32) return error(ArtifactErrorCode::limit, "attempts", "Attempt count exceeds byte budget");
         if (spec.bytes().size() > limits.bytes) return error(ArtifactErrorCode::limit, "spec", "Spec exceeds byte budget");
         const auto spec_text = bytes_to_string(spec.bytes());
         std::uint64_t payload_bytes=spec.bytes().size();
-        auto spec_json = parse_bounded(spec_text, DecodeLimits{limits.bytes, 1000000, 64, limits.string_bytes});
+        auto spec_json = parse_bounded(spec_text, validation_limits);
         if (spec_json.dump() != spec_text) return error(ArtifactErrorCode::invalid_input, "spec", "Spec must be canonical JSON");
         const auto [strategy_count,repetition_count]=validate_spec(spec_json);
         if (attempts.size()!=static_cast<std::uint64_t>(strategy_count)*repetition_count)
@@ -155,10 +156,10 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
                 return error(ArtifactErrorCode::limit, "attempts", "Attempt payloads exceed byte budget");
             payload_bytes+=run_bytes.size();
             const auto run_text = bytes_to_string(run_bytes);
-            auto validated = decode_recorded_run(run_text, DecodeLimits{limits.bytes, 1000000, 64, limits.string_bytes});
+            auto validated = decode_recorded_run(run_text, validation_limits);
             if (std::holds_alternative<ArtifactError>(validated))
                 return error(ArtifactErrorCode::reference, "attempts[" + std::to_string(i) + "].run", "Attempt does not contain a valid recorded run");
-            const auto run_json = parse_bounded(run_text, DecodeLimits{limits.bytes, 1000000, 64, limits.string_bytes});
+            const auto run_json = parse_bounded(run_text, validation_limits);
             if (run_json.at("run").get<std::string>() != attempt.reference.run.value ||
                 attempt.run.content().digest() != attempt.reference.content_digest ||
                 run_json.at("problem").get<std::string>()!=spec_json.at("problem_id").get<std::string>() ||
