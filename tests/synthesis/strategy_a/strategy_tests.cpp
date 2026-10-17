@@ -3,6 +3,7 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/contracts.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
+#include <csl/synthesis/ts03_singular_integrator.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/convex/highs.hpp>
@@ -73,6 +74,10 @@ problem::ResolvedProblem exact_ts02_integrator(TerminalObjective objective=Linea
         std::move(objective)};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
+problem::ResolvedProblem exact_ts03_integrator() {
+    QuadraticTerminal objective{};objective.Q={1,1,{2}};objective.linear={-2};objective.offset=1;
+    return exact_ts02_integrator(TerminalObjective{std::move(objective)},0);
+}
 StrategyRequest request(problem::ResolvedProblem problem) {
     FamilyRequest family;family.objective=problem.identity();family.profile="nominal_open_loop";
     family.representation={"csl.polyhedron.h"};
@@ -94,6 +99,11 @@ StrategyRequest exact_ts02_request(problem::ResolvedProblem problem) {
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.reach-back"};
     configuration.representation={"csl.polyhedron.h"};
     return {std::move(problem),configuration,family,"1",{}};
+}
+StrategyRequest exact_ts03_request(problem::ResolvedProblem problem) {
+    auto request=exact_ts02_request(std::move(problem));
+    request.family.profile=synthesis::ts03_singular_integrator_profile;
+    return request;
 }
 class CancelAfterTerminal final : public ConvexWorkspace {
     std::unique_ptr<ConvexWorkspace> inner_;
@@ -653,6 +663,65 @@ TEST_CASE("public Strategy A exact T-S02 family equals the analytic feasible-his
     REQUIRE(result.objective.upper);
     CHECK(result.objective.lower->value==3);
     CHECK(result.objective.upper->value==3);
+}
+TEST_CASE("public Strategy A exact T-S03 preserves every history under a unique terminal minimizer") {
+    const auto query=exact_ts03_request(exact_ts03_integrator());
+    auto result=run(query);
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->registry_verified());
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto* relation=dynamic_cast<const synthesis::Ts03SingularIntegratorRelation*>(complete.relation.payload.get());
+    REQUIRE(relation);
+    const auto polyhedron=relation->h_polyhedron();
+    const auto representation=polyhedron.representation();
+    const auto& actual=std::get<sets::HRepresentation>(representation);
+    REQUIRE(actual.inequalities.rows()==2);
+    REQUIRE(actual.equalities.rows()==4);
+    CHECK(actual.inequalities.cols()==5);
+    CHECK(actual.equalities.cols()==5);
+    CHECK(has_inequality(actual,{0,0,0,1,0},1));
+    CHECK(has_inequality(actual,{0,0,0,-1,0},0));
+    CHECK(has_equality(actual,{1,0,0,0,0},0));
+    CHECK(has_equality(actual,{0,1,0,-1,0},0));
+    CHECK(has_equality(actual,{0,0,1,0,0},1));
+    CHECK(has_equality(actual,{0,0,0,0,1},1));
+    for(const Vector& point:std::vector<Vector>{{0,0,1,0,1},{0,.25,1,.25,1},{0,1,1,1,1}})
+        CHECK(contains(polyhedron,point));
+    CHECK_FALSE(contains(polyhedron,{0,1,1,1,0}));
+    REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==0);CHECK(result.objective.upper->value==0);
+    const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+    REQUIRE(proof);CHECK(proof->verifier==ModuleId{synthesis::ts03_singular_integrator_verifier});
+    CHECK(proof->proof==synthesis::ts03_singular_integrator_proof);
+}
+TEST_CASE("T-S03 verifier profile rejects changed dynamics and objective") {
+    for(const auto& problem:std::vector<problem::ResolvedProblem>{
+        exact_ts02_integrator(TerminalObjective{QuadraticTerminal{{1,1,{2}},{-2},1}},1),
+        exact_ts02_integrator(TerminalObjective{LinearTerminal{{0},3}},0)}) {
+        const auto admitted=admit(exact_ts03_request(problem));
+        REQUIRE(std::holds_alternative<Rejection>(admitted));
+        CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
+    }
+}
+TEST_CASE("T-S03 compiled verifier rejects altered completeness evidence") {
+    const auto query=exact_ts03_request(exact_ts03_integrator());
+    auto workspace=take(admit(query,false,{},true)).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    auto result=take(workspace->run(context));
+    REQUIRE(result.complete_proposal);
+    const auto verifier=detail::find_compiled_verifier(ModuleId{synthesis::ts03_singular_integrator_verifier},"1");
+    REQUIRE(verifier);
+    auto frozen=query;frozen.lineage=result.complete_proposal->identity.lineage;
+    const auto verified=verifier->verify(frozen,*result.complete_proposal);
+    for(const auto& diagnostic:verified)std::cerr<<diagnostic.field<<": "<<diagnostic.explanation<<'\n';
+    CHECK(verified.empty());
+    auto altered=*result.complete_proposal;
+    auto* proof=std::get_if<RegisteredCompletenessEvidence>(&altered.family.completeness.support);
+    REQUIRE(proof);proof->proof="altered-ts03-proof";
+    CHECK_FALSE(verifier->verify(frozen,altered).empty());
 }
 TEST_CASE("exact T-S02 recovered preimage contains the entire feasible control box") {
     const auto query=exact_ts02_request(exact_ts02_integrator());
