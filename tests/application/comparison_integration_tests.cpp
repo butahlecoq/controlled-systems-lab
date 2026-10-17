@@ -18,14 +18,19 @@
 #include <type_traits>
 #include <utility>
 #include <memory>
+#include <source_location>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 using namespace csl;
 
 namespace {
-template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
-    REQUIRE(std::holds_alternative<T>(value));
+template<class T, class... Rest> T take(std::variant<T, Rest...> value,
+    const std::source_location location = std::source_location::current()) {
+    if (!std::holds_alternative<T>(value))
+        throw std::runtime_error("generic take failed at line " + std::to_string(location.line())
+            + " with variant index " + std::to_string(value.index()));
     return std::get<T>(std::move(value));
 }
 
