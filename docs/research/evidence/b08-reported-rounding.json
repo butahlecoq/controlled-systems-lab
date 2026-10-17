@@ -1,0 +1,73 @@
+{
+  "source_id": "L04",
+  "source_sha256": "6e07c9a2fac2d112885a495c9fe7f13acec9d990d947017b1701a4b95538cd5f",
+  "source_bytes": 390884,
+  "scope": "L04 printed terminal rows, nearest-decimal rounding boxes and printed linear model",
+  "criterion": "L04 p.7 Eq.(15) and p.12: Euclidean distance to (1200,0,450,0)",
+  "rows": "L04 physical PDF p.13 text and Table 2",
+  "nonlinear_text": {
+    "coordinates": [
+      "1200.139",
+      "-2.294",
+      "450.406",
+      "-16.254"
+    ],
+    "coordinate_half_width": "0.0005",
+    "reported_cost": "14.048",
+    "cost_half_width": "0.0005",
+    "norm_squared_box": [
+      "269620017/1000000",
+      "269658203/1000000"
+    ],
+    "cost_squared_box": [
+      "31573161/160000",
+      "789441409/4000000"
+    ],
+    "cost_box_disjoint": true
+  },
+  "nonlinear_table": {
+    "coordinates": [
+      "1200.14",
+      "-2.29",
+      "450.41",
+      "-16.25"
+    ],
+    "coordinate_half_width": "0.005",
+    "reported_cost": "14.05",
+    "cost_half_width": "0.005",
+    "norm_squared_box": [
+      "538607/2000",
+      "2696853/10000"
+    ],
+    "cost_squared_box": [
+      "7890481/40000",
+      "7901721/40000"
+    ],
+    "cost_box_disjoint": true
+  },
+  "linear_table": {
+    "coordinates": [
+      "1201.14",
+      "-27.29",
+      "452.61",
+      "-61.25"
+    ],
+    "coordinate_half_width": "0.005",
+    "reported_cost": "67.12",
+    "cost_half_width": "0.005",
+    "norm_squared_box": [
+      "9006991/2000",
+      "45053413/10000"
+    ],
+    "cost_squared_box": [
+      "180176929/40000",
+      "288369/64"
+    ],
+    "cost_box_disjoint": false,
+    "corner_count": 256,
+    "corners_in_coordinate_box": 0,
+    "nearest_corner_max_coordinate_gap": "3/80",
+    "worst_corner_squared": "112730080707/25000000",
+    "worst_cost_box_disjoint": true
+  }
+}
