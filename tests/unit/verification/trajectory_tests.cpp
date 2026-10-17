@@ -41,6 +41,22 @@ TEST_CASE("wrong original transition control and cost each have named residuals"
     CHECK(residual(r,"objective").measure.violation==5);
     CHECK(residual(r,"objective").tolerance==0.40625);
 }
+TEST_CASE("positive-horizon witnesses reject truncated and extended state and control histories") {
+    const auto p=resolve(scalar());
+    const auto reject_shape=[&](TrajectoryRequest q,const std::string& expected_field) {
+        const auto report=verify_trajectory(p,q);
+        CHECK(report.bindings==CheckStatus::numerical_pass);
+        CHECK(report.feasibility==CheckStatus::invalid_input);
+        CHECK(report.objective==CheckStatus::invalid_input);
+        CHECK(std::any_of(report.diagnostics.begin(),report.diagnostics.end(),[&](const auto& diagnostic) {
+            return diagnostic.code==DiagnosticCode::invalid_input&&diagnostic.field==expected_field;
+        }));
+    };
+    auto q=request(p);q.witness.states.pop_back();reject_shape(q,"witness.states");
+    q=request(p);q.witness.states.push_back({4});reject_shape(q,"witness.states");
+    q=request(p);q.witness.controls.pop_back();reject_shape(q,"witness.controls");
+    q=request(p);q.witness.controls.push_back({3});reject_shape(q,"witness.controls");
+}
 TEST_CASE("wrong problem and evidence never pass binding") {
     auto p=resolve(scalar());auto q=request(p);q.witness.problem={"wrong"};
     auto r=verify_trajectory(p,q);CHECK(r.bindings==CheckStatus::invalid_input);CHECK(r.feasibility==CheckStatus::not_checked);
@@ -214,9 +230,12 @@ TEST_CASE("original quadratic and residual norm costs are not squared or replace
     auto input=ltv();input.objective=QuadraticTerminal{{2,2,{2,0,0,4}},{1,-1},5};
     auto p=resolve(input);auto q=ltv_request(p);q.witness.original_objective=62;
     CHECK(verify_trajectory(p,q).recomputed_objective==62);CHECK(verify_trajectory(p,q).objective==CheckStatus::numerical_pass);
-    input.objective=ResidualNormTerminal{{1,2,{1,2}},{2}};p=resolve(input);q=ltv_request(p);q.witness.original_objective=100;
-    auto r=verify_trajectory(p,q);CHECK(r.recomputed_objective==10);CHECK(r.objective==CheckStatus::violation);
-    CHECK(residual(r,"objective").measure.violation==90);
+    input.objective=ResidualNormTerminal{{1,2,{1,2}},{7}};p=resolve(input);q=ltv_request(p);
+    q.witness.original_objective=5;
+    auto r=verify_trajectory(p,q);CHECK(r.recomputed_objective==5);CHECK(r.objective==CheckStatus::numerical_pass);
+    q.witness.original_objective=25;r=verify_trajectory(p,q);
+    CHECK(r.recomputed_objective==5);CHECK(r.objective==CheckStatus::violation);
+    CHECK(residual(r,"objective").measure.violation==20);
 }
 TEST_CASE("direct H inequalities and equalities include initial and terminal domains") {
     auto input=scalar();input.states={interval_h(),accepted(sets::make_h({{"eq"},1,{}},
@@ -265,6 +284,51 @@ TEST_CASE("explicit numerical thresholds and finite arithmetic do not certify va
     q.verification=VerificationRequest{{1e-8,1e-8},Assurance::validated};r=verify_trajectory(p,q);CHECK(r.feasibility==CheckStatus::unsupported);
     CHECK(r.validated==CheckStatus::unsupported);
     q=request(p);q.witness.states[0][0]=std::numeric_limits<double>::quiet_NaN();CHECK(verify_trajectory(p,q).feasibility==CheckStatus::invalid_input);
+}
+TEST_CASE("relative tolerances use the reported objective scale at exact boundaries") {
+    auto p=resolve(scalar());auto q=request(p);ExecutionContext context;
+    context.numerical={0.5,0.125};q.witness.original_objective=4;
+    auto report=verify_trajectory(p,q,context);
+    CHECK(report.objective==CheckStatus::numerical_pass);
+    CHECK(residual(report,"objective").measure.scale==4);
+    CHECK(residual(report,"objective").measure.violation==1);
+    CHECK(residual(report,"objective").tolerance==1);
+
+    context.numerical={0.5,0.0625};report=verify_trajectory(p,q,context);
+    CHECK(report.objective==CheckStatus::violation);
+    CHECK(residual(report,"objective").tolerance==0.75);
+
+    q.witness.original_objective=8;context.numerical={0.5,0.5625};report=verify_trajectory(p,q,context);
+    CHECK(report.objective==CheckStatus::numerical_pass);
+    CHECK(residual(report,"objective").measure.scale==8);
+    CHECK(residual(report,"objective").measure.violation==5);
+    CHECK(residual(report,"objective").tolerance==5);
+    context.numerical={0.5,0.5};report=verify_trajectory(p,q,context);
+    CHECK(report.objective==CheckStatus::violation);
+    CHECK(residual(report,"objective").tolerance==4.5);
+}
+TEST_CASE("infinite witness values and numerical tolerances are invalid inputs") {
+    const auto p=resolve(scalar());auto q=request(p);
+    q.witness.states[1][0]=std::numeric_limits<double>::infinity();
+    auto report=verify_trajectory(p,q);
+    CHECK(report.feasibility==CheckStatus::invalid_input);
+    CHECK(std::any_of(report.diagnostics.begin(),report.diagnostics.end(),[](const auto& diagnostic) {
+        return diagnostic.field=="witness.states[1]"&&diagnostic.code==DiagnosticCode::invalid_input;
+    }));
+
+    q=request(p);q.witness.original_objective=std::numeric_limits<double>::infinity();
+    report=verify_trajectory(p,q);
+    CHECK(report.objective==CheckStatus::invalid_input);
+    CHECK(std::any_of(report.diagnostics.begin(),report.diagnostics.end(),[](const auto& diagnostic) {
+        return diagnostic.field=="witness.original_objective"&&diagnostic.code==DiagnosticCode::invalid_input;
+    }));
+
+    q=request(p);ExecutionContext context;context.numerical={std::numeric_limits<double>::infinity(),0};
+    report=verify_trajectory(p,q,context);
+    CHECK(report.feasibility==CheckStatus::invalid_input);
+    CHECK(std::any_of(report.diagnostics.begin(),report.diagnostics.end(),[](const auto& diagnostic) {
+        return diagnostic.field=="numerical"&&diagnostic.code==DiagnosticCode::invalid_input;
+    }));
 }
 TEST_CASE("unknown assurance values are rejected instead of downgraded to numerical verification") {
     const auto p=resolve(scalar());
