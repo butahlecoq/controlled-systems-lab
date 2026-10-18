@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/adapters/lp/highs.hpp>
+#include "highs_warm_start_test_hook.hpp"
 #include <csl/optimization/lp_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include "../../../src/adapters/certificate_verification.hpp"
@@ -82,6 +83,8 @@ TEST_CASE("cross-query warm starts are optional, workspace-local, dimension-chec
     const auto first=rhs_lp("warm-first",1);
     const auto changed_row=rhs_lp("warm-row-change",2);
     const auto changed_bound=rhs_lp("warm-bound-change",2,1);
+    const auto changed_coefficient=accepted(make_linear_program({{{"native-test"},{"warm-coefficient-change"}},
+        {-1,-2},0,{1,2,{0,2},{0,1},{1,2}},{{0,{}},{0,{}}},{{{},2}}}));
     const auto changed_columns=accepted(make_linear_program({{{"native-test"},{"warm-column-change"}},
         {-1,-2,-3},0,{1,3,{0,3},{0,1,2},{1,1,1}},{{0,{}},{0,{}},{0,{}}},{{{},2}}}));
     auto registration=accepted(make_highs_registration({.cross_query_warm_start=true}));
@@ -106,6 +109,13 @@ TEST_CASE("cross-query warm starts are optional, workspace-local, dimension-chec
     CHECK(dimension_change.raw_diagnostics.find("warm_start.fallback=cold_no_compatible_basis")!=std::string::npos);
     CHECK(dimension_change.raw_diagnostics.find("warm_start.setup_seconds=")!=std::string::npos);
     CHECK(dimension_change.raw_diagnostics.find("native.solve_seconds=")!=std::string::npos);
+
+    auto coefficient_workspace=registration.factory(first);
+    cost(accepted(coefficient_workspace->solve(first,context())),first,-2);
+    const auto coefficient_result=accepted(coefficient_workspace->solve(changed_coefficient,context()));
+    cost(coefficient_result,changed_coefficient,-2);
+    CHECK(coefficient_result.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);
+    CHECK(coefficient_result.raw_diagnostics.find("warm_start.accepted=true")!=std::string::npos);
 
     auto other_workspace=registration.factory(first);
     const auto isolated=accepted(other_workspace->solve(first,context()));
@@ -158,6 +168,26 @@ TEST_CASE("warm starts preserve independently checked results across a degenerat
     CHECK(infeasible_result.raw_diagnostics.find("warm_start.fallback=cold_after_invalid_result")!=std::string::npos);
     CHECK(infeasible_result.raw_diagnostics.find("warm_start.retry=cold_after_invalid_result")!=std::string::npos);
     CHECK(infeasible_result.raw_diagnostics.find("warm_start.cache_state=empty")!=std::string::npos);
+}
+
+TEST_CASE("a rejected warm basis is retried by a fresh cold solver") {
+    const auto first=rhs_lp("warm-rejected-first",1);
+    const auto changed=rhs_lp("warm-rejected-changed",2);
+    auto registration=accepted(make_highs_registration({.cross_query_warm_start=true}));
+    auto worker=registration.factory(first);
+    const auto primed=accepted(worker->solve(first,context()));
+    cost(primed,first,-2);
+
+    test_support::reject_next_warm_basis_installation();
+    const auto result=accepted(worker->solve(changed,context()));
+    INFO(result.raw_diagnostics);
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    cost(result,changed,-4);
+    CHECK(result.raw_diagnostics.find("warm_start.accepted=false")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("warm_start.fallback=cold_after_rejection")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("warm_start.retry=cold_after_rejection")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("warm_start.cache_state=empty")!=std::string::npos);
 }
 
 TEST_CASE("literal offset equality free fixed infeasible unbounded and zero-dimensional LPs") {

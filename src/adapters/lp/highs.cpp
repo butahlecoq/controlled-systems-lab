@@ -3,6 +3,9 @@
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include "../certificate_verification.hpp"
 #include "../highs_session.hpp"
+#if defined(CSL_HIGHSLP_TESTING)
+#include "highs_warm_start_test_hook.hpp"
+#endif
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -13,6 +16,9 @@
 
 namespace csl::adapters::lp {
 namespace {
+#if defined(CSL_HIGHSLP_TESTING)
+thread_local bool reject_next_warm_basis_installation_for_test{};
+#endif
 using namespace optimization;
 constexpr const char* adapter_version = "1.1.0+highs.1.11.0";
 constexpr const char* archive_hash = "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275";
@@ -235,6 +241,17 @@ class HighsLPWorkspace final : public LPWorkspace {
             loaded_ = p;
         }
         bool warm_accepted=false;
+        auto retry_cold = [&](std::string_view cause) -> ProgramOutcome {
+            raw << "\nwarm_start.fallback=" << cause;
+            const auto warm_diagnostics=raw.str();
+            native_.reset();
+            loaded_.reset();
+            warm_basis_.reset();
+            auto cold_result=solve_native(p,c);
+            if (auto* cold_program=std::get_if<ProgramResult>(&cold_result))
+                cold_program->raw_diagnostics += "\nwarm_start.retry=" + std::string(cause) + "\nwarm_start.rejected_attempt_diagnostics:\n" + warm_diagnostics;
+            return cold_result;
+        };
         if(options_.cross_query_warm_start) {
             const bool dimensions_match=previous_basis && previous_basis->rows==p.rows().size() && previous_basis->columns==p.variables().size();
             raw << "\nwarm_start.enabled=true";
@@ -242,24 +259,17 @@ class HighsLPWorkspace final : public LPWorkspace {
             const auto warm_setup_start=std::chrono::steady_clock::now();
             if(dimensions_match && previous_basis->basis.valid && previous_basis->basis.row_status.size()==p.rows().size() &&
                 previous_basis->basis.col_status.size()==p.variables().size()) {
+#if defined(CSL_HIGHSLP_TESTING)
+                const auto basis_status=reject_next_warm_basis_installation_for_test
+                    ? (reject_next_warm_basis_installation_for_test=false,HighsStatus::kError)
+                    : h.setBasis(previous_basis->basis);
+#else
                 const auto basis_status=h.setBasis(previous_basis->basis);
+#endif
                 warm_accepted=basis_status==HighsStatus::kOk;
                 raw << "\nwarm_start.install_status=" << static_cast<int>(basis_status)
                     << "\nwarm_start.accepted=" << (warm_accepted?"true":"false");
-                if(!warm_accepted) {
-                    raw << "\nwarm_start.fallback=cold_after_rejection";
-                    require_option(h.clearModel());
-                    loaded_.reset();
-                    const auto load_start=std::chrono::steady_clock::now();
-                    const auto cold_status=h.passModel(translate(p));
-                    raw << "\nnative.cold_reload_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-load_start).count()
-                        << "\nnative.cold_reload_status=" << static_cast<int>(cold_status);
-                    if(cold_status==HighsStatus::kError) {
-                        result.raw_diagnostics=raw.str()+"\nnative_run=false\nnative.info=unavailable";
-                        return result;
-                    }
-                    loaded_=p;
-                }
+                if(!warm_accepted) return retry_cold("cold_after_rejection");
             } else raw << "\nwarm_start.accepted=false\nwarm_start.fallback=cold_no_compatible_basis";
             raw << "\nwarm_start.setup_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-warm_setup_start).count();
         } else raw << "\nwarm_start.enabled=false\nwarm_start.cache_state=disabled";
@@ -357,15 +367,7 @@ class HighsLPWorkspace final : public LPWorkspace {
                 // A basis accepted by HiGHS is still only a hint. If its result
                 // is not an independently checked optimum, discard that solver
                 // instance and solve once with a fresh, cold native solver.
-                raw << "\nwarm_start.fallback=cold_after_invalid_result";
-                const auto warm_diagnostics=raw.str();
-                native_.reset();
-                loaded_.reset();
-                warm_basis_.reset();
-                auto cold_result=solve_native(p,c);
-                if (auto* cold_program=std::get_if<ProgramResult>(&cold_result))
-                    cold_program->raw_diagnostics += "\nwarm_start.retry=cold_after_invalid_result\nwarm_start.rejected_attempt_diagnostics:\n" + warm_diagnostics;
-                return cold_result;
+                return retry_cold("cold_after_invalid_result");
             }
         }
         raw << "\ncertificates=" << (std::holds_alternative<ExactFarkasEvidence>(result.outcome.support)?"exact_farkas":"unavailable")
@@ -388,6 +390,11 @@ public:
     std::unique_ptr<LPWorkspace> make_workspace() const override { return std::make_unique<HighsLPWorkspace>(options_); }
 };
 } // namespace
+#if defined(CSL_HIGHSLP_TESTING)
+void test_support::reject_next_warm_basis_installation() noexcept {
+    reject_next_warm_basis_installation_for_test=true;
+}
+#endif
 HighsLPRegistrationResult make_highs_registration(HighsLPOptions options) {
     if (options.simplex_iteration_limit && *options.simplex_iteration_limit > static_cast<std::size_t>(kHighsIInf))
         return diagnostic(DiagnosticCode::unsupported,"highs.simplex_iteration_limit","Native integer width exceeded");

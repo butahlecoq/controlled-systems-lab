@@ -29,8 +29,11 @@ if(TARGET CSL::highs_lp)
 endif()
 
 if(TARGET CSL::highs_lp)
+  target_compile_definitions(csl_highs_lp PRIVATE CSL_HIGHSLP_TESTING)
+  target_include_directories(csl_highs_lp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/support)
   add_executable(highs_lp_tests tests/contract/lp/highs_tests.cpp)
   target_link_libraries(highs_lp_tests PRIVATE CSL::highs_lp doctest::doctest Threads::Threads)
+  target_include_directories(highs_lp_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/support)
   target_compile_definitions(highs_lp_tests PRIVATE
       "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\"")
   add_test(NAME highs_lp_tests COMMAND highs_lp_tests)
