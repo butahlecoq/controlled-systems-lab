@@ -67,6 +67,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("not an execution trace", page)
         self.assertIn("duplicate of point 0", page)
         self.assertIn("binary64", page)
+        self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
         parser.feed(page)
         for link in parser.links:

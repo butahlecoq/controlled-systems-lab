@@ -171,8 +171,10 @@ def section(example, number):
                  "Qhull/HiGHS outputs match this fixture within absolute tolerance 1e−7; they are numerical geometry, "
                  "not a validated exact enclosure. Vertex row order is not a promised cyclic boundary order.")
         option, target = "GEO04", "csl_geo04_intersection_report"
-        flags = " -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON"
-        driver = "benchmarks/reporting/geo04/polyhedral_intersection_driver.cpp"
+        # This frozen harness predates optional-adapter flags and the later
+        # move to benchmarks/reporting. Reproduce its actual historical tree.
+        flags = ""
+        driver = "reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp"
         extra = "<p>The complete inputs below use A·[x,y] ≤ b for each shape. The driver links CSL::polyhedral, CSL::qhull_conversion and CSL::highs_lp.</p>"
     command = (f'cmake -S . -B build/visual-{option.lower()} -DCMAKE_BUILD_TYPE=Release '
                f'-DBUILD_TESTING=OFF -DCSL_BUILD_{option}_REPORT=ON{flags}\n'
