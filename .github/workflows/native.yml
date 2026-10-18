@@ -3,9 +3,9 @@ name: Native C++20
 on:
   push:
     branches: [main]
-    paths-ignore: ['**/*.md', 'reports/algorithm-results/**']
+    paths: ['**', '!**/*.md', '!reports/algorithm-results/**', 'reports/algorithm-results/tooling/**']
   pull_request:
-    paths-ignore: ['**/*.md', 'reports/algorithm-results/**']
+    paths: ['**', '!**/*.md', '!reports/algorithm-results/**', 'reports/algorithm-results/tooling/**']
   workflow_dispatch:
 
 permissions:

@@ -16,7 +16,9 @@ feature-branch builds without deleting those checks.
 | Manual `workflow_dispatch` | Full native validation, regardless of paths |
 | Push of a tag | No native run; release validation is a separate delivery decision |
 
-The path exclusions are deliberately narrow: `**/*.md` and saved result bundles.
+The ordered path filters exclude `**/*.md` and saved result bundles, then
+explicitly re-include `reports/algorithm-results/tooling/**`: that directory
+contains executable measurement drivers and must retain native validation.
 Python tools, fixture JSON outside saved bundles, dependency pins/patches and the
 workflow itself retain native validation. Markdown-only changes to report guides
 do not invoke the report workflow unless its own path rules include them.
