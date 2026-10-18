@@ -127,6 +127,11 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Certificate | Evidence for a specific feasibility, inclusion or optimality claim; identify what it certifies |
 | Validated numerics | Numerical procedures accounting for rounding/truncation to justify bounds |
 | Residual | Measured mismatch in equations/constraints; tolerance-based evidence alone is not universal proof |
+| Represented-dyadic input | Finite IEEE 754 binary64 value interpreted as the exact dyadic rational represented by its bits in the resolved computational model; does not imply equivalence to an authored decimal or physical value |
+| Authored-real claim | Claim about intended source values or a physical model rather than the stored binary values; requires separately identified conversion, uncertainty, or model-error evidence |
+| Tolerance profile | Versioned identity for one method profile's residual quantities, units/scales, requested/effective tolerances, and independent acceptance criteria |
+| Numerical completeness support | Profile-specific evidence accepted by a compiled coverage verifier; it supports a numerical claim and is not an exact or validated certificate |
+| Coverage verifier | Selected compiled profile component that checks the binding, soundness, and coverage evidence for a complete-family claim |
 | Historical baseline | Published result with original assumptions and implementation context |
 | Corrected reference | Baseline after a documented correction; separate from original reported values |
 | Reproduction | Independent rerun matching an identified problem/environment sufficiently to compare |
