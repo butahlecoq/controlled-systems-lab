@@ -131,4 +131,3 @@ The current sources establish why these decisions matter and show established al
 - Kevin K. H. Cheung, Ambros Gleixner, and Daniel E. Steffy, [“Verifying Integer Programming Results”](https://arxiv.org/abs/1611.08832), 2016; revised 2019, arXiv:1611.08832.
 - Stefan Szeider, [“VIPR Certificate Construction from Black-Box ILP Solvers”](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2026.52), CP 2026, LIPIcs 379, 52:1–52:14, DOI 10.4230/LIPIcs.CP.2026.52.
 - Qhull project, [Precision issues](https://www.qhull.org/html/qh-impre.htm), Qhull 8.0.2 manual.
-
