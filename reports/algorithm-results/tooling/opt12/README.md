@@ -17,14 +17,14 @@ if ($LASTEXITCODE -ne 0) { throw 'OPT-12 Release build failed' }
 $sourceCommit = git rev-parse HEAD
 python scripts/reports/opt12_collect.py `
   --exe build/dev-windows/Release/csl_opt12_warm_start_measure.exe `
-  --source-commit $sourceCommit --build-log $buildLog `
+  --source-commit $sourceCommit --build build/dev-windows `
   --repetitions 7 --out build/dev-windows/opt12-collection
 python scripts/reports/opt12_render.py `
   --records build/dev-windows/opt12-collection/records.json `
   --out "reports/algorithm-results/opt12-$($sourceCommit.Substring(0,12))"
 ```
 
-The collector requires the exact clean source commit, a Release executable, a new destination, and complete verified trial rows. It retains raw JSONL, raw stderr, per-trial CSV and JSON, host snapshots, build log, measurement command and hashes. A failed collection is retained for diagnosis and must not be described as a successful comparison. The renderer consumes only saved records and has no solver dependency.
+The collector requires the exact clean source commit, the CMake File API Release target artifact, a new destination, and complete verified trial rows. It retains raw JSONL, raw stderr, the executable, build graph and log, per-trial CSV and JSON, system-load snapshots, measurement command and hashes. Timed-out or invalid collections remain available for diagnosis but the renderer rejects them. The renderer verifies raw/typed consistency and all retained evidence hashes, then consumes only saved records without solver access.
 
 ## Timing and scope
 

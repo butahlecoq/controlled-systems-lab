@@ -269,7 +269,10 @@ class HighsLPWorkspace final : public LPWorkspace {
                 warm_accepted=basis_status==HighsStatus::kOk;
                 raw << "\nwarm_start.install_status=" << static_cast<int>(basis_status)
                     << "\nwarm_start.accepted=" << (warm_accepted?"true":"false");
-                if(!warm_accepted) return retry_cold("cold_after_rejection");
+                if(!warm_accepted) {
+                    raw << "\nwarm_start.setup_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-warm_setup_start).count();
+                    return retry_cold("cold_after_rejection");
+                }
             } else raw << "\nwarm_start.accepted=false\nwarm_start.fallback=cold_no_compatible_basis";
             raw << "\nwarm_start.setup_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-warm_setup_start).count();
         } else raw << "\nwarm_start.enabled=false\nwarm_start.cache_state=disabled";
