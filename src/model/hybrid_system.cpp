@@ -313,6 +313,42 @@ Diagnostics check_hybrid_profile(const HybridSystem& system, const HybridRequest
     return errors;
 }
 
+HybridCapabilityReportResult report_hybrid_capability(const HybridSystem& system,
+    const HybridRequest& request,HybridEnumerationLimits limits,std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid capability reporting was cancelled before inspection"};
+    HybridCapabilityReport report;
+    report.horizon=system.horizon;
+    report.mode_count=system.modes.size();
+    report.edge_count=system.edges.size();
+    report.limits=limits;
+    report.modes.reserve(system.modes.size());
+    for(const auto& mode:system.modes) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid capability reporting was cancelled while collecting mode dimensions"};
+        report.maximum_state_dimension=std::max(report.maximum_state_dimension,mode.state_dimension);
+        report.maximum_control_dimension=std::max(report.maximum_control_dimension,mode.control_dimension);
+        report.modes.push_back({mode.id,mode.state_dimension,mode.control_dimension});
+    }
+    report.diagnostics=check_hybrid_profile(system,request);
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid capability reporting was cancelled during profile admission"};
+    report.profile_admitted=report.diagnostics.empty();
+    if(!report.profile_admitted) return report;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid capability reporting was cancelled before path enumeration"};
+    const auto paths=enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,limits,cancellation);
+    if(const auto* stopped=std::get_if<OperationStopped>(&paths)) return *stopped;
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&paths)) {
+        report.diagnostics.push_back(*diagnostic);
+        return report;
+    }
+    report.complete_allowed_path_count=std::get<std::vector<HybridPath>>(paths).size();
+    report.path_enumeration_completed=true;
+    return report;
+}
+
 HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
     const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits,
     std::stop_token cancellation) {

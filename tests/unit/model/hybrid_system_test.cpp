@@ -176,6 +176,55 @@ TEST_CASE("profile admission accepts rectangular reset relations between differe
     CHECK(check_hybrid_profile(system,request).empty());
 }
 
+TEST_CASE("hybrid capability report records request dimensions and complete path count") {
+    const auto [system,request]=dimension_changing_example();
+    const auto reported=report_hybrid_capability(system,request,{1,4});
+    REQUIRE(std::holds_alternative<HybridCapabilityReport>(reported));
+    const auto& report=std::get<HybridCapabilityReport>(reported);
+    CHECK(report.profile_admitted);
+    CHECK(report.path_enumeration_completed);
+    CHECK(report.horizon==1);
+    CHECK(report.mode_count==2);
+    CHECK(report.edge_count==1);
+    CHECK(report.maximum_state_dimension==2);
+    CHECK(report.maximum_control_dimension==1);
+    REQUIRE(report.modes.size()==2);
+    CHECK(report.modes[0].mode==HybridModeId{"source"});
+    CHECK(report.modes[0].state_dimension==1);
+    CHECK(report.modes[0].control_dimension==1);
+    REQUIRE(report.complete_allowed_path_count);
+    CHECK(*report.complete_allowed_path_count==1);
+    CHECK(report.diagnostics.empty());
+}
+
+TEST_CASE("hybrid capability report discloses path-limit failure without a partial count") {
+    const auto [system,request]=dimension_changing_example();
+    const auto reported=report_hybrid_capability(system,request,{1,0});
+    REQUIRE(std::holds_alternative<HybridCapabilityReport>(reported));
+    const auto& report=std::get<HybridCapabilityReport>(reported);
+    CHECK(report.profile_admitted);
+    CHECK_FALSE(report.path_enumeration_completed);
+    CHECK_FALSE(report.complete_allowed_path_count);
+    REQUIRE(report.diagnostics.size()==1);
+    CHECK(report.diagnostics[0].field=="hybrid.paths.limit");
+}
+
+TEST_CASE("hybrid capability report preserves profile rejection and cancellation") {
+    auto [system,request]=dimension_changing_example();
+    system.modes[0].control_sets.clear();
+    const auto rejected=report_hybrid_capability(system,request,{1,4});
+    REQUIRE(std::holds_alternative<HybridCapabilityReport>(rejected));
+    CHECK_FALSE(std::get<HybridCapabilityReport>(rejected).profile_admitted);
+    CHECK_FALSE(std::get<HybridCapabilityReport>(rejected).path_enumeration_completed);
+    CHECK_FALSE(std::get<HybridCapabilityReport>(rejected).diagnostics.empty());
+
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    const auto stopped=report_hybrid_capability(system,request,{1,4},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(stopped));
+    CHECK(std::get<OperationStopped>(stopped).reason==StopReason::cancelled);
+}
+
 TEST_CASE("profile admission checks source guard and source-plus-target reset dimensions") {
     auto [system,request] = dimension_changing_example();
     system.edges[0].guards[0] = UniversalSet{2};

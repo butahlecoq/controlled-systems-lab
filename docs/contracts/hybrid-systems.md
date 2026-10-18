@@ -194,6 +194,16 @@ and retained branch counts, provider identities, resource limits/observations,
 and rejected capabilities. Any pruning requires a reviewed proof that it
 preserves all optimal branches and their continuous relations.
 
+The current model-level `HybridCapabilityReport` reports the requested horizon,
+mode and transition counts, each mode's state/control dimensions, maxima across
+the mode catalogue, profile-admission diagnostics, caller path/horizon limits,
+and a complete allowed-path count only when enumeration finishes within those
+limits. A missing count means path enumeration did not complete; a reported
+count is request-scoped and does not imply that relation composition, solver
+execution, or family verification is supported or scalable. Per-operation
+provider/resource observations and generated/retained branch counts remain
+responsibilities of the synthesis and adapter reports.
+
 ## Independent test oracle requirements
 
 The exhaustive oracle independently enumerates every permitted mode/edge
