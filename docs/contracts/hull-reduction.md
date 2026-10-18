@@ -133,3 +133,42 @@ points used by those queries. `zero_width_coordinates` and
 recursive QuickHull counter is reported. Nonfinite, mismatched, or unsafe
 box arithmetic falls back to input-order streaming and is still validated by
 the shared reducer.
+
+### Recursive split-and-merge hull strategy
+
+`make_recursive_hull_reducer_registration(lp_provider)` registers the new
+`csl.hull.recursive-split-merge` strategy. The supplied LP registration is the
+selected membership backend; the strategy creates its own exclusive LP
+workspaces from that registration. Its deterministic partition policy sorts
+original point IDs by lexicographic coordinate order, using the original ID
+only to break coordinate-identical ties, then splits each node at the midpoint
+of that order. The leaf threshold is fixed at 16 points. A node with at most
+that many points is reduced with the existing exact-certified reducer.
+
+For any finite point sets `A` and `B`, `conv(A union B) =
+conv(conv(A) union conv(B))`. A leaf reduction retains a subset with the same
+convex hull as that leaf. Applying the identity at each internal node therefore
+preserves the input hull through every merge. The merge candidate set is the
+union of the child retained IDs; the existing reducer checks its candidates
+with exact dyadic convex-combination certificates, so uncertain outcomes remain
+retained. Certificate IDs always refer to the original `PointCloud`.
+
+When the common `ResourcePolicy` allows at least two outer workers, the root's
+two child subtrees run concurrently, each with a separately created LP
+workspace. Deeper recursion within each subtree is sequential; the merge runs
+after both children finish and reuses one now-idle child workspace. With one
+outer worker, both subtrees still have exclusive workspaces and run in
+deterministic left-then-right order. Each workspace receives the unchanged
+caller `ExecutionContext`, preserving the shared resource budget, deadline,
+cancellation token and numerical policy. No nested parallel scheduling is
+used.
+
+`RecursiveReductionMetrics` records leaf and merge node counts, LP calls
+separately for leaves and merges, the maximum number of points present in any
+merge candidate set, the number of concurrently executed child subtrees, and
+measured root-level parallel overhead. Parallel overhead is the root elapsed
+wall time minus the longer of the two measured child-subtree wall times,
+clamped to zero; it includes scheduling, synchronization and merge work. These
+counters describe one execution and do not imply a general speedup. If child
+workspace creation or a recursive child returns diagnostics, the strategy
+returns diagnostics without publishing a partial reduction.
