@@ -2,7 +2,7 @@
 
 Issue: [REVIEW-02 / #70](https://github.com/butahlecoq/controlled-systems-lab/issues/70)  
 Reviewed base: `599701fb1bd3174d10c9b5d95e9b843d57f67623` (`origin/main`, 2026-10-18)  
-Implementation head initially reviewed: `2ee69e5bce14b14aa28cefc208e1bc3686549679`  
+Implementation head initially reviewed: `2ee69e5bce14b14aa28cefc208e1bc3686549679`
 Report corrections checked at PR head: `55cbb15679c7669e57f7545493f6229ceb772a78` (implementation source unchanged)
 Scope: implemented polyhedral geometry, hull membership/reduction, H/V conversion, LP/convex contracts, registration and approximation guarantee routes.
 
