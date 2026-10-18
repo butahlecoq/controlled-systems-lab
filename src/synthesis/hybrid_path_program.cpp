@@ -108,6 +108,13 @@ HybridPortfolioExecution execute_hybrid_path_programs(
             auto pipeline=std::get<registry::PreparedPipeline<Port>>(std::move(prepared));
             const auto provenance=pipeline.provenance();
             execution.providers.assign(provenance.begin(),provenance.end());
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                execution.termination=context.cancellation.stop_requested()?
+                    Termination::cancelled:Termination::resource_limit;
+                complete=false;
+                return;
+            }
             auto workspaces=pipeline.create();
             auto outcome=std::get<0>(workspaces)->run(context);
             if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
@@ -117,11 +124,7 @@ HybridPortfolioExecution execute_hybrid_path_programs(
                 return;
             }
             auto result=std::get<ProgramResult>(std::move(outcome));
-            Diagnostics diagnostics;
-            if constexpr(std::is_same_v<Program,LinearProgram>)
-                diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
-            else
-                diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
+            auto diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
             if(!diagnostics.empty()) {
                 execution.termination=Termination::contract_rejected;
                 execution.diagnostics=std::move(diagnostics);
