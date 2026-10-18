@@ -265,7 +265,8 @@ TEST_CASE("exactly empty axis-aligned H boxes certify only empty conversion outp
     CHECK(std::get<sets::VRepresentation>(output.representation()).vertices.rows()==0);
 
     const auto h_data=take(sets::from_handle(input));
-    const auto& h=std::get<sets::HRepresentation>(h_data.representation());
+    const auto h_representation=h_data.representation();
+    const auto& h=std::get<sets::HRepresentation>(h_representation);
     CHECK(std::get<bool>(geometry::detail::exact_h_box_is_empty(h)));
     const auto empty_v=take(sets::from_handle(make_v_handle("empty-box-v",3,Matrix{0,3,{}})));
     const auto empty_certificate=geometry::detail::certify_h_box(
@@ -281,13 +282,15 @@ TEST_CASE("exactly empty axis-aligned H boxes certify only empty conversion outp
 
 TEST_CASE("box certificate rejects omitted corners and outside points but accepts interior vertices") {
     const auto h_data=take(sets::from_handle(unit_box_h("cube-h",3)));
-    const auto& h=std::get<sets::HRepresentation>(h_data.representation());
+    const auto h_representation=h_data.representation();
+    const auto& h=std::get<sets::HRepresentation>(h_representation);
     Vector corners;
     for (std::size_t mask=0;mask<8;++mask)
         for (std::size_t axis=0;axis<3;++axis)
             corners.push_back((mask&(std::size_t{1}<<axis))?1.0:-1.0);
     auto vertices=take(sets::from_handle(make_v_handle("cube-v",3,Matrix{8,3,corners})));
-    const auto& v=std::get<sets::VRepresentation>(vertices.representation());
+    const auto v_representation=vertices.representation();
+    const auto& v=std::get<sets::VRepresentation>(v_representation);
     const auto exact=geometry::detail::certify_h_box(h,v);
     REQUIRE(std::holds_alternative<double>(exact));
     CHECK(std::get<double>(exact)==0.0);
