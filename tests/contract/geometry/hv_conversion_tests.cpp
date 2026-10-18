@@ -4,7 +4,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/sets/data.hpp>
 #include "../../../src/geometry/conversion/exact_h_interval.hpp"
-#include "../../../src/geometry/conversion/exact_h_rectangle.hpp"
+#include "../../../src/geometry/conversion/exact_h_box.hpp"
 #include <algorithm>
 #include <array>
 #include <bit>
@@ -63,6 +63,15 @@ SetHandle make_v_handle(std::string id,std::size_t n,Matrix vertices,Matrix rays
     if (rays.cols==0) rays={0,n,{}};
     return take(sets::make_v({{std::move(id)},n,{}},
         {take(numeric::snapshot(vertices)),take(numeric::snapshot(rays))})).as_handle();
+}
+SetHandle unit_box_h(std::string id,std::size_t n) {
+    Matrix a{2*n,n,Vector(2*n*n,0.0)};
+    Vector b(2*n,1.0);
+    for (std::size_t axis=0;axis<n;++axis) {
+        a.values[(2*axis)*n+axis]=1.0;
+        a.values[(2*axis+1)*n+axis]=-1.0;
+    }
+    return make_h_handle(std::move(id),n,std::move(a),std::move(b));
 }
 SetTransformOutcome convert(SetHandle input,std::string output,std::string tag,QhullOptions options={}) {
     auto conversion=take(make_qhull_registration(take(make_highs_registration()),std::move(options)));
@@ -147,19 +156,19 @@ TEST_CASE("planar rectangle certificate rejects an omitted corner and oblique ro
         Matrix{3,2,{0,0, 1,0, 0,1}})));
     const auto h_rep=std::get<sets::HRepresentation>(h.representation());
     const auto v_rep=std::get<sets::VRepresentation>(omitted.representation());
-    const auto missing_corner=geometry::detail::certify_h_rectangle(h_rep,v_rep);
+    const auto missing_corner=geometry::detail::certify_h_box(h_rep,v_rep);
     CHECK(std::holds_alternative<std::string>(missing_corner));
 
     const auto outside=take(sets::from_handle(make_v_handle("outside-box",2,
         Matrix{5,2,{0,0, 1,0, 0,1, 1,1, 2,0}})));
-    const auto outside_result=geometry::detail::certify_h_rectangle(
+    const auto outside_result=geometry::detail::certify_h_box(
         h_rep,std::get<sets::VRepresentation>(outside.representation()));
     CHECK(std::holds_alternative<std::string>(outside_result));
 
     const auto oblique=make_h_handle("triangle-h",2,
         Matrix{3,2,{1,0, 0,1, -1,-1}},Vector{1,1,0});
     const auto oblique_data=take(sets::from_handle(oblique));
-    const auto oblique_result=geometry::detail::certify_h_rectangle(
+    const auto oblique_result=geometry::detail::certify_h_box(
         std::get<sets::HRepresentation>(oblique_data.representation()),v_rep);
     CHECK(std::holds_alternative<std::string>(oblique_result));
 }
@@ -224,6 +233,82 @@ TEST_CASE("bounded planar H to V conversion publishes checked global coverage") 
     REQUIRE(result.evidence.error_bound.has_value());
     CHECK(result.evidence.error_bound->metric.value == "csl.geometry.metric.l-infinity");
     CHECK(result.evidence.error_bound->bound == 0.0);
+}
+
+TEST_CASE("higher dimensional axis-aligned boxes receive exact global coverage certificates") {
+    const auto input=unit_box_h("unit-cube",3);
+    const auto req=request(input,"csl.polyhedron.v","unit-cube-coverage");
+    const auto outcome=convert(input,"csl.polyhedron.v","unit-cube-coverage");
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    const auto& result=std::get<OperationResult>(outcome);
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->metric.value=="csl.geometry.metric.l-infinity");
+    CHECK(result.evidence.error_bound->bound==0.0);
+    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& assumption) { return assumption.find("axis-aligned box")!=std::string::npos; }));
+}
+
+TEST_CASE("box certificate rejects omitted corners and outside points but accepts interior vertices") {
+    const auto h_data=take(sets::from_handle(unit_box_h("cube-h",3)));
+    const auto& h=std::get<sets::HRepresentation>(h_data.representation());
+    Vector corners;
+    for (std::size_t mask=0;mask<8;++mask)
+        for (std::size_t axis=0;axis<3;++axis)
+            corners.push_back((mask&(std::size_t{1}<<axis))?1.0:-1.0);
+    auto vertices=take(sets::from_handle(make_v_handle("cube-v",3,Matrix{8,3,corners})));
+    const auto& v=std::get<sets::VRepresentation>(vertices.representation());
+    const auto exact=geometry::detail::certify_h_box(h,v);
+    REQUIRE(std::holds_alternative<double>(exact));
+    CHECK(std::get<double>(exact)==0.0);
+
+    auto missing_corners=corners;
+    missing_corners.resize(21);
+    auto omitted=take(sets::from_handle(make_v_handle("cube-missing-corner",3,Matrix{7,3,missing_corners})));
+    const auto missing=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(omitted.representation()));
+    CHECK(std::holds_alternative<std::string>(missing));
+
+    auto with_interior_points=corners;
+    with_interior_points.insert(with_interior_points.end(),{0.0,0.0,0.0});
+    auto with_interior=take(sets::from_handle(make_v_handle("cube-with-interior",3,Matrix{9,3,with_interior_points})));
+    const auto interior=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(with_interior.representation()));
+    REQUIRE(std::holds_alternative<double>(interior));
+    CHECK(std::get<double>(interior)==0.0);
+
+    with_interior_points.insert(with_interior_points.end(),{2.0,0.0,0.0});
+    auto outside=take(sets::from_handle(make_v_handle("cube-outside-point",3,Matrix{10,3,with_interior_points})));
+    const auto out=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(outside.representation()));
+    CHECK(std::holds_alternative<std::string>(out));
+}
+
+TEST_CASE("box certificate handles degenerate axes and bounds corner enumeration") {
+    const auto h=make_h_handle("flat-box",3,
+        Matrix{6,3,{1,0,0, -1,0,0, 0,1,0, 0,-1,0, 0,0,1, 0,0,-1}},
+        Vector{1,1,0,0,1,1});
+    Vector corners;
+    for (std::size_t mask=0;mask<4;++mask) {
+        corners.push_back((mask&1)?1.0:-1.0);
+        corners.push_back(0.0);
+        corners.push_back((mask&2)?1.0:-1.0);
+    }
+    const auto h_data=take(sets::from_handle(h));
+    const auto v_data=take(sets::from_handle(make_v_handle("flat-box-v",3,Matrix{4,3,corners})));
+    const auto degenerate=geometry::detail::certify_h_box(
+        std::get<sets::HRepresentation>(h_data.representation()),
+        std::get<sets::VRepresentation>(v_data.representation()));
+    REQUIRE(std::holds_alternative<double>(degenerate));
+    CHECK(std::get<double>(degenerate)==0.0);
+
+    const auto oversized=make_h_handle("oversized-box",13,Matrix{0,13,{}},Vector{});
+    const auto oversized_data=take(sets::from_handle(oversized));
+    const auto empty_v=take(sets::from_handle(make_v_handle("oversized-v",13,Matrix{0,13,{}})));
+    const auto declined=geometry::detail::certify_h_box(
+        std::get<sets::HRepresentation>(oversized_data.representation()),
+        std::get<sets::VRepresentation>(empty_v.representation()));
+    CHECK(std::holds_alternative<std::string>(declined));
 }
 
 TEST_CASE("independent Qhull workspaces reach the native call boundary together") {
