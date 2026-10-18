@@ -2,6 +2,8 @@
 #include <doctest/doctest.h>
 #include <csl/artifacts/run_statistics.hpp>
 #include <csl/registry/registry.hpp>
+#include <csl/geometry/approximation.hpp>
+#include <csl/sets/data.hpp>
 #include <csl/execution/observability.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <nlohmann/json.hpp>
@@ -47,10 +49,28 @@ using namespace csl;
 namespace ar = csl::artifacts;
 namespace ob = csl::execution::observability;
 namespace {
+class ArtifactApproximationWorkspace final : public SetApproximatorWorkspace {
+    OperationResult result_;
+public:
+    explicit ArtifactApproximationWorkspace(OperationResult result):result_(std::move(result)){}
+    SetTransformOutcome approximate(const ApproximationRequest&,const ExecutionContext&) override {
+        return result_;
+    }
+};
 template<class T,class... E> T accepted(std::variant<T,E...> value) {
     const auto* error=std::get_if<ar::ArtifactError>(&value);
     INFO((error?error->path+": "+error->message:std::string{}));
     REQUIRE(std::holds_alternative<T>(value));return std::get<T>(std::move(value));
+}
+SetHandle relation_fixture_set(SetRelation relation,bool output,std::string id) {
+    const sets::Description description{{std::move(id)},1,{"x"}};
+    if(output && relation==SetRelation::inner)
+        return std::get<sets::SetData>(sets::make_empty(description)).as_handle();
+    if(output && relation==SetRelation::outer)
+        return std::get<sets::SetData>(sets::make_universal(description)).as_handle();
+    const auto point=numeric::snapshot_vector(Vector{1.0});
+    return std::get<sets::SetData>(sets::make_singleton(description,
+        std::get<numeric::VectorView>(point))).as_handle();
 }
 ar::ConfigurationInput configuration() {
     ar::ConfigurationInput c;
@@ -812,8 +832,39 @@ TEST_CASE("canonical relation evidence and requested assurance remain independen
     for(const auto relation:{SetRelation::equivalent,SetRelation::inner,SetRelation::outer,SetRelation::heuristic}){
         auto record=owner.description();auto collected=record.statistics.description();auto& descriptor=collected.spans[0].descriptor;
         descriptor.relation=relation;descriptor.requested_assurance=Assurance::validated;descriptor.applied_assurance=ar::Unavailable{ar::MissingReason::not_supported,"no checked verifier"};
-        EvidenceSupport support=relation==SetRelation::heuristic?EvidenceSupport{Unestablished{}}:EvidenceSupport{NumericalCheck{0,0,0,{"literal-verifier"}}};
-        descriptor.relation_evidence=std::make_shared<const GeometryEvidence>(GeometryEvidence{{{record.problem,{"request"},{"reference"}},{{"input/left"},{"input/right"}}},GeometryClaimScope::set_relation,support,{},{}});
+        GeometryEvidence evidence{{{record.problem,{"request"},{"reference"}},{{"input/left"},{"input/right"}}},
+            GeometryClaimScope::set_relation,Unestablished{},{},{}};
+        if(relation!=SetRelation::equivalent) {
+            const auto input=relation_fixture_set(relation,false,"input/source");
+            const auto output=relation_fixture_set(relation,true,"output/candidate");
+            const ApproximationRequest query{{record.problem,{"request"},{"reference"}},input,
+                output.metadata.representation,relation,2,Assurance::numerical};
+            GeometryEvidence provider_evidence{{query.identity,{input.id}},GeometryClaimScope::set_relation,
+                Unestablished{},{},{}};
+            OperationResult provider_result{output,relation,std::move(provider_evidence)};
+            registry::Registry<registry::ApproximationPort> providers;
+            const auto added=providers.add({{{"artifact.approximation"},"1"},
+                [](const ApproximationRequest& request,const registry::Requirements&) -> registry::Capability {
+                    registry::Output offer;offer.representation=request.output;offer.relation=request.direction;
+                    return registry::Offer{offer};
+                },
+                [provider_result](const ApproximationRequest&) {
+                    return std::make_unique<ArtifactApproximationWorkspace>(provider_result);
+                }});
+            REQUIRE_FALSE(added.has_value());
+            const auto outcome=geometry::approximation::run_registered(providers,
+                { {"artifact.approximation"},std::string{"1"}},query,ExecutionContext{});
+            if(relation==SetRelation::heuristic) {
+                REQUIRE(std::holds_alternative<geometry::approximation::HeuristicApproximation>(outcome));
+                evidence=std::get<geometry::approximation::HeuristicApproximation>(outcome).result.evidence;
+            } else {
+                REQUIRE(std::holds_alternative<geometry::approximation::EnclosedApproximation>(outcome));
+                evidence=std::get<geometry::approximation::EnclosedApproximation>(outcome).result.evidence;
+            }
+            CHECK(evidence.reference.identity==query.identity);
+            CHECK(evidence.reference.inputs==std::vector<SetId>{input.id});
+        }
+        descriptor.relation_evidence=std::make_shared<const GeometryEvidence>(std::move(evidence));
         record.statistics=accepted(ar::publish_collection(collected));const auto result=accepted(ar::decode_run(accepted(ar::encode_run(accepted(ar::publish_run({integrator_problem(),record}))))));
         const auto& actual=result.description().statistics.description().spans[0].descriptor;
         CHECK(actual.relation==relation);CHECK(actual.requested_assurance==Assurance::validated);CHECK(std::get<ar::Unavailable>(actual.applied_assurance).reason==ar::MissingReason::not_supported);
@@ -821,7 +872,10 @@ TEST_CASE("canonical relation evidence and requested assurance remain independen
         CHECK(actual.relation_evidence->reference.identity.problem==record.problem);
         CHECK(actual.relation_evidence->reference.identity.request==RequestId{"request"});
         CHECK(actual.relation_evidence->reference.identity.ideal_output==ReferenceId{"reference"});
-        CHECK(actual.relation_evidence->reference.inputs==std::vector<SetId>{SetId{"input/left"},SetId{"input/right"}});
+        if(relation==SetRelation::equivalent)
+            CHECK(actual.relation_evidence->reference.inputs==std::vector<SetId>{SetId{"input/left"},SetId{"input/right"}});
+        else
+            CHECK(actual.relation_evidence->reference.inputs==std::vector<SetId>{SetId{"input/source"}});
     }
 }
 TEST_CASE("pin wire variants are closed and semantic option changes leave mathematics unchanged") {

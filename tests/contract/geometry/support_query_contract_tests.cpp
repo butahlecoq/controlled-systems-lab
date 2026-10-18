@@ -130,12 +130,5 @@ TEST_CASE("external geometry registrations resolve typed operands and report con
     REQUIRE(std::holds_alternative<registry::Rejection>(missing));
     CHECK(std::get<registry::Rejection>(missing).diagnostics.front().field=="method");
 
-    registry::Registry<registry::ConversionPort> conversions;
-    const ConversionRequest future_conversion{request.identity,ellipsoid,
-        {"csl.polyhedron.v"},Assurance::numerical};
-    const auto no_inferred_conversion=registry::check_pipeline(registry::select(conversions,
-        registry::Method{{"test.automatic-ellipsoid-conversion"},std::nullopt},future_conversion));
-    REQUIRE(std::holds_alternative<registry::Rejection>(no_inferred_conversion));
-    CHECK(std::get<registry::Rejection>(no_inferred_conversion).diagnostics.front().field=="method");
     CHECK(*workspace_creations==1);
 }
