@@ -4,6 +4,9 @@ Before delivering public API, dependency, installation, example or publication
 changes, record release/package impact using the [delivery guide](../agents/delivery.md).
 Keep the installed-consumer checks below as the package validation gate.
 
+The [native CI event policy](ci.md) describes PR/main validation, superseded-run
+cancellation and documentation-only exclusions.
+
 Use the canonical [glossary](../research/glossary.md), [current module composition](../architecture/framework-composition.md)
 and [live issue tracker](../agents/issue-tracker.md). Read the live issue and its
 closed prerequisites before choosing a module. Mathematical data support does not
