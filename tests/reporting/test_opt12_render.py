@@ -168,6 +168,17 @@ class Opt12RenderTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "source-mapped profile has missing samples"):
                     opt12_render.parse_evidence(records)
 
+    def test_source_mapped_profile_percentage_must_match_sample_ratio(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records = fixture(root)
+            profile_path = root / "limiter-profile.json"
+            profile = json.loads(profile_path.read_text(encoding="utf-8"))
+            profile["dominant_sampled_stacks"][0]["percent_of_target_samples"] = 5.0
+            profile_path.write_text(json.dumps(profile), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "source-mapped profile has missing samples"):
+                opt12_render.parse_evidence(records)
+
     def test_rehashed_noncanonical_fixture_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

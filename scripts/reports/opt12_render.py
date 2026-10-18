@@ -88,6 +88,9 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
                    or type(row.get("percent_of_target_samples")) not in (int, float)
                    or not math.isfinite(row["percent_of_target_samples"])
                    or not 0 <= row["percent_of_target_samples"] <= 100
+                   or not math.isclose(row["percent_of_target_samples"],
+                                       row["inclusive_hits"] * 100 / target_samples,
+                                       rel_tol=0.0, abs_tol=0.0051)
                    for row in stack_rows)):
         raise ValueError("source-mapped profile has missing samples or lost ETW events")
     with (root / "trials.csv").open(encoding="utf-8", newline="") as stream:
