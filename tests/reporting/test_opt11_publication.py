@@ -201,6 +201,24 @@ class Opt11PublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "offline ZIP mismatch"):
                 report_site.opt11.adapt(bundle)
 
+    def test_tampered_native_report_id_or_payload_digest_is_rejected(self):
+        for field, value in (("report_id", "opt11-" + "0" * 16),
+                             ("payload_sha256", "0" * 64)):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as temp:
+                bundle = self.build_native_bundle(Path(temp))
+                builder = report_site.opt11.source
+                record_path = bundle / "records.json"
+                record = json.loads(record_path.read_text(encoding="utf-8"))
+                record[field] = value
+                record_path.write_bytes(builder.json_bytes(record))
+                manifest_path = bundle / "manifest.json"
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                manifest["files"]["records.json"] = builder.digest(record_path.read_bytes())
+                manifest_path.write_bytes(builder.json_bytes(manifest))
+                (bundle.parent / (bundle.name + ".source.zip")).write_bytes(builder.zip_bytes(bundle))
+                with self.assertRaisesRegex(ValueError, "typed report differs from retained raw bytes"):
+                    report_site.opt11.adapt(bundle)
+
 
 if __name__ == "__main__":
     unittest.main()
