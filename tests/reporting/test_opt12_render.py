@@ -52,6 +52,22 @@ def fixture(root: Path) -> Path:
     executable_hash = digest(executable)
     (root / "executable.sha256").write_text(f"{executable_hash}  csl_opt12_warm_start_measure.exe\n", encoding="ascii")
     (root / "measurement-command.txt").write_text("python collect.py\n", encoding="utf-8")
+    profile_files = {"trace.etl": b"ETW trace fixture", "stack-report.html": b"<html>symbols</html>",
+                     "trace-summary.txt": b"lost events: 0\n"}
+    profile_archive_path = root / "limiter-profile-evidence.zip"
+    with zipfile.ZipFile(profile_archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, content in profile_files.items():
+            archive.writestr(name, content)
+    profile_archive = profile_archive_path.read_bytes()
+    profile = {"schema": "csl.opt12-source-mapped-profile/1", "measured_source_commit": "a" * 40,
+               "measured_cpp_sources_unchanged": True, "scope": "separate diagnostic profile",
+               "source_comparison": {"changed_paths": []},
+               "trace": {"target_process_samples": 100, "lost_events": 0, "lost_buffers": 0},
+               "dominant_sampled_stacks": [{"symbol": "Highs::run", "inclusive_hits": 80,
+                                             "percent_of_target_samples": 80.0}],
+               "artifacts": {name: digest(content) for name, content in profile_files.items()},
+               "evidence_archive_sha256": digest(profile_archive)}
+    (root / "limiter-profile.json").write_text(json.dumps(profile), encoding="utf-8")
     input_fixtures = opt12_fixtures.fixture_descriptions()
     metadata = {"schema": "csl.opt12-cost-report/1", "source_commit": "a" * 40,
                 "adapter_version": "1.1.0+highs.1.11.0", "native_solver": "HiGHS 1.11.0",
@@ -87,8 +103,10 @@ class Opt12RenderTests(unittest.TestCase):
             self.assertTrue((out / "index.html").is_file())
             page = (out / "index.html").read_text(encoding="utf-8")
             self.assertIn("Performance interpretation is inconclusive.", page)
-            self.assertIn("no separate source-mapped limiter profile was collected", page)
-            self.assertIn("The measurements do not establish that warm reuse is slower.", page)
+            self.assertIn("Separate source-mapped CPU profile", page)
+            self.assertIn("Highs::run", page)
+            self.assertIn("limiter-profile-evidence.zip", page)
+            self.assertIn("The measurements do not establish a warm-reuse advantage; they do not establish that warm reuse is slower.", page)
             self.assertIn("transfer-cost", page)
             self.assertIn("Simplex iteration counts are reported separately", page)
             self.assertIn("column 0: -1 to 1; column 99999: 1 to -2", page)
@@ -114,6 +132,25 @@ class Opt12RenderTests(unittest.TestCase):
             payload["metadata"]["input_fixtures"]["transfer-cost"]["objective_change"] = "untracked change"
             records.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "input fixture hash is invalid"):
+                opt12_render.parse_evidence(records)
+
+    def test_fixture_dimensions_must_match_canonical_scenario(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records = fixture(root)
+            payload = json.loads(records.read_text(encoding="utf-8"))
+            payload["metadata"]["input_fixtures"]["transfer-cost"]["columns"] = 99999
+            records.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "input fixture dimensions are invalid: transfer-cost"):
+                opt12_render.parse_evidence(records)
+
+    def test_source_mapped_profile_archive_must_match_its_hashes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records = fixture(root)
+            with (root / "limiter-profile-evidence.zip").open("ab") as stream:
+                stream.write(b"changed")
+            with self.assertRaisesRegex(ValueError, "profile archive hash differs"):
                 opt12_render.parse_evidence(records)
 
     def test_rehashed_noncanonical_fixture_is_rejected(self):

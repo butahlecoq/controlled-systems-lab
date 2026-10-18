@@ -6,6 +6,7 @@ import argparse
 import csv
 import hashlib
 import html
+import io
 import json
 import math
 import statistics
@@ -16,7 +17,8 @@ from opt12_fixtures import SCENARIOS, fixture_descriptions, validate_driver_fixt
 
 EVIDENCE_FILES = ("raw-events.jsonl", "raw-stderr.txt", "release-build-log.txt",
                   "build-provenance.json", "executable.sha256", "measurement.exe",
-                  "measurement-command.txt", "trials.csv")
+                  "measurement-command.txt", "trials.csv", "limiter-profile.json",
+                  "limiter-profile-evidence.zip")
 MODES = ("cold", "warm")
 TIMED_FIELDS = ("model_load_seconds", "basis_transfer_seconds", "solve_seconds")
 
@@ -47,6 +49,41 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
     validate_driver_fixture_events(events[1:])
     if len(raw_trials) + len(SCENARIOS) != len(events[1:]):
         raise ValueError("raw event stream contains an unknown OPT-12 event")
+    limiter_profile = json.loads(files["limiter-profile.json"].decode("utf-8"))
+    if (not isinstance(limiter_profile, dict)
+            or limiter_profile.get("schema") != "csl.opt12-source-mapped-profile/1"
+            or limiter_profile.get("measured_source_commit") != metadata.get("source_commit")
+            or limiter_profile.get("measured_cpp_sources_unchanged") is not True
+            or not isinstance(limiter_profile.get("source_comparison"), dict)
+            or limiter_profile["source_comparison"].get("changed_paths") != []
+            or not isinstance(limiter_profile.get("scope"), str)
+            or not isinstance(limiter_profile.get("dominant_sampled_stacks"), list)):
+        raise ValueError("separate source-mapped profile identity differs from the measured solver sources")
+    profile_archive = files["limiter-profile-evidence.zip"]
+    if limiter_profile.get("evidence_archive_sha256") != sha256(profile_archive):
+        raise ValueError("source-mapped profile archive hash differs from its metadata")
+    expected_profile_files = {"trace.etl", "stack-report.html", "trace-summary.txt"}
+    try:
+        with zipfile.ZipFile(io.BytesIO(profile_archive)) as profile_zip:
+            if set(profile_zip.namelist()) != expected_profile_files or len(profile_zip.namelist()) != len(expected_profile_files):
+                raise ValueError("source-mapped profile archive inventory differs")
+            profile_artifacts = limiter_profile.get("artifacts")
+            if not isinstance(profile_artifacts, dict) or set(profile_artifacts) != expected_profile_files:
+                raise ValueError("source-mapped profile artifact metadata is incomplete")
+            for name in expected_profile_files:
+                if sha256(profile_zip.read(name)) != profile_artifacts[name]:
+                    raise ValueError(f"source-mapped profile artifact hash differs: {name}")
+    except zipfile.BadZipFile as error:
+        raise ValueError("source-mapped profile archive is invalid") from error
+    profile_trace = limiter_profile.get("trace", {})
+    if (type(profile_trace.get("target_process_samples")) is not int or profile_trace["target_process_samples"] <= 0
+            or profile_trace.get("lost_events") != 0 or profile_trace.get("lost_buffers") != 0
+            or not limiter_profile["dominant_sampled_stacks"]
+            or any(not isinstance(row, dict) or not isinstance(row.get("symbol"), str)
+                   or type(row.get("inclusive_hits")) is not int
+                   or type(row.get("percent_of_target_samples")) not in (int, float)
+                   for row in limiter_profile["dominant_sampled_stacks"])):
+        raise ValueError("source-mapped profile has missing samples or lost ETW events")
     with (root / "trials.csv").open(encoding="utf-8", newline="") as stream:
         csv_rows = list(csv.DictReader(stream))
     if len(csv_rows) != len(trials):
@@ -83,12 +120,15 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
     fixtures = metadata.get("input_fixtures")
     if not isinstance(fixtures, dict) or set(fixtures) != set(SCENARIOS):
         raise ValueError("input fixture descriptions do not match the measured scenarios")
-    expected_dimensions = {"tiny-overhead": (1, 1), "small-reuse": (1, 40), "transfer-cost": (1, 100000)}
+    canonical_fixtures = fixture_descriptions()
     for scenario, fixture in fixtures.items():
         if not isinstance(fixture, dict):
             raise ValueError(f"input fixture description is invalid: {scenario}")
+        canonical = canonical_fixtures.get(scenario)
+        if canonical is None:
+            raise ValueError(f"input fixture description is invalid: {scenario}")
         if (type(fixture.get("rows")) is not int or type(fixture.get("columns")) is not int
-                or (fixture["rows"], fixture["columns"]) != expected_dimensions[scenario]):
+                or (fixture["rows"], fixture["columns"]) != (canonical["rows"], canonical["columns"])):
             raise ValueError(f"input fixture dimensions are invalid: {scenario}")
         if not all(isinstance(fixture.get(key), (int, float)) and not isinstance(fixture.get(key), bool)
                    and math.isfinite(fixture[key]) for key in ("source_rhs", "changed_rhs", "expected_objective")):
@@ -100,7 +140,6 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
             raise ValueError(f"input fixture hash is invalid: {scenario}")
         if not isinstance(fixture.get("objective_change", "unchanged"), str):
             raise ValueError(f"input fixture objective description is invalid: {scenario}")
-    canonical_fixtures = fixture_descriptions()
     for scenario in SCENARIOS:
         if fixtures[scenario] != canonical_fixtures[scenario]:
             raise ValueError(f"input fixture description differs from canonical scenario: {scenario}")
@@ -176,6 +215,7 @@ def comparison_svg(rows: list[dict]) -> str:
 
 def render(records: Path, out: Path) -> dict:
     metadata, rows, evidence = parse_evidence(records)
+    limiter_profile = json.loads(evidence["limiter-profile.json"].decode("utf-8"))
     if out.exists():
         raise ValueError("output destination must be new")
     out.mkdir(parents=True)
@@ -183,23 +223,16 @@ def render(records: Path, out: Path) -> dict:
     for name, content in evidence.items():
         (out / name).write_bytes(content)
     rows_summary = summary(rows)
-    cost_scenarios = []
-    for scenario in SCENARIOS:
-        median_work = {mode: statistics.median([sum(float(row[field]) for field in TIMED_FIELDS)
-                                                for row in rows if row["scenario"] == scenario and row["mode"] == mode])
-                       for mode in MODES}
-        if median_work["warm"] > median_work["cold"]:
-            cost_scenarios.append(scenario)
-    cost_text = (f"Performance interpretation is inconclusive. Warm reuse records higher median aggregate native work in: {', '.join(cost_scenarios)}, "
-                 "but the observed ranges overlap and no separate source-mapped limiter profile was collected. "
-                 "Simplex iteration counts are reported separately. The measurements do not establish that warm reuse is slower."
-                 if cost_scenarios
-                 else "Performance interpretation is inconclusive: these measurements do not establish a warm-reuse advantage, and no separate source-mapped limiter profile was collected.")
+    cost_text = ("Performance interpretation is inconclusive. Paired medians and ranges are descriptive for these three synthetic LPs; "
+                 "the observed cold/warm ranges overlap. A separate source-mapped diagnostic profile locates sampled CPU work in the LP/HiGHS simplex path, "
+                 "but it does not attribute the measured cold/warm latency difference. Simplex iteration counts are reported separately. "
+                 "The measurements do not establish a warm-reuse advantage; they do not establish that warm reuse is slower.")
     summary_html = "\n".join("<tr>" + "".join(f"<td>{html.escape(str(row[key]))}</td>" for key in
         ("scenario", "mode", "n", "wall_ns", "load_s", "basis_s", "solve_s", "native_work_s", "iterations")) + "</tr>" for row in rows_summary)
     trial_html = "\n".join(f'<tr><td>{row["scenario"]}</td><td>{row["pair"]}</td><td>{row["mode"]}</td><td>{row.get("cache_state")}</td><td>{row.get("basis_accepted")}</td><td>{row["wall_ns"]}</td><td>{row.get("simplex_iterations")}</td><td><details><summary>raw diagnostics</summary><pre>{html.escape(row.get("diagnostics", ""))}</pre></details></td></tr>' for row in rows)
     fixtures = metadata.get("input_fixtures", {})
     fixtures_html = "".join(f'<tr><td>{html.escape(name)}</td><td>{fixture["rows"]} × {fixture["columns"]}</td><td>{fixture["sha256"]}</td><td>{fixture["source_rhs"]} → {fixture["changed_rhs"]}</td><td>{html.escape(fixture.get("objective_change", "unchanged"))}</td><td>{fixture["expected_objective"]}</td></tr>' for name, fixture in fixtures.items())
+    profile_symbols_html = "".join(f'<tr><td>{html.escape(item["symbol"])}</td><td>{item["inclusive_hits"]}</td><td>{item["percent_of_target_samples"]}%</td></tr>' for item in limiter_profile["dominant_sampled_stacks"])
     meta_html = "".join(f'<tr><th>{html.escape(key)}</th><td>{html.escape(json.dumps(value, sort_keys=True))}</td></tr>' for key, value in metadata.items() if key != "input_fixtures")
     (out / "comparison.svg").write_text(comparison_svg(rows), encoding="utf-8", newline="\n")
     files = sorted(path.name for path in out.iterdir() if path.is_file())
@@ -215,6 +248,7 @@ def render(records: Path, out: Path) -> dict:
 <h2>Paired medians</h2><img src="comparison.svg" alt="Median cold and warm wall time and native component work"><p>Native work sums model-load, basis-transfer, and solve intervals. It excludes independent result verification.</p>
 <table><thead><tr><th>Case</th><th>Mode</th><th>n</th><th>Wall ns median [min, max]</th><th>Load s</th><th>Basis setup s</th><th>Solve s</th><th>Native work s</th><th>Simplex iterations</th></tr></thead><tbody>{summary_html}</tbody></table>
 <h2>Trials</h2><table><thead><tr><th>Case</th><th>Pair</th><th>Mode</th><th>Cache</th><th>Basis accepted</th><th>Wall ns</th><th>Iterations</th><th>Diagnostics</th></tr></thead><tbody>{trial_html}</tbody></table>
+<h2>Separate source-mapped CPU profile</h2><p>{html.escape(limiter_profile["scope"])} It is a sampled CPU hotspot report; it does not attribute cold/warm latency differences. The trace contains {limiter_profile["trace"]["target_process_samples"]} target-process samples with no lost ETW events.</p><table><thead><tr><th>Resolved function</th><th>Inclusive samples</th><th>Target-process share</th></tr></thead><tbody>{profile_symbols_html}</tbody></table><p>Diagnostic build used Release optimization with PDB symbols; it is separate from the measured executable. Raw ETL, symbolized stack report, and trace summary are in <a href="limiter-profile-evidence.zip">limiter-profile-evidence.zip</a>. Profile metadata: <a href="limiter-profile.json">limiter-profile.json</a>.</p>
 <h2>Provenance</h2><table><tbody>{meta_html}</tbody></table><p>Saved evidence: {links} <a href="../{html.escape(report_id)}.zip">offline ZIP</a></p>
 <small>Rendered only from retained evidence. Consult the OPT-12 design note and published algorithm-results policy for scope and interpretation.</small></body></html>'''
     (out / "index.html").write_text(page, encoding="utf-8", newline="\n")

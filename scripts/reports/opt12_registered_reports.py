@@ -18,7 +18,7 @@ SOURCE_PATTERN = r"opt12-[0-9a-f]{12}"
 LIMITS = (
     "42 verified paired trials across three synthetic LPs on one recorded host; "
     "performance interpretation is inconclusive because observed transfer-cost ranges overlap "
-    "and no separate source-mapped limiter profile was collected; no general speedup, "
+    "and the separate source-mapped diagnostic profile does not attribute the cold/warm latency difference; no general speedup, "
     "application-scale, or worst-case complexity claim"
 )
 
