@@ -239,6 +239,20 @@ public:
         std::stop_token cancellation) const override;
 };
 
+// Independent numerical verifier for one-stage, one-dimensional hybrid
+// systems with interval admissible sets and identity reset relations. It
+// certifies complete interval minimizer families inside this explicit domain
+// and returns unsupported status outside it.
+class OneStepScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,
+        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
+        std::stop_token cancellation) const override;
+};
+
 // Enumerates the full permitted path inventory and validates that programs and
 // reports cover it exactly once. It does not promote a report into a complete
 // optimal-family publication.

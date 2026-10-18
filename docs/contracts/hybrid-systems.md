@@ -172,6 +172,28 @@ traversal ceiling; exceeding either returns unsupported. This bounded
 numerical verifier is not a compiled proof authority and does not certify
 general continuous branch coverage.
 
+`OneStepScalarIntervalHybridFamilyVerifier` adds a separate numerical domain for
+one-stage paths with scalar source/target states, a scalar control, bounded
+feasible control intervals, scalar interval guards/invariants, an identity
+H-relation reset, and a linear terminal objective. It independently
+reconstructs each path's feasible control interval and objective, checks the
+full program relation against the reconstructed affine line, and checks each
+optimal-face candidate against the complete minimizing interval. It can certify
+ties whose continuous intervals differ. It rejects other horizons, dimensions,
+reset relations, unbounded feasible intervals, and unsupported set forms; H
+relation row and matrix limits are enforced. The verifier uses floating-point
+policy tolerances for anchors and rank decisions. It requires represented
+relation equalities and projected interval endpoints to match exactly as
+computed, and checks represented inequalities without tolerance expansion.
+Flow and objective arithmetic must be exactly representable in binary floating
+point. Inexact sums, overflow, and products whose exactness cannot be
+established (including possible underflow of the product residual) return
+unsupported. Global objective ties therefore require exact equality of exactly
+represented values. Near ties, contradictory relations, and near-equal
+candidate intervals are rejected instead of expanded by tolerance. It is
+limited to this domain; it does not establish general continuous-polytope
+family coverage or validated assurance.
+
 ## Initial supported profile and rejection boundary
 
 The first profile is finite-horizon and discrete-time, with mode-specific

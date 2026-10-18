@@ -1051,6 +1051,395 @@ TEST_CASE("independent interval oracle matches the full continuous hybrid branch
     check_branch(programs[1],oracle_paths[1],0.25);
 }
 
+TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous branches") {
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    source.control_sets={interval("verifier-control",0,1)};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    auto reset_equalities=numeric::snapshot(Matrix{1,2,{-1,1}});
+    auto reset_rhs=numeric::snapshot_vector(Vector{0});
+    auto reset_inequalities=numeric::snapshot(Matrix{0,2,{}});
+    auto reset_bounds=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(reset_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(reset_rhs));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(reset_inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(reset_bounds));
+    auto reset=sets::make_h({{"verifier-identity-reset"},2,{}},
+        {std::get<numeric::MatrixView>(reset_inequalities),std::get<numeric::VectorView>(reset_bounds),
+         std::get<numeric::MatrixView>(reset_equalities),std::get<numeric::VectorView>(reset_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(reset));
+    auto system=model::HybridSystem{1,{source,target},
+        {{{"wide"},{"source"},{"target"},{interval("verifier-wide-guard",0,0.5)},
+            {std::get<sets::SetData>(reset).as_handle()}},
+         {{"narrow"},{"source"},{"target"},{interval("verifier-narrow-guard",0,0.25)},
+            {std::get<sets::SetData>(reset).as_handle()}}}};
+    auto request=model::HybridRequest{{{"source"},{0}},{{"target"}},
+        {{{"target"},LinearTerminal{{0},0},"cost","u"}}};
+    const auto built=build_hybrid_portfolio_programs(system,request,{"interval-family-verifier"},
+        {1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==2);
+    std::vector<HybridPathOptimalFaceCandidate> candidates{
+        exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
+    OneStepScalarIntervalHybridFamilyVerifier verifier;
+    const auto capabilities=verifier.capabilities();
+    CHECK(capabilities.checks_original_hybrid_feasibility);
+    CHECK(capabilities.checks_global_objective_optimality);
+    CHECK(capabilities.checks_continuous_branch_coverage);
+    CHECK(capabilities.assurance==Assurance::numerical);
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
+        {1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.verifier_id=="csl.hybrid.one-step-scalar-interval");
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==2);
+    for(const auto& branch:report.branches) {
+        CHECK(branch.feasibility==HybridVerificationStatus::established);
+        CHECK(branch.objective_optimality==HybridVerificationStatus::established);
+        CHECK(branch.continuous_coverage==HybridVerificationStatus::established);
+    }
+
+    auto ratio_system=system;
+    ratio_system.edges[1].guards[0]=interval("verifier-inexact-row-ratio-guard",0,0.3);
+    const auto ratio_built=build_hybrid_portfolio_programs(ratio_system,request,
+        {"inexact-row-ratio-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(ratio_built));
+    const auto& ratio_programs=std::get<std::vector<HybridPathProgram>>(ratio_built);
+    std::vector<HybridPathOptimalFaceCandidate> ratio_candidates{
+        exact_candidate(ratio_programs[0],{0,0,0,0}),exact_candidate(ratio_programs[1],{0,0,0,0})};
+    auto ratio_inequalities=numeric::snapshot(Matrix{3,4,{0,-1,0,0,0,1,0,0,0,0.1,0,0}});
+    auto ratio_bounds=numeric::snapshot_vector(Vector{0,0.3,0.03});
+    auto ratio_equalities=numeric::snapshot(Matrix{3,4,{1,0,0,0,0,-1,1,0,0,0,-1,1}});
+    auto ratio_rhs=numeric::snapshot_vector(Vector{0,0,0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(ratio_inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(ratio_bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(ratio_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(ratio_rhs));
+    auto inexact_row_relation=sets::make_h({{"verifier-inexact-row-ratio"},4,{}},
+        {std::get<numeric::MatrixView>(ratio_inequalities),std::get<numeric::VectorView>(ratio_bounds),
+         std::get<numeric::MatrixView>(ratio_equalities),std::get<numeric::VectorView>(ratio_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(inexact_row_relation));
+    ratio_candidates[1].relation=std::get<sets::SetData>(inexact_row_relation);
+    const auto inexact_row_result=verify_hybrid_portfolio_family(verifier,ratio_system,request,
+        ratio_programs,ratio_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_row_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(inexact_row_result).branches[1].continuous_coverage==
+        HybridVerificationStatus::unsupported);
+
+    auto narrow_tied_system=system;
+    narrow_tied_system.edges[1].guards[0]=interval("verifier-narrow-tied-guard",0,5e-11);
+    const auto narrow_tied_built=build_hybrid_portfolio_programs(narrow_tied_system,request,
+        {"narrow-tied-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(narrow_tied_built));
+    const auto& narrow_tied_programs=std::get<std::vector<HybridPathProgram>>(narrow_tied_built);
+    std::vector<HybridPathOptimalFaceCandidate> narrow_tied_candidates{
+        exact_candidate(narrow_tied_programs[0],{0,0,0,0}),
+        exact_candidate(narrow_tied_programs[1],{0,0,0,0})};
+    narrow_tied_candidates[1].relation=singleton_data({0,0,0,0});
+    const auto narrow_tied_result=verify_hybrid_portfolio_family(verifier,narrow_tied_system,request,
+        narrow_tied_programs,narrow_tied_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(narrow_tied_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(narrow_tied_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto underflow_system=system;
+    underflow_system.modes[0].flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1e-200}},
+        Matrix{1,0,{}},Vector{0}};
+    auto underflow_request=request;
+    underflow_request.terminal_objectives[0].objective=LinearTerminal{{1e-200},0};
+    const auto underflow_built=build_hybrid_portfolio_programs(underflow_system,underflow_request,
+        {"underflow-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(underflow_built));
+    const auto& underflow_programs=std::get<std::vector<HybridPathProgram>>(underflow_built);
+    std::vector<HybridPathOptimalFaceCandidate> underflow_candidates{
+        exact_candidate(underflow_programs[0],{0,0,0,0}),
+        exact_candidate(underflow_programs[1],{0,0,0,0})};
+    const auto underflow_result=verify_hybrid_portfolio_family(verifier,underflow_system,underflow_request,
+        underflow_programs,underflow_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(underflow_result));
+    const auto& underflow_report=std::get<HybridFamilyVerificationReport>(underflow_result);
+    CHECK(underflow_report.global_objective_optimality==HybridVerificationStatus::unsupported);
+    CHECK(underflow_report.complete_family_coverage==HybridVerificationStatus::unsupported);
+
+    auto subnormal_residual_system=system;
+    subnormal_residual_system.modes[0].flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0x1p-511}},
+        Matrix{1,0,{}},Vector{0}};
+    auto subnormal_residual_request=request;
+    subnormal_residual_request.terminal_objectives[0].objective=LinearTerminal{{0x1p-511},0};
+    const auto subnormal_residual_built=build_hybrid_portfolio_programs(subnormal_residual_system,
+        subnormal_residual_request,{"subnormal-residual-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(subnormal_residual_built));
+    const auto& subnormal_residual_programs=
+        std::get<std::vector<HybridPathProgram>>(subnormal_residual_built);
+    std::vector<HybridPathOptimalFaceCandidate> subnormal_residual_candidates{
+        exact_candidate(subnormal_residual_programs[0],{0,0,0,0}),
+        exact_candidate(subnormal_residual_programs[1],{0,0,0,0})};
+    const auto subnormal_residual_result=verify_hybrid_portfolio_family(verifier,
+        subnormal_residual_system,subnormal_residual_request,subnormal_residual_programs,
+        subnormal_residual_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(subnormal_residual_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(subnormal_residual_result).global_objective_optimality==
+        HybridVerificationStatus::unsupported);
+
+    auto inexact_flow_system=system;
+    inexact_flow_system.edges.resize(1);
+    inexact_flow_system.modes[0].control_sets[0]=Singleton{{0.3}};
+    inexact_flow_system.modes[0].flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0.1}},
+        Matrix{1,0,{}},Vector{0}};
+    auto inexact_flow_request=request;
+    const auto inexact_flow_built=build_hybrid_portfolio_programs(inexact_flow_system,inexact_flow_request,
+        {"inexact-flow-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(inexact_flow_built));
+    const auto& inexact_flow_programs=std::get<std::vector<HybridPathProgram>>(inexact_flow_built);
+    std::vector<HybridPathOptimalFaceCandidate> inexact_flow_candidates{
+        exact_candidate(inexact_flow_programs[0],{0,0.3,0.03,0.03})};
+    const auto inexact_flow_result=verify_hybrid_portfolio_family(verifier,inexact_flow_system,
+        inexact_flow_request,inexact_flow_programs,inexact_flow_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_flow_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(inexact_flow_result).global_objective_optimality==
+        HybridVerificationStatus::unsupported);
+
+    auto sub_ulp_system=system;
+    sub_ulp_system.edges[0].guards[0]=interval("verifier-sub-ulp-zero",0,0.5);
+    sub_ulp_system.edges[1].guards[0]=interval("verifier-sub-ulp-positive",
+        2.7755575615628914e-17,0.25);
+    auto sub_ulp_request=request;
+    sub_ulp_request.terminal_objectives[0].objective=LinearTerminal{{1},1};
+    const auto sub_ulp_built=build_hybrid_portfolio_programs(sub_ulp_system,sub_ulp_request,
+        {"sub-ulp-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(sub_ulp_built));
+    const auto& sub_ulp_programs=std::get<std::vector<HybridPathProgram>>(sub_ulp_built);
+    std::vector<HybridPathOptimalFaceCandidate> sub_ulp_candidates{
+        exact_candidate(sub_ulp_programs[0],{0,0,0,0}),
+        exact_candidate(sub_ulp_programs[1],{0,2.7755575615628914e-17,2.7755575615628914e-17,
+            2.7755575615628914e-17})};
+    const auto sub_ulp_result=verify_hybrid_portfolio_family(verifier,sub_ulp_system,sub_ulp_request,
+        sub_ulp_programs,sub_ulp_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(sub_ulp_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(sub_ulp_result).global_objective_optimality==
+        HybridVerificationStatus::unsupported);
+
+    candidates.pop_back();
+    const auto missing_tie=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
+        {1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(missing_tie));
+    CHECK(std::get<HybridFamilyVerificationReport>(missing_tie).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    candidates={exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
+    candidates[1].relation=singleton_data({0,0,0,0});
+    const auto altered_tie=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
+        {1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(altered_tie));
+    CHECK(std::get<HybridFamilyVerificationReport>(altered_tie).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto increasing_request=request;
+    increasing_request.terminal_objectives[0].objective=LinearTerminal{{1},0};
+    const auto increasing_built=build_hybrid_portfolio_programs(system,increasing_request,
+        {"interval-endpoint-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(increasing_built));
+    const auto& increasing_programs=std::get<std::vector<HybridPathProgram>>(increasing_built);
+    std::vector<HybridPathOptimalFaceCandidate> endpoint_candidates{
+        exact_candidate(increasing_programs[0],{0,0,0,0}),
+        exact_candidate(increasing_programs[1],{0,0,0,0})};
+    endpoint_candidates[0].relation=singleton_data({0,0,0,0});
+    endpoint_candidates[1].relation=singleton_data({0,0,0,0});
+    const auto endpoint_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        increasing_programs,endpoint_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(endpoint_result));
+    const auto& endpoint_report=std::get<HybridFamilyVerificationReport>(endpoint_result);
+    CHECK(endpoint_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(endpoint_report.complete_family_coverage==HybridVerificationStatus::established);
+
+    auto decreasing_request=request;
+    decreasing_request.terminal_objectives[0].objective=LinearTerminal{{-1},0};
+    const auto decreasing_built=build_hybrid_portfolio_programs(system,decreasing_request,
+        {"decreasing-endpoint-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(decreasing_built));
+    const auto& decreasing_programs=std::get<std::vector<HybridPathProgram>>(decreasing_built);
+    std::vector<HybridPathOptimalFaceCandidate> decreasing_candidates{
+        exact_candidate(decreasing_programs[0],{0,0.5,0.5,0.5}),
+        exact_candidate(decreasing_programs[1],{0,0.25,0.25,0.25})};
+    decreasing_candidates[0].relation=singleton_data({0,0.5,0.5,0.5});
+    decreasing_candidates[1].relation=singleton_data({0,0.25,0.25,0.25});
+    const auto decreasing_result=verify_hybrid_portfolio_family(verifier,system,decreasing_request,
+        decreasing_programs,decreasing_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(decreasing_result));
+    const auto& decreasing_report=std::get<HybridFamilyVerificationReport>(decreasing_result);
+    CHECK(decreasing_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(decreasing_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    CHECK(decreasing_report.branches[0].continuous_coverage==HybridVerificationStatus::established);
+    CHECK(decreasing_report.branches[1].objective_optimality==HybridVerificationStatus::refuted);
+
+    auto enlarged_inequalities=numeric::snapshot(Matrix{2,4,{0,-1,0,0,0,1,0,0}});
+    auto enlarged_bounds=numeric::snapshot_vector(Vector{0,5e-11});
+    auto line_equalities=numeric::snapshot(Matrix{3,4,{1,0,0,0,0,-1,1,0,0,0,-1,1}});
+    auto line_rhs=numeric::snapshot_vector(Vector{0,0,0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(enlarged_inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(enlarged_bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(line_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(line_rhs));
+    auto enlarged_face=sets::make_h({{"verifier-enlarged-optimal-face"},4,{}},
+        {std::get<numeric::MatrixView>(enlarged_inequalities),
+         std::get<numeric::VectorView>(enlarged_bounds),std::get<numeric::MatrixView>(line_equalities),
+         std::get<numeric::VectorView>(line_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(enlarged_face));
+    auto enlarged_candidates=endpoint_candidates;
+    enlarged_candidates[0].relation=std::get<sets::SetData>(enlarged_face);
+    const auto enlarged_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        increasing_programs,enlarged_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(enlarged_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(enlarged_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto shifted_singleton_candidates=endpoint_candidates;
+    shifted_singleton_candidates[0].relation=singleton_data({0,5e-11,5e-11,5e-11});
+    const auto shifted_singleton_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        increasing_programs,shifted_singleton_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(shifted_singleton_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(shifted_singleton_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto contradictory_inequality=numeric::snapshot(Matrix{1,4,{1,0,0,0}});
+    auto contradictory_bound=numeric::snapshot_vector(Vector{-5e-11});
+    auto fixed_equalities=numeric::snapshot(Matrix{4,4,{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}});
+    auto fixed_rhs=numeric::snapshot_vector(Vector{0,0,0,0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(contradictory_inequality));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(contradictory_bound));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(fixed_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(fixed_rhs));
+    auto empty_candidate=sets::make_h({{"verifier-contradictory-face"},4,{}},
+        {std::get<numeric::MatrixView>(contradictory_inequality),
+         std::get<numeric::VectorView>(contradictory_bound),std::get<numeric::MatrixView>(fixed_equalities),
+         std::get<numeric::VectorView>(fixed_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(empty_candidate));
+    auto contradictory_candidates=endpoint_candidates;
+    contradictory_candidates[0].relation=std::get<sets::SetData>(empty_candidate);
+    const auto contradictory_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        increasing_programs,contradictory_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(contradictory_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(contradictory_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto conflicting_equalities=numeric::snapshot(Matrix{5,4,
+        {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,0,0}});
+    auto conflicting_rhs=numeric::snapshot_vector(Vector{0,0,0,0,5e-11});
+    auto conflicting_inequalities=numeric::snapshot(Matrix{0,4,{}});
+    auto conflicting_bounds=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(conflicting_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(conflicting_rhs));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(conflicting_inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(conflicting_bounds));
+    auto conflicting_face=sets::make_h({{"verifier-conflicting-face"},4,{}},
+        {std::get<numeric::MatrixView>(conflicting_inequalities),std::get<numeric::VectorView>(conflicting_bounds),
+         std::get<numeric::MatrixView>(conflicting_equalities),std::get<numeric::VectorView>(conflicting_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(conflicting_face));
+    auto conflicting_candidates=endpoint_candidates;
+    conflicting_candidates[0].relation=std::get<sets::SetData>(conflicting_face);
+    const auto conflicting_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        increasing_programs,conflicting_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(conflicting_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(conflicting_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto rotated_equalities=numeric::snapshot(Matrix{3,4,
+        {1,0,0,0,0,1,-(1+5e-11),0,0,0,1,-1}});
+    auto rotated_rhs=numeric::snapshot_vector(Vector{0,0,0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rotated_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(rotated_rhs));
+    auto rotated_face=sets::make_h({{"verifier-rotated-singleton-face"},4,{}},
+        {std::get<numeric::MatrixView>(conflicting_inequalities),
+         std::get<numeric::VectorView>(conflicting_bounds),std::get<numeric::MatrixView>(rotated_equalities),
+         std::get<numeric::VectorView>(rotated_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(rotated_face));
+    auto rotated_candidates=endpoint_candidates;
+    rotated_candidates[0].relation=std::get<sets::SetData>(rotated_face);
+    const auto rotated_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        increasing_programs,rotated_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rotated_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(rotated_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto insufficient_variable_limits=increasing_programs;
+    insufficient_variable_limits[0].relation_limits.max_variables=3;
+    const auto variable_limit_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        insufficient_variable_limits,endpoint_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(variable_limit_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(variable_limit_result).complete_family_coverage==
+        HybridVerificationStatus::unsupported);
+
+    auto near_tie_system=system;
+    near_tie_system.edges[1].guards[0]=interval("verifier-near-tie-guard",5e-11,0.25);
+    const auto near_tie_built=build_hybrid_portfolio_programs(near_tie_system,increasing_request,
+        {"near-tie-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(near_tie_built));
+    const auto& near_tie_programs=std::get<std::vector<HybridPathProgram>>(near_tie_built);
+    std::vector<HybridPathOptimalFaceCandidate> near_tie_candidates{
+        exact_candidate(near_tie_programs[0],{0,0,0,0}),
+        exact_candidate(near_tie_programs[1],{0,5e-11,5e-11,5e-11})};
+    near_tie_candidates[0].relation=singleton_data({0,0,0,0});
+    near_tie_candidates[1].relation=singleton_data({0,5e-11,5e-11,5e-11});
+    const auto near_tie_result=verify_hybrid_portfolio_family(verifier,near_tie_system,increasing_request,
+        near_tie_programs,near_tie_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(near_tie_result));
+    const auto& near_tie_report=std::get<HybridFamilyVerificationReport>(near_tie_result);
+    CHECK(near_tie_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(near_tie_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    CHECK(near_tie_report.branches[1].objective_optimality==HybridVerificationStatus::refuted);
+
+    auto free_post_equalities=numeric::snapshot(Matrix{3,4,{1,0,0,0,0,1,0,0,0,0,1,0}});
+    auto free_post_rhs=numeric::snapshot_vector(Vector{0,0,0});
+    auto free_post_inequalities=numeric::snapshot(Matrix{0,4,{}});
+    auto free_post_bounds=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(free_post_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(free_post_rhs));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(free_post_inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(free_post_bounds));
+    auto free_post_data=sets::make_h({{"verifier-free-post"},4,{}},
+        {std::get<numeric::MatrixView>(free_post_inequalities),std::get<numeric::VectorView>(free_post_bounds),
+         std::get<numeric::MatrixView>(free_post_equalities),std::get<numeric::VectorView>(free_post_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(free_post_data));
+    auto malformed_face=endpoint_candidates;
+    malformed_face[0].relation=std::get<sets::SetData>(free_post_data);
+    const auto malformed_face_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        increasing_programs,malformed_face,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(malformed_face_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(malformed_face_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto malformed_programs=increasing_programs;
+    malformed_programs[0].joint_relation=std::get<sets::SetData>(free_post_data);
+    const auto malformed_program_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
+        malformed_programs,endpoint_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(malformed_program_result));
+    const auto& malformed_program_report=std::get<HybridFamilyVerificationReport>(malformed_program_result);
+    CHECK(malformed_program_report.branches[0].feasibility==HybridVerificationStatus::established);
+    CHECK(malformed_program_report.branches[0].continuous_coverage==HybridVerificationStatus::refuted);
+    CHECK(malformed_program_report.complete_family_coverage==HybridVerificationStatus::refuted);
+
+    auto malformed_suboptimal_programs=near_tie_programs;
+    malformed_suboptimal_programs[1].joint_relation=std::get<sets::SetData>(free_post_data);
+    std::vector<HybridPathOptimalFaceCandidate> only_optimal_near_tie_candidate{
+        near_tie_candidates[0]};
+    const auto malformed_suboptimal_result=verify_hybrid_portfolio_family(verifier,near_tie_system,
+        increasing_request,malformed_suboptimal_programs,only_optimal_near_tie_candidate,
+        {1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(malformed_suboptimal_result));
+    const auto& malformed_suboptimal_report=
+        std::get<HybridFamilyVerificationReport>(malformed_suboptimal_result);
+    CHECK(malformed_suboptimal_report.branches[1].objective_optimality==HybridVerificationStatus::refuted);
+    CHECK(malformed_suboptimal_report.branches[1].continuous_coverage==HybridVerificationStatus::refuted);
+    CHECK(malformed_suboptimal_report.complete_family_coverage==HybridVerificationStatus::refuted);
+}
+
 TEST_CASE("exact singleton hybrid verifier checks guard entry and rejects forbidden mode paths") {
     auto [system,request]=exact_singleton_portfolio();
     system.edges[0].guards[0]=Singleton{{3}};
