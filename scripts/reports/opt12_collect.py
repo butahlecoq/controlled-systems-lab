@@ -26,6 +26,17 @@ def git_value(root: Path, *args: str) -> str:
                           capture_output=True, text=True).stdout.strip()
 
 
+def cxx_compiler(toolchains: list[dict]) -> dict:
+    matches = [item for item in toolchains if item.get("language") == "CXX"]
+    if len(matches) != 1 or not isinstance(matches[0].get("compiler"), dict):
+        raise ValueError("CMake File API must provide exactly one CXX compiler record")
+    compiler = matches[0]["compiler"]
+    if not all(isinstance(compiler.get(key), str) and compiler[key]
+               for key in ("id", "version", "path")):
+        raise ValueError("CMake File API CXX compiler record is incomplete")
+    return compiler
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--exe", required=True, type=Path)
@@ -60,7 +71,7 @@ def main() -> int:
         codemodel = data.parse_json(codemodel_path.read_text(encoding="utf-8"))
         paths = codemodel["paths"]
         toolchains = data.parse_json((reply / index["reply"]["toolchains-v1"]["jsonFile"]).read_text(encoding="utf-8"))["toolchains"]
-        compiler = next(item for item in toolchains if item.get("language") == "CXX")
+        compiler = cxx_compiler(toolchains)
         build_owner = digest((paths["source"] + "\n" + paths["build"] + "\n" + compiler["path"]).encode())
     except (ValueError, KeyError, OSError, IndexError, StopIteration) as error:
         parser.error(f"measurement executable/build graph validation failed: {type(error).__name__}: {error}")
