@@ -636,6 +636,100 @@ HybridPortfolioOptimalFaceAnalysis assemble_hybrid_portfolio_optimal_face_candid
     return HybridPortfolioOptimalFaceCandidates{std::move(bounds),std::move(candidates)};
 }
 
+HybridFamilyVerificationResult verify_hybrid_portfolio_family(
+    const HybridFamilyVerificationAdapter& adapter,const model::HybridSystem& system,
+    const model::HybridRequest& request,std::span<const HybridPathProgram> programs,
+    std::span<const HybridPathOptimalFaceCandidate> candidates,
+    model::HybridEnumerationLimits enumeration_limits,NumericalPolicy numerical_policy,
+    std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled before profile admission"};
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled during profile admission"};
+    if(!profile_errors.empty()) return profile_errors;
+    if(!std::isfinite(numerical_policy.absolute_tolerance)||numerical_policy.absolute_tolerance<0||
+       !std::isfinite(numerical_policy.relative_tolerance)||numerical_policy.relative_tolerance<0)
+        return one({DiagnosticCode::invalid_input,"hybrid.verification.policy",
+            "Hybrid verification tolerances must be finite and nonnegative"});
+    const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,enumeration_limits,cancellation);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
+    if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
+    const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
+    if(paths.empty())
+        return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
+            "No allowed hybrid path exists to verify"});
+    if(programs.size()!=paths.size())
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.programs",
+            "Branch programs do not cover the complete enumerated path inventory"});
+    for(std::size_t i=0;i<paths.size();++i)
+        if(programs[i].path!=paths[i])
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.program_path",
+                "Branch programs must match the complete enumerated path order exactly"});
+    for(std::size_t i=0;i<candidates.size();++i) {
+        if(std::find(paths.begin(),paths.end(),candidates[i].path)==paths.end())
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.candidate_path",
+                "A candidate family branch is outside the enumerated path inventory"});
+        for(std::size_t j=i+1;j<candidates.size();++j)
+            if(candidates[i].path==candidates[j].path)
+                return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.candidate_duplicate",
+                    "Duplicate candidate paths make family coverage ambiguous"});
+    }
+    const auto capability=adapter.capabilities();
+    if(capability.assurance!=Assurance::numerical)
+        return one({DiagnosticCode::unsupported,"hybrid.verification.assurance",
+            "Validated hybrid-family verification is unavailable until certificate evidence is supported"});
+    if(!capability.checks_original_hybrid_feasibility||
+       !capability.checks_global_objective_optimality||
+       !capability.checks_continuous_branch_coverage)
+        return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
+            "Verifier must declare original feasibility, global objective, and continuous coverage checks"});
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled before verifier dispatch"};
+    auto result=adapter.verify(system,request,paths,programs,candidates,numerical_policy,cancellation);
+    if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&result)) return *diagnostics;
+    auto report=std::get<HybridFamilyVerificationReport>(std::move(result));
+    if(report.verifier_id.empty()||report.verifier_version.empty()||
+       report.assurance!=capability.assurance||report.numerical_policy!=numerical_policy||
+       report.enumerated_paths!=paths||report.branches.size()!=paths.size())
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.report",
+            "Verifier report identity, policy, assurance, or path inventory does not match the request"});
+    for(std::size_t i=0;i<paths.size();++i)
+        if(report.branches[i].path!=paths[i])
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.branch_path",
+                "Verifier report must contain each enumerated path exactly once and in order"});
+    const auto adjudicated=[](HybridVerificationStatus status) {
+        return status==HybridVerificationStatus::established||
+            status==HybridVerificationStatus::refuted;
+    };
+    if(report.complete_family_coverage==HybridVerificationStatus::established&&
+       std::any_of(report.branches.begin(),report.branches.end(),[](const auto& branch) {
+           return branch.continuous_coverage!=HybridVerificationStatus::established;
+       }))
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.consistency",
+            "Established complete coverage requires established coverage for every enumerated path"});
+    if(report.complete_family_coverage==HybridVerificationStatus::established&&
+       report.global_objective_optimality!=HybridVerificationStatus::established)
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.consistency",
+            "Established complete-family coverage requires established global objective optimality"});
+    if(report.global_objective_optimality==HybridVerificationStatus::established&&
+       std::any_of(report.branches.begin(),report.branches.end(),[&](const auto& branch) {
+           return !adjudicated(branch.feasibility)||!adjudicated(branch.objective_optimality);
+       }))
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.consistency",
+            "Established global optimality requires feasibility and objective adjudication for every enumerated path"});
+    if(report.global_objective_optimality==HybridVerificationStatus::established&&
+       std::none_of(report.branches.begin(),report.branches.end(),[](const auto& branch) {
+           return branch.feasibility==HybridVerificationStatus::established&&
+               branch.objective_optimality==HybridVerificationStatus::established;
+       }))
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.consistency",
+            "Established global optimality requires at least one feasible branch marked optimal"});
+    return report;
+}
+
 HybridPortfolioExecution execute_hybrid_path_programs(
     std::span<const HybridPathProgram> programs,
     const registry::PreparedProvider<registry::LPPort>& lp,

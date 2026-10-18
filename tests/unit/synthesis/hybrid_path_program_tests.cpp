@@ -105,6 +105,43 @@ public:
     }
 };
 
+class FixtureHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    mutable int calls{};
+    bool omit_last_branch{};
+    bool claim_established_aggregates{};
+    bool claim_coverage_only{};
+    bool mark_all_branches_refuted{};
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override {
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
+        NumericalPolicy policy,std::stop_token cancellation) const override {
+        ++calls;
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"fixture verifier cancelled"};
+        std::vector<model::HybridPath> inventory(paths.begin(),paths.end());
+        std::vector<HybridPathVerificationRecord> branches;
+        const auto count=omit_last_branch && !paths.empty()?paths.size()-1:paths.size();
+        for(std::size_t i=0;i<count;++i) {
+            const auto status=mark_all_branches_refuted?HybridVerificationStatus::refuted:
+                (claim_coverage_only?HybridVerificationStatus::established:
+                    HybridVerificationStatus::unsupported);
+            branches.push_back({paths[i],status,status,status,{}});
+        }
+        const auto aggregate=claim_established_aggregates?HybridVerificationStatus::established:
+            HybridVerificationStatus::unsupported;
+        const auto global=claim_established_aggregates?HybridVerificationStatus::established:
+            HybridVerificationStatus::unsupported;
+        const auto coverage=claim_coverage_only?HybridVerificationStatus::established:aggregate;
+        return HybridFamilyVerificationReport{"fixture.hybrid.verifier","1",policy,
+            Assurance::numerical,std::move(inventory),std::move(branches),
+            global,coverage};
+    }
+};
+
 std::pair<model::HybridSystem,model::HybridRequest> variable_size_parallel_profile() {
     auto source=model::HybridMode{{"source"},1,0,{"x"},{}};
     source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
@@ -441,6 +478,92 @@ TEST_CASE("hybrid reachability boundary rejects mismatched assurance and resourc
         else if(corruption==1) CHECK(field=="hybrid.reachability.limits");
         else CHECK(field=="hybrid.adapter.operations");
     }
+}
+
+TEST_CASE("hybrid family verification adapter receives the exhaustive path inventory") {
+    auto system=example_system();
+    auto parallel=system.edges.front();
+    parallel.id={"switch-parallel"};
+    system.edges.push_back(std::move(parallel));
+    auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    FixtureHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
+        {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    REQUIRE(report.enumerated_paths.size()==2);
+    REQUIRE(report.branches.size()==2);
+    CHECK(report.branches[0].path==programs[0].path);
+    CHECK(report.branches[1].path==programs[1].path);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::unsupported);
+    CHECK(verifier.calls==1);
+}
+
+TEST_CASE("hybrid family verification rejects missing inventory or report branches") {
+    auto system=example_system();
+    auto parallel=system.edges.front();
+    parallel.id={"switch-parallel"};
+    system.edges.push_back(std::move(parallel));
+    auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    auto programs=std::get<std::vector<HybridPathProgram>>(built);
+    FixtureHybridFamilyVerifier verifier;
+    programs.pop_back();
+    auto incomplete=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
+        {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<Diagnostics>(incomplete));
+    CHECK(verifier.calls==0);
+    programs=std::get<std::vector<HybridPathProgram>>(built);
+    verifier.omit_last_branch=true;
+    auto omitted=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
+        {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<Diagnostics>(omitted));
+    CHECK(std::get<Diagnostics>(omitted).front().field=="hybrid.verification.report");
+    CHECK(verifier.calls==1);
+}
+
+TEST_CASE("hybrid family verification rejects aggregates unsupported by branch evidence") {
+    auto system=example_system();
+    auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    FixtureHybridFamilyVerifier verifier;
+    verifier.claim_established_aggregates=true;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),
+        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.consistency");
+}
+
+TEST_CASE("hybrid family verification requires global optimum before complete coverage") {
+    auto system=example_system();
+    auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    FixtureHybridFamilyVerifier verifier;
+    verifier.claim_coverage_only=true;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),
+        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.consistency");
+}
+
+TEST_CASE("hybrid family verification rejects global optimum with no feasible optimal branch") {
+    auto system=example_system();
+    auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    FixtureHybridFamilyVerifier verifier;
+    verifier.claim_established_aggregates=true;
+    verifier.mark_all_branches_refuted=true;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),
+        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.consistency");
 }
 
 TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {

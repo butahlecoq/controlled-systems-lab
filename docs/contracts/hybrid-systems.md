@@ -151,7 +151,12 @@ branch-labelled relation, which objective classes it supports, and its
 assurance level; the wrapper rejects missing branch or objective capabilities
 before dispatch. Injected adapters must preserve that result contract and
 return diagnostics or cancellation without publishing a partial portfolio.
-The complete-family verification adapter remains unimplemented.
+The `HybridFamilyVerificationAdapter` boundary consumes the original model,
+request, exhaustive path inventory, branch programs, and candidate faces. Its
+wrapper checks complete path and report identity coverage. The report carries
+per-path feasibility, objective, and continuous-coverage statuses, but it is
+inspection data and cannot publish a `synthesis::OptimalFamily`. No concrete
+hybrid family verifier or compiled proof authority is implemented yet.
 
 ## Initial supported profile and rejection boundary
 
@@ -230,7 +235,7 @@ portfolio builders propagate those failure reports without dropping the path
 identity. Solver-provider provenance remains attached to each branch
 execution. The trace records work performed by the current direct composer; it
 does not imply that an independent projected-set reachability algorithm or a
-hybrid family verifier has been implemented.
+compiled hybrid family verifier has been implemented.
 
 ## Independent test oracle requirements
 

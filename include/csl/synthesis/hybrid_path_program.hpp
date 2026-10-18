@@ -186,6 +186,56 @@ struct HybridPortfolioOptimalFaceCandidates {
 using HybridPortfolioOptimalFaceAnalysis = std::variant<HybridPortfolioOptimalFaceCandidates,
     HybridPortfolioObjectiveIncomplete, Diagnostics, OperationStopped>;
 
+enum class HybridVerificationStatus { not_checked, established, refuted, unsupported };
+struct HybridPathVerificationRecord {
+    model::HybridPath path;
+    HybridVerificationStatus feasibility{HybridVerificationStatus::not_checked};
+    HybridVerificationStatus objective_optimality{HybridVerificationStatus::not_checked};
+    HybridVerificationStatus continuous_coverage{HybridVerificationStatus::not_checked};
+    Diagnostics diagnostics;
+};
+struct HybridFamilyVerificationReport {
+    std::string verifier_id;
+    std::string verifier_version;
+    NumericalPolicy numerical_policy;
+    Assurance assurance{Assurance::numerical};
+    std::vector<model::HybridPath> enumerated_paths;
+    std::vector<HybridPathVerificationRecord> branches;
+    HybridVerificationStatus global_objective_optimality{HybridVerificationStatus::not_checked};
+    HybridVerificationStatus complete_family_coverage{HybridVerificationStatus::not_checked};
+};
+using HybridFamilyVerificationResult = std::variant<HybridFamilyVerificationReport,
+    Diagnostics, OperationStopped>;
+
+struct HybridFamilyVerificationCapabilities {
+    bool checks_original_hybrid_feasibility{};
+    bool checks_global_objective_optimality{};
+    bool checks_continuous_branch_coverage{};
+    Assurance assurance{Assurance::numerical};
+};
+
+// Replaceable verification boundary. Reports are inspection data only; they
+// do not create synthesis::OptimalFamily authority or certify publication.
+class HybridFamilyVerificationAdapter {
+public:
+    virtual ~HybridFamilyVerificationAdapter() = default;
+    virtual HybridFamilyVerificationCapabilities capabilities() const noexcept = 0;
+    virtual HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,
+        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
+        std::stop_token cancellation) const = 0;
+};
+
+// Enumerates the full permitted path inventory and validates that programs and
+// reports cover it exactly once. It does not promote a report into a complete
+// optimal-family publication.
+HybridFamilyVerificationResult verify_hybrid_portfolio_family(
+    const HybridFamilyVerificationAdapter&, const model::HybridSystem&,
+    const model::HybridRequest&, std::span<const HybridPathProgram>,
+    std::span<const HybridPathOptimalFaceCandidate>, model::HybridEnumerationLimits,
+    NumericalPolicy, std::stop_token cancellation = {});
+
 // Transactionally assembles a candidate face for every branch that objective
 // bounds cannot exclude. The result retains path and provider provenance but
 // is not a verified complete globally optimal family.
