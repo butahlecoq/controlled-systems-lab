@@ -301,3 +301,25 @@ TEST_CASE("hybrid joint relation rejects V sets during capability preflight") {
     CHECK(std::get<Diagnostic>(result).code==DiagnosticCode::unsupported);
     CHECK(std::get<Diagnostic>(result).field=="hybrid.guard.representation");
 }
+
+TEST_CASE("hybrid relation IDs distinguish colon-delimited edge-ID sequences") {
+    HybridSystem system{2,
+        {mode("a",1,0,2),mode("b",1,0,2),mode("c",1,0,2)},
+        {{{"a:b"},{"a"},{"b"},{UniversalSet{1},UniversalSet{1}},
+            {universal_relation("ab-reset",2),universal_relation("ab-reset-2",2)}},
+         {{"c"},{"b"},{"c"},{UniversalSet{1},UniversalSet{1}},
+            {universal_relation("c-reset",2),universal_relation("c-reset-2",2)}},
+         {{"a"},{"a"},{"b"},{UniversalSet{1},UniversalSet{1}},
+            {universal_relation("a-reset",2),universal_relation("a-reset-2",2)}},
+         {{"b:c"},{"b"},{"c"},{UniversalSet{1},UniversalSet{1}},
+            {universal_relation("bc-reset",2),universal_relation("bc-reset-2",2)}}}};
+    HybridRequest request{{{"a"},{0}},{{"c"}},{{{"c"},LinearTerminal{{1},0},"energy","J"}}};
+    const HybridPath first{{{"a"},{"b"},{"c"}},{{"a:b"},{"c"}}};
+    const HybridPath second{{{"a"},{"b"},{"c"}},{{"a"},{"b:c"}}};
+    const auto first_relation=compose_hybrid_path_relation(system,request,first,{32,128,4096});
+    const auto second_relation=compose_hybrid_path_relation(system,request,second,{32,128,4096});
+    REQUIRE(std::holds_alternative<sets::SetData>(first_relation));
+    REQUIRE(std::holds_alternative<sets::SetData>(second_relation));
+    CHECK(std::get<sets::SetData>(first_relation).metadata()->id !=
+          std::get<sets::SetData>(second_relation).metadata()->id);
+}

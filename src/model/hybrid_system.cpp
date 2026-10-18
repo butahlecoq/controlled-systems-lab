@@ -460,7 +460,8 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
        !std::holds_alternative<numeric::VectorView>(ab)||!std::holds_alternative<numeric::VectorView>(eb))
         return Diagnostic{DiagnosticCode::invalid_input,"hybrid.relation.storage","Joint relation data failed numeric validation"};
     std::string relation_id = "hybrid-joint";
-    for (const auto& edge : path.edges) relation_id += ":" + edge.value;
+    for (const auto& edge : path.edges)
+        relation_id += ":" + std::to_string(edge.value.size()) + ":" + edge.value;
     auto made=sets::make_h({SetId{std::move(relation_id)},width,{}},
         {std::get<numeric::MatrixView>(ai),std::get<numeric::VectorView>(ab),std::get<numeric::MatrixView>(ei),std::get<numeric::VectorView>(eb)});
     if(const auto* d=std::get_if<Diagnostic>(&made)) return *d;
