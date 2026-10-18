@@ -194,7 +194,7 @@ Port effort (estimate): W01/W03/W09 are medium (350/354/282-line multi-module co
 |---|---|
 | B04 canonical inputs (T16 `U` rows, stage constraints, generating revision, first-action convention) | issues #10 and #2; `publication-source-matrix.md:28,36`; historical scenario remains non-executable (`README.md:59`) |
 | B09 canonical row (criterion/table mismatch; A08–A10 not matched to printed run) | issue #2; `publication-source-matrix.md:30` |
-| B05 adaptive-optimal rows (L08 equation objects/control labels; provisional row assignment) | `baselines.md:15,72`; `source-map.md:18` |
+| B05 adaptive-optimal rows (L08 Table 2 policy labels mapped; historical run inputs/provenance unresolved) | `baselines.md:15,72`; `source-map.md:18`; `l08-embedded-equations.md` |
 | B02 nonlinear-approximation semantics (initial-state/coordinate convention) | `baselines.md:12,38` |
 | B03 complete model/input generation and seeds | `baselines.md:13,44` |
 | B06/B07 canonical reproduction (control sign; disturbance set and full physical parameters) | `baselines.md:16–17` |

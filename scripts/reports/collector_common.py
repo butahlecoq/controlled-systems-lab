@@ -30,7 +30,7 @@ LP = Profile("lp",data.EVENT_SCHEMA,"csl.lp-profile/1","csl_lp_report","csl_repo
              frozenset({"csl_lp_report","csl_report_support","csl_report_runtime","csl_highs_lp","highs","csl_optimization","csl_registry","csl_numeric","csl_contracts"}))
 CONVEX = Profile("convex",data.CONVEX_EVENT_SCHEMA,"csl.convex-profile/1","csl_convex_report","csl_convex_report_support","csl.convex.highs",
                  frozenset({"csl_convex_report","csl_convex_report_support","csl_report_runtime","csl_highs_convex","csl_convex","csl_objectives","highs","csl_optimization","csl_registry","csl_numeric","csl_contracts"}))
-BACKEND={"id":LP.backend_id,"version":"1.0.0+highs.1.11.0"}
+BACKEND={"id":LP.backend_id,"version":"1.1.0+highs.1.11.0"}
 ROOT=Path(__file__).resolve().parents[2]
 
 def checked_profile(profile):
@@ -42,7 +42,10 @@ def event_profile(event):
     data.require(schema in (LP.event_schema,CONVEX.event_schema),"unknown event schema")
     return CONVEX if schema==CONVEX.event_schema else LP
 
-def backend(profile): return {"id":checked_profile(profile).backend_id,"version":"1.0.0+highs.1.11.0"}
+def backend(profile):
+    selected=checked_profile(profile)
+    version="1.1.0+highs.1.11.0" if selected is LP else "1.0.0+highs.1.11.0"
+    return {"id":selected.backend_id,"version":version}
 
 
 

@@ -68,30 +68,35 @@ the caller's tolerance. This is an algorithmic numerical relation only. For
 direct finite V, singleton, and empty inputs, the operation also reports an
 outward-rounded `GeometryEvidence.error_bound` when exact dyadic arithmetic
 can represent the post-hoc discrepancy. It also composes that candidate bound
-with an independently recomputed coverage bound for bounded ambient-one H
-inputs when every converted operand has a verifiable exact stored-dyadic
-interval. Its metric is L-infinity Hausdorff distance on output coordinates,
+with independently recomputed coverage bounds for bounded ambient-one H
+inputs and bounded axis-aligned boxes in supported dimensions when every
+converted operand has a verifiable exact stored-dyadic interval or box. Its
+metric is L-infinity Hausdorff distance on output coordinates,
 and its units are maximum absolute output-coordinate units. For candidate
 generation, the bound compares every generated binary64 point with the exact
 affine image or Minkowski pair operation on the stored (possibly converted)
-binary64 vertices. If `E_gen` is the largest such coordinate discrepancy and
-`E_H` is an ambient-one H-to-V coverage bound, the affine-image bound includes
+binary64 vertices. Let `E_gen` be the largest such coordinate discrepancy and
+`E_H` a certified H-to-V coverage bound from either supported exact interval
+or box profile. The affine-image bound includes
 `max_row(sum_col(abs(M[row,col]))) * E_H + E_gen`. The Minkowski bound includes
 `E_H,left + E_H,right + E_gen`; direct finite V operands contribute zero
 conversion error. These compositions use exact dyadic accumulation and are
 rounded up to representable binary64. They follow by pairing convex
 combinations and by the induced L-infinity operator norm / Minkowski sum
-inequality. Exact candidate deletion adds zero error because deletion
+inequality. For a box input, the certificate checks every converted point is
+inside the exact box and that every distinct box corner is present, capped at
+4,096 corners. Exact candidate deletion adds zero error because deletion
 preserves the generated hull exactly. For an empty result, the bound is zero
 under the empty-to-empty distance convention stated in the evidence units.
 
 This bound says nothing about authored pre-rounding real values or uncertainty
 in how input coordinates and coefficients were obtained. H inputs outside the
-bounded ambient-one profile receive no operation error bound: checking returned
-converted vertices against H rows does not prove that all needed vertices were
-found. For ambient-one inputs, affine-sum independently recomputes exact H
-interval coverage against the returned V extrema; it does not trust a
-converter's numerical relation or residual as global coverage evidence. If
+bounded ambient-one interval or supported axis-aligned-box profiles receive no
+operation error bound: checking returned converted vertices against H rows
+does not prove that all needed vertices were found. For supported inputs,
+affine-sum independently recomputes exact H coverage against returned V
+extrema or box corners; it does not trust a converter's numerical relation or
+residual as global coverage evidence. If
 exact arithmetic cannot produce a finite outward binary64 bound, the operation
 fails closed instead of returning an unbounded or rounded-down value.
 `NumericalCheck.max_residual` remains a reducer diagnostic and does not supply

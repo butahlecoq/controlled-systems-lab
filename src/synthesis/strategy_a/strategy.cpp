@@ -1,6 +1,7 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
+#include <csl/synthesis/ts03_singular_integrator.hpp>
 #include <csl/execution/timing_collector.hpp>
 #include "../../registry/compiled_verifiers.hpp"
 #include "../../registry/strategy_a_lineage.hpp"
@@ -21,8 +22,9 @@ Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyReq
     if(auto errors=check_family_request(family,problem.identity());!errors.empty())return errors;
     const bool exact_ts01=registry::detail::ts01_case_valid(problem,family,family.representation);
     const bool exact_ts02=registry::detail::ts02_case_valid(problem,family,family.representation);
-    if(!exact_ts01&&!exact_ts02&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and the reviewed T-S01/T-S02 exact profiles are supported.");
-    if(!exact_ts01&&!exact_ts02&&family.target!=FamilyTarget::candidate_relaxation)
+    const bool exact_ts03=registry::detail::ts03_case_valid(problem,family,family.representation);
+    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and the reviewed T-S01/T-S02/T-S03 exact profiles are supported.");
+    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&family.target!=FamilyTarget::candidate_relaxation)
         return unsupported("strategy_a.coverage","No reviewed coverage procedure or optimal-subset verifier; request a candidate relation.");
     if(family.assurance!=Assurance::numerical)
         return unsupported("strategy_a.assurance","Only unestablished binary64 candidate construction is supported.");
@@ -86,6 +88,26 @@ canonical_ts02_relation() {
     if(!std::holds_alternative<sets::SetData>(data))
         return Diagnostics{{DiagnosticCode::invalid_input,"strategy_a.ts02.relation","Canonical T-S02 H-relation is not a valid polyhedron."}};
     return std::make_shared<const ::csl::synthesis::Ts02ConstantIntegratorRelation>(
+        std::get<sets::SetData>(std::move(data)));
+}
+std::variant<std::shared_ptr<const ::csl::synthesis::Ts03SingularIntegratorRelation>,Diagnostics>
+canonical_ts03_relation() {
+    auto inequalities=numeric::snapshot(Matrix{2,5,{0,0,0,1,0, 0,0,0,-1,0}});
+    auto upper=numeric::snapshot_vector(Vector{1,0});
+    auto equalities=numeric::snapshot(Matrix{4,5,{1,0,0,0,0, 0,1,0,-1,0,
+        0,0,1,0,0, 0,0,0,0,1}});
+    auto equality_values=numeric::snapshot_vector(Vector{0,0,1,1});
+    if(!std::holds_alternative<numeric::MatrixView>(inequalities)||
+        !std::holds_alternative<numeric::VectorView>(upper)||
+        !std::holds_alternative<numeric::MatrixView>(equalities)||
+        !std::holds_alternative<numeric::VectorView>(equality_values))
+        return Diagnostics{{DiagnosticCode::invalid_input,"strategy_a.ts03.relation","Could not construct exact canonical H-relation buffers."}};
+    auto data=sets::make_h({{"ts03-singular-optimal-histories"},5,{"x0","x1","x2","u0","u1"}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(equality_values)});
+    if(!std::holds_alternative<sets::SetData>(data))
+        return Diagnostics{{DiagnosticCode::invalid_input,"strategy_a.ts03.relation","Canonical T-S03 H-relation is not a valid polyhedron."}};
+    return std::make_shared<const ::csl::synthesis::Ts03SingularIntegratorRelation>(
         std::get<sets::SetData>(std::move(data)));
 }
 void reject(SynthesisResult& result,RequestProvenance request,Diagnostics diagnostics,
@@ -267,9 +289,11 @@ public:
                 minimized.optimization->outcome.value==MathematicalOutcome::optimal;
             const bool exact_ts02=registry::detail::ts02_case_valid(problem,request,request.representation)&&lineage==prepared_request_.lineage&&
                 minimized.optimization&&minimized.optimization->outcome.value==MathematicalOutcome::optimal;
+            const bool exact_ts03=registry::detail::ts03_case_valid(problem,request,request.representation)&&lineage==prepared_request_.lineage&&
+                minimized.optimization&&minimized.optimization->outcome.value==MathematicalOutcome::optimal;
             const auto proposal_identity=FamilyIdentity{problem.identity(),request,history.coordinates,
                 strategy,version,lineage};
-            if(exact_ts01&&result.termination==Termination::completed) {
+            if((exact_ts01||exact_ts03)&&result.termination==Termination::completed) {
                 receipt_=registry::detail::StrategyARuntimeLineageReceipt{prepared_request_,
                     std::make_shared<const reachability::ForwardTube>(tube),
                     std::make_shared<const sets::SetData>(slice.feasible),
@@ -314,6 +338,24 @@ public:
                 result.objective=optimum.bounds;
                 result.complete_proposal=CompleteFamilyProposal{proposal_identity,std::move(family)};
             }
+            if(exact_ts03&&result.termination==Termination::completed) {
+                const SymbolicArgument derivation{"T-S03 exact singular-integrator derivation",
+                    "For x1=u0 and x2=u1, the terminal objective (x2-1)^2 is nonnegative and equals zero exactly when x2=u1=1. Thus x0=0, x1=u0, x2=1, u1=1, and 0<=u0<=1 describe the entire optimal joint-history relation."};
+                const ClaimEvidence claim{problem.identity(),derivation};
+                const ObjectiveBound zero{0,{problem.identity(),derivation}};
+                const OptimumEvidence optimum{claim,{zero,zero}};
+                auto canonical=canonical_ts03_relation();
+                if(const auto* errors=std::get_if<Diagnostics>(&canonical)) {
+                    contract_failure(result,*errors);return result;
+                }
+                auto payload=std::get<std::shared_ptr<const synthesis::Ts03SingularIntegratorRelation>>(std::move(canonical));
+                CompleteOptimalFamily family{{proposal_identity.coordinates,request.representation,payload},optimum,
+                    {proposal_identity,RegisteredCompletenessEvidence{{::csl::synthesis::ts03_singular_integrator_verifier},"1",
+                        ::csl::synthesis::ts03_singular_integrator_proof}},Assurance::numerical};
+                result.outcome={problem.identity(),MathematicalOutcome::optimal,derivation,{}};
+                result.objective=optimum.bounds;
+                result.complete_proposal=CompleteFamilyProposal{proposal_identity,std::move(family)};
+            }
             return result;
         } catch(const std::bad_alloc&) {
             stop(result,local({"strategy-a/storage"}),{StopReason::resource_limit,"Strategy A allocation failed; previously published evidence retained."});
@@ -343,6 +385,9 @@ registry::StrategyRegistration make_registration(Providers providers) {
                     if(prepared.family.profile==::csl::synthesis::ts02_constant_integrator_profile&&
                         prepared.family.target==FamilyTarget::exact_optimal_relation)
                         selected_verifier={{::csl::synthesis::ts02_constant_integrator_verifier},"1"};
+                    if(prepared.family.profile==::csl::synthesis::ts03_singular_integrator_profile&&
+                        prepared.family.target==FamilyTarget::exact_optimal_relation)
+                        selected_verifier={{::csl::synthesis::ts03_singular_integrator_verifier},"1"};
                     return std::make_unique<detail::StrategyAExecutionRunner>(reachability::ForwardDependencies{
                         std::get<0>(generated),std::get<1>(generated),std::get<2>(generated)},
                         std::get<3>(generated),std::get<4>(generated),prepared,std::move(selected_verifier));
@@ -355,6 +400,9 @@ registry::StrategyRegistration make_registration(Providers providers) {
             if(request.strategy_version==version&&request.configuration.strategy==strategy&&
                 registry::detail::ts02_case_valid(request.problem,request.family,request.configuration.representation))
                 return detail::expected_ts02_lineage(request.problem.identity());
+            if(request.strategy_version==version&&request.configuration.strategy==strategy&&
+                registry::detail::ts03_case_valid(request.problem,request.family,request.configuration.representation))
+                return detail::expected_ts03_lineage(request.problem.identity());
             return std::vector<TransformStepIdentity>{};
         }};
     registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
@@ -362,6 +410,9 @@ registry::StrategyRegistration make_registration(Providers providers) {
         if(request.configuration.strategy==strategy&&
             registry::detail::ts02_case_valid(request.problem,request.family,request.configuration.representation))
             return registry::StrategyRegistration::CompleteFamilyVerifierKey{{::csl::synthesis::ts02_constant_integrator_verifier},"1"};
+        if(request.configuration.strategy==strategy&&
+            registry::detail::ts03_case_valid(request.problem,request.family,request.configuration.representation))
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{::csl::synthesis::ts03_singular_integrator_verifier},"1"};
         // Retain the original T-S01 binding for all other requests; capabilities
         // still reject unsupported coverage/profile requests with scoped diagnostics.
         return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};

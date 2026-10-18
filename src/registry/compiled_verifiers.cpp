@@ -7,6 +7,7 @@
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
+#include <csl/synthesis/ts03_singular_integrator.hpp>
 #include <csl/sets/data.hpp>
 #include <algorithm>
 #include <array>
@@ -80,6 +81,11 @@ StrategyARuntimeLineageReceipt::StrategyARuntimeLineageReceipt(const StrategyReq
 
 bool StrategyARuntimeLineageReceipt::matches(const StrategyRequest& request,const FamilyIdentity& identity,
     const StrategyRegistration::CompleteFamilyVerifierKey& verifier_binding) const {
+    const bool ts03=strategy_a_ts03_profile_valid(binding_.problem,binding_);
+    const bool ts01=strategy_a_ts01_profile_valid(binding_.problem,binding_);
+    const auto expected_profile_lineage=ts03?
+        synthesis::strategy_a::detail::expected_ts03_lineage(binding_.problem.identity()):
+        synthesis::strategy_a::detail::expected_ts01_lineage(binding_.problem.identity());
     if(verifier_binding_.id.value.empty()||verifier_binding_.version.empty()||
         verifier_binding_.id!=verifier_binding.id||verifier_binding_.version!=verifier_binding.version||
         !forward_||!feasible_terminal_||!feasible_recovery_||!terminal_||!optimal_recovery_)return false;
@@ -94,8 +100,7 @@ bool StrategyARuntimeLineageReceipt::matches(const StrategyRequest& request,cons
         identity.coordinates!=prepared.problem.constraints().coordinates()||
         identity.strategy!=ModuleId{"csl.synthesis.reach-back"}||identity.strategy_version!="1"||
         prepared.configuration.strategy!=identity.strategy||prepared.strategy_version!=identity.strategy_version||
-        !strategy_a_ts01_profile_valid(prepared.problem,prepared)||
-        prepared.lineage!=synthesis::strategy_a::detail::expected_ts01_lineage(prepared.problem.identity())||
+        (!ts01&&!ts03)||prepared.lineage!=expected_profile_lineage||
         identity.lineage!=prepared.lineage)
         return false;
 
@@ -177,7 +182,7 @@ bool control_interval(const AdmissibleSet& set) {
 }
 
 bool integrator_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
-    const RepresentationId& representation,FamilyTarget target) {
+    const RepresentationId& representation,FamilyTarget target,double state_gain=1) {
     if(family.objective!=problem.identity()||
         family.target!=target||family.assurance!=Assurance::numerical||
         family.representation!=h_polyhedron||family.materialization_limit||representation!=h_polyhedron)
@@ -191,7 +196,7 @@ bool integrator_case_valid(const ::csl::problem::ResolvedProblem& problem,const 
     for(std::size_t stage=0;stage<2;++stage) {
         const auto dynamics=model.stage({stage});if(!std::holds_alternative<csl::model::DynamicsStage>(dynamics))return false;
         const auto& coefficients=std::get<csl::model::DynamicsStage>(dynamics);
-        if(!matrix_is(coefficients.A,1,1,{1})||!matrix_is(coefficients.B,1,1,{1})||
+        if(!matrix_is(coefficients.A,1,1,{state_gain})||!matrix_is(coefficients.B,1,1,{1})||
             !matrix_is(coefficients.E,1,0,{})||!vector_is(coefficients.offset,{0}))return false;
         const auto time=model.time({stage});if(!std::holds_alternative<double>(time)||std::get<double>(time)!=static_cast<double>(stage))return false;
     }
@@ -270,6 +275,20 @@ bool ts02_case_valid(const ::csl::problem::ResolvedProblem& problem,const Family
         family.target==FamilyTarget::exact_optimal_relation&&
         integrator_case_valid(problem,family,representation,FamilyTarget::exact_optimal_relation)&&
         ts02_constant_objective_valid(problem);
+}
+bool ts03_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
+    const RepresentationId& representation) {
+    if(family.profile!=synthesis::ts03_singular_integrator_profile||
+        !integrator_case_valid(problem,family,representation,FamilyTarget::exact_optimal_relation,0))return false;
+    const auto objective=problem.objective();const auto coefficients=objective.coefficients();
+    const auto* quadratic=std::get_if<::csl::optimization::QuadraticCoefficients>(&coefficients);
+    return quadratic&&objective.dimension()==1&&matrix_is(quadratic->Q,1,1,{2})&&
+        vector_is(quadratic->linear,{-2})&&quadratic->offset==1;
+}
+bool strategy_a_ts03_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
+    return ts03_case_valid(problem,request.family,request.configuration.representation)&&
+        request.configuration.strategy.value=="csl.synthesis.reach-back"&&request.strategy_version=="1"&&
+        request.lineage==synthesis::strategy_a::detail::expected_ts03_lineage(problem.identity());
 }
 
 }
@@ -410,6 +429,60 @@ public:
         return diagnostics;
     }
 };
+class Ts03SingularIntegratorVerifier final : public CompiledCompleteFamilyVerifier {
+public:
+    const ModuleId& id() const noexcept override {
+        static const ModuleId value{synthesis::ts03_singular_integrator_verifier};return value;
+    }
+    const std::string& version() const noexcept override { static const std::string value{"1"};return value; }
+    Diagnostics verify(const StrategyRequest& request,const CompleteFamilyProposal& proposal) const override {
+        if(!strategy_a_ts03_profile_valid(request.problem,request))
+            return {{DiagnosticCode::unsupported,"ts03.verifier.profile",
+                "Verifier only admits the exact singular-integrator Strategy A profile and registered lineage."}};
+        Diagnostics diagnostics;const auto& identity=proposal.identity;const auto& complete=proposal.family;
+        if(identity.problem!=request.problem.identity()||identity.request!=request.family||
+            identity.coordinates!=request.problem.constraints().coordinates()||
+            identity.strategy!=request.configuration.strategy||identity.strategy_version!=request.strategy_version||
+            identity.lineage!=request.lineage||complete.completeness.binding!=identity||
+            complete.relation.coordinates!=identity.coordinates||
+            complete.relation.representation!=request.family.representation||complete.assurance!=Assurance::numerical)
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts03.verifier.binding",
+                "T-S03 proof must bind the exact resolved problem, request, strategy, coordinates and frozen lineage."});
+        const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+        if(!proof||proof->verifier!=id()||proof->verifier_version!=version()||
+            proof->proof!=synthesis::ts03_singular_integrator_proof)
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts03.verifier.support",
+                "T-S03 proof requires the registered singular-integrator analytic payload."});
+        const auto* relation=dynamic_cast<const synthesis::Ts03SingularIntegratorRelation*>(complete.relation.payload.get());
+        bool exact_relation=false;
+        if(relation) {
+            const auto& set=relation->h_polyhedron();const auto metadata=set.metadata();
+            const auto representation=set.representation();const auto* h=std::get_if<::csl::sets::HRepresentation>(&representation);
+            exact_relation=metadata&&metadata->id==SetId{"ts03-singular-optimal-histories"}&&metadata->set.dimension==5&&
+                metadata->coordinate_labels==std::vector<std::string>{"x0","x1","x2","u0","u1"}&&h&&
+                matrix_is(h->inequalities,2,5,{0,0,0,1,0, 0,0,0,-1,0})&&
+                vector_is(h->upper_bounds,{1,0})&&
+                matrix_is(h->equalities,4,5,{1,0,0,0,0, 0,1,0,-1,0, 0,0,1,0,0, 0,0,0,0,1})&&
+                vector_is(h->equality_values,{0,0,1,1});
+        }
+        if(!exact_relation)
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts03.verifier.relation",
+                "T-S03 relation must be the exact canonical full optimal-history line."});
+        const SymbolicArgument derivation{"T-S03 exact singular-integrator derivation",
+            "For x1=u0 and x2=u1, the terminal objective (x2-1)^2 is nonnegative and equals zero exactly when x2=u1=1. Thus x0=0, x1=u0, x2=1, u1=1, and 0<=u0<=1 describe the entire optimal joint-history relation."};
+        const auto same_claim=[&](const ClaimEvidence& claim) {
+            const auto* support=std::get_if<SymbolicArgument>(&claim.support);
+            return claim.problem==request.problem.identity()&&support&&support->reference==derivation.reference&&
+                support->assumptions==derivation.assumptions;
+        };
+        if(!same_claim(complete.optimum.optimum)||!complete.optimum.bounds.lower||!complete.optimum.bounds.upper||
+            complete.optimum.bounds.lower->value!=0||complete.optimum.bounds.upper->value!=0||
+            !same_claim(complete.optimum.bounds.lower->evidence)||!same_claim(complete.optimum.bounds.upper->evidence))
+            diagnostics.push_back({DiagnosticCode::evidence_mismatch,"ts03.verifier.optimum",
+                "T-S03 proof must bind the exact analytic optimum and matching zero lower/upper bounds."});
+        return diagnostics;
+    }
+};
 class Ts01MidpointVerifier final : public CompiledPartialFamilyVerifier {
 public:
     const ModuleId& id() const noexcept override { static const ModuleId value{"csl.verifier.ts01-midpoint"}; return value; }
@@ -508,6 +581,8 @@ std::shared_ptr<const CompiledCompleteFamilyVerifier> find_compiled_verifier(con
     if(id==ts01->id()&&version==ts01->version())return ts01;
     static const auto ts02=std::make_shared<const Ts02ConstantIntegratorVerifier>();
     if(id==ts02->id()&&version==ts02->version())return ts02;
+    static const auto ts03=std::make_shared<const Ts03SingularIntegratorVerifier>();
+    if(id==ts03->id()&&version==ts03->version())return ts03;
 #ifdef CSL_TEST_VERIFIER_CATALOG
     static const auto second=std::make_shared<const TestCatalogVerifier>();
     if(id==second->id()&&version==second->version())return second;

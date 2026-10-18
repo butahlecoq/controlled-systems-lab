@@ -385,7 +385,7 @@ TEST_CASE("same immutable request selects phase one or actual reference without 
                 CHECK(independently.objective==0);CHECK(independently.residuals.rows.violation<1e-8);CHECK(independently.residuals.variables.violation<1e-8);
             }
             if(std::string(method)=="csl.lp.highs") {
-                CHECK(plan.provenance()[0].actual->version=="1.0.0+highs.1.11.0");
+                CHECK(plan.provenance()[0].actual->version=="1.1.0+highs.1.11.0");
                 CHECK(r.raw_diagnostics.find("native.version=1.11.0")!=std::string::npos);
                 CHECK(r.raw_diagnostics.find("options.absolute_tolerance=1e-08")!=std::string::npos);
             }

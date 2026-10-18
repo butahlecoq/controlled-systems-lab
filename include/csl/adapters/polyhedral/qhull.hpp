@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/registry/registry.hpp>
+#include <functional>
 
 namespace csl::adapters::polyhedral {
 
@@ -30,6 +31,9 @@ struct QhullOptions {
     // policy limit; Qhull's own integer-width and host allocation limits remain.
     std::optional<std::size_t> max_ambient_dimension;
     std::optional<std::size_t> max_input_rows;
+    // Called inline immediately before each native qh_new_qhull invocation.
+    // Separate workspaces may invoke it concurrently; callback exceptions propagate.
+    std::function<void()> before_native_call;
     std::function<void(const ConversionObservation&)> observe;
 };
 

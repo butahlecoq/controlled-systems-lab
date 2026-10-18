@@ -35,6 +35,32 @@ review. Main-only Pages deployment and live exact-byte verification remain
 publication gates. OPT-07 issue #38 remains open for grouped and streaming
 reduction work.
 
+## OPT-11 recursive split-and-merge hull report
+
+The reviewed OPT-11 source is `488d4ca8888d91c44b64d5d2f0baf564d1c28ae7`.
+Its native bundle is
+[`opt11-8cfbc0c65f420dfd`](../../reports/algorithm-results/opt11-8cfbc0c65f420dfd/)
+and its schema-3 publication ID is
+`opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865`.
+The collection contains 18 complete alternating baseline/recursive pairs,
+with six measured pairs on each of three fixed 33-point clouds. The independent
+exact-dyadic oracle validated 1,274 deletion certificates; all 42 calls
+completed. In baseline/recursive order, median public-call durations were
+2,704,100/2,786,750 ns for `signed-grid`, 2,778,150/2,822,650 ns for
+`duplicate-collinear`, and 2,685,650/3,196,350 ns for `rank-one-offset`.
+Ranges overlap and no performance winner is supported. Timing includes
+recursive child LP-workspace creation and root async scheduling; it excludes
+parsing, injected workspace creation, validation, serialization and rendering.
+The source-mapped limiter is unavailable. These observations cover only the
+three fixed binary64 clouds on the recorded host/backend and establish no
+universal speedup, application-scale behavior, or scalability claim. The
+deployed [versioned report](https://butahlecoq.github.io/controlled-systems-lab/opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865/index.html)
+uses source commit `488d4ca8888d91c44b64d5d2f0baf564d1c28ae7`. Live page
+SHA-256 is `702e8a91d3a757978289ef7b565ec03e841ba6dd765fe81af49fe4fd01aa2116`;
+the public ZIP SHA-256 is `90b609866df72e0432ae7ef9dbe4f4692a321c6d7b84225a0cb1bf6254704767`
+and matches the main catalogue. The live HTML bytes match the page in the ZIP
+and the hash in its publication manifest.
+
 ## GEO-07 registered dependent generator sum report
 
 The bounded GEO-07 dependent-sum bundle
@@ -73,6 +99,12 @@ publication gates.
 The [report-record contract](../contracts/algorithm-report-records.md) specifies the executable, saved schemas, exact timing scopes, independent literals, build/environment provenance, commands and OBS migration. `csl_lp_report --smoke` is a bounded functional test. Accepted seven-trial measurements and the separate counter profile follow review of a fixed clean Release code commit; their source identity is distinct from the later artifact commit.
 
 Collection, plotting, rendering and static staging are separate commands under `scripts/reports`. Regenerate a reviewed bundle from saved `records.json` without rerunning the solver. Keep all failures and unavailable fields, inspect actual figures/pages, and retain raw JSONL, JSON/CSV, profile/build evidence and exact-byte manifests. Bundles live under `reports/algorithm-results/<report-id>/`, with a catalogue/index and adjacent offline ZIP. Destinations are immutable, and only allowlisted reviewed files enter the main-only Pages deployment workflow. The actual deployed versioned URL and downloads must be verified before algorithm-report completion is claimed.
+
+## OPT-12 workspace-local cross-query basis reuse
+
+Issue [OPT-12 #46](https://github.com/butahlecoq/controlled-systems-lab/issues/46) measures the optional HiGHS workspace-local warm-start path from source commit `7b732a53716ce963af83095fd2aeca8a681b76c4`. The native bundle [`opt12-7b732a53716c`](../../reports/algorithm-results/opt12-7b732a53716c/) retains 42 verified paired rows across three synthetic LPs and seven alternating repetitions per side. On the 100,000-column transfer-cost fixture, median aggregate native work is 35.7031 ms cold and 37.7611 ms warm; the ranges overlap (33.3761–41.2337 ms cold and 34.7062–45.2157 ms warm). A separate PDB-enabled Release CPU profile resolves the dominant sampled path through `LPWorkspace::solve`, the HiGHS LP workspace, and `Highs::run`; its diagnostic trace is excluded from timings and does not attribute the measured cold/warm latency difference. Performance interpretation remains inconclusive. The measurement does not establish that warm reuse is slower, a general speedup, or a worst-case complexity change.
+
+The timing workload is criterion 3 evidence only. The implementation contract tests in [`tests/contract/lp/highs_tests.cpp`](../../tests/contract/lp/highs_tests.cpp) cover optional activation, workspace isolation, row and column dimension invalidation, coefficient and bound changes, degenerate bases, rejected hints, cold retries, and independently checked cold/warm results for supported cases. The report is registered through the schema-3 catalogue/site adapter; publication remains pending until the main-only Pages deployment and live URL/download hashes are verified.
 
 ## SYN-04 registered Strategy B T-S01 report
 

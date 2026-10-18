@@ -1,0 +1,31 @@
+# EXT-07: Define and implement hybrid-system profiles
+
+GitHub: [#156](https://github.com/butahlecoq/controlled-systems-lab/issues/156).
+
+## Purpose and scope
+
+Track the future hybrid-system extension explicitly. Hybrid systems are reserved as a future model class in the architecture, but their discrete mode semantics are not covered by the finite/mixed-action or observation-feedback tickets. This is a later profile, not part of the initial nominal affine discrete comparison.
+
+Read the [class-level system architecture](../../specs/2026-10-12-class-level-system-architecture.md), [hybrid-system contract](../../../contracts/hybrid-systems.md), and coordinate with [#68](https://github.com/butahlecoq/controlled-systems-lab/issues/68), [#73](https://github.com/butahlecoq/controlled-systems-lab/issues/73), and [#76](https://github.com/butahlecoq/controlled-systems-lab/issues/76). These are coordination points, not native blockers for the design ticket.
+
+## Acceptance criteria
+
+- [ ] Specify finite mode identities, mode-specific affine dynamics and admissible continuous controls, initial-mode semantics, and the stage at which a mode is active.
+- [ ] Specify stage-indexed mode invariants, transition guards, permitted transitions, and reset relations with explicit pre/post-transition timing and dimension rules.
+- [ ] Preserve the joint relation among state, continuous control, and mode sequence. Retain every optimal mode branch and ties; never replace a hybrid family with a convex hull or an unlabelled sample cloud.
+- [ ] Declare supported exact operations and any approximation guarantee for guard intersection, reset images, and mode-branch composition. Reject unsupported operation plans before execution.
+- [ ] Keep reachability, direct-trajectory, and verification adapters replaceable and record per-mode/per-transition provenance and resource use.
+- [ ] Add unit and contract tests for guard entry/exit, reset maps, forbidden transitions, empty branches, duplicate mode paths, tied optimal branches, cancellation, and resource limits. Compare tiny instances with an independently implemented exhaustive mode-sequence oracle.
+- [ ] Provide a capability profile and report for dimensions/mode counts; do not claim general scalability from finite fixtures.
+
+## Dependencies and review
+
+This ticket is intentionally later than the nominal v1 comparison and may refine model, geometry, strategy, and result contracts. Coordinate with model tickets and the shared outcome contract [SYN-07](https://github.com/butahlecoq/controlled-systems-lab/issues/155) once created. Resolve semantics and capability/evidence claims in a reviewed design update before implementation. Do not silently infer hybrid meaning from finite controls or stage-varying matrices.
+
+## Design gate
+
+The proposed contract is [hybrid-systems.md](../../../contracts/hybrid-systems.md). It defines a known request-selected initial mode/state, stage-indexed invariants and transition timing, existential reset witnesses (without universal physical guarantees), global minimization over explicitly allowed terminal modes, branch-labelled all-optimal families, replaceable reachability/direct-trajectory/verification adapter seams, admission checks, independent oracle requirements, and the unsupported capability boundary. Implementation remains separate until this design gate is reviewed and accepted.
+
+## Delivery and review
+
+Ship meaningful unit/contract tests with the implementation, using the named independent oracle. Return commits, tests and commands run, supported assumptions, numerical/evidence limitations and unresolved findings. Shared contract changes require an explicit specification revision and integration review.

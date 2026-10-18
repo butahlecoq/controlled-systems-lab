@@ -1,0 +1,9 @@
+{
+  "calls": 42,
+  "exact_certificates": 1274,
+  "fixtures": 3,
+  "noncomplete_calls": 0,
+  "paired_matrix_complete": true,
+  "pairs": 21,
+  "purpose": "measurement"
+}

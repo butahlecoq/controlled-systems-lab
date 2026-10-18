@@ -3,6 +3,7 @@
 #include <csl/registry/provider.hpp>
 #include <csl/sets/data.hpp>
 #include "../../geometry/conversion/affine_coordinates.hpp"
+#include "../../geometry/conversion/exact_h_box.hpp"
 #include "../../geometry/conversion/exact_h_interval.hpp"
 #include <Eigen/Core>
 #include <Eigen/SVD>
@@ -99,10 +100,10 @@ struct NativeQhull {
     }
 };
 struct Facets { std::vector<Eigen::VectorXd> normals; std::vector<double> offsets; std::string error; };
-Facets hull_facets(const Eigen::MatrixXd& points) {
+Facets hull_facets(const Eigen::MatrixXd& points,const std::function<void()>& before_native_call) {
     Facets result;
     if (points.cols()<2||points.rows()<=points.cols()) { result.error="Qhull needs more than dimension+1 points."; return result; }
-    if (points.cols()>std::numeric_limits<int>::max()||points.rows()>std::numeric_limits<int>::max()) {
+    if (points.cols()>std::numeric_limits<int>::max()||points.rows()>qh_POINTSmax) {
         result.error="Qhull's signed-int point or dimension limit is exceeded."; return result;
     }
     std::vector<coordT> coordinates;
@@ -115,6 +116,7 @@ Facets hull_facets(const Eigen::MatrixXd& points) {
     NativeQhull native; qh_zero(&native.qh,native.err); native.started=true;
     qhT* qh=&native.qh;
     char options[]="qhull Qx";
+    if (before_native_call) before_native_call();
     const auto status=qh_new_qhull(&native.qh,static_cast<int>(points.cols()),static_cast<int>(points.rows()),
                                    coordinates.data(),False,options,native.out,native.err);
     if (status!=qh_ERRnone) { result.error="Qhull 8.0.2 Qx returned error code "+std::to_string(status)+"."; return result; }
@@ -401,7 +403,7 @@ class Workspace final : public RepresentationConverterWorkspace {
             if (!std::isfinite(denominator)||denominator<=0) return unsupported("conversion.polar","A polar denominator is nonpositive or nonfinite.");
             polar.row(i)=c.row(i)/denominator;
         }
-        auto facets=hull_facets(polar);
+        auto facets=hull_facets(polar,options_.before_native_call);
         StopReason stop{}; if (stopped(context,stop)) return OperationStopped{stop,"Stopped after Qhull returned; no converted set is published."};
         if (!facets.error.empty()) return unsupported("conversion.qhull",facets.error);
         std::vector<Eigen::VectorXd> vertices;
@@ -455,7 +457,7 @@ class Workspace final : public RepresentationConverterWorkspace {
         } else if (r>1) {
             Eigen::MatrixXd points(vertices.rows(),r);
             for (Eigen::Index i=0;i<vertices.rows();++i) points.row(i)=(coords.basis.transpose()*(vertices.row(i).transpose()-coords.origin)).transpose();
-            auto facets=hull_facets(points);
+            auto facets=hull_facets(points,options_.before_native_call);
             StopReason stop{}; if (stopped(context,stop)) return OperationStopped{stop,"Stopped after Qhull returned; no converted set is published."};
             if (!facets.error.empty()) return unsupported("conversion.qhull",facets.error);
             a.resize(facets.normals.size(),n); b.resize(facets.normals.size());
@@ -559,6 +561,28 @@ public:
                     "global ambient-one H/V coverage checked against exact stored binary64 H rows");
                 if (auto errors=check_geometry_evidence(completed->evidence,request);!errors.empty())
                     return finish(Unsupported{std::move(errors)});
+            }
+        }
+        if (!want_h && request.input.metadata.dimension >= 2 &&
+            std::holds_alternative<sets::HRepresentation>(rep)) {
+            if (auto* completed=std::get_if<OperationResult>(&result)) {
+                auto converted=sets::from_handle(completed->output);
+                if (std::holds_alternative<sets::SetData>(converted)) {
+                    const auto converted_rep=std::get<sets::SetData>(converted).representation();
+                    if (const auto* vertices=std::get_if<sets::VRepresentation>(&converted_rep)) {
+                        const auto bound=geometry::detail::certify_h_box(
+                            std::get<sets::HRepresentation>(rep),*vertices);
+                        if (const auto* certified=std::get_if<double>(&bound)) {
+                            completed->evidence.error_bound=GeometryErrorBound{
+                                {"csl.geometry.metric.l-infinity"},*certified,
+                                "maximum absolute coordinate units; exact axis-aligned box equality"};
+                            completed->evidence.assumptions.emplace_back(
+                                "global H/V coverage checked for a bounded axis-aligned box over stored binary64 rows");
+                            if (auto errors=check_geometry_evidence(completed->evidence,request);!errors.empty())
+                                return finish(Unsupported{std::move(errors)});
+                        }
+                    }
+                }
             }
         }
         if (stopped(context,reason)) return finish(OperationStopped{reason,"Stopped before publishing conversion output."});

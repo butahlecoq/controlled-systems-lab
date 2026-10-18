@@ -52,6 +52,31 @@ struct OrderedReductionMetrics {
     bool used_identity_fallback{};
 };
 
+struct GroupedReductionMetrics {
+    // Original PointCloud IDs after deterministic outer-box ordering.
+    std::vector<std::size_t> processing_order;
+    std::size_t ordered_candidates{};
+    std::size_t streamed_candidates{};
+    // Candidates retested in the grouped remainder, including the trigger point.
+    std::size_t grouping_passes{};
+    std::size_t grouped_candidates{};
+    std::size_t nearby_supports{};
+    std::size_t certified_stream_removals{};
+    bool grouping_triggered{};
+    std::size_t zero_width_coordinates{};
+    bool used_identity_fallback{};
+};
+
+struct RecursiveReductionMetrics {
+    std::size_t leaf_nodes{};
+    std::size_t merge_nodes{};
+    std::size_t leaf_lp_calls{};
+    std::size_t merge_lp_calls{};
+    std::size_t peak_merge_points{};
+    std::size_t concurrent_child_subtrees{};
+    std::uint64_t parallel_overhead_microseconds{};
+};
+
 struct ConvexCombination {
     std::size_t point;
     double weight;
@@ -81,6 +106,11 @@ struct HullReduction {
     std::optional<BasisReuseMetrics> basis_reuse{};
     // Present only for a reducer that sorts candidates before certified LP reduction.
     std::optional<OrderedReductionMetrics> ordered{};
+    // Present only for the grouped hull-level strategy. Grouping changes LP
+    // query order; exact membership certificates remain the removal authority.
+    std::optional<GroupedReductionMetrics> grouped{};
+    // Present only for recursive split-and-merge reduction.
+    std::optional<RecursiveReductionMetrics> recursive{};
 };
 
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;
@@ -103,6 +133,12 @@ HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
 HullReductionResult reduce_ordered_hull(const PointCloud&, LPWorkspace&,
                                         const ExecutionContext&);
 
+// Streams candidates in the archived Constrained QLPHULL signed max-absolute
+// box order; after ten certified redundant outcomes, filters the remainder
+// against a fixed retained group plus nearby candidates, then certifies its hull.
+HullReductionResult reduce_grouped_hull(const PointCloud&, LPWorkspace&,
+                                        const ExecutionContext&);
+
 
 } // namespace csl::geometry
 
@@ -120,8 +156,16 @@ struct HullReducerPort {
 } // namespace csl::registry
 
 namespace csl::geometry {
+// Registers a recursive reducer whose child LP workspaces are created from
+// the explicitly selected LP provider. The LPWorkspace parameter on
+// HullReducerPort is unused by this implementation; recursive LP work is
+// performed through the registered provider's exclusive child workspaces.
+registry::Registration<registry::HullReducerPort>
+make_recursive_hull_reducer_registration(registry::Registration<registry::LPPort> lp_provider);
+
 // Registers the LP-backed membership reducer as one replaceable implementation
 // behind HullReducerPort. The LP workspace remains a separate dependency.
 registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_ordered_hull_reducer_registration();
+registry::Registration<registry::HullReducerPort> make_grouped_hull_reducer_registration();
 } // namespace csl::geometry

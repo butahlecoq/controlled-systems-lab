@@ -29,9 +29,11 @@ bool ts01_partial_profile_valid(const problem::ResolvedProblem&, const StrategyR
 bool ts01_case_valid(const problem::ResolvedProblem&, const FamilyRequest&, const RepresentationId&,
     FamilyTarget target=FamilyTarget::exact_optimal_relation);
 bool ts02_case_valid(const problem::ResolvedProblem&, const FamilyRequest&, const RepresentationId&);
+bool ts03_case_valid(const problem::ResolvedProblem&, const FamilyRequest&, const RepresentationId&);
 bool strategy_b_ts01_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 bool strategy_a_ts01_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 bool strategy_b_ts02_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 bool strategy_a_ts02_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
+bool strategy_a_ts03_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 std::variant<std::shared_ptr<const ::csl::synthesis::strategy_ts01::ExactJointRelation>, Diagnostics> make_ts01_relation();
 }

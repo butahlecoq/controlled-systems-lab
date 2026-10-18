@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/reachability/nominal_predecessor.hpp>
 #include <csl/geometry/operation_admission.hpp>
+#include <csl/geometry/polyhedral_intersection.hpp>
 #include <iostream>
 #include <limits>
 #include <stop_token>
@@ -98,6 +99,57 @@ TEST_CASE("integrator predecessor includes existential controls and clips X") {
     CHECK(result.result.evidence.reference.identity==request.identity);
     CHECK(result.result.evidence.reference.inputs==std::vector<SetId>{{"X"},{"U"},{"S"}});
     CHECK(take(sets::from_handle(result.result.output)).metadata()->coordinate_labels==std::vector<std::string>{"x"});
+}
+
+TEST_CASE("one-step target predecessor has explicit control witnesses and rejects exterior states") {
+    const auto states=interval("X",-2,2,"x").as_handle();
+    const auto controls=interval("U",0,1,"u").as_handle();
+    const auto target=h("target",1,{2,1,{1,-1}},{1,-1},{0,1,{}},{},{"x"}).as_handle();
+    const auto request=predecessor(states,controls,target,{1,1,{1}},{1,1,{1}},{0});
+    const auto result=run(request);
+
+    for(const double x:{0.0,0.25,0.5,0.75,1.0}) {
+        const double u=1.0-x;
+        CHECK(contains(result.result.output,{x}));
+        CHECK(contains(states,{x}));
+        CHECK(contains(controls,{u}));
+        CHECK(contains(target,{x+u}));
+        CHECK(x+u==1.0);
+    }
+    CHECK_FALSE(contains(result.result.output,{-0.125}));
+    CHECK_FALSE(contains(result.result.output,{1.125}));
+    const auto predecessor_data=take(sets::from_handle(result.result.output));
+    REQUIRE(predecessor_data.metadata()->set.dimension==1);
+    const auto predecessor_representation=predecessor_data.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(predecessor_representation));
+    const auto& predecessor_h=std::get<sets::HRepresentation>(predecessor_representation);
+    double lower=-std::numeric_limits<double>::infinity();
+    double upper=std::numeric_limits<double>::infinity();
+    bool feasible=true;
+    for(std::size_t row=0;row<predecessor_h.inequalities.rows();++row) {
+        const double coefficient=predecessor_h.inequalities(row,0);
+        const double bound=predecessor_h.upper_bounds[row];
+        if(coefficient>0)upper=std::min(upper,bound/coefficient);
+        else if(coefficient<0)lower=std::max(lower,bound/coefficient);
+        else if(bound<0)feasible=false;
+    }
+    for(std::size_t row=0;row<predecessor_h.equalities.rows();++row) {
+        const double coefficient=predecessor_h.equalities(row,0);
+        const double value=predecessor_h.equality_values[row];
+        if(coefficient!=0) {
+            lower=std::max(lower,value/coefficient);
+            upper=std::min(upper,value/coefficient);
+        } else if(value!=0)feasible=false;
+    }
+    CHECK(feasible);
+    CHECK(lower==0.0);
+    CHECK(upper==1.0);
+    CHECK(result.result.relation==SetRelation::equivalent);
+    CHECK(result.result.evidence.reference.identity==request.identity);
+    CHECK(result.result.evidence.reference.inputs==std::vector<SetId>{{"X"},{"U"},{"target"}});
+    CHECK(result.result.evidence.scope==GeometryClaimScope::set_relation);
+    CHECK(std::holds_alternative<Unestablished>(result.result.evidence.support));
+    CHECK_FALSE(result.result.evidence.error_bound.has_value());
 }
 
 TEST_CASE("singular A keeps its unconstrained state direction and target equality") {
@@ -219,6 +271,43 @@ TEST_CASE("projection of the rational unit-square triangle is the exact interval
     CHECK(check_geometry_evidence(result.evidence,request).empty());
 }
 
+TEST_CASE("TEST-08 triangle intersection followed by projection preserves the literal interval") {
+    const auto square=h("chain-unit-square",2,
+        {4,2,{1,0,-1,0,0,1,0,-1}},{1,0,1,0},
+        {0,2,{}},{},{"x","y"});
+    const auto cutting_halfspace=h("chain-x-plus-y-halfspace",2,
+        {1,2,{1,1}},{1},{0,2,{}},{},{"x","y"});
+    const auto triangle=take(geometry::polyhedral::intersect_h(
+        square,cutting_halfspace,{"chain-unit-triangle"}));
+    const auto triangle_representation=triangle.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(triangle_representation));
+    const auto& triangle_h=std::get<sets::HRepresentation>(triangle_representation);
+    CHECK(triangle.metadata()->set.dimension==2);
+    CHECK(triangle_h.inequalities.cols()==2);
+    CHECK(triangle_h.inequalities.rows()<=5);
+    CHECK(triangle_h.equalities.rows()==0);
+    CHECK(contains(triangle.as_handle(),{0,0}));
+    CHECK(contains(triangle.as_handle(),{1,0}));
+    CHECK(contains(triangle.as_handle(),{0,1}));
+    CHECK_FALSE(contains(triangle.as_handle(),{0.75,0.75}));
+
+    const auto request=projection(triangle.as_handle(),{0});
+    const auto result=take(project(request,geometry::polyhedral::ProjectionOutput::h));
+    CHECK(result.output.metadata.dimension==1);
+    CHECK(contains(result.output,{0}));
+    CHECK(contains(result.output,{0.5}));
+    CHECK(contains(result.output,{1}));
+    CHECK_FALSE(contains(result.output,{-0.25}));
+    CHECK_FALSE(contains(result.output,{1.25}));
+    const auto projected_representation=take(sets::from_handle(result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(projected_representation));
+    const auto& projected_h=std::get<sets::HRepresentation>(projected_representation);
+    CHECK(projected_h.inequalities.cols()==1);
+    CHECK(projected_h.inequalities.rows()<=4);
+    CHECK(projected_h.equalities.rows()==0);
+    CHECK(check_geometry_evidence(result.evidence,request).empty());
+}
+
 TEST_CASE("V projection preserves rays including directions annihilated by selection") {
     auto joint=take(sets::make_v({{"V"},2,{"x","y"}},
         {take(numeric::snapshot(Matrix{1,2,{2,3}})),take(numeric::snapshot(Matrix{2,2,{1,0,0,-1}}))}));
@@ -256,6 +345,33 @@ TEST_CASE("projection fails explicitly at caller row limit without publishing a 
     auto joint=h("joint",2,{4,2,{1,1,-1,1,1,-1,-1,-1}},{2,2,2,2},{0,2,{}},{});
     auto result=project(projection(joint.as_handle(),{0}),geometry::polyhedral::ProjectionOutput::h,3);
     CHECK(std::holds_alternative<Unsupported>(result));
+    const auto boundary=take(project(projection(joint.as_handle(),{0}),
+        geometry::polyhedral::ProjectionOutput::h,4));
+    CHECK(contains(boundary.output,{-2}));
+    CHECK(contains(boundary.output,{0}));
+    CHECK(contains(boundary.output,{2}));
+    CHECK_FALSE(contains(boundary.output,{-2.125}));
+    CHECK_FALSE(contains(boundary.output,{2.125}));
+    const auto boundary_data=take(sets::from_handle(boundary.output));
+    const auto boundary_representation=boundary_data.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(boundary_representation));
+    const auto& interval_h=std::get<sets::HRepresentation>(boundary_representation);
+    CHECK(interval_h.inequalities.cols()==1);
+    CHECK(interval_h.equalities.rows()==0);
+    bool has_lower=false;
+    bool has_upper=false;
+    for(std::size_t row=0;row<interval_h.inequalities.rows();++row) {
+        const auto coefficient=interval_h.inequalities(row,0);
+        const auto bound=interval_h.upper_bounds[row];
+        const bool lower=coefficient<0.0 && bound==-2.0*coefficient;
+        const bool upper=coefficient>0.0 && bound==2.0*coefficient;
+        const bool tautology=coefficient==0.0 && bound>=0.0;
+        CHECK((lower || upper || tautology));
+        has_lower=has_lower || lower;
+        has_upper=has_upper || upper;
+    }
+    CHECK(has_lower);
+    CHECK(has_upper);
 }
 
 TEST_CASE("zero-control predecessor preserves a lower-dimensional equality set") {
@@ -400,6 +516,38 @@ TEST_CASE("unavailable geometry operation rejects before creating a projection w
     CHECK(rejection->provenance.requested.id.value=="csl.geometry.polyhedral-projection");
     REQUIRE(rejection->provenance.actual);
     CHECK(rejection->provenance.actual->id.value=="csl.geometry.polyhedral-projection");
+    CHECK(*creations==0);
+}
+
+TEST_CASE("unsupported triangle intersection request retains both operands and request identity") {
+    const auto square=h("typed-unit-square",2,{4,2,{1,0,-1,0,0,1,0,-1}},{1,0,1,0},
+        {0,2,{}},{}, {"x","y"});
+    const auto halfspace=h("typed-triangle-cut",2,{3,2,{1,1,-1,0,0,-1}},{1,0,0},
+        {0,2,{}},{}, {"x","y"});
+    const OperationRequest request{{{"test08"},{"triangle-intersection"},{"unit-triangle"}},
+        {"csl.geometry.polyhedral-projection"},
+        Intersection{square.as_handle(),halfspace.as_handle()},SetRelation::equivalent,Assurance::numerical};
+    CHECK(check_operation_shape(request).empty());
+
+    auto entry=geometry::polyhedral::make_projection_registration();
+    auto creations=std::make_shared<int>(0);
+    auto create=entry.factory;
+    entry.factory=[creations,create](const OperationRequest& operation) {
+        ++*creations;
+        return create(operation);
+    };
+    auto selected=provider(std::move(entry),"csl.polyhedron.h");
+    const auto admission=geometry::prepare_geometry_operation(request,selected);
+    const auto* rejection=std::get_if<geometry::GeometryAdmissionRejection>(&admission);
+    REQUIRE(rejection);
+    CHECK(rejection->reference.identity==request.identity);
+    CHECK(rejection->reference.inputs==std::vector<SetId>{square.metadata()->id,halfspace.metadata()->id});
+    REQUIRE(rejection->provider.diagnostics.size()==1);
+    CHECK(rejection->provider.diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(rejection->provider.diagnostics.front().field=="projection.operation");
+    CHECK(rejection->provider.provenance.requested.id==ModuleId{"csl.geometry.polyhedral-projection"});
+    REQUIRE(rejection->provider.provenance.actual);
+    CHECK(rejection->provider.provenance.actual->id==ModuleId{"csl.geometry.polyhedral-projection"});
     CHECK(*creations==0);
 }
 

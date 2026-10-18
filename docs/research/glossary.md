@@ -31,6 +31,10 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Stage cost | Criterion accumulated at intermediate steps |
 | Phase constraint | Historical term for a state constraint; avoid confusion with phase in multiphase optimization |
 | Finite-action domain | A discrete catalogue of allowed controls; its convex hull is a relaxation |
+| Hybrid mode | A discrete operating regime with its own dynamics and admissible continuous controls; it is distinct from a finite control action |
+| Mode path | An ordered sequence of mode identities followed by a hybrid trajectory; parallel transition edges are distinguished separately |
+| Guard | A condition on the pre-transition state that enables a particular mode transition |
+| Reset relation | A relation from the pre-transition state to the post-transition state applied when an enabled transition fires |
 | Mixed-integer control | Controls combining continuous values with integer/discrete decisions |
 | Uncertainty set | Admissible values or models; distinguish deterministic sets from confidence regions |
 | Stagewise independent uncertainty | Cartesian uncertainty admissibility over stages; a set assumption, not necessarily probabilistic independence |
@@ -127,6 +131,11 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Certificate | Evidence for a specific feasibility, inclusion or optimality claim; identify what it certifies |
 | Validated numerics | Numerical procedures accounting for rounding/truncation to justify bounds |
 | Residual | Measured mismatch in equations/constraints; tolerance-based evidence alone is not universal proof |
+| Represented-dyadic input | Finite IEEE 754 binary64 value interpreted as the exact dyadic rational represented by its bits in the resolved computational model; does not imply equivalence to an authored decimal or physical value |
+| Authored-real claim | Claim about intended source values or a physical model rather than the stored binary values; requires separately identified conversion, uncertainty, or model-error evidence |
+| Tolerance profile | Versioned identity for one method profile's residual quantities, units/scales, requested/effective tolerances, and independent acceptance criteria |
+| Numerical completeness support | Profile-specific evidence accepted by a compiled coverage verifier; it supports a numerical claim and is not an exact or validated certificate |
+| Coverage verifier | Selected compiled profile component that checks the binding, soundness, and coverage evidence for a complete-family claim |
 | Historical baseline | Published result with original assumptions and implementation context |
 | Corrected reference | Baseline after a documented correction; separate from original reported values |
 | Reproduction | Independent rerun matching an identified problem/environment sufficiently to compare |

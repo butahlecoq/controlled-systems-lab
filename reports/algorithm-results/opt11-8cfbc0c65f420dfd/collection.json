@@ -1,0 +1,204 @@
+{
+  "algorithm": {
+    "baseline": {
+      "method": "csl.hull.lp-membership",
+      "version": "1.0.0"
+    },
+    "recursive": {
+      "method": "csl.hull.recursive-split-merge",
+      "version": "1.0.0"
+    }
+  },
+  "backend": {
+    "adapter_version": "1.0.0",
+    "configured_threads": 1,
+    "method": "csl.lp.highs",
+    "native_version": "1.11.0",
+    "observed_native_threads": null,
+    "parallel": "off",
+    "presolve": "off",
+    "simplex_iteration_limit": null,
+    "version": "1.0.0+highs.1.11.0"
+  },
+  "build_log_sha256": "2a8c95c83218f4147f2d2ab39edc9a0505cbd5288e82809cd128d37467d896ed",
+  "cmake_cache_sha256": "fce3a714d365a91d73e1b523f206fcdc190c10244f415b827bf599d402a72f0f",
+  "compiler_identification_sha256": "2784e980aae54020d3a9b08c95ddb6d0b174c29299e21f2de19991951c5f8923",
+  "compiler_identification_source_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+  "description": {
+    "backend": {
+      "method": "csl.lp.highs",
+      "version": "1.0.0+highs.1.11.0"
+    },
+    "configuration": "Release",
+    "cxx_standard": 202002,
+    "harness_sha256": "544cbf1b075cbc1b8ff19c57cf156769f25d9f2a94c5f3317439cf79d3a4c3a3",
+    "kind": "describe",
+    "measured_pairs_per_fixture": 6,
+    "ndebug": true,
+    "source_commit": "488d4ca8888d91c44b64d5d2f0baf564d1c28ae7",
+    "warmups_per_fixture": 1
+  },
+  "environment": {
+    "concurrent_work_note": "No deliberate competing benchmark or build workload was started. A five-second host sample reported 4% then 7% total processor use across 12 logical processors; no observed process accumulated more than 1 CPU-second in that interval. Ordinary background processes were not stopped. The measurement collector will retain before/after host snapshots and matching-process CPU deltas grouped by process name.",
+    "logical_processors": 12,
+    "machine": "AMD64",
+    "machine_load": {
+      "after": {
+        "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "load_percent": [
+          8
+        ],
+        "logical_processors": 12,
+        "os": "Windows-11-10.0.22631-SP0",
+        "python": "3.13.5",
+        "ram_bytes": 34189107200,
+        "utc": "2026-10-18T17:31:22Z"
+      },
+      "before": {
+        "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "load_percent": [
+          5
+        ],
+        "logical_processors": 12,
+        "os": "Windows-11-10.0.22631-SP0",
+        "python": "3.13.5",
+        "ram_bytes": 34189107200,
+        "utc": "2026-10-18T17:31:18Z"
+      },
+      "process_cpu_deltas": {
+        "available": true,
+        "scope": "matching observed processes only; no arguments/paths, new/exited processes omitted",
+        "unit": "process CPU seconds over collection interval",
+        "values": {
+          "AdobeIPCBroker": 0.0,
+          "ApplicationFrameHost": 0.0,
+          "AvastUI": 0.0,
+          "CCXProcess": 0,
+          "ChatGPT": 0.015625,
+          "DTShellHlp": 0.0,
+          "DataExchangeHost": 0.0,
+          "FLPService": 0.015625,
+          "MSBuild": 0.0,
+          "OpenConsole": 0.0,
+          "PhoneExperienceHost": 0.0,
+          "RedShieldVPN": 0.0,
+          "RuntimeBroker": 0.0,
+          "SearchHost": 0.0,
+          "SecurityHealthSystray": 0.0,
+          "ShellExperienceHost": 0.0,
+          "StartMenuExperienceHost": 0.0,
+          "SystemSettings": 0.0,
+          "SystemSettingsBroker": 0.0,
+          "Telegram": 0.03125,
+          "TextInputHost": 0.0,
+          "WINWORD": 0.0,
+          "WebKitNetworkProcess": 0.0,
+          "WidgetService": 0.0,
+          "Widgets": 0.0,
+          "WindowsTerminal": 0.0,
+          "WizTree64": 0.703125,
+          "cbservice": 0.046875,
+          "chrome": 0.0,
+          "cmd": 0,
+          "cnqtbapp": 0.0,
+          "codex": 0.0,
+          "codex-code-mode-host": 0.0,
+          "codex-computer-use-swift": 0.0,
+          "conhost": 0.0,
+          "ctfmon": 0.0,
+          "dllhost": 0.0,
+          "explorer": 0.0,
+          "msedge": 0.0,
+          "node": 0.0,
+          "node_repl": 0.0,
+          "opencode": 0.0,
+          "pdf24": 0.0,
+          "pwsh": 0.0,
+          "python": 0.0,
+          "rhinomcp": 0,
+          "sihost": 0.0,
+          "sketchup-mcp": 0,
+          "svchost": 0.0,
+          "tailscale-ipn": 0.0,
+          "taskhostw": 0.0,
+          "uv": 0.0,
+          "vctip": 0.0
+        }
+      }
+    },
+    "observed_native_threads": null,
+    "os": "Windows-11-10.0.22631-SP0",
+    "python": "3.13.5"
+  },
+  "executable_sha256": "cdbeb10f94dba820f8d6aea261ec82f6013e9c433d94cdddbb336344e7fcd1dc",
+  "fixture_sha256": "b45354541e5d92899fc2a1237c3f824135e413e9c3093f2a38c711fe56049210",
+  "harness_sha256": "544cbf1b075cbc1b8ff19c57cf156769f25d9f2a94c5f3317439cf79d3a4c3a3",
+  "process_exit_code": 0,
+  "process_outcome": "completed",
+  "protocol": {
+    "alternation": "recursive-first iff (round + fixture index) is odd",
+    "cancellation": "not requested",
+    "deadline": "not requested",
+    "measured_pairs_per_fixture": 6,
+    "numerical_policy": {
+      "absolute_tolerance": 1e-08,
+      "relative_tolerance": 1e-08
+    },
+    "performance_interpretation": "paired descriptive comparison only; no speedup claim until independent review",
+    "recursive_parallel_policy": "ResourcePolicy requests two outer workers and one thread per worker in measurement; smoke does not request parallel execution",
+    "timing_scope": "steady_clock around one public BoundWorkspace<HullReducerPort>::run_with call; excludes fixture parsing, reducer and injected LP workspace creation, independent validation, serialization and rendering; includes recursive child workspace creation and root async scheduling",
+    "unavailable": [
+      "LP simplex iterations/internal phase times",
+      "observed native thread count",
+      "per-node wall times",
+      "CPU time",
+      "peak memory",
+      "source-mapped limiter"
+    ],
+    "warmups_per_fixture": 1,
+    "workspace_policy": "baseline reducer and LP workspace are prepared before each timed call; recursive public run creates its registered child LP workspaces during the timed call; reducer workspace and injected LP workspace are created before timing"
+  },
+  "purpose": "measurement",
+  "raw_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "raw_stdout_sha256": "c4166daf5a12588e591f949dd80e7a539401d94e134b02b04ba9bf55154040eb",
+  "release_project": {
+    "compiler_id": "MSVC",
+    "compiler_identification_file": "CMakeFiles/3.31.6/CMakeCXXCompiler.cmake",
+    "compiler_path_sanitized": "$PROGRAM_FILES/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+    "compiler_version": "19.44.35215.0",
+    "configuration": "Release",
+    "generator": "Visual Studio 17 2022",
+    "language_standard": "stdcpp20",
+    "ndebug": true,
+    "optimization": "MaxSpeed",
+    "preprocessor_definitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CSL_OPT11_SOURCE_COMMIT=\"488d4ca8888d91c44b64d5d2f0baf564d1c28ae7\";CSL_OPT11_HARNESS_SHA256=\"544cbf1b075cbc1b8ff19c57cf156769f25d9f2a94c5f3317439cf79d3a4c3a3\";CSL_OPT11_CONFIG=\"Release\";CMAKE_INTDIR=\"Release\""
+  },
+  "release_project_sha256": "9fc6d7180c5ddb3771897c9c559ed42523e811b1b21755636f0cf62f41d4068a",
+  "sanitized_build_log_sha256": "c90fa8d72eadfc1757736d930b696609bb8ac1fec47cf17a55e590a6518d187e",
+  "source_commit": "488d4ca8888d91c44b64d5d2f0baf564d1c28ae7",
+  "source_sha256": {
+    "include/csl/geometry/hull_reducer.hpp": "b7288585cadf7df6b4434bdd33a5fdfc68ffad50514074352a0fbd56d707a0e7",
+    "reports/algorithm-results/tooling/opt11/CMakeLists.txt": "5e05a868fd0ec44adffa879d7b99d382442780ffc04bbe0110b63de8002e1ab1",
+    "reports/algorithm-results/tooling/opt11/build_bundle.py": "7b3e38fb9a975051c4f82cf5355b28f5a8f8d48fb2d7a2bc1b77c4a184ca967a",
+    "reports/algorithm-results/tooling/opt11/collect.py": "7aef2d6e57534b0308726829c2cb3e7c154b4ca97f587e20127fc0ce53aaae99",
+    "reports/algorithm-results/tooling/opt11/oracle.py": "50ca7875fb0680de3e0d81de8e5fc951c340bbc9dfc0490d53a46a2328cfaf55",
+    "reports/algorithm-results/tooling/opt11/recursive_hull_driver.cpp": "544cbf1b075cbc1b8ff19c57cf156769f25d9f2a94c5f3317439cf79d3a4c3a3",
+    "reports/algorithm-results/tooling/opt11/validate.py": "d190b8d0b0f9760e342d29bf23261ed90d8702673bdb6a553205c15dfe53a2aa",
+    "src/adapters/highs_session.hpp": "6a53330fea10d2ce50bd87d3b1366c2889a88ba0d6fa7b1c93a1e8d581d339bc",
+    "src/adapters/lp/highs.cpp": "8b4e71563fc9cb01eb67847f1a2a3d7bb0b5fa1dd8c50b336265a92c07d10188",
+    "src/geometry/exact_convex_combination.hpp": "3449d12cc341019c6ac114b56ba7c7cdb9b86e112a3c1306f6366ea8c268ebb8",
+    "src/geometry/hull/recursive_reducer.cpp": "9c31a910b20a1d791a43f77e4693174beb446361dfd5459c49c6a4c93fb15344",
+    "src/geometry/hull_reducer.cpp": "3755e10cd5967290b67aca6d5a109c26b02abf854aeca929494f92024462543d"
+  },
+  "timeout_seconds": 1800,
+  "validation": {
+    "calls": 42,
+    "exact_certificates": 1274,
+    "fixtures": 3,
+    "noncomplete_calls": 0,
+    "paired_matrix_complete": true,
+    "pairs": 21,
+    "purpose": "measurement"
+  },
+  "validation_error": null
+}

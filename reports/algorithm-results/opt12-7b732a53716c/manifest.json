@@ -1,0 +1,19 @@
+{
+  "files": {
+    "build-provenance.json": "c8f549abd8e87f37e9696f2b9f4a89ef7b9802b2ae5522b285d834d29156fee8",
+    "comparison.svg": "6c2748204d80b9c752fabdbd0694a66dac8ca6db705cf377dd502d170f2b8f34",
+    "executable.sha256": "b550176dbe8cb3de5150d691b650cdcc0fc12e260bf77eadd8e3690497538c8f",
+    "index.html": "0705b99923579a3d7a61a1a6a40039cbfce3e7f76ecf1b9b6552d8590ae9561f",
+    "limiter-profile-evidence.zip": "ad2bb34602c5790ba9e5a31d4ef5410521c1061cc76d339a51549fe16b01919a",
+    "limiter-profile.json": "7bc27fb706b1feb912e760e5bf5d6efa9881b573f665bb776b41c0db8a7496f7",
+    "measurement-command.txt": "8b34498e4adcd1e1786b428315a0db0f922982994598de74ffc6a4e04c8fb2db",
+    "measurement.exe": "3b892424927c686e60f47cec4dc059a6bc70ed15d4d56f923e9492285aa56030",
+    "raw-events.jsonl": "9ed6812802543696d2be42e6a838bd6c8ea288fbde900c4f805541e959b0d789",
+    "raw-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "records.json": "77e6f20b16794b522d19d7efed3215e651575ff8cec9ac55708538f8368d60f7",
+    "release-build-log.txt": "751b4fcfb3e518c7ef6b1b3fb2665df043662df7bd1a5760931698f3f5497aee",
+    "trials.csv": "14cc419ea2c0a3ee175d7154459c53fb75f4f44227bb90649d24767acf0e3220"
+  },
+  "report_id": "opt12-7b732a53716c",
+  "schema": "csl.opt12-cost-manifest/1"
+}

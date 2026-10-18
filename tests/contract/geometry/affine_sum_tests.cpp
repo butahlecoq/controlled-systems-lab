@@ -1,6 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/geometry/affine_sum.hpp>
+#include <csl/geometry/operation_admission.hpp>
+#include <csl/geometry/polyhedral_intersection.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/optimization/phase_one.hpp>
@@ -214,6 +216,54 @@ TEST_CASE("registered affine image preserves the literal shifted reversed interv
     REQUIRE(result.evidence.error_bound.has_value());
     CHECK(result.evidence.error_bound->bound==0.0);
     CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
+TEST_CASE("TEST-08 triangle intersection followed by affine image preserves the literal interval") {
+    const auto square=take(sets::make_h({{"chain-affine-square"},2,{}},
+        {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
+         take(numeric::snapshot_vector(Vector{1,0,1,0})),
+         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))}));
+    const auto cutting_halfspace=take(sets::make_h({{"chain-affine-cut"},2,{}},
+        {take(numeric::snapshot(Matrix{1,2,{1,1}})),
+         take(numeric::snapshot_vector(Vector{1})),
+         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))}));
+    const auto triangle=take(geometry::polyhedral::intersect_h(
+        square,cutting_halfspace,{"chain-affine-triangle"}));
+    const auto triangle_representation=triangle.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(triangle_representation));
+    const auto& triangle_h=std::get<sets::HRepresentation>(triangle_representation);
+    CHECK(triangle.metadata()->set.dimension==2);
+    CHECK(triangle_h.inequalities.rows()<=5);
+    CHECK(triangle_h.inequalities.cols()==2);
+    CHECK(triangle_h.equalities.rows()==0);
+
+    const auto req=request(AffineImage{triangle.as_handle(),{1,2,{1,0}},{0}},
+        "triangle-intersection-affine-image");
+    const auto result=take(run(req,dependencies()));
+    CHECK(support(result.output,{1})==doctest::Approx(1));
+    CHECK(support(result.output,{-1})==doctest::Approx(0));
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    CHECK(result.evidence.reference.identity==req.identity);
+    CHECK(result.evidence.reference.inputs==std::vector<SetId>{{"chain-affine-triangle"}});
+}
+
+TEST_CASE("TEST-08 Minkowski sum followed by affine image preserves literal support endpoints") {
+    const auto left=vertices("chain-sum-left",1,{0,1},2);
+    const auto right=vertices("chain-sum-right",1,{2,3},2);
+    const auto sum_request=request(MinkowskiSum{left,right},"interval-minkowski-chain");
+    const auto sum=take(run(sum_request,dependencies()));
+    CHECK(support(sum.output,{1})==4.0);
+    CHECK(support(sum.output,{-1})==-2.0);
+    CHECK(check_geometry_evidence(sum.evidence,sum_request).empty());
+
+    const auto image_request=request(AffineImage{sum.output,{1,1,{-2}},{3}},
+        "minkowski-affine-chain");
+    const auto image=take(run(image_request,dependencies()));
+    CHECK(support(image.output,{1})==-1.0);
+    CHECK(support(image.output,{-1})==5.0);
+    CHECK(check_geometry_evidence(image.evidence,image_request).empty());
+    CHECK(image.evidence.reference.identity==image_request.identity);
+    CHECK(image.evidence.reference.inputs==std::vector<SetId>{sum.output.id});
 }
 
 TEST_CASE("fixed-seed integer rectangles have independently enumerated affine supports") {
@@ -604,6 +654,51 @@ TEST_CASE("affine and Minkowski error bounds compose independently checked 1D H 
     CHECK(empty_sum.evidence.error_bound->bound==0.0);
 }
 
+TEST_CASE("affine images compose exact higher-dimensional box coverage with candidate rounding") {
+    const auto box=take(sets::make_h({{"affine-box-coverage"},2,{}},
+        {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
+         take(numeric::snapshot_vector(Vector{3,0,1,1})),
+         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    const auto req=request(AffineImage{box,{1,2,{0.1,0.0}},{0.0}},
+        "compose-affine-box-coverage");
+    const auto result=take(run(req,dependencies()));
+
+    CHECK(support(result.output,{1})==0.30000000000000004);
+    CHECK(support(result.output,{-1})==0.0);
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0x1p-55);
+    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& assumption) {
+            return assumption.find("axis-aligned box rows")!=std::string::npos;
+        }));
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
+TEST_CASE("Minkowski sums compose independent exact higher-dimensional box coverage") {
+    const auto box=[](std::string id,Vector bounds) {
+        return take(sets::make_h({{std::move(id)},2,{}},
+            {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
+             take(numeric::snapshot_vector(std::move(bounds))),
+             take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    };
+    const auto left=box("sum-box-left",{1,0,1,0});
+    const auto right=box("sum-box-right",{3,-2,3,-2});
+    const auto req=request(MinkowskiSum{left,right},"compose-sum-box-coverage");
+    const auto result=take(run(req,dependencies()));
+
+    CHECK(support(result.output,{1,0})==4.0);
+    CHECK(support(result.output,{-1,0})==-2.0);
+    CHECK(support(result.output,{0,1})==4.0);
+    CHECK(support(result.output,{0,-1})==-2.0);
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
+    CHECK(std::count_if(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& assumption) {
+            return assumption.find("axis-aligned box rows")!=std::string::npos;
+        })==2);
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
 TEST_CASE("public geometry operation rejects an H-to-V vertex outside H rows despite zero reported residual") {
     auto h=take(sets::make_h({{"h-interval-inaccurate"},1,{}},
         {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
@@ -797,12 +892,55 @@ TEST_CASE("affine image rejects non-finite map and offset even for an empty inpu
         request(AffineImage{empty,{1,1,{1}},{infinity}}),dependencies())));
 }
 
+TEST_CASE("positive-dimensional universal inputs are request-scoped unsupported affine and sum operands") {
+    const auto universal = take(sets::make_universal({{"universal-line"}, 1, {}})).as_handle();
+    const auto interval = vertices("unit-interval-for-universal-sum", 1, {0, 1}, 2);
+    const auto check_rejection = [](const OperationRequest& req, std::vector<SetId> inputs) {
+        std::size_t factory_calls = 0;
+        auto registration = geometry::make_affine_sum_registration(dependencies());
+        auto factory = std::move(registration.factory);
+        registration.factory = [&factory_calls, factory = std::move(factory)](const OperationRequest& operation) mutable {
+            ++factory_calls;
+            return factory(operation);
+        };
+        Registry<GeometryPort> registry;
+        REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+        Requirements requirements;
+        requirements.output.representation = {"csl.polyhedron.v"};
+        requirements.output.relation = SetRelation::equivalent;
+        const auto admission = geometry::prepare_geometry_operation(
+            select(registry, {{"csl.geometry.affine-sum"}, {}}, req, requirements));
+        const auto* rejection = std::get_if<geometry::GeometryAdmissionRejection>(&admission);
+        REQUIRE(rejection);
+        CHECK(rejection->reference.identity == req.identity);
+        CHECK(rejection->reference.inputs == inputs);
+        REQUIRE(rejection->provider.diagnostics.size() == 1);
+        CHECK(rejection->provider.diagnostics.front().code == DiagnosticCode::unsupported);
+        CHECK(rejection->provider.diagnostics.front().field == "affine-sum.universal");
+        CHECK(rejection->provider.provenance.requested.id == ModuleId{"csl.geometry.affine-sum"});
+        REQUIRE(rejection->provider.provenance.actual);
+        CHECK(rejection->provider.provenance.actual->id == ModuleId{"csl.geometry.affine-sum"});
+        CHECK(factory_calls == 0);
+    };
+    check_rejection(request(AffineImage{universal, {1, 1, {1}}, {0}}, "universal-affine"),
+        {universal.id});
+    check_rejection(request(MinkowskiSum{universal, interval}, "universal-minkowski"),
+        {universal.id, interval.id});
+    check_rejection(request(MinkowskiSum{interval, universal}, "universal-minkowski-right"),
+        {interval.id, universal.id});
+}
+
 TEST_CASE("candidate limits and pre-request stops never publish successful geometry") {
     const auto input=vertices("interval",1,{0,1},2);
     const auto req=request(MinkowskiSum{input,input});
     geometry::AffineSumOptions options;
     options.max_candidates=3;
     CHECK(std::holds_alternative<Unsupported>(run(req,dependencies(),options)));
+    options.max_candidates=4;
+    const auto admitted=take(run(req,dependencies(),options));
+    CHECK(support(admitted.output,{1})==2.0);
+    CHECK(support(admitted.output,{-1})==0.0);
+    CHECK(check_geometry_evidence(admitted.evidence,req).empty());
     std::stop_source stop;
     stop.request_stop();
     auto ctx=context();ctx.cancellation=stop.get_token();

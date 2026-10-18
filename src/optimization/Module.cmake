@@ -31,6 +31,10 @@ csl_add_library(csl_worst_case_vertex STATIC src/optimization/worst_case_vertex.
 
 target_link_libraries(csl_worst_case_vertex PUBLIC CSL::objectives CSL::sets)
 
+csl_add_library(csl_worst_case_interval STATIC src/optimization/worst_case_interval.cpp)
+
+target_link_libraries(csl_worst_case_interval PUBLIC CSL::objectives CSL::sets)
+
 csl_add_library(csl_finite_action_minimax STATIC src/optimization/finite_action_minimax.cpp)
 
 target_link_libraries(csl_finite_action_minimax PUBLIC CSL::fixed_plan_disturbance CSL::worst_case_vertex)

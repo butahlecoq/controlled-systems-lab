@@ -173,7 +173,7 @@ example_check(scenario_cli_run_explicit_h_representation scenario_cli
   "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=31 threads=1.*verification=numerical_pass")
 example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
-example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.0.0.highs.1.11.0")
+example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.1.0.highs.1.11.0")
 example_check(substitution_phase_one backend_substitution phase-one-bland 0 "backend=phase-one-bland version=1")
 example_check(lp_unknown_backend registered_lp missing-backend 2 "Selection rejected.*missing-backend")
 example_check(convex_unknown_backend registered_convex missing-backend 2 "Selection rejected.*missing-backend")

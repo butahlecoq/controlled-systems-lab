@@ -1,6 +1,6 @@
 # ADR 0002: pinned native integrations for the first contract probes
 
-Date: 2026-10-11. Status: CORE-01 implementation decision, pending integration review. Scope: reproducible probe defaults for [native interface revision 1](../../contracts/core-interfaces.md). The project license remains undecided; no project LICENSE file is added or changed.
+Date: 2026-10-11. Status: CORE-01 implementation decision; broader architecture review remains open under [issue #7](https://github.com/butahlecoq/controlled-systems-lab/issues/7). Scope: reproducible probe defaults for [native interface revision 1](../../contracts/core-interfaces.md). The project license remains undecided; no project LICENSE file is added or changed.
 
 ## Decision and alternatives
 
@@ -62,6 +62,62 @@ Capability admission returns `Unsupported` for nonempty V ray sets, unbounded H 
 
 This selection does not implement the general polyhedral operation algebra. Affine images, Minkowski sums, intersections, set projections, and nominal predecessor operations still require separate `GeometryPort` adapters and operation-specific guarantee rules; they remain open in #40/#41/#51. Conversion residual checks are numerical evidence only and do not prove global set equality. A successful `equivalent` result is the adapter's numerical algorithm claim under its recorded assumptions, not exact arithmetic or a validated certificate.
 
+## 2026-10-18 update: bounded Qhull integration review
+
+The source-backed [Qhull 8.0.2 integration review](../../research/qhull-8.0.2-integration-review.md)
+records the supported bounded H/V profile, numeric-only evidence, signed-integer
+and caller-capacity limits, boundary-only cancellation, and the evidence gap for
+independent-instance concurrency. It also checks the upstream notice against
+the configured install path; the installed-package script now asserts the
+Qhull notice when that optional integration is enabled. This closes only the
+source-scope and notice-presence-test subgate. It does not establish a global
+memory/facet cap, interruptible Qhull calls, a verified thread-safety guarantee,
+or downstream package completeness; issue #7 remains open.
+
 ## 2026-10-17 update: bounded HiGHS LP/QP integration review
 
-The [pinned HiGHS 1.11.0 integration review](../../research/highs-1.11-integration-review.md) ties the selected static build and narrow downstream initialization patch to upstream source, the current adapters, concurrent-workspace and preexecution-stop tests, and the three-file notice inventory. It supports only the adapters' one-thread, separate-workspace Windows profile. Simplex cancellation is cooperative; the QP path has no prompt stop-token callback. No process-wide thread or memory cap, hard deadline, general thread-safety claim, or final distribution-license approval follows from this check. This ADR remains **pending integration review** for the other selected dependencies, Qhull's bounded conversion profile, cross-platform/race coverage, and packaging; architecture issue #7 remains open.
+The [pinned HiGHS 1.11.0 integration review](../../research/highs-1.11-integration-review.md) ties the selected static build and narrow downstream initialization patch to upstream source, the current adapters, concurrent-workspace and preexecution-stop tests, and the three-file notice inventory. It supports only the adapters' one-thread, separate-workspace Windows profile. Simplex cancellation is cooperative; the QP path has no prompt stop-token callback. No process-wide thread or memory cap, hard deadline, general thread-safety claim, or final distribution-license approval follows from this check.
+
+## 2026-10-18 update: bounded Eigen integration review
+
+The [pinned Eigen 3.4.0 integration review](../../research/eigen-3.4-integration-review.md)
+maps the production headers and operations used by objectives, Phase I, and
+Qhull conversion; the neutral matrix boundary and local index guards; target
+compile definitions; configured notice installation; and the checked-in
+behavior-test surface. It supports only those source-level findings. No tests
+were run as part of that review, and it does not establish numerical
+conditioning guarantees, a process-wide thread policy, universal index safety,
+independent-instance thread safety, or downstream packaging compliance.
+
+The [bounded JSON/doctest and installed-package review](../../research/issue7-package-install-integration-review.md)
+records the pinned private JSON integration, test-only doctest integration,
+installed-client checks, removal of a duplicate JSON notice install, and use of
+the configured install library directory when locating the exported targets.
+PR [#456](https://github.com/butahlecoq/controlled-systems-lab/pull/456)
+merged at `8a82279882845655ddcf9371159a3b081b115dd0` after all twelve exact-head
+hosted jobs passed. The CI matrix covered Windows and Linux builds; the Linux
+core and HiGHS package profiles exercised the default installed-client
+layout. This closes the source integration and tested default-layout harness
+subgate. Custom package
+layouts and complete downstream notice collection remain unverified.
+
+## 2026-10-18 update: independent Qhull call-boundary evidence
+
+PR [#457](https://github.com/butahlecoq/controlled-systems-lab/pull/457)
+merged at `f2d52c7a8348d607237449fad03174b97b608fbc`. It adds a caller-owned
+`QhullOptions::before_native_call` hook immediately before `qh_new_qhull` and a
+test that synchronizes two separately prepared bounded H-to-V conversions at
+that boundary, then checks each result against literal square vertices. All
+twelve exact-head hosted jobs passed and independent specification and
+standards reviews found no remaining issues. This demonstrates simultaneous
+arrival at the native-call boundary for the exercised cases; it does not prove
+that the Qhull call bodies overlapped, establish race freedom, or guarantee
+general Qhull/HiGHS thread safety.
+
+The bounded Eigen, HiGHS, Qhull, and package reviews now have merged source and
+CI evidence, but issue #7 remains open. It still needs an initial geometry
+profile and capacity policy (including output/facet and memory limits), the
+broader operation algebra with operation-specific guarantees, stronger
+cross-platform race evidence, and equal-output comparison evidence. None of
+these component reviews decides the project license or the broader scientific
+numerical policy.

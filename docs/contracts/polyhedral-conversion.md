@@ -49,18 +49,27 @@ For **ambient dimension one** H-to-V conversions, an additional independent
 checker interprets each stored finite binary64 H coefficient and bound as an
 exact dyadic rational. It derives the exact interval from all original
 inequalities and equalities, then compares its two endpoints with the minimum
-and maximum of the returned finite V vertices. Successful bounded nonempty
-conversions publish an outward-rounded L-infinity Hausdorff bound in
-`GeometryEvidence.error_bound`, measured in input-coordinate units. An exact
-empty H set paired with an empty V output has bound zero by the empty-to-empty
-convention. Contradictory nonempty/empty outputs, unbounded exact H inputs,
-nonfinite vertices and arithmetic range failures do not publish this bound;
-a successful numerical conversion is rejected if its purported one-dimensional
-coverage cannot be checked. A returned vertex's small H-row residual alone
-cannot hide a missing endpoint. This certificate covers the stored H rows,
-not pre-rounding authored real coefficients. It is unavailable for ambient
-dimension greater than one, including lines embedded in a higher-dimensional
-space, and it does not change validated-assurance admission.
+and maximum of the returned finite V vertices. For bounded nonempty
+axis-aligned boxes in ambient dimensions 2 through 12, a second checker derives
+each exact coordinate interval from the original H inequalities. It verifies
+that every returned finite V vertex lies in the box and that every box corner
+is present. This proves equality of the box and `conv(V)` for this restricted
+shape. Corner enumeration is capped at 4,096; larger dimensions, rotated boxes,
+and general polytopes are outside this certificate.
+
+The supported profiles publish an outward-rounded L-infinity Hausdorff bound
+in `GeometryEvidence.error_bound`, measured in input-coordinate units. The
+box certificate publishes zero after exact corner coverage succeeds, or when
+supported axis-aligned constraints prove the H set empty and the output is
+empty. Contradictory outputs, unbounded nonempty exact H inputs, nonfinite
+vertices and arithmetic range failures do not publish a bound. A returned vertex's
+small H-row residual alone cannot hide missing interval endpoints or box
+corners. These certificates cover stored binary64 rows interpreted as exact
+dyadic values, not pre-rounding authored real coefficients. They do not change
+validated-assurance admission. The affine-image/Minkowski adapter independently
+recomputes ambient-one interval and supported axis-aligned box certificates
+before composing them through those operations. Other higher-dimensional
+conversion bounds are not yet propagated.
 
 `QhullOptions::observe` receives an owning `ConversionObservation` after each
 attempt. It records request identity, converter and LP backend identities,
@@ -70,6 +79,12 @@ The synchronous callback runs after conversion cleanup and outside the timed
 interval; callback synchronization belongs to its owner. Callback exceptions
 propagate. This observation can feed the existing artifact/reporting path; it
 does not silently create a global collector or a benchmark claim.
+
+`QhullOptions::before_native_call` runs inline immediately before each
+synchronous `qh_new_qhull` invocation. It is intended for caller-owned
+coordination or instrumentation at the native-call boundary. Distinct
+workspaces can invoke it concurrently, so shared callback state requires
+caller synchronization. Exceptions propagate before the native call begins.
 
 ## Lineage audit: A17 and A18
 

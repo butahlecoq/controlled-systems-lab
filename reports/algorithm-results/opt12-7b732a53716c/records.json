@@ -1,0 +1,1500 @@
+{
+  "metadata": {
+    "schema": "csl.opt12-cost-report/1",
+    "created_utc": "2026-10-18T16:26:51.733626+00:00",
+    "source_commit": "7b732a53716ce963af83095fd2aeca8a681b76c4",
+    "adapter": "csl.lp.highs",
+    "adapter_version": "1.1.0+highs.1.11.0",
+    "native_solver": "HiGHS 1.11.0",
+    "build_configuration": "Release",
+    "build_log_sha256": "751b4fcfb3e518c7ef6b1b3fb2665df043662df7bd1a5760931698f3f5497aee",
+    "executable_sha256": "3b892424927c686e60f47cec4dc059a6bc70ed15d4d56f923e9492285aa56030",
+    "executable_path": "Release/csl_opt12_warm_start_measure.exe",
+    "host": {
+      "system": "Windows-11-10.0.22631-SP0",
+      "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+      "logical_cpus": 12
+    },
+    "build_identity": {
+      "schema": "csl.opt12-build/1",
+      "source_commit": "7b732a53716ce963af83095fd2aeca8a681b76c4",
+      "build_owner_sha256": "f0aefdb6e6ac9abc1750ddd06aea25b42ffb8e275873610eeb855a1ba74db865",
+      "compiler": "MSVC",
+      "compiler_version": "19.44.35215.0",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "AMD64/x64",
+      "configured_flags": "/DWIN32 /D_WINDOWS /EHsc",
+      "release_flags": "/O2 /Ob2 /DNDEBUG",
+      "configuration": "Release",
+      "ndebug": true
+    },
+    "build_graph_sha256": "622a4d96463c578709683b581e1af17e219747fece92726d5bd07e74be10a752",
+    "policy": {
+      "native_threads": 1,
+      "presolve": "off",
+      "parallel": "off",
+      "seed": 0,
+      "simplex_iteration_limit": null,
+      "repetitions_per_side_per_case": 7,
+      "warmup": "one unreported source solve in a fresh workspace per warm trial",
+      "order": "alternating cold/warm within each pair",
+      "timing": "steady-clock wall around LPWorkspace.solve; native setup components separately timed"
+    },
+    "input_fixtures": {
+      "tiny-overhead": {
+        "rows": 1,
+        "columns": 1,
+        "source_objective": [
+          -1.0
+        ],
+        "changed_objective": [
+          -1.0
+        ],
+        "coefficient": [
+          1.0
+        ],
+        "variable_bounds": {
+          "lower": 0.0,
+          "upper": null
+        },
+        "row_sense": "upper",
+        "source_rhs": 1.0,
+        "changed_rhs": 0.5,
+        "expected_objective": -0.5,
+        "sha256": "4c8694f6770dca413cb4bce004c6492fa690447f2b833e135cc1125922e031ba"
+      },
+      "small-reuse": {
+        "rows": 1,
+        "columns": 40,
+        "source_objective": [
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0
+        ],
+        "changed_objective": [
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0
+        ],
+        "coefficient": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "variable_bounds": {
+          "lower": 0.0,
+          "upper": null
+        },
+        "row_sense": "upper",
+        "source_rhs": 20.0,
+        "changed_rhs": 19.0,
+        "expected_objective": -19.0,
+        "sha256": "e48caf08c5db26dfcfb2ccab48e49cda9abb6a34d5e49e726c1a079416b80f26"
+      },
+      "transfer-cost": {
+        "rows": 1,
+        "columns": 100000,
+        "source_objective": {
+          "all_columns": 1.0,
+          "column_0": -1.0
+        },
+        "changed_objective": {
+          "all_columns": 1.0,
+          "column_99999": -2.0
+        },
+        "coefficient": {
+          "all_columns": 1.0
+        },
+        "variable_bounds": {
+          "lower": 0.0,
+          "upper": null
+        },
+        "row_sense": "upper",
+        "source_rhs": 50000.0,
+        "changed_rhs": 49999.0,
+        "expected_objective": -99998.0,
+        "objective_change": "column 0: -1 to 1; column 99999: 1 to -2",
+        "sha256": "0664966f78a7f2b0f2a65c4db1652464430cc78d708c0d11907d923d65f23317"
+      }
+    },
+    "process": {
+      "return_code": 0,
+      "timed_out": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9ed6812802543696d2be42e6a838bd6c8ea288fbde900c4f805541e959b0d789",
+      "retained_trial_count": 42,
+      "parse_error": null
+    },
+    "system": {
+      "before": {
+        "utc": "2026-10-18T16:26:43Z",
+        "os": "Windows-11-10.0.22631-SP0",
+        "logical_processors": 12,
+        "python": "3.13.5",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "load_percent": [
+          5
+        ],
+        "ram_bytes": 34189107200
+      },
+      "after": {
+        "utc": "2026-10-18T16:26:48Z",
+        "os": "Windows-11-10.0.22631-SP0",
+        "logical_processors": 12,
+        "python": "3.13.5",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+        "load_percent": [
+          3
+        ],
+        "ram_bytes": 34189107200
+      },
+      "process_cpu_deltas": {
+        "available": true,
+        "unit": "process CPU seconds over collection interval",
+        "values": {
+          "AdobeIPCBroker": 0.0,
+          "ApplicationFrameHost": 0.0,
+          "AvastUI": 0.0,
+          "cbservice": 0.03125,
+          "CCXProcess": 0,
+          "ChatGPT": 0.03125,
+          "chrome": 0.015625,
+          "cmd": 0,
+          "cnqtbapp": 0.0,
+          "codex": 0.0,
+          "codex-code-mode-host": 0.0,
+          "codex-computer-use-swift": 0.0,
+          "conhost": 0.0,
+          "ctfmon": 0.0,
+          "DataExchangeHost": 0.0,
+          "dllhost": 0.0,
+          "DTShellHlp": 0.0,
+          "explorer": 0.0,
+          "FLPService": 0.0,
+          "msedge": 0.0,
+          "node": 0.0,
+          "node_repl": 0.0,
+          "opencode": 0.0,
+          "OpenConsole": 0.0,
+          "pdf24": 0.0,
+          "PhoneExperienceHost": 0.0,
+          "pwsh": 0.0,
+          "python": 0.0,
+          "RedShieldVPN": 0.0,
+          "rhinomcp": 0,
+          "RuntimeBroker": 0.0,
+          "SearchHost": 0.0,
+          "SecurityHealthSystray": 0.0,
+          "ShellExperienceHost": 0.0,
+          "sihost": 0.0,
+          "sketchup-mcp": 0,
+          "StartMenuExperienceHost": 0.0,
+          "svchost": 0.0,
+          "SystemSettings": 0.0,
+          "SystemSettingsBroker": 0.0,
+          "tailscale-ipn": 0.0,
+          "taskhostw": 0.0,
+          "Telegram": 0.0,
+          "TextInputHost": 0.0,
+          "uv": 0.0,
+          "WebKitNetworkProcess": 0.0,
+          "Widgets": 0.0,
+          "WidgetService": 0.0,
+          "WindowsTerminal": 0.0,
+          "WINWORD": 0.0,
+          "WizTree64": 0.9375
+        },
+        "scope": "matching observed processes only; no arguments/paths, new/exited processes omitted"
+      }
+    }
+  },
+  "trials": [
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "cold",
+      "pair": 0,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 595000,
+      "model_load_seconds": 3.7e-05,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0003836,
+      "native_attempts": [
+        {
+          "model_load_seconds": 3.7e-05,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0003836,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=3.6999999999999998e-05\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.0003836\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -9.9999805444e-01 Ph1: 1(1); Du: 1(0.999998) 0s\n          1    -5.0000000000e-01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "warm",
+      "pair": 0,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 56300,
+      "model_load_seconds": 4.1e-06,
+      "basis_transfer_seconds": 1.1e-06,
+      "solve_seconds": 3.29e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 4.1e-06,
+          "basis_transfer_seconds": 1.1e-06,
+          "solve_seconds": 3.29e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=4.0999999999999997e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=1.1000000000000001e-06\nnative.solve_seconds=3.29e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "warm",
+      "pair": 1,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 47700,
+      "model_load_seconds": 3.8e-06,
+      "basis_transfer_seconds": 7e-07,
+      "solve_seconds": 2.78e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 3.8e-06,
+          "basis_transfer_seconds": 7e-07,
+          "solve_seconds": 2.78e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=3.8e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=6.9999999999999997e-07\nnative.solve_seconds=2.7800000000000001e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "cold",
+      "pair": 1,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 189300,
+      "model_load_seconds": 6.7e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 9.72e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 6.7e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 9.72e-05,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=6.7000000000000002e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=9.7200000000000004e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -9.9999805444e-01 Ph1: 1(1); Du: 1(0.999998) 0s\n          1    -5.0000000000e-01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "cold",
+      "pair": 2,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 176100,
+      "model_load_seconds": 6.7e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 8.69e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 6.7e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 8.69e-05,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=6.7000000000000002e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=8.6899999999999998e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -9.9999805444e-01 Ph1: 1(1); Du: 1(0.999998) 0s\n          1    -5.0000000000e-01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "warm",
+      "pair": 2,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 46700,
+      "model_load_seconds": 3.7e-06,
+      "basis_transfer_seconds": 7e-07,
+      "solve_seconds": 2.71e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 3.7e-06,
+          "basis_transfer_seconds": 7e-07,
+          "solve_seconds": 2.71e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=3.7000000000000002e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=6.9999999999999997e-07\nnative.solve_seconds=2.7100000000000001e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "warm",
+      "pair": 3,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 44300,
+      "model_load_seconds": 3.5e-06,
+      "basis_transfer_seconds": 6e-07,
+      "solve_seconds": 2.58e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 3.5e-06,
+          "basis_transfer_seconds": 6e-07,
+          "solve_seconds": 2.58e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=3.4999999999999999e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=5.9999999999999997e-07\nnative.solve_seconds=2.58e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "cold",
+      "pair": 3,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 175200,
+      "model_load_seconds": 5e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 9.69e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 5e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 9.69e-05,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=5.0000000000000004e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=9.6899999999999997e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -9.9999805444e-01 Ph1: 1(1); Du: 1(0.999998) 0s\n          1    -5.0000000000e-01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "cold",
+      "pair": 4,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 178800,
+      "model_load_seconds": 7e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 9.48e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 7e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 9.48e-05,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=6.9999999999999999e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=9.48e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -9.9999805444e-01 Ph1: 1(1); Du: 1(0.999998) 0s\n          1    -5.0000000000e-01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "warm",
+      "pair": 4,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 47900,
+      "model_load_seconds": 3.8e-06,
+      "basis_transfer_seconds": 7e-07,
+      "solve_seconds": 2.84e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 3.8e-06,
+          "basis_transfer_seconds": 7e-07,
+          "solve_seconds": 2.84e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=3.8e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=6.9999999999999997e-07\nnative.solve_seconds=2.8399999999999999e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "warm",
+      "pair": 5,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 46000,
+      "model_load_seconds": 3.5e-06,
+      "basis_transfer_seconds": 7e-07,
+      "solve_seconds": 2.64e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 3.5e-06,
+          "basis_transfer_seconds": 7e-07,
+          "solve_seconds": 2.64e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=3.4999999999999999e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=6.9999999999999997e-07\nnative.solve_seconds=2.6400000000000001e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "cold",
+      "pair": 5,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 173300,
+      "model_load_seconds": 5e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 9.67e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 5e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 9.67e-05,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=5.0000000000000004e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=9.6700000000000006e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -9.9999805444e-01 Ph1: 1(1); Du: 1(0.999998) 0s\n          1    -5.0000000000e-01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "cold",
+      "pair": 6,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 191300,
+      "model_load_seconds": 6.5e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0001069,
+      "native_attempts": [
+        {
+          "model_load_seconds": 6.5e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0001069,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=6.4999999999999996e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.0001069\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -9.9999805444e-01 Ph1: 1(1); Du: 1(0.999998) 0s\n          1    -5.0000000000e-01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "tiny-overhead",
+      "mode": "warm",
+      "pair": 6,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -0.5,
+      "objective": -0.5,
+      "wall_ns": 45400,
+      "model_load_seconds": 4e-06,
+      "basis_transfer_seconds": 7e-07,
+      "solve_seconds": 2.66e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 4e-06,
+          "basis_transfer_seconds": 7e-07,
+          "solve_seconds": 2.66e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=tiny-overhead-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=3.9999999999999998e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=6.9999999999999997e-07\nnative.solve_seconds=2.6599999999999999e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-0.5\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-0.5\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 1 cols; 1 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e-01, 5e-01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -5.0000000000e-01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "cold",
+      "pair": 0,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 208500,
+      "model_load_seconds": 1.41e-05,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0001154,
+      "native_attempts": [
+        {
+          "model_load_seconds": 1.41e-05,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0001154,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=1.4100000000000001e-05\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.0001154\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -3.9999935912e+01 Ph1: 1(40); Du: 40(39.9999) 0s\n          1    -1.9000000000e+01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "warm",
+      "pair": 0,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 69400,
+      "model_load_seconds": 8.5e-06,
+      "basis_transfer_seconds": 8e-07,
+      "solve_seconds": 3.96e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 8.5e-06,
+          "basis_transfer_seconds": 8e-07,
+          "solve_seconds": 3.96e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=8.4999999999999999e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=7.9999999999999996e-07\nnative.solve_seconds=3.96e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "warm",
+      "pair": 1,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 65700,
+      "model_load_seconds": 7.9e-06,
+      "basis_transfer_seconds": 7e-07,
+      "solve_seconds": 3.75e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 7.9e-06,
+          "basis_transfer_seconds": 7e-07,
+          "solve_seconds": 3.75e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=7.9000000000000006e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=6.9999999999999997e-07\nnative.solve_seconds=3.7499999999999997e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "cold",
+      "pair": 1,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 201500,
+      "model_load_seconds": 8.1e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0001163,
+      "native_attempts": [
+        {
+          "model_load_seconds": 8.1e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0001163,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=8.1000000000000004e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.00011629999999999999\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -3.9999935912e+01 Ph1: 1(40); Du: 40(39.9999) 0s\n          1    -1.9000000000e+01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "cold",
+      "pair": 2,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 204400,
+      "model_load_seconds": 9.2e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0001124,
+      "native_attempts": [
+        {
+          "model_load_seconds": 9.2e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0001124,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=9.2e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.00011239999999999999\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -3.9999935912e+01 Ph1: 1(40); Du: 40(39.9999) 0s\n          1    -1.9000000000e+01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "warm",
+      "pair": 2,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 65000,
+      "model_load_seconds": 7.2e-06,
+      "basis_transfer_seconds": 8e-07,
+      "solve_seconds": 3.68e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 7.2e-06,
+          "basis_transfer_seconds": 8e-07,
+          "solve_seconds": 3.68e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=7.1999999999999997e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=7.9999999999999996e-07\nnative.solve_seconds=3.68e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "warm",
+      "pair": 3,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 62300,
+      "model_load_seconds": 7.1e-06,
+      "basis_transfer_seconds": 6e-07,
+      "solve_seconds": 3.58e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 7.1e-06,
+          "basis_transfer_seconds": 6e-07,
+          "solve_seconds": 3.58e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=7.0999999999999998e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=5.9999999999999997e-07\nnative.solve_seconds=3.5800000000000003e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "cold",
+      "pair": 3,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 217400,
+      "model_load_seconds": 8.3e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0001229,
+      "native_attempts": [
+        {
+          "model_load_seconds": 8.3e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0001229,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=8.3000000000000002e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.00012290000000000001\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -3.9999935912e+01 Ph1: 1(40); Du: 40(39.9999) 0s\n          1    -1.9000000000e+01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "cold",
+      "pair": 4,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 208900,
+      "model_load_seconds": 9.9e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0001152,
+      "native_attempts": [
+        {
+          "model_load_seconds": 9.9e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0001152,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=9.9000000000000001e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.00011519999999999999\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -3.9999935912e+01 Ph1: 1(40); Du: 40(39.9999) 0s\n          1    -1.9000000000e+01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "warm",
+      "pair": 4,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 63200,
+      "model_load_seconds": 8e-06,
+      "basis_transfer_seconds": 8e-07,
+      "solve_seconds": 3.56e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 8e-06,
+          "basis_transfer_seconds": 8e-07,
+          "solve_seconds": 3.56e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=7.9999999999999996e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=7.9999999999999996e-07\nnative.solve_seconds=3.5599999999999998e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "warm",
+      "pair": 5,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 64400,
+      "model_load_seconds": 7.7e-06,
+      "basis_transfer_seconds": 6e-07,
+      "solve_seconds": 3.72e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 7.7e-06,
+          "basis_transfer_seconds": 6e-07,
+          "solve_seconds": 3.72e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=7.7000000000000008e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=5.9999999999999997e-07\nnative.solve_seconds=3.7200000000000003e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "cold",
+      "pair": 5,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 197800,
+      "model_load_seconds": 9.9e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0001108,
+      "native_attempts": [
+        {
+          "model_load_seconds": 9.9e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0001108,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=9.9000000000000001e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.0001108\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -3.9999935912e+01 Ph1: 1(40); Du: 40(39.9999) 0s\n          1    -1.9000000000e+01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "cold",
+      "pair": 6,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 194100,
+      "model_load_seconds": 9.3e-06,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0001084,
+      "native_attempts": [
+        {
+          "model_load_seconds": 9.3e-06,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0001084,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=9.3000000000000007e-06\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.00010840000000000001\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -3.9999935912e+01 Ph1: 1(40); Du: 40(39.9999) 0s\n          1    -1.9000000000e+01 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "small-reuse",
+      "mode": "warm",
+      "pair": 6,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -19,
+      "objective": -19,
+      "wall_ns": 64100,
+      "model_load_seconds": 7e-06,
+      "basis_transfer_seconds": 8e-07,
+      "solve_seconds": 3.67e-05,
+      "native_attempts": [
+        {
+          "model_load_seconds": 7e-06,
+          "basis_transfer_seconds": 8e-07,
+          "solve_seconds": 3.67e-05,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 0,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=small-reuse-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=6.9999999999999999e-06\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=7.9999999999999996e-07\nnative.solve_seconds=3.6699999999999998e-05\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-19\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=0\noriginal.objective=-19\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 40 cols; 40 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 1e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [2e+01, 2e+01]\nSolving LP without presolve, or with basis, or unconstrained\nModel status        : Optimal\nObjective value     : -1.9000000000e+01\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "cold",
+      "pair": 0,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 39870900,
+      "model_load_seconds": 0.005733,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0276431,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.005733,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0276431,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0057330000000000002\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.0276431\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -1.9999970893e+00 Ph1: 1(1); Du: 1(2) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "warm",
+      "pair": 0,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 43328300,
+      "model_load_seconds": 0.0043427,
+      "basis_transfer_seconds": 4.85e-05,
+      "solve_seconds": 0.0328245,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0043427,
+          "basis_transfer_seconds": 4.85e-05,
+          "solve_seconds": 0.0328245,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0043426999999999997\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=4.85e-05\nnative.solve_seconds=0.0328245\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -4.0137870857e+00 Ph1: 1(51516); Du: 51516(4.01379) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "warm",
+      "pair": 1,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 43457000,
+      "model_load_seconds": 0.0041609,
+      "basis_transfer_seconds": 4.85e-05,
+      "solve_seconds": 0.0329696,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0041609,
+          "basis_transfer_seconds": 4.85e-05,
+          "solve_seconds": 0.0329696,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0041609000000000004\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=4.85e-05\nnative.solve_seconds=0.032969600000000002\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -4.0137870857e+00 Ph1: 1(51516); Du: 51516(4.01379) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "cold",
+      "pair": 1,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 48636400,
+      "model_load_seconds": 0.0062707,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.034963,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0062707,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.034963,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0062706999999999997\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.034963000000000001\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -1.9999970893e+00 Ph1: 1(1); Du: 1(2) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "cold",
+      "pair": 2,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 42445800,
+      "model_load_seconds": 0.0065064,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0296182,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0065064,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0296182,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0065063999999999999\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.029618200000000001\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -1.9999970893e+00 Ph1: 1(1); Du: 1(2) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "warm",
+      "pair": 2,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 46271600,
+      "model_load_seconds": 0.0047441,
+      "basis_transfer_seconds": 4.9e-05,
+      "solve_seconds": 0.0352451,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0047441,
+          "basis_transfer_seconds": 4.9e-05,
+          "solve_seconds": 0.0352451,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0047441000000000002\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=4.8999999999999998e-05\nnative.solve_seconds=0.035245100000000001\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -4.0137870857e+00 Ph1: 1(51516); Du: 51516(4.01379) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.04\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "warm",
+      "pair": 3,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 43926600,
+      "model_load_seconds": 0.0050586,
+      "basis_transfer_seconds": 5.09e-05,
+      "solve_seconds": 0.0326777,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0050586,
+          "basis_transfer_seconds": 5.09e-05,
+          "solve_seconds": 0.0326777,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0050585999999999999\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=5.0899999999999997e-05\nnative.solve_seconds=0.032677699999999997\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -4.0137870857e+00 Ph1: 1(51516); Du: 51516(4.01379) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "cold",
+      "pair": 3,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 40517500,
+      "model_load_seconds": 0.0056316,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0284812,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0056316,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0284812,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0056315999999999996\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.028481200000000002\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -1.9999970893e+00 Ph1: 1(1); Du: 1(2) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "cold",
+      "pair": 4,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 40943600,
+      "model_load_seconds": 0.0055087,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0293466,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0055087,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0293466,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0055087000000000001\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.0293466\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -1.9999970893e+00 Ph1: 1(1); Du: 1(2) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "warm",
+      "pair": 4,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 44470900,
+      "model_load_seconds": 0.0046849,
+      "basis_transfer_seconds": 4.87e-05,
+      "solve_seconds": 0.0330275,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0046849,
+          "basis_transfer_seconds": 4.87e-05,
+          "solve_seconds": 0.0330275,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0046848999999999997\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=4.8699999999999998e-05\nnative.solve_seconds=0.033027500000000001\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -4.0137870857e+00 Ph1: 1(51516); Du: 51516(4.01379) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "warm",
+      "pair": 5,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 51253600,
+      "model_load_seconds": 0.0051879,
+      "basis_transfer_seconds": 4.87e-05,
+      "solve_seconds": 0.0399791,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0051879,
+          "basis_transfer_seconds": 4.87e-05,
+          "solve_seconds": 0.0399791,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0051878999999999996\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=4.8699999999999998e-05\nnative.solve_seconds=0.039979099999999997\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -4.0137870857e+00 Ph1: 1(51516); Du: 51516(4.01379) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.04\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "cold",
+      "pair": 5,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 42244600,
+      "model_load_seconds": 0.0061407,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0295624,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0061407,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0295624,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0061406999999999998\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.029562399999999999\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -1.9999970893e+00 Ph1: 1(1); Du: 1(2) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "cold",
+      "pair": 6,
+      "order": 0,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 42740600,
+      "model_load_seconds": 0.0060042,
+      "basis_transfer_seconds": 0,
+      "solve_seconds": 0.0302027,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.0060042,
+          "basis_transfer_seconds": 0,
+          "solve_seconds": 0.0302027,
+          "cache_state": "disabled",
+          "basis_accepted": false,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "disabled",
+      "basis_accepted": false,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0060042000000000003\nnative.load_status=0\nwarm_start.enabled=false\nwarm_start.cache_state=disabled\nnative.solve_seconds=0.030202699999999999\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\ncertificates=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -1.9999970893e+00 Ph1: 1(1); Du: 1(2) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    },
+    {
+      "schema": "csl.opt12-cost-trial/1",
+      "scenario": "transfer-cost",
+      "mode": "warm",
+      "pair": 6,
+      "order": 1,
+      "status": "verified",
+      "expected_objective": -99998,
+      "objective": -99998,
+      "wall_ns": 40741500,
+      "model_load_seconds": 0.004997,
+      "basis_transfer_seconds": 4.83e-05,
+      "solve_seconds": 0.0296609,
+      "native_attempts": [
+        {
+          "model_load_seconds": 0.004997,
+          "basis_transfer_seconds": 4.83e-05,
+          "solve_seconds": 0.0296609,
+          "cache_state": "compatible",
+          "basis_accepted": true,
+          "native_run": true
+        }
+      ],
+      "simplex_iterations": 1,
+      "cache_state": "compatible",
+      "basis_accepted": true,
+      "diagnostics": "adapter.version=1.1.0+highs.1.11.0\nnative.version=1.11.0\nnative.githash=n/a\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3\nprogram.problem=opt12-measure\nprogram.id=transfer-cost-changed\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback\noptions.absolute_tolerance=1e-08\nresidual.relative_tolerance=1e-08\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.iteration_limit=2147483647\noptions.time_limit=inf\nmodel.reused=false\nnative.load_seconds=0.0049969999999999997\nnative.load_status=0\nwarm_start.enabled=true\nwarm_start.cache_state=compatible\nwarm_start.install_status=0\nwarm_start.accepted=true\nwarm_start.setup_seconds=4.8300000000000002e-05\nnative.solve_seconds=0.0296609\nnative_run=true\nnative.call_status=0\nnative.call_status_name=OK\nnative.model_status=7\nnative.model_status_name=Optimal\nstop=none\nnative.info=available\nnative.objective=-99998\nnative.primal_infeasibility=0\nnative.dual_infeasibility=0\nnative.simplex_iterations=1\noriginal.objective=-99998\ncomplementarity=unavailable\nbasis=unavailable\ncertificate.extraction=not_requested\nwarm_start.next_cache=stored\ncertificates=unavailable\nnative.log:\nLP   has 1 rows; 100000 cols; 100000 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 1e+00]\n  Cost   [1e+00, 2e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [5e+04, 5e+04]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0    -4.0137870857e+00 Ph1: 1(51516); Du: 51516(4.01379) 0s\n          1    -9.9998000000e+04 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 1\nObjective value     : -9.9998000000e+04\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.03\n"
+    }
+  ]
+}

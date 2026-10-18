@@ -4,12 +4,19 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/sets/data.hpp>
 #include "../../../src/geometry/conversion/exact_h_interval.hpp"
+#include "../../../src/geometry/conversion/exact_h_box.hpp"
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <chrono>
 #include <cmath>
+#include <condition_variable>
 #include <cstdint>
+#include <future>
 #include <limits>
+#include <mutex>
+#include <stdexcept>
+#include <string>
 
 using namespace csl;
 using namespace csl::registry;
@@ -56,6 +63,15 @@ SetHandle make_v_handle(std::string id,std::size_t n,Matrix vertices,Matrix rays
     if (rays.cols==0) rays={0,n,{}};
     return take(sets::make_v({{std::move(id)},n,{}},
         {take(numeric::snapshot(vertices)),take(numeric::snapshot(rays))})).as_handle();
+}
+SetHandle unit_box_h(std::string id,std::size_t n) {
+    Matrix a{2*n,n,Vector(2*n*n,0.0)};
+    Vector b(2*n,1.0);
+    for (std::size_t axis=0;axis<n;++axis) {
+        a.values[(2*axis)*n+axis]=1.0;
+        a.values[(2*axis+1)*n+axis]=-1.0;
+    }
+    return make_h_handle(std::move(id),n,std::move(a),std::move(b));
 }
 SetTransformOutcome convert(SetHandle input,std::string output,std::string tag,QhullOptions options={}) {
     auto conversion=take(make_qhull_registration(take(make_highs_registration()),std::move(options)));
@@ -132,6 +148,30 @@ TEST_CASE("ambient-one checker fails closed when exact H coverage exceeds finite
         std::get<sets::VRepresentation>(converted.representation()));
     CHECK(std::holds_alternative<std::string>(certificate));
 }
+
+TEST_CASE("planar rectangle certificate rejects an omitted corner and oblique rows") {
+    const auto square=square_h();
+    const auto h=take(sets::from_handle(square));
+    const auto omitted=take(sets::from_handle(make_v_handle("three-corners",2,
+        Matrix{3,2,{0,0, 1,0, 0,1}})));
+    const auto h_rep=std::get<sets::HRepresentation>(h.representation());
+    const auto v_rep=std::get<sets::VRepresentation>(omitted.representation());
+    const auto missing_corner=geometry::detail::certify_h_box(h_rep,v_rep);
+    CHECK(std::holds_alternative<std::string>(missing_corner));
+
+    const auto outside=take(sets::from_handle(make_v_handle("outside-box",2,
+        Matrix{5,2,{0,0, 1,0, 0,1, 1,1, 2,0}})));
+    const auto outside_result=geometry::detail::certify_h_box(
+        h_rep,std::get<sets::VRepresentation>(outside.representation()));
+    CHECK(std::holds_alternative<std::string>(outside_result));
+
+    const auto oblique=make_h_handle("triangle-h",2,
+        Matrix{3,2,{1,0, 0,1, -1,-1}},Vector{1,1,0});
+    const auto oblique_data=take(sets::from_handle(oblique));
+    const auto oblique_result=geometry::detail::certify_h_box(
+        std::get<sets::HRepresentation>(oblique_data.representation()),v_rep);
+    CHECK(std::holds_alternative<std::string>(oblique_result));
+}
 class WrongSizeLpWorkspace final : public LPWorkspace {
 protected:
     ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext&) override {
@@ -181,6 +221,203 @@ TEST_CASE("bounded H to V conversion retains the square under independent checks
     const auto& h_out=std::get<sets::HRepresentation>(h_rep);
     const std::array<double,2> inside{0.5,0.5}, edge{1,0}, outside{2,0};
     CHECK(satisfies(h_out,inside)); CHECK(satisfies(h_out,edge)); CHECK_FALSE(satisfies(h_out,outside));
+}
+
+TEST_CASE("bounded planar H to V conversion publishes checked global coverage") {
+    const auto input = square_h();
+    const auto req = request(input, "csl.polyhedron.v", "square-planar-coverage");
+    const auto outcome = convert(input, "csl.polyhedron.v", "square-planar-coverage");
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    const auto& result = std::get<OperationResult>(outcome);
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->metric.value == "csl.geometry.metric.l-infinity");
+    CHECK(result.evidence.error_bound->bound == 0.0);
+}
+
+TEST_CASE("higher dimensional axis-aligned boxes receive exact global coverage certificates") {
+    const auto input=unit_box_h("unit-cube",3);
+    const auto req=request(input,"csl.polyhedron.v","unit-cube-coverage");
+    const auto outcome=convert(input,"csl.polyhedron.v","unit-cube-coverage");
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    const auto& result=std::get<OperationResult>(outcome);
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->metric.value=="csl.geometry.metric.l-infinity");
+    CHECK(result.evidence.error_bound->bound==0.0);
+    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& assumption) { return assumption.find("axis-aligned box")!=std::string::npos; }));
+}
+
+TEST_CASE("exactly empty axis-aligned H boxes certify only empty conversion outputs") {
+    const auto input=make_h_handle("empty-box",3,
+        Matrix{6,3,{1,0,0, -1,0,0, 0,1,0, 0,-1,0, 0,0,1, 0,0,-1}},
+        Vector{0,-1,1,1,1,1});
+    const auto req=request(input,"csl.polyhedron.v","empty-box-coverage");
+    const auto outcome=convert(input,"csl.polyhedron.v","empty-box-coverage");
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    const auto& result=std::get<OperationResult>(outcome);
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
+    const auto output=take(sets::from_handle(result.output));
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(output.representation()));
+    CHECK(std::get<sets::VRepresentation>(output.representation()).vertices.rows()==0);
+
+    const auto h_data=take(sets::from_handle(input));
+    const auto h_representation=h_data.representation();
+    const auto& h=std::get<sets::HRepresentation>(h_representation);
+    CHECK(std::get<bool>(geometry::detail::exact_h_box_is_empty(h)));
+    const auto empty_v=take(sets::from_handle(make_v_handle("empty-box-v",3,Matrix{0,3,{}})));
+    const auto empty_certificate=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(empty_v.representation()));
+    REQUIRE(std::holds_alternative<double>(empty_certificate));
+    CHECK(std::get<double>(empty_certificate)==0.0);
+
+    const auto nonempty_v=take(sets::from_handle(make_v_handle("wrong-nonempty-box-v",3,Matrix{1,3,{0,0,0}})));
+    const auto mismatch=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(nonempty_v.representation()));
+    CHECK(std::holds_alternative<std::string>(mismatch));
+}
+
+TEST_CASE("box certificate rejects omitted corners and outside points but accepts interior vertices") {
+    const auto h_data=take(sets::from_handle(unit_box_h("cube-h",3)));
+    const auto h_representation=h_data.representation();
+    const auto& h=std::get<sets::HRepresentation>(h_representation);
+    Vector corners;
+    for (std::size_t mask=0;mask<8;++mask)
+        for (std::size_t axis=0;axis<3;++axis)
+            corners.push_back((mask&(std::size_t{1}<<axis))?1.0:-1.0);
+    auto vertices=take(sets::from_handle(make_v_handle("cube-v",3,Matrix{8,3,corners})));
+    const auto v_representation=vertices.representation();
+    const auto& v=std::get<sets::VRepresentation>(v_representation);
+    const auto exact=geometry::detail::certify_h_box(h,v);
+    REQUIRE(std::holds_alternative<double>(exact));
+    CHECK(std::get<double>(exact)==0.0);
+
+    auto missing_corners=corners;
+    missing_corners.resize(21);
+    auto omitted=take(sets::from_handle(make_v_handle("cube-missing-corner",3,Matrix{7,3,missing_corners})));
+    const auto missing=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(omitted.representation()));
+    CHECK(std::holds_alternative<std::string>(missing));
+
+    auto with_interior_points=corners;
+    with_interior_points.insert(with_interior_points.end(),{0.0,0.0,0.0});
+    auto with_interior=take(sets::from_handle(make_v_handle("cube-with-interior",3,Matrix{9,3,with_interior_points})));
+    const auto interior=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(with_interior.representation()));
+    REQUIRE(std::holds_alternative<double>(interior));
+    CHECK(std::get<double>(interior)==0.0);
+
+    with_interior_points.insert(with_interior_points.end(),{2.0,0.0,0.0});
+    auto outside=take(sets::from_handle(make_v_handle("cube-outside-point",3,Matrix{10,3,with_interior_points})));
+    const auto out=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(outside.representation()));
+    CHECK(std::holds_alternative<std::string>(out));
+}
+
+TEST_CASE("box certificate handles degenerate axes and bounds corner enumeration") {
+    const auto h=make_h_handle("flat-box",3,
+        Matrix{6,3,{1,0,0, -1,0,0, 0,1,0, 0,-1,0, 0,0,1, 0,0,-1}},
+        Vector{1,1,0,0,1,1});
+    Vector corners;
+    for (std::size_t mask=0;mask<4;++mask) {
+        corners.push_back((mask&1)?1.0:-1.0);
+        corners.push_back(0.0);
+        corners.push_back((mask&2)?1.0:-1.0);
+    }
+    const auto h_data=take(sets::from_handle(h));
+    const auto v_data=take(sets::from_handle(make_v_handle("flat-box-v",3,Matrix{4,3,corners})));
+    const auto degenerate=geometry::detail::certify_h_box(
+        std::get<sets::HRepresentation>(h_data.representation()),
+        std::get<sets::VRepresentation>(v_data.representation()));
+    REQUIRE(std::holds_alternative<double>(degenerate));
+    CHECK(std::get<double>(degenerate)==0.0);
+
+    const auto oversized=make_h_handle("oversized-box",13,Matrix{0,13,{}},Vector{});
+    const auto oversized_data=take(sets::from_handle(oversized));
+    const auto empty_v=take(sets::from_handle(make_v_handle("oversized-v",13,Matrix{0,13,{}})));
+    const auto declined=geometry::detail::certify_h_box(
+        std::get<sets::HRepresentation>(oversized_data.representation()),
+        std::get<sets::VRepresentation>(empty_v.representation()));
+    CHECK(std::holds_alternative<std::string>(declined));
+}
+
+TEST_CASE("independent Qhull workspaces reach the native call boundary together") {
+    const auto make_worker = [](SetHandle input, std::string tag, const std::function<void()>& before_native_call) {
+        const auto lp = take(make_highs_registration());
+        QhullOptions options;
+        options.before_native_call = before_native_call;
+        auto conversion = take(make_qhull_registration(lp, std::move(options)));
+        Registry<ConversionPort> conversions;
+        REQUIRE_FALSE(conversions.add(std::move(conversion)).has_value());
+        auto req = request(std::move(input), "csl.polyhedron.v", std::move(tag));
+        auto prepared = prepare_pipeline(select(conversions, {{"csl.conversion.qhull"}, {}}, req,
+            conversion_requirements("csl.polyhedron.v")));
+        REQUIRE(std::holds_alternative<PreparedPipeline<ConversionPort>>(prepared));
+        auto [worker] = std::get<PreparedPipeline<ConversionPort>>(prepared).create();
+        return std::pair{std::move(req), std::move(worker)};
+    };
+
+    const auto first_input = square_h();
+    const auto second_input = make_h_handle("translated-square-h", 2,
+        Matrix{4, 2, {1, 0, -1, 0, 0, 1, 0, -1}}, Vector{3, -2, -1, 2});
+    const auto check_square = [](const OperationResult& result, const ConversionRequest& req,
+                                 double x_min, double x_max, double y_min, double y_max) {
+        CHECK(result.relation == SetRelation::equivalent);
+        CHECK(result.evidence.reference.identity == req.identity);
+        const auto converted = take(sets::from_handle(result.output));
+        const auto representation = converted.representation();
+        REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
+        const auto& v = std::get<sets::VRepresentation>(representation);
+        REQUIRE(v.vertices.rows() == 4);
+        CHECK(v.rays.rows() == 0);
+        const std::array<std::array<double, 2>, 4> expected{{
+            {x_min, y_min}, {x_min, y_max}, {x_max, y_min}, {x_max, y_max}}};
+        for (const auto& corner : expected) {
+            bool found = false;
+            for (std::size_t row = 0; row < v.vertices.rows(); ++row) {
+                found = found || (std::abs(v.vertices(row, 0) - corner[0]) < 1e-7 &&
+                                  std::abs(v.vertices(row, 1) - corner[1]) < 1e-7);
+            }
+            CHECK(found);
+        }
+    };
+
+    for (std::size_t iteration = 0; iteration < 16; ++iteration) {
+        std::mutex native_call_mutex;
+        std::condition_variable native_call_ready;
+        std::size_t native_call_entries{};
+        const auto before_native_call = [&] {
+            std::unique_lock lock(native_call_mutex);
+            ++native_call_entries;
+            native_call_ready.notify_all();
+            if (!native_call_ready.wait_for(lock, std::chrono::seconds(2), [&] {
+                    return native_call_entries == 2;
+                })) {
+                throw std::runtime_error("The concurrent conversion did not reach the native Qhull call boundary.");
+            }
+        };
+        auto [first_request, first_worker] = make_worker(first_input,
+            "concurrent-square-" + std::to_string(iteration), before_native_call);
+        auto [second_request, second_worker] = make_worker(second_input,
+            "concurrent-translated-square-" + std::to_string(iteration), before_native_call);
+        auto first_future = std::async(std::launch::async, [&] {
+            return first_worker->run(context());
+        });
+        auto second_future = std::async(std::launch::async, [&] {
+            return second_worker->run(context());
+        });
+
+        const auto first_outcome = first_future.get();
+        const auto second_outcome = second_future.get();
+        CHECK(native_call_entries == 2);
+        REQUIRE(std::holds_alternative<OperationResult>(first_outcome));
+        REQUIRE(std::holds_alternative<OperationResult>(second_outcome));
+        check_square(std::get<OperationResult>(first_outcome), first_request, 0, 1, 0, 1);
+        check_square(std::get<OperationResult>(second_outcome), second_request, 2, 3, -2, -1);
+    }
 }
 
 TEST_CASE("simplex H/V conversions preserve literal membership, support, and empty cases") {

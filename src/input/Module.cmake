@@ -14,6 +14,4 @@ install(FILES docs/contracts/scenario-input.md DESTINATION ${CMAKE_INSTALL_DATAD
 
 install(FILES tests/fixtures/input/minimal-integrator.json tests/fixtures/input/affine-ltv.json DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/tests/fixtures/input)
 
-install(FILES ${csl_json_SOURCE_DIR}/LICENSE.MIT DESTINATION ${CMAKE_INSTALL_DATADIR}/csl/licenses RENAME nlohmann-json-LICENSE.MIT)
-
 csl_install_headers(input)

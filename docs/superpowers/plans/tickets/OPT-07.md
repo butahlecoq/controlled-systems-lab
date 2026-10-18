@@ -12,9 +12,9 @@ Read the [2026-10-11-controlled-systems-master-design.md](https://github.com/but
 
 ## Acceptance criteria
 
-- [ ] Identify which Scientific Research and Constrained QLPHULL steps actually run; document commented-out sections and differences.
-- [ ] Sorting, filtering, grouping and final reduction preserve hull equality for every input permutation and degeneracy fixture.
-- [ ] Declare this as a hull-level strategy, separate from LP pivot rules and recursive QuickHull; expose grouping/order counters.
+- [x] Identify which Scientific Research and Constrained QLPHULL steps actually run; document commented-out sections and differences in the archival inventory and hull-reduction contract.
+- [x] Sorting, grouping and the certified final reduction preserve hull equality across every permutation of the grouped regression cloud, with flat, duplicate and overflow fixtures.
+- [x] Declare grouping as a hull-level strategy, separate from LP pivot rules and recursive QuickHull; expose group, candidate-order and fallback counters.
 
 ## Dependencies
 
@@ -27,3 +27,11 @@ Related scientific/architecture issues: [#7](https://github.com/butahlecoq/contr
 Ship meaningful unit/contract tests with the implementation, using the named independent oracle. Return commits, tests and commands run, supported assumptions, numerical/evidence limitations and unresolved findings. Shared contract changes require an explicit specification revision and integration review.
 
 Use the plan ownership map to claim files before editing. Later-phase tickets do not expand the first-release scope. Do not alter source transcriptions or label a witness sample as a complete optimal family.
+
+Implementation note: the native grouped adapter follows the Constrained
+source's signed max-absolute score, ten-consecutive-redundancy streaming
+trigger, fixed support group and accumulated nearby outside candidates. It
+replaces the historical simplex helper tableaus with the shared LP membership
+query; only the exact dyadic removal verifier can authorize deletion. The
+implementation contract revision records this boundary and the supported
+fallbacks.

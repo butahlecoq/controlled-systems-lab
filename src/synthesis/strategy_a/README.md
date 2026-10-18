@@ -11,19 +11,21 @@ selected provider before a request-specific workspace is created.
 
 The strategy implements the existing `StrategyPort` / `SynthesisWorkspace`
 contract. Its general path admits `nominal_open_loop`, numerical,
-`candidate_relaxation` requests with `csl.polyhedron.h` joint output. Two
-complete-family exceptions are registered analytic profiles. The strict
+`candidate_relaxation` requests with `csl.polyhedron.h` joint output. Three
+complete-family profiles are registered analytic cases. The strict
 `ts01_exact_integrator` profile is checked by the compiled T-S01 verifier. The
 `ts02_constant_integrator` profile is the scalar two-step unit integrator with
 controls in `[0,1]`, universal state factors, and constant terminal objective
 `3` in linear, zero-quadratic, or zero-map residual-norm form; it is checked by
-the shared compiled T-S02 verifier. Admission uses the verifier's strict
-model/objective predicate. Each uses a
-request-dependent verifier key while preserving the T-S01 mapping. The
-registration freezes the deterministic six-step lineage, and a proposal is
+the shared compiled T-S02 verifier. The strict `ts03_singular_integrator`
+profile admits `x1=u0`, `x2=u1` and objective `(x2-1)^2`; it is checked by an
+independent compiled T-S03 verifier. Admission uses each verifier's strict
+model/objective predicate. Each profile uses a request-dependent verifier key.
+The registration freezes the deterministic six-step lineage, and a proposal is
 emitted only after the transformations execute in order and the terminal
 optimizer reports optimal. T-S01 publishes its analytic segment; T-S02
-publishes the shared canonical H-relation for every feasible history, avoiding
+publishes the shared canonical H-relation for every feasible history; T-S03
+publishes the entire line `x0=0, x1=u0, x2=1, u1=1`, `0<=u0<=1`. These avoid
 dependence on floating-point H-row ordering. The registry checks the input,
 effective request, coordinates, strategy/version, executed lineage, theorem,
 bounds, proof identity, and canonical relation. Other exact or partial requests
@@ -92,19 +94,22 @@ new shared contract. No shared interface is changed by this module.
   cross-strategy T-X01 comparison, artifact export, complete sparse history
   representation, and T-L02 barycentric diagnostics are not delivered here.
 
-The T-S01 and singular T-S03 tests independently establish the fixture's whole
-candidate line via equality rank and substitution of every H row to the literal
-parameter interval `[0,1]`. Constant T-S02 tests preserve multiple terminal points
-and all four corner histories. T-S01 evaluates the retained primal with the
+The T-S01 and singular T-S03 tests independently establish their complete
+optimal-history relations, including equality rank and the literal parameter
+interval `[0,1]`; T-S03 also exercises registered completeness verification on
+the public StrategyPort path. Constant T-S02 tests preserve multiple terminal
+points and all four corner histories. T-S01 evaluates the retained primal with the
 original resolved objective and asserts literal cost zero. HiGHS withholds
 optional program bounds; their absence is checked before any value access.
-For strict T-S01 and T-S02, the registered Strategy A paths are exercised
+For strict T-S01, T-S02, and T-S03, the registered Strategy A paths are exercised
 end-to-end. T-S02 checks all four box corners and an interior history, rejects
 an inconsistent transition point, verifies equality rank and literal control
 bounds, and binds the shared canonical H payload and constant objective bound
-through the T-S02 verifier. Its recovered preimage independently retains the
-whole control box: all four affine corner histories are feasible, the three
-literal dynamics equalities have rank three, and the literal control bounds
+through the T-S02 verifier. T-S03 checks its full H relation and zero optimum,
+and rejects altered completeness evidence through its verifier. The recovered
+T-S02 preimage independently retains the whole control box: all four affine
+corner histories are feasible, the three literal dynamics equalities have rank
+three, and the literal control bounds
 exclude every history outside the box. Adversarial tests reject unreviewed
 model/objective inputs at admission and altered lineage, relation bindings,
 objective bounds, and enlarged or unrelated payloads at verification. For
@@ -112,6 +117,6 @@ T-S01, the pre-verification recovered
 H relation is checked independently to be exactly
 the five-coordinate canonical segment under an independent equality-rank and
 interval-substitution oracle before the compiled verifier accepts the complete
-proposal. These two exact analytic profiles do not establish general numerical
+proposal. These three exact analytic profiles do not establish general numerical
 family coverage or transfer completeness to another source profile. Issue #66
 must remain open.

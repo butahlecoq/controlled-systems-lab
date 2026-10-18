@@ -33,9 +33,10 @@ direction, or a bound to either authored real model. `NumericalCheck.max_residua
 describes an attempted reducer reconstruction residual; it is not the distance
 from `Q_64` to either real model. For direct finite V, singleton, and empty
 inputs, the operation now publishes an exact-post-hoc outward L-infinity bound
-from the stored dyadic operation to `Q_64`. It leaves `error_bound` empty
-whenever any input uses H-to-V conversion, whose global coverage remains
-uncertified.
+from the stored dyadic operation to `Q_64`. For H-to-V inputs, it publishes a
+bound when independent global coverage is certified for a bounded ambient-one
+interval or supported bounded axis-aligned box. Unsupported H profiles still
+leave `error_bound` empty because their global coverage remains uncertified.
 The public [affine-sum contract](../contracts/affine-sum-operations.md) and
 [`OperationResult`/`GeometryEvidence` types](../../include/csl/geometry/contracts.hpp)
 carry this distinction to callers.
@@ -122,10 +123,10 @@ These follow by pairing points with the same convex coefficients in the two
 V hulls, applying the induced L-infinity operator norm to the affine error,
 and pairing summands for Minkowski addition. Direct finite V inputs have zero
 conversion error. Exact dyadic arithmetic composes and outward-rounds the
-result, and exact candidate deletion adds zero. This profile remains limited
-to ambient-one H inputs, stored dyadics, and finite output-coordinate metric;
-it does not certify higher-dimensional H conversion or authored-real input
-uncertainty.
+result, and exact candidate deletion adds zero. Composition through H inputs
+is implemented for the bounded ambient-one interval profile and the bounded
+axis-aligned box profile (dimensions 2 through 12). Neither profile certifies
+authored-real input uncertainty.
 
 The error is observable even with exact dyadic V inputs. Take a singleton
 `v=(10^16,1,-10^16)`, a one-row matrix `M=(1,1,1)`, and `b=0`. Every input
@@ -164,16 +165,26 @@ independently justified input and coefficient/model uncertainty. Unknown
 pre-rounding data admit no finite claimed error from the present evidence
 alone.
 
-The converter now independently certifies the bounded **ambient-one** H-to-V
-case against the original stored dyadic rows. Exact rational endpoint bounds
-and the returned finite V extrema give the two-sided L-infinity Hausdorff
-distance; it is rounded upward into the conversion evidence. Empty-to-empty
-distance is zero. This is a global coverage check for that one-dimensional
-represented-input profile, including equality singletons. It does not apply
-to embedded lines in higher ambient dimension, higher-dimensional polytopes,
-or pre-rounding authored-real values. For ambient-one H inputs, the
-affine-image/Minkowski adapter independently reruns this checker on the
-original H rows and converted vertices, then composes its bound with exact
+The converter independently certifies bounded **ambient-one** H-to-V inputs
+against the original stored dyadic rows. Exact rational endpoint bounds and
+the returned finite V extrema give a two-sided L-infinity Hausdorff distance,
+rounded upward into the conversion evidence. Empty-to-empty distance is zero.
+This covers the one-dimensional represented-input profile, including equality
+singletons.
+
+It also certifies bounded, axis-aligned boxes in ambient dimensions 2 through
+12. For each coordinate, exact dyadic comparisons derive the lower and upper
+H endpoints. The checker verifies that every returned V point is inside those
+intervals and every distinct box corner is present. Those two checks prove
+both inclusions for this box profile and publish a zero L-infinity bound. It
+also publishes zero for an empty output when supported axis-aligned stored
+rows prove the H set is empty. It caps corner enumeration at 4,096 and declines
+unsupported rows, nonempty unbounded inputs, nonfinite values, and arithmetic
+range failures. It does not cover
+rotated boxes, general higher-dimensional polytopes, or pre-rounding
+authored-real values. For ambient-one H inputs and supported box inputs, the
+affine-image/Minkowski adapter independently reruns the relevant checker on
+the original H rows and converted vertices, then composes its bound with exact
 candidate-generation error. Other H-input operation evidence still omits
 `error_bound`.
 
@@ -182,12 +193,13 @@ candidate-generation error. Other H-input operation evidence still omits
 The represented-candidate deletion guarantee is sound for its narrow scope.
 The existing `equivalent` result remains an **unvalidated numerical algorithm
 claim** conditional on correct represented input interpretation and, for H
-inputs outside the independently checked ambient-one profile, the selected
-converter's unproved coverage. The finite-V and bounded ambient-one H
-operation bounds establish a distance to the stored-dyadic model only. The
-operation does not establish equivalence or a certified distance to the
-authored real set. Callers needing that guarantee must not promote its relation
-enum or small residual to a validated inclusion/coverage result.
+inputs outside the independently checked ambient-one interval or supported
+box profiles, the selected converter's unproved coverage. The finite-V and
+bounded supported-profile H operation bounds establish a distance to the
+stored-dyadic model only. The operation does not establish equivalence or a
+certified distance to the authored real set. Callers needing that guarantee
+must not promote its relation enum or small residual to a validated
+inclusion/coverage result.
 
 To claim a real-model bound in a future profile:
 
@@ -199,17 +211,17 @@ To claim a real-model bound in a future profile:
    with matching request/source identity. **Implemented** by the current
    finite-V affine-sum path; preserve the exact deletion check.
 3. For H inputs, obtain a **global two-sided** H/V conversion certificate or
-   separate directed bounds. The ambient-one bounded interval profile has
-   such a stored-dyadic certificate; other H profiles do not. Vertex-row
-   residuals alone are insufficient. Propagate a verified bound through the
-   map/sum as above; this is implemented only for the bounded ambient-one
-   profile.
+   separate directed bounds. The bounded ambient-one interval profile and
+   bounded axis-aligned-box profiles (dimensions 2 through 12) have
+   stored-dyadic certificates and propagate through the map/sum. Other H
+   profiles have no global coverage certificate; vertex-row residuals alone
+   are insufficient.
 4. Bind any broader `GeometryErrorBound` to a checked verifier and explicit
    assumptions, including upstream model uncertainty. The current finite-V
    bound is computed by the operation's exact dyadic post-hoc check, includes
    underflow and cancellation, and fails closed on overflow/range failure; it
-   covers H conversion only in the bounded ambient-one profile, not
-   authored-input uncertainty. Decide whether the shared relation type needs
+   covers H conversion in the bounded ambient-one and bounded axis-aligned
+   box profiles, not authored-input uncertainty. Decide whether the shared relation type needs
    a distinct bounded-numerical result; do not silently relabel the current
    result as validated.
 
