@@ -519,6 +519,38 @@ TEST_CASE("unavailable geometry operation rejects before creating a projection w
     CHECK(*creations==0);
 }
 
+TEST_CASE("unsupported triangle intersection request retains both operands and request identity") {
+    const auto square=h("typed-unit-square",2,{4,2,{1,0,-1,0,0,1,0,-1}},{1,0,1,0},
+        {0,2,{}},{}, {"x","y"});
+    const auto halfspace=h("typed-triangle-cut",2,{3,2,{1,1,-1,0,0,-1}},{1,0,0},
+        {0,2,{}},{}, {"x","y"});
+    const OperationRequest request{{{"test08"},{"triangle-intersection"},{"unit-triangle"}},
+        {"csl.geometry.polyhedral-projection"},
+        Intersection{square.as_handle(),halfspace.as_handle()},SetRelation::equivalent,Assurance::numerical};
+    CHECK(check_operation_shape(request).empty());
+
+    auto entry=geometry::polyhedral::make_projection_registration();
+    auto creations=std::make_shared<int>(0);
+    auto create=entry.factory;
+    entry.factory=[creations,create](const OperationRequest& operation) {
+        ++*creations;
+        return create(operation);
+    };
+    auto selected=provider(std::move(entry),"csl.polyhedron.h");
+    const auto admission=geometry::prepare_geometry_operation(request,selected);
+    const auto* rejection=std::get_if<geometry::GeometryAdmissionRejection>(&admission);
+    REQUIRE(rejection);
+    CHECK(rejection->reference.identity==request.identity);
+    CHECK(rejection->reference.inputs==std::vector<SetId>{square.metadata()->id,halfspace.metadata()->id});
+    REQUIRE(rejection->provider.diagnostics.size()==1);
+    CHECK(rejection->provider.diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(rejection->provider.diagnostics.front().field=="projection.operation");
+    CHECK(rejection->provider.provenance.requested.id==ModuleId{"csl.geometry.polyhedral-projection"});
+    REQUIRE(rejection->provider.provenance.actual);
+    CHECK(rejection->provider.provenance.actual->id==ModuleId{"csl.geometry.polyhedral-projection"});
+    CHECK(*creations==0);
+}
+
 TEST_CASE("projection provider rejects the unbounded preimage of y=0 instead of returning finite vertices") {
     // For f(x,y)=y and target {0}, f^{-1}({0})={(x,0): x in R}.
     // The rational points (-2,0), (0,0), and (3,0) lie in the expected line;

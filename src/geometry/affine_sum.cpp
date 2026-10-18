@@ -33,6 +33,12 @@ bool finite_policy(const NumericalPolicy& policy) {
         std::isfinite(policy.relative_tolerance) && policy.relative_tolerance >= 0.0 &&
         policy.absolute_tolerance <= std::numeric_limits<double>::max() - policy.relative_tolerance;
 }
+bool positive_dimensional_universal(const SetHandle& handle) {
+    auto imported = sets::from_handle(handle);
+    const auto* data = std::get_if<sets::SetData>(&imported);
+    if (!data || data->metadata()->set.dimension == 0) return false;
+    return std::holds_alternative<sets::UniversalRepresentation>(data->representation());
+}
 std::string identity(const registry::Provenance& provenance) {
     if (!provenance.actual) return "unresolved";
     return provenance.actual->id.value + "@" + provenance.actual->version;
@@ -576,6 +582,14 @@ registry::Registration<registry::GeometryPort> make_affine_sum_registration(
                 return Diagnostics{{DiagnosticCode::unsupported,"geometry.relation","Only numerical equivalent set operations are supported."}};
             if(!std::holds_alternative<AffineImage>(request.operation) && !std::holds_alternative<MinkowskiSum>(request.operation))
                 return Diagnostics{{DiagnosticCode::unsupported,"geometry.operation","Only affine images and Minkowski sums are implemented."}};
+            if (const auto* image = std::get_if<AffineImage>(&request.operation);
+                image && positive_dimensional_universal(image->input))
+                return Diagnostics{{DiagnosticCode::unsupported,"affine-sum.universal",
+                    "Positive-dimensional universal input is unbounded and is outside the finite V profile."}};
+            if (const auto* sum = std::get_if<MinkowskiSum>(&request.operation);
+                sum && (positive_dimensional_universal(sum->left) || positive_dimensional_universal(sum->right)))
+                return Diagnostics{{DiagnosticCode::unsupported,"affine-sum.universal",
+                    "Positive-dimensional universal input is unbounded and is outside the finite V profile."}};
             registry::Output output; output.representation={"csl.polyhedron.v"}; output.assurance=Assurance::numerical; output.relation=SetRelation::equivalent;
             return registry::Offer{output};
         },

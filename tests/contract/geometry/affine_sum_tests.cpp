@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/geometry/affine_sum.hpp>
+#include <csl/geometry/operation_admission.hpp>
 #include <csl/geometry/polyhedral_intersection.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
@@ -889,6 +890,42 @@ TEST_CASE("affine image rejects non-finite map and offset even for an empty inpu
         request(AffineImage{empty,{1,1,{nan}},{0}}),dependencies())));
     CHECK(std::holds_alternative<Unsupported>(run(
         request(AffineImage{empty,{1,1,{1}},{infinity}}),dependencies())));
+}
+
+TEST_CASE("positive-dimensional universal inputs are request-scoped unsupported affine and sum operands") {
+    const auto universal = take(sets::make_universal({{"universal-line"}, 1, {}})).as_handle();
+    const auto interval = vertices("unit-interval-for-universal-sum", 1, {0, 1}, 2);
+    const auto check_rejection = [](const OperationRequest& req, std::vector<SetId> inputs) {
+        std::size_t factory_calls = 0;
+        auto registration = geometry::make_affine_sum_registration(dependencies());
+        auto factory = std::move(registration.factory);
+        registration.factory = [&factory_calls, factory = std::move(factory)](const OperationRequest& operation) mutable {
+            ++factory_calls;
+            return factory(operation);
+        };
+        Registry<GeometryPort> registry;
+        REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+        Requirements requirements;
+        requirements.output.representation = {"csl.polyhedron.v"};
+        requirements.output.relation = SetRelation::equivalent;
+        const auto admission = geometry::prepare_geometry_operation(
+            select(registry, {{"csl.geometry.affine-sum"}, {}}, req, requirements));
+        const auto* rejection = std::get_if<geometry::GeometryAdmissionRejection>(&admission);
+        REQUIRE(rejection);
+        CHECK(rejection->reference.identity == req.identity);
+        CHECK(rejection->reference.inputs == inputs);
+        REQUIRE(rejection->provider.diagnostics.size() == 1);
+        CHECK(rejection->provider.diagnostics.front().code == DiagnosticCode::unsupported);
+        CHECK(rejection->provider.diagnostics.front().field == "affine-sum.universal");
+        CHECK(rejection->provider.provenance.requested.id == ModuleId{"csl.geometry.affine-sum"});
+        REQUIRE(rejection->provider.provenance.actual);
+        CHECK(rejection->provider.provenance.actual->id == ModuleId{"csl.geometry.affine-sum"});
+        CHECK(factory_calls == 0);
+    };
+    check_rejection(request(AffineImage{universal, {1, 1, {1}}, {0}}, "universal-affine"),
+        {universal.id});
+    check_rejection(request(MinkowskiSum{universal, interval}, "universal-minkowski"),
+        {universal.id, interval.id});
 }
 
 TEST_CASE("candidate limits and pre-request stops never publish successful geometry") {
