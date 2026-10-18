@@ -75,9 +75,10 @@ def validate_release_build_evidence(raw_log: str, root: Path, build_root: Path,
                                     exe: Path, commit: str, harness_sha256: str) -> None:
     """Require a clean-first compile and link of all timing-relevant sources."""
     lines = raw_log.splitlines()
-    clean_positions = [index for index, line in enumerate(lines) if "CoreClean:" in line]
+    clean_positions = [index for index, line in enumerate(lines)
+                       if "run clean command:" in line.casefold() and "/t:clean" in line.casefold()]
     require(bool(clean_positions),
-            "verbose Release log lacks clean-first CoreClean evidence")
+            "verbose Release log lacks explicit clean-first MSBuild command evidence")
 
     def normalized(path: Path) -> str:
         return str(path.resolve()).replace("/", "\\").casefold()

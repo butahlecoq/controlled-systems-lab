@@ -12,8 +12,8 @@ from collect import HARNESS, TIMING_TRANSLATION_UNITS, validate_release_build_ev
 
 class ReleaseBuildEvidenceTests(unittest.TestCase):
     def setUp(self):
-        self.root = Path("D:/work/opt11-source")
-        self.build_root = Path("D:/work/opt11-build")
+        self.root = Path.cwd() / "opt11-source-test"
+        self.build_root = Path.cwd() / "opt11-build-test"
         self.exe = self.build_root / "Release" / "csl_opt11_measure.exe"
         self.commit = "a" * 40
         self.harness_hash = "b" * 64
@@ -25,7 +25,7 @@ class ReleaseBuildEvidenceTests(unittest.TestCase):
                 f'{extra} "{path}"')
 
     def valid_log(self) -> str:
-        lines = ["CoreClean:"]
+        lines = ["Run Clean Command: MSBuild.exe /t:Clean"]
         for source in TIMING_TRANSLATION_UNITS:
             lines.append(self.compile_line(source))
         lines.append(self.compile_line(
@@ -50,8 +50,8 @@ class ReleaseBuildEvidenceTests(unittest.TestCase):
                                             self.exe, self.commit, self.harness_hash)
 
     def test_rejects_log_without_clean_first_evidence(self):
-        incomplete = self.log.replace("CoreClean:\n", "")
-        with self.assertRaisesRegex(ValueError, "clean-first CoreClean"):
+        incomplete = self.log.replace("Run Clean Command: MSBuild.exe /t:Clean\n", "")
+        with self.assertRaisesRegex(ValueError, "explicit clean-first MSBuild command"):
             validate_release_build_evidence(incomplete, self.root, self.build_root,
                                             self.exe, self.commit, self.harness_hash)
 
