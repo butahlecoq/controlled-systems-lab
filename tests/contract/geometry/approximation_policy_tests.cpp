@@ -35,6 +35,7 @@ SetHandle two_points(const char* id) {
     return take(sets::make_v({{id},1,{"x"}},
         {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)})).as_handle();
 }
+class OpaqueFuturePayload final : public SetPayload {};
 SetHandle h_set(const char* id, Vector inequality_rows, Vector upper_bounds,
                 Vector equality_rows = {}, Vector equality_values = {},
                 const char* coordinate = "x") {
@@ -61,7 +62,8 @@ public:
 };
 registry::Registry<registry::ApproximationPort> provider(const ApproximationRequest& request,
     SetHandle output, SetRelation offered, SetRelation returned, EvidenceSupport support=Unestablished{},
-    std::optional<GeometryErrorBound> error_bound=std::nullopt) {
+    std::optional<GeometryErrorBound> error_bound=std::nullopt,
+    std::shared_ptr<std::size_t> factory_creations={}) {
     registry::Registry<registry::ApproximationPort> result;
     GeometryEvidence evidence{{request.identity,{request.input.id}},GeometryClaimScope::set_relation,
         std::move(support),{},std::move(error_bound)};
@@ -71,7 +73,10 @@ registry::Registry<registry::ApproximationPort> provider(const ApproximationRequ
             registry::Output output;output.representation=query.output;output.relation=offered;
             return registry::Offer{output};
         },
-        [fixed](const ApproximationRequest&) {return std::make_unique<FixedWorkspace>(fixed);}});
+        [fixed,factory_creations](const ApproximationRequest&) {
+            if(factory_creations)++*factory_creations;
+            return std::make_unique<FixedWorkspace>(fixed);
+        }});
     REQUIRE_FALSE(added.has_value());
     return result;
 }
@@ -91,6 +96,8 @@ TEST_CASE("registered inner approximation admits a structurally empty subset") {
     CHECK(admitted.result.relation==SetRelation::inner);
     CHECK(admitted.basis==StructuralBasis::empty_subset);
     CHECK(admitted.result.output.id==SetId{"inner"});
+    CHECK(admitted.result.evidence.reference.identity==query.identity);
+    CHECK(admitted.result.evidence.reference.inputs==std::vector<SetId>{input.id});
 }
 
 TEST_CASE("registered outer approximation admits a universal superset") {
@@ -100,7 +107,11 @@ TEST_CASE("registered outer approximation admits a universal superset") {
     auto methods=provider(query,output,SetRelation::outer,SetRelation::outer);
     auto outcome=execute(methods,query);
     REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
-    CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::universal_superset);
+    const auto& admitted=std::get<EnclosedApproximation>(outcome);
+    CHECK(admitted.result.relation==SetRelation::outer);
+    CHECK(admitted.basis==StructuralBasis::universal_superset);
+    CHECK(admitted.result.evidence.reference.identity==query.identity);
+    CHECK(admitted.result.evidence.reference.inputs==std::vector<SetId>{input.id});
 }
 
 TEST_CASE("dropping a native H constraint admits a nontrivial outer enclosure") {
@@ -287,13 +298,37 @@ TEST_CASE("equivalent conversion and heuristic approximation stay separate") {
     auto input=set("singleton","reference");
     auto output=set("singleton","candidate");
     auto equivalent=request(input,SetRelation::equivalent,output.metadata.representation);
-    auto methods=provider(equivalent,output,SetRelation::equivalent,SetRelation::equivalent);
-    CHECK(std::holds_alternative<registry::Rejection>(execute(methods,equivalent)));
+    auto creations=std::make_shared<std::size_t>(0);
+    auto methods=provider(equivalent,output,SetRelation::outer,SetRelation::outer,
+        Unestablished{},std::nullopt,creations);
+    auto rejected=execute(methods,equivalent);
+    REQUIRE(std::holds_alternative<registry::Rejection>(rejected));
+    CHECK(std::get<registry::Rejection>(rejected).diagnostics[0].field=="approximation.direction");
+    CHECK(*creations==0);
     auto heuristic=request(input,SetRelation::heuristic,output.metadata.representation);
     methods=provider(heuristic,output,SetRelation::heuristic,SetRelation::heuristic);
     auto outcome=execute(methods,heuristic);
     REQUIRE(std::holds_alternative<HeuristicApproximation>(outcome));
-    CHECK(std::get<HeuristicApproximation>(outcome).result.output.id==SetId{"candidate"});
+    const auto& admitted=std::get<HeuristicApproximation>(outcome);
+    CHECK(admitted.result.output.id==SetId{"candidate"});
+    CHECK(admitted.result.relation==SetRelation::heuristic);
+    CHECK(admitted.result.evidence.reference.identity==heuristic.identity);
+    CHECK(admitted.result.evidence.reference.inputs==std::vector<SetId>{input.id});
+}
+
+TEST_CASE("future zonotope and ellipsoid representations get no inferred exact route") {
+    const SetHandle ellipsoid{{2,{"test.future.ellipsoid"},SetProperty::yes,
+        SetProperty::no,SetProperty::yes},std::make_shared<const OpaqueFuturePayload>(),{"ellipsoid"}};
+    const SetHandle zonotope{{2,{"test.future.zonotope"},SetProperty::yes,
+        SetProperty::yes,SetProperty::yes},std::make_shared<const OpaqueFuturePayload>(),{"zonotope"}};
+    auto equivalent=request(ellipsoid,SetRelation::equivalent,zonotope.metadata.representation);
+    auto creations=std::make_shared<std::size_t>(0);
+    const auto methods=provider(equivalent,zonotope,SetRelation::outer,SetRelation::outer,
+        Unestablished{},std::nullopt,creations);
+    const auto outcome=execute(methods,equivalent);
+    REQUIRE(std::holds_alternative<registry::Rejection>(outcome));
+    CHECK(std::get<registry::Rejection>(outcome).diagnostics.front().field=="approximation.direction");
+    CHECK(*creations==0);
 }
 
 TEST_CASE("set extrema have directed bounds but no optimizer-family claim") {

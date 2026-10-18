@@ -813,11 +813,15 @@ TEST_CASE("canonical relation evidence and requested assurance remain independen
         auto record=owner.description();auto collected=record.statistics.description();auto& descriptor=collected.spans[0].descriptor;
         descriptor.relation=relation;descriptor.requested_assurance=Assurance::validated;descriptor.applied_assurance=ar::Unavailable{ar::MissingReason::not_supported,"no checked verifier"};
         EvidenceSupport support=relation==SetRelation::heuristic?EvidenceSupport{Unestablished{}}:EvidenceSupport{NumericalCheck{0,0,0,{"literal-verifier"}}};
-        descriptor.relation_evidence=std::make_shared<const GeometryEvidence>(GeometryEvidence{{{record.problem,{"request"},{"reference"}},{{"input"}}},GeometryClaimScope::set_relation,support,{},{}});
+        descriptor.relation_evidence=std::make_shared<const GeometryEvidence>(GeometryEvidence{{{record.problem,{"request"},{"reference"}},{{"input/left"},{"input/right"}}},GeometryClaimScope::set_relation,support,{},{}});
         record.statistics=accepted(ar::publish_collection(collected));const auto result=accepted(ar::decode_run(accepted(ar::encode_run(accepted(ar::publish_run({integrator_problem(),record}))))));
         const auto& actual=result.description().statistics.description().spans[0].descriptor;
         CHECK(actual.relation==relation);CHECK(actual.requested_assurance==Assurance::validated);CHECK(std::get<ar::Unavailable>(actual.applied_assurance).reason==ar::MissingReason::not_supported);
-        REQUIRE(actual.relation_evidence);CHECK(actual.relation_evidence->reference.identity.ideal_output.value=="reference");
+        REQUIRE(actual.relation_evidence);
+        CHECK(actual.relation_evidence->reference.identity.problem==record.problem);
+        CHECK(actual.relation_evidence->reference.identity.request==RequestId{"request"});
+        CHECK(actual.relation_evidence->reference.identity.ideal_output==ReferenceId{"reference"});
+        CHECK(actual.relation_evidence->reference.inputs==std::vector<SetId>{SetId{"input/left"},SetId{"input/right"}});
     }
 }
 TEST_CASE("pin wire variants are closed and semantic option changes leave mathematics unchanged") {
