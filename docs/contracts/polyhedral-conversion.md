@@ -71,6 +71,12 @@ interval; callback synchronization belongs to its owner. Callback exceptions
 propagate. This observation can feed the existing artifact/reporting path; it
 does not silently create a global collector or a benchmark claim.
 
+`QhullOptions::before_native_call` runs inline immediately before each
+synchronous `qh_new_qhull` invocation. It is intended for caller-owned
+coordination or instrumentation at the native-call boundary. Distinct
+workspaces can invoke it concurrently, so shared callback state requires
+caller synchronization. Exceptions propagate before the native call begins.
+
 ## Lineage audit: A17 and A18
 
 The archival inventory identifies A17 as
