@@ -118,6 +118,29 @@ TEST_CASE("one-step target predecessor has explicit control witnesses and reject
     }
     CHECK_FALSE(contains(result.result.output,{-0.125}));
     CHECK_FALSE(contains(result.result.output,{1.125}));
+    const auto predecessor_data=take(sets::from_handle(result.result.output));
+    const auto& predecessor_h=std::get<sets::HRepresentation>(predecessor_data.representation());
+    double lower=-std::numeric_limits<double>::infinity();
+    double upper=std::numeric_limits<double>::infinity();
+    bool feasible=true;
+    for(std::size_t row=0;row<predecessor_h.inequalities.rows();++row) {
+        const double coefficient=predecessor_h.inequalities(row,0);
+        const double bound=predecessor_h.upper_bounds[row];
+        if(coefficient>0)upper=std::min(upper,bound/coefficient);
+        else if(coefficient<0)lower=std::max(lower,bound/coefficient);
+        else if(bound<0)feasible=false;
+    }
+    for(std::size_t row=0;row<predecessor_h.equalities.rows();++row) {
+        const double coefficient=predecessor_h.equalities(row,0);
+        const double value=predecessor_h.equality_values[row];
+        if(coefficient!=0) {
+            lower=std::max(lower,value/coefficient);
+            upper=std::min(upper,value/coefficient);
+        } else if(value!=0)feasible=false;
+    }
+    CHECK(feasible);
+    CHECK(lower==0.0);
+    CHECK(upper==1.0);
     CHECK(result.result.relation==SetRelation::equivalent);
     CHECK(result.result.evidence.reference.identity==request.identity);
     CHECK(result.result.evidence.reference.inputs==std::vector<SetId>{{"X"},{"U"},{"target"}});
