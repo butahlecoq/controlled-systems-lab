@@ -24,7 +24,7 @@ This ticket is intentionally later than the nominal v1 comparison and may refine
 
 ## Design gate
 
-The proposed contract is [hybrid-systems.md](../../../contracts/hybrid-systems.md). It defines a known request-selected initial mode/state, stage-indexed invariants and transition timing, existential reset witnesses (without universal physical guarantees), global minimization over explicitly allowed terminal modes, branch-labelled all-optimal families, admission checks, independent oracle requirements, and the unsupported capability boundary. Implementation remains separate until this design gate is reviewed and accepted.
+The proposed contract is [hybrid-systems.md](../../../contracts/hybrid-systems.md). It defines a known request-selected initial mode/state, stage-indexed invariants and transition timing, existential reset witnesses (without universal physical guarantees), global minimization over explicitly allowed terminal modes, branch-labelled all-optimal families, replaceable reachability/direct-trajectory/verification adapter seams, admission checks, independent oracle requirements, and the unsupported capability boundary. Implementation remains separate until this design gate is reviewed and accepted.
 
 ## Delivery and review
 

@@ -110,6 +110,35 @@ different edge sequences remain separate even if their mode sequences match.
 The branch record carries mode/edge provenance and provider/version/resource
 provenance for every flow, guard, reset, and composition operation.
 
+## Replaceable adapter boundaries
+
+The profile keeps three adapter seams independent of the public hybrid request
+and family meaning:
+
+- A reachability adapter composes mode-local flows, invariants, guards, and
+  reset relations. It may project intermediate variables internally, but it
+  must retain a reconstruction relation sufficient to recover the full
+  branch-labelled joint relation and may not merge distinct edge paths.
+- A direct-trajectory adapter formulates the full-horizon joint relation for a
+  fixed mode/edge path. Its output uses the same logical branch payload and
+  identity as reachability composition; neither adapter may downgrade the
+  continuous family to witnesses or samples.
+- A verification adapter consumes the original request and a candidate family
+  from either producer. It independently checks feasibility and objective
+  claims, and must establish that all feasible optimal branch identities and
+  their continuous relations are covered before certifying family completeness.
+  Producer status flags or finite point checks alone are insufficient.
+
+At these seams, each branch exposes the ordered mode and edge identities, the
+joint coordinates `(x_k, u_k, x⁻_(k+1), x_(k+1))`, the defining constraints or
+an equivalent exact relation with a reconstruction map, the per-branch
+objective, and provenance for the operations and providers used. Adapter
+implementations can differ in representation and algorithms, but must preserve
+this logical payload and the same existential trajectory semantics. Operation
+capabilities and assurance remain explicit per adapter; a missing composition,
+reconstruction, or completeness capability is rejected before workspace
+creation. No adapter seam or implementation is claimed to exist yet.
+
 ## Initial supported profile and rejection boundary
 
 The first profile is finite-horizon and discrete-time, with mode-specific
