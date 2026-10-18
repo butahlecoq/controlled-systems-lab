@@ -868,43 +868,56 @@ TEST_CASE("independent interval oracle matches the full continuous hybrid branch
          std::get<numeric::MatrixView>(reset_equalities),std::get<numeric::VectorView>(reset_rhs)});
     REQUIRE(std::holds_alternative<sets::SetData>(reset_data));
     model::HybridSystem system{1,{source,target},
-        {{{"switch"},{"source"},{"target"},{interval("oracle-guard",0,0.5)},
+        {{{"switch-wide"},{"source"},{"target"},{interval("oracle-guard-wide",0,0.5)},
+          {std::get<sets::SetData>(reset_data).as_handle()}},
+         {{"switch-narrow"},{"source"},{"target"},{interval("oracle-guard-narrow",0,0.25)},
           {std::get<sets::SetData>(reset_data).as_handle()}}}};
     model::HybridRequest request{{{"source"},{0}},{{"target"}},
-        {{{"target"},LinearTerminal{{1},0},"position","m"}}};
+        {{{"target"},LinearTerminal{{0},0},"cost","u"}}};
 
-    // Direct equations give the complete joint branch
-    // (x0,u,x_pre,x1)=(0,t,t,t), with 0 <= t <= 1/2.
-    const model::HybridPath path{{{"source"},{"target"}},{{"switch"}}};
-    const auto built=build_hybrid_path_program(system,request,path,{"continuous-oracle"},
-        {32,128,4096});
-    REQUIRE(std::holds_alternative<HybridPathProgram>(built));
-    const auto representation=std::get<HybridPathProgram>(built).joint_relation.representation();
-    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
-    const auto& h=std::get<sets::HRepresentation>(representation);
-    REQUIRE(h.equalities.cols()==4);
-    CHECK(equality_rank(h.equalities)==3);
-    CHECK(satisfies(h,{0,0,0,0}));
-    CHECK(satisfies(h,{0,0.5,0.5,0.5}));
+    // Both paths minimize the same constant objective. Their exact optimal
+    // joint relations are (0,t,t,t), with 0<=t<=1/2 and 0<=t<=1/4.
+    const std::vector<model::HybridPath> oracle_paths{
+        {{{"source"},{"target"}},{{"switch-wide"}}},
+        {{{"source"},{"target"}},{{"switch-narrow"}}}};
+    const auto built=build_hybrid_portfolio_programs(system,request,{"continuous-oracle"},
+        {1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle_paths.size());
 
-    double lower=-std::numeric_limits<double>::infinity();
-    double upper=std::numeric_limits<double>::infinity();
-    for(std::size_t row=0;row<h.inequalities.rows();++row) {
-        const double intercept=0;
-        const double slope=h.inequalities(row,1)+h.inequalities(row,2)+h.inequalities(row,3);
-        if(slope>0) upper=std::min(upper,(h.upper_bounds[row]-intercept)/slope);
-        else if(slope<0) lower=std::max(lower,(h.upper_bounds[row]-intercept)/slope);
-        else CHECK(intercept<=h.upper_bounds[row]);
-    }
-    CHECK(lower==0);
-    CHECK(upper==0.5);
-    const auto& program=std::get<LinearProgram>(std::get<HybridPathProgram>(built).program);
-    CHECK(program.objective().size()==4);
-    CHECK(program.offset()==0);
-    CHECK(program.objective()[0]==0);
-    CHECK(program.objective()[1]==0);
-    CHECK(program.objective()[2]==0);
-    CHECK(program.objective()[3]==1);
+    auto check_branch=[&](const HybridPathProgram& branch,const model::HybridPath& expected_path,
+        double expected_upper) {
+        CHECK(branch.path==expected_path);
+        const auto representation=branch.joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& h=std::get<sets::HRepresentation>(representation);
+        REQUIRE(h.equalities.cols()==4);
+        CHECK(equality_rank(h.equalities)==3);
+        CHECK(satisfies(h,{0,0,0,0}));
+        CHECK(satisfies(h,{0,expected_upper,expected_upper,expected_upper}));
+
+        double lower=-std::numeric_limits<double>::infinity();
+        double upper=std::numeric_limits<double>::infinity();
+        for(std::size_t row=0;row<h.inequalities.rows();++row) {
+            const double intercept=0;
+            const double slope=h.inequalities(row,1)+h.inequalities(row,2)+h.inequalities(row,3);
+            if(slope>0) upper=std::min(upper,(h.upper_bounds[row]-intercept)/slope);
+            else if(slope<0) lower=std::max(lower,(h.upper_bounds[row]-intercept)/slope);
+            else CHECK(intercept<=h.upper_bounds[row]);
+        }
+        CHECK(lower==0);
+        CHECK(upper==expected_upper);
+        const auto& program=std::get<LinearProgram>(branch.program);
+        CHECK(program.objective().size()==4);
+        CHECK(program.offset()==0);
+        CHECK(program.objective()[0]==0);
+        CHECK(program.objective()[1]==0);
+        CHECK(program.objective()[2]==0);
+        CHECK(program.objective()[3]==0);
+    };
+    check_branch(programs[0],oracle_paths[0],0.5);
+    check_branch(programs[1],oracle_paths[1],0.25);
 }
 
 TEST_CASE("exact singleton hybrid verifier checks guard entry and rejects forbidden mode paths") {
