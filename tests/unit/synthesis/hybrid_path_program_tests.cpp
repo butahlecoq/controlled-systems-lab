@@ -1106,6 +1106,59 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         CHECK(branch.continuous_coverage==HybridVerificationStatus::established);
     }
 
+    auto affine_reset_equalities=numeric::snapshot(Matrix{1,2,{-2,1}});
+    auto affine_reset_rhs=numeric::snapshot_vector(Vector{1});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(affine_reset_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(affine_reset_rhs));
+    auto affine_reset=sets::make_h({{"verifier-affine-reset"},2,{}},
+        {std::get<numeric::MatrixView>(reset_inequalities),
+         std::get<numeric::VectorView>(reset_bounds),
+         std::get<numeric::MatrixView>(affine_reset_equalities),
+         std::get<numeric::VectorView>(affine_reset_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(affine_reset));
+    auto affine_reset_system=system;
+    affine_reset_system.modes[1].invariants[1]=interval("verifier-affine-reset-target",1,2);
+    for(auto& edge:affine_reset_system.edges)
+        edge.reset_relations[0]=std::get<sets::SetData>(affine_reset).as_handle();
+    const auto affine_reset_built=build_hybrid_portfolio_programs(affine_reset_system,request,
+        {"affine-reset-interval-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(affine_reset_built));
+    const auto& affine_reset_programs=std::get<std::vector<HybridPathProgram>>(affine_reset_built);
+    std::vector<HybridPathOptimalFaceCandidate> affine_reset_candidates{
+        exact_candidate(affine_reset_programs[0],{0,0,0,1}),
+        exact_candidate(affine_reset_programs[1],{0,0,0,1})};
+    const auto affine_reset_result=verify_hybrid_portfolio_family(verifier,affine_reset_system,
+        request,affine_reset_programs,affine_reset_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(affine_reset_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(affine_reset_result).complete_family_coverage==
+        HybridVerificationStatus::established);
+
+    auto inexact_reset_equalities=numeric::snapshot(Matrix{1,2,{-1,3}});
+    auto inexact_reset_rhs=numeric::snapshot_vector(Vector{0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inexact_reset_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(inexact_reset_rhs));
+    auto inexact_reset=sets::make_h({{"verifier-inexact-affine-reset"},2,{}},
+        {std::get<numeric::MatrixView>(reset_inequalities),
+         std::get<numeric::VectorView>(reset_bounds),
+         std::get<numeric::MatrixView>(inexact_reset_equalities),
+         std::get<numeric::VectorView>(inexact_reset_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(inexact_reset));
+    auto inexact_reset_system=system;
+    for(auto& edge:inexact_reset_system.edges)
+        edge.reset_relations[0]=std::get<sets::SetData>(inexact_reset).as_handle();
+    const auto inexact_reset_built=build_hybrid_portfolio_programs(inexact_reset_system,request,
+        {"inexact-affine-reset-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(inexact_reset_built));
+    const auto& inexact_reset_programs=std::get<std::vector<HybridPathProgram>>(inexact_reset_built);
+    std::vector<HybridPathOptimalFaceCandidate> inexact_reset_candidates{
+        exact_candidate(inexact_reset_programs[0],{0,0,0,0}),
+        exact_candidate(inexact_reset_programs[1],{0,0,0,0})};
+    const auto inexact_reset_result=verify_hybrid_portfolio_family(verifier,inexact_reset_system,
+        request,inexact_reset_programs,inexact_reset_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_reset_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(inexact_reset_result).branches[0].continuous_coverage==
+        HybridVerificationStatus::unsupported);
+
     auto ratio_system=system;
     ratio_system.edges[1].guards[0]=interval("verifier-inexact-row-ratio-guard",0,0.3);
     const auto ratio_built=build_hybrid_portfolio_programs(ratio_system,request,

@@ -174,21 +174,22 @@ general continuous branch coverage.
 
 `OneStepScalarIntervalHybridFamilyVerifier` adds a separate numerical domain for
 one-stage paths with scalar source/target states, a scalar control, bounded
-feasible control intervals, scalar interval guards/invariants, an identity
-H-relation reset, and a linear terminal objective. It independently
+feasible control intervals, scalar interval guards/invariants, deterministic
+scalar affine H-relation resets, and a linear terminal objective. It independently
 reconstructs each path's feasible control interval and objective, checks the
 full program relation against the reconstructed affine line, and checks each
 optimal-face candidate against the complete minimizing interval. It can certify
 ties whose continuous intervals differ. It rejects other horizons, dimensions,
-reset relations, unbounded feasible intervals, and unsupported set forms; H
+nondeterministic or non-scalar reset relations, unbounded feasible intervals,
+and unsupported set forms; H
 relation row and matrix limits are enforced. The verifier uses floating-point
 policy tolerances for candidate anchors, while equality rank is established
 using only exact binary floating-point row operations; if those operations
 cannot establish rank exactly, coverage is unsupported. It requires represented
 relation equalities and projected interval endpoints to match exactly as
 computed, and checks represented inequalities without tolerance expansion.
-Flow and objective arithmetic must be exactly representable in binary floating
-point. Inexact sums, overflow, and products whose exactness cannot be
+Flow, reset-map, and objective arithmetic must be exactly representable in
+binary floating point. Inexact sums, overflow, and products whose exactness cannot be
 established (including possible underflow of the product residual) return
 unsupported. Global objective ties therefore require exact equality of exactly
 represented values. Near ties, contradictory relations, and near-equal

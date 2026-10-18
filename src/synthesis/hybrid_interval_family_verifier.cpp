@@ -21,8 +21,10 @@ struct ScalarBranch {
     enum class State { feasible, infeasible, unsupported } state{State::unsupported};
     Interval controls;
     double initial{};
-    double flow_offset{};
-    double flow_control{};
+    double pre_offset{};
+    double pre_control{};
+    double post_offset{};
+    double post_control{};
     double objective_slope{};
     double objective_offset{};
     double minimum{};
@@ -158,7 +160,7 @@ std::optional<Interval> set_interval(const AdmissibleSet& set,std::stop_token ca
     },set);
 }
 
-bool identity_reset(const SetHandle& handle) {
+bool scalar_affine_reset(const SetHandle& handle,double& offset,double& gain) {
     const auto decoded=sets::from_handle(handle);
     if(std::holds_alternative<Diagnostic>(decoded)) return false;
     const auto representation=std::get<sets::SetData>(decoded).representation();
@@ -166,9 +168,9 @@ bool identity_reset(const SetHandle& handle) {
     if(!h||h->equalities.rows()!=1||h->equalities.cols()!=2||
        h->inequalities.rows()!=0||h->inequalities.cols()!=2||
        h->equality_values.size()!=1||h->upper_bounds.size()!=0) return false;
-    const double left=h->equalities(0,0),right=h->equalities(0,1);
-    return std::isfinite(left)&&std::isfinite(right)&&std::isfinite(h->equality_values[0])&&
-        left!=0&&right==-left&&h->equality_values[0]==0;
+    const double pre=h->equalities(0,0),post=h->equalities(0,1),rhs=h->equality_values[0];
+    return std::isfinite(pre)&&std::isfinite(post)&&std::isfinite(rhs)&&post!=0&&
+        exact_division(rhs,post,offset)&&exact_division(-pre,post,gain);
 }
 
 const HybridMode* find_mode(const HybridSystem& system,const HybridModeId& id) {
@@ -198,7 +200,7 @@ bool contains_value(const AdmissibleSet& set,double value,NumericalPolicy policy
     return value>=interval->lower&&value<=interval->upper;
 }
 
-bool constrain_flow_preimage(Interval& controls,const Interval& states,double offset,double gain) {
+bool constrain_affine_preimage(Interval& controls,const Interval& states,double offset,double gain) {
     if(controls.empty||states.empty) { controls.empty=true; return true; }
     if(gain==0) {
         if(offset<states.lower||offset>states.upper) controls.empty=true;
@@ -270,8 +272,9 @@ ScalarBranch evaluate(const HybridSystem& system,const HybridRequest& request,co
     if(!std::isfinite(flow->A.values[0])||!std::isfinite(flow->B.values[0])||
        !std::isfinite(flow->offset[0]))
         return unsupported("Flow contains nonfinite coefficients");
-    if(!identity_reset(edge->reset_relations[0]))
-        return unsupported("Verifier supports only identity H-relation resets");
+    double reset_offset=0,reset_gain=0;
+    if(!scalar_affine_reset(edge->reset_relations[0],reset_offset,reset_gain))
+        return unsupported("Verifier supports only exactly representable scalar affine H-relation resets");
     double fixed_product=0,fixed=0;
     if(!exact_product(flow->A.values[0],result.initial,fixed_product)||
        !exact_sum(fixed_product,flow->offset[0],fixed))
@@ -280,8 +283,10 @@ ScalarBranch evaluate(const HybridSystem& system,const HybridRequest& request,co
     if(!std::isfinite(gain)) return unsupported("Flow evaluation overflowed");
     Interval allowed_state=*source_pre;
     intersect(allowed_state,*guard);
-    intersect(allowed_state,*target_post);
-    if(!constrain_flow_preimage(*control_interval,allowed_state,fixed,gain))
+    if(!constrain_affine_preimage(allowed_state,*target_post,reset_offset,reset_gain))
+        return unsupported("Reset preimage is not exactly representable as a finite interval");
+    if(allowed_state.empty) return infeasible();
+    if(!constrain_affine_preimage(*control_interval,allowed_state,fixed,gain))
         return unsupported("Flow preimage is not representable as a finite interval");
     if(control_interval->empty) return infeasible();
     if(!std::isfinite(control_interval->lower)||!std::isfinite(control_interval->upper))
@@ -292,8 +297,12 @@ ScalarBranch evaluate(const HybridSystem& system,const HybridRequest& request,co
        !exact_sum(fixed,lower_flow_increment,lower_state)||
        !exact_sum(fixed,upper_flow_increment,upper_state))
         return unsupported("Exactness could not be established for feasible interval flow endpoints");
-    static_cast<void>(lower_state);
-    static_cast<void>(upper_state);
+    double lower_reset_increment=0,upper_reset_increment=0,lower_post=0,upper_post=0;
+    if(!exact_product(reset_gain,lower_state,lower_reset_increment)||
+       !exact_product(reset_gain,upper_state,upper_reset_increment)||
+       !exact_sum(reset_offset,lower_reset_increment,lower_post)||
+       !exact_sum(reset_offset,upper_reset_increment,upper_post))
+        return unsupported("Exactness could not be established for reset image endpoints");
     const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
         [&](const auto& candidate){return candidate.mode==target->id;});
     if(objective==request.terminal_objectives.end()) return unsupported("Missing terminal objective");
@@ -301,11 +310,17 @@ ScalarBranch evaluate(const HybridSystem& system,const HybridRequest& request,co
     if(!linear||linear->coefficients.size()!=1||!std::isfinite(linear->coefficients[0])||
        !std::isfinite(linear->offset)) return unsupported("Only scalar linear terminal objectives are supported");
     result.controls=*control_interval;
-    result.flow_offset=fixed;
-    result.flow_control=gain;
+    result.pre_offset=fixed;
+    result.pre_control=gain;
+    double reset_fixed=0,reset_control=0;
+    if(!exact_product(reset_gain,fixed,reset_fixed)||
+       !exact_sum(reset_offset,reset_fixed,result.post_offset)||
+       !exact_product(reset_gain,gain,reset_control))
+        return unsupported("Exactness could not be established for the affine reset image");
+    result.post_control=reset_control;
     double objective_base=0;
-    if(!exact_product(linear->coefficients[0],gain,result.objective_slope)||
-       !exact_product(linear->coefficients[0],fixed,objective_base)||
+    if(!exact_product(linear->coefficients[0],result.post_control,result.objective_slope)||
+       !exact_product(linear->coefficients[0],result.post_offset,objective_base)||
        !exact_sum(objective_base,linear->offset,result.objective_offset))
         return unsupported("Exactness could not be established for objective arithmetic");
     const double optimal_control=result.objective_slope>0?control_interval->lower:
@@ -375,28 +390,31 @@ bool relation_domain_supported(const sets::SetData& data,HybridRelationLimits li
         h->upper_bounds.size()==h->inequalities.rows();
 }
 
-bool relation_is_line_interval(const sets::SetData& data,double initial,double offset,double gain,
-    Interval interval,HybridRelationLimits limits,
+bool relation_is_line_interval(const sets::SetData& data,double initial,double pre_offset,
+    double pre_gain,double post_offset,double post_gain,Interval interval,HybridRelationLimits limits,
     std::stop_token cancellation,bool& cancelled,bool& exactness_established) {
     if(interval.empty||!relation_domain_supported(data,limits)) return false;
     const auto representation=data.representation();
     if(const auto* singleton=std::get_if<sets::SingletonRepresentation>(&representation)) {
         if(singleton->point.size()!=4||
            interval.lower!=interval.upper) return false;
-        double increment=0,post=0;
-        if(!exact_product(gain,interval.lower,increment)||!exact_sum(offset,increment,post)) {
+        double pre_increment=0,pre=0,post_increment=0,post=0;
+        if(!exact_product(pre_gain,interval.lower,pre_increment)||
+           !exact_sum(pre_offset,pre_increment,pre)||
+           !exact_product(post_gain,interval.lower,post_increment)||
+           !exact_sum(post_offset,post_increment,post)) {
             exactness_established=false;
             return false;
         }
-        const Vector expected{initial,interval.lower,post,post};
+        const Vector expected{initial,interval.lower,pre,post};
         for(std::size_t i=0;i<expected.size();++i)
             if(singleton->point[i]!=expected[i]) return false;
         return true;
     }
     const auto* h=std::get_if<sets::HRepresentation>(&representation);
     if(!h) return false;
-    Vector base{initial,0,offset,offset};
-    Vector direction{0,1,gain,gain};
+    Vector base{initial,0,pre_offset,post_offset};
+    Vector direction{0,1,pre_gain,post_gain};
     Vector lower_point=base,upper_point=base;
     for(std::size_t j=0;j<4;++j) {
         double lower_increment=0,upper_increment=0;
@@ -467,7 +485,7 @@ bool program_objective_matches(const HybridPathProgram& program,const ScalarBran
     for(std::size_t i=0;i<expected.size();++i)
         if(!same(linear->objective()[i],expected[i],policy)) return false;
     return same(linear->offset(),terminal_offset,policy)&&
-        same(branch.objective_offset,terminal_coefficient*branch.flow_offset+terminal_offset,policy);
+        same(branch.objective_offset,terminal_coefficient*branch.post_offset+terminal_offset,policy);
 }
 
 } // namespace
@@ -570,8 +588,9 @@ HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify
             const bool program_domain=relation_domain_supported(
                 programs[i].joint_relation,programs[i].relation_limits);
             const bool program_valid=program_domain&&linear&&programs[i].path==paths[i]&&
-                relation_is_line_interval(programs[i].joint_relation,branch.initial,branch.flow_offset,
-                    branch.flow_control,branch.controls,programs[i].relation_limits,cancellation,
+                relation_is_line_interval(programs[i].joint_relation,branch.initial,branch.pre_offset,
+                    branch.pre_control,branch.post_offset,branch.post_control,branch.controls,
+                    programs[i].relation_limits,cancellation,
                     relation_cancelled,relation_exactness)&&
                 program_objective_matches(programs[i],branch,linear->coefficients[0],linear->offset,policy);
             if(cancellation.stop_requested())
@@ -613,10 +632,11 @@ HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify
                     anchor_control>=optimal_controls.lower-tolerance(policy,anchor_control)&&
                     anchor_control<=optimal_controls.upper+tolerance(policy,anchor_control)&&
                     same(candidate->anchor[0],branch.initial,policy)&&
-                    same(candidate->anchor[2],branch.flow_offset+branch.flow_control*anchor_control,policy)&&
-                    same(candidate->anchor[3],candidate->anchor[2],policy)&&
-                    face_domain&&relation_is_line_interval(candidate->relation,branch.initial,branch.flow_offset,
-                        branch.flow_control,optimal_controls,programs[i].relation_limits,cancellation,
+                    same(candidate->anchor[2],branch.pre_offset+branch.pre_control*anchor_control,policy)&&
+                    same(candidate->anchor[3],branch.post_offset+branch.post_control*anchor_control,policy)&&
+                    face_domain&&relation_is_line_interval(candidate->relation,branch.initial,branch.pre_offset,
+                        branch.pre_control,branch.post_offset,branch.post_control,optimal_controls,
+                        programs[i].relation_limits,cancellation,
                         relation_cancelled,relation_exactness);
                 if(cancellation.stop_requested())
                     return OperationStopped{StopReason::cancelled,"Scalar interval hybrid verification cancelled while checking a candidate face"};

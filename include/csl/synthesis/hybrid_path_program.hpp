@@ -240,8 +240,8 @@ public:
 };
 
 // Independent numerical verifier for one-stage, one-dimensional hybrid
-// systems with interval admissible sets and identity reset relations. It
-// certifies complete interval minimizer families inside this explicit domain
+// systems with interval admissible sets and deterministic scalar affine resets.
+// It certifies complete interval minimizer families inside this explicit domain
 // and returns unsupported status outside it.
 class OneStepScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
