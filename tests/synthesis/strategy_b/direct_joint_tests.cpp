@@ -1349,7 +1349,7 @@ TEST_CASE("registered Strategy B reports a completed unbounded objective without
     CHECK_FALSE(result.partial_proposal);
     CHECK_FALSE(result.family);
 }
-TEST_CASE("registered Strategy B retains infeasible program evidence while the public boundary rejects its source conflict") {
+TEST_CASE("registered Strategy B does not promote generated infeasibility over a feasible source candidate") {
     const auto p=resolve(integrator(LinearTerminal{{0},3}));
     const auto q=request(p);
     const auto prepared=registered_prepared(p,q,false,Termination::completed,nullptr,{},MathematicalOutcome::infeasible);
@@ -1359,10 +1359,10 @@ TEST_CASE("registered Strategy B retains infeasible program evidence while the p
 
     const auto result=accepted(workspace->run(context));
 
-    // The source has a feasible history (x0,x1,x2,u0,u1)=(0,0.25,1,0.25,0.75),
-    // so completed infeasibility of its generated joint program conflicts with
-    // the candidate relation retained for the resolved problem.
-    CHECK(result.termination==Termination::contract_rejected);
+    // The source has a feasible history (x0,x1,x2,u0,u1)=(0,0.25,1,0.25,0.75).
+    // Without a checked transfer certificate, generated-program infeasibility
+    // cannot override the independently checked source candidate.
+    CHECK(result.termination==Termination::completed);
     CHECK(result.outcome.subject==p.identity());
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
@@ -1379,7 +1379,7 @@ TEST_CASE("registered Strategy B retains infeasible program evidence while the p
     CHECK(retained->optimization->termination==Termination::completed);
     CHECK(retained->optimization->outcome.value==MathematicalOutcome::infeasible);
 }
-TEST_CASE("registered Strategy B reports infeasibility for an independently contradictory state constraint") {
+TEST_CASE("registered Strategy B rejects source infeasibility without a transfer certificate") {
     auto input=integrator(LinearTerminal{{1},0});
     // The authored dynamics are x1=x0+u0 with x0=0 and 0<=u0<=1,
     // while the stage-one state constraint requires x1=2. This is a direct
@@ -1394,24 +1394,11 @@ TEST_CASE("registered Strategy B reports infeasibility for an independently cont
 
     const auto result=accepted(workspace->run(context));
 
-    CHECK(result.termination==Termination::completed);
+    CHECK(result.termination==Termination::contract_rejected);
     CHECK(result.outcome.subject==p.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::infeasible);
-    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(result.outcome.support));
-    const auto& proof=std::get<ExactFarkasEvidence>(result.outcome.support);
-    const ProgramIdentity generated_program{p.identity(),{"syn04-joint:"+p.identity().value}};
-    CHECK(proof.subject()==generated_program);
-    const auto generated=accepted(build_joint_program(p,q));
-    const auto& lp=std::get<LinearProgram>(generated.program);
-    CHECK(lp.identity()==generated_program);
-    const auto verified=optimization::verify_linear_infeasibility_certificate(lp,proof.certificate());
-    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
-    CHECK(std::get<ExactFarkasEvidence>(verified).certificate()==proof.certificate());
-    const std::vector<std::string> expected_assumptions{
-        "Generated program syn04-joint:"+p.identity().value+" has an exact verified Farkas infeasibility certificate.",
-        "Source-to-program equivalence is the direct H-row joint-history encoding with identity-ordered source-history coordinates."
-    };
-    CHECK(result.outcome.assumptions==expected_assumptions);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
+    REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.objective.upper);
     CHECK_FALSE(result.family);
@@ -1419,7 +1406,7 @@ TEST_CASE("registered Strategy B reports infeasibility for an independently cont
     CHECK_FALSE(result.partial_proposal);
     CHECK(result.incumbents.empty());
 }
-TEST_CASE("registered Strategy B reports infeasibility for an explicitly empty control admissibility set") {
+TEST_CASE("registered Strategy B rejects empty-control infeasibility without a transfer certificate") {
     auto feasible_input=integrator(LinearTerminal{{0},0});
     feasible_input.controls=ContinuousDomain{{Singleton{{0}},Singleton{{0}}}};
     const auto feasible_problem=resolve(feasible_input);
@@ -1448,20 +1435,10 @@ TEST_CASE("registered Strategy B reports infeasibility for an explicitly empty c
 
     const auto result=accepted(empty_workspace->run(context));
 
-    CHECK(result.termination==Termination::completed);
+    CHECK(result.termination==Termination::contract_rejected);
     CHECK(result.outcome.subject==empty_problem.identity());
-    CHECK(result.outcome.value==MathematicalOutcome::infeasible);
-    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(result.outcome.support));
-    const auto& proof=std::get<ExactFarkasEvidence>(result.outcome.support);
-    const ProgramIdentity generated_program{empty_problem.identity(),
-        {"syn04-joint:"+empty_problem.identity().value}};
-    CHECK(proof.subject()==generated_program);
-    const auto generated=accepted(build_joint_program(empty_problem,empty_request));
-    const auto& lp=std::get<LinearProgram>(generated.program);
-    CHECK(lp.identity()==generated_program);
-    const auto verified=optimization::verify_linear_infeasibility_certificate(lp,proof.certificate());
-    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(verified));
-    CHECK(std::get<ExactFarkasEvidence>(verified).certificate()==proof.certificate());
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
     CHECK_FALSE(result.objective.lower);
     CHECK_FALSE(result.objective.upper);
     CHECK_FALSE(result.family);
