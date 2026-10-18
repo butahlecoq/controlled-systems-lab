@@ -9,9 +9,11 @@
 #include <limits>
 #include <iostream>
 #include <stop_token>
+#include <type_traits>
 using namespace csl;
 using namespace csl::registry;
 using namespace csl::reachability;
+static_assert(std::is_aggregate_v<ForwardFailure>);
 namespace {
 template<class V> void explain(const V& value) {
     std::visit([](const auto& item) {
