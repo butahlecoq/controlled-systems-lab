@@ -37,6 +37,51 @@ def cxx_compiler(toolchains: list[dict]) -> dict:
     return compiler
 
 
+def cmake_cache_values(path: Path) -> dict[str, str]:
+    values = {}
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if line.startswith("//") or line.startswith("#") or not line:
+            continue
+        name, separator, value = line.partition("=")
+        if separator and ":" in name:
+            key = name.split(":", 1)[0]
+            values[key] = value
+    return values
+
+
+def validate_build_identity(record: dict, *, source_commit: str, build_owner: str,
+                            compiler: dict, graph: dict, cache: dict[str, str]) -> None:
+    expected_fields = {"schema", "source_commit", "build_owner_sha256", "compiler",
+                       "compiler_version", "generator", "architecture", "configured_flags",
+                       "release_flags", "configuration", "ndebug"}
+    if not isinstance(record, dict) or set(record) != expected_fields:
+        raise ValueError("embedded build identity fields differ from csl.opt12-build/1")
+    generator = graph["cmake"]["generator"]
+    platform = cache["CMAKE_GENERATOR_PLATFORM"]
+    expected = {
+        "schema": "csl.opt12-build/1", "source_commit": source_commit,
+        "build_owner_sha256": build_owner, "compiler": compiler["id"],
+        "compiler_version": compiler["version"], "generator": generator,
+        "architecture": f'{cache["CMAKE_SYSTEM_PROCESSOR"]}/{platform}',
+        "configured_flags": cache["CMAKE_CXX_FLAGS"],
+        "release_flags": cache["CMAKE_CXX_FLAGS_RELEASE"],
+        "configuration": "Release", "ndebug": True,
+    }
+    if record != expected:
+        raise ValueError("embedded build identity differs from CMake cache and selected Release toolchain")
+    target = next(item for item in graph["targets"] if item["name"] == "csl_opt12_warm_start_measure")
+    groups = [item for item in target.get("compileGroups", []) if item.get("language") == "CXX"]
+    if len(groups) != 1 or groups[0].get("languageStandard", {}).get("standard") != "20":
+        raise ValueError("selected Release driver compile group is not C++20")
+    flags = " ".join(fragment["fragment"] for group in groups
+                      for fragment in group.get("compileCommandFragments", []))
+    flags = " ".join(flags.split())
+    for key in ("configured_flags", "release_flags"):
+        normalized = " ".join(expected[key].split())
+        if normalized and normalized not in flags:
+            raise ValueError(f"embedded {key} are absent from the selected Release compile group")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--exe", required=True, type=Path)
@@ -73,6 +118,11 @@ def main() -> int:
         toolchains = data.parse_json((reply / index["reply"]["toolchains-v1"]["jsonFile"]).read_text(encoding="utf-8"))["toolchains"]
         compiler = cxx_compiler(toolchains)
         build_owner = digest((paths["source"] + "\n" + paths["build"] + "\n" + compiler["path"]).encode())
+        cache = cmake_cache_values(build / "CMakeCache.txt")
+        for key in ("CMAKE_SYSTEM_PROCESSOR", "CMAKE_GENERATOR_PLATFORM",
+                    "CMAKE_CXX_FLAGS", "CMAKE_CXX_FLAGS_RELEASE"):
+            if not cache.get(key):
+                raise ValueError(f"required CMake cache value is missing: {key}")
     except (ValueError, KeyError, OSError, IndexError, StopIteration) as error:
         parser.error(f"measurement executable/build graph validation failed: {type(error).__name__}: {error}")
     if args.out.exists():
@@ -108,12 +158,8 @@ def main() -> int:
             build_record = parsed.pop(0)
         if not build_record:
             raise ValueError("embedded build identity event is missing")
-        if (build_record.get("source_commit") != head or build_record.get("configuration") != "Release"
-                or build_record.get("ndebug") is not True or build_record.get("build_owner_sha256") != build_owner
-                or build_record.get("compiler") != compiler.get("id")
-                or build_record.get("compiler_version") != compiler.get("version")
-                or build_record.get("generator") != graph["cmake"]["generator"]):
-            raise ValueError("embedded source/build/compiler identity differs from the selected Release codemodel")
+        validate_build_identity(build_record, source_commit=head, build_owner=build_owner,
+                                compiler=compiler, graph=graph, cache=cache)
         trials = parsed
         if any(row.get("schema") != "csl.opt12-cost-trial/1" for row in trials):
             raise ValueError("unknown trial schema")
