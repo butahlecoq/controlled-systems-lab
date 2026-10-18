@@ -4,6 +4,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/sets/data.hpp>
 #include "../../../src/geometry/conversion/exact_h_interval.hpp"
+#include "../../../src/geometry/conversion/exact_h_rectangle.hpp"
 #include <algorithm>
 #include <array>
 #include <bit>
@@ -138,6 +139,29 @@ TEST_CASE("ambient-one checker fails closed when exact H coverage exceeds finite
         std::get<sets::VRepresentation>(converted.representation()));
     CHECK(std::holds_alternative<std::string>(certificate));
 }
+
+TEST_CASE("planar rectangle certificate rejects an omitted corner and oblique rows") {
+    const auto h=take(sets::from_handle(square_h()));
+    const auto omitted=take(sets::from_handle(make_v_handle("three-corners",2,
+        Matrix{3,2,{0,0, 1,0, 0,1}})));
+    const auto& h_rep=std::get<sets::HRepresentation>(h.representation());
+    const auto& v_rep=std::get<sets::VRepresentation>(omitted.representation());
+    const auto missing_corner=geometry::detail::certify_h_rectangle(h_rep,v_rep);
+    CHECK(std::holds_alternative<std::string>(missing_corner));
+
+    const auto outside=take(sets::from_handle(make_v_handle("outside-box",2,
+        Matrix{5,2,{0,0, 1,0, 0,1, 1,1, 2,0}})));
+    const auto outside_result=geometry::detail::certify_h_rectangle(
+        h_rep,std::get<sets::VRepresentation>(outside.representation()));
+    CHECK(std::holds_alternative<std::string>(outside_result));
+
+    const auto oblique=make_h_handle("triangle-h",2,
+        Matrix{3,2,{1,0, 0,1, -1,-1}},Vector{1,1,0});
+    const auto oblique_data=take(sets::from_handle(oblique));
+    const auto oblique_result=geometry::detail::certify_h_rectangle(
+        std::get<sets::HRepresentation>(oblique_data.representation()),v_rep);
+    CHECK(std::holds_alternative<std::string>(oblique_result));
+}
 class WrongSizeLpWorkspace final : public LPWorkspace {
 protected:
     ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext&) override {
@@ -187,6 +211,18 @@ TEST_CASE("bounded H to V conversion retains the square under independent checks
     const auto& h_out=std::get<sets::HRepresentation>(h_rep);
     const std::array<double,2> inside{0.5,0.5}, edge{1,0}, outside{2,0};
     CHECK(satisfies(h_out,inside)); CHECK(satisfies(h_out,edge)); CHECK_FALSE(satisfies(h_out,outside));
+}
+
+TEST_CASE("bounded planar H to V conversion publishes checked global coverage") {
+    const auto input = square_h();
+    const auto req = request(input, "csl.polyhedron.v", "square-planar-coverage");
+    const auto outcome = convert(input, "csl.polyhedron.v", "square-planar-coverage");
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    const auto& result = std::get<OperationResult>(outcome);
+    CHECK(check_geometry_evidence(result.evidence, req).empty());
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->metric.value == "csl.geometry.metric.l-infinity");
+    CHECK(result.evidence.error_bound->bound == 0.0);
 }
 
 TEST_CASE("independent Qhull workspaces reach the native call boundary together") {
