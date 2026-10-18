@@ -15,6 +15,9 @@ INPUTS = (
     "cmake/JsonDependencies.cmake", "cmake/ObjectivesDependencies.cmake",
     "cmake/ApplyPinnedHighsPatch.cmake", "probes/core-01/CMakeLists.txt",
     "tests/cmake/pinned_highs_patch_contract.cmake", "CMakePresets.json",
+    "CMakeLists.txt", ".github/workflows/native.yml", "scripts/ci/cache_keys.py",
+    ".github/actions/native-cache-setup/action.yml",
+    ".github/actions/native-cache-finish/action.yml",
 )
 CONTEXT_FIELDS = {"os", "arch", "compiler", "cmake", "ccache", "generator",
                   "configuration", "options", "lane"}
@@ -40,10 +43,11 @@ def cache_keys(root, context, event, ref, revision):
         save = True
     elif event != "pull_request" and ref != "refs/heads/main":
         scope = "readonly-" + hashlib.sha256(ref.encode()).hexdigest()[:16]
-    archive_id = digest({"os": context["os"], "arch": context["arch"], "inputs": inputs_sha256})
-    compiler_id = digest({"context": context, "inputs": inputs_sha256})
-    compiler_prefix = f"csl-objects-v1-{scope}-{compiler_id}-"
-    return {"archive_key": f"csl-archives-v1-{scope}-{archive_id}",
+    # Each lane owns its immutable snapshots. A faster core lane must not save
+    # a partial archive set under the full/probe lane's key.
+    compatibility_id = digest({"context": context, "inputs": inputs_sha256})
+    compiler_prefix = f"csl-objects-v1-{scope}-{compatibility_id}-"
+    return {"archive_key": f"csl-archives-v1-{scope}-{compatibility_id}",
             "compiler_prefix": compiler_prefix, "compiler_key": compiler_prefix + revision,
             "save_allowed": str(save).lower(), "scope": scope,
             "inputs_sha256": inputs_sha256}

@@ -135,8 +135,10 @@ PRs compute main-compatible restore keys with saving disabled; manual runs on a
 development branch use a separate branch namespace; tag runs cannot save.
 Compiler prefixes include all explicit compatibility fields and dependency/patch
 inputs; a source-revision suffix allows a new immutable snapshot without broadening
-the compatible restore prefix. Raw-archive keys omit compiler settings because
-their contents remain the same independently verified source bytes.
+the compatible restore prefix. Archive snapshots also include lane/context:
+each lane owns its immutable archive set, so a faster core-only job cannot
+publish a partial set under a full/probe job's key. The bytes remain independently
+verified even when compiler or configuration differences partition storage.
 
 Pin cache actions to reviewed full commit SHAs. On the audit date, the official
 `v6.1.0` tag resolves to `55cc8345863c7cc4c66a329aec7e433d2d1c52a9`;

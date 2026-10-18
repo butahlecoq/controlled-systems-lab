@@ -1,6 +1,6 @@
 include_guard(GLOBAL)
 
-set(CSL_DEPENDENCY_ARCHIVE_CACHE "" CACHE PATH
+set(CSL_DEPENDENCY_ARCHIVE_CACHE "$ENV{CSL_DEPENDENCY_ARCHIVE_CACHE}" CACHE PATH
   "Optional absolute directory for verified dependency archives; empty keeps direct downloads")
 
 # Cache raw, pinned bytes only. FetchContent still extracts each dependency into

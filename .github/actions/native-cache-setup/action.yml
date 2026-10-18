@@ -1,0 +1,119 @@
+name: Prepare native validation caches
+description: Restore verified archive bytes and compatible Linux compiler objects.
+inputs:
+  lane:
+    description: Unique toolchain and coverage lane.
+    required: true
+  configuration:
+    description: CMake configuration.
+    required: true
+  generator:
+    description: Actual CMake generator.
+    required: true
+  options:
+    description: Explicit backend, probe and instrumentation options.
+    required: true
+  clean:
+    description: Disable cache restore/save and compiler launchers.
+    default: 'false'
+outputs:
+  archive_key:
+    description: Immutable archive snapshot key.
+    value: ${{ steps.keys.outputs.archive_key }}
+  compiler_key:
+    description: Compiler snapshot for this revision.
+    value: ${{ steps.keys.outputs.compiler_key }}
+  compiler_prefix:
+    description: Compatible compiler restore prefix.
+    value: ${{ steps.keys.outputs.compiler_prefix }}
+  compiler_enabled:
+    description: Whether this lane uses ccache.
+    value: ${{ steps.keys.outputs.compiler_enabled }}
+  save_allowed:
+    description: Explicit trust decision from the key generator.
+    value: ${{ steps.keys.outputs.save_allowed }}
+  archive_hit:
+    description: Exact archive snapshot restore result.
+    value: ${{ steps.archives.outputs.cache-hit }}
+  compiler_hit:
+    description: Exact compiler snapshot restore result.
+    value: ${{ steps.objects.outputs.cache-hit }}
+runs:
+  using: composite
+  steps:
+    - name: Install Linux compiler cache
+      if: runner.os == 'Linux' && inputs.clean != 'true'
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install --no-install-recommends -y ccache
+    - name: Record compatibility context and configure cache paths
+      id: keys
+      shell: python
+      env:
+        CACHE_LANE: ${{ inputs.lane }}
+        CACHE_CONFIGURATION: ${{ inputs.configuration }}
+        CACHE_GENERATOR: ${{ inputs.generator }}
+        CACHE_OPTIONS: ${{ inputs.options }}
+        CACHE_CLEAN: ${{ inputs.clean }}
+      run: |
+        import json, os, subprocess, sys
+        from pathlib import Path
+        root = Path(os.environ['GITHUB_WORKSPACE'])
+        evidence = root / '.ci-cache/evidence'
+        evidence.mkdir(parents=True, exist_ok=True)
+        enabled = os.environ['RUNNER_OS'] == 'Linux' and os.environ['CACHE_CLEAN'] != 'true'
+        def version(command):
+            return subprocess.check_output(command, text=True, stderr=subprocess.STDOUT).strip()
+        compiler = '; '.join(name + '=' + version([os.environ[name], '--version'])
+                             for name in ('CC', 'CXX')) if os.environ['RUNNER_OS'] == 'Linux' else 'MSVC v143 / Visual Studio 17 2022 (archive cache only)'
+        context = dict(os=os.environ['RUNNER_OS'], arch=os.environ['RUNNER_ARCH'],
+                       compiler=compiler, cmake=version([sys.executable, '-m', 'cmake', '--version']),
+                       ccache=version(['ccache', '--version']) if enabled else 'disabled',
+                       generator=os.environ['CACHE_GENERATOR'], configuration=os.environ['CACHE_CONFIGURATION'],
+                       options=os.environ['CACHE_OPTIONS'], lane=os.environ['CACHE_LANE'])
+        context_path = evidence / 'context.json'
+        context_path.write_text(json.dumps(context, indent=2), encoding='utf-8')
+        result = subprocess.run([sys.executable, 'scripts/ci/cache_keys.py', '--context', str(context_path)],
+                                check=True, text=True, capture_output=True)
+        print(result.stdout)
+        (evidence / 'keys.json').write_text(result.stdout, encoding='utf-8')
+        with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as stream:
+            stream.write('compiler_enabled=' + str(enabled).lower() + '\n')
+        archive_dir = (root / '.ci-cache/archives').as_posix() if os.environ['CACHE_CLEAN'] != 'true' else ''
+        launcher = 'ccache' if enabled else ''
+        with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as stream:
+            stream.write('CSL_DEPENDENCY_ARCHIVE_CACHE=' + archive_dir + '\n')
+            stream.write('CMAKE_C_COMPILER_LAUNCHER=' + launcher + '\n')
+            stream.write('CMAKE_CXX_COMPILER_LAUNCHER=' + launcher + '\n')
+            stream.write('CCACHE_DIR=' + (root / '.ci-cache/objects').as_posix() + '\n')
+            stream.write('CCACHE_MAXSIZE=1G\nCCACHE_COMPILERCHECK=content\n')
+    - name: Restore raw dependency archives
+      id: archives
+      if: inputs.clean != 'true'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-cache/archives/*.tar.gz
+        key: ${{ steps.keys.outputs.archive_key }}
+    - name: Restore compatible compiler objects
+      id: objects
+      if: steps.keys.outputs.compiler_enabled == 'true'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-cache/objects
+        key: ${{ steps.keys.outputs.compiler_key }}
+        restore-keys: ${{ steps.keys.outputs.compiler_prefix }}
+    - name: Record restoration and reset per-run compiler work counters
+      shell: python
+      env:
+        ARCHIVE_HIT: ${{ steps.archives.outputs.cache-hit }}
+        OBJECT_HIT: ${{ steps.objects.outputs.cache-hit }}
+        OBJECT_MATCH: ${{ steps.objects.outputs.cache-matched-key }}
+        COMPILER_ENABLED: ${{ steps.keys.outputs.compiler_enabled }}
+      run: |
+        import json, os, subprocess
+        from pathlib import Path
+        result = {name: os.environ[name] for name in ('ARCHIVE_HIT', 'OBJECT_HIT', 'OBJECT_MATCH', 'COMPILER_ENABLED')}
+        Path('.ci-cache/evidence/restore.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+        if os.environ['COMPILER_ENABLED'] == 'true':
+            subprocess.run(['ccache', '--zero-stats'], check=True)

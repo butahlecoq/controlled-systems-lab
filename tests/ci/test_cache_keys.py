@@ -16,6 +16,9 @@ INPUTS = (
     "cmake/JsonDependencies.cmake", "cmake/ObjectivesDependencies.cmake",
     "cmake/ApplyPinnedHighsPatch.cmake", "probes/core-01/CMakeLists.txt",
     "tests/cmake/pinned_highs_patch_contract.cmake", "CMakePresets.json",
+    "CMakeLists.txt", ".github/workflows/native.yml", "scripts/ci/cache_keys.py",
+    ".github/actions/native-cache-setup/action.yml",
+    ".github/actions/native-cache-finish/action.yml",
 )
 
 
@@ -63,6 +66,13 @@ class CacheKeyTests(unittest.TestCase):
                 self.assertNotEqual(original["archive_key"], changed["archive_key"])
                 self.assertNotEqual(original["compiler_prefix"], changed["compiler_prefix"])
                 path.write_text("literal initial dependency input", encoding="utf-8")
+
+    def test_each_lane_owns_its_immutable_archive_snapshot(self):
+        full = self.keys()
+        self.context["lane"] = "core-package"
+        self.context["options"] = "highs=off qhull=off probes=off"
+        core = self.keys()
+        self.assertNotEqual(core["archive_key"], full["archive_key"])
 
     def test_incompatible_build_context_cannot_restore_release_objects(self):
         original = self.keys()
