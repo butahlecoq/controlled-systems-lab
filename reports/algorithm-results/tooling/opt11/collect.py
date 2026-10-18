@@ -33,6 +33,11 @@ SOURCE_PATHS = (
     "reports/algorithm-results/tooling/opt11/build_bundle.py",
 )
 HARNESS = "reports/algorithm-results/tooling/opt11/recursive_hull_driver.cpp"
+TIMING_TRANSLATION_UNITS = (
+    "src/geometry/hull/recursive_reducer.cpp",
+    "src/geometry/hull_reducer.cpp",
+    "src/adapters/lp/highs.cpp",
+)
 
 
 def digest(data: bytes) -> str:
@@ -64,6 +69,55 @@ def cmd(*args: str) -> str:
 
 def source_hashes(root: Path) -> dict:
     return {name: file_hash(root / name) for name in SOURCE_PATHS}
+
+
+def validate_release_build_evidence(raw_log: str, root: Path, build_root: Path,
+                                    exe: Path, commit: str, harness_sha256: str) -> None:
+    """Require a clean-first compile and link of all timing-relevant sources."""
+    lines = raw_log.splitlines()
+    clean_positions = [index for index, line in enumerate(lines) if "CoreClean:" in line]
+    require(bool(clean_positions),
+            "verbose Release log lacks clean-first CoreClean evidence")
+
+    def normalized(path: Path) -> str:
+        return str(path.resolve()).replace("/", "\\").casefold()
+
+    def is_release_compile(line: str, source: Path) -> bool:
+        folded = line.casefold()
+        return (
+            "cl.exe" in folded and normalized(source) in folded and
+            re.search(r"(?:^|\s)/o2(?:\s|$)", line, re.IGNORECASE) is not None and
+            re.search(r"(?:^|\s)/std:c\+\+20(?:\s|$)", line, re.IGNORECASE) is not None and
+            re.search(r"(?:^|\s)/d\s+ndebug(?:\s|$)", line, re.IGNORECASE) is not None and
+            re.search(r'cmake_intdir=.*release', line, re.IGNORECASE) is not None
+        )
+
+    for relative in TIMING_TRANSLATION_UNITS:
+        source = root / relative
+        compile_positions = [index for index, line in enumerate(lines)
+                             if is_release_compile(line, source)]
+        require(any(clean_index < compile_index for clean_index in clean_positions
+                    for compile_index in compile_positions),
+                f"clean-first Release compiler evidence missing for {relative}")
+
+    harness_source = root / HARNESS
+    harness_commands = [line for index, line in enumerate(lines)
+                        if is_release_compile(line, harness_source) and
+                        any(clean_index < index for clean_index in clean_positions)]
+    require(any(commit in line and harness_sha256 in line for line in harness_commands),
+            "Release harness compile does not bind the requested source commit and harness hash")
+
+    expected_exe = normalized(exe)
+    expected_build = normalized(build_root)
+    link_commands = [line for line in lines
+                     if "link.exe" in line.casefold() and expected_exe in line.casefold()]
+    require(any("csl\\release\\csl_hull.lib" in line.casefold() and
+                "csl\\release\\csl_highs_lp.lib" in line.casefold() and
+                expected_build in line.casefold() for line in link_commands),
+            "Release executable link evidence does not bind the expected build tree and libraries")
+    require(any(expected_exe in line.casefold() and "csl_opt11_measure.exe" in line.casefold()
+                for line in lines),
+            "verbose Release log lacks expected executable build output")
 
 
 def preflight(exe: Path, root: Path, commit: str, build_log: Path,
@@ -114,10 +168,7 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path,
             backend_runtime.get("version") == "1.0.0+highs.1.11.0",
             "runtime registered HiGHS identity/version differs from the reviewed provider")
     log = build_log.read_text(encoding="utf-8", errors="replace")
-    compile_lines = [line for line in log.splitlines()
-                     if "CL.exe" in line and "recursive_hull_driver.cpp" in line]
-    require(any("/O2" in line and "/std:c++20" in line and re.search(r"/D\s+NDEBUG\b", line)
-                for line in compile_lines), "verbose Release compile flags not evidenced")
+    validate_release_build_evidence(log, root, build_root, exe, commit, hashes[HARNESS])
     note = concurrent_note.read_text(encoding="utf-8").strip()
     require(bool(note), "concurrent-work/load note is required")
     release_log = sanitized_log(build_log.read_text(encoding="utf-8", errors="replace"), {

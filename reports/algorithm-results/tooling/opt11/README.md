@@ -58,7 +58,12 @@ clean commit at which source hashes and the compiled description agree. Configur
 and build it from a clean Release tree, keep the full verbose log private, and
 write an accurate concurrent-load note. The collector requires the full source
 commit, clean source status, executable/harness identity, VS 2022 Release x64
-project settings and actual `/O2`, `/D NDEBUG`, `/std:c++20` compiler evidence.
+project settings and actual `/O2`, `/D NDEBUG`, `/std:c++20` compiler evidence
+for the harness, recursive reducer, registered hull reducer, and HiGHS adapter.
+The verbose log must show `CoreClean` before those compiles, bind the compile
+commands to the requested source root, and link the two registered libraries
+into the expected Release executable. `test_collect.py` checks acceptance and
+rejection of missing clean-first or timing-unit evidence.
 It writes exact raw stdout and stderr bytes before validating them; failed or
 incomplete executions stay in the collection directory and are rejected by the
 saved report builder.
