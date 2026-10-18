@@ -68,8 +68,36 @@ def inside_hull(p, hull) -> bool:
     return all(cross(hull[i], hull[(i + 1) % len(hull)], p) >= 0 for i in range(len(hull)))
 
 
+def recursive_query_namespaces(points: list[list[float]]) -> dict[int, set[str]]:
+    """Derive namespaces for each node in the registered deterministic split tree."""
+    namespaces = {point_id: set() for point_id in range(len(points))}
+
+    def visit(ids: list[int], path: str) -> None:
+        if len(ids) <= 16:
+            for point_id in ids:
+                namespaces[point_id].add(path)
+            return
+        middle = len(ids) // 2
+        for point_id in ids:
+            namespaces[point_id].add(path + "m")
+        visit(ids[:middle], path + "0")
+        visit(ids[middle:], path + "1")
+
+    ordered = sorted(range(len(points)), key=lambda point_id: (point_key(points[point_id]), point_id))
+    visit(ordered, "r")
+    return namespaces
+
+
 def exact_certificate(call: dict) -> None:
     points = call["points"]
+    fixture = call.get("fixture")
+    method = call.get("method")
+    expected_problem = f"opt11-{fixture}"
+    require(fixture in FIXTURES and call.get("problem") == expected_problem,
+            "point-cloud problem identity differs from its fixture")
+    require(method in {"baseline", "recursive"}, "certificate reducer method is missing")
+    allowed_recursive_namespaces = (recursive_query_namespaces(points)
+                                    if method == "recursive" else None)
     retained = call["retained"]
     removed = call["removed"]
     n = len(points)
@@ -80,6 +108,18 @@ def exact_certificate(call: dict) -> None:
         target = cert.get("point")
         require(type(target) is int and 0 <= target < n and target not in cert_by_id,
                 "duplicate or invalid removed ID")
+        require(cert.get("program_problem") == expected_problem,
+                "certificate program problem identity differs from its fixture cloud")
+        program = cert.get("program")
+        if method == "baseline":
+            expected_program = f"hull-membership-{target}"
+            require(program == expected_program,
+                    "baseline certificate program identity does not match the removed point")
+        else:
+            allowed = {f"hull-membership-{namespace}-{target}"
+                       for namespace in allowed_recursive_namespaces[target]}
+            require(program in allowed,
+                    "recursive certificate program identity is not a valid node query for this point")
         terms = cert.get("terms")
         require(isinstance(terms, list) and terms, "empty deletion certificate")
         weights = []

@@ -31,6 +31,7 @@ def validate_stream(path: Path, purpose: str) -> dict:
             method = row.get("method")
             require(method in METHODS and key + (method,) not in calls, "duplicate or unknown method call")
             require(row.get("points") == FIXTURES[fixture], "fixture bytes differ from literal catalogue")
+            require(row.get("problem") == f"opt11-{fixture}", "point cloud problem identity mismatch")
             require(type(row.get("elapsed_ns")) is int and row["elapsed_ns"] >= 0, "invalid call duration")
             require(row.get("status") in {"complete", "incomplete", "diagnostics"}, "unknown outcome status")
             if row["status"] != "diagnostics":

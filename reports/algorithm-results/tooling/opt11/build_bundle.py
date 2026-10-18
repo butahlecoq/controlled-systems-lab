@@ -61,6 +61,14 @@ def read_collection(directory: Path, allow_test=False):
             meta["description"].get("ndebug") is True and
             meta["description"].get("cxx_standard", 0) >= 202002,
             "embedded executable identity or Release description mismatch")
+    description_backend = meta["description"].get("backend")
+    backend = meta.get("backend", {})
+    require(isinstance(description_backend, dict) and
+            backend.get("method") == description_backend.get("method") == "csl.lp.highs" and
+            backend.get("version") == description_backend.get("version") == "1.0.0+highs.1.11.0" and
+            backend.get("configured_threads") == 1 and backend.get("presolve") == "off" and
+            backend.get("parallel") == "off" and backend.get("observed_native_threads") is None,
+            "saved backend record differs from executable's runtime registration/configuration")
     protocol = meta.get("protocol", {})
     require(protocol.get("warmups_per_fixture") == 1 and protocol.get("measured_pairs_per_fixture") == 6,
             "paired protocol differs")
@@ -168,6 +176,7 @@ def page(record):
 <table><thead><tr>{th(SUMMARY_FIELDS)}</tr></thead><tbody>{summary_rows}</tbody></table>
 <h2>All paired trials</h2><table><thead><tr>{th(TRIAL_FIELDS)}</tr></thead><tbody>{trial_rows}</tbody></table>
 <p>Performance interpretation: {esc(record['performance_interpretation'])}. Timing is one public registered <code>run_with</code> call. Fixture parsing, reducer/injected-workspace creation, exact validation, serialization and rendering are excluded; recursive child LP-workspace creation and root task scheduling are included. Backend phase times, native thread count, CPU time, peak memory and source-mapped limiter are unavailable.</p>
+<p>LP backend: <code>{esc(record['backend']['method'])}</code> version <code>{esc(record['backend']['version'])}</code>, reported by the executable's registered LP provider. Configured threads: {esc(record['backend']['configured_threads'])}; presolve: {esc(record['backend']['presolve'])}; parallel mode: {esc(record['backend']['parallel'])}. Observed native thread count remains unavailable.</p>
 <p>Host: {esc(env['os'])}; machine {esc(env['machine'])}; logical processors {esc(env['logical_processors'])}. Compiler: {esc(record['release_project']['compiler_id'])} {esc(record['release_project']['compiler_version'])}; C++ setting {esc(record['release_project']['language_standard'])}, optimization {esc(record['release_project']['optimization'])}, NDEBUG enabled. Concurrent work: {esc(env['concurrent_work_note'])}. Full sanitized Release evidence is in <a href="release-build-log-sanitized.txt">the build log</a>.</p>
 <h2>Saved evidence</h2><ul><li><a href="records.json">Typed records</a></li><li><a href="collection.json">Collection provenance</a></li><li><a href="raw-stdout.jsonl">Raw JSONL</a></li><li><a href="raw-stderr.txt">Raw stderr bytes</a></li><li><a href="functional-validation.json">Independent validation</a></li><li><a href="trials.csv">Trial CSV</a></li><li><a href="summary.csv">Summary CSV</a></li><li><a href="latency.svg">SVG figure</a></li><li><a href="manifest.json">Native manifest</a></li></ul>
 <p>Performance is exploratory and fixture-limited. No universal speedup, scalability, or correctness claim for arbitrary point clouds follows.</p></body></html>'''

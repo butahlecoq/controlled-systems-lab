@@ -22,6 +22,7 @@ else:
 
 HERE = Path(__file__).resolve().parent
 SOURCE_PATHS = (
+    "src/adapters/highs_session.hpp", "src/adapters/lp/highs.cpp",
     "src/geometry/hull/recursive_reducer.cpp", "src/geometry/hull_reducer.cpp",
     "src/geometry/exact_convex_combination.hpp", "include/csl/geometry/hull_reducer.hpp",
     "reports/algorithm-results/tooling/opt11/CMakeLists.txt",
@@ -108,6 +109,10 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path,
             description.get("warmups_per_fixture") == 1 and
             description.get("measured_pairs_per_fixture") == 6,
             "executable identity, Release mode or protocol differs")
+    backend_runtime = description.get("backend")
+    require(isinstance(backend_runtime, dict) and backend_runtime.get("method") == "csl.lp.highs" and
+            backend_runtime.get("version") == "1.0.0+highs.1.11.0",
+            "runtime registered HiGHS identity/version differs from the reviewed provider")
     log = build_log.read_text(encoding="utf-8", errors="replace")
     compile_lines = [line for line in log.splitlines()
                      if "CL.exe" in line and "recursive_hull_driver.cpp" in line]
@@ -127,10 +132,13 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path,
         "fixture_sha256": fixture_digest(), "harness_sha256": hashes[HARNESS],
         "algorithm": {"baseline": {"method": "csl.hull.lp-membership", "version": "1.0.0"},
                       "recursive": {"method": "csl.hull.recursive-split-merge", "version": "1.0.0"}},
-        "backend": {"method": "csl.lp.highs", "adapter_version": "1.0.0+highs.1.11.0",
-                    "native_version": "1.11.0", "simplex_iteration_limit": None,
-                    "configured_threads": None,
-                    "thread_policy": "native thread count unavailable; only root child subtree concurrency is requested"},
+        "backend": {"method": backend_runtime["method"],
+                    "version": backend_runtime["version"],
+                    "adapter_version": backend_runtime["version"].split("+", 1)[0],
+                    "native_version": backend_runtime["version"].split("+highs.", 1)[1],
+                    "simplex_iteration_limit": None, "configured_threads": 1,
+                    "presolve": "off", "parallel": "off",
+                    "observed_native_threads": None},
         "executable_sha256": file_hash(exe), "build_log_sha256": file_hash(build_log),
         "sanitized_build_log": release_log,
         "sanitized_build_log_sha256": digest(release_log.encode("utf-8")),

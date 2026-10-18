@@ -109,7 +109,8 @@ void emit_call(const Fixture& f, int round, bool warmup, const char* purpose, co
         const geometry::HullReductionResult& outcome) {
     std::cout << std::setprecision(17) << "{\"kind\":\"call\",\"purpose\":\"" << purpose << "\",\"fixture\":\""
         << f.id << "\",\"round\":" << round << ",\"warmup\":" << (warmup ? "true" : "false")
-        << ",\"method\":\"" << method << "\",\"elapsed_ns\":" << ns << ",\"points\":";
+        << ",\"problem\":\"" << f.cloud.problem.value << "\",\"method\":\"" << method
+        << "\",\"elapsed_ns\":" << ns << ",\"points\":";
     points(f.cloud);
     if (!std::holds_alternative<geometry::HullReduction>(outcome)) {
         std::cout << ",\"status\":\"diagnostics\",\"diagnostics\":[";
@@ -173,6 +174,10 @@ void describe() {
 #else
     constexpr long standard = __cplusplus;
 #endif
+    auto lp_result = adapters::lp::make_highs_registration();
+    if (!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
+        throw std::runtime_error("HiGHS registration unavailable while describing executable");
+    const auto& lp = std::get<registry::Registration<registry::LPPort>>(lp_result);
     std::cout << "{\"kind\":\"describe\",\"source_commit\":\"" << CSL_OPT11_SOURCE_COMMIT
         << "\",\"harness_sha256\":\"" << CSL_OPT11_HARNESS_SHA256 << "\",\"configuration\":\""
         << CSL_OPT11_CONFIG << "\",\"cxx_standard\":" << standard << ",\"ndebug\":"
@@ -181,7 +186,11 @@ void describe() {
 #else
         << "false";
 #endif
-    std::cout << ",\"warmups_per_fixture\":1,\"measured_pairs_per_fixture\":6}\n";
+    std::cout << ",\"backend\":{\"method\":";
+    json_string(lp.identity.id.value);
+    std::cout << ",\"version\":";
+    json_string(lp.identity.version);
+    std::cout << "},\"warmups_per_fixture\":1,\"measured_pairs_per_fixture\":6}\n";
 }
 
 void measure(const char* purpose) {

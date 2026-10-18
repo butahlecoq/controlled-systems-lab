@@ -7,7 +7,9 @@ independent Python oracle computes exact dyadic convex hulls, checks that both
 outputs have the same hull, checks every retained input lies in the literal
 hull, and validates every deletion certificate's nonnegative weights, exact
 unit sum, exact point reconstruction, acyclic substitution, and final retained
-hull reconstruction. No solver witness is trusted as a certificate.
+hull reconstruction. It also binds each certificate's problem identity to its
+fixture and checks baseline or recursive-tree program IDs against the removed
+point ID. No solver witness is trusted as a certificate.
 
 The native record schema is `csl.opt11-recursive-hull-report/1`. A native bundle
 contains exactly `records.json`, `collection.json`, `raw-stdout.jsonl`,
@@ -16,7 +18,9 @@ contains exactly `records.json`, `collection.json`, `raw-stdout.jsonl`,
 `index.html`, and `manifest.json`. The adjacent offline archive is
 `<report_id>.source.zip`. Records include all paired trial rows, method
 durations, LP call counts, recursive leaf/merge metrics, peak merge points,
-parallel overhead and explicit unavailable counters. The report is exploratory
+parallel overhead, runtime-reported HiGHS registration identity/version,
+configured single-thread/presolve/parallel settings, and explicit unavailable
+counters. The report is exploratory
 and makes no universal speedup or scalability claim. A publisher adapter,
 catalogue entry, independent report review, Pages deploy, and live byte/hash
 verification remain publication gates.
