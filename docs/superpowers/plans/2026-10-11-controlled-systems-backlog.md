@@ -241,6 +241,7 @@ These paths are planning proposals, not existing APIs. CORE-01/02 settle names. 
 | SYN-03 | `src/synthesis/reachability_strategy.cpp`, `src/synthesis/control_recovery.cpp` |
 | SYN-04 | `src/synthesis/joint_optimization_strategy.cpp` |
 | EXT-04 | `src/estimation/`, `src/controllers/`, `docs/contracts/information-patterns.md` |
+| EXT-07 | `include/csl/model/hybrid_system.hpp`, `src/model/hybrid_system.cpp`, `docs/contracts/hybrid-systems.md`, `tests/unit/model/hybrid_system_test.cpp`, `tests/reference/hybrid_mode_sequence_oracle.py` |
 | TEST-11 | `tests/unit/synthesis/terminal_minimizers_test.cpp`, `tests/fixtures/synthesis/terminal_minimizer_cases.json` |
 | REVIEW-02 | `docs/reviews/geometry-and-backend-substitution.md` |
 | SYN-05 | `src/synthesis/witness_selector.cpp` |
