@@ -5023,7 +5023,9 @@
         "tests/reference/hybrid_mode_sequence_oracle.py"
       ],
       "requirements": [],
-      "test_ids": [],
+      "test_ids": [
+        "T-EXT07"
+      ],
       "external_blockers": [],
       "related_issues": [
         68,

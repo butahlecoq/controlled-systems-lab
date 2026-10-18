@@ -13,6 +13,11 @@ target_link_libraries(observation_model_tests PRIVATE CSL::model doctest::doctes
 add_test(NAME observation_model_tests COMMAND observation_model_tests)
 csl_test_target(observation_model_tests model)
 
+add_executable(hybrid_model_tests tests/unit/model/hybrid_system_test.cpp)
+target_link_libraries(hybrid_model_tests PRIVATE CSL::model CSL::sets doctest::doctest)
+add_test(NAME hybrid_model_tests COMMAND hybrid_model_tests)
+csl_test_target(hybrid_model_tests model)
+
 add_executable(model_public_client tests/installed/model_client.cpp)
 target_link_libraries(model_public_client PRIVATE CSL::model)
 add_test(NAME model_public_client COMMAND model_public_client)

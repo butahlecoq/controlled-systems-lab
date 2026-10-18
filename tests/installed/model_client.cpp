@@ -1,4 +1,5 @@
 #include <csl/model/linear_system.hpp>
+#include <csl/model/hybrid_system.hpp>
 
 #include <iostream>
 #include <stdexcept>
@@ -36,6 +37,14 @@ int main() {
         const auto invalid = model.stage({2});
         if (!std::holds_alternative<Diagnostic>(invalid) || std::get<Diagnostic>(invalid).code != DiagnosticCode::invalid_input)
             throw std::runtime_error("Stage bound guard failed");
+        HybridMode parked;
+        parked.id={"parked"};
+        const HybridSystem hybrid{0,{parked},{}};
+        const auto paths = enumerate_hybrid_paths(hybrid,{"parked"},{{"parked"}},{0,1});
+        if (!std::holds_alternative<std::vector<HybridPath>>(paths) ||
+            std::get<std::vector<HybridPath>>(paths).size()!=1 ||
+            !std::get<std::vector<HybridPath>>(paths).front().edges.empty())
+            throw std::runtime_error("Installed hybrid model client failed");
         std::cout << "Installed model client: immutable LTI/LTV and scheduled observation literals passed\n";
         return 0;
     } catch (const std::exception& error) {
