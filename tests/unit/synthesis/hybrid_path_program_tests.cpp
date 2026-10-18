@@ -1133,6 +1133,60 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     CHECK(std::get<HybridFamilyVerificationReport>(affine_reset_result).complete_family_coverage==
         HybridVerificationStatus::established);
 
+    auto negative_reset_equalities=numeric::snapshot(Matrix{1,2,{2,1}});
+    auto negative_reset_rhs=numeric::snapshot_vector(Vector{1});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(negative_reset_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(negative_reset_rhs));
+    auto negative_reset=sets::make_h({{"verifier-negative-affine-reset"},2,{}},
+        {std::get<numeric::MatrixView>(reset_inequalities),
+         std::get<numeric::VectorView>(reset_bounds),
+         std::get<numeric::MatrixView>(negative_reset_equalities),
+         std::get<numeric::VectorView>(negative_reset_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(negative_reset));
+    auto negative_reset_system=system;
+    negative_reset_system.modes[1].invariants[1]=interval("verifier-negative-reset-target",0,1);
+    for(auto& edge:negative_reset_system.edges)
+        edge.reset_relations[0]=std::get<sets::SetData>(negative_reset).as_handle();
+    const auto negative_reset_built=build_hybrid_portfolio_programs(negative_reset_system,request,
+        {"negative-affine-reset-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(negative_reset_built));
+    const auto& negative_reset_programs=std::get<std::vector<HybridPathProgram>>(negative_reset_built);
+    std::vector<HybridPathOptimalFaceCandidate> negative_reset_candidates{
+        exact_candidate(negative_reset_programs[0],{0,0,0,1}),
+        exact_candidate(negative_reset_programs[1],{0,0,0,1})};
+    const auto negative_reset_result=verify_hybrid_portfolio_family(verifier,negative_reset_system,
+        request,negative_reset_programs,negative_reset_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(negative_reset_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(negative_reset_result).complete_family_coverage==
+        HybridVerificationStatus::established);
+
+    auto constant_reset_equalities=numeric::snapshot(Matrix{1,2,{0,1}});
+    auto constant_reset_rhs=numeric::snapshot_vector(Vector{1});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(constant_reset_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(constant_reset_rhs));
+    auto constant_reset=sets::make_h({{"verifier-constant-affine-reset"},2,{}},
+        {std::get<numeric::MatrixView>(reset_inequalities),
+         std::get<numeric::VectorView>(reset_bounds),
+         std::get<numeric::MatrixView>(constant_reset_equalities),
+         std::get<numeric::VectorView>(constant_reset_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(constant_reset));
+    auto constant_reset_system=system;
+    constant_reset_system.modes[1].invariants[1]=interval("verifier-constant-reset-target",1,1);
+    for(auto& edge:constant_reset_system.edges)
+        edge.reset_relations[0]=std::get<sets::SetData>(constant_reset).as_handle();
+    const auto constant_reset_built=build_hybrid_portfolio_programs(constant_reset_system,request,
+        {"constant-affine-reset-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(constant_reset_built));
+    const auto& constant_reset_programs=std::get<std::vector<HybridPathProgram>>(constant_reset_built);
+    std::vector<HybridPathOptimalFaceCandidate> constant_reset_candidates{
+        exact_candidate(constant_reset_programs[0],{0,0,0,1}),
+        exact_candidate(constant_reset_programs[1],{0,0,0,1})};
+    const auto constant_reset_result=verify_hybrid_portfolio_family(verifier,constant_reset_system,
+        request,constant_reset_programs,constant_reset_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(constant_reset_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(constant_reset_result).complete_family_coverage==
+        HybridVerificationStatus::established);
+
     auto inexact_reset_equalities=numeric::snapshot(Matrix{1,2,{-1,3}});
     auto inexact_reset_rhs=numeric::snapshot_vector(Vector{0});
     REQUIRE(std::holds_alternative<numeric::MatrixView>(inexact_reset_equalities));
@@ -1158,6 +1212,33 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_reset_result));
     CHECK(std::get<HybridFamilyVerificationReport>(inexact_reset_result).branches[0].continuous_coverage==
         HybridVerificationStatus::unsupported);
+
+    const double maximum=std::numeric_limits<double>::max();
+    auto overflow_reset_equalities=numeric::snapshot(Matrix{1,2,{-maximum,1}});
+    auto overflow_reset_rhs=numeric::snapshot_vector(Vector{0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(overflow_reset_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(overflow_reset_rhs));
+    auto overflow_reset=sets::make_h({{"verifier-overflow-affine-reset"},2,{}},
+        {std::get<numeric::MatrixView>(reset_inequalities),
+         std::get<numeric::VectorView>(reset_bounds),
+         std::get<numeric::MatrixView>(overflow_reset_equalities),
+         std::get<numeric::VectorView>(overflow_reset_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(overflow_reset));
+    auto overflow_reset_system=system;
+    overflow_reset_system.edges.resize(1);
+    overflow_reset_system.edges[0].guards[0]=interval("verifier-overflow-reset-guard",0,1);
+    overflow_reset_system.edges[0].reset_relations[0]=std::get<sets::SetData>(overflow_reset).as_handle();
+    const auto overflow_reset_built=build_hybrid_portfolio_programs(overflow_reset_system,request,
+        {"overflow-affine-reset-verifier"},{1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(overflow_reset_built));
+    const auto& overflow_reset_programs=std::get<std::vector<HybridPathProgram>>(overflow_reset_built);
+    std::vector<HybridPathOptimalFaceCandidate> overflow_reset_candidates{
+        exact_candidate(overflow_reset_programs[0],{0,1.0000000001,1.0000000001,maximum})};
+    const auto overflow_reset_result=verify_hybrid_portfolio_family(verifier,overflow_reset_system,
+        request,overflow_reset_programs,overflow_reset_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(overflow_reset_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(overflow_reset_result).branches[0].continuous_coverage==
+        HybridVerificationStatus::refuted);
 
     auto ratio_system=system;
     ratio_system.edges[1].guards[0]=interval("verifier-inexact-row-ratio-guard",0,0.3);

@@ -370,7 +370,11 @@ std::optional<std::size_t> exact_rank(numeric::MatrixView matrix,std::stop_token
 }
 
 bool same(double left,double right,NumericalPolicy policy) {
-    return std::abs(left-right)<=tolerance(policy,std::max(std::abs(left),std::abs(right)));
+    if(!std::isfinite(left)||!std::isfinite(right)) return false;
+    if(left==right) return true;
+    const double allowed=tolerance(policy,std::max(std::abs(left),std::abs(right)));
+    const double difference=std::abs(left-right);
+    return std::isfinite(allowed)&&std::isfinite(difference)&&difference<=allowed;
 }
 
 bool relation_domain_supported(const sets::SetData& data,HybridRelationLimits limits) {
