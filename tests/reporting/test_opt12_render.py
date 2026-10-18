@@ -54,7 +54,9 @@ def fixture(root: Path) -> Path:
                 "process": {"return_code": 0, "timed_out": False, "parse_error": None,
                             "stdout_sha256": digest(raw), "stderr_sha256": digest(stderr),
                             "retained_trial_count": len(trials)},
-                "input_fixtures": {}}
+                "input_fixtures": {"transfer-cost": {"rows": 1, "columns": 100000,
+                    "sha256": "c" * 64, "source_rhs": 50000.0, "changed_rhs": 49999.0,
+                    "objective_change": "column 99999: -1 to -2", "expected_objective": -99998.0}}}
     records = root / "records.json"
     records.write_text(json.dumps({"metadata": metadata, "trials": trials}), encoding="utf-8")
     columns = ["scenario", "pair", "order", "mode", "status", "cache_state", "basis_accepted",
@@ -77,7 +79,11 @@ class Opt12RenderTests(unittest.TestCase):
             out = root / "opt12-test"
             manifest = opt12_render.render(records, out)
             self.assertTrue((out / "index.html").is_file())
-            self.assertIn("higher median aggregate native work for warm reuse", (out / "index.html").read_text(encoding="utf-8"))
+            page = (out / "index.html").read_text(encoding="utf-8")
+            self.assertIn("Warm reuse records higher median aggregate native work in:", page)
+            self.assertIn("transfer-cost", page)
+            self.assertIn("Simplex iteration counts are reported separately", page)
+            self.assertIn("column 99999: -1 to -2", page)
             self.assertIn("comparison.svg", manifest["files"])
             with zipfile.ZipFile(root / "opt12-test.zip") as archive:
                 self.assertIn("opt12-test/index.html", archive.namelist())

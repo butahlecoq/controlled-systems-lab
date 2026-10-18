@@ -17,6 +17,8 @@ from pathlib import Path
 import collector_common as common
 import report_data as data
 
+SCENARIOS = ("tiny-overhead", "small-reuse", "transfer-cost")
+
 
 def digest(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
@@ -180,13 +182,13 @@ def main() -> int:
         trials = parsed
         if any(row.get("schema") != "csl.opt12-cost-trial/1" for row in trials):
             raise ValueError("unknown trial schema")
-        expected_count = args.repetitions * 4
+        expected_count = args.repetitions * len(SCENARIOS) * 2
         if len(trials) != expected_count:
             raise ValueError(f"expected {expected_count} trial rows, got {len(trials)}")
         if any(row.get("status") != "verified" for row in trials):
             raise ValueError("a trial failed its independent numerical checks")
         for pair in range(args.repetitions):
-            for scenario in ("tiny-overhead", "small-reuse"):
+            for scenario in SCENARIOS:
                 members = [row for row in trials if row["pair"] == pair and row["scenario"] == scenario]
                 expected_order = ["cold", "warm"] if pair % 2 == 0 else ["warm", "cold"]
                 if len(members) != 2 or [row["mode"] for row in sorted(members, key=lambda row: row["order"])] != expected_order:
@@ -199,6 +201,12 @@ def main() -> int:
     fixtures = {
         "tiny-overhead": {"rows": 1, "columns": 1, "objective": [-1.0], "coefficient": [1.0], "source_rhs": 1.0, "changed_rhs": 0.5, "expected_objective": -0.5},
         "small-reuse": {"rows": 1, "columns": 40, "objective": [-1.0] * 40, "coefficient": [1.0] * 40, "source_rhs": 20.0, "changed_rhs": 19.0, "expected_objective": -19.0},
+        "transfer-cost": {"rows": 1, "columns": 100000,
+                          "source_objective": {"all_columns": 1.0, "column_0": -1.0},
+                          "changed_objective": {"all_columns": 1.0, "column_99999": -2.0},
+                          "coefficient": {"all_columns": 1.0}, "source_rhs": 50000.0,
+                          "changed_rhs": 49999.0, "expected_objective": -99998.0,
+                          "objective_change": "column 99999: -1 to -2"},
     }
     for fixture in fixtures.values():
         fixture["sha256"] = digest(json.dumps(fixture, sort_keys=True, separators=(",", ":")).encode())

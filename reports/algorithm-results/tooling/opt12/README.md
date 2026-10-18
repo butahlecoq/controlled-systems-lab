@@ -4,7 +4,7 @@ This directory documents the paired cold/warm workspace comparison for issue #46
 
 ## Measurement sequence
 
-Review the implementation and this tooling at a fixed clean source commit before collecting measurements. Use a tuned Release build, an unused output directory, and at least five paired repetitions. The driver defaults to seven. For each pair it alternates cold and warm order. A warm trial first primes a fresh workspace on a source LP, then measures the same changed LP used by the cold trial in a fresh cold workspace. One case has one variable to expose transfer overhead; one has 40 variables to inspect whether reuse changes simplex work.
+Review the implementation and this tooling at a fixed clean source commit before collecting measurements. Use a tuned Release build, an unused output directory, and at least five paired repetitions. The driver defaults to seven. For each pair it alternates cold and warm order. A warm trial first primes a fresh workspace on a source LP, then measures the same changed LP used by the cold trial in a fresh cold workspace. The cases have 1, 40, and 100,000 variables. The 1-variable case exposes fixed overhead; the 40-variable case checks ordinary reuse; and the 100,000-variable case changes the last objective coefficient after priming so the accepted basis must adapt while cold and warm solve work can be compared. The report identifies a case where reuse costs more only when retained medians show higher aggregate native work; iteration counts and transfer time remain separately visible.
 
 On Windows PowerShell:
 
@@ -28,7 +28,7 @@ The collector requires the exact clean source commit, the CMake File API Release
 
 ## Timing and scope
 
-The public-call wall interval wraps `LPWorkspace.solve` and excludes the priming solve, workspace construction, input construction and independent post-solve oracle. Native model-load, basis-install/setup, and native solve intervals are separately read from adapter diagnostics. Simplex iteration counts and cache state are retained for every measured row. Every trial checks completed optimal status, independent numerical feasibility and the literal expected objective before it is marked verified. The tiny case only supports a cost observation if the retained work components and iteration counts actually show additional transfer work without saved simplex iterations. No general speedup claim is supported by these synthetic cases.
+The public-call wall interval wraps `LPWorkspace.solve` and excludes the priming solve, workspace construction, input construction and independent post-solve oracle. Native model-load, basis-install/setup, and native solve intervals are separately read from adapter diagnostics. Simplex iteration counts and cache state are retained for every measured row. Every trial checks completed optimal status, independent numerical feasibility and the literal expected objective before it is marked verified. No cost or speedup claim is supported unless the retained work components and iteration counts show it. No general speedup claim is supported by these synthetic cases.
 
 The host snapshot records Windows processor load, free physical memory and process names/CPU totals before and after collection where available. This is a coarse observation, not a limiter profile. A separate sampling profile is required before attributing the measured cost to a particular implementation layer; if it cannot identify a limiter, the report's performance interpretation remains inconclusive.
 

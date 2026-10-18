@@ -18,8 +18,9 @@ using namespace csl::optimization;
 using namespace csl::adapters::lp;
 using Clock=std::chrono::steady_clock;
 
-LinearProgram make_problem(std::string id,std::size_t columns,double rhs) {
-    Vector objective(columns,-1.0);
+LinearProgram make_problem(std::string id,std::size_t columns,double rhs,bool transfer_cost=false,bool target=false) {
+    Vector objective(columns,transfer_cost?1.0:-1.0);
+    if(transfer_cost)objective[target?columns-1:0]=target?-2.0:-1.0;
     std::vector<std::size_t> offsets{0,columns},indices(columns);
     std::vector<double> coefficients(columns,1.0);
     for(std::size_t i=0;i<columns;++i)indices[i]=i;
@@ -88,8 +89,11 @@ std::string quote(const std::string& value) {
 std::string json_number(const std::optional<std::string>& value) { return value?*value:"null"; }
 
 void run_pair(const std::string& scenario,std::size_t columns,std::size_t repetitions) {
-    const auto source=make_problem(scenario+"-source",columns,columns==1?1.0:20.0);
-    const auto target=make_problem(scenario+"-changed",columns,columns==1?0.5:19.0);
+    const bool transfer_cost=scenario=="transfer-cost";
+    const double source_rhs=columns==1?1.0:(transfer_cost?50000.0:20.0);
+    const double target_rhs=columns==1?0.5:(transfer_cost?49999.0:19.0);
+    const auto source=make_problem(scenario+"-source",columns,source_rhs,transfer_cost);
+    const auto target=make_problem(scenario+"-changed",columns,target_rhs,transfer_cost,transfer_cost);
     for(std::size_t pair=0;pair<repetitions;++pair) {
         for(unsigned order=0;order<2;++order) {
             const bool warm=(pair%2==0)?order==1:order==0;
@@ -115,7 +119,7 @@ void run_pair(const std::string& scenario,std::size_t columns,std::size_t repeti
                 throw std::runtime_error("measured solve failed independent result checks");
             const auto evaluation=evaluate_primal(target,*result->primal,{1e-8,1e-8},{{"opt12-measure.oracle"},"1"});
             const auto* primal=std::get_if<PrimalEvaluation>(&evaluation);
-            const double expected=columns==1?-0.5:-19.0;
+            const double expected=transfer_cost?-2.0*target_rhs:(columns==1?-0.5:-19.0);
             if(!primal||std::abs(primal->objective-expected)>1e-9)
                 throw std::runtime_error("measured solve differs from the independent literal objective");
             std::cout<<std::setprecision(17)
@@ -158,6 +162,7 @@ int main(int argc,char** argv) {
             <<"}\n";
         run_pair("tiny-overhead",1,repetitions);
         run_pair("small-reuse",40,repetitions);
+        run_pair("transfer-cost",100000,repetitions);
         return 0;
     } catch(const std::exception& error) {
         std::cerr<<error.what()<<'\n';return 1;

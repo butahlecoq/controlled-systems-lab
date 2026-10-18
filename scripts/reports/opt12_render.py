@@ -16,7 +16,7 @@ from pathlib import Path
 EVIDENCE_FILES = ("raw-events.jsonl", "raw-stderr.txt", "release-build-log.txt",
                   "build-provenance.json", "executable.sha256", "measurement.exe",
                   "measurement-command.txt", "trials.csv")
-SCENARIOS = ("tiny-overhead", "small-reuse")
+SCENARIOS = ("tiny-overhead", "small-reuse", "transfer-cost")
 MODES = ("cold", "warm")
 TIMED_FIELDS = ("model_load_seconds", "basis_transfer_seconds", "solve_seconds")
 
@@ -119,8 +119,8 @@ def summary(rows: list[dict]) -> list[dict]:
 def comparison_svg(rows: list[dict]) -> str:
     summaries = summary(rows)
     panels = (("Public solve wall time (ns)", "wall_ns"), ("Native component work (s)", "native_work_s"))
-    body = ['<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360">',
-            '<rect width="900" height="360" fill="white"/>',
+    body = ['<svg xmlns="http://www.w3.org/2000/svg" width="900" height="430" viewBox="0 0 900 430">',
+            '<rect width="900" height="430" fill="white"/>',
             '<style>text{font:14px system-ui,sans-serif;fill:#17202a}.axis{stroke:#687782}.cold{fill:#56758a}.warm{fill:#d27632}</style>']
     for panel_index, (title, field) in enumerate(panels):
         x0, y0, width = 70 + panel_index * 440, 65, 360
@@ -129,7 +129,7 @@ def comparison_svg(rows: list[dict]) -> str:
                                      for row in rows if row["scenario"] == case and row["mode"] == mode])
                   for case in SCENARIOS for mode in MODES]
         maximum = max(values) or 1.0
-        body.append(f'<line class="axis" x1="{x0}" y1="{y0}" x2="{x0}" y2="{y0+220}"/>')
+        body.append(f'<line class="axis" x1="{x0}" y1="{y0}" x2="{x0}" y2="{y0+275}"/>')
         for case_index, case in enumerate(SCENARIOS):
             group_y = y0 + 34 + case_index * 95
             body.append(f'<text x="{x0}" y="{group_y-8}">{html.escape(case)}</text>')
@@ -141,8 +141,8 @@ def comparison_svg(rows: list[dict]) -> str:
                 bar_width = max(1.0, width * value / maximum)
                 body.append(f'<rect class="{mode}" x="{x0}" y="{bar_y}" width="{bar_width:.1f}" height="17"/>')
                 body.append(f'<text x="{x0+bar_width+5:.1f}" y="{bar_y+14}">{mode}: {value:.6g}</text>')
-    body.extend(['<rect class="cold" x="70" y="330" width="14" height="14"/><text x="90" y="343">cold</text>',
-                 '<rect class="warm" x="150" y="330" width="14" height="14"/><text x="170" y="343">warm</text>', '</svg>'])
+    body.extend(['<rect class="cold" x="70" y="400" width="14" height="14"/><text x="90" y="413">cold</text>',
+                 '<rect class="warm" x="150" y="400" width="14" height="14"/><text x="170" y="413">warm</text>', '</svg>'])
     return "\n".join(body) + "\n"
 
 
@@ -155,17 +155,22 @@ def render(records: Path, out: Path) -> dict:
     for name, content in evidence.items():
         (out / name).write_bytes(content)
     rows_summary = summary(rows)
-    tiny_rows = [row for row in rows if row["scenario"] == "tiny-overhead"]
-    median_work = {mode: statistics.median([sum(float(row[field]) for field in TIMED_FIELDS)
-                                               for row in tiny_rows if row["mode"] == mode]) for mode in MODES}
-    cost_text = ("The tiny case records higher median aggregate native work for warm reuse; simplex iteration counts are reported separately."
-                 if median_work["warm"] > median_work["cold"]
-                 else "This run does not establish higher median aggregate native work for warm reuse in the tiny case.")
+    cost_scenarios = []
+    for scenario in SCENARIOS:
+        median_work = {mode: statistics.median([sum(float(row[field]) for field in TIMED_FIELDS)
+                                                for row in rows if row["scenario"] == scenario and row["mode"] == mode])
+                       for mode in MODES}
+        if median_work["warm"] > median_work["cold"]:
+            cost_scenarios.append(scenario)
+    cost_text = (f"Warm reuse records higher median aggregate native work in: {', '.join(cost_scenarios)}. "
+                 "Simplex iteration counts are reported separately."
+                 if cost_scenarios
+                 else "This run does not establish higher median aggregate native work for warm reuse in any case.")
     summary_html = "\n".join("<tr>" + "".join(f"<td>{html.escape(str(row[key]))}</td>" for key in
         ("scenario", "mode", "n", "wall_ns", "load_s", "basis_s", "solve_s", "native_work_s", "iterations")) + "</tr>" for row in rows_summary)
     trial_html = "\n".join(f'<tr><td>{row["scenario"]}</td><td>{row["pair"]}</td><td>{row["mode"]}</td><td>{row.get("cache_state")}</td><td>{row.get("basis_accepted")}</td><td>{row["wall_ns"]}</td><td>{row.get("simplex_iterations")}</td><td><details><summary>raw diagnostics</summary><pre>{html.escape(row.get("diagnostics", ""))}</pre></details></td></tr>' for row in rows)
     fixtures = metadata.get("input_fixtures", {})
-    fixtures_html = "".join(f'<tr><td>{html.escape(name)}</td><td>{fixture["rows"]} × {fixture["columns"]}</td><td>{fixture["sha256"]}</td><td>{fixture["source_rhs"]} → {fixture["changed_rhs"]}</td><td>{fixture["expected_objective"]}</td></tr>' for name, fixture in fixtures.items())
+    fixtures_html = "".join(f'<tr><td>{html.escape(name)}</td><td>{fixture["rows"]} × {fixture["columns"]}</td><td>{fixture["sha256"]}</td><td>{fixture["source_rhs"]} → {fixture["changed_rhs"]}</td><td>{html.escape(fixture.get("objective_change", "unchanged"))}</td><td>{fixture["expected_objective"]}</td></tr>' for name, fixture in fixtures.items())
     meta_html = "".join(f'<tr><th>{html.escape(key)}</th><td>{html.escape(json.dumps(value, sort_keys=True))}</td></tr>' for key, value in metadata.items() if key != "input_fixtures")
     (out / "comparison.svg").write_text(comparison_svg(rows), encoding="utf-8", newline="\n")
     files = sorted(path.name for path in out.iterdir() if path.is_file())
@@ -174,10 +179,10 @@ def render(records: Path, out: Path) -> dict:
     page = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(report_id)} — OPT-12</title>
 <style>body{{font:16px/1.5 system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#17202a}}table{{border-collapse:collapse;width:100%;margin:1rem 0}}th,td{{border:1px solid #9aa4ad;padding:.45rem;text-align:left;vertical-align:top}}th{{background:#edf2f5}}pre{{white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow:auto}}.note{{padding:1rem;border-left:4px solid #46647a;background:#f3f6f8}}img{{max-width:100%;height:auto}}</style></head><body>
-<h1>OPT-12: HiGHS cross-query basis reuse</h1><p class="note">{html.escape(cost_text)} Measurements describe two synthetic LPs on the recorded host. They do not establish a general speedup or worst-case complexity change.</p>
+<h1>OPT-12: HiGHS cross-query basis reuse</h1><p class="note">{html.escape(cost_text)} Measurements describe three synthetic LPs on the recorded host. They do not establish a general speedup or worst-case complexity change.</p>
 <p>Source commit <code>{html.escape(metadata["source_commit"])}</code>; adapter {html.escape(metadata["adapter_version"])}; native solver {html.escape(metadata["native_solver"])}; Release.</p>
 <h2>Workload and independent checks</h2><p>Each warm trial performs one unreported source solve in a fresh workspace, then solves the same changed LP as its paired cold trial. Measured results pass optimal-status, feasibility, and literal-objective checks. Side order alternates within each pair. Public-call wall time wraps <code>LPWorkspace.solve</code>; native load, basis-transfer setup, and solve intervals are reported separately.</p>
-<table><thead><tr><th>Case</th><th>Size</th><th>Input SHA-256</th><th>RHS change</th><th>Expected objective</th></tr></thead><tbody>{fixtures_html}</tbody></table>
+<table><thead><tr><th>Case</th><th>Size</th><th>Input SHA-256</th><th>RHS change</th><th>Objective change</th><th>Expected objective</th></tr></thead><tbody>{fixtures_html}</tbody></table>
 <h2>Paired medians</h2><img src="comparison.svg" alt="Median cold and warm wall time and native component work"><p>Native work sums model-load, basis-transfer, and solve intervals. It excludes independent result verification.</p>
 <table><thead><tr><th>Case</th><th>Mode</th><th>n</th><th>Wall ns median [min, max]</th><th>Load s</th><th>Basis setup s</th><th>Solve s</th><th>Native work s</th><th>Simplex iterations</th></tr></thead><tbody>{summary_html}</tbody></table>
 <h2>Trials</h2><table><thead><tr><th>Case</th><th>Pair</th><th>Mode</th><th>Cache</th><th>Basis accepted</th><th>Wall ns</th><th>Iterations</th><th>Diagnostics</th></tr></thead><tbody>{trial_html}</tbody></table>
