@@ -6,6 +6,12 @@
 namespace csl::synthesis {
 namespace {
 Diagnostics one(Diagnostic diagnostic) { return Diagnostics{std::move(diagnostic)}; }
+std::optional<Termination> interruption(const ExecutionContext& context) {
+    if(context.cancellation.stop_requested()) return Termination::cancelled;
+    if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)
+        return Termination::resource_limit;
+    return {};
+}
 ProgramId path_program_id(const model::HybridPath& path) {
     std::string value="hybrid-path";
     for(const auto& edge:path.edges)
@@ -88,7 +94,7 @@ HybridPortfolioExecution execute_hybrid_path_programs(
     std::vector<std::optional<PreparedBranch>> prepared_branches;
     prepared_branches.reserve(programs.size());
     bool admitted=true;
-    bool stopped=false;
+    std::optional<Termination> preflight_interruption;
 
     // Admit every branch before creating any solver workspace. A rejection in
     // a later branch must not leave earlier branches partially executed.
@@ -97,11 +103,9 @@ HybridPortfolioExecution execute_hybrid_path_programs(
         execution.path=branch.path;
         auto prepare=[&]<class Program,class Port>(const Program& program,
             const registry::PreparedProvider<Port>& provider)->std::optional<PreparedBranch> {
-            if(context.cancellation.stop_requested() ||
-               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
-                execution.termination=context.cancellation.stop_requested()?
-                    Termination::cancelled:Termination::resource_limit;
-                stopped=true;
+            if(const auto stop=interruption(context)) {
+                execution.termination=*stop;
+                preflight_interruption=*stop;
                 return {};
             }
             auto selection=provider.prepare(program);
@@ -115,11 +119,9 @@ HybridPortfolioExecution execute_hybrid_path_programs(
             auto pipeline=std::get<registry::PreparedPipeline<Port>>(std::move(selection));
             const auto provenance=pipeline.provenance();
             execution.providers.assign(provenance.begin(),provenance.end());
-            if(context.cancellation.stop_requested() ||
-               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
-                execution.termination=context.cancellation.stop_requested()?
-                    Termination::cancelled:Termination::resource_limit;
-                stopped=true;
+            if(const auto stop=interruption(context)) {
+                execution.termination=*stop;
+                preflight_interruption=*stop;
                 return {};
             }
             return PreparedBranch{std::move(pipeline)};
@@ -131,14 +133,20 @@ HybridPortfolioExecution execute_hybrid_path_programs(
         portfolio.branches.push_back(std::move(execution));
     }
 
-    if(!admitted || stopped) {
+    if(!admitted || preflight_interruption) {
         for(std::size_t i=0;i<portfolio.branches.size();++i) {
             auto& branch=portfolio.branches[i];
             if(!branch.diagnostics.empty() || branch.termination==Termination::cancelled ||
                branch.termination==Termination::resource_limit) continue;
-            branch.termination=Termination::operation_rejected;
-            branch.diagnostics={{DiagnosticCode::unsupported,"hybrid.portfolio.admission",
-                "No branch was executed because complete portfolio admission did not succeed"}};
+            if(preflight_interruption) {
+                branch.termination=*preflight_interruption;
+                branch.diagnostics={{DiagnosticCode::unsupported,"hybrid.portfolio.preflight_interrupted",
+                    "No branch was executed because portfolio admission was cancelled or its deadline expired"}};
+            } else {
+                branch.termination=Termination::operation_rejected;
+                branch.diagnostics={{DiagnosticCode::unsupported,"hybrid.portfolio.admission",
+                    "No branch was executed because complete portfolio admission did not succeed"}};
+            }
         }
         return portfolio;
     }
@@ -149,10 +157,8 @@ HybridPortfolioExecution execute_hybrid_path_programs(
         auto& execution=portfolio.branches[i];
         auto run=[&]<class Program,class Port>(const Program& program,
             registry::PreparedPipeline<Port>& pipeline) {
-            if(context.cancellation.stop_requested() ||
-               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
-                execution.termination=context.cancellation.stop_requested()?
-                    Termination::cancelled:Termination::resource_limit;
+            if(const auto stop=interruption(context)) {
+                execution.termination=*stop;
                 complete=false;
                 return;
             }

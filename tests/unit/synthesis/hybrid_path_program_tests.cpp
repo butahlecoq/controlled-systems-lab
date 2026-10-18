@@ -60,11 +60,13 @@ class RejectingConvex final : public ConvexWorkspace {
 };
 
 registry::PreparedProvider<registry::LPPort> lp_provider(std::stop_source* cancel_during_prepare=nullptr,
-    std::shared_ptr<int> factory_calls=std::make_shared<int>(0),std::string reject_problem={}) {
+    std::shared_ptr<int> factory_calls=std::make_shared<int>(0),std::string reject_problem={},
+    std::string cancel_problem={}) {
     registry::Registry<registry::LPPort> providers;
     REQUIRE_FALSE(providers.add({{{"reject-lp"},"1"},
-        [cancel_during_prepare,reject_problem](const LinearProgram& program,const registry::Requirements&)->registry::Capability{
-            if(cancel_during_prepare) cancel_during_prepare->request_stop();
+        [cancel_during_prepare,reject_problem,cancel_problem](const LinearProgram& program,const registry::Requirements&)->registry::Capability{
+            if(cancel_during_prepare && (cancel_problem.empty() || program.identity().problem.value==cancel_problem))
+                cancel_during_prepare->request_stop();
             if(program.identity().problem.value==reject_problem && !reject_problem.empty())
                 return Diagnostics{{DiagnosticCode::unsupported,"fixture.capability","requested fixture rejection"}};
             return registry::Offer{};
@@ -193,21 +195,29 @@ TEST_CASE("hybrid branch execution records cancellation without invoking a provi
 }
 
 TEST_CASE("hybrid branch execution observes cancellation after provider preparation") {
-    auto built=build_hybrid_path_program(example_system(),example_request(),example_path(),
-        {"hybrid-problem"},{16,64,1024});
-    REQUIRE(std::holds_alternative<HybridPathProgram>(built));
-    const std::array<HybridPathProgram,1> programs{std::get<HybridPathProgram>(std::move(built))};
+    auto first=build_hybrid_path_program(example_system(),example_request(),example_path(),
+        {"first-problem"},{16,64,1024});
+    auto second=build_hybrid_path_program(example_system(),example_request(),example_path(),
+        {"stop-during-prepare"},{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(first));
+    REQUIRE(std::holds_alternative<HybridPathProgram>(second));
+    const std::array<HybridPathProgram,2> programs{
+        std::get<HybridPathProgram>(std::move(first)),std::get<HybridPathProgram>(std::move(second))};
     std::stop_source cancellation;
     auto factory_calls=std::make_shared<int>(0);
     const ExecutionContext context{{},cancellation.get_token(),{},{1e-8,1e-8},{},{}};
-    const auto report=execute_hybrid_path_programs(programs,lp_provider(&cancellation,factory_calls),
+    const auto report=execute_hybrid_path_programs(programs,
+        lp_provider(&cancellation,factory_calls,{},"stop-during-prepare"),
         convex_provider(),context);
-    REQUIRE(report.branches.size()==1);
+    REQUIRE(report.branches.size()==2);
     CHECK_FALSE(report.all_supplied_branches_completed);
     CHECK(report.branches[0].termination==Termination::cancelled);
     CHECK(*factory_calls==0);
     REQUIRE(report.branches[0].providers.size()==1);
     CHECK_FALSE(report.branches[0].result.has_value());
+    CHECK(report.branches[0].diagnostics[0].field=="hybrid.portfolio.preflight_interrupted");
+    CHECK(report.branches[1].termination==Termination::cancelled);
+    CHECK(report.branches[1].diagnostics.empty());
 }
 
 TEST_CASE("hybrid branch execution retains a completed solver result and provenance") {
