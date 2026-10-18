@@ -129,6 +129,15 @@ restore/save steps, with trusted main/manual saves and restore-only PR access;
 release publishers should use a separate namespace or clean build.
 [GitHub cache scope and trust](https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching).
 
+The initial [key generator](../../scripts/ci/cache_keys.py) and its
+[CLI tests](../../tests/ci/test_cache_keys.py) implement these boundaries:
+PRs compute main-compatible restore keys with saving disabled; manual runs on a
+development branch use a separate branch namespace; tag runs cannot save.
+Compiler prefixes include all explicit compatibility fields and dependency/patch
+inputs; a source-revision suffix allows a new immutable snapshot without broadening
+the compatible restore prefix. Raw-archive keys omit compiler settings because
+their contents remain the same independently verified source bytes.
+
 Pin cache actions to reviewed full commit SHAs. On the audit date, the official
 `v6.1.0` tag resolves to `55cc8345863c7cc4c66a329aec7e433d2d1c52a9`;
 check runner compatibility and its Node 24 runtime before adoption.
@@ -146,7 +155,9 @@ separation, corrupt-byte replacement/rejection and the empty-option direct path.
 Two separate Windows Visual Studio core configurations also recorded Eigen/JSON
 archive misses followed by hash-verified hits in a fresh build directory.
 This proves local archive behavior, not hosted compiler-cache reuse or reduced
-wall-clock time. Compiler/workflow keys and hosted evidence remain pending.
+wall-clock time. Five local CLI tests also pass for pin/patch invalidation,
+incompatible compiler/configuration/options/lane keys and PR/manual trust scopes.
+Compiler-cache workflow integration and hosted evidence remain pending.
 
 Retain hosted links, exact head SHA, tool versions, options, archive hashes,
 cache keys and restore/save results for each experiment:
