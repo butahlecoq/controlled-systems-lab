@@ -148,10 +148,15 @@ TEST_CASE("warm starts fall back for a changed row dimension and retain exact in
     auto worker=registration.factory(feasible);
     cost(accepted(worker->solve(feasible,context())),feasible,-4);
     const auto result=accepted(worker->solve(infeasible,context()));
+    const auto cold=cold_result(infeasible);
     CHECK(result.termination==Termination::completed);
     CHECK(result.outcome.value==MathematicalOutcome::infeasible);
+    CHECK(cold.termination==result.termination);
+    CHECK(cold.outcome.value==result.outcome.value);
     REQUIRE(std::holds_alternative<ExactFarkasEvidence>(result.outcome.support));
     CHECK(verify_linear_infeasibility_certificate(infeasible,std::get<ExactFarkasEvidence>(result.outcome.support).certificate()).index()==0);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(cold.outcome.support));
+    CHECK(verify_linear_infeasibility_certificate(infeasible,std::get<ExactFarkasEvidence>(cold.outcome.support).certificate()).index()==0);
     CHECK(result.raw_diagnostics.find("warm_start.cache_state=invalidated_dimension_change")!=std::string::npos);
     CHECK(result.raw_diagnostics.find("warm_start.next_cache=invalidated_after_result")!=std::string::npos);
 }
