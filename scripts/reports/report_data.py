@@ -790,6 +790,11 @@ def _validate_trial_rows(trials,scenarios,provenance,clock,environment,convex,ba
                         require(all(block['context'][key]==environment[key] for key in ('absolute_tolerance','relative_tolerance')),
                                 'convex residual context differs from declared numerical policy')
             require(isinstance(result["raw_diagnostics"],str), "raw diagnostics required")
+            if not convex:
+                actual_backend = trial["registry"].get("actual")
+                if isinstance(actual_backend, dict) and actual_backend.get("id") == "csl.lp.highs":
+                    require(actual_backend == provenance["backend"], "returned LP backend differs from report provenance")
+                    native_iterations(result["raw_diagnostics"], actual_backend["version"])
         if convex:
             require(type(trial["public_run_entered"]) is bool and trial["public_run_entered"]==trial["timings"]["public_run"]["available"],"public entry boundary mismatch")
             require(trial["native_phases"]==convex_native_phases(trial,convex_route(scenarios[key]),scenarios[key]["solver"]["identity"]["program"]),"native phase projection differs")
@@ -804,8 +809,6 @@ def _validate_trial_rows(trials,scenarios,provenance,clock,environment,convex,ba
         if trial["validation"]["passed"]:
             require(all(trial["timings"][p]["available"] for p in PHASES),"successful trial requires all measured phase spans")
             require(trial["registry"]["actual"]==provenance["backend"],"successful trial requires actual method provenance")
-            if not convex:
-                native_iterations(result["raw_diagnostics"], provenance["backend"]["version"])
             require(trial["harness"]["status"] == "returned" and reference_matches(trial,scenarios[key]), "inconsistent successful validation")
             require(trial["attempt"] == {"number":1,"state":"returned_result","workspace_reuse":False}, "current attempt mismatch")
             require(re.fullmatch(r"[0-9]+",trial["observation_token"]) is not None, "observation token required")

@@ -256,6 +256,13 @@ class RecordTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'diagnostic/backend identity mismatch'):
             self.data.validate_view(self.data.seal(payload))
 
+        failed=self.fixture();payload=failed['payload'];trial=payload['trials'][0]
+        trial['validation']={'passed':False,'errors':['synthetic validation failure']}
+        trial['result']['raw_diagnostics']=trial['result']['raw_diagnostics'].replace(
+            'adapter.version=1.0.0+highs.1.11.0',f'adapter.version={current_version}')
+        with self.assertRaisesRegex(ValueError,'diagnostic/backend identity mismatch'):
+            self.data.validate_view(self.data.seal(payload))
+
     def test_synthetic_measurement_shape_cannot_hide_spans_or_change_source(self):
         # Literal data only, no process execution or real measurement claim.
         view=self.fixture();p=view['payload'];p['purpose']='measurement'
