@@ -2,7 +2,7 @@
 
 **Audit base:** `35b663a17cb1a1b60997b549fff32f15e43e82c0`
 **Scope:** source audit of current Qhull H/V conversion, H projection / Fourier–Motzkin elimination, nominal predecessor construction, Phase I, `ExecutionContext` / `ResourcePolicy`, and `Executor`; compared with the candidate T-S01 and clipped-stage fixture in the class-level architecture.
-**Not in scope:** benchmark execution, performance measurement, changing implementation, or establishing universal numerical behavior.
+**Original scope:** source audit of declared controls and gaps; no benchmark or performance claim and no universal capacity guarantee.
 
 ## Findings
 
@@ -22,7 +22,30 @@
 
 The architecture’s candidate T-S01 case uses two stages, scalar state/control, and `[0,1]` controls. Its clipped companion adds `X1=[0,1/2]`; the canonical joint relation has five coordinates, four equality rows and six source inequality rows before permitted reduction, and is a segment with two extreme points and no rays. The class-map labels these counts as minimum regression requirements only; they exclude backend auxiliaries and do not establish global caps. The TEST-08 operator companions are two-dimensional (triangle, interval projection, singular image) and have a three-vertex triangle oracle.
 
-These are small structural fixtures, but the current source does not prove that every proposed operation chain is implemented or admitted: the class map explicitly says H/V conversion alone is not intersection, projection, predecessor, or family extraction. Nor do the source row counts bound intermediate FM growth for a general input. Any test demonstrating that these specific analytic cases fit a selected policy would establish only those fixture cases.
+These are small structural fixtures. The clipped forward-chain test below verifies only its named nominal fixture; it does not establish backward recovery, complete-family extraction, a composed TEST-08 chain, or admission of a general profile. The individual TEST-08 operator oracles already have behavior-facing tests, summarized below; those tests are separate cases and do not report peak allocations or prove that a selected capacity policy admits a composed chain. Nor do the source row counts bound intermediate Fourier–Motzkin growth for a general input. Any test demonstrating that these analytic cases fit a selected policy establishes only those fixture cases.
+
+### Existing TEST-08 operator behavior tests
+
+| Oracle | Current test evidence | Structural evidence currently asserted | Remaining measurement gap |
+|---|---|---|---|
+| Unit square intersected with `x+y<=1` | `tests/unit/geometry/polyhedral_intersection_test.cpp`, `unit square intersected with x+y<=1 matches the independent rational triangle` | Checks six independently selected triangle points are admitted and three exterior points rejected. Inputs carry four square inequalities plus three halfspace inequalities. | Does not assert the returned H row count or compose this result with projection in one test. |
+| Triangle projected onto `x` | `tests/contract/geometry/projection_predecessor_tests.cpp`, `projection of the rational unit-square triangle is the exact interval [0,1]` | Input H has five inequalities; output dimension is one, no equalities, and at least two endpoint/tautology rows; literal points 0, 1/2, 1 are admitted and exterior points rejected. | Output row count is intentionally not fixed; intermediate Fourier–Motzkin row counts and allocations are not recorded. |
+| `[0,1]+[2,3]=[2,4]` | `tests/contract/geometry/affine_sum_tests.cpp`, `interval Minkowski sum matches independent rational endpoint oracles` | Output is ambient-one V with at least two vertices; every vertex lies in `[2,4]` and both endpoints occur. | Does not assert an exact vertex count or record candidate/temporary allocation counts. |
+| Singular map `(x,y)->(x,0)` of the unit square | `tests/contract/geometry/affine_sum_tests.cpp`, `rectangular and singular affine maps retain their actual ambient spaces` | Output remains ambient two, has observed affine rank one, lies on `y=0` within `[0,1]`, and includes both segment endpoints. | Does not assert an exact vertex count or record candidate/temporary allocation counts. |
+| Unbounded line preimage | `tests/contract/geometry/projection_predecessor_tests.cpp`, `projection provider rejects the unbounded preimage of y=0 instead of returning finite vertices` | Provider admission rejects the request before execution and verifies that no workspace is created. | Does not execute projection or prove runtime unbounded-result detection; contributes no finite-output capacity counts. |
+
+### Executed clipped T-S01 forward-chain evidence (2026-10-18)
+
+The caller-facing `nominal_forward_tests` now executes the two-stage scalar integrator with `X1=[0,1/2]`, all controls `[0,1]`, and the existing terminal state constraint `X2=[0,2]`. Literal independent interval oracles confirm the stage marginals `R0={0}`, `R1=[0,1/2]`, and `R2=[0,3/2]`. This traverses the registered state/control affine images, Minkowski sum, V-to-H conversion, next-state intersection, state projection, and zero-coordinate feasibility projection. The later stage retains six operation-lineage entries.
+
+The public `ForwardStage` factors expose these observed H shapes (dimension, inequality rows, equality rows, inequality scalar entries, equality scalar entries):
+
+| Stage | Joint transition factor | Post-sum state intersection | Published state marginal |
+|---|---:|---:|---:|
+| 1, clipped | `(3, 6, 2, 18, 6)` | `(1, 4, 0, 4, 0)` | `(1, 4, 0, 4, 0)` |
+| 2 | `(3, 8, 1, 24, 3)` | `(1, 4, 0, 4, 0)` | `(1, 4, 0, 4, 0)` |
+
+These are observed stage-result counts, including retained redundant rows; they are not minimal representations, whole-family five-coordinate counts, backend peak allocations, or hard-cap values. The public tube does not expose each intermediate V image/sum, so their generator counts and temporary allocations remain unmeasured. The test establishes only this clipped forward fixture. The named TEST-08 operations have separate behavior tests (above), but a composed chain with consistently recorded input/output shapes and enforceable boundary tests remains outstanding before any profile ceiling can be selected.
 
 ## Capacity policy recommendation for the first analytic profile
 
@@ -30,8 +53,8 @@ The audit supports defining a fixture-scoped profile, but it does **not** suppor
 
 The next evidence needed to choose finite fixture-profile values is:
 
-1. Implement or identify the complete analytic fixture operation chains and their observable result contracts, including T-S01, its clipped companion, and TEST-08. The architecture currently cautions that H/V conversion alone does not prove intersection, projection, predecessor, or family extraction.
-2. Add behavior-facing tests that execute each full chain and record exact per-stage input and output dimensions, row/generator counts, and checked scalar-entry requirements. Keep equalities, inequalities, vertices, and rays distinct.
+1. Complete the observable-operation-chain inventory: unmodified and clipped T-S01 forward fixtures have caller-facing output/shape tests, and the TEST-08 operator oracles have separate behavior-facing tests. Add a composed operator-chain case (or explicitly justify why separate public contract cases are sufficient) and state the result contract at each step.
+2. Extend behavior-facing evidence to composed chains and record input/output dimensions, row/generator counts, and checked scalar-entry requirements. Existing tests leave some output counts variable and do not expose each intermediate V image/sum in the public T-S01 tube; obtain missing counts from a behavior-facing observation seam or separately exercised public operation chain. Keep equalities, inequalities, vertices, and rays distinct.
 3. Derive the smallest structural limits that admit those exact chains, then add boundary tests proving each limit admits the required result and rejects an over-limit request at the earliest enforceable point. Require rejection before allocation only when a conservative size bound is available. For backend-generated output whose size is unknown until enumeration (such as the current synchronous Qhull call), document that a post-generation check cannot provide a hard allocation cap; require a separately reviewed backend admission bound or interruptible allocation before making that claim. Any capacity stop must preserve request identity and completed lineage and must never present a truncated result as equivalent.
 4. Keep those values explicitly fixture-profile scoped. A broader profile requires separate workload evidence and a policy decision; fixture results cannot establish universal capacity, host-memory enforcement, native-thread enforcement, or numerical completeness.
 5. For concurrent scenarios, use one caller-owned `ExecutionContext`/`ResourcePolicy` and per-task workspace reservations. Keep the existing warning that reservations are accounting/admission only, and do not describe separate `Executor` instances as sharing a process-wide cap.
@@ -46,6 +69,10 @@ This recommendation establishes the evidence sequence without inventing capacity
 - `include/csl/geometry/polyhedral_projection.hpp:10-16, 50-55` — optional projection row budget and materializer API.
 - `src/geometry/polyhedral/projection.cpp:112-125, 130-145, 147-194, 200-214, 227-248` — checked row arithmetic, FM intermediate count, stop checkpoints, and V generator copying without a V output cap.
 - `include/csl/reachability/nominal_predecessor.hpp:7-16, 34-52` and `src/reachability/nominal_predecessor.cpp:60-83, 110-177` — H-only operands, separate prepared projection workspace, overflow-checked joint pullback assembly without an execution context or policy during preparation.
+- `include/csl/reachability/nominal_forward.hpp:8-31` and `tests/unit/reachability/nominal_forward_tests.cpp` — public forward-stage factors and the unmodified/clipped T-S01 literal marginal and shape-count oracles.
+- `tests/unit/geometry/polyhedral_intersection_test.cpp` — rational square/triangle intersection membership oracle.
+- `tests/contract/geometry/projection_predecessor_tests.cpp` — rational triangle projection and unbounded line-preimage rejection.
+- `tests/contract/geometry/affine_sum_tests.cpp` — interval Minkowski endpoint oracle and singular square-to-segment affine image.
 - `include/csl/optimization/phase_one.hpp:18-27, 36-50` and `src/optimization/phase_one/simplex.cpp:32-56, 81-84, 218-257, 275-338` — local defaults/profile estimate, context polling, caller memory estimate check and pivot stop.
 - `include/csl/execution/contracts.hpp:10-23` and `src/contracts/execution.cpp:14-19` — shared caller policy, optional deadline and validation of declared thread arithmetic; memory explicitly not enforced.
 - `include/csl/execution/executor.hpp:11-20, 49-57, 121-145, 176` and `src/execution/executor.cpp:30-37, 51-73, 87-131, 151-219` — per-task declarations, enforcement labels, admission checks, cancellation/deadline, reservations and worker launch/join behavior.
@@ -60,4 +87,12 @@ Commands run from the audited worktree:
 - `rg -n` and numbered `Get-Content` reads over the source and architecture paths listed above — used to locate and inspect implementation contracts and fixture definitions.
 - `git diff --check` — run after writing this report.
 
-No benchmark, performance measurement, build, test, or external-source lookup was run. This report establishes source-declared controls and gaps only; it does not establish runtime memory use, backend interruptibility, fixture completion, selected profile thresholds, or a universal capacity guarantee.
+Follow-up verification in isolated worktree `test/issue7-ts01-clipped-capacity-20261018`:
+
+- MSVC Release configure with `cmake --preset dev-windows` — passed.
+- `cmake --build --preset dev-windows --target nominal_forward_tests` — passed.
+- `build/dev-windows/Release/nominal_forward_tests.exe --test-case="clipped T-S01 chain retains literal marginals and stage shape counts"` — passed (1 case, 81 assertions).
+- Full `nominal_forward_tests.exe` — passed (9 cases, 605 assertions).
+- `git diff --check` — passed.
+
+No benchmark or performance measurement was run. This follow-up establishes executed behavior for the stated clipped fixture only; it does not establish runtime peak memory, backend interruptibility, selected profile thresholds, or universal capacity guarantees.
