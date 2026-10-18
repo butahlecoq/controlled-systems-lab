@@ -93,7 +93,8 @@ if(doctest_install_artifacts)
   message(FATAL_ERROR
     "Test-only doctest artifacts were installed: ${doctest_install_artifacts}")
 endif()
-file(GLOB_RECURSE public_headers "${prefix}/include/csl/*.hpp")
+file(GLOB_RECURSE public_headers
+  "${prefix}/${CSL_INSTALL_INCLUDEDIR}/csl/*.hpp")
 if(NOT public_headers)
   message(FATAL_ERROR "No installed CSL public headers found for dependency audit.")
 endif()
