@@ -2,6 +2,8 @@
 
 When finding or implementing GitHub work, follow the live discovery, claim and dependency-verification protocol in [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md). For comparison-program tickets, also read [the comparison-program contract](docs/architecture/comparison-program.md); it is a planning spec, not authorization to run benchmarks.
 
+For changes to public APIs, dependencies, installation, executable examples or publication workflows, follow [delivery guidance](docs/agents/delivery.md) and record release/package impact in the PR. Numerical algorithms also need a minimal visual example where a supported 2D case exists; preserve the [published-results evidence gates](docs/architecture/published-algorithm-results.md).
+
 ## Worktree and disk hygiene
 
 At the end of a session that creates worktrees or local build directories, and before starting another large local build:
