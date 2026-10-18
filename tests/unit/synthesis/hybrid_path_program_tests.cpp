@@ -5,6 +5,7 @@
 #include <csl/sets/data.hpp>
 #include <csl/registry/provider.hpp>
 #include "hybrid_family_verifier_internal.hpp"
+#include <algorithm>
 #include <array>
 
 using namespace csl;
@@ -51,6 +52,108 @@ std::pair<model::HybridSystem,model::HybridRequest> exact_singleton_portfolio() 
     model::HybridRequest request{{{"source"},{2}},{{"target"}},
         {{{"target"},LinearTerminal{{1,0},0},"cost","u"}}};
     return {std::move(system),std::move(request)};
+}
+
+struct OneStepOracleBranch {
+    model::HybridPath path;
+    Vector joint_tuple;
+    double objective{};
+};
+
+bool equality_rows_have_full_column_rank(const numeric::MatrixView& equalities) {
+    std::vector<Vector> reduced(equalities.rows(),Vector(equalities.cols()));
+    for(std::size_t row=0;row<equalities.rows();++row)
+        for(std::size_t col=0;col<equalities.cols();++col)
+            reduced[row][col]=equalities(row,col);
+    std::size_t rank=0;
+    for(std::size_t col=0;col<equalities.cols() && rank<reduced.size();++col) {
+        auto pivot=rank;
+        while(pivot<reduced.size() && reduced[pivot][col]==0) ++pivot;
+        if(pivot==reduced.size()) continue;
+        std::swap(reduced[pivot],reduced[rank]);
+        const double scale=reduced[rank][col];
+        for(std::size_t j=col;j<equalities.cols();++j) reduced[rank][j]/=scale;
+        for(std::size_t row=0;row<reduced.size();++row) {
+            if(row==rank) continue;
+            const double factor=reduced[row][col];
+            for(std::size_t j=col;j<equalities.cols();++j)
+                reduced[row][j]-=factor*reduced[rank][j];
+        }
+        ++rank;
+    }
+    return rank==equalities.cols();
+}
+
+// Deliberately independent of the production path enumerator, relation
+// composer, and verifier. This small exhaustive oracle directly interprets
+// the one-step singleton fixture from its raw mode/edge data.
+std::vector<OneStepOracleBranch> enumerate_one_step_singleton_oracle(
+    const model::HybridSystem& system,const model::HybridRequest& request) {
+    REQUIRE(system.horizon==1);
+    std::vector<OneStepOracleBranch> branches;
+    const auto source=std::find_if(system.modes.begin(),system.modes.end(),[&](const auto& mode) {
+        return mode.id==request.initial.mode;
+    });
+    REQUIRE(source!=system.modes.end());
+    const auto* flow=std::get_if<LinearStage>(&source->flow);
+    REQUIRE(flow!=nullptr);
+    REQUIRE(flow->A.rows==request.initial.state.size());
+    REQUIRE(flow->A.cols==request.initial.state.size());
+    REQUIRE(flow->B.cols==source->control_dimension);
+    REQUIRE(flow->B.rows==flow->A.rows);
+    REQUIRE(flow->offset.size()==flow->A.rows);
+    REQUIRE(source->control_sets.size()==1);
+    const auto* control_singleton=std::get_if<Singleton>(&source->control_sets[0]);
+    REQUIRE(control_singleton!=nullptr);
+    const Vector control=control_singleton->point;
+    Vector pre(flow->A.rows);
+    for(std::size_t row=0;row<pre.size();++row) {
+        pre[row]=flow->offset[row];
+        for(std::size_t col=0;col<request.initial.state.size();++col)
+            pre[row]+=flow->A.values[row*flow->A.cols+col]*request.initial.state[col];
+        for(std::size_t col=0;col<control.size();++col)
+            pre[row]+=flow->B.values[row*flow->B.cols+col]*control[col];
+    }
+
+    for(const auto& edge:system.edges) {
+        if(edge.source!=request.initial.mode) continue;
+        if(std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),edge.target)==
+           request.allowed_terminal_modes.end()) continue;
+        REQUIRE(edge.guards.size()==1);
+        const auto* guard=std::get_if<Singleton>(&edge.guards[0]);
+        REQUIRE(guard!=nullptr);
+        if(guard->point!=pre) continue;
+        REQUIRE(edge.reset_relations.size()==1);
+        const auto reset_data=sets::from_handle(edge.reset_relations[0]);
+        REQUIRE(std::holds_alternative<sets::SetData>(reset_data));
+        const auto reset_rep=std::get<sets::SetData>(reset_data).representation();
+        REQUIRE(std::holds_alternative<sets::SingletonRepresentation>(reset_rep));
+        const auto reset_view=std::get<sets::SingletonRepresentation>(reset_rep).point;
+        const auto target=std::find_if(system.modes.begin(),system.modes.end(),[&](const auto& mode) {
+            return mode.id==edge.target;
+        });
+        REQUIRE(target!=system.modes.end());
+        REQUIRE(reset_view.size()==pre.size()+target->state_dimension);
+        bool reset_matches=true;
+        for(std::size_t i=0;i<pre.size();++i) reset_matches=reset_matches && reset_view[i]==pre[i];
+        if(!reset_matches) continue;
+        Vector post(reset_view.size()-pre.size());
+        for(std::size_t i=0;i<post.size();++i) post[i]=reset_view[pre.size()+i];
+        const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+            [&](const auto& candidate) { return candidate.mode==edge.target; });
+        REQUIRE(objective!=request.terminal_objectives.end());
+        const auto* linear=std::get_if<LinearTerminal>(&objective->objective);
+        REQUIRE(linear!=nullptr);
+        REQUIRE(linear->coefficients.size()==post.size());
+        double cost=linear->offset;
+        for(std::size_t i=0;i<post.size();++i) cost+=linear->coefficients[i]*post[i];
+        Vector joint=request.initial.state;
+        joint.insert(joint.end(),control.begin(),control.end());
+        joint.insert(joint.end(),pre.begin(),pre.end());
+        joint.insert(joint.end(),post.begin(),post.end());
+        branches.push_back({{{request.initial.mode,edge.target},{edge.id}},std::move(joint),cost});
+    }
+    return branches;
 }
 
 HybridPathOptimalFaceCandidate exact_candidate(const HybridPathProgram& program,Vector point) {
@@ -637,6 +740,49 @@ TEST_CASE("exact singleton hybrid verifier independently retains every tied edge
     CHECK(report.branches[1].objective_optimality==HybridVerificationStatus::established);
     CHECK(report.branches[2].objective_optimality==HybridVerificationStatus::refuted);
     CHECK(report.branches[2].continuous_coverage==HybridVerificationStatus::established);
+}
+
+TEST_CASE("independent one-step oracle matches exhaustive hybrid portfolio and tied optimum") {
+    auto [system,request]=exact_singleton_portfolio();
+    system.edges[1].reset_relations[0]=singleton_relation("oracle-reset-b",{3,0,1});
+    const auto oracle=enumerate_one_step_singleton_oracle(system,request);
+    REQUIRE(oracle.size()==3);
+    CHECK(oracle[0].path.edges[0].value=="tie-a");
+    CHECK(oracle[0].joint_tuple==Vector{2,1,3,0,0});
+    CHECK(oracle[0].objective==0);
+    CHECK(oracle[1].path.edges[0].value=="tie-b");
+    CHECK(oracle[1].joint_tuple==Vector{2,1,3,0,1});
+    CHECK(oracle[1].objective==0);
+    CHECK(oracle[2].path.edges[0].value=="worse");
+    CHECK(oracle[2].joint_tuple==Vector{2,1,3,1,0});
+    CHECK(oracle[2].objective==1);
+
+    const auto built=build_hybrid_portfolio_programs(system,request,{"oracle-hybrid"},
+        {1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle.size());
+    std::vector<double> costs;
+    for(std::size_t i=0;i<oracle.size();++i) {
+        CHECK(programs[i].path==oracle[i].path);
+        const auto representation=programs[i].joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& h=std::get<sets::HRepresentation>(representation);
+        CHECK(satisfies(h,oracle[i].joint_tuple));
+        CHECK(equality_rows_have_full_column_rank(h.equalities));
+        const auto& linear=std::get<LinearProgram>(programs[i].program);
+        costs.push_back(linear.offset());
+        for(std::size_t j=0;j<linear.objective().size();++j)
+            costs.back()+=linear.objective()[j]*oracle[i].joint_tuple[j];
+        CHECK(costs.back()==oracle[i].objective);
+    }
+    const auto minimum=std::min_element(oracle.begin(),oracle.end(),[](const auto& left,const auto& right) {
+        return left.objective<right.objective;
+    })->objective;
+    std::vector<std::string> oracle_optima;
+    for(const auto& branch:oracle) if(branch.objective==minimum)
+        oracle_optima.push_back(branch.path.edges[0].value);
+    CHECK(oracle_optima==std::vector<std::string>{"tie-a","tie-b"});
 }
 
 TEST_CASE("exact singleton hybrid verifier checks guard entry and rejects forbidden mode paths") {
