@@ -416,7 +416,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
     auto append = [&](Vector row, double rhs, bool equality) -> bool {
         if(cancellation.stop_requested()) return false;
         const auto row_count = inequalities.size()+equalities.size();
-        if (row_count >= limits.max_rows || width != 0 && row_count + 1 > limits.max_matrix_elements / width) return false;
+        if (row_count >= limits.max_rows ||
+            (width != 0 && row_count + 1 > limits.max_matrix_elements / width)) return false;
         (equality ? equalities : inequalities).push_back(std::move(row));
         (equality ? equality_values : bounds).push_back(rhs); return true;
     };
@@ -639,7 +640,7 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& sys
             }
             return TerminalObjective{QuadraticTerminal{std::move(q),std::move(linear),value.offset}};
         } else {
-            if(width!=0 && value.map.rows>std::numeric_limits<std::size_t>::max()/width ||
+            if((width!=0 && value.map.rows>std::numeric_limits<std::size_t>::max()/width) ||
                value.map.rows*width>limits.max_matrix_elements)
                 return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.storage","Lifted residual map exceeds its storage limit"};
             Matrix map{value.map.rows,width,Vector(value.map.rows*width)};
