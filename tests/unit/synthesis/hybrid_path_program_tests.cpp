@@ -234,6 +234,16 @@ TEST_CASE("hybrid portfolio builder returns every parallel edge branch transacti
     CHECK(std::holds_alternative<Diagnostics>(limited));
 }
 
+TEST_CASE("hybrid portfolio builder propagates cancellation to path enumeration") {
+    auto system=example_system();
+    std::stop_source source;
+    source.request_stop();
+    const auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024},{},source.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(built));
+    CHECK(std::get<OperationStopped>(built).reason==StopReason::cancelled);
+}
+
 TEST_CASE("hybrid portfolio builder rolls back after a later dimension limit failure") {
     auto [system,request]=variable_size_parallel_profile();
     const auto built=build_hybrid_portfolio_programs(system,request,{"hybrid-problem"},

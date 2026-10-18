@@ -133,6 +133,8 @@ HybridPathEnumeration enumerate_hybrid_paths(const HybridSystem& system,
     std::vector<std::unordered_set<std::string>> can_reach(system.horizon+1);
     can_reach[0] = terminal_ids;
     for (std::size_t remaining = 1; remaining <= system.horizon; ++remaining) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid path enumeration was cancelled while computing reachable modes"};
         for (const auto& edge : system.edges) {
             if(cancellation.stop_requested())
                 return OperationStopped{StopReason::cancelled,"Hybrid path enumeration was cancelled while computing reachable modes"};
