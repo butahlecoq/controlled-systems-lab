@@ -1,0 +1,119 @@
+"""Check the educational gallery against reviewed native data and literal geometry."""
+import hashlib
+from html.parser import HTMLParser
+import json
+from pathlib import Path
+import shutil
+import sys
+import tempfile
+import unittest
+from urllib.parse import urlsplit
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts/reports"))
+import visual_examples as gallery
+
+
+class Links(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.links = []
+
+    def handle_starttag(self, tag, attrs):
+        self.links.extend(value for name, value in attrs if name in {"href", "src"})
+
+
+class GalleryTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = ROOT / "reports/algorithm-results/catalog.json"
+        cls.examples = gallery.load_examples(cls.catalog)
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.site = Path(self.temp.name)
+        (self.site / "index.html").write_text("<html><body><h1>Reports</h1></body></html>")
+        for example in self.examples:
+            target = self.site / example["report_id"]
+            target.mkdir(exist_ok=True)
+            shutil.copyfile(example["records_path"], target / "records.json")
+            (target / "index.html").write_text("<html><body>Reviewed report</body></html>")
+
+    def test_saved_outputs_match_literal_geometry(self):
+        square, line, intersection = self.examples
+        self.assertEqual(square["points"], [[0,0],[1,0],[1,1],[0,1],[.5,.5],[0,0],[1,0]])
+        self.assertEqual(square["indices"], [0,1,2,3])
+        self.assertEqual(line["indices"], [1,3])
+        self.assertEqual(len(intersection["vertices"]), 8)
+        expected = {(1,.5),(1,-.5),(-1,.5),(-1,-.5),(.5,1),(-.5,1),(.5,-1),(-.5,-1)}
+        self.assertEqual({tuple(round(x, 7) for x in p) for p in intersection["vertices"]}, expected)
+        self.assertEqual(intersection["vertices"][0], [-1.0000000000000002, -.5000000000000001])
+
+    def test_build_preserves_reports_and_has_resolvable_links(self):
+        before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
+                  for p in self.site.rglob("*") if p.is_file() and p.name != "index.html"}
+        original_reports = {e["report_id"]: (self.site / e["report_id"] / "index.html").read_bytes()
+                            for e in self.examples}
+        gallery.build(self.catalog, self.site)
+        for path, digest in before.items():
+            self.assertEqual(hashlib.sha256((self.site / path).read_bytes()).hexdigest(), digest)
+        for rid, content in original_reports.items():
+            self.assertEqual((self.site / rid / "index.html").read_bytes(), content)
+        self.assertIn('href="examples/index.html"', (self.site / "index.html").read_text())
+        page = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        self.assertIn("Original point ID", page)
+        self.assertIn("not an execution trace", page)
+        self.assertIn("duplicate of point 0", page)
+        self.assertIn("binary64", page)
+        self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
+        parser = Links()
+        parser.feed(page)
+        for link in parser.links:
+            if not urlsplit(link).scheme and not link.startswith("#"):
+                self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
+        figures = list((self.site / "examples").glob("*.svg"))
+        self.assertEqual(len(figures), 3)
+        for figure in figures:
+            tree = ET.fromstring(figure.read_text())
+            self.assertEqual(tree.attrib["role"], "img")
+            self.assertIsNotNone(tree.find("{http://www.w3.org/2000/svg}desc"))
+        square = ET.parse(self.site / "examples/square_duplicates.svg")
+        boundary = square.find(".//{http://www.w3.org/2000/svg}polygon")
+        self.assertEqual(boundary.attrib["points"],
+                         "146.666667,373.333333 413.333333,373.333333 413.333333,106.666667 146.666667,106.666667")
+        self.assertEqual(len(square.findall(".//{http://www.w3.org/2000/svg}circle")), 5)
+        self.assertEqual(len(ET.parse(self.site / "examples/collinear_endpoints.svg")
+                             .findall(".//{http://www.w3.org/2000/svg}polyline")), 1)
+        first = {p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}
+        gallery.build(self.catalog, self.site)
+        self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)
+        self.assertEqual((self.site / "index.html").read_text().count('id="visual-examples-link"'), 1)
+
+    def test_modified_staged_results_are_rejected_before_writes(self):
+        target = self.site / self.examples[0]["report_id"] / "records.json"
+        record = json.loads(target.read_text())
+        record["rows"][0]["indices"] = "0:1:2"
+        target.write_text(json.dumps(record))
+        with self.assertRaisesRegex(ValueError, "staged records"):
+            gallery.build(self.catalog, self.site)
+        self.assertFalse((self.site / "examples").exists())
+
+    def test_missing_reviewed_route_is_rejected(self):
+        (self.site / self.examples[-1]["report_id"] / "index.html").unlink()
+        with self.assertRaisesRegex(ValueError, "staged report"):
+            gallery.build(self.catalog, self.site)
+
+    def test_cli_stages_the_downloaded_values(self):
+        import subprocess
+        subprocess.run([sys.executable, str(ROOT / "scripts/reports/visual_examples.py"),
+                        "--catalog", str(self.catalog), "--site", str(self.site)], check=True)
+        result = json.loads((self.site / "examples/minimal-inputs.json").read_text())
+        self.assertEqual(result["examples"][0]["indices"], [0,1,2,3])
+        self.assertEqual(result["examples"][1]["vertices"], [[0,0],[3,3]])
+        self.assertEqual(result["examples"][2]["vertices"][0], [-1.0000000000000002, -.5000000000000001])
+
+
+if __name__ == "__main__":
+    unittest.main()

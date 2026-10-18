@@ -78,6 +78,9 @@ jobs:
             echo 'No measured catalogue has been committed; publication remains pending.'
             echo 'has_reports=false' >> "$GITHUB_OUTPUT"
           fi
+      - name: Stage minimal 2D visual examples from reviewed saved results
+        if: steps.catalog.outputs.has_reports == 'true'
+        run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site
       - name: Upload reviewed static site on main only
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.catalog.outputs.has_reports == 'true'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
