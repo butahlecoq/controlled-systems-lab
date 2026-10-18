@@ -709,6 +709,7 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
         // These observations come from the admitted program/candidate inputs,
         // not from the replaceable verifier, so an adapter cannot omit or
         // rewrite the operation and provider lineage in its report.
+        report.branches[i].relation_limits=programs[i].relation_limits;
         report.branches[i].relation_operations=programs[i].relation_operations;
         const auto candidate=std::find_if(candidates.begin(),candidates.end(),[&](const auto& value) {
             return value.path==paths[i];

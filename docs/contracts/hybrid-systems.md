@@ -157,10 +157,11 @@ return diagnostics or cancellation without publishing a partial portfolio.
 The `HybridFamilyVerificationAdapter` boundary consumes the original model,
 request, exhaustive path inventory, branch programs, and candidate faces. Its
 wrapper checks complete path and report identity coverage and attaches each
-program's ordered relation-operation/resource trace and any candidate face's
-solver-provider provenance to that path's verification record. The report
-carries per-path feasibility, objective, and continuous-coverage statuses, but
-it is inspection data and cannot publish a `synthesis::OptimalFamily`.
+program's relation limits and ordered relation-operation/resource trace, plus
+any candidate face's solver-provider provenance, to that path's verification
+record. The report carries per-path feasibility, objective, and continuous-
+coverage statuses, but it is inspection data and cannot publish a
+`synthesis::OptimalFamily`.
 `ExactSingletonHybridFamilyVerifier` independently enumerates edge paths and
 reconstructs trajectories using checked integer arithmetic. It supports only
 integral initial states, singleton controls, singleton-representation resets,

@@ -816,6 +816,10 @@ TEST_CASE("exact singleton hybrid verifier independently retains every tied edge
     CHECK(report.branches[2].objective_optimality==HybridVerificationStatus::refuted);
     CHECK(report.branches[2].continuous_coverage==HybridVerificationStatus::established);
     for(std::size_t i=0;i<programs.size();++i) {
+        CHECK(report.branches[i].relation_limits.max_variables==programs[i].relation_limits.max_variables);
+        CHECK(report.branches[i].relation_limits.max_rows==programs[i].relation_limits.max_rows);
+        CHECK(report.branches[i].relation_limits.max_matrix_elements==
+            programs[i].relation_limits.max_matrix_elements);
         REQUIRE(report.branches[i].relation_operations.size()==programs[i].relation_operations.size());
         CHECK_FALSE(report.branches[i].relation_operations.empty());
         CHECK(report.branches[i].relation_operations.front().implementation_id==

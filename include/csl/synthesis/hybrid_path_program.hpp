@@ -195,6 +195,7 @@ struct HybridPathVerificationRecord {
     Diagnostics diagnostics;
     // Request-scoped composition work for this fixed path, plus family-solver
     // provider lineage retained by a supplied optimal-face candidate.
+    model::HybridRelationLimits relation_limits{};
     std::vector<model::HybridRelationOperationRecord> relation_operations;
     std::vector<registry::Provenance> candidate_providers;
 };
