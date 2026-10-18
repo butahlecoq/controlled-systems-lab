@@ -21,7 +21,8 @@ ProgramId path_program_id(const model::HybridPath& path) {
 }
 }
 
-HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& system,
+namespace {
+HybridPathProgramResult build_joint_hybrid_path_program(const model::HybridSystem& system,
     const model::HybridRequest& request, const model::HybridPath& path, ProblemId problem,
     model::HybridRelationLimits limits, optimization::ObjectivePolicy policy,
     std::stop_token cancellation) {
@@ -85,8 +86,88 @@ HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& sys
     return HybridPathProgram{path,std::move(relation),std::get<TerminalObjective>(std::move(lifted)),
         std::move(*program),composition.limits,std::move(composition.operations)};
 }
+}
 
-HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::HybridSystem& system,
+HybridDirectTrajectoryCapabilities JointHDirectTrajectoryAdapter::capabilities() const noexcept {
+    return {true,true,true,Assurance::numerical};
+}
+
+HybridPathProgramResult JointHDirectTrajectoryAdapter::build_path(
+    const model::HybridSystem& system, const model::HybridRequest& request,
+    const model::HybridPath& path, ProblemId problem, model::HybridRelationLimits limits,
+    optimization::ObjectivePolicy policy, std::stop_token cancellation) const {
+    return build_joint_hybrid_path_program(system, request, path, std::move(problem), limits,
+        policy, cancellation);
+}
+
+HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAdapter& adapter,
+    const model::HybridSystem& system, const model::HybridRequest& request,
+    const model::HybridPath& path, ProblemId problem, model::HybridRelationLimits limits,
+    optimization::ObjectivePolicy policy, std::stop_token cancellation) {
+    if(problem.value.empty())
+        return one({DiagnosticCode::invalid_input,"hybrid.program.problem","Problem identity must be nonempty"});
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid path program construction was cancelled before profile admission"};
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    if(!profile_errors.empty()) return profile_errors;
+    if(path.edges.size()!=system.horizon || path.modes.size()!=path.edges.size()+1 || path.modes.empty() ||
+       path.modes.front()!=request.initial.mode ||
+       std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),path.modes.back())==
+           request.allowed_terminal_modes.end())
+        return one({DiagnosticCode::invalid_input,"hybrid.adapter.path",
+            "Direct-trajectory request path does not match the admitted initial and terminal modes"});
+    for(std::size_t i=0;i<path.edges.size();++i) {
+        const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate) {
+            return candidate.id==path.edges[i];
+        });
+        if(edge==system.edges.end() || edge->source!=path.modes[i] || edge->target!=path.modes[i+1])
+            return one({DiagnosticCode::invalid_input,"hybrid.adapter.path_edge",
+                "Direct-trajectory request path contains an unknown or disconnected edge"});
+    }
+    const auto capability=adapter.capabilities();
+    if(capability.assurance!=Assurance::numerical)
+        return one({DiagnosticCode::unsupported,"hybrid.adapter.assurance",
+            "Validated adapter assurance is unsupported until its evidence is carried in the result"});
+    if(!capability.preserves_branch_labelled_joint_relation)
+        return one({DiagnosticCode::unsupported,"hybrid.adapter.branch_relation",
+            "Direct-trajectory adapter does not declare branch-labelled joint-relation support"});
+    if(!path.modes.empty()) {
+        const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+            [&](const auto& candidate) { return candidate.mode==path.modes.back(); });
+        if(objective==request.terminal_objectives.end())
+            return one({DiagnosticCode::invalid_input,"hybrid.adapter.objective",
+                "No terminal objective is defined for the requested path's final mode"});
+        const bool supported=std::visit([&](const auto& value) {
+            using T=std::decay_t<decltype(value)>;
+            if constexpr(std::is_same_v<T,LinearTerminal>) return capability.linear_objectives;
+            else return capability.convex_objectives;
+        },objective->objective);
+        if(!supported)
+            return one({DiagnosticCode::unsupported,"hybrid.adapter.objective",
+                "Direct-trajectory adapter does not declare support for this terminal objective"});
+    }
+    auto built=adapter.build_path(system, request, path, std::move(problem), limits, policy, cancellation);
+    if(const auto* program=std::get_if<HybridPathProgram>(&built); program && program->path!=path)
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.path",
+            "Direct-trajectory adapter returned a program for a different path"});
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built);
+       failure && failure->path!=path)
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.failure_path",
+            "Direct-trajectory adapter returned a failure report for a different path"});
+    return built;
+}
+
+HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& system,
+    const model::HybridRequest& request, const model::HybridPath& path, ProblemId problem,
+    model::HybridRelationLimits limits, optimization::ObjectivePolicy policy,
+    std::stop_token cancellation) {
+    const JointHDirectTrajectoryAdapter adapter;
+    return build_hybrid_path_program(adapter, system, request, path, std::move(problem), limits,
+        policy, cancellation);
+}
+
+HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectTrajectoryAdapter& adapter,
+    const model::HybridSystem& system,
     const model::HybridRequest& request,ProblemId problem,model::HybridEnumerationLimits enumeration_limits,
     model::HybridRelationLimits relation_limits,optimization::ObjectivePolicy policy,
     std::stop_token cancellation) {
@@ -105,7 +186,7 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::Hybrid
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,"Hybrid portfolio construction stopped between edge paths; no programs were published"};
-        auto built=build_hybrid_path_program(system,request,path,problem,relation_limits,policy,cancellation);
+        auto built=build_hybrid_path_program(adapter,system,request,path,problem,relation_limits,policy,cancellation);
         if(const auto* errors=std::get_if<Diagnostics>(&built)) return *errors;
         if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
         if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) return *failure;
@@ -114,6 +195,15 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::Hybrid
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Hybrid portfolio construction was cancelled before publication"};
     return programs;
+}
+
+HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::HybridSystem& system,
+    const model::HybridRequest& request, ProblemId problem,
+    model::HybridEnumerationLimits enumeration_limits, model::HybridRelationLimits relation_limits,
+    optimization::ObjectivePolicy policy, std::stop_token cancellation) {
+    const JointHDirectTrajectoryAdapter adapter;
+    return build_hybrid_portfolio_programs(adapter, system, request, std::move(problem),
+        enumeration_limits, relation_limits, policy, cancellation);
 }
 
 HybridPortfolioObjectiveAnalysis compare_hybrid_portfolio_objective_bounds(

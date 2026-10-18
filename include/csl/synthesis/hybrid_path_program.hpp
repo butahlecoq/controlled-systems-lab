@@ -23,6 +23,39 @@ using HybridPortfolioProgramResult = std::variant<std::vector<HybridPathProgram>
 using HybridPathProgramResult = std::variant<HybridPathProgram, Diagnostics, OperationStopped,
     model::HybridPathCompositionFailureReport>;
 
+struct HybridDirectTrajectoryCapabilities {
+    bool preserves_branch_labelled_joint_relation{};
+    bool linear_objectives{};
+    bool convex_objectives{};
+    Assurance assurance{Assurance::numerical};
+};
+
+// Replaceable direct-trajectory boundary. Implementations return the same
+// branch-labelled joint relation, lifted objective, and optimization program.
+class HybridDirectTrajectoryAdapter {
+public:
+    virtual ~HybridDirectTrajectoryAdapter() = default;
+    virtual HybridDirectTrajectoryCapabilities capabilities() const noexcept = 0;
+    virtual HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&, ProblemId,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token cancellation) const = 0;
+};
+
+class JointHDirectTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override;
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&, ProblemId,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token cancellation) const override;
+};
+
+HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAdapter&,
+    const model::HybridSystem&, const model::HybridRequest&, const model::HybridPath&,
+    ProblemId, model::HybridRelationLimits, optimization::ObjectivePolicy = {},
+    std::stop_token cancellation = {});
+
 // Builds one directly formulated program per edge path. Branch identity is
 // encoded into the generated ProgramId so parallel paths remain separate.
 HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem&,
@@ -33,6 +66,11 @@ HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem&,
 // Enumerates and builds the complete allowed branch portfolio transactionally:
 // no partial branch-program list is returned on a limit, capability, or stop.
 HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::HybridSystem&,
+    const model::HybridRequest&, ProblemId, model::HybridEnumerationLimits,
+    model::HybridRelationLimits, optimization::ObjectivePolicy = {},
+    std::stop_token cancellation = {});
+HybridPortfolioProgramResult build_hybrid_portfolio_programs(
+    const HybridDirectTrajectoryAdapter&, const model::HybridSystem&,
     const model::HybridRequest&, ProblemId, model::HybridEnumerationLimits,
     model::HybridRelationLimits, optimization::ObjectivePolicy = {},
     std::stop_token cancellation = {});

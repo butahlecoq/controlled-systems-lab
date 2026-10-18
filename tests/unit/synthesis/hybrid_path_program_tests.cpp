@@ -39,6 +39,34 @@ model::HybridPath example_path() {
     return {{{"source"},{"target"}},{{"switch"}}};
 }
 
+class RejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int calls{};
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override { return {true,true,true,Assurance::numerical}; }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&, ProblemId,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid_adapter","fixture rejection"}};
+    }
+};
+
+class MismatchingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override { return {true,true,true,Assurance::numerical}; }
+    HybridPathProgramResult build_path(const model::HybridSystem& system,
+        const model::HybridRequest& request, const model::HybridPath& path, ProblemId problem,
+        model::HybridRelationLimits limits, optimization::ObjectivePolicy policy,
+        std::stop_token cancellation) const override {
+        JointHDirectTrajectoryAdapter delegate;
+        auto built=delegate.build_path(system,request,path,std::move(problem),limits,policy,cancellation);
+        if(auto* program=std::get_if<HybridPathProgram>(&built))
+            program->path.edges.front().value="wrong-edge";
+        return built;
+    }
+};
+
 std::pair<model::HybridSystem,model::HybridRequest> variable_size_parallel_profile() {
     auto source=model::HybridMode{{"source"},1,0,{"x"},{}};
     source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
@@ -280,6 +308,64 @@ TEST_CASE("hybrid portfolio builder returns every parallel edge branch transacti
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
     CHECK(diagnostic->field=="hybrid.relation.variables");
+}
+
+TEST_CASE("hybrid portfolio builder dispatches through the injected direct trajectory adapter") {
+    auto system=example_system();
+    auto parallel=system.edges.front();
+    parallel.id={"switch-parallel"};
+    system.edges.push_back(std::move(parallel));
+    RejectingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,example_request(),
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.hybrid_adapter");
+    CHECK(adapter.calls==1);
+}
+
+TEST_CASE("hybrid path builder rejects an adapter result with mismatched branch identity") {
+    MismatchingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_path_program(adapter,example_system(),example_request(),
+        example_path(),{"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.path");
+}
+
+TEST_CASE("hybrid path builder rejects a missing terminal objective before adapter dispatch") {
+    auto request=example_request();
+    request.terminal_objectives.clear();
+    RejectingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_path_program(adapter,example_system(),request,
+        example_path(),{"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.terminal_objectives");
+    CHECK(adapter.calls==0);
+}
+
+TEST_CASE("hybrid path builder rejects a path that does not span the system horizon before dispatch") {
+    auto request=example_request();
+    request.allowed_terminal_modes={{"source"}};
+    request.terminal_objectives={{{"source"},LinearTerminal{{1},0},"energy","J"}};
+    RejectingTrajectoryAdapter adapter;
+    const model::HybridPath short_path{{{"source"}},{}};
+    const auto result=build_hybrid_path_program(adapter,example_system(),request,short_path,
+        {"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.path");
+    CHECK(adapter.calls==0);
+}
+
+TEST_CASE("hybrid path builder preserves pre-cancellation precedence over profile validation") {
+    auto request=example_request();
+    request.terminal_objectives.clear();
+    std::stop_source source;
+    source.request_stop();
+    RejectingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_path_program(adapter,example_system(),request,example_path(),
+        {"hybrid-problem"},{16,64,1024},{},source.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.calls==0);
 }
 
 TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {

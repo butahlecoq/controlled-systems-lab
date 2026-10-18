@@ -137,7 +137,16 @@ implementations can differ in representation and algorithms, but must preserve
 this logical payload and the same existential trajectory semantics. Operation
 capabilities and assurance remain explicit per adapter; a missing composition,
 reconstruction, or completeness capability is rejected before workspace
-creation. No adapter seam or implementation is claimed to exist yet.
+creation. The direct-trajectory API is replaceable through
+`HybridDirectTrajectoryAdapter`; its default implementation,
+`JointHDirectTrajectoryAdapter`, builds a branch-labelled joint H relation and
+optimization program. Each direct adapter declares whether it preserves the
+branch-labelled relation, which objective classes it supports, and its
+assurance level; the wrapper rejects missing branch or objective capabilities
+before dispatch. Injected adapters must preserve that result contract and
+return diagnostics or cancellation without publishing a partial portfolio.
+Separate reachability composition and complete-family verification adapters
+remain unimplemented.
 
 ## Initial supported profile and rejection boundary
 
