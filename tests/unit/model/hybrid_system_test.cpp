@@ -243,6 +243,9 @@ TEST_CASE("hybrid joint relation retains flow, controls, resets, and mode-local 
     REQUIRE(std::holds_alternative<sets::SetData>(relation));
     const auto& data=std::get<sets::SetData>(relation);
     CHECK(data.metadata()->set.dimension==5);
+    CHECK(data.metadata()->coordinate_labels==std::vector<std::string>{
+        "post:0:6:source:2:x0","control:0:6:source:2:u0","pre:1:6:source:2:x0",
+        "post:1:6:target:1:p","post:1:6:target:1:v"});
     const auto representation=data.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
     const auto h=std::get<sets::HRepresentation>(representation);

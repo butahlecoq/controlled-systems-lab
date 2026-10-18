@@ -450,6 +450,22 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
         if(auto e=add_reset(edges[t]->reset_relations[t],pre_offsets[t],state_offsets[t+1],mode.state_dimension,modes[t+1]->state_dimension)) return *e;
     }
     if(cancellation.stop_requested()) return stopped();
+    std::vector<std::string> coordinate_labels(width);
+    auto label_block=[&](std::size_t offset,const HybridMode& mode,const std::vector<std::string>& labels,
+        std::size_t stage,const char* role) {
+        for(std::size_t j=0;j<labels.size();++j) {
+            const auto& coordinate=labels[j];
+            coordinate_labels[offset+j]=std::string(role)+":"+std::to_string(stage)+":"+
+                std::to_string(mode.id.value.size())+":"+mode.id.value+":"+
+                std::to_string(coordinate.size())+":"+coordinate;
+        }
+    };
+    label_block(state_offsets[0],*modes[0],modes[0]->state_coordinate_labels,0,"post");
+    for(std::size_t t=0;t<system.horizon;++t) {
+        label_block(control_offsets[t],*modes[t],modes[t]->control_coordinate_labels,t,"control");
+        label_block(pre_offsets[t],*modes[t],modes[t]->state_coordinate_labels,t+1,"pre");
+        label_block(state_offsets[t+1],*modes[t+1],modes[t+1]->state_coordinate_labels,t+1,"post");
+    }
     Matrix A{inequalities.size(),width,{}}; A.values.reserve(inequalities.size()*width);
     for(const auto& row:inequalities) A.values.insert(A.values.end(),row.begin(),row.end());
     Matrix E{equalities.size(),width,{}}; E.values.reserve(equalities.size()*width);
@@ -462,7 +478,7 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
     std::string relation_id = "hybrid-joint";
     for (const auto& edge : path.edges)
         relation_id += ":" + std::to_string(edge.value.size()) + ":" + edge.value;
-    auto made=sets::make_h({SetId{std::move(relation_id)},width,{}},
+    auto made=sets::make_h({SetId{std::move(relation_id)},width,std::move(coordinate_labels)},
         {std::get<numeric::MatrixView>(ai),std::get<numeric::VectorView>(ab),std::get<numeric::MatrixView>(ei),std::get<numeric::VectorView>(eb)});
     if(const auto* d=std::get_if<Diagnostic>(&made)) return *d;
     if(cancellation.stop_requested()) return stopped();
