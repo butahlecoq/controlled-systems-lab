@@ -1,5 +1,9 @@
 # Copy only consumer inputs into a separate source tree. Its sole product
 # dependency is find_package(CSL CONFIG), resolved from the installed prefix.
+if(IS_ABSOLUTE "${CSL_INSTALL_LIBDIR}")
+  message(FATAL_ERROR
+    "installed_public_client requires a relative CMAKE_INSTALL_LIBDIR; absolute destinations are outside its temporary prefix")
+endif()
 set(work "${CSL_BUILD_DIR}/installed-consumer")
 file(MAKE_DIRECTORY "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/witness_selector_client.cpp" DESTINATION "${work}/source")
@@ -76,11 +80,7 @@ if(CSL_EXPECT_QHULL AND NOT EXISTS
     "${notices_root}/Qhull-8.0.2/COPYING.txt")
   message(FATAL_ERROR "Installed Qhull dependency notice is missing")
 endif()
-if(IS_ABSOLUTE "${CSL_INSTALL_LIBDIR}")
-  set(exports_file "${CSL_INSTALL_LIBDIR}/cmake/CSL/CSLTargets.cmake")
-else()
-  set(exports_file "${prefix}/${CSL_INSTALL_LIBDIR}/cmake/CSL/CSLTargets.cmake")
-endif()
+set(exports_file "${prefix}/${CSL_INSTALL_LIBDIR}/cmake/CSL/CSLTargets.cmake")
 if(NOT EXISTS "${exports_file}")
   message(FATAL_ERROR "Installed CMake target export is missing: ${exports_file}")
 endif()
