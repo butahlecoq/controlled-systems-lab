@@ -98,7 +98,8 @@
     "REVIEW-07",
     "REVIEW-08",
     "REVIEW-10",
-    "REVIEW-09"
+    "REVIEW-09",
+    "EXT-07"
   ],
   "tickets": [
     {
@@ -4994,6 +4995,50 @@
         "id": 5837209520,
         "number": 204,
         "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/204"
+      },
+      "blocking_dependencies": []
+    },
+    {
+      "key": "EXT-07",
+      "title": "Define and implement hybrid-system profiles",
+      "kind": "implementation",
+      "area": "extensions",
+      "phase": 5,
+      "dependencies": [],
+      "scope": "Define and implement an explicit finite-horizon hybrid profile with mode-specific affine flows, continuous controls, invariants, guards, reset relations, branch identity, complete optimal-family semantics, capability admission, and independent exhaustive tests. Coordinate with EXT-04 #68, EXT-03 #73, and EXT-02 #76; coordination is not a blocking dependency.",
+      "acceptance": [
+        "Specify finite mode identities, mode-specific affine dynamics and admissible continuous controls, initial-mode semantics, and the stage at which a mode is active.",
+        "Specify stage-indexed mode invariants, transition guards, permitted transitions, and reset relations with explicit pre/post-transition timing and dimension rules.",
+        "Preserve the joint relation among state, continuous control, and mode sequence. Retain every optimal mode branch and ties; never replace a hybrid family with a convex hull or an unlabelled sample cloud.",
+        "Declare supported exact operations and any approximation guarantee for guard intersection, reset images, and mode-branch composition. Reject unsupported operation plans before execution.",
+        "Keep reachability, direct-trajectory, and verification adapters replaceable and record per-mode/per-transition provenance and resource use.",
+        "Add unit and contract tests for guard entry/exit, reset maps, forbidden transitions, empty branches, duplicate mode paths, tied optimal branches, cancellation, and resource limits. Compare tiny instances with an independently implemented exhaustive mode-sequence oracle.",
+        "Provide a capability profile and report for dimensions/mode counts; do not claim general scalability from finite fixtures."
+      ],
+      "files": [
+        "include/csl/model/hybrid_system.hpp",
+        "src/model/hybrid_system.cpp",
+        "docs/contracts/hybrid-systems.md",
+        "tests/unit/model/hybrid_system_test.cpp",
+        "tests/reference/hybrid_mode_sequence_oracle.py"
+      ],
+      "requirements": [],
+      "test_ids": [],
+      "external_blockers": [],
+      "related_issues": [
+        68,
+        73,
+        76
+      ],
+      "ready": false,
+      "sources": [
+        "docs/contracts/hybrid-systems.md",
+        "docs/superpowers/specs/2026-10-12-class-level-system-architecture.md"
+      ],
+      "github": {
+        "id": 5816140647,
+        "number": 156,
+        "url": "https://github.com/butahlecoq/controlled-systems-lab/issues/156"
       },
       "blocking_dependencies": []
     }

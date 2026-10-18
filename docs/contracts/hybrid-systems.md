@@ -64,11 +64,20 @@ Thus the indexed objects are unambiguous:
              -- enabled edge guard --> reset relation --> (x_(k+1), q_(k+1))
 ```
 
-Mode-local state relations apply to post-reset `x_k`. Any constraint on the
-pre-reset flow result is separately named and has source dimension `n_q`;
-guards do not silently double as general state constraints. There is no
-post-reset control at stage `k` and no pre-reset observation timing in this
-profile.
+For every mode `q`, provide a state invariant `I[q,k]` in that mode's state
+coordinates for every state stage `k=0..T`. An unconstrained invariant is
+written explicitly as `UniversalSet`; a missing entry is invalid, and
+`EmptySet` is valid input that can make a branch infeasible. At each transition
+`q_k → q_(k+1)`, require `x_k ∈ I[q_k,k]` and the pre-reset flow result
+`x⁻_(k+1) ∈ I[q_k,k+1]`, then separately require the edge guard and reset
+relation, and require `x_(k+1) ∈ I[q_(k+1),k+1]`. Thus the source-mode
+invariant is checked on the pre-reset state and the destination-mode invariant
+on the post-reset state; guards are additional conditions, not substitutes for
+invariants. At termination, `q_T` must be in the explicit allowed terminal-mode
+set `Q_T` and `x_T ∈ I[q_T,T]`. For `T=0`, check the initial/terminal
+invariant once and require `q_0 ∈ Q_T`; there are no transition-stage checks.
+There is no post-reset control at stage `k` and no pre-reset observation timing
+in this profile.
 
 ## Complete hybrid family and identity
 
@@ -76,7 +85,20 @@ A hybrid trajectory retains states, controls, intermediate pre-reset states,
 mode identities, and transition-edge identities in their stage order. A mode
 path is the ordered mode sequence; a branch identity additionally includes the
 ordered transition-edge sequence, since distinct parallel edges may share the
-same source and target modes while having different guards or resets.
+same source and target modes while having different guards or resets. The
+request supplies a nonempty allowed terminal-mode set `Q_T` and exactly one
+terminal objective per allowed mode. Each objective is one of the supported
+minimized terminal forms (`LinearTerminal`, `QuadraticTerminal`, or
+`ResidualNormTerminal`), has the dimension required by that mode, and is
+validated under the existing objective policy. All mode-indexed objectives
+must represent the same scalar quantity in the same units. Modes outside `Q_T`
+are not terminal outcomes; a feasible path ending outside `Q_T` is excluded.
+The objective is minimized globally over the union of feasible branch
+relations ending in `Q_T`, including its per-mode objective offset. An empty
+`Q_T`, missing objective, incompatible dimension, unsupported objective or
+provider, or inconsistent quantity/units is rejected before workspace
+creation. For `T=0`, the same terminal-mode and objective rules apply to the
+initial state.
 
 The feasible/optimal result is a finite union of branch-labelled joint
 relations. It must preserve every admitted optimal mode/edge branch and the
@@ -90,11 +112,17 @@ provenance for every flow, guard, reset, and composition operation.
 
 ## Initial supported profile and rejection boundary
 
-The first profile is deterministic, finite-horizon, discrete-time, with
-mode-specific affine flows, continuous controls, finite modes/edges, and exact
-polyhedral state/control/guard/reset relations. A reset relation may be
-non-functional and may map between different state dimensions. It must use an
-exact polyhedral relation operation supported by the selected provider.
+The first profile is finite-horizon and discrete-time, with mode-specific
+affine flows, continuous controls, finite modes/edges, and exact polyhedral
+state/control/guard/reset relations. A trajectory is a witness in one joint
+feasibility relation: mode and edge sequence, controls, intermediate flow
+states, and reset outputs are existential variables. The profile represents all
+feasible tuples and, when optimizing, all globally optimal tuples under that
+relation. A nonfunctional reset therefore represents alternative feasible
+post-reset states; it does not promise that a physical system with nondeterministic
+reset behavior succeeds for every possible outcome. Requests for universal
+reset-outcome guarantees or robust success are unsupported and rejected. It
+must use an exact polyhedral relation operation supported by the selected provider.
 "Exact" describes the set operation: no geometric approximation or
 cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
@@ -109,9 +137,10 @@ Operation admission is complete and occurs before any workspace is created:
 2. Confirm exact support for each mode's flow, every required guard
    intersection, reset relational image/projection, and branch-labelled union
    over the finite transition graph.
-3. Confirm a common scalar objective meaning and scale across every reachable
-   terminal mode, and a family verifier for the resulting mode-indexed joint
-   relation and all-optimal-branch claim.
+3. Validate `Q_T` and the per-mode supported terminal objectives, including
+   dimensions, objective policy, shared scalar quantity/units, and global
+   minimization semantics; confirm a family verifier for the resulting
+   mode-indexed joint relation and all-optimal-branch claim.
 4. If any check fails, return a request-scoped unsupported/rejected result
    naming the first unsupported capability and the affected mode/edge/stage;
    do not start an algorithm, create a workspace, or publish partial family
@@ -166,7 +195,8 @@ EXT-04 owns initial-set quantifiers and information/observation-based policies;
 EXT-03 owns temporal coupling and its memory augmentation; EXT-02 owns finite
 and mixed action identity and tie semantics. This proposed EXT-07 contract
 shares none of those unsupported meanings: it uses one request-selected known
-initial mode/state, continuous open-loop controls, and no temporal or
-observation coupling in its first executable profile. Integrations with those
+initial mode/state, existential reset witnesses (not universal guarantees),
+continuous open-loop controls, and no temporal or observation coupling in its
+first executable profile. Integrations with those
 extensions require a separately reviewed contract revision and capability
 combination; their semantics must not be guessed from hybrid mode paths.
