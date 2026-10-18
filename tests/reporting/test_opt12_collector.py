@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -40,20 +41,32 @@ class CMakeCompilerIdentityTests(unittest.TestCase):
                   "ndebug": True}
         opt12_collect.validate_build_identity(record, source_commit="a" * 40,
                                               build_owner="b" * 64, compiler=compiler,
-                                              graph=graph, cache=cache)
+                                              graph=graph, cache=cache,
+                                              system_processor="AMD64")
         for field in ("architecture", "configured_flags", "release_flags", "compiler_version"):
             inconsistent = dict(record)
             inconsistent[field] += " mismatch"
             with self.subTest(field=field), self.assertRaisesRegex(ValueError, "differs from CMake cache"):
                 opt12_collect.validate_build_identity(inconsistent, source_commit="a" * 40,
                                                       build_owner="b" * 64, compiler=compiler,
-                                                      graph=graph, cache=cache)
+                                                      graph=graph, cache=cache,
+                                                      system_processor="AMD64")
         incomplete = dict(record)
         del incomplete["release_flags"]
         with self.assertRaisesRegex(ValueError, "fields differ"):
             opt12_collect.validate_build_identity(incomplete, source_commit="a" * 40,
                                                   build_owner="b" * 64, compiler=compiler,
-                                                  graph=graph, cache=cache)
+                                                  graph=graph, cache=cache,
+                                                  system_processor="AMD64")
+
+    def test_reads_system_processor_from_generated_cmake_system_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build = Path(directory)
+            cmake_files = build / "CMakeFiles" / "3.31.6"
+            cmake_files.mkdir(parents=True)
+            (cmake_files / "CMakeSystem.cmake").write_text(
+                'set(CMAKE_SYSTEM_PROCESSOR "AMD64")\n', encoding="utf-8")
+            self.assertEqual(opt12_collect.cmake_system_processor(build), "AMD64")
 
 
 if __name__ == "__main__":

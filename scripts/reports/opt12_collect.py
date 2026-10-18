@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -49,8 +50,22 @@ def cmake_cache_values(path: Path) -> dict[str, str]:
     return values
 
 
+def cmake_system_processor(build: Path) -> str:
+    values = set()
+    for path in (build / "CMakeFiles").glob("*/CMakeSystem.cmake"):
+        source = path.read_text(encoding="utf-8", errors="replace")
+        match = re.search(r'^set\(CMAKE_SYSTEM_PROCESSOR\s+"?([^"\)\s]+)"?\)',
+                          source, re.MULTILINE)
+        if match:
+            values.add(match.group(1))
+    if len(values) != 1:
+        raise ValueError("generated CMake system processor identity is missing or inconsistent")
+    return next(iter(values))
+
+
 def validate_build_identity(record: dict, *, source_commit: str, build_owner: str,
-                            compiler: dict, graph: dict, cache: dict[str, str]) -> None:
+                            compiler: dict, graph: dict, cache: dict[str, str],
+                            system_processor: str) -> None:
     expected_fields = {"schema", "source_commit", "build_owner_sha256", "compiler",
                        "compiler_version", "generator", "architecture", "configured_flags",
                        "release_flags", "configuration", "ndebug"}
@@ -62,7 +77,7 @@ def validate_build_identity(record: dict, *, source_commit: str, build_owner: st
         "schema": "csl.opt12-build/1", "source_commit": source_commit,
         "build_owner_sha256": build_owner, "compiler": compiler["id"],
         "compiler_version": compiler["version"], "generator": generator,
-        "architecture": f'{cache["CMAKE_SYSTEM_PROCESSOR"]}/{platform}',
+        "architecture": f'{system_processor}/{platform}',
         "configured_flags": cache["CMAKE_CXX_FLAGS"],
         "release_flags": cache["CMAKE_CXX_FLAGS_RELEASE"],
         "configuration": "Release", "ndebug": True,
@@ -119,7 +134,8 @@ def main() -> int:
         compiler = cxx_compiler(toolchains)
         build_owner = digest((paths["source"] + "\n" + paths["build"] + "\n" + compiler["path"]).encode())
         cache = cmake_cache_values(build / "CMakeCache.txt")
-        for key in ("CMAKE_SYSTEM_PROCESSOR", "CMAKE_GENERATOR_PLATFORM",
+        system_processor = cmake_system_processor(build)
+        for key in ("CMAKE_GENERATOR_PLATFORM",
                     "CMAKE_CXX_FLAGS", "CMAKE_CXX_FLAGS_RELEASE"):
             if not cache.get(key):
                 raise ValueError(f"required CMake cache value is missing: {key}")
@@ -159,7 +175,8 @@ def main() -> int:
         if not build_record:
             raise ValueError("embedded build identity event is missing")
         validate_build_identity(build_record, source_commit=head, build_owner=build_owner,
-                                compiler=compiler, graph=graph, cache=cache)
+                                compiler=compiler, graph=graph, cache=cache,
+                                system_processor=system_processor)
         trials = parsed
         if any(row.get("schema") != "csl.opt12-cost-trial/1" for row in trials):
             raise ValueError("unknown trial schema")
