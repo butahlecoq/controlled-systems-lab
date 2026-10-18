@@ -1,6 +1,6 @@
 # Complete-family verifier boundary and scientific gate
 
-**Status at main `470ab2e8cc40652a6207bd42222c23e18342a70f`:** the shared fail-closed publication seam described by this file's former blocker is delivered. General numerical coverage evidence remains an open scientific gate. This record tracks that distinction for [#155](https://github.com/butahlecoq/controlled-systems-lab/issues/155) and [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8); it does not approve new assurance claims.
+**Status (2026-10-18):** the shared fail-closed publication seam described by this file's former blocker is delivered. The initial architecture's input/evidence policy is recorded in [ADR 0003](../architecture/decisions/0003-numerical-input-and-coverage-policy.md); a general numerical coverage procedure and new profile verifiers remain open scientific gates. This record tracks that distinction for [#155](https://github.com/butahlecoq/controlled-systems-lab/issues/155) and [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8); it does not approve new assurance claims.
 
 ## Delivered boundary
 
@@ -20,15 +20,16 @@ The production catalog currently provides profile-specific analytic verifiers fo
 
 - The target in #8 is the full joint state/control argmin relation. A witness set, independent stage marginals, or a near-optimal sublevel set is not an equivalent output.
 - Numerical and validated assurance remain distinct. The delivered boundary can verify registered, profile-specific evidence; it does not turn arbitrary symbolic text, a certificate reference, or residual data into coverage evidence.
-- No general numerical coverage procedure, arithmetic/rounding model, tolerance values, or acceptance thresholds are approved by this record. No generic Strategy A/B complete-family claim follows from the current T-S01/T-S02 cases.
+- The initial architecture uses the represented-dyadic input semantics, numerical/validated assurance boundary, and per-profile tolerance policy recorded in [ADR 0003](../architecture/decisions/0003-numerical-input-and-coverage-policy.md). It sets no project-wide tolerance values or acceptance thresholds.
+- No general numerical coverage procedure is approved. No generic Strategy A/B complete-family claim follows from the current T-S01/T-S02 cases.
 
 **Proof obligations before admitting a new numerically supported complete-family profile:**
 
 1. State the supported model/objective assumptions and define the exact joint optimizer relation to be returned, including ties, nonunique terminal minimizers, and distinct histories leading to the same terminal point.
 2. Give a reviewed argument connecting the computed relation to that full optimizer relation. Specify whether each construction/conversion is exact or what sound inclusion/error guarantee it supplies; approximation direction must support the claimed coverage.
 3. Establish optimum evidence separately from relation coverage. An objective bound or a feasible incumbent can support the value claim but does not show that no optimal histories are missing.
-4. Define the arithmetic, rounding, tolerance, and error-accounting policy used by the coverage procedure. Thresholds are profile-specific review decisions; they are intentionally unspecified here.
+4. Follow [ADR 0003](../architecture/decisions/0003-numerical-input-and-coverage-policy.md): define each profile's arithmetic, rounding, tolerance, and error-accounting policy and acceptance thresholds. There is no project-wide threshold.
 5. Implement a verifier that checks the evidence against the immutable resolved problem, effective request, ordered joint-coordinate schema, strategy/version, and ordered transformation lineage. It must reject missing, malformed, mismatched, or unsupported proof data.
 6. Add independent public-path tests for positive and adversarial cases. Preserve T-S01's `u0 + u1 = 1` dependence and T-S02's constant-objective full feasible set; include ties/degeneracy and any approximation route claimed by the profile. A residual-only or sampled-witness test cannot serve as a coverage oracle.
 
-**Open review decisions:** scientific reviewers and the owner must approve each profile's coverage theorem, supported operations/representations, arithmetic and tolerance policy, and thresholds before its verifier is enabled. These decisions belong to #155/#8 and the strategy reviews #66/#67. This record does not select a numerical method or threshold on their behalf.
+**Open profile decisions:** scientific reviewers must approve each profile's coverage theorem, supported operations/representations, arithmetic/error accounting, and acceptance thresholds before its verifier is enabled. These profile-specific decisions belong to #155/#8 and the strategy reviews #66/#67. ADR 0003 selects the architecture-wide boundary but does not select a numerical method or a profile's physical tolerance values.
