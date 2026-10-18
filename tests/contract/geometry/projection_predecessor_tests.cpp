@@ -101,6 +101,31 @@ TEST_CASE("integrator predecessor includes existential controls and clips X") {
     CHECK(take(sets::from_handle(result.result.output)).metadata()->coordinate_labels==std::vector<std::string>{"x"});
 }
 
+TEST_CASE("one-step target predecessor has explicit control witnesses and rejects exterior states") {
+    const auto states=interval("X",-2,2,"x").as_handle();
+    const auto controls=interval("U",0,1,"u").as_handle();
+    const auto target=h("target",1,{2,1,{1,-1}},{1,-1},{0,1,{}},{},{"x"}).as_handle();
+    const auto request=predecessor(states,controls,target,{1,1,{1}},{1,1,{1}},{0});
+    const auto result=run(request);
+
+    for(const double x:{0.0,0.25,0.5,0.75,1.0}) {
+        const double u=1.0-x;
+        CHECK(contains(result.result.output,{x}));
+        CHECK(contains(states,{x}));
+        CHECK(contains(controls,{u}));
+        CHECK(contains(target,{x+u}));
+        CHECK(x+u==1.0);
+    }
+    CHECK_FALSE(contains(result.result.output,{-0.125}));
+    CHECK_FALSE(contains(result.result.output,{1.125}));
+    CHECK(result.result.relation==SetRelation::equivalent);
+    CHECK(result.result.evidence.reference.identity==request.identity);
+    CHECK(result.result.evidence.reference.inputs==std::vector<SetId>{{"X"},{"U"},{"target"}});
+    CHECK(result.result.evidence.scope==GeometryClaimScope::set_relation);
+    CHECK(std::holds_alternative<Unestablished>(result.result.evidence.support));
+    CHECK_FALSE(result.result.evidence.error_bound.has_value());
+}
+
 TEST_CASE("singular A keeps its unconstrained state direction and target equality") {
     // x+=(x0+u, 0), S={(2,0)}, u in [-1,1] => 1<=x0<=3; x1 is free.
     auto x=take(sets::make_universal({{"X"},2,{"x0","x1"}}));

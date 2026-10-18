@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/reachability/nominal_forward.hpp>
+#include <algorithm>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
@@ -107,6 +108,24 @@ void range(const SetHandle& set,double lo,double hi,std::vector<std::string> exp
     }
     CHECK(feasible);CHECK(lower==lo);CHECK(upper==hi);
 }
+bool contains_h(const SetHandle& set,const Vector& point) {
+    const auto data=take(sets::from_handle(set));
+    const auto representation=data.representation();
+    if(std::holds_alternative<sets::EmptyRepresentation>(representation))return false;
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    REQUIRE(h);
+    for(std::size_t row=0;row<h->inequalities.rows();++row) {
+        double value=0;
+        for(std::size_t column=0;column<point.size();++column)value+=h->inequalities(row,column)*point[column];
+        if(value>h->upper_bounds[row])return false;
+    }
+    for(std::size_t row=0;row<h->equalities.rows();++row) {
+        double value=0;
+        for(std::size_t column=0;column<point.size();++column)value+=h->equalities(row,column)*point[column];
+        if(value!=h->equality_values[row])return false;
+    }
+    return true;
+}
 }
 TEST_CASE("two step integrator returns literal reachable marginals and recovery factors") {
     auto p=resolved(integrator());auto result=nominal_forward(p,{"tube"},dependencies(),{});
@@ -178,6 +197,38 @@ TEST_CASE("clipped T-S01 chain retains literal marginals and stage shape counts"
     CHECK(shape(tube.stages[2].propagation_factor)==stage2_propagation);
     CHECK(shape(tube.stages[2].marginal.output)==stage2_marginal);
     CHECK(tube.stages[2].operation_lineage.size()==6);
+}
+TEST_CASE("a terminal singleton does not claim a complete trajectory history") {
+    auto p=integrator();
+    p.states[2]=interval("X2-terminal",1,1);
+    const auto tube=take<ForwardTube>(run(std::move(p)));
+    REQUIRE(tube.stages.size()==3);
+    range(tube.stages[2].marginal.output,1,1);
+
+    // The same terminal state has at least two distinct valid control histories.
+    CHECK(contains_h(tube.stages[1].joint_factor,{0,0,0}));
+    CHECK(contains_h(tube.stages[2].joint_factor,{0,1,1}));
+    CHECK(contains_h(tube.stages[1].joint_factor,{0,1,1}));
+    CHECK(contains_h(tube.stages[2].joint_factor,{1,0,1}));
+
+    for(std::size_t stage=1;stage<tube.stages.size();++stage) {
+        const auto& result=tube.stages[stage].marginal;
+        CHECK(result.relation==SetRelation::equivalent);
+        CHECK(result.evidence.scope==GeometryClaimScope::set_relation);
+        CHECK(std::holds_alternative<Unestablished>(result.evidence.support));
+        CHECK(std::find(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+            "stage marginal only; no optimality or joint-history completeness claim")!=result.evidence.assumptions.end());
+        CHECK(tube.stages[stage].recovery_evidence.scope==GeometryClaimScope::set_relation);
+        CHECK(std::holds_alternative<Unestablished>(tube.stages[stage].recovery_evidence.support));
+        CHECK(tube.stages[stage].recovery_evidence.assumptions.back()==
+            "compiled [x,u,y] authored transition rows retained for future recovery; no provider or validated recovery theorem asserted");
+        REQUIRE(tube.stages[stage].operation_lineage.size()==tube.stages[stage].providers.size());
+        for(std::size_t operation=0;operation<tube.stages[stage].operation_lineage.size();++operation) {
+            const auto& evidence=tube.stages[stage].operation_lineage[operation];
+            CHECK(evidence.scope==GeometryClaimScope::set_relation);
+            CHECK(tube.stages[stage].providers[operation].request==evidence.reference.identity.request);
+        }
+    }
 }
 TEST_CASE("LTV uses authored stage order offset and next constraints") {
     auto p=integrator();p.initial=KnownInitial{{1}};p.states={interval("X0",0,2),interval("X1",3,4),interval("X2",-5,-4)};
