@@ -80,6 +80,10 @@ class CMakeCompilerIdentityTests(unittest.TestCase):
         events[-1]["fixture"]["expected_objective"] = -149997.0
         with self.assertRaisesRegex(ValueError, "driver fixture identities differ"):
             opt12_collect.validate_driver_fixture_events(events)
+        events[-1]["fixture"]["expected_objective"] = -99998.0
+        events[0]["fixture"]["rows"] = True
+        with self.assertRaisesRegex(ValueError, "contains a boolean value"):
+            opt12_collect.validate_driver_fixture_events(events)
 
 
 if __name__ == "__main__":

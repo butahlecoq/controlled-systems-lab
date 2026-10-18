@@ -51,10 +51,23 @@ def validate_driver_fixture_events(events: list[dict]) -> None:
         scenario = event.get("scenario")
         if scenario in observed:
             raise ValueError(f"driver emitted a duplicate fixture identity: {scenario}")
-        observed[scenario] = event.get("fixture")
+        fixture = event.get("fixture")
+        if _contains_boolean(fixture):
+            raise ValueError(f"driver fixture identity contains a boolean value: {scenario}")
+        observed[scenario] = fixture
     expected = {
         name: {key: value for key, value in fixture.items() if key != "sha256"}
         for name, fixture in fixture_descriptions().items()
     }
     if observed != expected:
         raise ValueError("driver fixture identities differ from the canonical measured inputs")
+
+
+def _contains_boolean(value) -> bool:
+    if isinstance(value, bool):
+        return True
+    if isinstance(value, dict):
+        return any(_contains_boolean(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_contains_boolean(item) for item in value)
+    return False
