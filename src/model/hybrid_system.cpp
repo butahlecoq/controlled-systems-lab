@@ -1,12 +1,14 @@
 #include <csl/model/hybrid_system.hpp>
 #include <csl/optimization/objectives.hpp>
 #include <csl/sets/data.hpp>
+#include <csl/numeric/data.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <limits>
 #include <optional>
+#include <stop_token>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
@@ -76,7 +78,7 @@ void check_stage(Diagnostics& errors, const LinearStage& stage, const HybridMode
 
 template<class T>
 bool unique_nonempty_labels(const std::vector<T>& labels, std::size_t dimension) {
-    if (labels.empty()) return true;
+    if (dimension == 0 && labels.empty()) return true;
     if (labels.size() != dimension) return false;
     std::unordered_set<std::string> seen;
     for (const auto& label : labels)
@@ -294,6 +296,153 @@ Diagnostics check_hybrid_profile(const HybridSystem& system, const HybridRequest
         }
     }
     return errors;
+}
+
+HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
+    const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits,
+    std::stop_token cancellation) {
+    const auto errors = check_hybrid_profile(system, request);
+    if (!errors.empty()) return errors.front();
+    const auto stopped = [] { return OperationStopped{StopReason::cancelled,
+        "Hybrid joint-relation construction was cancelled; no relation was returned"}; };
+    if (cancellation.stop_requested()) return stopped();
+    if (path.modes.size() != system.horizon + 1 || path.edges.size() != system.horizon ||
+        path.modes.front() != request.initial.mode ||
+        std::find(request.allowed_terminal_modes.begin(), request.allowed_terminal_modes.end(), path.modes.back()) == request.allowed_terminal_modes.end())
+        return invalid("hybrid.path", "Path must match the horizon and request endpoints");
+    const auto max = std::numeric_limits<std::size_t>::max();
+    std::vector<const HybridMode*> modes;
+    std::vector<const HybridTransitionEdge*> edges;
+    for (const auto& id : path.modes) {
+        const auto* mode = find_mode(system, id);
+        if (!mode) return invalid("hybrid.path.modes", "Path references an unknown mode");
+        modes.push_back(mode);
+    }
+    std::vector<std::size_t> state_offsets(system.horizon + 1), control_offsets(system.horizon), pre_offsets(system.horizon);
+    std::size_t width = 0;
+    auto reserve = [&](std::size_t amount, std::size_t& offset) {
+        if (width > max - amount) return false;
+        offset = width; width += amount; return width <= limits.max_variables;
+    };
+    if (!reserve(modes[0]->state_dimension, state_offsets[0]))
+        return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.variables","Joint relation exceeds its variable limit"};
+    for (std::size_t t=0; t<system.horizon; ++t) {
+        const auto found = std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& e){return e.id==path.edges[t];});
+        if (found==system.edges.end() || found->source!=path.modes[t] || found->target!=path.modes[t+1])
+            return invalid("hybrid.path.edges", "Each path edge must connect its adjacent modes");
+        edges.push_back(&*found);
+        if (!reserve(modes[t]->control_dimension,control_offsets[t]) ||
+            !reserve(modes[t]->state_dimension,pre_offsets[t]) ||
+            !reserve(modes[t+1]->state_dimension,state_offsets[t+1]))
+            return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.variables","Joint relation exceeds its variable limit"};
+    }
+    std::vector<Vector> inequalities, equalities;
+    Vector bounds, equality_values;
+    auto append = [&](Vector row, double rhs, bool equality) -> bool {
+        const auto row_count = inequalities.size()+equalities.size();
+        if (row_count >= limits.max_rows || width != 0 && row_count + 1 > limits.max_matrix_elements / width) return false;
+        (equality ? equalities : inequalities).push_back(std::move(row));
+        (equality ? equality_values : bounds).push_back(rhs); return true;
+    };
+    auto add_set = [&](const AdmissibleSet& set, std::size_t offset, std::size_t dimension) -> std::optional<Diagnostic> {
+        auto empty = [&] { Vector row(width); if(!append(std::move(row),-1,false)) return false; return true; };
+        auto singleton = [&](std::span<const double> point) {
+            for (std::size_t j=0;j<dimension;++j) { Vector row(width); row[offset+j]=1; if(!append(std::move(row),point[j],true)) return false; }
+            return true;
+        };
+        auto hrep = [&](const sets::HRepresentation& h) {
+            for(std::size_t i=0;i<h.inequalities.rows();++i) { Vector row(width); for(std::size_t j=0;j<dimension;++j) row[offset+j]=h.inequalities(i,j); if(!append(std::move(row),h.upper_bounds[i],false)) return false; }
+            for(std::size_t i=0;i<h.equalities.rows();++i) { Vector row(width); for(std::size_t j=0;j<dimension;++j) row[offset+j]=h.equalities(i,j); if(!append(std::move(row),h.equality_values[i],true)) return false; }
+            return true;
+        };
+        bool supported = true;
+        if (std::holds_alternative<EmptySet>(set)) supported=empty();
+        else if (std::holds_alternative<UniversalSet>(set)) { }
+        else if (const auto* point=std::get_if<Singleton>(&set)) supported=singleton(point->point);
+        else {
+            const auto frozen=sets::from_handle(std::get<SetHandle>(set));
+            if(const auto* d=std::get_if<Diagnostic>(&frozen)) return *d;
+            const auto rep=std::get<sets::SetData>(frozen).representation();
+            if(const auto* h=std::get_if<sets::HRepresentation>(&rep)) supported=hrep(*h);
+            else if(const auto* singleton_rep=std::get_if<sets::SingletonRepresentation>(&rep)) supported=singleton(singleton_rep->point.values());
+            else if(std::holds_alternative<sets::EmptyRepresentation>(rep)) supported=empty();
+            else if(!std::holds_alternative<sets::UniversalRepresentation>(rep))
+                return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.set_representation","Direct joint composition requires H, empty, universal, or singleton sets; V conversion is not implicit"};
+        }
+        if (!supported) return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
+        return std::nullopt;
+    };
+    auto add_linear = [&](const LinearStage& step,std::size_t x,std::size_t u,std::size_t pre) -> bool {
+        for(std::size_t i=0;i<step.A.rows;++i) {
+            Vector row(width); row[pre+i]=1;
+            for(std::size_t j=0;j<step.A.cols;++j) row[x+j]-=step.A.values[i*step.A.cols+j];
+            for(std::size_t j=0;j<step.B.cols;++j) row[u+j]-=step.B.values[i*step.B.cols+j];
+            if(!append(std::move(row),step.offset[i],true)) return false;
+        }
+        return true;
+    };
+    auto add_reset = [&](const SetHandle& handle,std::size_t pre,std::size_t post,std::size_t npre,std::size_t npost)->std::optional<Diagnostic> {
+        const auto frozen=sets::from_handle(handle);
+        if(const auto* d=std::get_if<Diagnostic>(&frozen)) return *d;
+        const auto rep=std::get<sets::SetData>(frozen).representation();
+        if(std::holds_alternative<sets::UniversalRepresentation>(rep)) return std::nullopt;
+        if(std::holds_alternative<sets::EmptyRepresentation>(rep)) {
+            if(!append(Vector(width),-1,false)) return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
+            return std::nullopt;
+        }
+        if(const auto* point=std::get_if<sets::SingletonRepresentation>(&rep)) {
+            for(std::size_t j=0;j<npre+npost;++j) {
+                Vector row(width);
+                if(j<npre) row[pre+j]=1; else row[post+(j-npre)]=1;
+                if(!append(std::move(row),point->point[j],true)) return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
+            }
+            return std::nullopt;
+        }
+        const auto* h=std::get_if<sets::HRepresentation>(&rep);
+        if(!h) return Diagnostic{DiagnosticCode::unsupported,"hybrid.reset.representation","Direct joint composition requires reset relations in H form"};
+        auto add_rows=[&](numeric::MatrixView matrix,numeric::VectorView rhs,bool eq) {
+            for(std::size_t i=0;i<matrix.rows();++i) { Vector row(width);
+                for(std::size_t j=0;j<npre;++j) row[pre+j]=matrix(i,j);
+                for(std::size_t j=0;j<npost;++j) row[post+j]=matrix(i,npre+j);
+                if(!append(std::move(row),rhs[i],eq)) return false;
+            } return true;
+        };
+        if(!add_rows(h->inequalities,h->upper_bounds,false)||!add_rows(h->equalities,h->equality_values,true))
+            return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
+        return std::nullopt;
+    };
+    auto initial_error=add_set(Singleton{request.initial.state},state_offsets[0],modes[0]->state_dimension);
+    if(initial_error) return *initial_error;
+    for(std::size_t t=0;t<=system.horizon;++t) {
+        if(cancellation.stop_requested()) return stopped();
+        if(auto e=add_set(modes[t]->invariants[t],state_offsets[t],modes[t]->state_dimension)) return *e;
+        if(t==system.horizon) continue;
+        const auto& mode=*modes[t];
+        const auto& flow=std::holds_alternative<LinearStage>(mode.flow)?std::get<LinearStage>(mode.flow):std::get<std::vector<LinearStage>>(mode.flow)[t];
+        if(!add_linear(flow,state_offsets[t],control_offsets[t],pre_offsets[t]))
+            return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
+        if(auto e=add_set(mode.control_sets[t],control_offsets[t],mode.control_dimension)) return *e;
+        if(auto e=add_set(mode.invariants[t+1],pre_offsets[t],mode.state_dimension)) return *e;
+        if(auto e=add_set(edges[t]->guards[t],pre_offsets[t],mode.state_dimension)) return *e;
+        if(auto e=add_reset(edges[t]->reset_relations[t],pre_offsets[t],state_offsets[t+1],mode.state_dimension,modes[t+1]->state_dimension)) return *e;
+    }
+    if(cancellation.stop_requested()) return stopped();
+    Matrix A{inequalities.size(),width,{}}; A.values.reserve(inequalities.size()*width);
+    for(const auto& row:inequalities) A.values.insert(A.values.end(),row.begin(),row.end());
+    Matrix E{equalities.size(),width,{}}; E.values.reserve(equalities.size()*width);
+    for(const auto& row:equalities) E.values.insert(E.values.end(),row.begin(),row.end());
+    auto ai=numeric::snapshot(A); auto ei=numeric::snapshot(E);
+    auto ab=numeric::snapshot_vector(bounds); auto eb=numeric::snapshot_vector(equality_values);
+    if(!std::holds_alternative<numeric::MatrixView>(ai)||!std::holds_alternative<numeric::MatrixView>(ei)||
+       !std::holds_alternative<numeric::VectorView>(ab)||!std::holds_alternative<numeric::VectorView>(eb))
+        return Diagnostic{DiagnosticCode::invalid_input,"hybrid.relation.storage","Joint relation data failed numeric validation"};
+    std::string relation_id = "hybrid-joint";
+    for (const auto& edge : path.edges) relation_id += ":" + edge.value;
+    auto made=sets::make_h({SetId{std::move(relation_id)},width,{}},
+        {std::get<numeric::MatrixView>(ai),std::get<numeric::VectorView>(ab),std::get<numeric::MatrixView>(ei),std::get<numeric::VectorView>(eb)});
+    if(const auto* d=std::get_if<Diagnostic>(&made)) return *d;
+    if(cancellation.stop_requested()) return stopped();
+    return std::get<sets::SetData>(std::move(made));
 }
 
 } // namespace csl::model

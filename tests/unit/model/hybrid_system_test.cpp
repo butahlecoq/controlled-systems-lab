@@ -51,6 +51,8 @@ LinearStage stage(std::size_t state, std::size_t control) {
 
 HybridMode mode(std::string id, std::size_t state, std::size_t control, std::size_t horizon) {
     HybridMode result{{std::move(id)},state,control};
+    for(std::size_t i=0;i<state;++i) result.state_coordinate_labels.push_back("x"+std::to_string(i));
+    for(std::size_t i=0;i<control;++i) result.control_coordinate_labels.push_back("u"+std::to_string(i));
     result.flow = std::vector<LinearStage>(horizon, stage(state,control));
     result.control_sets.assign(horizon, UniversalSet{control});
     result.invariants.assign(horizon+1, UniversalSet{state});
@@ -64,7 +66,9 @@ SetHandle universal_relation(std::string id, std::size_t dimension) {
 }
 
 std::pair<HybridSystem,HybridRequest> dimension_changing_example() {
-    HybridSystem system{1,{mode("source",1,1,1),mode("target",2,1,1)},
+    auto source=mode("source",1,1,1), target=mode("target",2,1,1);
+    target.state_coordinate_labels={"p","v"};
+    HybridSystem system{1,{std::move(source),std::move(target)},
         {{{"switch"},{"source"},{"target"},{UniversalSet{1}},
             {universal_relation("reset-relation",3)}}}};
     HybridRequest request{{{"source"},{3}},{{"target"}},
@@ -167,6 +171,16 @@ TEST_CASE("profile admission requires a mode invariant for every state stage") {
     }));
 }
 
+TEST_CASE("profile admission requires coordinate labels for every nonzero mode dimension") {
+    auto [system,request]=dimension_changing_example();
+    system.modes[0].state_coordinate_labels.clear();
+
+    const auto diagnostics=check_hybrid_profile(system,request);
+    CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& d) {
+        return d.field=="hybrid.mode.coordinates";
+    }));
+}
+
 TEST_CASE("per-mode terminal objectives must compare the same quantity and units") {
     auto [system,request] = dimension_changing_example();
     system.modes.push_back(mode("alternate",1,1,1));
@@ -196,4 +210,30 @@ TEST_CASE("zero-horizon profile validates its single initial and terminal stage"
         {{{"parked"},LinearTerminal{{1},0},"energy","J"}}};
 
     CHECK(check_hybrid_profile(system,request).empty());
+}
+
+TEST_CASE("hybrid joint relation retains flow, controls, resets, and mode-local dimensions") {
+    auto [system,request]=dimension_changing_example();
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto relation=compose_hybrid_path_relation(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<sets::SetData>(relation));
+    const auto& data=std::get<sets::SetData>(relation);
+    CHECK(data.metadata()->set.dimension==5);
+    const auto representation=data.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto h=std::get<sets::HRepresentation>(representation);
+    CHECK(h.equalities.rows()==2); // fixed initial coordinate and one-dimensional flow
+    CHECK(h.equalities.cols()==5);
+}
+
+TEST_CASE("hybrid joint relation rejects capacity exhaustion without truncation and observes cancellation") {
+    auto [system,request]=dimension_changing_example();
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto limited=compose_hybrid_path_relation(system,request,path,{4,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostic>(limited));
+    CHECK(std::get<Diagnostic>(limited).code==DiagnosticCode::unsupported);
+    std::stop_source source; source.request_stop();
+    const auto cancelled=compose_hybrid_path_relation(system,request,path,{16,64,1024},source.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(cancelled));
+    CHECK(std::get<OperationStopped>(cancelled).reason==StopReason::cancelled);
 }

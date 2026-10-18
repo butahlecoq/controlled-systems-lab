@@ -1,11 +1,14 @@
 #pragma once
 
 #include <csl/core/diagnostics.hpp>
+#include <csl/core/outcomes.hpp>
 #include <csl/model/contracts.hpp>
 #include <csl/optimization/objective_contracts.hpp>
 #include <csl/sets/contracts.hpp>
+#include <csl/sets/data.hpp>
 #include <cstddef>
 #include <string>
+#include <stop_token>
 #include <variant>
 #include <vector>
 
@@ -78,6 +81,13 @@ struct HybridEnumerationLimits {
     std::size_t max_paths;
 };
 
+struct HybridRelationLimits {
+    std::size_t max_variables;
+    std::size_t max_rows;
+    std::size_t max_matrix_elements;
+};
+using HybridRelationResult = std::variant<sets::SetData, Diagnostic, OperationStopped>;
+
 // Enumerates each allowed edge path once. The result is complete or the
 // request is rejected at the caller's limits; a truncated family is never returned.
 HybridPathEnumeration enumerate_hybrid_paths(
@@ -85,5 +95,10 @@ HybridPathEnumeration enumerate_hybrid_paths(
     const std::vector<HybridModeId>& allowed_terminal_modes, HybridEnumerationLimits);
 
 Diagnostics check_hybrid_profile(const HybridSystem&, const HybridRequest&);
+
+// Builds the exact joint H-relation for one already enumerated branch. The
+// relation retains post states, controls, and pre-reset states as coordinates.
+HybridRelationResult compose_hybrid_path_relation(const HybridSystem&, const HybridRequest&,
+    const HybridPath&, HybridRelationLimits, std::stop_token cancellation = {});
 
 } // namespace csl::model
