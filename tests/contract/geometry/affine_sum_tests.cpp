@@ -246,6 +246,25 @@ TEST_CASE("TEST-08 triangle intersection followed by affine image preserves the 
     CHECK(result.evidence.reference.inputs==std::vector<SetId>{{"chain-affine-triangle"}});
 }
 
+TEST_CASE("TEST-08 Minkowski sum followed by affine image preserves literal support endpoints") {
+    const auto left=vertices("chain-sum-left",1,{0,1},2);
+    const auto right=vertices("chain-sum-right",1,{2,3},2);
+    const auto sum_request=request(MinkowskiSum{left,right},"interval-minkowski-chain");
+    const auto sum=take(run(sum_request,dependencies()));
+    CHECK(support(sum.output,{1})==4.0);
+    CHECK(support(sum.output,{-1})==-2.0);
+    CHECK(check_geometry_evidence(sum.evidence,sum_request).empty());
+
+    const auto image_request=request(AffineImage{sum.output,{1,1,{-2}},{3}},
+        "minkowski-affine-chain");
+    const auto image=take(run(image_request,dependencies()));
+    CHECK(support(image.output,{1})==-1.0);
+    CHECK(support(image.output,{-1})==5.0);
+    CHECK(check_geometry_evidence(image.evidence,image_request).empty());
+    CHECK(image.evidence.reference.identity==image_request.identity);
+    CHECK(image.evidence.reference.inputs==std::vector<SetId>{sum.output.id});
+}
+
 TEST_CASE("fixed-seed integer rectangles have independently enumerated affine supports") {
     constexpr std::uint32_t seed = 0x5EED08U;
     std::mt19937 generator(seed);
