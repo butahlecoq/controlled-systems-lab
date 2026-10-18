@@ -12,6 +12,7 @@
 using namespace csl;
 
 namespace {
+class FutureRepresentationPayload final : public SetPayload {};
 template<class T,class... Alternatives> T take(std::variant<T,Alternatives...> result) {
     REQUIRE(std::holds_alternative<T>(result));
     return std::get<T>(std::move(result));
@@ -308,4 +309,27 @@ TEST_CASE("bounded explicit zonotope to V conversion has literal vertices and cl
     CHECK(point_v.vertices.rows()==1);
     CHECK(point_v.vertices(0,0)==3);
     CHECK(point_v.vertices(0,1)==-1);
+}
+
+TEST_CASE("future zonotope and ellipsoid payloads need explicit geometry and conversion adapters") {
+    const SetHandle future_ellipsoid{{2,{"test.future.ellipsoid"},SetProperty::yes,
+        SetProperty::no,SetProperty::yes},std::make_shared<const FutureRepresentationPayload>(),{"future/ellipsoid"}};
+    const SetHandle future_zonotope{{2,{"test.future.zonotope"},SetProperty::yes,
+        SetProperty::yes,SetProperty::yes},std::make_shared<const FutureRepresentationPayload>(),{"future/zonotope"}};
+
+    auto sum_adapter=provider(geometry::generators::make_operation_registration(),{"csl.zonotope"});
+    const OperationRequest sum{{{"future-representation"},{"sum"},{"sum-result"}},
+        {"csl.geometry.generators.operations"},MinkowskiSum{future_ellipsoid,future_zonotope},
+        SetRelation::equivalent,Assurance::numerical};
+    const auto sum_result=sum_adapter.prepare(sum);
+    REQUIRE(std::holds_alternative<registry::Rejection>(sum_result));
+    CHECK(std::get<registry::Rejection>(sum_result).diagnostics.front().field=="generators.handle");
+
+    auto converter=provider(geometry::generators::make_v_conversion_registration(16),
+        {"csl.polyhedron.v"});
+    const ConversionRequest conversion{{{"future-representation"},{"convert"},{"v-result"}},
+        future_ellipsoid,{"csl.polyhedron.v"},Assurance::numerical};
+    const auto conversion_result=converter.prepare(conversion);
+    REQUIRE(std::holds_alternative<registry::Rejection>(conversion_result));
+    CHECK(std::get<registry::Rejection>(conversion_result).diagnostics.front().field=="generators.handle");
 }
