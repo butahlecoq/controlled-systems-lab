@@ -248,12 +248,36 @@ TEST_CASE("hybrid joint relation retains flow, controls, resets, and mode-local 
     const auto h=std::get<sets::HRepresentation>(representation);
     CHECK(h.equalities.rows()==7); // initial, control, flow, guard, and rectangular reset witness
     CHECK(h.equalities.cols()==5);
+    const Matrix expected_equalities{7,5,{
+         1,0,0,0,0,
+        -1,0,1,0,0,
+         0,1,0,0,0,
+         0,0,1,0,0,
+         0,0,1,0,0,
+         0,0,0,1,0,
+         0,0,0,0,1}};
+    const Vector expected_rhs{3,0,0,3,3,3,2};
+    CHECK(h.equality_values.size()==expected_rhs.size());
+    for(std::size_t i=0;i<expected_equalities.rows;++i) {
+        CHECK(h.equality_values[i]==expected_rhs[i]);
+        for(std::size_t j=0;j<expected_equalities.cols;++j)
+            CHECK(h.equalities(i,j)==expected_equalities.values[i*expected_equalities.cols+j]);
+    }
     const Vector expected_variables{3,0,3,3,2};
     for(std::size_t i=0;i<h.equalities.rows();++i) {
         double value=0;
         for(std::size_t j=0;j<h.equalities.cols();++j) value+=h.equalities(i,j)*expected_variables[j];
         CHECK(value==h.equality_values[i]);
     }
+    Vector altered_variables{4,0,3,3,2};
+    bool altered_satisfies=true;
+    for(std::size_t i=0;i<expected_equalities.rows;++i) {
+        double value=0;
+        for(std::size_t j=0;j<expected_equalities.cols;++j)
+            value+=expected_equalities.values[i*expected_equalities.cols+j]*altered_variables[j];
+        if(value!=expected_rhs[i]) altered_satisfies=false;
+    }
+    CHECK_FALSE(altered_satisfies);
 }
 
 TEST_CASE("hybrid joint relation rejects capacity exhaustion without truncation and observes cancellation") {
