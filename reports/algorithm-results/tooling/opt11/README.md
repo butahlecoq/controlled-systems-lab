@@ -14,7 +14,7 @@ point ID. No solver witness is trusted as a certificate.
 The native record schema is `csl.opt11-recursive-hull-report/1`. A native bundle
 contains exactly `records.json`, `collection.json`, `raw-stdout.jsonl`,
 `raw-stderr.txt`, `release-build-log-sanitized.txt`,
-`functional-validation.json`, `trials.csv`, `summary.csv`, `latency.svg`,
+`compiler-identification.cmake`, `functional-validation.json`, `trials.csv`, `summary.csv`, `latency.svg`,
 `index.html`, and `manifest.json`. The adjacent offline archive is
 `<report_id>.source.zip`. Records include all paired trial rows, method
 durations, LP call counts, recursive leaf/merge metrics, peak merge points,
@@ -58,7 +58,8 @@ clean commit at which source hashes and the compiled description agree. Configur
 and build it from a clean Release tree, keep the full verbose log private, and
 write an accurate concurrent-load note. The collector requires the full source
 commit, clean source status, executable/harness identity, VS 2022 Release x64
-project settings and actual `/O2`, `/D NDEBUG`, `/std:c++20` compiler evidence
+project settings, the generated CMake compiler identity file and its hashes, and
+actual `/O2`, `/D NDEBUG`, `/std:c++20` compiler evidence
 for the harness, recursive reducer, registered hull reducer, and HiGHS adapter.
 The verbose log must show the explicit MSBuild clean command before those compiles, bind the compile
 commands to the requested source root, and link the two registered libraries
@@ -75,7 +76,7 @@ cmake -S reports/algorithm-results/tooling/opt11 -B build/opt11-harness `
 cmake --build build/opt11-harness --config Release --target csl_opt11_measure `
   --clean-first --parallel 4 --verbose *> build/opt11-harness/release-build.log
 if ($LASTEXITCODE -ne 0) { throw 'Release build failed' }
-'Describe observed concurrent work and machine load here.' |
+'No deliberate competing benchmark or build workload was started. Ordinary background processes were not stopped; before/after host and matching process-CPU snapshots are retained.' |
   Set-Content build/opt11-harness/concurrent-work.txt
 python -B reports/algorithm-results/tooling/opt11/collect.py preflight `
   --exe build/opt11-harness/Release/csl_opt11_measure.exe --source-root . `

@@ -24,7 +24,7 @@ SCHEMA = "csl.opt11-recursive-hull-report/1"
 MANIFEST_SCHEMA = "csl.opt11-native-manifest/1"
 FILES = {"records.json", "collection.json", "raw-stdout.jsonl", "raw-stderr.txt",
          "release-build-log-sanitized.txt", "functional-validation.json", "trials.csv",
-         "summary.csv", "latency.svg", "index.html"}
+         "summary.csv", "latency.svg", "compiler-identification.cmake", "index.html"}
 TRIAL_FIELDS = ("fixture", "round", "warmup", "recursive_first", "baseline_ns", "recursive_ns",
                 "paired_delta_recursive_minus_baseline_ns", "baseline_lp_calls", "recursive_lp_calls",
                 "leaf_lp_calls", "merge_lp_calls", "peak_merge_points", "concurrent_child_subtrees",
@@ -78,11 +78,27 @@ def read_collection(directory: Path, allow_test=False):
     require(digest(raw) == meta.get("raw_stdout_sha256") and digest(err) == meta.get("raw_stderr_sha256"),
             "raw byte hashes differ from collection-time hashes")
     require(digest(log) == meta.get("sanitized_build_log_sha256"), "sanitized Release log hash mismatch")
+    compiler_source = (directory / "compiler-identification.cmake").read_bytes()
+    compiler_text = compiler_source.decode("utf-8")
+    require(digest(compiler_source) == meta.get("compiler_identification_sha256"),
+            "sanitized compiler identification hash mismatch")
+    require(isinstance(meta.get("compiler_identification_source_sha256"), str) and
+            len(meta["compiler_identification_source_sha256"]) == 64,
+            "generated compiler source hash is missing")
+    compiler = meta.get("release_project", {})
+    require(compiler.get("compiler_id") is not None and compiler.get("compiler_version") is not None and
+            f'set(CMAKE_CXX_COMPILER_ID "{compiler["compiler_id"]}")' in compiler_text and
+            f'set(CMAKE_CXX_COMPILER_VERSION "{compiler["compiler_version"]}")' in compiler_text,
+            "compiler identity differs from retained CMake compiler source")
     require(meta.get("process_outcome") == "completed" and meta.get("process_exit_code") == 0,
             "failed or timed-out process bytes are retained but cannot form a completed report")
     validation = validate_stream(directory / "raw-stdout.jsonl", "measurement")
     saved = json.loads((directory / "functional-validation.json").read_text(encoding="utf-8"))
     require(validation == saved == meta.get("validation"), "independent validation result differs")
+    machine_load = meta.get("environment", {}).get("machine_load")
+    require(isinstance(machine_load, dict) and
+            {"before", "after", "process_cpu_deltas"} <= set(machine_load),
+            "before/after machine-load and process-CPU snapshots are missing")
     rows = [json.loads(line) for line in raw.decode("utf-8").splitlines()]
     return meta, rows, validation
 
@@ -177,8 +193,8 @@ def page(record):
 <h2>All paired trials</h2><table><thead><tr>{th(TRIAL_FIELDS)}</tr></thead><tbody>{trial_rows}</tbody></table>
 <p>Performance interpretation: {esc(record['performance_interpretation'])}. Timing is one public registered <code>run_with</code> call. Fixture parsing, reducer/injected-workspace creation, exact validation, serialization and rendering are excluded; recursive child LP-workspace creation and root task scheduling are included. Backend phase times, native thread count, CPU time, peak memory and source-mapped limiter are unavailable.</p>
 <p>LP backend: <code>{esc(record['backend']['method'])}</code> version <code>{esc(record['backend']['version'])}</code>, reported by the executable's registered LP provider. Configured threads: {esc(record['backend']['configured_threads'])}; presolve: {esc(record['backend']['presolve'])}; parallel mode: {esc(record['backend']['parallel'])}. Observed native thread count remains unavailable.</p>
-<p>Host: {esc(env['os'])}; machine {esc(env['machine'])}; logical processors {esc(env['logical_processors'])}. Compiler: {esc(record['release_project']['compiler_id'])} {esc(record['release_project']['compiler_version'])}; C++ setting {esc(record['release_project']['language_standard'])}, optimization {esc(record['release_project']['optimization'])}, NDEBUG enabled. Concurrent work: {esc(env['concurrent_work_note'])}. Full sanitized Release evidence is in <a href="release-build-log-sanitized.txt">the build log</a>.</p>
-<h2>Saved evidence</h2><ul><li><a href="records.json">Typed records</a></li><li><a href="collection.json">Collection provenance</a></li><li><a href="raw-stdout.jsonl">Raw JSONL</a></li><li><a href="raw-stderr.txt">Raw stderr bytes</a></li><li><a href="functional-validation.json">Independent validation</a></li><li><a href="trials.csv">Trial CSV</a></li><li><a href="summary.csv">Summary CSV</a></li><li><a href="latency.svg">SVG figure</a></li><li><a href="manifest.json">Native manifest</a></li></ul>
+<p>Host: {esc(env['os'])}; machine {esc(env['machine'])}; logical processors {esc(env['logical_processors'])}. Compiler: {esc(record['release_project']['compiler_id'])} {esc(record['release_project']['compiler_version'])}; C++ setting {esc(record['release_project']['language_standard'])}, optimization {esc(record['release_project']['optimization'])}, NDEBUG enabled. Concurrent work: {esc(env['concurrent_work_note'])}. Machine-load and process-CPU snapshots: <code>{esc(json.dumps(env.get('machine_load', {}), sort_keys=True))}</code>. Full sanitized Release and compiler evidence are in <a href="release-build-log-sanitized.txt">the build log</a> and <a href="compiler-identification.cmake">CMake compiler identification</a>.</p>
+<h2>Saved evidence</h2><ul><li><a href="records.json">Typed records</a></li><li><a href="collection.json">Collection provenance</a></li><li><a href="raw-stdout.jsonl">Raw JSONL</a></li><li><a href="raw-stderr.txt">Raw stderr bytes</a></li><li><a href="functional-validation.json">Independent validation</a></li><li><a href="compiler-identification.cmake">Compiler identification</a></li><li><a href="trials.csv">Trial CSV</a></li><li><a href="summary.csv">Summary CSV</a></li><li><a href="latency.svg">SVG figure</a></li><li><a href="manifest.json">Native manifest</a></li></ul>
 <p>Performance is exploratory and fixture-limited. No universal speedup, scalability, or correctness claim for arbitrary point clouds follows.</p></body></html>'''
 
 
@@ -199,7 +215,7 @@ def build(collection: Path, out_root: Path, allow_test=False):
     archive = out_root / (bundle.name + ".source.zip")
     require(not bundle.exists() and not archive.exists(), "immutable report destination already exists")
     files = {name: (collection / name).read_bytes() for name in
-             ("collection.json", "raw-stdout.jsonl", "raw-stderr.txt", "release-build-log-sanitized.txt", "functional-validation.json")}
+             ("collection.json", "raw-stdout.jsonl", "raw-stderr.txt", "release-build-log-sanitized.txt", "functional-validation.json", "compiler-identification.cmake")}
     files.update({"records.json": json_bytes(record),
                   "trials.csv": csv_bytes(record["trials"], TRIAL_FIELDS),
                   "summary.csv": csv_bytes(record["summary"], SUMMARY_FIELDS),

@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+import tempfile
 import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from collect import HARNESS, TIMING_TRANSLATION_UNITS, validate_release_build_evidence
+from collect import (HARNESS, TIMING_TRANSLATION_UNITS, compiler_identity,
+                     validate_release_build_evidence, write_utf8_lf)
 
 
 class ReleaseBuildEvidenceTests(unittest.TestCase):
@@ -76,6 +78,30 @@ class ReleaseBuildEvidenceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "src/adapters/lp/highs.cpp"):
             validate_release_build_evidence(incomplete, self.root, self.build_root,
                                             self.exe, self.commit, self.harness_hash)
+
+    def test_compiler_identity_comes_from_hashed_generated_cmake_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            build = Path(directory)
+            compiler_dir = build / "CMakeFiles" / "3.31.6"
+            compiler_dir.mkdir(parents=True)
+            compiler_file = compiler_dir / "CMakeCXXCompiler.cmake"
+            compiler_file.write_text(
+                'set(CMAKE_CXX_COMPILER "C:/Program Files/MSVC/cl.exe")\n'
+                'set(CMAKE_CXX_COMPILER_ID "MSVC")\n'
+                'set(CMAKE_CXX_COMPILER_VERSION "19.44.1")\n', encoding="utf-8")
+            compiler_id, version, path, sanitized, relative = compiler_identity(
+                build, {"$PROGRAM_FILES": Path("C:/Program Files")})
+            self.assertEqual((compiler_id, version, path), ("MSVC", "19.44.1", "C:/Program Files/MSVC/cl.exe"))
+            self.assertIn(b'set(CMAKE_CXX_COMPILER_ID "MSVC")', sanitized)
+            self.assertNotIn(b"C:/Program Files", sanitized)
+            self.assertEqual(relative, "CMakeFiles/3.31.6/CMakeCXXCompiler.cmake")
+
+    def test_utf8_lf_persistence_does_not_translate_newlines(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "sanitized.txt"
+            written = write_utf8_lf(target, "first\nsecond\n")
+            self.assertEqual(written, b"first\nsecond\n")
+            self.assertEqual(target.read_bytes(), b"first\nsecond\n")
 
 
 if __name__ == "__main__":

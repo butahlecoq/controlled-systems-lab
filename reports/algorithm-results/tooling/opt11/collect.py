@@ -71,6 +71,32 @@ def source_hashes(root: Path) -> dict:
     return {name: file_hash(root / name) for name in SOURCE_PATHS}
 
 
+def compiler_identity(build_root: Path, roots: dict[str, Path]) -> tuple[str, str, str, bytes, str]:
+    candidates = sorted((build_root / "CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
+    identities = []
+    for source in candidates:
+        raw = source.read_bytes()
+        text = raw.decode("utf-8", errors="replace")
+        compiler_id = re.search(r'^set\(CMAKE_CXX_COMPILER_ID "([^"]+)"\)', text, re.MULTILINE)
+        version = re.search(r'^set\(CMAKE_CXX_COMPILER_VERSION "([^"]+)"\)', text, re.MULTILINE)
+        compiler_path = re.search(r'^set\(CMAKE_CXX_COMPILER "([^"]+)"\)', text, re.MULTILINE)
+        if compiler_id and version and compiler_path:
+            identities.append((compiler_id.group(1), version.group(1), compiler_path.group(1), raw, source))
+    require(bool(identities), "generated CMake C++ compiler identity is missing")
+    require(len({(item[0], item[1], item[2]) for item in identities}) == 1,
+            "generated CMake compiler identity files disagree")
+    compiler_id, version, compiler_path, raw, source = identities[0]
+    sanitized = sanitized_log(raw.decode("utf-8", errors="replace"), roots).encode("utf-8")
+    return compiler_id, version, compiler_path, sanitized, source.relative_to(build_root).as_posix()
+
+
+def write_utf8_lf(path: Path, text: str) -> bytes:
+    """Persist UTF-8 bytes exactly, without Windows text-mode newline conversion."""
+    encoded = text.encode("utf-8")
+    path.write_bytes(encoded)
+    return encoded
+
+
 def validate_release_build_evidence(raw_log: str, root: Path, build_root: Path,
                                     exe: Path, commit: str, harness_sha256: str) -> None:
     """Require a clean-first compile and link of all timing-relevant sources."""
@@ -204,6 +230,12 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path,
                                                    ("$PROGRAM_FILES", os.environ.get("ProgramFiles")),
                                                    ("$WINDOWS_ROOT", os.environ.get("SystemRoot"))) if value},
     })
+    compiler_id, compiler_version, compiler_path, compiler_source, compiler_file = compiler_identity(
+        build_root, {"$SOURCE_ROOT": root, "$BUILD_ROOT": build_root,
+                    "$TEMP_ROOT": Path(tempfile.gettempdir()), "$USER_ROOT": Path.home(),
+                    **{label: Path(value) for label, value in (("$PROGRAM_FILES_X86", os.environ.get("ProgramFiles(x86)")),
+                                                               ("$PROGRAM_FILES", os.environ.get("ProgramFiles")),
+                                                               ("$WINDOWS_ROOT", os.environ.get("SystemRoot"))) if value}})
     return {
         "source_commit": commit, "source_sha256": hashes,
         "fixture_sha256": fixture_digest(), "harness_sha256": hashes[HARNESS],
@@ -219,14 +251,19 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path,
         "executable_sha256": file_hash(exe), "build_log_sha256": file_hash(build_log),
         "sanitized_build_log": release_log,
         "sanitized_build_log_sha256": digest(release_log.encode("utf-8")),
+        "compiler_identification_sha256": digest(compiler_source),
+        "compiler_identification_source_sha256": digest((build_root / compiler_file).read_bytes()),
+        "sanitized_compiler_identification": compiler_source.decode("utf-8"),
         "cmake_cache_sha256": file_hash(cache_path),
         "release_project_sha256": file_hash(build_root / "csl_opt11_measure.vcxproj"),
         "release_project": {"generator": cache.get("CMAKE_GENERATOR"), "configuration": "Release",
                             "language_standard": project_flags["LanguageStandard"],
                             "optimization": project_flags["Optimization"],
                             "preprocessor_definitions": project_flags.get("PreprocessorDefinitions"),
-                            "compiler_id": cache.get("CMAKE_CXX_COMPILER_ID"),
-                            "compiler_version": cache.get("CMAKE_CXX_COMPILER_VERSION"),
+                            "compiler_id": compiler_id,
+                            "compiler_version": compiler_version,
+                            "compiler_path": compiler_path,
+                            "compiler_identification_file": compiler_file,
                             "ndebug": True},
         "description": description,
         "environment": {"os": platform.platform(), "machine": platform.machine(),
@@ -251,6 +288,12 @@ def collect(args) -> Path:
     output = args.out.resolve()
     require(not output.exists(), "collection output already exists")
     output.mkdir(parents=True)
+    reports_path = str(args.source_root.resolve() / "scripts" / "reports")
+    if reports_path not in sys.path:
+        sys.path.insert(0, reports_path)
+    import collector_common as common
+
+    before = common.machine_snapshot()
     timed_out = False
     try:
         proc = subprocess.run([str(args.exe.resolve()), "run", "measurement"],
@@ -261,6 +304,8 @@ def collect(args) -> Path:
         raw_out = error.output or b""
         raw_err = error.stderr or b""
         return_code = None
+    after = common.machine_snapshot()
+    metadata["environment"]["machine_load"] = common.public_load(before, after)
     (output / "raw-stdout.jsonl").write_bytes(raw_out)
     (output / "raw-stderr.txt").write_bytes(raw_err)
     validation = None
@@ -278,8 +323,9 @@ def collect(args) -> Path:
                      "timeout_seconds": args.timeout_seconds,
                      "raw_stdout_sha256": digest(raw_out), "raw_stderr_sha256": digest(raw_err),
                      "validation": validation, "validation_error": validation_error})
-    (output / "release-build-log-sanitized.txt").write_text(
-        metadata.pop("sanitized_build_log"), encoding="utf-8")
+    write_utf8_lf(output / "release-build-log-sanitized.txt", metadata.pop("sanitized_build_log"))
+    write_utf8_lf(output / "compiler-identification.cmake",
+                  metadata.pop("sanitized_compiler_identification"))
     (output / "collection.json").write_text(json.dumps(metadata, sort_keys=True, indent=2) + "\n",
                                              encoding="utf-8")
     if return_code != 0 or timed_out or validation_error:
