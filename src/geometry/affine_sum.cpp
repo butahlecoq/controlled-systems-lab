@@ -4,6 +4,7 @@
 #include <csl/sets/data.hpp>
 #include "exact_dyadic.hpp"
 #include "exact_convex_combination.hpp"
+#include "conversion/exact_h_box.hpp"
 #include "conversion/exact_h_interval.hpp"
 #include <algorithm>
 #include <cmath>
@@ -225,10 +226,14 @@ std::variant<FiniteSet, OperationOutcome> finite_vertices(const SetHandle& handl
         const auto coverage = detail::certify_h_interval(*input_h, *converted_v);
         if (const auto* bound = std::get_if<double>(&coverage))
             result.input_to_vertices_error = *bound;
+    } else {
+        const auto coverage = detail::certify_h_box(*input_h, *converted_v);
+        if (const auto* bound = std::get_if<double>(&coverage))
+            result.input_to_vertices_error = *bound;
     }
     result.assumptions.emplace_back("H-to-V conversion evidence is numerical and conditional on the selected converter");
     if (result.input_to_vertices_error)
-        result.assumptions.emplace_back("ambient-one H/V coverage was independently checked against exact stored-dyadic rows");
+        result.assumptions.emplace_back("H/V coverage was independently checked against exact stored-dyadic ambient-one or supported axis-aligned box rows");
     return result;
 }
 
@@ -498,7 +503,7 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
             "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
             exact_bound_applicable ?
-                "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one H/V coverage; exact deletion preserves the generated hull" :
+                "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one/axis-aligned-box H/V coverage; exact deletion preserves the generated hull" :
                 "no independently checked global H/V coverage bound is available for every converted operand; no operation error bound is reported",
             "finite and mixed action catalogues are not accepted by this SetHandle operation",
             "selected hull reducer: " + identity(dependencies_.hull.provenance()),
