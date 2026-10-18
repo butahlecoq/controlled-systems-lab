@@ -199,6 +199,10 @@ TEST_CASE("profile admission requires coordinate labels for every nonzero mode d
     CHECK(std::any_of(diagnostics.begin(),diagnostics.end(),[](const Diagnostic& d) {
         return d.field=="hybrid.mode.coordinates";
     }));
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto relation=compose_hybrid_path_relation(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostic>(relation));
+    CHECK(std::get<Diagnostic>(relation).field=="hybrid.mode.coordinates");
 }
 
 TEST_CASE("per-mode terminal objectives must compare the same quantity and units") {
