@@ -362,6 +362,7 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
     std::vector<Vector> inequalities, equalities;
     Vector bounds, equality_values;
     auto append = [&](Vector row, double rhs, bool equality) -> bool {
+        if(cancellation.stop_requested()) return false;
         const auto row_count = inequalities.size()+equalities.size();
         if (row_count >= limits.max_rows || width != 0 && row_count + 1 > limits.max_matrix_elements / width) return false;
         (equality ? equalities : inequalities).push_back(std::move(row));
@@ -435,19 +436,26 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
         return std::nullopt;
     };
     auto initial_error=add_set(Singleton{request.initial.state},state_offsets[0],modes[0]->state_dimension);
-    if(initial_error) return *initial_error;
+    if(initial_error) return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*initial_error};
     for(std::size_t t=0;t<=system.horizon;++t) {
         if(cancellation.stop_requested()) return stopped();
-        if(auto e=add_set(modes[t]->invariants[t],state_offsets[t],modes[t]->state_dimension)) return *e;
+        if(auto e=add_set(modes[t]->invariants[t],state_offsets[t],modes[t]->state_dimension))
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
         if(t==system.horizon) continue;
         const auto& mode=*modes[t];
         const auto& flow=std::holds_alternative<LinearStage>(mode.flow)?std::get<LinearStage>(mode.flow):std::get<std::vector<LinearStage>>(mode.flow)[t];
-        if(!add_linear(flow,state_offsets[t],control_offsets[t],pre_offsets[t]))
+        if(!add_linear(flow,state_offsets[t],control_offsets[t],pre_offsets[t])) {
+            if(cancellation.stop_requested()) return stopped();
             return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
-        if(auto e=add_set(mode.control_sets[t],control_offsets[t],mode.control_dimension)) return *e;
-        if(auto e=add_set(mode.invariants[t+1],pre_offsets[t],mode.state_dimension)) return *e;
-        if(auto e=add_set(edges[t]->guards[t],pre_offsets[t],mode.state_dimension)) return *e;
-        if(auto e=add_reset(edges[t]->reset_relations[t],pre_offsets[t],state_offsets[t+1],mode.state_dimension,modes[t+1]->state_dimension)) return *e;
+        }
+        if(auto e=add_set(mode.control_sets[t],control_offsets[t],mode.control_dimension))
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
+        if(auto e=add_set(mode.invariants[t+1],pre_offsets[t],mode.state_dimension))
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
+        if(auto e=add_set(edges[t]->guards[t],pre_offsets[t],mode.state_dimension))
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
+        if(auto e=add_reset(edges[t]->reset_relations[t],pre_offsets[t],state_offsets[t+1],mode.state_dimension,modes[t+1]->state_dimension))
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
     }
     if(cancellation.stop_requested()) return stopped();
     std::vector<std::string> coordinate_labels(width);
