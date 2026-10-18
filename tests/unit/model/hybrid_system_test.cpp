@@ -523,6 +523,59 @@ TEST_CASE("hybrid joint relation retains flow, controls, resets, and mode-local 
     CHECK_FALSE(altered_satisfies);
 }
 
+TEST_CASE("hybrid composition report records mode and transition operations with resource use") {
+    auto [system,request]=dimension_changing_example();
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto composed=compose_hybrid_path_relation_with_report(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridComposedPathRelation>(composed));
+    const auto& report=std::get<HybridComposedPathRelation>(composed);
+    CHECK(report.relation.metadata()->set.dimension==5);
+    CHECK(report.limits.max_variables==16);
+    CHECK(report.limits.max_rows==64);
+    REQUIRE(report.operations.size()==8);
+    CHECK(report.operations[0].operation==HybridRelationOperationKind::initial_state);
+    CHECK(report.operations[0].mode==HybridModeId{"source"});
+    CHECK(report.operations[0].rows_added==1);
+    CHECK(report.operations[1].operation==HybridRelationOperationKind::post_state_invariant);
+    CHECK(report.operations[2].operation==HybridRelationOperationKind::mode_flow);
+    CHECK(report.operations[2].mode==HybridModeId{"source"});
+    CHECK(report.operations[2].rows_added==1);
+    CHECK(report.operations[3].operation==HybridRelationOperationKind::continuous_control);
+    CHECK(report.operations[4].operation==HybridRelationOperationKind::pre_reset_invariant);
+    CHECK(report.operations[5].operation==HybridRelationOperationKind::transition_guard);
+    CHECK(report.operations[5].edge==HybridEdgeId{"switch"});
+    CHECK(report.operations[6].operation==HybridRelationOperationKind::reset_relation);
+    CHECK(report.operations[6].edge==HybridEdgeId{"switch"});
+    CHECK(report.operations[7].operation==HybridRelationOperationKind::post_state_invariant);
+    for(const auto& operation:report.operations) {
+        CHECK(operation.implementation_id=="csl.model.hybrid.joint-h-composer");
+        CHECK(operation.implementation_version=="1");
+        CHECK(operation.joint_variables==5);
+        CHECK(operation.cumulative_matrix_elements==operation.cumulative_rows*5);
+    }
+    CHECK(report.operations.back().cumulative_rows==2);
+    CHECK(report.operations.back().cumulative_matrix_elements==10);
+
+    const auto limited=compose_hybrid_path_relation_with_report(system,request,path,{16,1,1024});
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(limited));
+    const auto& limit_report=std::get<HybridPathCompositionFailureReport>(limited);
+    CHECK(limit_report.limits.max_rows==1);
+    const auto* limit_diagnostic=std::get_if<Diagnostic>(&limit_report.failure);
+    REQUIRE(limit_diagnostic);
+    CHECK(limit_diagnostic->field=="hybrid.relation.rows");
+    REQUIRE(limit_report.operations.size()==2);
+    CHECK(limit_report.operations.back().cumulative_rows==1);
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    const auto stopped=compose_hybrid_path_relation_with_report(
+        system,request,path,{16,64,1024},cancellation.get_token());
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(stopped));
+    const auto& stop_report=std::get<HybridPathCompositionFailureReport>(stopped);
+    CHECK(stop_report.limits.max_rows==64);
+    CHECK(std::holds_alternative<OperationStopped>(stop_report.failure));
+    CHECK(stop_report.operations.empty());
+}
+
 TEST_CASE("hybrid joint relation rejects capacity exhaustion without truncation and observes cancellation") {
     auto [system,request]=dimension_changing_example();
     const HybridPath path{{{"source"},{"target"}},{{"switch"}}};

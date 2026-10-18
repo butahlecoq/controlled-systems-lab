@@ -211,6 +211,12 @@ TEST_CASE("hybrid direct path program preserves branch and terminal objective co
     CHECK(program.rows()[1].upper==0);
     CHECK(built.joint_relation.metadata()->set.dimension==5);
     CHECK(built.path==example_path());
+    CHECK(built.relation_limits.max_variables==16);
+    REQUIRE(built.relation_operations.size()==8);
+    CHECK(built.relation_operations[2].operation==model::HybridRelationOperationKind::mode_flow);
+    CHECK(built.relation_operations[2].mode==model::HybridModeId{"source"});
+    CHECK(built.relation_operations[5].operation==model::HybridRelationOperationKind::transition_guard);
+    CHECK(built.relation_operations[5].edge==model::HybridEdgeId{"switch"});
 }
 
 TEST_CASE("hybrid program construction preserves cancellation and unsupported limits") {
@@ -223,8 +229,13 @@ TEST_CASE("hybrid program construction preserves cancellation and unsupported li
 
     const auto limited=build_hybrid_path_program(example_system(),example_request(),example_path(),
         {"hybrid-problem"},{4,64,1024});
-    REQUIRE(std::holds_alternative<Diagnostics>(limited));
-    CHECK(std::get<Diagnostics>(limited)[0].code==DiagnosticCode::unsupported);
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(limited));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(limited);
+    CHECK(failure.path==example_path());
+    CHECK(failure.limits.max_variables==4);
+    const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+    REQUIRE(diagnostic);
+    CHECK(diagnostic->code==DiagnosticCode::unsupported);
 }
 
 TEST_CASE("hybrid direct path programs admit quadratic and residual terminal objectives") {
@@ -263,7 +274,12 @@ TEST_CASE("hybrid portfolio builder returns every parallel edge branch transacti
 
     const auto limited=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
         {1,8},{4,64,1024});
-    CHECK(std::holds_alternative<Diagnostics>(limited));
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(limited));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(limited);
+    CHECK(failure.path==example_path());
+    const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+    REQUIRE(diagnostic);
+    CHECK(diagnostic->field=="hybrid.relation.variables");
 }
 
 TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
@@ -451,8 +467,13 @@ TEST_CASE("hybrid portfolio builder rolls back after a later dimension limit fai
     auto [system,request]=variable_size_parallel_profile();
     const auto built=build_hybrid_portfolio_programs(system,request,{"hybrid-problem"},
         {1,8},{3,64,4096});
-    REQUIRE(std::holds_alternative<Diagnostics>(built));
-    CHECK(std::get<Diagnostics>(built)[0].field=="hybrid.relation.variables");
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(built));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(built);
+    CHECK(failure.path.edges==std::vector<model::HybridEdgeId>{{"to-large"}});
+    CHECK(failure.limits.max_variables==3);
+    const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+    REQUIRE(diagnostic);
+    CHECK(diagnostic->field=="hybrid.relation.variables");
 }
 
 TEST_CASE("hybrid branch execution retains path and solver provenance on rejection") {

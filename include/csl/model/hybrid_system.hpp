@@ -89,6 +89,38 @@ struct HybridRelationLimits {
 };
 using HybridRelationResult = std::variant<sets::SetData, Diagnostic, OperationStopped>;
 
+enum class HybridRelationOperationKind {
+    initial_state, post_state_invariant, mode_flow, continuous_control,
+    pre_reset_invariant, transition_guard, reset_relation
+};
+
+struct HybridRelationOperationRecord {
+    HybridRelationOperationKind operation;
+    std::size_t stage{};
+    std::optional<HybridModeId> mode;
+    std::optional<HybridEdgeId> edge;
+    std::string implementation_id;
+    std::string implementation_version;
+    std::size_t joint_variables{};
+    std::size_t rows_added{};
+    std::size_t cumulative_rows{};
+    std::size_t cumulative_matrix_elements{};
+};
+
+struct HybridComposedPathRelation {
+    sets::SetData relation;
+    HybridRelationLimits limits;
+    std::vector<HybridRelationOperationRecord> operations;
+};
+struct HybridPathCompositionFailureReport {
+    HybridPath path;
+    HybridRelationLimits limits;
+    std::vector<HybridRelationOperationRecord> operations;
+    std::variant<Diagnostic, OperationStopped> failure;
+};
+using HybridComposedPathRelationResult = std::variant<HybridComposedPathRelation,
+    HybridPathCompositionFailureReport>;
+
 struct HybridModeCapabilitySummary {
     HybridModeId mode;
     std::size_t state_dimension{};
@@ -130,6 +162,9 @@ Diagnostics check_hybrid_profile(const HybridSystem&, const HybridRequest&);
 // relation retains post states, controls, and pre-reset states as coordinates.
 HybridRelationResult compose_hybrid_path_relation(const HybridSystem&, const HybridRequest&,
     const HybridPath&, HybridRelationLimits, std::stop_token cancellation = {});
+HybridComposedPathRelationResult compose_hybrid_path_relation_with_report(
+    const HybridSystem&, const HybridRequest&, const HybridPath&, HybridRelationLimits,
+    std::stop_token cancellation = {});
 
 using HybridObjectiveLiftResult = std::variant<TerminalObjective, Diagnostic>;
 HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem&, const HybridRequest&,

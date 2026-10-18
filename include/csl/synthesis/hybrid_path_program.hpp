@@ -13,11 +13,15 @@ struct HybridPathProgram {
     sets::SetData joint_relation;
     TerminalObjective lifted_objective;
     std::variant<LinearProgram, ConvexProgram> program;
+    model::HybridRelationLimits relation_limits;
+    std::vector<model::HybridRelationOperationRecord> relation_operations;
 };
 
-using HybridPortfolioProgramResult = std::variant<std::vector<HybridPathProgram>, Diagnostics, OperationStopped>;
+using HybridPortfolioProgramResult = std::variant<std::vector<HybridPathProgram>, Diagnostics,
+    OperationStopped, model::HybridPathCompositionFailureReport>;
 
-using HybridPathProgramResult = std::variant<HybridPathProgram, Diagnostics, OperationStopped>;
+using HybridPathProgramResult = std::variant<HybridPathProgram, Diagnostics, OperationStopped,
+    model::HybridPathCompositionFailureReport>;
 
 // Builds one directly formulated program per edge path. Branch identity is
 // encoded into the generated ProgramId so parallel paths remain separate.

@@ -349,9 +349,10 @@ HybridCapabilityReportResult report_hybrid_capability(const HybridSystem& system
     return report;
 }
 
-HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
+namespace {
+HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& system,
     const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits,
-    std::stop_token cancellation) {
+    std::stop_token cancellation,std::vector<HybridRelationOperationRecord>* operations) {
     const auto errors = check_hybrid_profile(system, request);
     if (!errors.empty()) return errors.front();
     const auto stopped = [] { return OperationStopped{StopReason::cancelled,
@@ -486,27 +487,50 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
             return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
         return std::nullopt;
     };
+    auto row_count=[&] { return inequalities.size()+equalities.size(); };
+    auto record_operation=[&](HybridRelationOperationKind operation,std::size_t stage,
+        std::optional<HybridModeId> mode,std::optional<HybridEdgeId> edge,std::size_t rows_before) {
+        if(!operations) return;
+        const auto total_rows=row_count();
+        operations->push_back({operation,stage,std::move(mode),std::move(edge),
+            "csl.model.hybrid.joint-h-composer","1",width,total_rows-rows_before,
+            total_rows,total_rows*width});
+    };
+    auto rows_before=row_count();
     auto initial_error=add_set(Singleton{request.initial.state},state_offsets[0],modes[0]->state_dimension);
     if(initial_error) return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*initial_error};
+    record_operation(HybridRelationOperationKind::initial_state,0,modes[0]->id,{},rows_before);
     for(std::size_t t=0;t<=system.horizon;++t) {
         if(cancellation.stop_requested()) return stopped();
+        rows_before=row_count();
         if(auto e=add_set(modes[t]->invariants[t],state_offsets[t],modes[t]->state_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
+        record_operation(HybridRelationOperationKind::post_state_invariant,t,modes[t]->id,{},rows_before);
         if(t==system.horizon) continue;
         const auto& mode=*modes[t];
         const auto& flow=std::holds_alternative<LinearStage>(mode.flow)?std::get<LinearStage>(mode.flow):std::get<std::vector<LinearStage>>(mode.flow)[t];
+        rows_before=row_count();
         if(!add_linear(flow,state_offsets[t],control_offsets[t],pre_offsets[t])) {
             if(cancellation.stop_requested()) return stopped();
             return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
         }
+        record_operation(HybridRelationOperationKind::mode_flow,t,mode.id,{},rows_before);
+        rows_before=row_count();
         if(auto e=add_set(mode.control_sets[t],control_offsets[t],mode.control_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
+        record_operation(HybridRelationOperationKind::continuous_control,t,mode.id,{},rows_before);
+        rows_before=row_count();
         if(auto e=add_set(mode.invariants[t+1],pre_offsets[t],mode.state_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
+        record_operation(HybridRelationOperationKind::pre_reset_invariant,t+1,mode.id,{},rows_before);
+        rows_before=row_count();
         if(auto e=add_set(edges[t]->guards[t],pre_offsets[t],mode.state_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
+        record_operation(HybridRelationOperationKind::transition_guard,t,{},edges[t]->id,rows_before);
+        rows_before=row_count();
         if(auto e=add_reset(edges[t]->reset_relations[t],pre_offsets[t],state_offsets[t+1],mode.state_dimension,modes[t+1]->state_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
+        record_operation(HybridRelationOperationKind::reset_relation,t,{},edges[t]->id,rows_before);
     }
     if(cancellation.stop_requested()) return stopped();
     std::vector<std::string> coordinate_labels(width);
@@ -542,6 +566,25 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
     if(const auto* d=std::get_if<Diagnostic>(&made)) return *d;
     if(cancellation.stop_requested()) return stopped();
     return std::get<sets::SetData>(std::move(made));
+}
+} // namespace
+
+HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
+    const HybridRequest& request,const HybridPath& path,HybridRelationLimits limits,
+    std::stop_token cancellation) {
+    return compose_hybrid_path_relation_impl(system,request,path,limits,cancellation,nullptr);
+}
+
+HybridComposedPathRelationResult compose_hybrid_path_relation_with_report(
+    const HybridSystem& system,const HybridRequest& request,const HybridPath& path,
+    HybridRelationLimits limits,std::stop_token cancellation) {
+    std::vector<HybridRelationOperationRecord> operations;
+    auto result=compose_hybrid_path_relation_impl(system,request,path,limits,cancellation,&operations);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&result))
+        return HybridPathCompositionFailureReport{path,limits,std::move(operations),*diagnostic};
+    if(const auto* stopped=std::get_if<OperationStopped>(&result))
+        return HybridPathCompositionFailureReport{path,limits,std::move(operations),*stopped};
+    return HybridComposedPathRelation{std::get<sets::SetData>(std::move(result)),limits,std::move(operations)};
 }
 
 HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& system,

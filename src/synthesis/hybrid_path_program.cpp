@@ -27,12 +27,14 @@ HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& sys
     std::stop_token cancellation) {
     if(problem.value.empty()) return one({DiagnosticCode::invalid_input,"hybrid.program.problem","Problem identity must be nonempty"});
     if(cancellation.stop_requested()) return OperationStopped{StopReason::cancelled,"Hybrid path program construction was cancelled before relation composition"};
-    auto composed=model::compose_hybrid_path_relation(system,request,path,limits,cancellation);
-    if(const auto* diagnostic=std::get_if<Diagnostic>(&composed)) return one(*diagnostic);
-    if(const auto* stopped=std::get_if<OperationStopped>(&composed)) return *stopped;
+    auto composed=model::compose_hybrid_path_relation_with_report(system,request,path,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&composed)) {
+        return *failure;
+    }
     auto lifted=model::lift_hybrid_terminal_objective(system,request,path,limits);
     if(const auto* diagnostic=std::get_if<Diagnostic>(&lifted)) return one(*diagnostic);
-    auto relation=std::get<sets::SetData>(std::move(composed));
+    auto composition=std::get<model::HybridComposedPathRelation>(std::move(composed));
+    auto relation=std::move(composition.relation);
     const auto representation=relation.representation();
     const auto* h=std::get_if<sets::HRepresentation>(&representation);
     if(!h) return one({DiagnosticCode::unsupported,"hybrid.program.relation","Direct path program requires its composed H relation"});
@@ -80,7 +82,8 @@ HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& sys
         program=std::variant<LinearProgram,ConvexProgram>{std::get<ConvexProgram>(std::move(made))};
     }
     if(cancellation.stop_requested()) return OperationStopped{StopReason::cancelled,"Hybrid path program construction was cancelled before publication"};
-    return HybridPathProgram{path,std::move(relation),std::get<TerminalObjective>(std::move(lifted)),std::move(*program)};
+    return HybridPathProgram{path,std::move(relation),std::get<TerminalObjective>(std::move(lifted)),
+        std::move(*program),composition.limits,std::move(composition.operations)};
 }
 
 HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::HybridSystem& system,
@@ -105,6 +108,7 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::Hybrid
         auto built=build_hybrid_path_program(system,request,path,problem,relation_limits,policy,cancellation);
         if(const auto* errors=std::get_if<Diagnostics>(&built)) return *errors;
         if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
+        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) return *failure;
         programs.push_back(std::get<HybridPathProgram>(std::move(built)));
     }
     if(cancellation.stop_requested())

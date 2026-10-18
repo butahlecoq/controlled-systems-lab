@@ -204,6 +204,20 @@ execution, or family verification is supported or scalable. Per-operation
 provider/resource observations and generated/retained branch counts remain
 responsibilities of the synthesis and adapter reports.
 
+The direct joint composer exposes an operation trace, and every
+`HybridPathProgram` retains that trace with the relation limits used. Each
+record binds an initial-state, mode invariant, flow, control set, transition
+guard, or reset relation to its stage and mode/edge identity, identifies the
+composer implementation and version, and records joint-variable, added-row,
+cumulative-row, and cumulative matrix-element counts. Both successful and
+failed composition reports retain the configured limits and the operation
+records completed before a diagnostic or cancellation; path-program and
+portfolio builders propagate those failure reports without dropping the path
+identity. Solver-provider provenance remains attached to each branch
+execution. The trace records work performed by the current direct composer; it
+does not imply that a separate reachability adapter or hybrid family verifier
+has been implemented.
+
 ## Independent test oracle requirements
 
 The exhaustive oracle independently enumerates every permitted mode/edge
