@@ -1,9 +1,12 @@
-# Hybrid system profile (proposed)
+# Hybrid system profile
 
-Status: proposed for review under EXT-07 #156. This document defines a
-finite-horizon, discrete-time hybrid profile and its admission boundary. It
-does not claim that the current model, synthesis, geometry, or verification
-modules implement the profile. The profile is deliberately distinct from the
+Status: accepted design contract. Exact-head specification and standards
+reviews cleared this contract in [PR #471](https://github.com/butahlecoq/controlled-systems-lab/pull/471)
+at `7632a4c`; it merged as `5e4f174`. Implementation is tracked separately in
+[EXT-07 #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156)
+and [PR #472](https://github.com/butahlecoq/controlled-systems-lab/pull/472)
+and remains incomplete. The implementation-status notes below identify the
+supported subset and gaps. The profile is deliberately distinct from the
 finite/mixed control domains and observation-based policy profiles.
 
 ## Hybrid automaton data
