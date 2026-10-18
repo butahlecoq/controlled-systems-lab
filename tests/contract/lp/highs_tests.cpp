@@ -226,6 +226,48 @@ TEST_CASE("a rejected warm basis is retried by a fresh cold solver") {
     CHECK(result.raw_diagnostics.find("warm_start.cache_state=empty")!=std::string::npos);
 }
 
+TEST_CASE("interleaved warm workspaces and rejected bases preserve literal optima after objective changes") {
+    struct Query { LinearProgram program; double optimum; Vector point; };
+    const auto changed_objective=accepted(make_linear_program({
+        {{"warm-interleaved"},{"changed-objective"}}, {-3,-1}, 7,
+        {1,2,{0,2},{0,1},{1,1}}, {{0,{}},{0,{}}}, {{{},2}}}));
+    const std::vector<Query> queries{
+        {rhs_lp("interleaved-one",1), -2, {0,1}},
+        {changed_objective, 1, {2,0}},
+        {rhs_lp("interleaved-three",3), -6, {0,3}},
+        {rhs_lp("interleaved-bound",2,0.5), -2.5, {1.5,0.5}},
+        {rhs_lp("interleaved-return",1), -2, {0,1}}
+    };
+    const auto provider=accepted(make_highs_registration({.cross_query_warm_start=true}));
+    auto left=provider.factory(queries.front().program);
+    auto right=provider.factory(queries.back().program);
+    REQUIRE(left); REQUIRE(right);
+    std::vector<ProgramResult> history;
+    for (std::size_t i=0; i<queries.size(); ++i) {
+        const auto& query=queries[i];
+        // Reject one installation after left has already solved two queries.
+        // The fallback must preserve the mathematical answer and its identity.
+        if (i==2) test_support::reject_next_warm_basis_installation();
+        const auto result=accepted(left->solve(query.program,context()));
+        compare_optimal(cold_result(query.program),result,query.program,query.optimum);
+        REQUIRE(result.primal);
+        REQUIRE(result.primal->size()==query.point.size());
+        for (std::size_t j=0; j<query.point.size(); ++j)
+            CHECK((*result.primal)[j]==doctest::Approx(query.point[j]));
+        history.push_back(result);
+
+        const auto& other=queries[queries.size()-1-i];
+        const auto independent=accepted(right->solve(other.program,context()));
+        compare_optimal(cold_result(other.program),independent,other.program,other.optimum);
+        REQUIRE(independent.primal);
+        REQUIRE(independent.primal->size()==other.point.size());
+        for (std::size_t j=0; j<other.point.size(); ++j)
+            CHECK((*independent.primal)[j]==doctest::Approx(other.point[j]));
+    }
+    for (std::size_t i=0; i<history.size(); ++i)
+        cost(history[i],queries[i].program,queries[i].optimum);
+}
+
 TEST_CASE("literal offset equality free fixed infeasible unbounded and zero-dimensional LPs") {
     const auto offset = triangle(7);
     auto [offset_worker] = prepare(offset).create();
