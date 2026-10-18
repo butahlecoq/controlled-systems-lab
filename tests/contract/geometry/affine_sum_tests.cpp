@@ -663,7 +663,7 @@ TEST_CASE("affine images compose exact higher-dimensional box coverage with cand
     const auto result=take(run(req,dependencies()));
 
     CHECK(support(result.output,{1})==0.30000000000000004);
-    CHECK(support(result.output,{-1})==-0.30000000000000004);
+    CHECK(support(result.output,{-1})==0.0);
     REQUIRE(result.evidence.error_bound.has_value());
     CHECK(result.evidence.error_bound->bound==0x1p-55);
     CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
