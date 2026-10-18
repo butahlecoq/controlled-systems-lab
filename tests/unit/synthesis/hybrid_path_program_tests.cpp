@@ -4,6 +4,7 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/registry/provider.hpp>
+#include "hybrid_family_verifier_internal.hpp"
 #include <array>
 
 using namespace csl;
@@ -679,6 +680,18 @@ TEST_CASE("exact singleton hybrid verifier bounds independent path expansion") {
     const auto result=verifier.verify(system,request,{}, {}, {},{1e-10,1e-10},{});
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.oracle_limit");
+}
+
+TEST_CASE("independent verifier path enumeration observes cancellation after traversal begins") {
+    auto [system,request]=exact_singleton_portfolio();
+    std::size_t polls=0;
+    const auto result=detail::independently_enumerate_paths(system,request,10,100,[&] {
+        return ++polls==7;
+    });
+    CHECK(result.cancelled);
+    CHECK_FALSE(result.resource_limit);
+    CHECK(result.paths.size()==1);
+    CHECK(polls==7);
 }
 
 TEST_CASE("exact singleton hybrid verifier reports missing or altered optimal faces") {

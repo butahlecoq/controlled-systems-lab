@@ -1,4 +1,5 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include "hybrid_family_verifier_internal.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -137,53 +138,6 @@ ResetCheck exact_singleton_reset(const SetHandle& handle,std::vector<Integer>& r
         result.push_back(*converted);
     }
     return ResetCheck::point;
-}
-
-std::optional<std::vector<HybridPath>> independent_paths(
-    const HybridSystem& system,const HybridRequest& request,std::size_t expected_paths,
-    std::size_t visit_limit,bool& resource_limit,std::stop_token cancellation) {
-    std::vector<HybridPath> paths;
-    HybridPath prefix{{request.initial.mode},{}};
-    std::size_t visits=0;
-    struct Frame { std::size_t stage; std::size_t next_edge; bool terminal_processed; };
-    std::vector<Frame> stack{{0,0,false}};
-    visits=1;
-    while(!stack.empty()) {
-        if(cancellation.stop_requested()) return {};
-        auto& frame=stack.back();
-        if(frame.stage==system.horizon) {
-            if(!frame.terminal_processed) {
-                frame.terminal_processed=true;
-                if(std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),
-                    prefix.modes.back())!=request.allowed_terminal_modes.end()) {
-                    if(paths.size()==expected_paths) {
-                        resource_limit=true;
-                        return {};
-                    }
-                    paths.push_back(prefix);
-                }
-            }
-            stack.pop_back();
-            if(!stack.empty()) { prefix.edges.pop_back(); prefix.modes.pop_back(); }
-            continue;
-        }
-        if(frame.next_edge==system.edges.size()) {
-            stack.pop_back();
-            if(!stack.empty()) { prefix.edges.pop_back(); prefix.modes.pop_back(); }
-            continue;
-        }
-        const auto& edge=system.edges[frame.next_edge++];
-        if(edge.source!=prefix.modes.back()) continue;
-        if(visits==visit_limit) {
-            resource_limit=true;
-            return {};
-        }
-        ++visits;
-        prefix.edges.push_back(edge.id);
-        prefix.modes.push_back(edge.target);
-        stack.push_back({frame.stage+1,0,false});
-    }
-    return paths;
 }
 
 BranchEvaluation evaluate(const HybridSystem& system,const HybridRequest& request,
@@ -425,14 +379,14 @@ HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
     visit_limit=bounded_product(visit_limit,bounded_increment(system.edges.size()));
     visit_limit=bounded_product(visit_limit,64);
     visit_limit=std::min(visit_limit,max_visits);
-    bool resource_limit=false;
-    const auto inventory=independent_paths(system,request,paths.size(),visit_limit,resource_limit,cancellation);
-    if(cancellation.stop_requested())
+    auto inventory=detail::independently_enumerate_paths(system,request,paths.size(),visit_limit,
+        [&]{return cancellation.stop_requested();});
+    if(cancellation.stop_requested()||inventory.cancelled)
         return OperationStopped{StopReason::cancelled,"Exact singleton hybrid verification was cancelled during path enumeration"};
-    if(resource_limit)
+    if(inventory.resource_limit)
         return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.oracle_limit",
             "Independent verifier path traversal exceeded its inventory-derived resource limit"}};
-    if(!inventory||*inventory!=std::vector<HybridPath>(paths.begin(),paths.end()))
+    if(inventory.paths!=std::vector<HybridPath>(paths.begin(),paths.end()))
         return Diagnostics{{DiagnosticCode::evidence_mismatch,"hybrid.verification.oracle_paths",
             "Independent verifier path enumeration disagrees with the admitted inventory"}};
     if(programs.size()!=paths.size())

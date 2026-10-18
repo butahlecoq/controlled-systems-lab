@@ -46,6 +46,7 @@ csl_test_target(control_recovery_public_client synthesis)
 
 add_executable(hybrid_path_program_tests tests/unit/synthesis/hybrid_path_program_tests.cpp)
 target_link_libraries(hybrid_path_program_tests PRIVATE CSL::hybrid_path_program doctest::doctest)
+target_include_directories(hybrid_path_program_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/synthesis)
 add_test(NAME hybrid_path_program_tests COMMAND hybrid_path_program_tests)
 csl_test_target(hybrid_path_program_tests synthesis)
 
