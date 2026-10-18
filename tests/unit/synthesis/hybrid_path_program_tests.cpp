@@ -84,6 +84,36 @@ bool equality_rows_have_full_column_rank(const numeric::MatrixView& equalities) 
     return rank==equalities.cols();
 }
 
+bool has_conflicting_equalities(const sets::HRepresentation& relation) {
+    std::vector<Vector> augmented(relation.equalities.rows(),Vector(relation.equalities.cols()+1));
+    for(std::size_t row=0;row<relation.equalities.rows();++row) {
+        for(std::size_t col=0;col<relation.equalities.cols();++col)
+            augmented[row][col]=relation.equalities(row,col);
+        augmented[row].back()=relation.equality_values[row];
+    }
+    std::size_t pivot_row=0;
+    for(std::size_t col=0;col<relation.equalities.cols() && pivot_row<augmented.size();++col) {
+        auto pivot=pivot_row;
+        while(pivot<augmented.size() && augmented[pivot][col]==0) ++pivot;
+        if(pivot==augmented.size()) continue;
+        std::swap(augmented[pivot],augmented[pivot_row]);
+        const double scale=augmented[pivot_row][col];
+        for(std::size_t j=col;j<=relation.equalities.cols();++j)
+            augmented[pivot_row][j]/=scale;
+        for(std::size_t row=0;row<augmented.size();++row) {
+            if(row==pivot_row) continue;
+            const double factor=augmented[row][col];
+            for(std::size_t j=col;j<=relation.equalities.cols();++j)
+                augmented[row][j]-=factor*augmented[pivot_row][j];
+        }
+        ++pivot_row;
+    }
+    return std::any_of(augmented.begin(),augmented.end(),[&](const auto& row) {
+        const bool zero_coefficients=std::all_of(row.begin(),row.end()-1,[](double value) { return value==0; });
+        return zero_coefficients && row.back()!=0;
+    });
+}
+
 // Deliberately independent of the production path enumerator, relation
 // composer, and verifier. This small exhaustive oracle directly interprets
 // the one-step singleton fixture from its raw mode/edge data.
@@ -745,6 +775,8 @@ TEST_CASE("exact singleton hybrid verifier independently retains every tied edge
 TEST_CASE("independent one-step oracle matches exhaustive hybrid portfolio and tied optimum") {
     auto [system,request]=exact_singleton_portfolio();
     system.edges[1].reset_relations[0]=singleton_relation("oracle-reset-b",{3,0,1});
+    system.edges.push_back({{"guard-exit"},{"source"},{"target"},{Singleton{{4}}},
+        {singleton_relation("reset-guard-exit",{3,0,0})}});
     const auto oracle=enumerate_one_step_singleton_oracle(system,request);
     REQUIRE(oracle.size()==3);
     CHECK(oracle[0].path.edges[0].value=="tie-a");
@@ -757,11 +789,14 @@ TEST_CASE("independent one-step oracle matches exhaustive hybrid portfolio and t
     CHECK(oracle[2].joint_tuple==Vector{2,1,3,1,0});
     CHECK(oracle[2].objective==1);
 
+    // Flow produces pre-reset state 3: one edge allows 3 while this parallel
+    // outgoing edge requires 4, so the latter branch must be empty.
+    CHECK(oracle[0].joint_tuple[2]==3);
     const auto built=build_hybrid_portfolio_programs(system,request,{"oracle-hybrid"},
         {1,8},{32,128,4096});
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
     const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
-    REQUIRE(programs.size()==oracle.size());
+    REQUIRE(programs.size()==system.edges.size());
     std::vector<double> costs;
     for(std::size_t i=0;i<oracle.size();++i) {
         CHECK(programs[i].path==oracle[i].path);
@@ -776,6 +811,27 @@ TEST_CASE("independent one-step oracle matches exhaustive hybrid portfolio and t
             costs.back()+=linear.objective()[j]*oracle[i].joint_tuple[j];
         CHECK(costs.back()==oracle[i].objective);
     }
+    CHECK(programs.back().path.edges==std::vector<model::HybridEdgeId>{{"guard-exit"}});
+    const auto rejected_representation=programs.back().joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(rejected_representation));
+    CHECK(has_conflicting_equalities(std::get<sets::HRepresentation>(rejected_representation)));
+
+    // With the same edge guard (pre-state 3), changing the initial state to 3
+    // makes the affine flow produce 4 and the branch exits that guard.
+    auto exiting_request=request;
+    exiting_request.initial.state={3};
+    auto exiting_system=system;
+    exiting_system.edges.resize(1);
+    exiting_system.edges[0].reset_relations[0]=singleton_relation("reset-exiting-flow",{4,0,0});
+    const model::HybridPath entering_edge{{{"source"},{"target"}},{{"tie-a"}}};
+    CHECK(enumerate_one_step_singleton_oracle(exiting_system,exiting_request).empty());
+    const auto exiting=build_hybrid_path_program(exiting_system,exiting_request,entering_edge,
+        {"oracle-guard-exit"},{32,128,4096});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(exiting));
+    const auto exiting_relation=std::get<HybridPathProgram>(exiting).joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(exiting_relation));
+    CHECK(has_conflicting_equalities(std::get<sets::HRepresentation>(exiting_relation)));
+
     const auto minimum=std::min_element(oracle.begin(),oracle.end(),[](const auto& left,const auto& right) {
         return left.objective<right.objective;
     })->objective;
