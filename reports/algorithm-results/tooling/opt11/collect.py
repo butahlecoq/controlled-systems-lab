@@ -109,13 +109,38 @@ def validate_release_build_evidence(raw_log: str, root: Path, build_root: Path,
             "Release harness compile does not bind the requested source commit and harness hash")
 
     expected_exe = normalized(exe)
-    expected_build = normalized(build_root)
     link_commands = [line for line in lines
                      if "link.exe" in line.casefold() and expected_exe in line.casefold()]
-    require(any("csl\\release\\csl_hull.lib" in line.casefold() and
-                "csl\\release\\csl_highs_lp.lib" in line.casefold() and
-                expected_build in line.casefold() for line in link_commands),
-            "Release executable link evidence does not bind the expected build tree and libraries")
+
+    def resolved_link_library(argument: str) -> tuple[str, str] | None:
+        value = argument.strip('"')
+        library_name = Path(value.replace("\\", "/")).name.casefold()
+        if library_name not in {"csl_hull.lib", "csl_highs_lp.lib"}:
+            return None
+        normalized_argument = value.replace("/", "\\")
+        if re.match(r"^[A-Za-z]:\\", normalized_argument) or normalized_argument.startswith("\\\\"):
+            resolved = normalized_argument.casefold()
+        else:
+            resolved = normalized(build_root / Path(value.replace("\\", os.sep)))
+        return library_name, resolved
+
+    def has_exact_link_inputs(line: str) -> bool:
+        arguments = [quoted or unquoted for quoted, unquoted in
+                     re.findall(r'"([^"]*)"|(\S+)', line)]
+        actual: dict[str, set[str]] = {}
+        for argument in arguments:
+            library = resolved_link_library(argument)
+            if library is not None:
+                name, path = library
+                actual.setdefault(name, set()).add(path)
+        expected = {
+            "csl_hull.lib": {normalized(build_root / "csl" / "Release" / "csl_hull.lib")},
+            "csl_highs_lp.lib": {normalized(build_root / "csl" / "Release" / "csl_highs_lp.lib")},
+        }
+        return actual == expected
+
+    require(any(has_exact_link_inputs(line) for line in link_commands),
+            "Release link arguments do not resolve to both expected libraries under the verified build root")
     require(any(expected_exe in line.casefold() and "csl_opt11_measure.exe" in line.casefold()
                 for line in lines),
             "verbose Release log lacks expected executable build output")

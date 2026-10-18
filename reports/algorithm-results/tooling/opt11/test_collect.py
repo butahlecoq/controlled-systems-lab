@@ -33,9 +33,8 @@ class ReleaseBuildEvidenceTests(unittest.TestCase):
             f'/D "CSL_OPT11_SOURCE_COMMIT=\\"{self.commit}\\"" '
             f'/D "CSL_OPT11_HARNESS_SHA256=\\"{self.harness_hash}\\""'))
         exe = self.exe.as_posix().replace("/", "\\")
-        build = self.build_root.as_posix().replace("/", "\\")
-        lines.append(f'link.exe /OUT:"{exe}" "{build}\\csl\\Release\\csl_hull.lib" '
-                     f'"{build}\\csl\\Release\\csl_highs_lp.lib"')
+        lines.append(f'link.exe /OUT:"{exe}" csl\\Release\\csl_hull.lib '
+                     'csl\\Release\\csl_highs_lp.lib')
         lines.append(f'csl_opt11_measure.vcxproj -> {exe}')
         return "\n".join(lines)
 
@@ -52,6 +51,29 @@ class ReleaseBuildEvidenceTests(unittest.TestCase):
     def test_rejects_log_without_clean_first_evidence(self):
         incomplete = self.log.replace("Run Clean Command: MSBuild.exe /t:Clean\n", "")
         with self.assertRaisesRegex(ValueError, "explicit clean-first MSBuild command"):
+            validate_release_build_evidence(incomplete, self.root, self.build_root,
+                                            self.exe, self.commit, self.harness_hash)
+
+    def test_rejects_link_library_from_wrong_root(self):
+        wrong_root = self.log.replace("csl\\Release\\csl_hull.lib",
+                                      "other\\csl\\Release\\csl_hull.lib")
+        with self.assertRaisesRegex(ValueError, "both expected libraries under the verified build root"):
+            validate_release_build_evidence(wrong_root, self.root, self.build_root,
+                                            self.exe, self.commit, self.harness_hash)
+
+    def test_rejects_missing_release_optimization_flag(self):
+        line = self.compile_line("src/geometry/hull_reducer.cpp")
+        incomplete = self.log.replace(line, line.replace("/O2", "/Od"))
+        with self.assertRaisesRegex(ValueError, "src/geometry/hull_reducer.cpp"):
+            validate_release_build_evidence(incomplete, self.root, self.build_root,
+                                            self.exe, self.commit, self.harness_hash)
+
+    def test_rejects_source_compiled_from_different_root(self):
+        line = self.compile_line("src/adapters/lp/highs.cpp")
+        wrong_source = line.replace(str(self.root).replace("/", "\\"),
+                                    str(self.root.parent / "other-source").replace("/", "\\"))
+        incomplete = self.log.replace(line, wrong_source)
+        with self.assertRaisesRegex(ValueError, "src/adapters/lp/highs.cpp"):
             validate_release_build_evidence(incomplete, self.root, self.build_root,
                                             self.exe, self.commit, self.harness_hash)
 
