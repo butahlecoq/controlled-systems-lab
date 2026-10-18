@@ -65,6 +65,15 @@ SetHandle universal_relation(std::string id, std::size_t dimension) {
     return std::get<sets::SetData>(std::move(result)).as_handle();
 }
 
+SetHandle singleton_relation(std::string id, Vector point) {
+    auto coordinates= numeric::snapshot_vector(point);
+    REQUIRE(std::holds_alternative<numeric::VectorView>(coordinates));
+    auto result=sets::make_singleton({SetId{std::move(id)},point.size(),{}},
+        std::get<numeric::VectorView>(std::move(coordinates)));
+    REQUIRE(std::holds_alternative<sets::SetData>(result));
+    return std::get<sets::SetData>(std::move(result)).as_handle();
+}
+
 std::pair<HybridSystem,HybridRequest> dimension_changing_example() {
     auto source=mode("source",1,1,1), target=mode("target",2,1,1);
     target.state_coordinate_labels={"p","v"};
@@ -214,6 +223,10 @@ TEST_CASE("zero-horizon profile validates its single initial and terminal stage"
 
 TEST_CASE("hybrid joint relation retains flow, controls, resets, and mode-local dimensions") {
     auto [system,request]=dimension_changing_example();
+    system.modes[0].flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0}},Matrix{1,0,{}},Vector{0}};
+    system.modes[0].control_sets[0]=Singleton{{0}};
+    system.edges[0].guards[0]=Singleton{{3}};
+    system.edges[0].reset_relations[0]=singleton_relation("rectangular-reset",{3,3,2});
     const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
     const auto relation=compose_hybrid_path_relation(system,request,path,{16,64,1024});
     REQUIRE(std::holds_alternative<sets::SetData>(relation));
@@ -222,8 +235,14 @@ TEST_CASE("hybrid joint relation retains flow, controls, resets, and mode-local 
     const auto representation=data.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
     const auto h=std::get<sets::HRepresentation>(representation);
-    CHECK(h.equalities.rows()==2); // fixed initial coordinate and one-dimensional flow
+    CHECK(h.equalities.rows()==7); // initial, control, flow, guard, and rectangular reset witness
     CHECK(h.equalities.cols()==5);
+    const Vector expected_variables{3,0,3,3,2};
+    for(std::size_t i=0;i<h.equalities.rows();++i) {
+        double value=0;
+        for(std::size_t j=0;j<h.equalities.cols();++j) value+=h.equalities(i,j)*expected_variables[j];
+        CHECK(value==h.equality_values[i]);
+    }
 }
 
 TEST_CASE("hybrid joint relation rejects capacity exhaustion without truncation and observes cancellation") {
