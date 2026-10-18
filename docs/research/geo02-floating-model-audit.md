@@ -33,9 +33,10 @@ direction, or a bound to either authored real model. `NumericalCheck.max_residua
 describes an attempted reducer reconstruction residual; it is not the distance
 from `Q_64` to either real model. For direct finite V, singleton, and empty
 inputs, the operation now publishes an exact-post-hoc outward L-infinity bound
-from the stored dyadic operation to `Q_64`. It leaves `error_bound` empty
-whenever any input uses H-to-V conversion, whose global coverage remains
-uncertified.
+from the stored dyadic operation to `Q_64`. For H-to-V inputs, it publishes a
+bound when independent global coverage is certified for a bounded ambient-one
+interval or supported bounded axis-aligned box. Unsupported H profiles still
+leave `error_bound` empty because their global coverage remains uncertified.
 The public [affine-sum contract](../contracts/affine-sum-operations.md) and
 [`OperationResult`/`GeometryEvidence` types](../../include/csl/geometry/contracts.hpp)
 carry this distinction to callers.
