@@ -101,4 +101,8 @@ Diagnostics check_hybrid_profile(const HybridSystem&, const HybridRequest&);
 HybridRelationResult compose_hybrid_path_relation(const HybridSystem&, const HybridRequest&,
     const HybridPath&, HybridRelationLimits, std::stop_token cancellation = {});
 
+using HybridObjectiveLiftResult = std::variant<TerminalObjective, Diagnostic>;
+HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem&, const HybridRequest&,
+    const HybridPath&, HybridRelationLimits);
+
 } // namespace csl::model

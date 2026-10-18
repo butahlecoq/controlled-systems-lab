@@ -330,3 +330,36 @@ TEST_CASE("hybrid relation IDs distinguish colon-delimited edge-ID sequences") {
     CHECK(std::get<sets::SetData>(first_relation).metadata()->id !=
           std::get<sets::SetData>(second_relation).metadata()->id);
 }
+
+TEST_CASE("hybrid terminal objective is lifted only onto its branch terminal coordinates") {
+    auto [system,request]=dimension_changing_example();
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto lifted=lift_hybrid_terminal_objective(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<TerminalObjective>(lifted));
+    const auto* linear=std::get_if<LinearTerminal>(&std::get<TerminalObjective>(lifted));
+    REQUIRE(linear);
+    CHECK(linear->coefficients==Vector{0,0,0,1,0});
+    CHECK(linear->offset==0);
+}
+
+TEST_CASE("hybrid quadratic and residual objectives lift onto rectangular terminal blocks") {
+    auto [system,request]=dimension_changing_example();
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    request.terminal_objectives[0].objective=QuadraticTerminal{
+        Matrix{2,2,{1,0,0,2}},Vector{4,5},7};
+    const auto quadratic=lift_hybrid_terminal_objective(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<TerminalObjective>(quadratic));
+    const auto& q=std::get<QuadraticTerminal>(std::get<TerminalObjective>(quadratic));
+    CHECK(q.Q.rows==5);
+    CHECK(q.Q.values==Vector{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,1,0, 0,0,0,0,2});
+    CHECK(q.linear==Vector{0,0,0,4,5});
+    CHECK(q.offset==7);
+
+    request.terminal_objectives[0].objective=ResidualNormTerminal{Matrix{1,2,{1,2}},Vector{0}};
+    const auto residual=lift_hybrid_terminal_objective(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<TerminalObjective>(residual));
+    const auto& r=std::get<ResidualNormTerminal>(std::get<TerminalObjective>(residual));
+    CHECK(r.map.rows==1);
+    CHECK(r.map.cols==5);
+    CHECK(r.map.values==Vector{0,0,0,1,2});
+}

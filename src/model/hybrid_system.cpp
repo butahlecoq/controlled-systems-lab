@@ -485,4 +485,68 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
     return std::get<sets::SetData>(std::move(made));
 }
 
+HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& system,
+    const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits) {
+    const auto errors=check_hybrid_profile(system,request);
+    if(!errors.empty()) return errors.front();
+    if(path.modes.size()!=system.horizon+1 || path.edges.size()!=system.horizon ||
+       path.modes.front()!=request.initial.mode ||
+       std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),path.modes.back())==request.allowed_terminal_modes.end())
+        return invalid("hybrid.path","Path must match the horizon and request endpoints");
+    std::vector<const HybridMode*> modes;
+    modes.reserve(path.modes.size());
+    for(const auto& id:path.modes) {
+        const auto* mode=find_mode(system,id);
+        if(!mode) return invalid("hybrid.path.modes","Path references an unknown mode");
+        modes.push_back(mode);
+    }
+    std::size_t width=modes.front()->state_dimension;
+    for(std::size_t t=0;t<system.horizon;++t) {
+        const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate){return candidate.id==path.edges[t];});
+        if(edge==system.edges.end() || edge->source!=path.modes[t] || edge->target!=path.modes[t+1])
+            return invalid("hybrid.path.edges","Each path edge must connect its adjacent modes");
+        for(const auto amount:{modes[t]->control_dimension,modes[t]->state_dimension,modes[t+1]->state_dimension}) {
+            if(width>std::numeric_limits<std::size_t>::max()-amount)
+                return invalid("hybrid.objective.width","Joint coordinate count overflows size_t");
+            width+=amount;
+        }
+    }
+    if(width>limits.max_variables)
+        return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.variables","Lifted objective exceeds its variable limit"};
+    const auto terminal_dimension=modes.back()->state_dimension;
+    const auto terminal_offset=width-terminal_dimension;
+    const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+        [&](const HybridModeObjective& entry){return entry.mode==path.modes.back();});
+    if(objective==request.terminal_objectives.end())
+        return invalid("hybrid.terminal_objectives","Path terminal mode has no admitted objective");
+    return std::visit([&](const auto& value)->HybridObjectiveLiftResult {
+        using T=std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T,LinearTerminal>) {
+            Vector coefficients(width);
+            std::copy(value.coefficients.begin(),value.coefficients.end(),coefficients.begin()+static_cast<std::ptrdiff_t>(terminal_offset));
+            return TerminalObjective{LinearTerminal{std::move(coefficients),value.offset}};
+        } else if constexpr(std::is_same_v<T,QuadraticTerminal>) {
+            if(width!=0 && width>std::numeric_limits<std::size_t>::max()/width || width*width>limits.max_matrix_elements)
+                return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.storage","Lifted quadratic objective exceeds its storage limit"};
+            Matrix q{width,width,Vector(width*width)};
+            Vector linear(width);
+            for(std::size_t i=0;i<terminal_dimension;++i) {
+                linear[terminal_offset+i]=value.linear[i];
+                for(std::size_t j=0;j<terminal_dimension;++j)
+                    q.values[(terminal_offset+i)*width+terminal_offset+j]=value.Q.values[i*terminal_dimension+j];
+            }
+            return TerminalObjective{QuadraticTerminal{std::move(q),std::move(linear),value.offset}};
+        } else {
+            if(width!=0 && value.map.rows>std::numeric_limits<std::size_t>::max()/width ||
+               value.map.rows*width>limits.max_matrix_elements)
+                return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.storage","Lifted residual map exceeds its storage limit"};
+            Matrix map{value.map.rows,width,Vector(value.map.rows*width)};
+            for(std::size_t i=0;i<value.map.rows;++i)
+                for(std::size_t j=0;j<terminal_dimension;++j)
+                    map.values[i*width+terminal_offset+j]=value.map.values[i*terminal_dimension+j];
+            return TerminalObjective{ResidualNormTerminal{std::move(map),value.target}};
+        }
+    },objective->objective);
+}
+
 } // namespace csl::model
