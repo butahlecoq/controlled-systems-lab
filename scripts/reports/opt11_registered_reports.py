@@ -30,10 +30,10 @@ LIMITS = (
 )
 
 
-def adapt(bundle: Path) -> common.PublicationRecord:
+def adapt(bundle: Path, allow_test: bool = False) -> common.PublicationRecord:
     bundle = Path(bundle)
-    record = source.check(bundle)
-    if record.get("purpose") != "measurement":
+    record = source.check(bundle, allow_test=allow_test)
+    if record.get("purpose") != "measurement" and not (allow_test and record.get("purpose") == "test"):
         raise ValueError("test-only OPT-11 artifact cannot be published")
     if re.fullmatch(r"opt11-[0-9a-f]{16}", bundle.name) is None:
         raise ValueError("unsafe OPT-11 source identity")
@@ -64,8 +64,8 @@ def adapt(bundle: Path) -> common.PublicationRecord:
     )
 
 
-def render_page(bundle: Path, publication: common.PublicationRecord) -> str:
-    record = source.check(Path(bundle))
+def render_page(bundle: Path, publication: common.PublicationRecord, allow_test: bool = False) -> str:
+    record = source.check(Path(bundle), allow_test=allow_test)
     original = source.page(record)
     if original.count("</body>") != 1:
         raise ValueError("OPT-11 source HTML structure is malformed")
@@ -76,9 +76,10 @@ def render_page(bundle: Path, publication: common.PublicationRecord) -> str:
     return original.replace("</body>", links + "</body>")
 
 
-def publication_artifacts(bundle: Path, publication: common.PublicationRecord) -> dict:
+def publication_artifacts(bundle: Path, publication: common.PublicationRecord,
+                          allow_test: bool = False) -> dict:
     bundle = Path(bundle)
-    record = source.check(bundle)
+    record = source.check(bundle, allow_test=allow_test)
     envelope = {
         "schema": "csl.algorithm-report-envelope/1",
         "report_id": publication.report_id,
@@ -93,11 +94,12 @@ def publication_artifacts(bundle: Path, publication: common.PublicationRecord) -
         "payload": record,
     }
     return common.assemble_publication(
-        bundle, publication, page=render_page(bundle, publication),
+        bundle, publication, page=render_page(bundle, publication, allow_test=allow_test),
         envelope=envelope, source_files=publication.files,
     )
 
 
-def offline_zip(bundle: Path, publication: common.PublicationRecord) -> bytes:
+def offline_zip(bundle: Path, publication: common.PublicationRecord,
+                allow_test: bool = False) -> bytes:
     return common.publication_zip(publication.report_id,
-                                  publication_artifacts(bundle, publication))
+                                  publication_artifacts(bundle, publication, allow_test=allow_test))

@@ -76,7 +76,7 @@ cmake -S reports/algorithm-results/tooling/opt11 -B build/opt11-harness `
 cmake --build build/opt11-harness --config Release --target csl_opt11_measure `
   --clean-first --parallel 4 --verbose *> build/opt11-harness/release-build.log
 if ($LASTEXITCODE -ne 0) { throw 'Release build failed' }
-'No deliberate competing benchmark or build workload was started. Ordinary background processes were not stopped; before/after host and matching process-CPU snapshots are retained.' |
+'No deliberate competing benchmark or build workload was started. Ordinary background processes were not stopped; before/after host snapshots and matching-process CPU deltas aggregated by process name are retained.' |
   Set-Content build/opt11-harness/concurrent-work.txt
 python -B reports/algorithm-results/tooling/opt11/collect.py preflight `
   --exe build/opt11-harness/Release/csl_opt11_measure.exe --source-root . `

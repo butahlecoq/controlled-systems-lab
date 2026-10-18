@@ -296,7 +296,10 @@ def stage(catalog_path,out,check=True,allow_test=False):
                               r"geo03-\d{8}-[0-9a-f]{12}")
             data.require(isinstance(source_id,str) and re.fullmatch(source_pattern,source_id) is not None,"invalid registered source bundle identity")
             publisher = opt04 if report["report_kind"] == opt04.KIND else opt07 if report["report_kind"] == opt07.KIND else opt11 if report["report_kind"] == opt11.KIND else geo04 if report["report_kind"] == "geo04-intersection" else geo02 if report["report_kind"] == "geo02-affine-sum" else geo05 if report["report_kind"] == "geo05-projection-predecessor" else geo06 if report["report_kind"] == "geo06-quickhull" else b08_exact if report["report_kind"] == b08_exact.KIND else issue3 if report["report_kind"] == issue3.KIND else syn02 if report["report_kind"] == "syn02-terminal-minimizers" else syn01 if report["report_kind"] == "syn01-nominal-forward" else ts01 if report["report_kind"] == "syn07-ts01-analytic" else syn04_strategy_b if report["report_kind"] == "syn04-strategy-b-ts01" else syn04_ts02 if report["report_kind"] == "syn04-strategy-b-ts02" else syn03_strategy_a_ts02 if report["report_kind"] == "syn03-strategy-a-ts02" else syn03_strategy_a if report["report_kind"] == "syn03-strategy-a-ts01" else syn_ts01_paired if report["report_kind"] == "syn-ts01-paired-comparison" else registered
-            item=publisher.adapt(root/source_id, allow_test=allow_test) if report["report_kind"] == opt04.KIND else publisher.adapt(root/source_id)
+            if report["report_kind"] in (opt04.KIND, opt11.KIND):
+                item = publisher.adapt(root/source_id, allow_test=allow_test)
+            else:
+                item = publisher.adapt(root/source_id)
             data.require(item.report_id==rid and report.get("report_kind")==item.kind,"registered catalogue kind differs from bundle")
             data.require(report.get("source_report_id","")==item.source_report_id,"registered catalogue source identity mismatch")
             data.require(report.get("payload_sha256")==item.payload_sha256 and report.get("source_commit")==item.source_commit,"registered catalogue provenance mismatch")
@@ -304,7 +307,9 @@ def stage(catalog_path,out,check=True,allow_test=False):
             data.require(report.get("payload_schema")==item.payload_schema,"registered catalogue payload schema differs")
             if report["report_kind"] in (opt04.KIND, opt07.KIND, opt11.KIND, geo06.KIND, b08_exact.KIND, issue3.KIND):
                 data.require(report.get("native_payload_sha256") == item.native_payload_sha256,"catalogue native digest differs")
-            generated_page=publisher.render_page(root/source_id,item)
+            generated_page=(publisher.render_page(root/source_id, item, allow_test=allow_test)
+                            if report["report_kind"] == opt11.KIND else
+                            publisher.render_page(root/source_id, item))
             page_files = set(item.files) | {"report-envelope.json", "publication-manifest.json"}
             if report["report_kind"] == opt04.KIND:
                 page_files |= {"source-evidence/" + name for name in item.files}
@@ -315,8 +320,12 @@ def stage(catalog_path,out,check=True,allow_test=False):
                 else:
                     svg_name = "timings.svg" if report["report_kind"] == "geo02-affine-sum" else "latency.svg"
                     data.validate_svg((root/source_id/svg_name).read_bytes())
-            artifacts=publisher.publication_artifacts(root/source_id,item)
-            archive_bytes=publisher.offline_zip(root/source_id,item)
+            if report["report_kind"] == opt11.KIND:
+                artifacts = publisher.publication_artifacts(root/source_id, item, allow_test=allow_test)
+                archive_bytes = publisher.offline_zip(root/source_id, item, allow_test=allow_test)
+            else:
+                artifacts = publisher.publication_artifacts(root/source_id,item)
+                archive_bytes = publisher.offline_zip(root/source_id,item)
             data.require(hashlib.sha256(archive_bytes).hexdigest()==report.get("zip_sha256"),"registered generated ZIP digest differs")
             if report["report_kind"] == issue3.KIND:
                 data.require(data.local_file(root, rid + ".zip").read_bytes() == archive_bytes,

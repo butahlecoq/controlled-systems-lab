@@ -56,8 +56,9 @@ def validate_stream(path: Path, purpose: str) -> dict:
             positions[key + (method,)] = ordinal
         elif row.get("kind") == "pair":
             require(key not in pairs, "duplicate pair row")
+            expected_warmup = round_id == 0 and purpose != "test"
             require(type(row.get("warmup")) is bool and
-                    row["warmup"] == (round_id == 0), "warmup identity mismatch")
+                    row["warmup"] == expected_warmup, "warmup identity mismatch")
             pairs[key] = row
         else:
             require(row.get("kind") == "describe", "unknown raw row type")

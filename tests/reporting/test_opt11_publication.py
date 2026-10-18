@@ -23,13 +23,13 @@ class Opt11PublicationTests(unittest.TestCase):
         oracle = builder.FIXTURES
         rows = []
         for fixture_id, points in oracle.items():
-            for round_id in range(7):
-                warmup = round_id == 0
+            for round_id in range(1):
+                warmup = False
                 recursive_first = (round_id + list(oracle).index(fixture_id)) % 2 == 1
                 methods = ("recursive", "baseline") if recursive_first else ("baseline", "recursive")
                 for method in methods:
                     call = {
-                        "kind": "call", "purpose": "measurement", "fixture": fixture_id,
+                        "kind": "call", "purpose": "test", "fixture": fixture_id,
                         "round": round_id, "warmup": warmup, "method": method,
                         "problem": f"opt11-{fixture_id}",
                         "elapsed_ns": 1000 + round_id * 10 + (method == "recursive"),
@@ -44,7 +44,7 @@ class Opt11PublicationTests(unittest.TestCase):
                                              "peak_merge_points": 0, "concurrent_child_subtrees": 0,
                                              "parallel_overhead_microseconds": 0}
                     rows.append(call)
-                rows.append({"kind": "pair", "purpose": "measurement", "fixture": fixture_id,
+                rows.append({"kind": "pair", "purpose": "test", "fixture": fixture_id,
                              "round": round_id, "warmup": warmup,
                              "recursive_first": recursive_first})
         raw = ("\n".join(json.dumps(row, separators=(",", ":")) for row in rows) + "\n").encode()
@@ -53,13 +53,17 @@ class Opt11PublicationTests(unittest.TestCase):
         raw_path = collection / "raw-stdout.jsonl"
         raw_path.write_bytes(raw)
         stderr = b""
-        build_log = b"OPT-11 test fixture build log\n"
-        compiler_source = (b'set(CMAKE_CXX_COMPILER_ID "test")\n'
-                           b'set(CMAKE_CXX_COMPILER_VERSION "test")\n')
+        compiler_path = "$PROGRAM_FILES_X86/MSVC/cl.exe"
+        build_log = ("\n".join(
+            f'"{compiler_path}" /O2 /std:c++20 /D NDEBUG "${{SOURCE_ROOT}}/{source}"'
+            for source in builder.TIMING_TRANSLATION_UNITS) + "\n").encode()
+        compiler_source = (f'set(CMAKE_CXX_COMPILER "{compiler_path}")\n'
+                           'set(CMAKE_CXX_COMPILER_ID "test")\n'
+                           'set(CMAKE_CXX_COMPILER_VERSION "test")\n').encode()
         (collection / "raw-stderr.txt").write_bytes(stderr)
         (collection / "release-build-log-sanitized.txt").write_bytes(build_log)
         (collection / "compiler-identification.cmake").write_bytes(compiler_source)
-        validation = builder.validate_stream(raw_path, "measurement")
+        validation = builder.validate_stream(raw_path, "test")
         (collection / "functional-validation.json").write_text(
             json.dumps(validation, sort_keys=True, indent=2) + "\n", encoding="utf-8")
         source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
@@ -72,7 +76,7 @@ class Opt11PublicationTests(unittest.TestCase):
                        "warmups_per_fixture": 1, "measured_pairs_per_fixture": 6,
                        "backend": {"method": "csl.lp.highs", "version": "1.0.0+highs.1.11.0"}}
         metadata = {
-            "purpose": "measurement", "source_commit": commit,
+            "purpose": "test", "source_commit": commit,
             "source_sha256": source_hashes, "fixture_sha256": builder.fixture_digest(),
             "harness_sha256": harness_hash,
             "algorithm": {"baseline": {"method": "csl.hull.lp-membership", "version": "1.0.0"},
@@ -84,13 +88,23 @@ class Opt11PublicationTests(unittest.TestCase):
             "environment": {"os": "test", "machine": "test", "logical_processors": 1,
                             "python": "test", "concurrent_work_note": "isolated publisher test",
                             "observed_native_threads": None,
-                            "machine_load": {"before": {}, "after": {}, "process_cpu_deltas": []}},
+                            "machine_load": {
+                                "before": {"utc": "2026-10-18T00:00:00Z", "os": "test",
+                                           "logical_processors": 1, "python": "3.12", "cpu": "test",
+                                           "load_percent": [0], "ram_bytes": 1024},
+                                "after": {"utc": "2026-10-18T00:00:01Z", "os": "test",
+                                          "logical_processors": 1, "python": "3.12", "cpu": "test",
+                                          "load_percent": [0], "ram_bytes": 1024},
+                                "process_cpu_deltas": {"available": True,
+                                    "unit": "process CPU seconds over collection interval",
+                                    "values": {"python": 0.0},
+                                    "scope": "matching observed processes only; test fixture"}}},
             "release_project": {"generator": "test", "configuration": "Release",
                                 "language_standard": "stdcpp20", "optimization": "MaxSpeed",
                                 "preprocessor_definitions": "NDEBUG", "compiler_id": "test",
-                                "compiler_version": "test", "compiler_path_sha256": "c" * 64,
+                                "compiler_version": "test", "compiler_path_sanitized": compiler_path,
                                 "ndebug": True},
-            "protocol": {"warmups_per_fixture": 1, "measured_pairs_per_fixture": 6,
+            "protocol": {"warmups_per_fixture": 0, "measured_pairs_per_fixture": 1,
                          "unavailable": []},
             "description": description, "executable_sha256": "b" * 64,
             "process_outcome": "completed", "process_exit_code": 0,
@@ -110,7 +124,53 @@ class Opt11PublicationTests(unittest.TestCase):
         collection = self.make_collection(root)
         out_root = root / "algorithm-results"
         out_root.mkdir()
-        return builder.build(collection, out_root)
+        return builder.build(collection, out_root, allow_test=True)
+
+    def test_saved_collection_rejects_compiler_path_mismatch(self):
+        with tempfile.TemporaryDirectory() as temp:
+            collection = self.make_collection(Path(temp))
+            metadata_path = collection / "collection.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            metadata["release_project"]["compiler_path_sanitized"] = "$PROGRAM_FILES_X86/Other/cl.exe"
+            metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "differs from retained CMake compiler source"):
+                report_site.opt11.source.read_collection(collection, allow_test=True)
+
+    def test_saved_collection_rejects_compile_log_using_different_compiler(self):
+        with tempfile.TemporaryDirectory() as temp:
+            collection = self.make_collection(Path(temp))
+            log_path = collection / "release-build-log-sanitized.txt"
+            log = log_path.read_bytes().replace(b"$PROGRAM_FILES_X86/MSVC/cl.exe",
+                                                b"$PROGRAM_FILES_X86/Other/cl.exe", 1)
+            log_path.write_bytes(log)
+            metadata_path = collection / "collection.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            metadata["sanitized_build_log_sha256"] = hashlib.sha256(log).hexdigest()
+            metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "sanitized compiler path is not present"):
+                report_site.opt11.source.read_collection(collection, allow_test=True)
+
+    def test_saved_collection_rejects_malformed_machine_load_summary(self):
+        with tempfile.TemporaryDirectory() as temp:
+            collection = self.make_collection(Path(temp))
+            metadata_path = collection / "collection.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            metadata["environment"]["machine_load"]["process_cpu_deltas"] = []
+            metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "process CPU delta summary is malformed"):
+                report_site.opt11.source.read_collection(collection, allow_test=True)
+
+    def test_saved_collection_rejects_snapshots_without_load_data_or_unavailable_reason(self):
+        with tempfile.TemporaryDirectory() as temp:
+            collection = self.make_collection(Path(temp))
+            metadata_path = collection / "collection.json"
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            metadata["environment"]["machine_load"]["before"] = {
+                "utc": "2026-10-18T00:00:00Z", "os": "test",
+                "logical_processors": 1, "python": "3.12"}
+            metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "counters are absent"):
+                report_site.opt11.source.read_collection(collection, allow_test=True)
 
     def test_exact_oracle_rejects_wrong_certificate_identity(self):
         oracle = importlib.import_module("csl_opt11_report_tooling.oracle")
@@ -132,14 +192,16 @@ class Opt11PublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             bundle = self.build_native_bundle(root)
-            publication = report_site.opt11.adapt(bundle)
+            with self.assertRaisesRegex(ValueError, "explicit test gate"):
+                report_site.opt11.adapt(bundle)
+            publication = report_site.opt11.adapt(bundle, allow_test=True)
             self.assertEqual("opt11-recursive-hull", publication.kind)
             self.assertTrue(publication.report_id.startswith("opt11-"))
-            self.assertEqual("18 alternating baseline/recursive pairs across 3 fixed clouds; "
-                             "18 pairs complete; performance interpretation inconclusive",
+            self.assertEqual("3 alternating baseline/recursive pairs across 3 fixed clouds; "
+                             "3 pairs complete; performance interpretation inconclusive",
                              publication.measured_scope)
 
-            public_zip = report_site.opt11.offline_zip(bundle, publication)
+            public_zip = report_site.opt11.offline_zip(bundle, publication, allow_test=True)
             production = ROOT / "reports" / "algorithm-results"
             legacy_catalogue = json.loads((production / "catalog.json").read_text(encoding="utf-8"))
             pinned_ids = set(json.loads((production / "legacy-publications.json").read_text(
@@ -172,7 +234,9 @@ class Opt11PublicationTests(unittest.TestCase):
             catalog_path = bundle.parent / "catalog.json"
             catalog_path.write_text(json.dumps(catalogue, indent=2) + "\n", encoding="utf-8")
             (bundle.parent / "index.html").write_text(report_site.catalogue_index(catalogue), encoding="utf-8")
-            staged = report_site.stage(catalog_path, root / "site", check=True)
+            with self.assertRaisesRegex(ValueError, "explicit test gate"):
+                report_site.stage(catalog_path, root / "production-site", check=True)
+            staged = report_site.stage(catalog_path, root / "site", check=True, allow_test=True)
             index = (staged / "index.html").read_text(encoding="utf-8")
             self.assertIn("https://github.com/butahlecoq/controlled-systems-lab/tree/main/reports/algorithm-results/"
                           + publication.source_report_id, index)
@@ -184,21 +248,21 @@ class Opt11PublicationTests(unittest.TestCase):
             self.assertEqual(publication.report_id, envelope["report_id"])
             self.assertEqual(publication.payload_sha256, envelope["payload_sha256"])
             self.assertEqual(publication.native_payload_sha256, envelope["native_payload_sha256"])
-            self.assertEqual("measurement", envelope["payload"]["purpose"])
+            self.assertEqual("test", envelope["payload"]["purpose"])
 
             catalogue["reports"][-1]["payload_sha256"] = "0" * 64
             catalog_path.write_text(json.dumps(catalogue, indent=2) + "\n", encoding="utf-8")
             (bundle.parent / "index.html").write_text(report_site.catalogue_index(catalogue),
                                                         encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "registered catalogue provenance mismatch"):
-                report_site.stage(catalog_path, root / "bad-digest-site", check=True)
+                report_site.stage(catalog_path, root / "bad-digest-site", check=True, allow_test=True)
             catalogue["reports"][-1]["payload_sha256"] = publication.payload_sha256
             catalogue["reports"][-1]["report_id"] = "opt11-" + "0" * 64
             catalog_path.write_text(json.dumps(catalogue, indent=2) + "\n", encoding="utf-8")
             (bundle.parent / "index.html").write_text(report_site.catalogue_index(catalogue),
                                                         encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "registered catalogue kind differs from bundle"):
-                report_site.stage(catalog_path, root / "bad-id-site", check=True)
+                report_site.stage(catalog_path, root / "bad-id-site", check=True, allow_test=True)
 
     def test_tampered_native_source_zip_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -206,7 +270,7 @@ class Opt11PublicationTests(unittest.TestCase):
             source_zip = bundle.parent / (bundle.name + ".source.zip")
             source_zip.write_bytes(source_zip.read_bytes() + b"tampered")
             with self.assertRaisesRegex(ValueError, "offline ZIP mismatch"):
-                report_site.opt11.adapt(bundle)
+                report_site.opt11.adapt(bundle, allow_test=True)
 
     def test_tampered_native_report_id_or_payload_digest_is_rejected(self):
         for field, value in (("report_id", "opt11-" + "0" * 16),
@@ -224,7 +288,7 @@ class Opt11PublicationTests(unittest.TestCase):
                 manifest_path.write_bytes(builder.json_bytes(manifest))
                 (bundle.parent / (bundle.name + ".source.zip")).write_bytes(builder.zip_bytes(bundle))
                 with self.assertRaisesRegex(ValueError, "typed report differs from retained raw bytes"):
-                    report_site.opt11.adapt(bundle)
+                    report_site.opt11.adapt(bundle, allow_test=True)
 
 
 if __name__ == "__main__":
