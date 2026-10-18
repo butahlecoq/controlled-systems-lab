@@ -172,3 +172,41 @@ clamped to zero; it includes scheduling, synchronization and merge work. These
 counters describe one execution and do not imply a general speedup. If child
 workspace creation or a recursive child returns diagnostics, the strategy
 returns diagnostics without publishing a partial reduction.
+
+#### Complexity, representation costs and evaluation
+
+The guarantee assumes a finite point cloud with equal coordinate dimension,
+and an LP provider whose completed responses are correctly bound to each
+membership request. Exact dyadic certificates authorize removals; uncertain
+responses retain points. For any finite input, the convex-hull identity above
+preserves the represented hull at each partition and merge. It does not promise
+that every non-extreme point is removed, nor a particular retained vertex
+ordering.
+
+For `n` points of dimension `d`, each internal node sorts its IDs. With balanced
+midpoint splits and leaf size 16, sorting costs `O(d n log^2 n)` coordinate
+comparisons in the worst case across all levels. ID partitioning and merging
+cost `O(n log n)` total ID operations, excluding the LP reducer. If every point
+survives every merge candidate set, the sum of candidate counts across merge
+levels is `O(n log n)`; LP call and solver cost therefore depend on that
+data-dependent candidate count and the selected backend, and have no
+backend-independent time bound. The reported `peak_merge_points` is the largest
+single candidate set, bounded by `n`.
+
+The input cloud uses `O(nd)` coordinate storage. Partition ID vectors and
+recursive stacks use `O(n)` additional ID storage at a time, excluding result
+records. The reducer retains attempts and certificates from leaves and merges;
+in the worst case those records can total `O(n log n)` because a candidate may
+be reconsidered at each merge level. Two LP workspaces may be live at once for
+root children, plus the retained merge result data. Actual workspace memory is
+provider-specific and is not included in the point-count metric.
+
+Evaluation compares support and certificate validity with the independent
+baseline reducer on signed, duplicate and affine-degenerate fixtures and input
+permutations. Performance evidence is reported separately using fixed clean
+Release source and harness commits, raw per-repetition records, environment and
+resource provenance, and a measured interval that identifies workspace setup,
+recursive work and verification. Any recursive-vs-baseline timing comparison
+requires alternating tuned repetitions and a separate limiter profile; small
+fixture measurements without that evidence remain descriptive, with no
+universal speedup claim.

@@ -24,6 +24,18 @@ bool point_less(const PointCloud& cloud, std::size_t left, std::size_t right) {
     return left < right;
 }
 
+std::pair<std::vector<std::size_t>, std::vector<std::size_t>> split_ids(
+        const PointCloud& cloud, std::vector<std::size_t> ids) {
+    std::sort(ids.begin(), ids.end(), [&](std::size_t a, std::size_t b) {
+        return point_less(cloud, a, b);
+    });
+    const auto middle = ids.size() / 2;
+    return {
+        std::vector<std::size_t>(ids.begin(), ids.begin() + static_cast<std::ptrdiff_t>(middle)),
+        std::vector<std::size_t>(ids.begin() + static_cast<std::ptrdiff_t>(middle), ids.end())
+    };
+}
+
 using ChildWorkspace = registry::BoundWorkspace<registry::LPPort>;
 
 std::variant<registry::PreparedPipeline<registry::LPPort>, Diagnostics> prepare_lp_provider(
@@ -104,12 +116,7 @@ NodeOutcome reduce_node(const PointCloud& cloud, std::vector<std::size_t> ids,
         return NodeResult{std::move(reduction), std::move(stats)};
     }
 
-    std::sort(ids.begin(), ids.end(), [&](std::size_t a, std::size_t b) {
-        return point_less(cloud, a, b);
-    });
-    const auto middle = ids.size() / 2;
-    std::vector<std::size_t> left_ids(ids.begin(), ids.begin() + static_cast<std::ptrdiff_t>(middle));
-    std::vector<std::size_t> right_ids(ids.begin() + static_cast<std::ptrdiff_t>(middle), ids.end());
+    auto [left_ids, right_ids] = split_ids(cloud, std::move(ids));
 
     // A subtree is sequential internally. Only the caller may run the root's
     // left and right subtrees concurrently, bounding active workers at two.
@@ -179,13 +186,7 @@ public:
         NodeOutcome right_outcome = Diagnostics{};
         std::chrono::steady_clock::duration left_time{};
         std::chrono::steady_clock::duration right_time{};
-        auto split_ids = ids;
-        std::sort(split_ids.begin(), split_ids.end(), [&](std::size_t a, std::size_t b) {
-            return point_less(cloud, a, b);
-        });
-        const auto middle = split_ids.size() / 2;
-        std::vector<std::size_t> left_ids(split_ids.begin(), split_ids.begin() + static_cast<std::ptrdiff_t>(middle));
-        std::vector<std::size_t> right_ids(split_ids.begin() + static_cast<std::ptrdiff_t>(middle), split_ids.end());
+        auto [left_ids, right_ids] = split_ids(cloud, std::move(ids));
         const auto root_started = std::chrono::steady_clock::now();
         if (parallel) {
             auto left_future = std::async(std::launch::async, [&] {
