@@ -251,10 +251,10 @@ TEST_CASE("incompatible final constraint returns explicit empty stage and comple
 }
 TEST_CASE("cancellation and deadline are typed stops without success stages") {
     std::stop_source stop;stop.request_stop();ExecutionContext context;context.cancellation=stop.get_token();
-    auto result=alternative<ForwardFailure>(run(integrator(),context));CHECK(result.prefix.stages.empty());
+    auto result=alternative<ForwardFailure>(run(integrator(),context));CHECK(result.prefix.stages.empty());CHECK_FALSE(result.partial_relation);
     CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::cancelled);
     context={};context.deadline=std::chrono::steady_clock::now();result=alternative<ForwardFailure>(run(integrator(),context));
-    CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::deadline_expired);
+    CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::deadline_expired);CHECK_FALSE(result.partial_relation);
 }
 TEST_CASE("declared temporal coupling is rejected before propagation") {
     auto p=integrator();p.temporal=TemporalConstraints{{1,5,{0,1},{0},{1}},{{0,0}}};
@@ -266,6 +266,16 @@ TEST_CASE("stop after final feasibility preserves completed child evidence witho
     auto result=alternative<ForwardFailure>(nominal_forward(p,{"tube"},dependencies(cancelling_provider(stop)),context));
     CHECK(std::get<OperationStopped>(result.cause).reason==StopReason::cancelled);
     CHECK(result.stage.value==2);CHECK(result.prefix.stages.size()==2);CHECK(result.completed_lineage.size()==6);
+    REQUIRE(result.partial_relation);
+    CHECK(result.partial_relation->stage.value==2);
+    CHECK(result.partial_relation->source_coordinates==std::vector<std::size_t>{0});
+    CHECK(result.partial_relation->projection_source.metadata.dimension==1);
+    range(result.partial_relation->marginal.output,0,2);
+    CHECK(result.partial_relation->marginal.relation==SetRelation::equivalent);
+    CHECK(result.partial_relation->marginal.evidence.scope==GeometryClaimScope::set_relation);
+    CHECK(std::holds_alternative<Unestablished>(result.partial_relation->marginal.evidence.support));
+    CHECK(result.partial_relation->marginal.evidence.reference.identity.problem==p.identity());
+    CHECK(result.partial_relation->marginal.evidence.reference.identity.request.value.ends_with("2/stage"));
     REQUIRE(result.active_request);CHECK(result.active_request->identity.request.value.ends_with("2/feasibility"));
 }
 TEST_CASE("selected affine provider rejection is retained with stage scope") {

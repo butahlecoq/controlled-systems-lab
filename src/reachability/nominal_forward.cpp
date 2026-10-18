@@ -98,10 +98,11 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
     const auto& provider=dependencies.projection;
     ForwardTube tube{resolved.identity(),std::move(request),{}};
     StageIndex stage{0};std::optional<GeometryReference> active;
+    std::optional<ForwardPartialRelation> partial_relation;
     std::vector<GeometryEvidence> lineage;std::vector<RequestProvenance> providers;
     std::vector<CoordinateRelabeling> coordinate_lineage;
     const auto failure=[&](auto cause) -> NominalForwardOutcome {
-        return ForwardFailure{tube,stage,active,lineage,providers,coordinate_lineage,std::move(cause)};
+        return ForwardFailure{tube,stage,std::move(partial_relation),active,lineage,providers,coordinate_lineage,std::move(cause)};
     };
     try {
     if(tube.request.value.empty())return failure(Unsupported{error("forward.request","Nonempty immutable request ID required.",DiagnosticCode::invalid_input)});
@@ -238,7 +239,7 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         return std::move(*result);
     };
     for(std::size_t t=0;t<=system.horizon();++t) {
-        stage={t};active.reset();lineage.clear();providers.clear();coordinate_lineage.clear();
+        stage={t};partial_relation.reset();active.reset();lineage.clear();providers.clear();coordinate_lineage.clear();
         if(auto stop=stopped(context))return failure(*stop);
         Rows rows(t?2*n+m:n);std::vector<SetId> factors;std::vector<std::string> joint_labels;
         std::vector<std::size_t> current,control,next;
@@ -309,10 +310,18 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
             propagation=intersection.finish({child(tube.problem,tube.request,t,"/intersection")},labels).as_handle();
             marginal_coordinates=coordinates(0,n);
         }
+        const auto scoped_coordinates=marginal_coordinates;
         auto projected=run_projection(propagation,std::move(marginal_coordinates),"/project");
         if(auto* rejected=std::get_if<Unsupported>(&projected))return failure(*rejected);
         if(auto* stop=std::get_if<OperationStopped>(&projected))return failure(*stop);
         auto marginal=std::get<OperationResult>(std::move(projected));
+        marginal.evidence.reference={{tube.problem,{child(tube.problem,tube.request,t,"/stage")},
+            {child(tube.problem,tube.request,t,"/reachable")}},factors};
+        marginal.evidence.scope=GeometryClaimScope::set_relation;
+        marginal.evidence.support=Unestablished{};marginal.evidence.error_bound.reset();
+        marginal.evidence.assumptions.push_back("selected affine-image, sum, conversion and projection evidence retained separately; authored aggregate recurrence and compiled recovery-factor support remain unestablished");
+        marginal.evidence.assumptions.push_back("stage marginal only; no optimality or joint-history completeness claim");
+        partial_relation=ForwardPartialRelation{stage,marginal,propagation,scoped_coordinates};
         // Eliminate all coordinates to decide emptiness rather than interpreting
         // an H payload or absence of sampled points as a feasibility proof.
         auto feasibility=run_projection(propagation,{},"/feasibility");
@@ -320,17 +329,13 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         if(auto* stop=std::get_if<OperationStopped>(&feasibility))return failure(*stop);
         const auto probe=std::get<OperationResult>(std::move(feasibility));
         const bool empty=empty_zero_projection(take(sets::from_handle(probe.output)));
-        marginal.evidence.reference={{tube.problem,{child(tube.problem,tube.request,t,"/stage")},
-            {child(tube.problem,tube.request,t,"/reachable")}},factors};
-        marginal.evidence.support=Unestablished{};marginal.evidence.error_bound.reset();
-        marginal.evidence.assumptions.push_back("selected affine-image, sum, conversion and projection evidence retained separately; authored aggregate recurrence and compiled recovery-factor support remain unestablished");
-        marginal.evidence.assumptions.push_back("stage marginal only; no optimality or joint-history completeness claim");
         auto recovery=marginal.evidence;
         recovery.reference.identity.request={child(tube.problem,tube.request,t,"/recovery")};
         recovery.reference.identity.ideal_output={joint.id.value};
         recovery.assumptions.push_back("compiled [x,u,y] authored transition rows retained for future recovery; no provider or validated recovery theorem asserted");
         tube.stages.push_back({stage,std::move(marginal),joint,std::move(recovery),propagation,std::move(factors),std::move(current),std::move(control),
             std::move(next),lineage,providers,coordinate_lineage});
+        partial_relation.reset();
         if(empty) {
             auto evidence=tube.stages.back().marginal.evidence;
             evidence.assumptions.push_back("zero-coordinate projection of the propagation factor is empty; authored emptiness support remains unestablished");

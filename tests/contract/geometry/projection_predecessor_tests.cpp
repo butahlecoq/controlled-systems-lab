@@ -119,7 +119,10 @@ TEST_CASE("one-step target predecessor has explicit control witnesses and reject
     CHECK_FALSE(contains(result.result.output,{-0.125}));
     CHECK_FALSE(contains(result.result.output,{1.125}));
     const auto predecessor_data=take(sets::from_handle(result.result.output));
-    const auto& predecessor_h=std::get<sets::HRepresentation>(predecessor_data.representation());
+    REQUIRE(predecessor_data.metadata()->set.dimension==1);
+    const auto predecessor_representation=predecessor_data.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(predecessor_representation));
+    const auto& predecessor_h=std::get<sets::HRepresentation>(predecessor_representation);
     double lower=-std::numeric_limits<double>::infinity();
     double upper=std::numeric_limits<double>::infinity();
     bool feasible=true;
