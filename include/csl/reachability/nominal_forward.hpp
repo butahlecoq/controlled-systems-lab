@@ -2,6 +2,8 @@
 
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/problem/resolved_problem.hpp>
+#include <type_traits>
+#include <utility>
 
 namespace csl::reachability {
 // Lossless metadata bridge: native numeric buffers keep their ordered columns;
@@ -49,6 +51,20 @@ struct ForwardFailure {
     std::vector<RequestProvenance> providers;
     std::vector<CoordinateRelabeling> coordinate_lineage;
     std::variant<Unsupported,OperationStopped> cause;
+
+    template<class Cause>
+        requires (std::is_same_v<std::remove_cvref_t<Cause>,Unsupported> ||
+            std::is_same_v<std::remove_cvref_t<Cause>,OperationStopped>)
+    ForwardFailure(const ForwardTube& prefix_value,StageIndex stage_value,
+            const std::optional<ForwardPartialRelation>& partial_relation_value,
+            const std::optional<GeometryReference>& active_request_value,
+            const std::vector<GeometryEvidence>& completed_lineage_value,
+            const std::vector<RequestProvenance>& providers_value,
+            const std::vector<CoordinateRelabeling>& coordinate_lineage_value,Cause&& cause_value)
+        : prefix(prefix_value),stage(stage_value),partial_relation(partial_relation_value),
+          active_request(active_request_value),completed_lineage(completed_lineage_value),
+          providers(providers_value),coordinate_lineage(coordinate_lineage_value),
+          cause(std::in_place_type<std::remove_cvref_t<Cause>>,std::forward<Cause>(cause_value)) {}
 };
 using NominalForwardOutcome = std::variant<ForwardTube,EmptyForwardStage,ForwardFailure>;
 struct ForwardDependencies {
