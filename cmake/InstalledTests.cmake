@@ -1,12 +1,15 @@
-if(IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+if(IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}" OR
+   IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}" OR
+   IS_ABSOLUTE "${CMAKE_INSTALL_DATADIR}")
   message(STATUS
-    "Skipping installed_public_client because absolute CMAKE_INSTALL_LIBDIR cannot be staged under its temporary prefix")
+    "Skipping installed_public_client because absolute install directories cannot be staged under its temporary prefix")
 else()
   add_test(NAME installed_public_client COMMAND ${CMAKE_COMMAND}
     "-DCSL_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
     "-DCSL_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
     "-DCSL_CONFIG=$<CONFIG>"
     "-DCSL_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}"
+    "-DCSL_INSTALL_INCLUDEDIR=${CMAKE_INSTALL_INCLUDEDIR}"
     "-DCSL_INSTALL_DATADIR=${CMAKE_INSTALL_DATADIR}"
     "-DCSL_EXPECT_HIGHS=${CSL_ENABLE_HIGHS}"
     "-DCSL_EXPECT_QHULL=${CSL_ENABLE_QHULL}"
