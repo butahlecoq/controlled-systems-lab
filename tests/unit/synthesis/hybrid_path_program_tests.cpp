@@ -296,6 +296,7 @@ public:
     bool claim_established_aggregates{};
     bool claim_coverage_only{};
     bool mark_all_branches_refuted{};
+    bool inject_candidate_providers{};
     HybridFamilyVerificationCapabilities capabilities() const noexcept override {
         return {true,true,true,Assurance::numerical};
     }
@@ -314,6 +315,9 @@ public:
                 (claim_coverage_only?HybridVerificationStatus::established:
                     HybridVerificationStatus::unsupported);
             branches.push_back({paths[i],status,status,status,{}});
+            if(inject_candidate_providers)
+                branches.back().candidate_providers.push_back({"fabricated provider",
+                    {"fabricated.id",std::string{"0"}},registry::Identity{{"fabricated.id"},"0"}});
         }
         const auto aggregate=claim_established_aggregates?HybridVerificationStatus::established:
             HybridVerificationStatus::unsupported;
@@ -686,6 +690,40 @@ TEST_CASE("hybrid family verification adapter receives the exhaustive path inven
     CHECK(verifier.calls==1);
 }
 
+TEST_CASE("hybrid family verification report only retains candidate providers from supplied faces") {
+    auto system=example_system();
+    auto parallel=system.edges.front();
+    parallel.id={"switch-parallel"};
+    system.edges.push_back(std::move(parallel));
+    auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    FixtureHybridFamilyVerifier verifier;
+    verifier.inject_candidate_providers=true;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
+        {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    REQUIRE(report.branches.size()==programs.size());
+    for(const auto& branch:report.branches) CHECK(branch.candidate_providers.empty());
+}
+
+TEST_CASE("hybrid family verification rejects a missing program operation trace before dispatch") {
+    auto system=example_system();
+    auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    auto programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    programs[0].relation_operations.clear();
+    FixtureHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
+        {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.operations");
+    CHECK(verifier.calls==0);
+}
+
 TEST_CASE("hybrid family verification rejects missing inventory or report branches") {
     auto system=example_system();
     auto parallel=system.edges.front();
@@ -760,6 +798,8 @@ TEST_CASE("exact singleton hybrid verifier independently retains every tied edge
     const Vector point{2,1,3,0,0};
     std::vector<HybridPathOptimalFaceCandidate> candidates{
         exact_candidate(programs[0],point),exact_candidate(programs[1],point)};
+    candidates[0].providers.push_back({"fixture LP",{"fixture.lp",std::string{"1.0"}},
+        registry::Identity{{"fixture.lp"},"1.0"}});
     ExactSingletonHybridFamilyVerifier verifier;
     const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
         {1,8},{1e-10,1e-10});
@@ -775,6 +815,19 @@ TEST_CASE("exact singleton hybrid verifier independently retains every tied edge
     CHECK(report.branches[1].objective_optimality==HybridVerificationStatus::established);
     CHECK(report.branches[2].objective_optimality==HybridVerificationStatus::refuted);
     CHECK(report.branches[2].continuous_coverage==HybridVerificationStatus::established);
+    for(std::size_t i=0;i<programs.size();++i) {
+        REQUIRE(report.branches[i].relation_operations.size()==programs[i].relation_operations.size());
+        CHECK_FALSE(report.branches[i].relation_operations.empty());
+        CHECK(report.branches[i].relation_operations.front().implementation_id==
+            programs[i].relation_operations.front().implementation_id);
+        CHECK(report.branches[i].relation_operations.front().cumulative_rows==
+            programs[i].relation_operations.front().cumulative_rows);
+    }
+    REQUIRE(report.branches[0].candidate_providers.size()==1);
+    CHECK(report.branches[0].candidate_providers[0].actual->id.value=="fixture.lp");
+    CHECK(report.branches[0].candidate_providers[0].actual->version=="1.0");
+    CHECK(report.branches[1].candidate_providers.empty());
+    CHECK(report.branches[2].candidate_providers.empty());
 }
 
 TEST_CASE("independent one-step oracle matches exhaustive hybrid portfolio and tied optimum") {
@@ -1555,9 +1608,8 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     insufficient_variable_limits[0].relation_limits.max_variables=3;
     const auto variable_limit_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
         insufficient_variable_limits,endpoint_candidates,{1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(variable_limit_result));
-    CHECK(std::get<HybridFamilyVerificationReport>(variable_limit_result).complete_family_coverage==
-        HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(variable_limit_result));
+    CHECK(std::get<Diagnostics>(variable_limit_result).front().field=="hybrid.adapter.operations");
 
     auto near_tie_system=system;
     near_tie_system.edges[1].guards[0]=interval("verifier-near-tie-guard",5e-11,0.25);
@@ -1716,9 +1768,8 @@ TEST_CASE("exact singleton hybrid verifier reports missing or altered optimal fa
     over_limit_programs[0].relation_limits.max_matrix_elements=1;
     const auto over_limit=verify_hybrid_portfolio_family(verifier,system,request,over_limit_programs,altered,
         {1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(over_limit));
-    CHECK(std::get<HybridFamilyVerificationReport>(over_limit).complete_family_coverage==
-        HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(over_limit));
+    CHECK(std::get<Diagnostics>(over_limit).front().field=="hybrid.adapter.operations");
 
     std::vector<HybridPathOptimalFaceCandidate> extra_worse{
         exact_candidate(programs[0],point),exact_candidate(programs[1],point),

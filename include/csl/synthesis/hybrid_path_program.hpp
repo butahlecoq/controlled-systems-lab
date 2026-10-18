@@ -193,6 +193,10 @@ struct HybridPathVerificationRecord {
     HybridVerificationStatus objective_optimality{HybridVerificationStatus::not_checked};
     HybridVerificationStatus continuous_coverage{HybridVerificationStatus::not_checked};
     Diagnostics diagnostics;
+    // Request-scoped composition work for this fixed path, plus family-solver
+    // provider lineage retained by a supplied optimal-face candidate.
+    std::vector<model::HybridRelationOperationRecord> relation_operations;
+    std::vector<registry::Provenance> candidate_providers;
 };
 struct HybridFamilyVerificationReport {
     std::string verifier_id;

@@ -667,6 +667,11 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
         if(programs[i].path!=paths[i])
             return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.program_path",
                 "Branch programs must match the complete enumerated path order exactly"});
+    for(std::size_t i=0;i<paths.size();++i) {
+        const auto trace_errors=hybrid_operation_trace_errors(paths[i],programs[i].relation_limits,
+            programs[i].relation_operations,true,programs[i].joint_relation.metadata()->set.dimension);
+        if(!trace_errors.empty()) return trace_errors;
+    }
     for(std::size_t i=0;i<candidates.size();++i) {
         if(std::find(paths.begin(),paths.end(),candidates[i].path)==paths.end())
             return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.candidate_path",
@@ -700,6 +705,17 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
         if(report.branches[i].path!=paths[i])
             return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.branch_path",
                 "Verifier report must contain each enumerated path exactly once and in order"});
+    for(std::size_t i=0;i<paths.size();++i) {
+        // These observations come from the admitted program/candidate inputs,
+        // not from the replaceable verifier, so an adapter cannot omit or
+        // rewrite the operation and provider lineage in its report.
+        report.branches[i].relation_operations=programs[i].relation_operations;
+        const auto candidate=std::find_if(candidates.begin(),candidates.end(),[&](const auto& value) {
+            return value.path==paths[i];
+        });
+        report.branches[i].candidate_providers=candidate==candidates.end()
+            ?std::vector<registry::Provenance>{}:candidate->providers;
+    }
     const auto adjudicated=[](HybridVerificationStatus status) {
         return status==HybridVerificationStatus::established||
             status==HybridVerificationStatus::refuted;
