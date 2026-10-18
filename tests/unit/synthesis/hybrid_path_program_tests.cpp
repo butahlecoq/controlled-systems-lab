@@ -1133,6 +1133,55 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     CHECK(std::get<HybridFamilyVerificationReport>(inexact_row_result).branches[1].continuous_coverage==
         HybridVerificationStatus::unsupported);
 
+    auto rank_overcount_inequalities=numeric::snapshot(Matrix{2,4,{0,-1,0,0,0,1,0,0}});
+    auto rank_overcount_bounds=numeric::snapshot_vector(Vector{0,1});
+    auto rank_overcount_equalities=numeric::snapshot(Matrix{3,4,{
+        -2,18372082061.0,-42348971870.0,23976889809.0,
+        1,-14888587493.0,81823523113.0,-66934935620.0,
+        -9,76971822812.0,-129921336237.0,52949513425.0}});
+    auto rank_overcount_rhs=numeric::snapshot_vector(Vector{0,0,0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rank_overcount_inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(rank_overcount_bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rank_overcount_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(rank_overcount_rhs));
+    auto rank_overcount_relation=sets::make_h({{"verifier-dependent-row-rank"},4,{}},
+        {std::get<numeric::MatrixView>(rank_overcount_inequalities),
+         std::get<numeric::VectorView>(rank_overcount_bounds),
+         std::get<numeric::MatrixView>(rank_overcount_equalities),
+         std::get<numeric::VectorView>(rank_overcount_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(rank_overcount_relation));
+    auto rank_overcount_system=system;
+    rank_overcount_system.edges[1].guards[0]=interval("verifier-dependent-row-rank-guard",0,1);
+    auto rank_overcount_programs=programs;
+    auto rank_overcount_candidates=std::vector<HybridPathOptimalFaceCandidate>{
+        exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
+    rank_overcount_programs[1].joint_relation=std::get<sets::SetData>(rank_overcount_relation);
+    rank_overcount_candidates[1].relation=std::get<sets::SetData>(rank_overcount_relation);
+    const auto rank_overcount_result=verify_hybrid_portfolio_family(verifier,rank_overcount_system,request,
+        rank_overcount_programs,rank_overcount_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rank_overcount_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(rank_overcount_result).branches[1].continuous_coverage==
+        HybridVerificationStatus::refuted);
+
+    auto inexact_rank_equalities=numeric::snapshot(Matrix{3,4,{1,0,0,0,0,3,0,-3,0,1,2,-3}});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inexact_rank_equalities));
+    auto inexact_rank_relation=sets::make_h({{"verifier-inexact-elimination-rank"},4,{}},
+        {std::get<numeric::MatrixView>(rank_overcount_inequalities),
+         std::get<numeric::VectorView>(rank_overcount_bounds),
+         std::get<numeric::MatrixView>(inexact_rank_equalities),
+         std::get<numeric::VectorView>(rank_overcount_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(inexact_rank_relation));
+    auto inexact_rank_programs=programs;
+    auto inexact_rank_candidates=std::vector<HybridPathOptimalFaceCandidate>{
+        exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
+    inexact_rank_programs[1].joint_relation=std::get<sets::SetData>(inexact_rank_relation);
+    inexact_rank_candidates[1].relation=std::get<sets::SetData>(inexact_rank_relation);
+    const auto inexact_rank_result=verify_hybrid_portfolio_family(verifier,rank_overcount_system,request,
+        inexact_rank_programs,inexact_rank_candidates,{1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_rank_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(inexact_rank_result).branches[1].continuous_coverage==
+        HybridVerificationStatus::unsupported);
+
     auto narrow_tied_system=system;
     narrow_tied_system.edges[1].guards[0]=interval("verifier-narrow-tied-guard",0,5e-11);
     const auto narrow_tied_built=build_hybrid_portfolio_programs(narrow_tied_system,request,

@@ -318,29 +318,36 @@ ScalarBranch evaluate(const HybridSystem& system,const HybridRequest& request,co
     return result;
 }
 
-std::size_t rank(numeric::MatrixView matrix,double eps,std::stop_token cancellation,bool& cancelled) {
+std::optional<std::size_t> exact_rank(numeric::MatrixView matrix,std::stop_token cancellation,
+    bool& cancelled) {
     std::vector<Vector> values(matrix.rows(),Vector(matrix.cols()));
     for(std::size_t row=0;row<matrix.rows();++row) {
-        if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return 0; }
+        if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return {}; }
         for(std::size_t col=0;col<matrix.cols();++col) values[row][col]=matrix(row,col);
     }
     std::size_t result=0;
     for(std::size_t col=0;col<matrix.cols()&&result<values.size();++col) {
-        if(cancellation.stop_requested()) { cancelled=true; return 0; }
+        if(cancellation.stop_requested()) { cancelled=true; return {}; }
         auto pivot=result;
-        while(pivot<values.size()&&std::abs(values[pivot][col])<=eps) {
-            if((pivot&255U)==0&&cancellation.stop_requested()) { cancelled=true; return 0; }
+        while(pivot<values.size()&&values[pivot][col]==0) {
+            if((pivot&255U)==0&&cancellation.stop_requested()) { cancelled=true; return {}; }
             ++pivot;
         }
         if(pivot==values.size()) continue;
         std::swap(values[pivot],values[result]);
         const double scale=values[result][col];
-        for(std::size_t j=col;j<matrix.cols();++j) values[result][j]/=scale;
-        for(std::size_t row=0;row<values.size();++row) {
-            if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return 0; }
-            if(row==result) continue;
-            const double factor=values[row][col];
-            for(std::size_t j=col;j<matrix.cols();++j) values[row][j]-=factor*values[result][j];
+        for(std::size_t row=result+1;row<values.size();++row) {
+            if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return {}; }
+            if(values[row][col]==0) continue;
+            double factor=0;
+            if(!exact_division(values[row][col],scale,factor)) return {};
+            for(std::size_t j=col+1;j<matrix.cols();++j) {
+                double product=0,remainder=0;
+                if(!exact_product(factor,values[result][j],product)||
+                   !exact_sum(values[row][j],-product,remainder)) return {};
+                values[row][j]=remainder;
+            }
+            values[row][col]=0;
         }
         ++result;
     }
@@ -369,7 +376,7 @@ bool relation_domain_supported(const sets::SetData& data,HybridRelationLimits li
 }
 
 bool relation_is_line_interval(const sets::SetData& data,double initial,double offset,double gain,
-    Interval interval,HybridRelationLimits limits,NumericalPolicy policy,
+    Interval interval,HybridRelationLimits limits,
     std::stop_token cancellation,bool& cancelled,bool& exactness_established) {
     if(interval.empty||!relation_domain_supported(data,limits)) return false;
     const auto representation=data.representation();
@@ -412,15 +419,19 @@ bool relation_is_line_interval(const sets::SetData& data,double initial,double o
         const double rhs=h->equality_values[row];
         if(!std::isfinite(rhs)||lower_value!=rhs||upper_value!=rhs) return false;
     }
-    const auto equality_rank=rank(h->equalities,tolerance(policy),cancellation,cancelled);
+    const auto equality_rank=exact_rank(h->equalities,cancellation,cancelled);
     if(cancelled) return false;
+    if(!equality_rank) {
+        exactness_established=false;
+        return false;
+    }
     if(interval.upper>interval.lower) {
-        if(equality_rank!=3) return false;
+        if(*equality_rank!=3) return false;
     } else {
         // A rank-three affine line can be rotated slightly away from the true
         // trajectory while remaining tolerance-close. Require a point-defining
         // equality system for a singleton relation.
-        if(equality_rank!=4) return false;
+        if(*equality_rank!=4) return false;
     }
     double lower=-std::numeric_limits<double>::infinity();
     double upper=std::numeric_limits<double>::infinity();
@@ -560,7 +571,7 @@ HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify
                 programs[i].joint_relation,programs[i].relation_limits);
             const bool program_valid=program_domain&&linear&&programs[i].path==paths[i]&&
                 relation_is_line_interval(programs[i].joint_relation,branch.initial,branch.flow_offset,
-                    branch.flow_control,branch.controls,programs[i].relation_limits,policy,cancellation,
+                    branch.flow_control,branch.controls,programs[i].relation_limits,cancellation,
                     relation_cancelled,relation_exactness)&&
                 program_objective_matches(programs[i],branch,linear->coefficients[0],linear->offset,policy);
             if(cancellation.stop_requested())
@@ -605,7 +616,7 @@ HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify
                     same(candidate->anchor[2],branch.flow_offset+branch.flow_control*anchor_control,policy)&&
                     same(candidate->anchor[3],candidate->anchor[2],policy)&&
                     face_domain&&relation_is_line_interval(candidate->relation,branch.initial,branch.flow_offset,
-                        branch.flow_control,optimal_controls,programs[i].relation_limits,policy,cancellation,
+                        branch.flow_control,optimal_controls,programs[i].relation_limits,cancellation,
                         relation_cancelled,relation_exactness);
                 if(cancellation.stop_requested())
                     return OperationStopped{StopReason::cancelled,"Scalar interval hybrid verification cancelled while checking a candidate face"};
