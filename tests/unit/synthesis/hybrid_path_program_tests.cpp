@@ -60,11 +60,13 @@ class RejectingConvex final : public ConvexWorkspace {
 };
 
 registry::PreparedProvider<registry::LPPort> lp_provider(std::stop_source* cancel_during_prepare=nullptr,
-    std::shared_ptr<int> factory_calls=std::make_shared<int>(0)) {
+    std::shared_ptr<int> factory_calls=std::make_shared<int>(0),std::string reject_problem={}) {
     registry::Registry<registry::LPPort> providers;
     REQUIRE_FALSE(providers.add({{{"reject-lp"},"1"},
-        [cancel_during_prepare](const LinearProgram&,const registry::Requirements&)->registry::Capability{
+        [cancel_during_prepare,reject_problem](const LinearProgram& program,const registry::Requirements&)->registry::Capability{
             if(cancel_during_prepare) cancel_during_prepare->request_stop();
+            if(program.identity().problem.value==reject_problem && !reject_problem.empty())
+                return Diagnostics{{DiagnosticCode::unsupported,"fixture.capability","requested fixture rejection"}};
             return registry::Offer{};
         },
         [factory_calls](const LinearProgram&){++*factory_calls; return std::make_unique<RejectingLP>();}}));
@@ -224,4 +226,25 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     REQUIRE(report.branches[0].providers.size()==1);
     REQUIRE(report.branches[0].providers[0].actual);
     CHECK(report.branches[0].providers[0].actual->id.value=="completing-lp");
+}
+
+TEST_CASE("hybrid portfolio admits every branch before creating any solver workspace") {
+    auto first=build_hybrid_path_program(example_system(),example_request(),example_path(),
+        {"accepted-problem"},{16,64,1024});
+    auto rejected=build_hybrid_path_program(example_system(),example_request(),example_path(),
+        {"rejected-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(first));
+    REQUIRE(std::holds_alternative<HybridPathProgram>(rejected));
+    const std::array<HybridPathProgram,2> programs{
+        std::get<HybridPathProgram>(std::move(first)),std::get<HybridPathProgram>(std::move(rejected))};
+    auto factory_calls=std::make_shared<int>(0);
+    const auto report=execute_hybrid_path_programs(programs,
+        lp_provider(nullptr,factory_calls,"rejected-problem"),convex_provider(),{});
+    REQUIRE(report.branches.size()==2);
+    CHECK_FALSE(report.all_supplied_branches_completed);
+    CHECK(*factory_calls==0);
+    CHECK(report.branches[0].termination==Termination::operation_rejected);
+    CHECK(report.branches[0].diagnostics[0].field=="hybrid.portfolio.admission");
+    CHECK(report.branches[1].termination==Termination::operation_rejected);
+    CHECK(report.branches[1].diagnostics[0].field=="fixture.capability");
 }

@@ -81,32 +81,74 @@ HybridPortfolioExecution execute_hybrid_path_programs(
     const registry::PreparedProvider<registry::LPPort>& lp,
     const registry::PreparedProvider<registry::ConvexPort>& convex,
     const ExecutionContext& context) {
+    using PreparedBranch = std::variant<registry::PreparedPipeline<registry::LPPort>,
+        registry::PreparedPipeline<registry::ConvexPort>>;
     HybridPortfolioExecution portfolio;
     portfolio.branches.reserve(programs.size());
-    bool complete=true;
+    std::vector<std::optional<PreparedBranch>> prepared_branches;
+    prepared_branches.reserve(programs.size());
+    bool admitted=true;
+    bool stopped=false;
+
+    // Admit every branch before creating any solver workspace. A rejection in
+    // a later branch must not leave earlier branches partially executed.
     for(const auto& branch:programs) {
         HybridBranchExecution execution;
         execution.path=branch.path;
-        auto run=[&]<class Program,class Port>(const Program& program,
-            const registry::PreparedProvider<Port>& provider) {
+        auto prepare=[&]<class Program,class Port>(const Program& program,
+            const registry::PreparedProvider<Port>& provider)->std::optional<PreparedBranch> {
             if(context.cancellation.stop_requested() ||
                (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
                 execution.termination=context.cancellation.stop_requested()?
                     Termination::cancelled:Termination::resource_limit;
-                complete=false;
-                return;
+                stopped=true;
+                return {};
             }
-            auto prepared=provider.prepare(program);
-            if(const auto* rejection=std::get_if<registry::Rejection>(&prepared)) {
+            auto selection=provider.prepare(program);
+            if(const auto* rejection=std::get_if<registry::Rejection>(&selection)) {
                 execution.termination=Termination::operation_rejected;
                 execution.providers.push_back(rejection->provenance);
                 execution.diagnostics=rejection->diagnostics;
-                complete=false;
-                return;
+                admitted=false;
+                return {};
             }
-            auto pipeline=std::get<registry::PreparedPipeline<Port>>(std::move(prepared));
+            auto pipeline=std::get<registry::PreparedPipeline<Port>>(std::move(selection));
             const auto provenance=pipeline.provenance();
             execution.providers.assign(provenance.begin(),provenance.end());
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                execution.termination=context.cancellation.stop_requested()?
+                    Termination::cancelled:Termination::resource_limit;
+                stopped=true;
+                return {};
+            }
+            return PreparedBranch{std::move(pipeline)};
+        };
+        std::optional<PreparedBranch> selection;
+        if(const auto* linear=std::get_if<LinearProgram>(&branch.program)) selection=prepare(*linear,lp);
+        else selection=prepare(std::get<ConvexProgram>(branch.program),convex);
+        prepared_branches.push_back(std::move(selection));
+        portfolio.branches.push_back(std::move(execution));
+    }
+
+    if(!admitted || stopped) {
+        for(std::size_t i=0;i<portfolio.branches.size();++i) {
+            auto& branch=portfolio.branches[i];
+            if(!branch.diagnostics.empty() || branch.termination==Termination::cancelled ||
+               branch.termination==Termination::resource_limit) continue;
+            branch.termination=Termination::operation_rejected;
+            branch.diagnostics={{DiagnosticCode::unsupported,"hybrid.portfolio.admission",
+                "No branch was executed because complete portfolio admission did not succeed"}};
+        }
+        return portfolio;
+    }
+
+    bool complete=true;
+    for(std::size_t i=0;i<programs.size();++i) {
+        const auto& branch=programs[i];
+        auto& execution=portfolio.branches[i];
+        auto run=[&]<class Program,class Port>(const Program& program,
+            registry::PreparedPipeline<Port>& pipeline) {
             if(context.cancellation.stop_requested() ||
                (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
                 execution.termination=context.cancellation.stop_requested()?
@@ -135,9 +177,10 @@ HybridPortfolioExecution execute_hybrid_path_programs(
             if(result.termination!=Termination::completed) complete=false;
             execution.result=std::move(result);
         };
-        if(const auto* linear=std::get_if<LinearProgram>(&branch.program)) run(*linear,lp);
-        else run(std::get<ConvexProgram>(branch.program),convex);
-        portfolio.branches.push_back(std::move(execution));
+        if(const auto* linear=std::get_if<LinearProgram>(&branch.program))
+            run(*linear,std::get<registry::PreparedPipeline<registry::LPPort>>(*prepared_branches[i]));
+        else run(std::get<ConvexProgram>(branch.program),
+            std::get<registry::PreparedPipeline<registry::ConvexPort>>(*prepared_branches[i]));
     }
     portfolio.all_supplied_branches_completed=complete;
     return portfolio;
