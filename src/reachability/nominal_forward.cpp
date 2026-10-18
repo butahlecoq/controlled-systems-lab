@@ -102,11 +102,15 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
     std::vector<GeometryEvidence> lineage;std::vector<RequestProvenance> providers;
     std::vector<CoordinateRelabeling> coordinate_lineage;
     const auto failure=[&](auto cause) -> NominalForwardOutcome {
-        ForwardFailure result{tube,stage,partial_relation,active,lineage,providers,coordinate_lineage,Unsupported{Diagnostics{}}};
-        if constexpr(std::is_same_v<std::remove_cvref_t<decltype(cause)>,Unsupported>)
-            result.cause.emplace<Unsupported>(std::move(cause));
-        else result.cause.emplace<OperationStopped>(std::move(cause));
-        return NominalForwardOutcome{std::in_place_type<ForwardFailure>,std::move(result)};
+        if constexpr(std::is_same_v<std::remove_cvref_t<decltype(cause)>,Unsupported>) {
+            ForwardFailure result{tube,stage,partial_relation,active,lineage,providers,coordinate_lineage,
+                std::variant<Unsupported,OperationStopped>{std::in_place_type<Unsupported>,std::move(cause)}};
+            return NominalForwardOutcome{std::in_place_type<ForwardFailure>,std::move(result)};
+        } else {
+            ForwardFailure result{tube,stage,partial_relation,active,lineage,providers,coordinate_lineage,
+                std::variant<Unsupported,OperationStopped>{std::in_place_type<OperationStopped>,std::move(cause)}};
+            return NominalForwardOutcome{std::in_place_type<ForwardFailure>,std::move(result)};
+        }
     };
     try {
     if(tube.request.value.empty())return failure(Unsupported{error("forward.request","Nonempty immutable request ID required.",DiagnosticCode::invalid_input)});
