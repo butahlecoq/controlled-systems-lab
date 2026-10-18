@@ -162,7 +162,23 @@ incompatible compiler/configuration/options/lane keys and PR/manual trust scopes
 The additional lane-ownership regression first reproduced a shared archive key
 between core and full builds, then passed after snapshots were partitioned by
 the complete compatibility context.
-Compiler-cache workflow integration and hosted evidence remain pending.
+The shared [setup action](../../.github/actions/native-cache-setup/action.yml)
+and [finish action](../../.github/actions/native-cache-finish/action.yml) wire
+these caches into the unchanged native coverage lanes. Linux uses ccache with a
+1 GiB limit and content-based compiler checking. Windows retains Visual Studio
+and records an archive-only compiler label; its actual compiler version remains
+in the native configure log. Compiler caching is not enabled there. No configured
+trees, extracted sources, installed packages or report bundles enter a cache.
+
+Dispatch the native workflow on the implementation branch twice with `clean=false`
+to collect cold and warm snapshots in that branch's namespace. Use `clean=true`
+for full manual validation with no restore/save and empty compiler launchers.
+Default PR validation is restore-only. The entire matrix remains enabled for
+manual runs. Context, keys, restore results and actual compiler counters are
+uploaded as `native-cache-<lane>-<attempt>` Actions artifacts with seven-day
+retention; these are temporary validation evidence, not published install bundles.
+The 369-test reporting suite also passed locally (six skips, no failures).
+Hosted cold/warm/invalidation evidence and independent PR review remain pending.
 
 Retain hosted links, exact head SHA, tool versions, options, archive hashes,
 cache keys and restore/save results for each experiment:

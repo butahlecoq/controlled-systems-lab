@@ -1,6 +1,7 @@
 """Exercise verified archive reuse through real FetchContent configurations."""
 import hashlib
 import io
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -53,7 +54,11 @@ file(WRITE "${CMAKE_BINARY_DIR}/answer.txt" "${value}")
         command = [sys.executable, "-m", "cmake", "-S", str(self.source), "-B", str(build)]
         if cache:
             command.append("-DCSL_DEPENDENCY_ARCHIVE_CACHE=" + self.cache.as_posix())
-        result = subprocess.run(command, text=True, capture_output=True)
+        else:
+            command.append("-DCSL_DEPENDENCY_ARCHIVE_CACHE=")
+        result = subprocess.run(command, text=True, capture_output=True,
+                                env={**os.environ, "CSL_DEPENDENCY_ARCHIVE_CACHE":
+                                     str(self.area / "inherited-cache")})
         return result, build
 
     def require_success(self, result):
@@ -105,6 +110,7 @@ file(WRITE "${CMAKE_BINARY_DIR}/answer.txt" "${value}")
         self.require_success(result)
         self.assertEqual((build / "answer.txt").read_text(), "clean mode")
         self.assertFalse(self.cache.exists())
+        self.assertFalse((self.area / "inherited-cache").exists())
 
 
 if __name__ == "__main__":

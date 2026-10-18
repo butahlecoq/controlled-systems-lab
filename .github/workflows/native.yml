@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      clean:
+        description: Disable archive/compiler cache restore and save for clean validation
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -31,16 +36,19 @@ jobs:
             os: windows-2022
             cc: cl
             cxx: cl
+            generator: Visual Studio 17 2022
             configure: -G "Visual Studio 17 2022" -A x64
           - name: Linux GCC 13 x64
             os: ubuntu-24.04
             cc: gcc-13
             cxx: g++-13
+            generator: Ninja
             configure: -G Ninja
           - name: Linux Clang 18 x64
             os: ubuntu-24.04
             cc: clang-18
             cxx: clang++-18
+            generator: Ninja
             configure: -G Ninja
     runs-on: ${{ matrix.os }}
     env:
@@ -55,6 +63,17 @@ jobs:
           python-version: '3.12'
       - name: Install pinned CMake tooling
         run: python -m pip install cmake==3.31.6
+      - name: Restore compatible validation caches
+        id: cache
+        uses: ./.github/actions/native-cache-setup
+        with:
+          lane: release-${{ matrix.cc }}
+          configuration: Release
+          generator: ${{ matrix.generator }}
+          options: ${{ matrix.configure }} -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON
+          clean: ${{ inputs.clean || false }}
+      - name: Verify pinned archive reuse and corruption rejection
+        run: python -m unittest discover -s tests/cmake -p 'test_dependency_archive.py'
       - name: Configure
         run: cmake -S . -B tmp/native ${{ matrix.configure }} -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON
       - name: Build
@@ -63,6 +82,19 @@ jobs:
         run: ctest --test-dir tmp/native -C Release --output-on-failure --no-tests=error
       - name: Install public package
         run: cmake --install tmp/native --config Release --prefix install
+      - name: Preserve cache work evidence and permitted snapshots
+        if: always() && steps.cache.outputs.archive_key != ''
+        uses: ./.github/actions/native-cache-finish
+        with:
+          lane: release-${{ matrix.cc }}
+          clean: ${{ inputs.clean || false }}
+          build_success: ${{ job.status == 'success' }}
+          archive_key: ${{ steps.cache.outputs.archive_key }}
+          compiler_key: ${{ steps.cache.outputs.compiler_key }}
+          compiler_enabled: ${{ steps.cache.outputs.compiler_enabled }}
+          save_allowed: ${{ steps.cache.outputs.save_allowed }}
+          archive_hit: ${{ steps.cache.outputs.archive_hit }}
+          compiler_hit: ${{ steps.cache.outputs.compiler_hit }}
 
   sanitizers:
     needs: route
@@ -82,6 +114,18 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install cmake==3.31.6
+      - name: Restore instrumented validation caches
+        id: cache
+        uses: ./.github/actions/native-cache-setup
+        with:
+          lane: gcc-sanitizers
+          configuration: Debug
+          generator: Ninja
+          options: >-
+            -DCSL_DEPENDENCY_PROBES=OFF
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+          clean: ${{ inputs.clean || false }}
       - name: Configure instrumented public modules and consumers
         run: >-
           cmake -S . -B tmp/sanitizers -G Ninja -DCMAKE_BUILD_TYPE=Debug
@@ -90,6 +134,19 @@ jobs:
           -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
       - run: cmake --build tmp/sanitizers --parallel 4
       - run: ctest --test-dir tmp/sanitizers --output-on-failure --no-tests=error
+      - name: Preserve instrumented cache evidence and permitted snapshots
+        if: always() && steps.cache.outputs.archive_key != ''
+        uses: ./.github/actions/native-cache-finish
+        with:
+          lane: gcc-sanitizers
+          clean: ${{ inputs.clean || false }}
+          build_success: ${{ job.status == 'success' }}
+          archive_key: ${{ steps.cache.outputs.archive_key }}
+          compiler_key: ${{ steps.cache.outputs.compiler_key }}
+          compiler_enabled: ${{ steps.cache.outputs.compiler_enabled }}
+          save_allowed: ${{ steps.cache.outputs.save_allowed }}
+          archive_hit: ${{ steps.cache.outputs.archive_hit }}
+          compiler_hit: ${{ steps.cache.outputs.compiler_hit }}
 
   partial-package:
     needs: route
@@ -111,6 +168,15 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install cmake==3.31.6
+      - name: Restore selected package validation caches
+        id: cache
+        uses: ./.github/actions/native-cache-setup
+        with:
+          lane: package-${{ matrix.preset }}
+          configuration: Release
+          generator: Ninja
+          options: cmake --preset ${{ matrix.preset }} ${{ matrix.preset == 'core' && '-DCSL_BUILD_SYN07_REPORT=ON' || '' }}
+          clean: ${{ inputs.clean || false }}
       - name: Configure selected package and backend-neutral report regression
         shell: bash
         run: |
@@ -128,6 +194,19 @@ jobs:
           fi
       - run: cmake --build --preset ${{ matrix.preset }}
       - run: ctest --preset ${{ matrix.preset }}
+      - name: Preserve package cache evidence and permitted snapshots
+        if: always() && steps.cache.outputs.archive_key != ''
+        uses: ./.github/actions/native-cache-finish
+        with:
+          lane: package-${{ matrix.preset }}
+          clean: ${{ inputs.clean || false }}
+          build_success: ${{ job.status == 'success' }}
+          archive_key: ${{ steps.cache.outputs.archive_key }}
+          compiler_key: ${{ steps.cache.outputs.compiler_key }}
+          compiler_enabled: ${{ steps.cache.outputs.compiler_enabled }}
+          save_allowed: ${{ steps.cache.outputs.save_allowed }}
+          archive_hit: ${{ steps.cache.outputs.archive_hit }}
+          compiler_hit: ${{ steps.cache.outputs.compiler_hit }}
 
   native-status:
     name: Native validation
