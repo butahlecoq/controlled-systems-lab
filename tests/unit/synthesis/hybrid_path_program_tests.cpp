@@ -39,6 +39,36 @@ model::HybridPath example_path() {
     return {{{"source"},{"target"}},{{"switch"}}};
 }
 
+SetHandle interval(std::string id,double lower,double upper) {
+    auto matrix=numeric::snapshot(Matrix{2,1,{-1,1}});
+    auto bounds=numeric::snapshot_vector(Vector{-lower,upper});
+    auto equalities=numeric::snapshot(Matrix{0,1,{}});
+    auto rhs=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(matrix));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(rhs));
+    auto data=sets::make_h({SetId{std::move(id)},1,{"guard-coordinate"}},
+        {std::get<numeric::MatrixView>(matrix),std::get<numeric::VectorView>(bounds),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
+bool satisfies(const sets::HRepresentation& h,const Vector& point) {
+    for(std::size_t i=0;i<h.inequalities.rows();++i) {
+        double value=0;
+        for(std::size_t j=0;j<h.inequalities.cols();++j) value+=h.inequalities(i,j)*point[j];
+        if(value>h.upper_bounds[i]) return false;
+    }
+    for(std::size_t i=0;i<h.equalities.rows();++i) {
+        double value=0;
+        for(std::size_t j=0;j<h.equalities.cols();++j) value+=h.equalities(i,j)*point[j];
+        if(value!=h.equality_values[i]) return false;
+    }
+    return true;
+}
+
 class RejectingLP final : public LPWorkspace {
     ProgramOutcome do_solve(const LinearProgram&,const ExecutionContext&) override {
         return Unsupported{{{DiagnosticCode::unsupported,"fixture.lp","fixture rejection"}}};
@@ -253,6 +283,39 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     REQUIRE(report.branches[0].providers.size()==1);
     REQUIRE(report.branches[0].providers[0].actual);
     CHECK(report.branches[0].providers[0].actual->id.value=="completing-lp");
+}
+
+TEST_CASE("hybrid guard entry and exit constrain the pre-reset state") {
+    auto system=example_system();
+    system.edges[0].guards[0]=interval("guard-3-to-4",3,4);
+    const auto relation=model::compose_hybrid_path_relation(system,example_request(),example_path(),
+        {16,64,1024});
+    REQUIRE(std::holds_alternative<sets::SetData>(relation));
+    const auto representation=std::get<sets::SetData>(relation).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    CHECK(satisfies(h,{2,1,3,0,0}));
+    CHECK(satisfies(h,{2,2,4,0,0}));
+    CHECK_FALSE(satisfies(h,{2,0,2,0,0}));
+    CHECK_FALSE(satisfies(h,{2,3,5,0,0}));
+}
+
+TEST_CASE("hybrid empty guard produces an explicitly empty branch relation") {
+    auto system=example_system();
+    system.edges[0].guards[0]=EmptySet{1};
+    const auto relation=model::compose_hybrid_path_relation(system,example_request(),example_path(),
+        {16,64,1024});
+    REQUIRE(std::holds_alternative<sets::SetData>(relation));
+    const auto representation=std::get<sets::SetData>(relation).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    bool contradictory_row=false;
+    for(std::size_t i=0;i<h.inequalities.rows();++i) {
+        bool zero=true;
+        for(std::size_t j=0;j<h.inequalities.cols();++j) zero=zero && h.inequalities(i,j)==0;
+        if(zero && h.upper_bounds[i]<0) contradictory_row=true;
+    }
+    CHECK(contradictory_row);
 }
 
 TEST_CASE("hybrid portfolio admits every branch before creating any solver workspace") {
