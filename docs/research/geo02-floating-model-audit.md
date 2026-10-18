@@ -211,11 +211,10 @@ To claim a real-model bound in a future profile:
    with matching request/source identity. **Implemented** by the current
    finite-V affine-sum path; preserve the exact deletion check.
 3. For H inputs, obtain a **global two-sided** H/V conversion certificate or
-   separate directed bounds. The ambient-one bounded interval profile has
-   such a stored-dyadic certificate. No broader H profiles are certified;
-   vertex-row residuals alone are insufficient. The bounded ambient-one and
-   bounded axis-aligned-box conversion profiles now have stored-dyadic certificates,
-   and propagation through the map/sum is implemented for both profiles.
+   separate directed bounds. The bounded ambient-one interval and bounded
+   axis-aligned-box profiles in dimensions 2 through 12 have stored-dyadic
+   certificates and propagate through the map/sum. Other H profiles have no
+   global coverage certificate; vertex-row residuals alone are insufficient.
 4. Bind any broader `GeometryErrorBound` to a checked verifier and explicit
    assumptions, including upstream model uncertainty. The current finite-V
    bound is computed by the operation's exact dyadic post-hoc check, includes
