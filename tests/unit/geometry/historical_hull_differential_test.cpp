@@ -73,6 +73,7 @@ bool exact_sum(const std::vector<std::pair<double, int>>& terms, int expected) {
 
 void check_certificates(const geometry::PointCloud& cloud, const geometry::HullReduction& result) {
     std::vector<bool> accounted(cloud.points.size(), false);
+    std::vector<bool> removed_earlier(cloud.points.size(), false);
     for (const auto id : result.retained) {
         REQUIRE(id < cloud.points.size());
         CHECK_FALSE(accounted[id]); accounted[id] = true;
@@ -85,6 +86,9 @@ void check_certificates(const geometry::PointCloud& cloud, const geometry::HullR
         for (const auto& term : certificate.combination) {
             REQUIRE(term.point < cloud.points.size());
             CHECK(term.point != certificate.removed);
+            // Public certificates may reference a later removal. Forward-only
+            // substitution must eventually reach retained points, never a cycle.
+            CHECK_FALSE(removed_earlier[term.point]);
             sum.emplace_back(term.weight, 1);
             x.emplace_back(term.weight, static_cast<int>(cloud.points[term.point][0]));
             y.emplace_back(term.weight, static_cast<int>(cloud.points[term.point][1]));
@@ -92,6 +96,7 @@ void check_certificates(const geometry::PointCloud& cloud, const geometry::HullR
         CHECK(exact_sum(sum, 1));
         CHECK(exact_sum(x, static_cast<int>(cloud.points[certificate.removed][0])));
         CHECK(exact_sum(y, static_cast<int>(cloud.points[certificate.removed][1])));
+        removed_earlier[certificate.removed] = true;
     }
     CHECK(std::all_of(accounted.begin(), accounted.end(), [](bool present) { return present; }));
 }
