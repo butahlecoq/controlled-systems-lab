@@ -5,6 +5,7 @@
 #include <csl/sets/data.hpp>
 
 #include <algorithm>
+#include <type_traits>
 #include <utility>
 
 using namespace csl::model;
@@ -41,6 +42,86 @@ std::vector<HybridPath> exhaustive_path_oracle(const HybridSystem& system,
         return std::find(terminals.begin(),terminals.end(),path.modes.back()) == terminals.end();
     }),prefixes.end());
     return prefixes;
+}
+
+bool literal_relation_contains(const sets::SetData& relation,const Vector& point) {
+    const auto representation=relation.representation();
+    if(const auto* singleton=std::get_if<sets::SingletonRepresentation>(&representation))
+        return std::equal(singleton->point.values().begin(),singleton->point.values().end(),point.begin(),point.end());
+    if(const auto* h=std::get_if<sets::HRepresentation>(&representation)) {
+        if(point.size()!=h->inequalities.cols() || point.size()!=h->equalities.cols()) return false;
+        for(std::size_t i=0;i<h->inequalities.rows();++i) {
+            double value=0;
+            for(std::size_t j=0;j<h->inequalities.cols();++j) value+=h->inequalities(i,j)*point[j];
+            if(value>h->upper_bounds[i]) return false;
+        }
+        for(std::size_t i=0;i<h->equalities.rows();++i) {
+            double value=0;
+            for(std::size_t j=0;j<h->equalities.cols();++j) value+=h->equalities(i,j)*point[j];
+            if(value!=h->equality_values[i]) return false;
+        }
+        return true;
+    }
+    return std::holds_alternative<sets::UniversalRepresentation>(representation);
+}
+
+std::pair<bool,std::size_t> equality_consistency_and_rank(const sets::HRepresentation& h) {
+    Matrix augmented{h.equalities.rows(),h.equalities.cols()+1,{}};
+    augmented.values.reserve(augmented.rows*augmented.cols);
+    for(std::size_t i=0;i<h.equalities.rows();++i) {
+        for(std::size_t j=0;j<h.equalities.cols();++j)
+            augmented.values.push_back(h.equalities(i,j));
+        augmented.values.push_back(h.equality_values[i]);
+    }
+    std::size_t rank=0;
+    for(std::size_t column=0;column<h.equalities.cols() && rank<augmented.rows;++column) {
+        auto pivot=rank;
+        while(pivot<augmented.rows && augmented.values[pivot*augmented.cols+column]==0) ++pivot;
+        if(pivot==augmented.rows) continue;
+        for(std::size_t j=0;j<augmented.cols;++j)
+            std::swap(augmented.values[rank*augmented.cols+j],augmented.values[pivot*augmented.cols+j]);
+        const auto divisor=augmented.values[rank*augmented.cols+column];
+        for(std::size_t j=column;j<augmented.cols;++j)
+            augmented.values[rank*augmented.cols+j]/=divisor;
+        for(std::size_t i=rank+1;i<augmented.rows;++i) {
+            const auto factor=augmented.values[i*augmented.cols+column];
+            for(std::size_t j=column;j<augmented.cols;++j)
+                augmented.values[i*augmented.cols+j]-=factor*augmented.values[rank*augmented.cols+j];
+        }
+        ++rank;
+    }
+    bool consistent=true;
+    for(std::size_t i=0;i<augmented.rows;++i) {
+        bool zero_coefficients=true;
+        for(std::size_t j=0;j<h.equalities.cols();++j)
+            zero_coefficients=zero_coefficients && augmented.values[i*augmented.cols+j]==0;
+        if(zero_coefficients && augmented.values[i*augmented.cols+h.equalities.cols()]!=0)
+            consistent=false;
+    }
+    return {consistent,rank};
+}
+
+bool literal_set_contains(const AdmissibleSet& set,const Vector& point) {
+    return std::visit([&](const auto& value) {
+        using T=std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T,UniversalSet>) return true;
+        else if constexpr(std::is_same_v<T,EmptySet>) return false;
+        else if constexpr(std::is_same_v<T,Singleton>) return value.point==point;
+        else {
+            const auto data=sets::from_handle(value);
+            return std::holds_alternative<sets::SetData>(data) &&
+                literal_relation_contains(std::get<sets::SetData>(data),point);
+        }
+    },set);
+}
+
+Vector literal_singleton(const SetHandle& handle) {
+    const auto data=sets::from_handle(handle);
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    const auto representation=std::get<sets::SetData>(data).representation();
+    REQUIRE(std::holds_alternative<sets::SingletonRepresentation>(representation));
+    const auto& point=std::get<sets::SingletonRepresentation>(representation).point;
+    return {point.values().begin(),point.values().end()};
 }
 
 LinearStage stage(std::size_t state, std::size_t control) {
@@ -110,6 +191,103 @@ TEST_CASE("parallel transition edges remain distinct branches") {
     CHECK(branches[1].modes == std::vector<HybridModeId>{{"idle"}, {"active"}});
     CHECK(branches[0].edges == std::vector<HybridEdgeId>{{"start-a"}});
     CHECK(branches[1].edges == std::vector<HybridEdgeId>{{"start-b"}});
+}
+
+TEST_CASE("independent tiny trajectory oracle matches guarded reset branches and ties") {
+    auto source=mode("source",1,1,1);
+    source.flow=std::vector<LinearStage>{
+        {Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}}};
+    source.control_sets[0]=Singleton{{1}};
+    auto target=mode("target",2,0,1);
+    const HybridSystem system{1,{source,target},
+        {{{"edge-a"},{"source"},{"target"},{Singleton{{1}}},
+            {singleton_relation("reset-a",{1,2,0})}},
+         {{"edge-b"},{"source"},{"target"},{Singleton{{1}}},
+            {singleton_relation("reset-b",{1,2,1})}},
+         {{"edge-c"},{"source"},{"target"},{Singleton{{1}}},
+            {singleton_relation("reset-c",{1,3,0})}}}};
+    const HybridRequest request{{{"source"},{0}},{{"target"}},
+        {{{"target"},LinearTerminal{{1,0},0},"cost","u"}}};
+
+    // The oracle enumerates edge sequences independently, then evaluates the
+    // one-stage trajectory equations and set membership directly.
+    const auto oracle_paths=exhaustive_path_oracle(system,{"source"},{{"target"}});
+    REQUIRE(oracle_paths.size()==3);
+    std::vector<std::pair<HybridPath,Vector>> oracle_feasible;
+    const auto& source_mode=system.modes[0];
+    const auto& flow=std::get<std::vector<LinearStage>>(source_mode.flow)[0];
+    const double initial=request.initial.state[0];
+    const double control=std::get<Singleton>(source_mode.control_sets[0]).point[0];
+    const double pre=flow.A.values[0]*initial+flow.B.values[0]*control+flow.offset[0];
+    REQUIRE(literal_set_contains(source_mode.invariants[0],{initial}));
+    REQUIRE(literal_set_contains(source_mode.invariants[1],{pre}));
+    for(const auto& path:oracle_paths) {
+        const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate) {
+            return candidate.id==path.edges[0];
+        });
+        REQUIRE(edge!=system.edges.end());
+        if(!literal_set_contains(edge->guards[0],{pre})) continue;
+        const auto reset=literal_singleton(edge->reset_relations[0]);
+        REQUIRE(reset.size()==3);
+        if(reset[0]!=pre) continue;
+        const Vector terminal{reset[1],reset[2]};
+        if(!literal_set_contains(target.invariants[1],terminal)) continue;
+        oracle_feasible.push_back({path,{initial,control,pre,terminal[0],terminal[1]}});
+    }
+    REQUIRE(oracle_feasible.size()==3);
+    CHECK(oracle_feasible[0].first.edges==std::vector<HybridEdgeId>{{"edge-a"}});
+    CHECK(oracle_feasible[1].first.edges==std::vector<HybridEdgeId>{{"edge-b"}});
+    CHECK(oracle_feasible[2].first.edges==std::vector<HybridEdgeId>{{"edge-c"}});
+    CHECK(oracle_feasible[0].second[4]!=oracle_feasible[1].second[4]);
+    const auto& objective=std::get<LinearTerminal>(request.terminal_objectives[0].objective);
+    Vector oracle_objectives;
+    for(const auto& branch:oracle_feasible)
+        oracle_objectives.push_back(objective.coefficients[0]*branch.second[3]+
+            objective.coefficients[1]*branch.second[4]+objective.offset);
+    REQUIRE(oracle_objectives==Vector{2,2,3});
+    const auto global_oracle_objective=*std::min_element(oracle_objectives.begin(),oracle_objectives.end());
+    std::vector<HybridPath> oracle_optimal_paths;
+    for(std::size_t i=0;i<oracle_feasible.size();++i)
+        if(oracle_objectives[i]==global_oracle_objective)
+            oracle_optimal_paths.push_back(oracle_feasible[i].first);
+    CHECK(oracle_optimal_paths==std::vector<HybridPath>{
+        oracle_feasible[0].first,oracle_feasible[1].first});
+
+    const auto enumerated=enumerate_hybrid_paths(system,{"source"},{{"target"}},{1,4});
+    REQUIRE(std::holds_alternative<std::vector<HybridPath>>(enumerated));
+    CHECK(std::get<std::vector<HybridPath>>(enumerated)==oracle_paths);
+    for(const auto& path:oracle_paths) {
+        const auto relation=compose_hybrid_path_relation(system,request,path,{16,64,1024});
+        REQUIRE(std::holds_alternative<sets::SetData>(relation));
+        const auto& data=std::get<sets::SetData>(relation);
+        const auto feasible=std::find_if(oracle_feasible.begin(),oracle_feasible.end(),[&](const auto& item) {
+            return item.first==path;
+        });
+        REQUIRE(feasible!=oracle_feasible.end());
+        CHECK(literal_relation_contains(data,feasible->second));
+        const auto representation=data.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& h=std::get<sets::HRepresentation>(representation);
+        CHECK(h.inequalities.rows()==0);
+        const auto [consistent,rank]=equality_consistency_and_rank(h);
+        CHECK(consistent);
+        CHECK(rank==5); // five independent equalities make the expected tuple the whole branch
+    }
+
+    auto guard_exit_request=request;
+    guard_exit_request.initial.state={2};
+    const double exit_pre=flow.A.values[0]*guard_exit_request.initial.state[0]+
+        flow.B.values[0]*control+flow.offset[0];
+    CHECK(exit_pre==3);
+    CHECK_FALSE(literal_set_contains(system.edges[0].guards[0],{exit_pre}));
+    const HybridPath first_edge{{{"source"},{"target"}},{{"edge-a"}}};
+    const auto guard_exit=compose_hybrid_path_relation(system,guard_exit_request,first_edge,{16,64,1024});
+    REQUIRE(std::holds_alternative<sets::SetData>(guard_exit));
+    const auto exit_representation=std::get<sets::SetData>(guard_exit).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(exit_representation));
+    const auto& exit_h=std::get<sets::HRepresentation>(exit_representation);
+    CHECK(exit_h.inequalities.rows()==0);
+    CHECK_FALSE(equality_consistency_and_rank(exit_h).first);
 }
 
 TEST_CASE("zero-horizon path is the initial terminal mode and has no edge") {
