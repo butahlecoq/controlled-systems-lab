@@ -59,7 +59,8 @@ std::string phase_sum(const std::string& diagnostics,const std::string& key) {
 std::string attempt_timings(const std::string& diagnostics) {
     std::ostringstream out;out<<'[';bool first=true;
     for(const auto& attempt:attempts(diagnostics)) {
-        if(!first)out<<',';first=false;
+        if(!first)out<<',';
+        first=false;
         out<<"{\"model_load_seconds\":"<<json_number(field(attempt,"native.load_seconds"))
             <<",\"basis_transfer_seconds\":"<<json_number(field(attempt,"warm_start.setup_seconds"))
             <<",\"solve_seconds\":"<<json_number(field(attempt,"native.solve_seconds"))
@@ -92,7 +93,8 @@ void run_pair(const std::string& scenario,std::size_t columns,std::size_t repeti
     for(std::size_t pair=0;pair<repetitions;++pair) {
         for(unsigned order=0;order<2;++order) {
             const bool warm=(pair%2==0)?order==1:order==0;
-            auto registration_result=make_highs_registration({.cross_query_warm_start=warm});
+            auto registration_result=make_highs_registration({
+                .simplex_iteration_limit=std::nullopt,.cross_query_warm_start=warm});
             auto* registration=std::get_if<registry::Registration<registry::LPPort>>(&registration_result);
             if(!registration)throw std::runtime_error("HiGHS LP registration failed");
             auto workspace=registration->factory(warm?source:target);

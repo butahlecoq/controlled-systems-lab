@@ -272,7 +272,12 @@ def _validate_view(view):
     provenance = payload["provenance"]
     require(re.fullmatch(r"[0-9a-f]{40}", provenance["source_commit"]) is not None, "source SHA required")
     require(type(provenance["tracked_clean"]) is bool and HEX.fullmatch(provenance["executable_sha256"]) is not None, "executable provenance")
-    require(provenance["backend"] == {"id": backend_id, "version": "1.0.0+highs.1.11.0"}, "backend identity")
+    backend_versions = {"csl.lp.highs": {"1.0.0+highs.1.11.0", "1.1.0+highs.1.11.0"},
+                        "csl.convex.highs": {"1.0.0+highs.1.11.0"}}
+    require(isinstance(provenance["backend"], dict) and
+            provenance["backend"].get("id") == backend_id and
+            provenance["backend"].get("version") in backend_versions.get(backend_id, set()),
+            "backend identity")
     if convex:
         if payload["purpose"]=="measurement" or "native_archive_sha256" in provenance:
             require(provenance["native_archive_sha256"]==CONVEX_ARCHIVE,"convex provenance archive differs from diagnostic pin")
