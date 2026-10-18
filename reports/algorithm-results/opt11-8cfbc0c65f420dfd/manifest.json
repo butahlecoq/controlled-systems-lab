@@ -1,0 +1,17 @@
+{
+  "files": {
+    "collection.json": "1f100c5e11814ac5e3c6af7e3eda01dd97286baacde1df0e9eb2498b9a45c070",
+    "compiler-identification.cmake": "2784e980aae54020d3a9b08c95ddb6d0b174c29299e21f2de19991951c5f8923",
+    "functional-validation.json": "40c5e4da0d6e94444beebd50d8cd459751c0af2f8174a85eb54f0ee8102a99aa",
+    "index.html": "9561239ae2d3bfb7563fbe5605825ddb5f5704e956a9bc158f3baa42d81c24a6",
+    "latency.svg": "4283db516677662eaf5a4b37e0ab4df62d7386566005c9d17db4a0b6db000933",
+    "raw-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw-stdout.jsonl": "c4166daf5a12588e591f949dd80e7a539401d94e134b02b04ba9bf55154040eb",
+    "records.json": "f6a708c88e75c62d0eed870ee32a3030dfb0970fffb9ddc280d6095ae158fa9e",
+    "release-build-log-sanitized.txt": "c90fa8d72eadfc1757736d930b696609bb8ac1fec47cf17a55e590a6518d187e",
+    "summary.csv": "df5566204f6389d03701bc86a11fc9c1e1e322e728030ed386336a7cb8b9cfc8",
+    "trials.csv": "4cf91d9498805167cccf6fc392dacc7c1d228f1016bfb0eb3a4f760ed1576870"
+  },
+  "report_id": "opt11-8cfbc0c65f420dfd",
+  "schema": "csl.opt11-native-manifest/1"
+}

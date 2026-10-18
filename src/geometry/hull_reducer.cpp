@@ -10,6 +10,7 @@
 #include <numeric>
 #include <optional>
 #include <string>
+#include <string_view>
 
 namespace csl::geometry {
 namespace {
@@ -19,7 +20,8 @@ Diagnostics invalid(std::string field, std::string explanation) {
 }
 
 std::optional<LinearProgram> membership_program(const PointCloud& cloud,
-        const std::vector<std::size_t>& support, std::size_t candidate) {
+        const std::vector<std::size_t>& support, std::size_t candidate,
+        std::string_view query_namespace = {}) {
     const auto dimension = cloud.points[candidate].size();
     const auto count = support.size();
     if (dimension == std::numeric_limits<std::size_t>::max()) return {};
@@ -48,8 +50,14 @@ std::optional<LinearProgram> membership_program(const PointCloud& cloud,
     std::vector<Interval> equalities;
     equalities.reserve(rows);
     for (double value : rhs) equalities.push_back({value, value});
+    std::string program_id = "hull-membership-";
+    if (!query_namespace.empty()) {
+        program_id.append(query_namespace);
+        program_id.push_back('-');
+    }
+    program_id.append(std::to_string(candidate));
     LinearProgramInput input{
-        {cloud.problem, {"hull-membership-" + std::to_string(candidate)}},
+        {cloud.problem, {std::move(program_id)}},
         Vector(count, 0.0), 0.0, std::move(matrix),
         std::vector<Interval>(count, Interval{0.0, std::nullopt}),
         std::move(equalities)};
@@ -243,7 +251,8 @@ public:
 
 HullReductionResult detail::reduce_hull_in_order(const PointCloud& cloud, LPWorkspace& lp,
         const ExecutionContext& context, const std::vector<std::size_t>& order,
-        std::vector<RemovalCertificate> prior_certificates) {
+        std::vector<RemovalCertificate> prior_certificates,
+        std::string_view query_namespace) {
     if (cloud.problem.value.empty()) return invalid("point_cloud.problem", "Problem identity is required");
     if (!std::isfinite(context.numerical.absolute_tolerance) || context.numerical.absolute_tolerance < 0 ||
         !std::isfinite(context.numerical.relative_tolerance) || context.numerical.relative_tolerance < 0 ||
@@ -269,7 +278,7 @@ HullReductionResult detail::reduce_hull_in_order(const PointCloud& cloud, LPWork
         std::vector<std::size_t> support;
         support.reserve(output.retained.size() - 1);
         for (const auto point : output.retained) if (point != candidate) support.push_back(point);
-        auto program = membership_program(cloud, support, candidate);
+        auto program = membership_program(cloud, support, candidate, query_namespace);
         if (!program) {
             output.status = ReductionStatus::incomplete;
             output.attempts.push_back({candidate, MembershipOutcome::malformed_result});

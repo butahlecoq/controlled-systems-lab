@@ -1,0 +1,4 @@
+fixture,points,measured_pairs,baseline_median_ns,baseline_min_ns,baseline_max_ns,recursive_median_ns,recursive_min_ns,recursive_max_ns,median_paired_delta_recursive_minus_baseline_ns,failed_pairs
+signed-grid,33,6,2704100.0,2649700,2803700,2786750.0,2614400,3028500,117950.0,0
+duplicate-collinear,33,6,2778150.0,2594600,2879400,2822650.0,2118300,3141500,-4900.0,0
+rank-one-offset,33,6,2685650.0,2593400,2844400,3196350.0,2439500,3617200,470550.0,0

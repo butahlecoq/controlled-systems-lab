@@ -67,6 +67,16 @@ struct GroupedReductionMetrics {
     bool used_identity_fallback{};
 };
 
+struct RecursiveReductionMetrics {
+    std::size_t leaf_nodes{};
+    std::size_t merge_nodes{};
+    std::size_t leaf_lp_calls{};
+    std::size_t merge_lp_calls{};
+    std::size_t peak_merge_points{};
+    std::size_t concurrent_child_subtrees{};
+    std::uint64_t parallel_overhead_microseconds{};
+};
+
 struct ConvexCombination {
     std::size_t point;
     double weight;
@@ -99,6 +109,8 @@ struct HullReduction {
     // Present only for the grouped hull-level strategy. Grouping changes LP
     // query order; exact membership certificates remain the removal authority.
     std::optional<GroupedReductionMetrics> grouped{};
+    // Present only for recursive split-and-merge reduction.
+    std::optional<RecursiveReductionMetrics> recursive{};
 };
 
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;
@@ -144,6 +156,13 @@ struct HullReducerPort {
 } // namespace csl::registry
 
 namespace csl::geometry {
+// Registers a recursive reducer whose child LP workspaces are created from
+// the explicitly selected LP provider. The LPWorkspace parameter on
+// HullReducerPort is unused by this implementation; recursive LP work is
+// performed through the registered provider's exclusive child workspaces.
+registry::Registration<registry::HullReducerPort>
+make_recursive_hull_reducer_registration(registry::Registration<registry::LPPort> lp_provider);
+
 // Registers the LP-backed membership reducer as one replaceable implementation
 // behind HullReducerPort. The LP workspace remains a separate dependency.
 registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration();

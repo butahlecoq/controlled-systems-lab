@@ -8,6 +8,11 @@ if(TARGET CSL::highs_lp)
   target_link_libraries(ordered_reducer_test PRIVATE CSL::hull CSL::highs_lp doctest::doctest)
   add_test(NAME ordered_reducer_test COMMAND ordered_reducer_test)
   csl_test_target(ordered_reducer_test geometry)
+
+  add_executable(recursive_reducer_test tests/unit/geometry/recursive_reducer_test.cpp)
+  target_link_libraries(recursive_reducer_test PRIVATE CSL::hull CSL::highs_lp doctest::doctest)
+  add_test(NAME recursive_reducer_test COMMAND recursive_reducer_test)
+  csl_test_target(recursive_reducer_test geometry)
 endif()
 
 add_executable(quickhull_2d_test tests/unit/geometry/quickhull_2d_test.cpp)
