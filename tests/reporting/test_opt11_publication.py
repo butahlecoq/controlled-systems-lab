@@ -54,8 +54,9 @@ class Opt11PublicationTests(unittest.TestCase):
         raw_path.write_bytes(raw)
         stderr = b""
         compiler_path = "$PROGRAM_FILES_X86/MSVC/cl.exe"
+        windows_compiler_path = compiler_path.replace("/", "\\")
         build_log = ("\n".join(
-            f'"{compiler_path}" /O2 /std:c++20 /D NDEBUG "${{SOURCE_ROOT}}/{source}"'
+            f'"{windows_compiler_path}" /O2 /std:c++20 /D NDEBUG "${{SOURCE_ROOT}}/{source.replace("/", chr(92))}"'
             for source in builder.TIMING_TRANSLATION_UNITS) + "\n").encode()
         compiler_source = (f'set(CMAKE_CXX_COMPILER "{compiler_path}")\n'
                            'set(CMAKE_CXX_COMPILER_ID "test")\n'
@@ -140,8 +141,8 @@ class Opt11PublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             collection = self.make_collection(Path(temp))
             log_path = collection / "release-build-log-sanitized.txt"
-            log = log_path.read_bytes().replace(b"$PROGRAM_FILES_X86/MSVC/cl.exe",
-                                                b"$PROGRAM_FILES_X86/Other/cl.exe", 1)
+            log = log_path.read_bytes().replace(b"$PROGRAM_FILES_X86\\MSVC\\cl.exe",
+                                                b"$PROGRAM_FILES_X86\\Other\\cl.exe", 1)
             log_path.write_bytes(log)
             metadata_path = collection / "collection.json"
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))

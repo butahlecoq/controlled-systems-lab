@@ -110,10 +110,11 @@ def validate_compiler_evidence(compiler_text: str, build_log: str, compiler: dic
     require(f'set(CMAKE_CXX_COMPILER "{compiler_path}")' in compiler_text,
             "sanitized compiler path differs from retained CMake compiler source")
     lines = build_log.splitlines()
+    normalized_compiler_path = compiler_path.replace("\\", "/").casefold()
     for relative in TIMING_TRANSLATION_UNITS:
-        source = relative.replace("/", "\\").casefold()
-        require(any(compiler_path.casefold() in line.casefold() and
-                    source in line.replace("/", "\\").casefold() for line in lines),
+        source = relative.replace("\\", "/").casefold()
+        require(any(normalized_compiler_path in line.replace("\\", "/").casefold() and
+                    source in line.replace("\\", "/").casefold() for line in lines),
                 f"sanitized compiler path is not present for {relative} in retained Release log")
 
 
