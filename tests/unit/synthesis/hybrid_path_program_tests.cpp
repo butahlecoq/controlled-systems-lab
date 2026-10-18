@@ -77,6 +77,38 @@ SetHandle interval(std::string id,double lower,double upper) {
     return std::get<sets::SetData>(std::move(data)).as_handle();
 }
 
+SetHandle affine_reset() {
+    auto inequalities=numeric::snapshot(Matrix{0,3,{}});
+    auto upper=numeric::snapshot_vector(Vector{});
+    auto equalities=numeric::snapshot(Matrix{1,3,{-1,1,0}});
+    auto rhs=numeric::snapshot_vector(Vector{0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(rhs));
+    auto data=sets::make_h({{"affine-reset"},3,{}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
+sets::SetData relation_excluding_anchor() {
+    auto inequalities=numeric::snapshot(Matrix{0,5,{}});
+    auto upper=numeric::snapshot_vector(Vector{});
+    auto equalities=numeric::snapshot(Matrix{1,5,{1,0,0,0,0}});
+    auto rhs=numeric::snapshot_vector(Vector{0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(rhs));
+    auto data=sets::make_h({{"wrong-joint-relation"},5,{}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data));
+}
+
 bool satisfies(const sets::HRepresentation& h,const Vector& point) {
     for(std::size_t i=0;i<h.inequalities.rows();++i) {
         double value=0;
@@ -296,6 +328,62 @@ TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
     REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(interrupted));
     CHECK(std::get<HybridPortfolioObjectiveIncomplete>(interrupted).
         branches_without_comparable_bounds==std::vector<std::size_t>{1});
+}
+
+TEST_CASE("hybrid path optimal-face candidates preserve the full minimizer equations") {
+    auto check_face=[&](TerminalObjective objective,double objective_value) {
+        auto system=example_system();
+        system.modes[0].control_sets[0]=interval("bounded-control",-1,1);
+        system.edges[0].reset_relations[0]=affine_reset();
+        auto request=example_request();
+        request.terminal_objectives[0].objective=std::move(objective);
+        auto built=build_hybrid_path_program(system,request,example_path(),{"hybrid-face"},{16,64,1024});
+        REQUIRE(std::holds_alternative<HybridPathProgram>(built));
+        const auto& branch=std::get<HybridPathProgram>(built);
+        const ProgramIdentity identity=std::visit([](const auto& program){return program.identity();},branch.program);
+        const auto support=SymbolicArgument{"literal face fixture","synthetic global optimum"};
+        const ProgramBoundEvidence bound{identity,support,{}};
+        ProgramResult solved{Termination::completed,{identity,MathematicalOutcome::optimal,support,{}},
+            Vector{2,-1,1,1,0},
+            {ProgramObjectiveBound{objective_value,bound},ProgramObjectiveBound{objective_value,bound}},
+            "literal feasible optimizer"};
+        const auto face=build_hybrid_path_optimal_face_candidate(branch,solved,{1e-10,1e-10});
+        REQUIRE(std::holds_alternative<HybridPathOptimalFaceCandidate>(face));
+        const auto& candidate=std::get<HybridPathOptimalFaceCandidate>(face);
+        CHECK(candidate.path==example_path());
+        CHECK(candidate.anchor==Vector{2,-1,1,1,0});
+        CHECK(candidate.solver_result.objective.upper->value==objective_value);
+        const auto representation=candidate.relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& h=std::get<sets::HRepresentation>(representation);
+        CHECK(satisfies(h,{2,-1,1,1,0}));
+        CHECK(satisfies(h,{2,-1,1,1,1}));
+        CHECK_FALSE(satisfies(h,{2,0,2,2,0}));
+        CHECK(candidate.assumptions.size()==3);
+    };
+
+    check_face(LinearTerminal{{1,0},0},1);
+    check_face(QuadraticTerminal{Matrix{2,2,{2,0,0,0}},Vector{0,0},0},1);
+    check_face(ResidualNormTerminal{Matrix{1,2,{1,0}},Vector{1}},0);
+
+    auto system=example_system();
+    system.modes[0].control_sets[0]=interval("bounded-control-mismatch",-1,1);
+    system.edges[0].reset_relations[0]=affine_reset();
+    auto request=example_request();
+    request.terminal_objectives[0].objective=LinearTerminal{{1,0},0};
+    auto built=build_hybrid_path_program(system,request,example_path(),{"hybrid-face-mismatch"},{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(built));
+    auto mismatched=std::get<HybridPathProgram>(std::move(built));
+    const auto& program=std::get<LinearProgram>(mismatched.program);
+    const auto support=SymbolicArgument{"literal mismatch fixture","synthetic global optimum"};
+    const ProgramBoundEvidence bound{program.identity(),support,{}};
+    ProgramResult solved{Termination::completed,{program.identity(),MathematicalOutcome::optimal,support,{}},
+        Vector{2,-1,1,1,0},
+        {ProgramObjectiveBound{1,bound},ProgramObjectiveBound{1,bound}},"literal feasible optimizer"};
+    mismatched.joint_relation=relation_excluding_anchor();
+    const auto rejected=build_hybrid_path_optimal_face_candidate(mismatched,solved,{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<Diagnostics>(rejected));
+    CHECK(std::get<Diagnostics>(rejected)[0].field=="hybrid.optimal_face.source_relation");
 }
 
 TEST_CASE("hybrid portfolio builder rejects a pre-cancelled request") {

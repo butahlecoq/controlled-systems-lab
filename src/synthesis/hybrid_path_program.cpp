@@ -187,6 +187,186 @@ HybridPortfolioObjectiveAnalysis compare_hybrid_portfolio_objective_bounds(
         std::move(potentially_optimal),std::move(lower_sources),std::move(upper_sources),policy};
 }
 
+HybridPathOptimalFaceResult build_hybrid_path_optimal_face_candidate(
+    const HybridPathProgram& branch,const ProgramResult& result,NumericalPolicy policy,
+    std::stop_token cancellation) {
+    if(!std::isfinite(policy.absolute_tolerance)||policy.absolute_tolerance<0||
+       !std::isfinite(policy.relative_tolerance)||policy.relative_tolerance<0)
+        return one({DiagnosticCode::invalid_input,"hybrid.optimal_face.policy",
+            "Optimal-face tolerances must be finite and nonnegative"});
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled before validation"};
+    if(result.termination!=Termination::completed||result.outcome.value!=MathematicalOutcome::optimal||!result.primal)
+        return one({DiagnosticCode::invalid_claim,"hybrid.optimal_face.anchor",
+            "A completed optimal solver result with a primal anchor is required"});
+    auto validate=[&]<class Program>(const Program& program) {
+        return optimization::check_program_result(result,program,Assurance::numerical);
+    };
+    const auto validation=std::visit(validate,branch.program);
+    if(!validation.empty()) return validation;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled after result validation"};
+    const auto representation=branch.joint_relation.representation();
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if(!h) return one({DiagnosticCode::unsupported,"hybrid.optimal_face.representation",
+        "Optimal-face construction requires the admitted joint H relation"});
+    const auto dimension=branch.joint_relation.metadata()->set.dimension;
+    if(result.primal->size()!=dimension)
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.optimal_face.dimension",
+            "Solver anchor dimension differs from the joint branch relation"});
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled before primal evaluation"};
+
+    auto within_policy=[&](double violation,double scale) {
+        if(!std::isfinite(violation)||!std::isfinite(scale)||violation<0||scale<0) return false;
+        if(violation<=policy.absolute_tolerance) return true;
+        if(scale==0) return false;
+        return (violation-policy.absolute_tolerance)/scale<=policy.relative_tolerance;
+    };
+    auto relation_satisfied=[&](numeric::MatrixView matrix,numeric::VectorView rhs,bool equality) {
+        for(std::size_t i=0;i<matrix.rows();++i) {
+            if(cancellation.stop_requested()) return false;
+            double activity=0,scale=std::abs(rhs[i]);
+            for(std::size_t j=0;j<dimension;++j) {
+                if(cancellation.stop_requested()) return false;
+                const double contribution=matrix(i,j)*(*result.primal)[j];
+                if(!std::isfinite(contribution)) return false;
+                activity+=contribution;
+                scale+=std::abs(contribution);
+            }
+            if(!std::isfinite(activity)||!std::isfinite(scale)) return false;
+            const double violation=equality?std::abs(activity-rhs[i]):std::max(0.0,activity-rhs[i]);
+            if(!within_policy(violation,scale)) return false;
+        }
+        return true;
+    };
+    if(!relation_satisfied(h->inequalities,h->upper_bounds,false)||
+       !relation_satisfied(h->equalities,h->equality_values,true)) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled while checking the source relation"};
+        return one({DiagnosticCode::invalid_claim,"hybrid.optimal_face.source_relation",
+            "Solver anchor does not satisfy the supplied joint relation within the requested numerical policy"});
+    }
+
+    std::optional<OperationStopped> evaluation_stop;
+    auto check_residuals=[&](const PrimalResiduals& residuals)->Diagnostics {
+        if(residuals.rows.violation>policy.absolute_tolerance+policy.relative_tolerance*residuals.rows.scale||
+           residuals.variables.violation>policy.absolute_tolerance+policy.relative_tolerance*residuals.variables.scale)
+            return one({DiagnosticCode::invalid_claim,"hybrid.optimal_face.feasibility",
+                "Solver anchor does not satisfy the branch program within the requested numerical policy"});
+        return {};
+    };
+    const auto evaluation_diagnostics=std::visit([&]<class Program>(const Program& program)->Diagnostics {
+        if constexpr(std::is_same_v<Program,LinearProgram>) {
+            auto evaluated=optimization::evaluate_primal(program,*result.primal,policy,
+                {"hybrid-optimal-face-primal","1"});
+            if(const auto* errors=std::get_if<Diagnostics>(&evaluated)) return *errors;
+            const auto& checked=std::get<optimization::PrimalEvaluation>(evaluated);
+            return check_residuals(checked.residuals);
+        } else {
+            auto evaluated=optimization::evaluate_primal(program,*result.primal,policy,
+                {"hybrid-optimal-face-primal","1"});
+            if(const auto* stopped=std::get_if<OperationStopped>(&evaluated)) {
+                evaluation_stop=*stopped;
+                return {};
+            }
+            if(const auto* errors=std::get_if<Diagnostics>(&evaluated)) return *errors;
+            const auto& checked=std::get<optimization::ConvexPrimalEvaluation>(evaluated);
+            return check_residuals(checked.residuals);
+        }
+    },branch.program);
+    if(evaluation_stop) return *evaluation_stop;
+    if(!evaluation_diagnostics.empty()) return evaluation_diagnostics;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled after primal evaluation"};
+
+    Matrix equalities{h->equalities.rows(),dimension,{}};
+    Vector rhs;
+    rhs.reserve(h->equality_values.size());
+    for(std::size_t i=0;i<h->equality_values.size();++i) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled while copying the joint relation"};
+        rhs.push_back(h->equality_values[i]);
+    }
+    for(std::size_t i=0;i<h->equalities.rows();++i) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled while copying the joint relation"};
+        for(std::size_t j=0;j<dimension;++j) {
+            if(cancellation.stop_requested())
+                return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled while copying the joint relation"};
+            equalities.values.push_back(h->equalities(i,j));
+        }
+    }
+    std::string characterization;
+    auto append=[&](std::span<const double> row)->bool {
+        if(cancellation.stop_requested()) return false;
+        if(row.size()!=dimension) return false;
+        double value=0;
+        for(std::size_t j=0;j<dimension;++j) {
+            if(!std::isfinite(row[j])) return false;
+            value+=row[j]*(*result.primal)[j];
+        }
+        if(!std::isfinite(value)) return false;
+        equalities.values.insert(equalities.values.end(),row.begin(),row.end());
+        rhs.push_back(value);
+        ++equalities.rows;
+        return true;
+    };
+    bool rows_built=std::visit([&](const auto& objective)->bool {
+        using T=std::decay_t<decltype(objective)>;
+        if constexpr(std::is_same_v<T,LinearTerminal>) {
+            characterization="joint feasible relation intersected with the linear objective level through the solver anchor";
+            return append(objective.coefficients);
+        } else if constexpr(std::is_same_v<T,QuadraticTerminal>) {
+            if(objective.Q.rows!=dimension||objective.Q.cols!=dimension||objective.linear.size()!=dimension||
+               (dimension!=0&&dimension>std::numeric_limits<std::size_t>::max()/dimension)||
+               objective.Q.values.size()!=dimension*dimension)
+                return false;
+            characterization="joint feasible relation intersected with Hx=Ha and q'x=q'a for the convex quadratic objective";
+            for(std::size_t i=0;i<dimension;++i) {
+                Vector row(dimension);
+                for(std::size_t j=0;j<dimension;++j)
+                    row[j]=objective.Q.values[i*dimension+j]/2+objective.Q.values[j*dimension+i]/2;
+                if(!append(row)) return false;
+            }
+            return append(objective.linear);
+        } else {
+            if(objective.map.cols!=dimension||objective.target.size()!=objective.map.rows||
+               (dimension!=0&&objective.map.rows>std::numeric_limits<std::size_t>::max()/dimension)||
+               objective.map.values.size()!=objective.map.rows*dimension) return false;
+            characterization="joint feasible relation intersected with Lx=La for the residual-norm objective";
+            for(std::size_t i=0;i<objective.map.rows;++i) {
+                Vector row(dimension);
+                for(std::size_t j=0;j<dimension;++j) row[j]=objective.map.values[i*dimension+j];
+                if(!append(row)) return false;
+            }
+            return true;
+        }
+    },branch.lifted_objective);
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled; no candidate relation was published"};
+    if(!rows_built)
+        return one({DiagnosticCode::invalid_claim,"hybrid.optimal_face.equations",
+            "Objective optimal-face equations could not be constructed from the admitted dimensions and finite anchor"});
+    auto matrix=numeric::snapshot(equalities);
+    auto values=numeric::snapshot_vector(rhs);
+    if(!std::holds_alternative<numeric::MatrixView>(matrix)||!std::holds_alternative<numeric::VectorView>(values))
+        return one({DiagnosticCode::invalid_claim,"hybrid.optimal_face.arithmetic",
+            "Optimal-face equations contain nonfinite binary64 values"});
+    const auto& metadata=*branch.joint_relation.metadata();
+    auto relation=sets::make_h({metadata.id.value+":optimal-face-candidate",dimension,
+        metadata.coordinate_labels},{h->inequalities,h->upper_bounds,
+        std::get<numeric::MatrixView>(matrix),std::get<numeric::VectorView>(values)});
+    if(const auto* errors=std::get_if<Diagnostic>(&relation)) return one(*errors);
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled before publication"};
+    return HybridPathOptimalFaceCandidate{branch.path,std::get<sets::SetData>(std::move(relation)),
+        *result.primal,result,std::move(characterization),
+        {"the solver anchor is a true global minimizer of the convex lifted objective",
+         "the appended objective equations characterize every minimizer on the branch relation",
+         "family completeness and global cross-branch optimality remain unverified"}};
+}
+
 HybridPortfolioExecution execute_hybrid_path_programs(
     std::span<const HybridPathProgram> programs,
     const registry::PreparedProvider<registry::LPPort>& lp,

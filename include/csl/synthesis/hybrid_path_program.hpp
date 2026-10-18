@@ -77,6 +77,24 @@ using HybridPortfolioObjectiveAnalysis = std::variant<HybridPortfolioObjectiveBo
 HybridPortfolioObjectiveAnalysis compare_hybrid_portfolio_objective_bounds(
     std::span<const HybridPathProgram>, const HybridPortfolioExecution&, NumericalPolicy);
 
+// Builds the affine optimal-face equations implied by a feasible optimizer
+// anchor. This remains a candidate until the selected family verifier accepts
+// the anchor's global optimality and the face's complete coverage.
+struct HybridPathOptimalFaceCandidate {
+    model::HybridPath path;
+    sets::SetData relation;
+    Vector anchor;
+    ProgramResult solver_result;
+    std::string characterization;
+    std::vector<std::string> assumptions;
+};
+using HybridPathOptimalFaceResult = std::variant<HybridPathOptimalFaceCandidate,
+    Diagnostics, OperationStopped>;
+
+HybridPathOptimalFaceResult build_hybrid_path_optimal_face_candidate(
+    const HybridPathProgram&, const ProgramResult&, NumericalPolicy,
+    std::stop_token cancellation = {});
+
 HybridPortfolioExecution execute_hybrid_path_programs(
     std::span<const HybridPathProgram>,
     const registry::PreparedProvider<registry::LPPort>&,
