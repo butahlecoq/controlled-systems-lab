@@ -4,9 +4,10 @@ csl_add_library(csl_hull STATIC
   src/geometry/hull_reducer.cpp
   src/geometry/basis_reuse_reducer.cpp
   src/geometry/hull/ordered_reducer.cpp
-  src/geometry/hull/grouped_reducer.cpp)
+  src/geometry/hull/grouped_reducer.cpp
+  src/geometry/hull/recursive_reducer.cpp)
 
-target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry PRIVATE CSL::phase_one)
+target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry PRIVATE CSL::phase_one Threads::Threads)
 
 csl_add_library(csl_quickhull_2d STATIC src/geometry/hull/quickhull_2d.cpp)
 

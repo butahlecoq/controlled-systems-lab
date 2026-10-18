@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/geometry/hull_reducer.hpp>
+#include <string_view>
 
 namespace csl::geometry::detail {
 
@@ -11,7 +12,8 @@ HullReductionResult reduce_hull_in_order(const PointCloud&, LPWorkspace&,
 
 HullReductionResult reduce_hull_in_order(const PointCloud&, LPWorkspace&,
     const ExecutionContext&, const std::vector<std::size_t>& order,
-    std::vector<RemovalCertificate> prior_certificates);
+    std::vector<RemovalCertificate> prior_certificates,
+    std::string_view query_namespace = {});
 
 HullReductionResult finish_grouped_hull(const PointCloud&, LPWorkspace&,
     const ExecutionContext&, const std::vector<std::size_t>& retained,

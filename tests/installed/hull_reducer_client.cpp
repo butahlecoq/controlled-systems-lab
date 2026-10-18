@@ -58,5 +58,27 @@ int main() {
     if (basis_reduction.status != geometry::ReductionStatus::complete ||
         !basis_reduction.basis_reuse || basis_reduction.basis_reuse->basis_solves != 1 ||
         basis_reduction.retained.size() != 4) return 11;
+
+    auto recursive_provider_result = adapters::lp::make_highs_registration();
+    if (!std::holds_alternative<registry::Registration<registry::LPPort>>(recursive_provider_result)) return 12;
+    auto recursive_provider = std::get<registry::Registration<registry::LPPort>>(
+        std::move(recursive_provider_result));
+    registry::Registry<registry::HullReducerPort> recursive_registry;
+    if (recursive_registry.add(geometry::make_recursive_hull_reducer_registration(recursive_provider))) return 13;
+    auto recursive_prepared_result = registry::prepare_pipeline(registry::select(recursive_registry,
+        registry::Method{{"csl.hull.recursive-split-merge"}, std::nullopt}, cloud));
+    if (!std::holds_alternative<registry::PreparedPipeline<registry::HullReducerPort>>(recursive_prepared_result)) return 14;
+    auto recursive_prepared = std::get<registry::PreparedPipeline<registry::HullReducerPort>>(
+        std::move(recursive_prepared_result));
+    auto recursive_workspaces = recursive_prepared.create();
+    auto seed = optimization::make_linear_program({{{"installed-hull"},{"recursive-seed"}}, {}, 0.0,
+        {0, 0, {0}, {}, {}}, {}, {}});
+    if (!std::holds_alternative<LinearProgram>(seed)) return 15;
+    auto recursive_injected_lp = recursive_provider.factory(std::get<LinearProgram>(seed));
+    auto recursive_result = std::get<0>(recursive_workspaces)->run_with(ExecutionContext{}, *recursive_injected_lp);
+    if (!std::holds_alternative<geometry::HullReduction>(recursive_result)) return 16;
+    const auto& recursive_reduction = std::get<geometry::HullReduction>(recursive_result);
+    if (!recursive_reduction.recursive || recursive_reduction.retained.size() != 4 ||
+        recursive_reduction.recursive->leaf_nodes != 1) return 17;
     std::cout << "Installed hull client: each membership LP passed registered-provider admission\n";
 }
