@@ -3,9 +3,7 @@ name: Native C++20
 on:
   push:
     branches: [main]
-    paths: ['**', '!**/*.md', '!reports/algorithm-results/**', 'reports/algorithm-results/tooling/**']
   pull_request:
-    paths: ['**', '!**/*.md', '!reports/algorithm-results/**', 'reports/algorithm-results/tooling/**']
   workflow_dispatch:
 
 permissions:
@@ -18,7 +16,12 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  route:
+    uses: ./.github/workflows/validation-routing.yml
+
   release:
+    needs: route
+    if: needs.route.outputs.native == 'true'
     name: Release / ${{ matrix.name }}
     strategy:
       fail-fast: false
@@ -62,6 +65,8 @@ jobs:
         run: cmake --install tmp/native --config Release --prefix install
 
   sanitizers:
+    needs: route
+    if: needs.route.outputs.native == 'true'
     name: Linux GCC 13 / ASan and UBSan (public modules and consumers)
     runs-on: ubuntu-24.04
     env:
@@ -87,6 +92,8 @@ jobs:
       - run: ctest --test-dir tmp/sanitizers --output-on-failure --no-tests=error
 
   partial-package:
+    needs: route
+    if: needs.route.outputs.native == 'true'
     name: Linux GCC 13 / ${{ matrix.preset }} installed package
     runs-on: ubuntu-24.04
     strategy:
@@ -121,3 +128,27 @@ jobs:
           fi
       - run: cmake --build --preset ${{ matrix.preset }}
       - run: ctest --preset ${{ matrix.preset }}
+
+  native-status:
+    name: Native validation
+    if: always()
+    needs: [route, release, sanitizers, partial-package]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require routing and every requested native configuration
+        env:
+          ROUTE_RESULT: ${{ needs.route.result }}
+          NATIVE: ${{ needs.route.outputs.native }}
+          RELEASE_RESULT: ${{ needs.release.result }}
+          SANITIZERS_RESULT: ${{ needs.sanitizers.result }}
+          PACKAGE_RESULT: ${{ needs.partial-package.result }}
+        run: |
+          test "$ROUTE_RESULT" = success
+          if [ "$NATIVE" = true ]; then
+            test "$RELEASE_RESULT" = success
+            test "$SANITIZERS_RESULT" = success
+            test "$PACKAGE_RESULT" = success
+          else
+            test "$NATIVE" = false
+            echo 'Native inputs unchanged: six configurations intentionally not scheduled.'
+          fi
