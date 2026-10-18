@@ -15,9 +15,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import collector_common as common
+from opt12_fixtures import SCENARIOS, fixture_descriptions
 import report_data as data
-
-SCENARIOS = ("tiny-overhead", "small-reuse", "transfer-cost")
 
 
 def digest(value: bytes) -> str:
@@ -198,18 +197,7 @@ def main() -> int:
     except (UnicodeDecodeError, ValueError, KeyError) as error:
         parse_error = f"{type(error).__name__}: {error}"
 
-    fixtures = {
-        "tiny-overhead": {"rows": 1, "columns": 1, "objective": [-1.0], "coefficient": [1.0], "source_rhs": 1.0, "changed_rhs": 0.5, "expected_objective": -0.5},
-        "small-reuse": {"rows": 1, "columns": 40, "objective": [-1.0] * 40, "coefficient": [1.0] * 40, "source_rhs": 20.0, "changed_rhs": 19.0, "expected_objective": -19.0},
-        "transfer-cost": {"rows": 1, "columns": 100000,
-                          "source_objective": {"all_columns": 1.0, "column_0": -1.0},
-                          "changed_objective": {"all_columns": 1.0, "column_99999": -2.0},
-                          "coefficient": {"all_columns": 1.0}, "source_rhs": 50000.0,
-                          "changed_rhs": 49999.0, "expected_objective": -99998.0,
-                          "objective_change": "column 99999: -1 to -2"},
-    }
-    for fixture in fixtures.values():
-        fixture["sha256"] = digest(json.dumps(fixture, sort_keys=True, separators=(",", ":")).encode())
+    fixtures = fixture_descriptions()
     metadata = {
         "schema": "csl.opt12-cost-report/1", "created_utc": datetime.now(timezone.utc).isoformat(),
         "source_commit": head, "adapter": "csl.lp.highs", "adapter_version": "1.1.0+highs.1.11.0",

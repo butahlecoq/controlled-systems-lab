@@ -12,11 +12,11 @@ import statistics
 import zipfile
 from pathlib import Path
 
+from opt12_fixtures import SCENARIOS, fixture_descriptions
 
 EVIDENCE_FILES = ("raw-events.jsonl", "raw-stderr.txt", "release-build-log.txt",
                   "build-provenance.json", "executable.sha256", "measurement.exe",
                   "measurement-command.txt", "trials.csv")
-SCENARIOS = ("tiny-overhead", "small-reuse", "transfer-cost")
 MODES = ("cold", "warm")
 TIMED_FIELDS = ("model_load_seconds", "basis_transfer_seconds", "solve_seconds")
 
@@ -96,6 +96,10 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
             raise ValueError(f"input fixture hash is invalid: {scenario}")
         if not isinstance(fixture.get("objective_change", "unchanged"), str):
             raise ValueError(f"input fixture objective description is invalid: {scenario}")
+    canonical_fixtures = fixture_descriptions()
+    for scenario in SCENARIOS:
+        if fixtures[scenario] != canonical_fixtures[scenario]:
+            raise ValueError(f"input fixture description differs from canonical scenario: {scenario}")
     for trial in trials:
         if not isinstance(trial, dict) or trial.get("schema") != "csl.opt12-cost-trial/1" or trial.get("status") != "verified":
             raise ValueError("trial schema or numerical verification status is invalid")
