@@ -6,6 +6,7 @@
 #include "../../../src/geometry/conversion/exact_h_interval.hpp"
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <barrier>
 #include <bit>
 #include <cmath>
@@ -186,10 +187,12 @@ TEST_CASE("bounded H to V conversion retains the square under independent checks
     CHECK(satisfies(h_out,inside)); CHECK(satisfies(h_out,edge)); CHECK_FALSE(satisfies(h_out,outside));
 }
 
-TEST_CASE("independent Qhull workspaces convert separate bounded inputs concurrently") {
-    const auto make_worker = [](SetHandle input, std::string tag) {
+TEST_CASE("independent Qhull workspaces reach the native call boundary together") {
+    const auto make_worker = [](SetHandle input, std::string tag, const std::function<void()>& before_native_call) {
         const auto lp = take(make_highs_registration());
-        auto conversion = take(make_qhull_registration(lp));
+        QhullOptions options;
+        options.before_native_call = before_native_call;
+        auto conversion = take(make_qhull_registration(lp, std::move(options)));
         Registry<ConversionPort> conversions;
         REQUIRE_FALSE(conversions.add(std::move(conversion)).has_value());
         auto req = request(std::move(input), "csl.polyhedron.v", std::move(tag));
@@ -226,22 +229,26 @@ TEST_CASE("independent Qhull workspaces convert separate bounded inputs concurre
     };
 
     for (std::size_t iteration = 0; iteration < 16; ++iteration) {
-        auto [first_request, first_worker] = make_worker(first_input, "concurrent-square-" + std::to_string(iteration));
+        std::barrier native_call_gate{2};
+        std::atomic<std::size_t> native_call_entries{};
+        const auto before_native_call = [&] {
+            native_call_entries.fetch_add(1, std::memory_order_relaxed);
+            native_call_gate.arrive_and_wait();
+        };
+        auto [first_request, first_worker] = make_worker(first_input,
+            "concurrent-square-" + std::to_string(iteration), before_native_call);
         auto [second_request, second_worker] = make_worker(second_input,
-            "concurrent-translated-square-" + std::to_string(iteration));
-        std::barrier start_together{3};
+            "concurrent-translated-square-" + std::to_string(iteration), before_native_call);
         auto first_future = std::async(std::launch::async, [&] {
-            start_together.arrive_and_wait();
             return first_worker->run(context());
         });
         auto second_future = std::async(std::launch::async, [&] {
-            start_together.arrive_and_wait();
             return second_worker->run(context());
         });
-        start_together.arrive_and_wait();
 
         const auto first_outcome = first_future.get();
         const auto second_outcome = second_future.get();
+        CHECK(native_call_entries.load(std::memory_order_relaxed) == 2);
         REQUIRE(std::holds_alternative<OperationResult>(first_outcome));
         REQUIRE(std::holds_alternative<OperationResult>(second_outcome));
         check_square(std::get<OperationResult>(first_outcome), first_request, 0, 1, 0, 1);
