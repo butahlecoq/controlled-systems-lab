@@ -234,7 +234,7 @@ TEST_CASE("hybrid portfolio builder returns every parallel edge branch transacti
     CHECK(std::holds_alternative<Diagnostics>(limited));
 }
 
-TEST_CASE("hybrid portfolio builder propagates cancellation to path enumeration") {
+TEST_CASE("hybrid portfolio builder rejects a pre-cancelled request") {
     auto system=example_system();
     std::stop_source source;
     source.request_stop();
