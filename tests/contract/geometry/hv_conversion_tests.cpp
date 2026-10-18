@@ -141,11 +141,12 @@ TEST_CASE("ambient-one checker fails closed when exact H coverage exceeds finite
 }
 
 TEST_CASE("planar rectangle certificate rejects an omitted corner and oblique rows") {
-    const auto h=take(sets::from_handle(square_h()));
+    const auto square=square_h();
+    const auto h=take(sets::from_handle(square));
     const auto omitted=take(sets::from_handle(make_v_handle("three-corners",2,
         Matrix{3,2,{0,0, 1,0, 0,1}})));
-    const auto& h_rep=std::get<sets::HRepresentation>(h.representation());
-    const auto& v_rep=std::get<sets::VRepresentation>(omitted.representation());
+    const auto h_rep=std::get<sets::HRepresentation>(h.representation());
+    const auto v_rep=std::get<sets::VRepresentation>(omitted.representation());
     const auto missing_corner=geometry::detail::certify_h_rectangle(h_rep,v_rep);
     CHECK(std::holds_alternative<std::string>(missing_corner));
 
