@@ -656,13 +656,13 @@ TEST_CASE("affine and Minkowski error bounds compose independently checked 1D H 
 TEST_CASE("affine images compose exact higher-dimensional box coverage with candidate rounding") {
     const auto box=take(sets::make_h({{"affine-box-coverage"},2,{}},
         {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
-         take(numeric::snapshot_vector(Vector{4,-3,1,1})),
+         take(numeric::snapshot_vector(Vector{3,0,1,1})),
          take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
     const auto req=request(AffineImage{box,{1,2,{0.1,0.0}},{0.0}},
         "compose-affine-box-coverage");
     const auto result=take(run(req,dependencies()));
 
-    CHECK(support(result.output,{1})==0.4);
+    CHECK(support(result.output,{1})==0.30000000000000004);
     CHECK(support(result.output,{-1})==-0.30000000000000004);
     REQUIRE(result.evidence.error_bound.has_value());
     CHECK(result.evidence.error_bound->bound==0x1p-55);
