@@ -39,6 +39,28 @@ model::HybridPath example_path() {
     return {{{"source"},{"target"}},{{"switch"}}};
 }
 
+std::pair<model::HybridSystem,model::HybridRequest> variable_size_parallel_profile() {
+    auto source=model::HybridMode{{"source"},1,0,{"x"},{}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+    source.control_sets={UniversalSet{0}};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    auto small=model::HybridMode{{"small"},1,0,{"x"},{}};
+    small.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+    small.control_sets={UniversalSet{0}};
+    small.invariants={UniversalSet{1},UniversalSet{1}};
+    auto large=model::HybridMode{{"large"},2,0,{"x","y"},{}};
+    large.flow=LinearStage{Matrix{2,2,{1,0,0,1}},Matrix{2,0,{}},Matrix{2,0,{}},Vector{0,0}};
+    large.control_sets={UniversalSet{0}};
+    large.invariants={UniversalSet{2},UniversalSet{2}};
+    model::HybridSystem system{1,{source,small,large},
+        {{{"to-small"},{"source"},{"small"},{UniversalSet{1}},{universal("small-reset",2)}},
+         {{"to-large"},{"source"},{"large"},{UniversalSet{1}},{universal("large-reset",3)}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"small"},{"large"}},
+        {{{"small"},LinearTerminal{{1},0},"cost","u"},
+         {{"large"},LinearTerminal{{1,0},0},"cost","u"}}};
+    return {std::move(system),std::move(request)};
+}
+
 SetHandle interval(std::string id,double lower,double upper) {
     auto matrix=numeric::snapshot(Matrix{2,1,{-1,1}});
     auto bounds=numeric::snapshot_vector(Vector{-lower,upper});
@@ -210,6 +232,14 @@ TEST_CASE("hybrid portfolio builder returns every parallel edge branch transacti
     const auto limited=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
         {1,8},{4,64,1024});
     CHECK(std::holds_alternative<Diagnostics>(limited));
+}
+
+TEST_CASE("hybrid portfolio builder rolls back after a later dimension limit failure") {
+    auto [system,request]=variable_size_parallel_profile();
+    const auto built=build_hybrid_portfolio_programs(system,request,{"hybrid-problem"},
+        {1,8},{3,64,4096});
+    REQUIRE(std::holds_alternative<Diagnostics>(built));
+    CHECK(std::get<Diagnostics>(built)[0].field=="hybrid.relation.variables");
 }
 
 TEST_CASE("hybrid branch execution retains path and solver provenance on rejection") {

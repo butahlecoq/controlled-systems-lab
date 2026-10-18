@@ -74,7 +74,7 @@ struct HybridRequest {
     std::vector<HybridModeObjective> terminal_objectives;
 };
 
-using HybridPathEnumeration = std::variant<std::vector<HybridPath>, Diagnostic>;
+using HybridPathEnumeration = std::variant<std::vector<HybridPath>, Diagnostic, OperationStopped>;
 
 struct HybridEnumerationLimits {
     std::size_t max_horizon;
@@ -92,7 +92,8 @@ using HybridRelationResult = std::variant<sets::SetData, Diagnostic, OperationSt
 // request is rejected at the caller's limits; a truncated family is never returned.
 HybridPathEnumeration enumerate_hybrid_paths(
     const HybridSystem&, const HybridModeId& initial_mode,
-    const std::vector<HybridModeId>& allowed_terminal_modes, HybridEnumerationLimits);
+    const std::vector<HybridModeId>& allowed_terminal_modes, HybridEnumerationLimits,
+    std::stop_token cancellation = {});
 
 Diagnostics check_hybrid_profile(const HybridSystem&, const HybridRequest&);
 

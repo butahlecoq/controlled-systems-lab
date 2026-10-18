@@ -92,8 +92,9 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::Hybrid
     const auto profile_errors=model::check_hybrid_profile(system,request);
     if(!profile_errors.empty()) return profile_errors;
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
-        request.allowed_terminal_modes,enumeration_limits);
+        request.allowed_terminal_modes,enumeration_limits,cancellation);
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
+    if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
     std::vector<HybridPathProgram> programs;
     programs.reserve(paths.size());

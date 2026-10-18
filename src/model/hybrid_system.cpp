@@ -90,7 +90,9 @@ bool unique_nonempty_labels(const std::vector<T>& labels, std::size_t dimension)
 
 HybridPathEnumeration enumerate_hybrid_paths(const HybridSystem& system,
     const HybridModeId& initial_mode, const std::vector<HybridModeId>& allowed_terminal_modes,
-    HybridEnumerationLimits limits) {
+    HybridEnumerationLimits limits,std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid path enumeration was cancelled before validation"};
     if (system.horizon == std::numeric_limits<std::size_t>::max())
         return invalid("hybrid.horizon", "Horizon is too large to represent T+1 state stages");
     if (system.horizon > limits.max_horizon)
@@ -98,6 +100,8 @@ HybridPathEnumeration enumerate_hybrid_paths(const HybridSystem& system,
             "The requested horizon exceeds the caller's admitted stage limit"};
     std::unordered_set<std::string> mode_ids;
     for (const auto& mode : system.modes) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid path enumeration was cancelled while validating modes"};
         if (mode.id.value.empty() || !mode_ids.insert(mode.id.value).second)
             return invalid("hybrid.modes", "Mode IDs must be unique and nonempty");
     }
@@ -106,6 +110,8 @@ HybridPathEnumeration enumerate_hybrid_paths(const HybridSystem& system,
 
     std::unordered_set<std::string> edge_ids;
     for (const auto& edge : system.edges) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid path enumeration was cancelled while validating edges"};
         if (edge.id.value.empty() || !edge_ids.insert(edge.id.value).second)
             return invalid("hybrid.edges", "Transition-edge IDs must be unique and nonempty");
         if (!find_mode(system, edge.source) || !find_mode(system, edge.target))
@@ -114,6 +120,8 @@ HybridPathEnumeration enumerate_hybrid_paths(const HybridSystem& system,
 
     std::unordered_set<std::string> terminal_ids;
     for (const auto& mode : allowed_terminal_modes) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid path enumeration was cancelled while validating terminal modes"};
         if (!find_mode(system, mode))
             return invalid("hybrid.terminal_modes", "Each allowed terminal mode must be in the system catalogue");
         if (!terminal_ids.insert(mode.value).second)
@@ -125,9 +133,12 @@ HybridPathEnumeration enumerate_hybrid_paths(const HybridSystem& system,
     std::vector<std::unordered_set<std::string>> can_reach(system.horizon+1);
     can_reach[0] = terminal_ids;
     for (std::size_t remaining = 1; remaining <= system.horizon; ++remaining) {
-        for (const auto& edge : system.edges)
+        for (const auto& edge : system.edges) {
+            if(cancellation.stop_requested())
+                return OperationStopped{StopReason::cancelled,"Hybrid path enumeration was cancelled while computing reachable modes"};
             if (can_reach[remaining-1].contains(edge.target.value))
                 can_reach[remaining].insert(edge.source.value);
+        }
     }
     if (!can_reach[system.horizon].contains(initial_mode.value))
         return std::vector<HybridPath>{};
@@ -137,6 +148,8 @@ HybridPathEnumeration enumerate_hybrid_paths(const HybridSystem& system,
     struct Frame { std::size_t stage; HybridModeId mode; std::size_t next_edge; };
     std::vector<Frame> stack{{0,initial_mode,0}};
     while (!stack.empty()) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid path enumeration stopped; no partial path list was returned"};
         auto& frame = stack.back();
         if (frame.stage == system.horizon) {
             if (terminal_ids.contains(frame.mode.value)) {

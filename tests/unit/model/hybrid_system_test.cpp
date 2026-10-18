@@ -145,6 +145,15 @@ TEST_CASE("path limit is reported instead of returning a truncated branch family
     CHECK(std::get<csl::Diagnostic>(result).field == "hybrid.paths.limit");
 }
 
+TEST_CASE("path enumeration cancellation returns no partial paths") {
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    const auto result=enumerate_hybrid_paths(parallel_edges(),{"idle"},{{"active"}},
+        {4,8},cancellation.get_token());
+    REQUIRE(std::holds_alternative<csl::OperationStopped>(result));
+    CHECK(std::get<csl::OperationStopped>(result).reason==csl::StopReason::cancelled);
+}
+
 TEST_CASE("horizon limits reject the request before any path is returned") {
     const auto result = enumerate_hybrid_paths(parallel_edges(), {"idle"}, {{"active"}}, {0,8});
 
