@@ -54,7 +54,7 @@ Use [skill routing](../../agents/skill-routing.md) to select one workflow owner 
 
 ## Ticket index
 
-GitHub is the working tracker. All 94 issues are published: 61 implementation, contract, artifact or experiment tasks, 23 independent test expansions and 10 code-review tasks. The [machine-readable manifest](backlog.json) records stable keys, GitHub IDs, full prerequisites, minimal native blocking edges, proposed ownership and test IDs. Local ticket mirrors keep the same acceptance checklist.
+GitHub is the working tracker. The original 94-ticket plan remains published; later extension and contract tickets are tracked in the same manifest. The current manifest contains 96 tickets: 63 delivery tasks, 23 independent test expansions and 10 code-review tasks. The [machine-readable manifest](backlog.json) records stable keys, GitHub IDs, full prerequisites, minimal native blocking edges, proposed ownership and test IDs. Local ticket mirrors keep the same acceptance checklist.
 
 Only [CORE-01 #11](https://github.com/butahlecoq/controlled-systems-lab/issues/11) is initially dependency-ready. Re-evaluate labels as prerequisites close. Existing research issues remain open and were not rewritten. Native GitHub links use 183 nonredundant edges with the same transitive prerequisite relation as the complete graph; issue descriptions retain the full list.
 
@@ -174,6 +174,7 @@ Only [CORE-01 #11](https://github.com/butahlecoq/controlled-systems-lab/issues/1
 | [EXT-04: Add initial-set semantics and observation-based control workflows](tickets/EXT-04.md) | [#68](https://github.com/butahlecoq/controlled-systems-lab/issues/68) | implementation | MODEL-02, SYN-06, EXT-01 |
 | [EXT-03: Add temporal-constraint strategies and exact memory lifts](tickets/EXT-03.md) | [#73](https://github.com/butahlecoq/controlled-systems-lab/issues/73) | implementation | MODEL-02, SYN-04, #9 |
 | [EXT-02: Preserve all optimal branches for finite and mixed control domains](tickets/EXT-02.md) | [#76](https://github.com/butahlecoq/controlled-systems-lab/issues/76) | implementation | MODEL-02, SYN-05, SYN-06, EXT-01 |
+| [EXT-07: Define and implement hybrid-system profiles](tickets/EXT-07.md) | [#156](https://github.com/butahlecoq/controlled-systems-lab/issues/156) | implementation | Design gate; coordinate with EXT-04, EXT-03, EXT-02 |
 | [TEST-21: Expand declared extension profiles with independent quantifier oracles](tickets/TEST-21.md) | [#81](https://github.com/butahlecoq/controlled-systems-lab/issues/81) | test | EXT-01, EXT-02, EXT-03, EXT-04, EXT-05, EXT-06, OPT-10 |
 | [REVIEW-09: Review extension quantifiers, information patterns and native scalability](tickets/REVIEW-09.md) | [#104](https://github.com/butahlecoq/controlled-systems-lab/issues/104) | review | TEST-21, REVIEW-08 |
 
@@ -241,6 +242,7 @@ These paths are planning proposals, not existing APIs. CORE-01/02 settle names. 
 | SYN-03 | `src/synthesis/reachability_strategy.cpp`, `src/synthesis/control_recovery.cpp` |
 | SYN-04 | `src/synthesis/joint_optimization_strategy.cpp` |
 | EXT-04 | `src/estimation/`, `src/controllers/`, `docs/contracts/information-patterns.md` |
+| EXT-07 | `include/csl/model/hybrid_system.hpp`, `src/model/hybrid_system.cpp`, `docs/contracts/hybrid-systems.md`, `tests/unit/model/hybrid_system_test.cpp`, `tests/reference/hybrid_mode_sequence_oracle.py` |
 | TEST-11 | `tests/unit/synthesis/terminal_minimizers_test.cpp`, `tests/fixtures/synthesis/terminal_minimizer_cases.json` |
 | REVIEW-02 | `docs/reviews/geometry-and-backend-substitution.md` |
 | SYN-05 | `src/synthesis/witness_selector.cpp` |

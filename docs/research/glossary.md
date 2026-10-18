@@ -31,6 +31,10 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Stage cost | Criterion accumulated at intermediate steps |
 | Phase constraint | Historical term for a state constraint; avoid confusion with phase in multiphase optimization |
 | Finite-action domain | A discrete catalogue of allowed controls; its convex hull is a relaxation |
+| Hybrid mode | A discrete operating regime with its own dynamics and admissible continuous controls; it is distinct from a finite control action |
+| Mode path | An ordered sequence of mode identities followed by a hybrid trajectory; parallel transition edges are distinguished separately |
+| Guard | A condition on the pre-transition state that enables a particular mode transition |
+| Reset relation | A relation from the pre-transition state to the post-transition state applied when an enabled transition fires |
 | Mixed-integer control | Controls combining continuous values with integer/discrete decisions |
 | Uncertainty set | Admissible values or models; distinguish deterministic sets from confidence regions |
 | Stagewise independent uncertainty | Cartesian uncertainty admissibility over stages; a set assumption, not necessarily probabilistic independence |
