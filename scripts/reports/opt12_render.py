@@ -190,10 +190,11 @@ def render(records: Path, out: Path) -> dict:
                        for mode in MODES}
         if median_work["warm"] > median_work["cold"]:
             cost_scenarios.append(scenario)
-    cost_text = (f"Warm reuse records higher median aggregate native work in: {', '.join(cost_scenarios)}. "
-                 "Simplex iteration counts are reported separately."
+    cost_text = (f"Performance interpretation is inconclusive. Warm reuse records higher median aggregate native work in: {', '.join(cost_scenarios)}, "
+                 "but the observed ranges overlap and no separate source-mapped limiter profile was collected. "
+                 "Simplex iteration counts are reported separately. The measurements do not establish that warm reuse is slower."
                  if cost_scenarios
-                 else "This run does not establish higher median aggregate native work for warm reuse in any case.")
+                 else "Performance interpretation is inconclusive: these measurements do not establish a warm-reuse advantage, and no separate source-mapped limiter profile was collected.")
     summary_html = "\n".join("<tr>" + "".join(f"<td>{html.escape(str(row[key]))}</td>" for key in
         ("scenario", "mode", "n", "wall_ns", "load_s", "basis_s", "solve_s", "native_work_s", "iterations")) + "</tr>" for row in rows_summary)
     trial_html = "\n".join(f'<tr><td>{row["scenario"]}</td><td>{row["pair"]}</td><td>{row["mode"]}</td><td>{row.get("cache_state")}</td><td>{row.get("basis_accepted")}</td><td>{row["wall_ns"]}</td><td>{row.get("simplex_iterations")}</td><td><details><summary>raw diagnostics</summary><pre>{html.escape(row.get("diagnostics", ""))}</pre></details></td></tr>' for row in rows)
