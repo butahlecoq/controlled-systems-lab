@@ -194,6 +194,23 @@ TEST_CASE("hybrid branch execution records cancellation without invoking a provi
     CHECK_FALSE(report.branches[0].result.has_value());
 }
 
+TEST_CASE("hybrid branch execution records an expired deadline before provider preparation") {
+    auto built=build_hybrid_path_program(example_system(),example_request(),example_path(),
+        {"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(built));
+    const std::array<HybridPathProgram,1> programs{std::get<HybridPathProgram>(std::move(built))};
+    auto factory_calls=std::make_shared<int>(0);
+    const ExecutionContext context{{},{},std::chrono::steady_clock::now()-std::chrono::milliseconds(1),
+        {1e-8,1e-8},{},{}};
+    const auto report=execute_hybrid_path_programs(programs,lp_provider(nullptr,factory_calls),
+        convex_provider(),context);
+    REQUIRE(report.branches.size()==1);
+    CHECK_FALSE(report.all_supplied_branches_completed);
+    CHECK(report.branches[0].termination==Termination::resource_limit);
+    CHECK(report.branches[0].providers.empty());
+    CHECK(*factory_calls==0);
+}
+
 TEST_CASE("hybrid branch execution observes cancellation after provider preparation") {
     auto first=build_hybrid_path_program(example_system(),example_request(),example_path(),
         {"first-problem"},{16,64,1024});
