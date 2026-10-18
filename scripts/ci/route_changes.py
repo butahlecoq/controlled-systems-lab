@@ -8,10 +8,11 @@ import subprocess
 
 
 # Ownership map: educational output only; neither file is a named CTest input
-# or imported by a native smoke checker/collector. CSS, legends and links are
-# embedded in visual_examples.py. Add files only after reviewing their consumers.
+# or imported by a native smoke checker/collector. Add files only after reviewing
+# their consumers; the stylesheet is copied into the educational site.
 PRESENTATION_FILES = {
     "scripts/reports/visual_examples.py",
+    "scripts/reports/visual_examples.css",
     "tests/reporting/test_visual_examples.py",
 }
 SAVED_REPORTS = "reports/algorithm-results/"

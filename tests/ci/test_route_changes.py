@@ -62,6 +62,11 @@ class RoutingTests(unittest.TestCase):
         self.commit()
         self.assertEqual(self.route(), ("false", "true"))
 
+    def test_gallery_stylesheet_alone_uses_complete_reporting_only(self):
+        self.write("scripts/reports/visual_examples.css", "/* gallery style */")
+        self.commit()
+        self.assertEqual(self.route(), ("false", "true"))
+
     def test_coupled_and_unknown_executables_keep_both_gates(self):
         for name in ("scripts/reports/collector_common.py", "scripts/reports/geo07/check_smoke.py",
                      "scripts/reports/visual_examples_new.py", "tests/reporting/test_render.py",

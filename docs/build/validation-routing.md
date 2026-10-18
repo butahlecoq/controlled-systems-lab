@@ -10,7 +10,7 @@ empty diffs, invalid event data and unavailable history request both gates.
 
 | Owner / changed paths | Native matrix | Full reporting validation and staging |
 | --- | --- | --- |
-| Educational renderer `scripts/reports/visual_examples.py` (embedded CSS, legends, hyperlinks) and its `tests/reporting/test_visual_examples.py` | Skip | Run |
+| Educational renderer `scripts/reports/visual_examples.py` (legends, hyperlinks), its `scripts/reports/visual_examples.css` stylesheet and `tests/reporting/test_visual_examples.py` | Skip | Run |
 | Saved `reports/algorithm-results/` bundles, except `tooling/` | Skip | Run |
 | Other Markdown documentation | Skip | Skip |
 | Everything else, including unknown executable files | Run | Run |
@@ -56,7 +56,7 @@ Run the event/history tests locally with:
 python -m unittest discover -s tests/ci -p 'test_*.py'
 ```
 
-Tests cover presentation, coupled collectors and smoke checkers, mixed files,
+Tests cover presentation including stylesheet-only edits, coupled collectors and smoke checkers, mixed files,
 unknown executable paths, main push/manual events, missing history, renames,
 PR merge bases, saved bundles and Markdown. Actual workflow runs remain the
 evidence for job scheduling and status propagation.
