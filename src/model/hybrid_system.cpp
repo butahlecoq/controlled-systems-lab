@@ -629,7 +629,8 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& sys
             std::copy(value.coefficients.begin(),value.coefficients.end(),coefficients.begin()+static_cast<std::ptrdiff_t>(terminal_offset));
             return TerminalObjective{LinearTerminal{std::move(coefficients),value.offset}};
         } else if constexpr(std::is_same_v<T,QuadraticTerminal>) {
-            if(width!=0 && width>std::numeric_limits<std::size_t>::max()/width || width*width>limits.max_matrix_elements)
+            if((width!=0 && width>std::numeric_limits<std::size_t>::max()/width) ||
+               width*width>limits.max_matrix_elements)
                 return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.storage","Lifted quadratic objective exceeds its storage limit"};
             Matrix q{width,width,Vector(width*width)};
             Vector linear(width);
