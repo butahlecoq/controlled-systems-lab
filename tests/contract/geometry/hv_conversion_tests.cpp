@@ -6,13 +6,15 @@
 #include "../../../src/geometry/conversion/exact_h_interval.hpp"
 #include <algorithm>
 #include <array>
-#include <atomic>
-#include <barrier>
 #include <bit>
+#include <chrono>
 #include <cmath>
+#include <condition_variable>
 #include <cstdint>
 #include <future>
 #include <limits>
+#include <mutex>
+#include <stdexcept>
 #include <string>
 
 using namespace csl;
@@ -229,11 +231,18 @@ TEST_CASE("independent Qhull workspaces reach the native call boundary together"
     };
 
     for (std::size_t iteration = 0; iteration < 16; ++iteration) {
-        std::barrier native_call_gate{2};
-        std::atomic<std::size_t> native_call_entries{};
+        std::mutex native_call_mutex;
+        std::condition_variable native_call_ready;
+        std::size_t native_call_entries{};
         const auto before_native_call = [&] {
-            native_call_entries.fetch_add(1, std::memory_order_relaxed);
-            native_call_gate.arrive_and_wait();
+            std::unique_lock lock(native_call_mutex);
+            ++native_call_entries;
+            native_call_ready.notify_all();
+            if (!native_call_ready.wait_for(lock, std::chrono::seconds(2), [&] {
+                    return native_call_entries == 2;
+                })) {
+                throw std::runtime_error("The concurrent conversion did not reach the native Qhull call boundary.");
+            }
         };
         auto [first_request, first_worker] = make_worker(first_input,
             "concurrent-square-" + std::to_string(iteration), before_native_call);
@@ -248,7 +257,7 @@ TEST_CASE("independent Qhull workspaces reach the native call boundary together"
 
         const auto first_outcome = first_future.get();
         const auto second_outcome = second_future.get();
-        CHECK(native_call_entries.load(std::memory_order_relaxed) == 2);
+        CHECK(native_call_entries == 2);
         REQUIRE(std::holds_alternative<OperationResult>(first_outcome));
         REQUIRE(std::holds_alternative<OperationResult>(second_outcome));
         check_square(std::get<OperationResult>(first_outcome), first_request, 0, 1, 0, 1);
