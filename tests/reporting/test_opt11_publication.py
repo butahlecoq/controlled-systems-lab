@@ -54,8 +54,11 @@ class Opt11PublicationTests(unittest.TestCase):
         raw_path.write_bytes(raw)
         stderr = b""
         build_log = b"OPT-11 test fixture build log\n"
+        compiler_source = (b'set(CMAKE_CXX_COMPILER_ID "test")\n'
+                           b'set(CMAKE_CXX_COMPILER_VERSION "test")\n')
         (collection / "raw-stderr.txt").write_bytes(stderr)
         (collection / "release-build-log-sanitized.txt").write_bytes(build_log)
+        (collection / "compiler-identification.cmake").write_bytes(compiler_source)
         validation = builder.validate_stream(raw_path, "measurement")
         (collection / "functional-validation.json").write_text(
             json.dumps(validation, sort_keys=True, indent=2) + "\n", encoding="utf-8")
@@ -80,11 +83,13 @@ class Opt11PublicationTests(unittest.TestCase):
                         "observed_native_threads": None},
             "environment": {"os": "test", "machine": "test", "logical_processors": 1,
                             "python": "test", "concurrent_work_note": "isolated publisher test",
-                            "observed_native_threads": None},
+                            "observed_native_threads": None,
+                            "machine_load": {"before": {}, "after": {}, "process_cpu_deltas": []}},
             "release_project": {"generator": "test", "configuration": "Release",
                                 "language_standard": "stdcpp20", "optimization": "MaxSpeed",
                                 "preprocessor_definitions": "NDEBUG", "compiler_id": "test",
-                                "compiler_version": "test", "ndebug": True},
+                                "compiler_version": "test", "compiler_path_sha256": "c" * 64,
+                                "ndebug": True},
             "protocol": {"warmups_per_fixture": 1, "measured_pairs_per_fixture": 6,
                          "unavailable": []},
             "description": description, "executable_sha256": "b" * 64,
@@ -92,6 +97,8 @@ class Opt11PublicationTests(unittest.TestCase):
             "raw_stdout_sha256": hashlib.sha256(raw).hexdigest(),
             "raw_stderr_sha256": hashlib.sha256(stderr).hexdigest(),
             "sanitized_build_log_sha256": hashlib.sha256(build_log).hexdigest(),
+            "compiler_identification_sha256": hashlib.sha256(compiler_source).hexdigest(),
+            "compiler_identification_source_sha256": "d" * 64,
             "validation": validation,
         }
         (collection / "collection.json").write_text(
