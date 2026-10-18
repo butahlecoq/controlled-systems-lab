@@ -48,6 +48,23 @@ void cost(const ProgramResult& result, const LinearProgram& program, double expe
     CHECK_FALSE(result.objective.lower.has_value());
     CHECK_FALSE(result.objective.upper.has_value());
 }
+ProgramResult cold_result(const LinearProgram& program) {
+    const auto registration=accepted(make_highs_registration());
+    auto worker=registration.factory(program);
+    return accepted(worker->solve(program,context()));
+}
+void compare_optimal(const ProgramResult& cold,const ProgramResult& warm,
+                     const LinearProgram& program,double expected) {
+    CHECK(cold.termination==warm.termination);
+    CHECK(cold.outcome.value==warm.outcome.value);
+    cost(cold,program,expected);
+    cost(warm,program,expected);
+    REQUIRE(cold.primal.has_value());
+    REQUIRE(warm.primal.has_value());
+    const auto cold_objective=accepted(evaluate_primal(program,*cold.primal,{1e-8,1e-8},{{"test.oracle"},"1"})).objective;
+    const auto warm_objective=accepted(evaluate_primal(program,*warm.primal,{1e-8,1e-8},{{"test.oracle"},"1"})).objective;
+    CHECK(cold_objective==doctest::Approx(warm_objective));
+}
 }
 
 TEST_CASE("registered native triangle reports literal optimum and independent residuals") {
@@ -96,15 +113,15 @@ TEST_CASE("cross-query warm starts are optional, workspace-local, dimension-chec
     const auto changed=accepted(warm->solve(changed_row,context()));
     INFO(changed.raw_diagnostics);
     CHECK(changed.outcome.value==MathematicalOutcome::optimal);
-    cost(changed,changed_row,-4);
+    compare_optimal(cold_result(changed_row),changed,changed_row,-4);
     CHECK(changed.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);
     CHECK(changed.raw_diagnostics.find("warm_start.accepted=true")!=std::string::npos);
     const auto bounded=accepted(warm->solve(changed_bound,context()));
     CHECK(bounded.outcome.value==MathematicalOutcome::optimal);
-    cost(bounded,changed_bound,-3);
+    compare_optimal(cold_result(changed_bound),bounded,changed_bound,-3);
     const auto dimension_change=accepted(warm->solve(changed_columns,context()));
     CHECK(dimension_change.outcome.value==MathematicalOutcome::optimal);
-    cost(dimension_change,changed_columns,-6);
+    compare_optimal(cold_result(changed_columns),dimension_change,changed_columns,-6);
     CHECK(dimension_change.raw_diagnostics.find("warm_start.cache_state=invalidated_dimension_change")!=std::string::npos);
     CHECK(dimension_change.raw_diagnostics.find("warm_start.fallback=cold_no_compatible_basis")!=std::string::npos);
     CHECK(dimension_change.raw_diagnostics.find("warm_start.setup_seconds=")!=std::string::npos);
@@ -113,7 +130,7 @@ TEST_CASE("cross-query warm starts are optional, workspace-local, dimension-chec
     auto coefficient_workspace=registration.factory(first);
     cost(accepted(coefficient_workspace->solve(first,context())),first,-2);
     const auto coefficient_result=accepted(coefficient_workspace->solve(changed_coefficient,context()));
-    cost(coefficient_result,changed_coefficient,-2);
+    compare_optimal(cold_result(changed_coefficient),coefficient_result,changed_coefficient,-2);
     CHECK(coefficient_result.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);
     CHECK(coefficient_result.raw_diagnostics.find("warm_start.accepted=true")!=std::string::npos);
 
@@ -152,14 +169,19 @@ TEST_CASE("warm starts preserve independently checked results across a degenerat
     cost(first,degenerate,-1);
     const auto second=accepted(worker->solve(changed_rows,context()));
     INFO(second.raw_diagnostics);
-    cost(second,changed_rows,-0.5);
+    compare_optimal(cold_result(changed_rows),second,changed_rows,-0.5);
     CHECK(second.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);
     CHECK(second.raw_diagnostics.find("warm_start.setup_seconds=")!=std::string::npos);
     CHECK(second.raw_diagnostics.find("native.load_seconds=")!=std::string::npos);
     CHECK(second.raw_diagnostics.find("native.solve_seconds=")!=std::string::npos);
     const auto infeasible_result=accepted(worker->solve(infeasible,context()));
+    const auto cold_infeasible=cold_result(infeasible);
     CHECK(infeasible_result.termination==Termination::completed);
     CHECK(infeasible_result.outcome.value==MathematicalOutcome::infeasible);
+    CHECK(cold_infeasible.termination==infeasible_result.termination);
+    CHECK(cold_infeasible.outcome.value==infeasible_result.outcome.value);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(cold_infeasible.outcome.support));
+    CHECK(verify_linear_infeasibility_certificate(infeasible,std::get<ExactFarkasEvidence>(cold_infeasible.outcome.support).certificate()).index()==0);
     REQUIRE(std::holds_alternative<ExactFarkasEvidence>(infeasible_result.outcome.support));
     CHECK(verify_linear_infeasibility_certificate(infeasible,std::get<ExactFarkasEvidence>(infeasible_result.outcome.support).certificate()).index()==0);
     CHECK(infeasible_result.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);

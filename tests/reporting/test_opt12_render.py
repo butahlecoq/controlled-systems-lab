@@ -31,7 +31,7 @@ def fixture(root: Path) -> Path:
                 trials.append({"schema": "csl.opt12-cost-trial/1", "scenario": scenario, "pair": pair,
                                "order": index, "mode": mode, "status": "verified", "wall_ns": 100 + index,
                                "model_load_seconds": 0.001, "basis_transfer_seconds": 0.0001 if mode == "warm" else 0.0,
-                               "solve_seconds": 0.002, "simplex_iterations": 1, "cache_state": "hit",
+                               "solve_seconds": 0.002, "simplex_iterations": 1 if mode == "cold" else 0, "cache_state": "hit",
                                "basis_accepted": mode == "warm", "diagnostics": ""})
     raw = ("\n".join(json.dumps(item, separators=(",", ":")) for item in [identity, *trials]) + "\n").encode()
     stderr = b""
@@ -77,6 +77,7 @@ class Opt12RenderTests(unittest.TestCase):
             out = root / "opt12-test"
             manifest = opt12_render.render(records, out)
             self.assertTrue((out / "index.html").is_file())
+            self.assertIn("higher median aggregate native work for warm reuse", (out / "index.html").read_text(encoding="utf-8"))
             self.assertIn("comparison.svg", manifest["files"])
             with zipfile.ZipFile(root / "opt12-test.zip") as archive:
                 self.assertIn("opt12-test/index.html", archive.namelist())

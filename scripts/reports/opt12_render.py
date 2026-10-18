@@ -158,11 +158,9 @@ def render(records: Path, out: Path) -> dict:
     tiny_rows = [row for row in rows if row["scenario"] == "tiny-overhead"]
     median_work = {mode: statistics.median([sum(float(row[field]) for field in TIMED_FIELDS)
                                                for row in tiny_rows if row["mode"] == mode]) for mode in MODES}
-    iteration_values = {mode: sorted(int(row["simplex_iterations"]) for row in tiny_rows
-                                      if row["mode"] == mode and row.get("simplex_iterations") is not None) for mode in MODES}
-    cost_text = ("The tiny case records higher median aggregate native work for warm reuse with no reduction in simplex iterations."
-                 if median_work["warm"] > median_work["cold"] and iteration_values["warm"] == iteration_values["cold"]
-                 else "This run does not establish higher aggregate native work for warm reuse without fewer simplex iterations in the tiny case.")
+    cost_text = ("The tiny case records higher median aggregate native work for warm reuse; simplex iteration counts are reported separately."
+                 if median_work["warm"] > median_work["cold"]
+                 else "This run does not establish higher median aggregate native work for warm reuse in the tiny case.")
     summary_html = "\n".join("<tr>" + "".join(f"<td>{html.escape(str(row[key]))}</td>" for key in
         ("scenario", "mode", "n", "wall_ns", "load_s", "basis_s", "solve_s", "native_work_s", "iterations")) + "</tr>" for row in rows_summary)
     trial_html = "\n".join(f'<tr><td>{row["scenario"]}</td><td>{row["pair"]}</td><td>{row["mode"]}</td><td>{row.get("cache_state")}</td><td>{row.get("basis_accepted")}</td><td>{row["wall_ns"]}</td><td>{row.get("simplex_iterations")}</td><td><details><summary>raw diagnostics</summary><pre>{html.escape(row.get("diagnostics", ""))}</pre></details></td></tr>' for row in rows)
