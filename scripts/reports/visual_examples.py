@@ -179,11 +179,13 @@ def section(example, number):
                f'cmake --build build/visual-{option.lower()} --config Release --target {target} --parallel 2\n'
                f'./build/visual-{option.lower()}/{target} --smoke')
     source_url = "https://github.com/butahlecoq/controlled-systems-lab/blob/" + example["harness"] + "/" + driver
+    caption = ("Green: hull boundary; amber: omitted points. Slash-separated original IDs coincide. Equal x/y scale."
+               if example["kind"] == "hull" else
+               "Green: returned intersection. Blue: input square; amber: input diamond. Labels are saved output row IDs. Equal x/y scale.")
     return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / 2D geometry</p>'
             f'<h2>{example["title"]}</h2><p>{explanation}</p>'
             f'<figure><img src="{example["slug"]}.svg" alt="{escape(explanation, quote=True)}">'
-            '<figcaption>Green: returned boundary. Labels identify original points or saved output rows. '
-            'Intersection inputs: blue square, amber diamond. Equal x/y scale.</figcaption></figure>'
+            f'<figcaption>{caption}</figcaption></figure>'
             f'<p class="answer">{result}</p>{point_table(example)}'
             '<details><summary>Complete minimal input</summary><pre><code>' + escape(json.dumps(example["inputs"], indent=2)) + '</code></pre></details>'
             + extra + '<details><summary>Reproduce the native functional example</summary>'
