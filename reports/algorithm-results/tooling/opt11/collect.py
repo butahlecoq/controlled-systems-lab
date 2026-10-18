@@ -98,7 +98,8 @@ def write_utf8_lf(path: Path, text: str) -> bytes:
 
 
 def validate_release_build_evidence(raw_log: str, root: Path, build_root: Path,
-                                    exe: Path, commit: str, harness_sha256: str) -> None:
+                                    exe: Path, commit: str, harness_sha256: str,
+                                    compiler_path: str) -> None:
     """Require a clean-first compile and link of all timing-relevant sources."""
     lines = raw_log.splitlines()
     clean_positions = [index for index, line in enumerate(lines)
@@ -111,8 +112,11 @@ def validate_release_build_evidence(raw_log: str, root: Path, build_root: Path,
 
     def is_release_compile(line: str, source: Path) -> bool:
         folded = line.casefold()
+        expected_compiler = os.path.normcase(os.path.normpath(compiler_path)).replace("/", "\\").casefold()
+        actual_compiler_line = os.path.normcase(os.path.normpath(line)).replace("/", "\\").casefold()
         return (
             "cl.exe" in folded and normalized(source) in folded and
+            expected_compiler in actual_compiler_line and
             re.search(r"(?:^|\s)/o2(?:\s|$)", line, re.IGNORECASE) is not None and
             re.search(r"(?:^|\s)/std:c\+\+20(?:\s|$)", line, re.IGNORECASE) is not None and
             re.search(r"(?:^|\s)/d\s+ndebug(?:\s|$)", line, re.IGNORECASE) is not None and
@@ -220,7 +224,13 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path,
             backend_runtime.get("version") == "1.0.0+highs.1.11.0",
             "runtime registered HiGHS identity/version differs from the reviewed provider")
     log = build_log.read_text(encoding="utf-8", errors="replace")
-    validate_release_build_evidence(log, root, build_root, exe, commit, hashes[HARNESS])
+    compiler_id, compiler_version, compiler_path, compiler_source, compiler_file = compiler_identity(
+        build_root, {"$SOURCE_ROOT": root, "$BUILD_ROOT": build_root,
+                    "$TEMP_ROOT": Path(tempfile.gettempdir()), "$USER_ROOT": Path.home(),
+                    **{label: Path(value) for label, value in (("$PROGRAM_FILES_X86", os.environ.get("ProgramFiles(x86)")),
+                                                               ("$PROGRAM_FILES", os.environ.get("ProgramFiles")),
+                                                               ("$WINDOWS_ROOT", os.environ.get("SystemRoot"))) if value}})
+    validate_release_build_evidence(log, root, build_root, exe, commit, hashes[HARNESS], compiler_path)
     note = concurrent_note.read_text(encoding="utf-8").strip()
     require(bool(note), "concurrent-work/load note is required")
     release_log = sanitized_log(build_log.read_text(encoding="utf-8", errors="replace"), {
@@ -230,12 +240,6 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path,
                                                    ("$PROGRAM_FILES", os.environ.get("ProgramFiles")),
                                                    ("$WINDOWS_ROOT", os.environ.get("SystemRoot"))) if value},
     })
-    compiler_id, compiler_version, compiler_path, compiler_source, compiler_file = compiler_identity(
-        build_root, {"$SOURCE_ROOT": root, "$BUILD_ROOT": build_root,
-                    "$TEMP_ROOT": Path(tempfile.gettempdir()), "$USER_ROOT": Path.home(),
-                    **{label: Path(value) for label, value in (("$PROGRAM_FILES_X86", os.environ.get("ProgramFiles(x86)")),
-                                                               ("$PROGRAM_FILES", os.environ.get("ProgramFiles")),
-                                                               ("$WINDOWS_ROOT", os.environ.get("SystemRoot"))) if value}})
     return {
         "source_commit": commit, "source_sha256": hashes,
         "fixture_sha256": fixture_digest(), "harness_sha256": hashes[HARNESS],
@@ -262,7 +266,7 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path,
                             "preprocessor_definitions": project_flags.get("PreprocessorDefinitions"),
                             "compiler_id": compiler_id,
                             "compiler_version": compiler_version,
-                            "compiler_path": compiler_path,
+                            "compiler_path_sha256": digest(compiler_path.encode("utf-8")),
                             "compiler_identification_file": compiler_file,
                             "ndebug": True},
         "description": description,

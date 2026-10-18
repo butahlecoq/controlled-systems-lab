@@ -17,13 +17,15 @@ class ReleaseBuildEvidenceTests(unittest.TestCase):
         self.root = Path.cwd() / "opt11-source-test"
         self.build_root = Path.cwd() / "opt11-build-test"
         self.exe = self.build_root / "Release" / "csl_opt11_measure.exe"
+        self.compiler_path = self.build_root / "toolchain" / "cl.exe"
         self.commit = "a" * 40
         self.harness_hash = "b" * 64
         self.log = self.valid_log()
 
     def compile_line(self, source: str, extra: str = "") -> str:
         path = (self.root / source).as_posix().replace("/", "\\")
-        return (f'CL.exe /O2 /std:c++20 /D NDEBUG /D "CMAKE_INTDIR=\\"Release\\"" '
+        compiler = self.compiler_path.as_posix().replace("/", "\\")
+        return (f'"{compiler}" /O2 /std:c++20 /D NDEBUG /D "CMAKE_INTDIR=\\"Release\\"" '
                 f'{extra} "{path}"')
 
     def valid_log(self) -> str:
@@ -42,33 +44,38 @@ class ReleaseBuildEvidenceTests(unittest.TestCase):
 
     def test_accepts_full_clean_release_graph_bound_to_source(self):
         validate_release_build_evidence(self.log, self.root, self.build_root,
-                                        self.exe, self.commit, self.harness_hash)
+                                        self.exe, self.commit, self.harness_hash,
+                                        str(self.compiler_path))
 
     def test_rejects_missing_timing_translation_unit(self):
         incomplete = self.log.replace(self.compile_line("src/adapters/lp/highs.cpp") + "\n", "")
         with self.assertRaisesRegex(ValueError, "src/adapters/lp/highs.cpp"):
             validate_release_build_evidence(incomplete, self.root, self.build_root,
-                                            self.exe, self.commit, self.harness_hash)
+                                            self.exe, self.commit, self.harness_hash,
+                                            str(self.compiler_path))
 
     def test_rejects_log_without_clean_first_evidence(self):
         incomplete = self.log.replace("Run Clean Command: MSBuild.exe /t:Clean\n", "")
         with self.assertRaisesRegex(ValueError, "explicit clean-first MSBuild command"):
             validate_release_build_evidence(incomplete, self.root, self.build_root,
-                                            self.exe, self.commit, self.harness_hash)
+                                            self.exe, self.commit, self.harness_hash,
+                                            str(self.compiler_path))
 
     def test_rejects_link_library_from_wrong_root(self):
         wrong_root = self.log.replace("csl\\Release\\csl_hull.lib",
                                       "other\\csl\\Release\\csl_hull.lib")
         with self.assertRaisesRegex(ValueError, "both expected libraries under the verified build root"):
             validate_release_build_evidence(wrong_root, self.root, self.build_root,
-                                            self.exe, self.commit, self.harness_hash)
+                                            self.exe, self.commit, self.harness_hash,
+                                            str(self.compiler_path))
 
     def test_rejects_missing_release_optimization_flag(self):
         line = self.compile_line("src/geometry/hull_reducer.cpp")
         incomplete = self.log.replace(line, line.replace("/O2", "/Od"))
         with self.assertRaisesRegex(ValueError, "src/geometry/hull_reducer.cpp"):
             validate_release_build_evidence(incomplete, self.root, self.build_root,
-                                            self.exe, self.commit, self.harness_hash)
+                                            self.exe, self.commit, self.harness_hash,
+                                            str(self.compiler_path))
 
     def test_rejects_source_compiled_from_different_root(self):
         line = self.compile_line("src/adapters/lp/highs.cpp")
@@ -77,7 +84,18 @@ class ReleaseBuildEvidenceTests(unittest.TestCase):
         incomplete = self.log.replace(line, wrong_source)
         with self.assertRaisesRegex(ValueError, "src/adapters/lp/highs.cpp"):
             validate_release_build_evidence(incomplete, self.root, self.build_root,
-                                            self.exe, self.commit, self.harness_hash)
+                                            self.exe, self.commit, self.harness_hash,
+                                            str(self.compiler_path))
+
+    def test_rejects_timing_compile_from_different_compiler(self):
+        line = self.compile_line("src/geometry/hull_reducer.cpp")
+        other = line.replace(str(self.compiler_path).replace("/", "\\"),
+                             str(self.build_root / "other" / "cl.exe").replace("/", "\\"))
+        log = self.log.replace(line, other)
+        with self.assertRaisesRegex(ValueError, "src/geometry/hull_reducer.cpp"):
+            validate_release_build_evidence(log, self.root, self.build_root,
+                                            self.exe, self.commit, self.harness_hash,
+                                            str(self.compiler_path))
 
     def test_compiler_identity_comes_from_hashed_generated_cmake_source(self):
         with tempfile.TemporaryDirectory() as directory:

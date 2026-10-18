@@ -8,6 +8,7 @@ import html
 import io
 import json
 from pathlib import Path
+import re
 import statistics
 import zipfile
 
@@ -87,6 +88,9 @@ def read_collection(directory: Path, allow_test=False):
             "generated compiler source hash is missing")
     compiler = meta.get("release_project", {})
     require(compiler.get("compiler_id") is not None and compiler.get("compiler_version") is not None and
+            isinstance(compiler.get("compiler_path_sha256"), str) and
+            re.fullmatch(r"[0-9a-f]{64}", compiler["compiler_path_sha256"]) is not None and
+            "compiler_path" not in compiler and
             f'set(CMAKE_CXX_COMPILER_ID "{compiler["compiler_id"]}")' in compiler_text and
             f'set(CMAKE_CXX_COMPILER_VERSION "{compiler["compiler_version"]}")' in compiler_text,
             "compiler identity differs from retained CMake compiler source")
