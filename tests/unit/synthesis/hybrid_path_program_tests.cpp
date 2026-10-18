@@ -3,6 +3,8 @@
 
 #include <csl/synthesis/hybrid_path_program.hpp>
 #include <csl/sets/data.hpp>
+#include <csl/registry/provider.hpp>
+#include <array>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -35,6 +37,38 @@ model::HybridRequest example_request() {
 
 model::HybridPath example_path() {
     return {{{"source"},{"target"}},{{"switch"}}};
+}
+
+class RejectingLP final : public LPWorkspace {
+    ProgramOutcome do_solve(const LinearProgram&,const ExecutionContext&) override {
+        return Unsupported{{{DiagnosticCode::unsupported,"fixture.lp","fixture rejection"}}};
+    }
+};
+
+class RejectingConvex final : public ConvexWorkspace {
+    ProgramOutcome do_solve(const ConvexProgram&,const ExecutionContext&) override {
+        return Unsupported{{{DiagnosticCode::unsupported,"fixture.convex","fixture rejection"}}};
+    }
+};
+
+registry::PreparedProvider<registry::LPPort> lp_provider() {
+    registry::Registry<registry::LPPort> providers;
+    REQUIRE_FALSE(providers.add({{{"reject-lp"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability{return registry::Offer{};},
+        [](const LinearProgram&){return std::make_unique<RejectingLP>();}}));
+    auto prepared=registry::prepare_provider(registry::select_provider(providers,{{"reject-lp"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
+}
+
+registry::PreparedProvider<registry::ConvexPort> convex_provider() {
+    registry::Registry<registry::ConvexPort> providers;
+    REQUIRE_FALSE(providers.add({{{"reject-convex"},"1"},
+        [](const ConvexProgram&,const registry::Requirements&)->registry::Capability{return registry::Offer{};},
+        [](const ConvexProgram&){return std::make_unique<RejectingConvex>();}}));
+    auto prepared=registry::prepare_provider(registry::select_provider(providers,{{"reject-convex"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::ConvexPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::ConvexPort>>(std::move(prepared));
 }
 }
 
@@ -99,4 +133,21 @@ TEST_CASE("hybrid direct path programs admit quadratic and residual terminal obj
     REQUIRE(std::holds_alternative<HybridPathProgram>(residual));
     REQUIRE(std::holds_alternative<ConvexProgram>(std::get<HybridPathProgram>(residual).program));
     CHECK(std::get<ConvexProgram>(std::get<HybridPathProgram>(residual).program).original_objective().dimension()==5);
+}
+
+TEST_CASE("hybrid branch execution retains path and solver provenance on rejection") {
+    auto built=build_hybrid_path_program(example_system(),example_request(),example_path(),
+        {"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(built));
+    const std::array<HybridPathProgram,1> programs{std::get<HybridPathProgram>(std::move(built))};
+    const auto report=execute_hybrid_path_programs(programs,lp_provider(),convex_provider(),{});
+    REQUIRE(report.branches.size()==1);
+    CHECK_FALSE(report.all_supplied_branches_completed);
+    CHECK(report.branches[0].path==example_path());
+    CHECK(report.branches[0].termination==Termination::operation_rejected);
+    REQUIRE(report.branches[0].providers.size()==1);
+    REQUIRE(report.branches[0].providers[0].actual);
+    CHECK(report.branches[0].providers[0].actual->id.value=="reject-lp");
+    REQUIRE(report.branches[0].diagnostics.size()==1);
+    CHECK(report.branches[0].diagnostics[0].field=="fixture.lp");
 }

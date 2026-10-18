@@ -77,4 +77,68 @@ HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& sys
     return HybridPathProgram{path,std::move(relation),std::get<TerminalObjective>(std::move(lifted)),std::move(*program)};
 }
 
+HybridPortfolioExecution execute_hybrid_path_programs(
+    std::span<const HybridPathProgram> programs,
+    const registry::PreparedProvider<registry::LPPort>& lp,
+    const registry::PreparedProvider<registry::ConvexPort>& convex,
+    const ExecutionContext& context) {
+    HybridPortfolioExecution portfolio;
+    portfolio.branches.reserve(programs.size());
+    bool complete=true;
+    for(const auto& branch:programs) {
+        HybridBranchExecution execution;
+        execution.path=branch.path;
+        auto run=[&]<class Program,class Port>(const Program& program,
+            const registry::PreparedProvider<Port>& provider) {
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                execution.termination=context.cancellation.stop_requested()?
+                    Termination::cancelled:Termination::resource_limit;
+                complete=false;
+                return;
+            }
+            auto prepared=provider.prepare(program);
+            if(const auto* rejection=std::get_if<registry::Rejection>(&prepared)) {
+                execution.termination=Termination::operation_rejected;
+                execution.providers.push_back(rejection->provenance);
+                execution.diagnostics=rejection->diagnostics;
+                complete=false;
+                return;
+            }
+            auto pipeline=std::get<registry::PreparedPipeline<Port>>(std::move(prepared));
+            const auto provenance=pipeline.provenance();
+            execution.providers.assign(provenance.begin(),provenance.end());
+            auto workspaces=pipeline.create();
+            auto outcome=std::get<0>(workspaces)->run(context);
+            if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
+                execution.termination=Termination::operation_rejected;
+                execution.diagnostics=unsupported->diagnostics;
+                complete=false;
+                return;
+            }
+            auto result=std::get<ProgramResult>(std::move(outcome));
+            Diagnostics diagnostics;
+            if constexpr(std::is_same_v<Program,LinearProgram>)
+                diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
+            else
+                diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
+            if(!diagnostics.empty()) {
+                execution.termination=Termination::contract_rejected;
+                execution.diagnostics=std::move(diagnostics);
+                complete=false;
+                return;
+            }
+            execution.termination=result.termination;
+            execution.outcome=result.outcome.value;
+            if(result.termination!=Termination::completed) complete=false;
+            execution.result=std::move(result);
+        };
+        if(const auto* linear=std::get_if<LinearProgram>(&branch.program)) run(*linear,lp);
+        else run(std::get<ConvexProgram>(branch.program),convex);
+        portfolio.branches.push_back(std::move(execution));
+    }
+    portfolio.all_supplied_branches_completed=complete;
+    return portfolio;
+}
+
 } // namespace csl::synthesis
