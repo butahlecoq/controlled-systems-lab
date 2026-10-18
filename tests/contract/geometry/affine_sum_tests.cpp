@@ -926,6 +926,8 @@ TEST_CASE("positive-dimensional universal inputs are request-scoped unsupported 
         {universal.id});
     check_rejection(request(MinkowskiSum{universal, interval}, "universal-minkowski"),
         {universal.id, interval.id});
+    check_rejection(request(MinkowskiSum{interval, universal}, "universal-minkowski-right"),
+        {interval.id, universal.id});
 }
 
 TEST_CASE("candidate limits and pre-request stops never publish successful geometry") {
