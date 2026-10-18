@@ -76,6 +76,26 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
     repetitions = metadata.get("policy", {}).get("repetitions_per_side_per_case")
     if type(repetitions) is not int or repetitions < 5 or len(trials) != repetitions * len(SCENARIOS) * len(MODES):
         raise ValueError("trial count does not match the paired repetition policy")
+    fixtures = metadata.get("input_fixtures")
+    if not isinstance(fixtures, dict) or set(fixtures) != set(SCENARIOS):
+        raise ValueError("input fixture descriptions do not match the measured scenarios")
+    expected_dimensions = {"tiny-overhead": (1, 1), "small-reuse": (1, 40), "transfer-cost": (1, 100000)}
+    for scenario, fixture in fixtures.items():
+        if not isinstance(fixture, dict):
+            raise ValueError(f"input fixture description is invalid: {scenario}")
+        if (type(fixture.get("rows")) is not int or type(fixture.get("columns")) is not int
+                or (fixture["rows"], fixture["columns"]) != expected_dimensions[scenario]):
+            raise ValueError(f"input fixture dimensions are invalid: {scenario}")
+        if not all(isinstance(fixture.get(key), (int, float)) and not isinstance(fixture.get(key), bool)
+                   and math.isfinite(fixture[key]) for key in ("source_rhs", "changed_rhs", "expected_objective")):
+            raise ValueError(f"input fixture values are invalid: {scenario}")
+        fixture_hash = fixture.get("sha256")
+        fixture_payload = {key: value for key, value in fixture.items() if key != "sha256"}
+        expected_hash = sha256(json.dumps(fixture_payload, sort_keys=True, separators=(",", ":")).encode())
+        if fixture_hash != expected_hash:
+            raise ValueError(f"input fixture hash is invalid: {scenario}")
+        if not isinstance(fixture.get("objective_change", "unchanged"), str):
+            raise ValueError(f"input fixture objective description is invalid: {scenario}")
     for trial in trials:
         if not isinstance(trial, dict) or trial.get("schema") != "csl.opt12-cost-trial/1" or trial.get("status") != "verified":
             raise ValueError("trial schema or numerical verification status is invalid")
