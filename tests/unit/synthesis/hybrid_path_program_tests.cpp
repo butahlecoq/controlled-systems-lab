@@ -7,6 +7,7 @@
 #include "hybrid_family_verifier_internal.hpp"
 #include <algorithm>
 #include <array>
+#include <limits>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -60,7 +61,7 @@ struct OneStepOracleBranch {
     double objective{};
 };
 
-bool equality_rows_have_full_column_rank(const numeric::MatrixView& equalities) {
+std::size_t equality_rank(const numeric::MatrixView& equalities) {
     std::vector<Vector> reduced(equalities.rows(),Vector(equalities.cols()));
     for(std::size_t row=0;row<equalities.rows();++row)
         for(std::size_t col=0;col<equalities.cols();++col)
@@ -81,7 +82,11 @@ bool equality_rows_have_full_column_rank(const numeric::MatrixView& equalities) 
         }
         ++rank;
     }
-    return rank==equalities.cols();
+    return rank;
+}
+
+bool equality_rows_have_full_column_rank(const numeric::MatrixView& equalities) {
+    return equality_rank(equalities)==equalities.cols();
 }
 
 bool has_conflicting_equalities(const sets::HRepresentation& relation) {
@@ -839,6 +844,67 @@ TEST_CASE("independent one-step oracle matches exhaustive hybrid portfolio and t
     for(const auto& branch:oracle) if(branch.objective==minimum)
         oracle_optima.push_back(branch.path.edges[0].value);
     CHECK(oracle_optima==std::vector<std::string>{"tie-a","tie-b"});
+}
+
+TEST_CASE("independent interval oracle matches the full continuous hybrid branch") {
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    source.control_sets={interval("oracle-control",0,1)};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    auto reset_equalities=numeric::snapshot(Matrix{1,2,{-1,1}});
+    auto reset_rhs=numeric::snapshot_vector(Vector{0});
+    auto reset_inequalities=numeric::snapshot(Matrix{0,2,{}});
+    auto reset_bounds=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(reset_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(reset_rhs));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(reset_inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(reset_bounds));
+    auto reset_data=sets::make_h({{"oracle-identity-reset"},2,{}},
+        {std::get<numeric::MatrixView>(reset_inequalities),std::get<numeric::VectorView>(reset_bounds),
+         std::get<numeric::MatrixView>(reset_equalities),std::get<numeric::VectorView>(reset_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(reset_data));
+    model::HybridSystem system{1,{source,target},
+        {{{"switch"},{"source"},{"target"},{interval("oracle-guard",0,0.5)},
+          {std::get<sets::SetData>(reset_data).as_handle()}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"target"}},
+        {{{"target"},LinearTerminal{{1},0},"position","m"}}};
+
+    // Direct equations give the complete joint branch
+    // (x0,u,x_pre,x1)=(0,t,t,t), with 0 <= t <= 1/2.
+    const model::HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto built=build_hybrid_path_program(system,request,path,{"continuous-oracle"},
+        {32,128,4096});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(built));
+    const auto representation=std::get<HybridPathProgram>(built).joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    REQUIRE(h.equalities.cols()==4);
+    CHECK(equality_rank(h.equalities)==3);
+    CHECK(satisfies(h,{0,0,0,0}));
+    CHECK(satisfies(h,{0,0.5,0.5,0.5}));
+
+    double lower=-std::numeric_limits<double>::infinity();
+    double upper=std::numeric_limits<double>::infinity();
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        const double intercept=0;
+        const double slope=h.inequalities(row,1)+h.inequalities(row,2)+h.inequalities(row,3);
+        if(slope>0) upper=std::min(upper,(h.upper_bounds[row]-intercept)/slope);
+        else if(slope<0) lower=std::max(lower,(h.upper_bounds[row]-intercept)/slope);
+        else CHECK(intercept<=h.upper_bounds[row]);
+    }
+    CHECK(lower==0);
+    CHECK(upper==0.5);
+    const auto& program=std::get<LinearProgram>(std::get<HybridPathProgram>(built).program);
+    CHECK(program.objective().size()==4);
+    CHECK(program.offset()==0);
+    CHECK(program.objective()[0]==0);
+    CHECK(program.objective()[1]==0);
+    CHECK(program.objective()[2]==0);
+    CHECK(program.objective()[3]==1);
 }
 
 TEST_CASE("exact singleton hybrid verifier checks guard entry and rejects forbidden mode paths") {
