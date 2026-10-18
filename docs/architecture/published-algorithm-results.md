@@ -53,8 +53,13 @@ recursive child LP-workspace creation and root async scheduling; it excludes
 parsing, injected workspace creation, validation, serialization and rendering.
 The source-mapped limiter is unavailable. These observations cover only the
 three fixed binary64 clouds on the recorded host/backend and establish no
-universal speedup, application-scale behavior, or scalability claim. Main-only
-deployment and live URL/hash verification remain required publication gates.
+universal speedup, application-scale behavior, or scalability claim. The
+deployed [versioned report](https://butahlecoq.github.io/controlled-systems-lab/opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865/index.html)
+uses source commit `488d4ca8888d91c44b64d5d2f0baf564d1c28ae7`. Live page
+SHA-256 is `702e8a91d3a757978289ef7b565ec03e841ba6dd765fe81af49fe4fd01aa2116`;
+the public ZIP SHA-256 is `90b609866df72e0432ae7ef9dbe4f4692a321c6d7b84225a0cb1bf6254704767`
+and matches the main catalogue. The live HTML bytes match the page in the ZIP
+and the hash in its publication manifest.
 
 ## GEO-07 registered dependent generator sum report
 

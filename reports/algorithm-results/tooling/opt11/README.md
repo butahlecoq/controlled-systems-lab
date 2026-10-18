@@ -29,8 +29,13 @@ Its schema-3 publication identity is
 `opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865`;
 the public archive is
 [`opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865.zip`](../../opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865.zip).
-The public Pages URL and live hashes remain pending until the reviewed artifact
-is deployed from `main` and verified there.
+The deployed [report page](https://butahlecoq.github.io/controlled-systems-lab/opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865/index.html)
+was verified against the offline ZIP and publication manifest. The live
+page SHA-256 is
+`702e8a91d3a757978289ef7b565ec03e841ba6dd765fe81af49fe4fd01aa2116`; the live
+ZIP SHA-256 is
+`90b609866df72e0432ae7ef9dbe4f4692a321c6d7b84225a0cb1bf6254704767` and
+matches the main catalogue.
 
 ## Functional smoke
 
