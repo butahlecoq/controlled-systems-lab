@@ -16,6 +16,8 @@ Date: 2026-10-18. This design is limited to an optional HiGHS simplex workspace 
 
 Contract tests compare independently checked cold and warm outcomes for optimal and infeasible LPs after compatible changes, and exercise dimension changes, degenerate bases, rejected hints, and two independent workspaces. The observations separate model setup from solve work. A tiny LP records the basis-transfer overhead even when the warm path saves no simplex iterations; no general speedup claim follows from the test.
 
+The adapter stores one HiGHS basis status per row and column, so the cached representation consumes O(m+n) status entries and bytes, excluding the native solver's own factorization. Installing the hint requires transferring those statuses; its measured cost and the solver's subsequent refactorization or simplex work depend on the LP and must be reported separately. This optional cache does not change simplex's worst-case complexity or guarantee lower total work. The evaluation plan is a repeated paired cold/warm comparison on identical changed LPs, including a tiny case where basis transfer costs more than it saves, with native model-load, basis-transfer, solve, and iteration records retained.
+
 ## Limits
 
 The initial implementation is specific to HiGHS simplex. Other LP backends remain cold unless they implement their own private state under the same workspace isolation rule. Numerical solver reports remain subject to the adapter's existing binary64 feasibility checks and do not become mathematical certificates through basis reuse.

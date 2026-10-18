@@ -155,6 +155,9 @@ TEST_CASE("warm starts preserve independently checked results across a degenerat
     CHECK(infeasible_result.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);
     CHECK(infeasible_result.raw_diagnostics.find("warm_start.accepted=true")!=std::string::npos);
     CHECK(infeasible_result.raw_diagnostics.find("warm_start.next_cache=invalidated_after_result")!=std::string::npos);
+    CHECK(infeasible_result.raw_diagnostics.find("warm_start.fallback=cold_after_invalid_result")!=std::string::npos);
+    CHECK(infeasible_result.raw_diagnostics.find("warm_start.retry=cold_after_invalid_result")!=std::string::npos);
+    CHECK(infeasible_result.raw_diagnostics.find("warm_start.cache_state=empty")!=std::string::npos);
 }
 
 TEST_CASE("literal offset equality free fixed infeasible unbounded and zero-dimensional LPs") {

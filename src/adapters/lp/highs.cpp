@@ -157,12 +157,15 @@ void classify(ProgramResult& r,HighsStatus api,HighsModelStatus model,const Call
     }
 }
 class HighsLPWorkspace final : public LPWorkspace {
+    struct WarmBasisCache {
+        HighsBasis basis;
+        std::size_t rows{};
+        std::size_t columns{};
+    };
     HighsLPOptions options_;
     std::unique_ptr<Highs> native_;
     std::optional<LinearProgram> loaded_;
-    std::optional<HighsBasis> warm_basis_;
-    std::size_t warm_rows_{};
-    std::size_t warm_columns_{};
+    std::optional<WarmBasisCache> warm_basis_;
     ProgramOutcome solve_native(const LinearProgram& p,const ExecutionContext& c) {
         auto previous_basis=std::move(warm_basis_);
         warm_basis_.reset();
@@ -233,13 +236,13 @@ class HighsLPWorkspace final : public LPWorkspace {
         }
         bool warm_accepted=false;
         if(options_.cross_query_warm_start) {
-            const bool dimensions_match=previous_basis && warm_rows_==p.rows().size() && warm_columns_==p.variables().size();
+            const bool dimensions_match=previous_basis && previous_basis->rows==p.rows().size() && previous_basis->columns==p.variables().size();
             raw << "\nwarm_start.enabled=true";
             raw << "\nwarm_start.cache_state=" << (!previous_basis?"empty":dimensions_match?"compatible":"invalidated_dimension_change");
             const auto warm_setup_start=std::chrono::steady_clock::now();
-            if(dimensions_match && previous_basis->valid && previous_basis->row_status.size()==p.rows().size() &&
-                previous_basis->col_status.size()==p.variables().size()) {
-                const auto basis_status=h.setBasis(*previous_basis);
+            if(dimensions_match && previous_basis->basis.valid && previous_basis->basis.row_status.size()==p.rows().size() &&
+                previous_basis->basis.col_status.size()==p.variables().size()) {
+                const auto basis_status=h.setBasis(previous_basis->basis);
                 warm_accepted=basis_status==HighsStatus::kOk;
                 raw << "\nwarm_start.install_status=" << static_cast<int>(basis_status)
                     << "\nwarm_start.accepted=" << (warm_accepted?"true":"false");
@@ -349,9 +352,20 @@ class HighsLPWorkspace final : public LPWorkspace {
                 basis.valid && basis.row_status.size()==p.rows().size() && basis.col_status.size()==p.variables().size();
             raw << "\nwarm_start.next_cache=" << (valid_result?"stored":"invalidated_after_result");
             if(valid_result) {
-                warm_basis_=basis;
-                warm_rows_=p.rows().size();
-                warm_columns_=p.variables().size();
+                warm_basis_=WarmBasisCache{basis,p.rows().size(),p.variables().size()};
+            } else if(warm_accepted) {
+                // A basis accepted by HiGHS is still only a hint. If its result
+                // is not an independently checked optimum, discard that solver
+                // instance and solve once with a fresh, cold native solver.
+                raw << "\nwarm_start.fallback=cold_after_invalid_result";
+                const auto warm_diagnostics=raw.str();
+                native_.reset();
+                loaded_.reset();
+                warm_basis_.reset();
+                auto cold_result=solve_native(p,c);
+                if (auto* cold_program=std::get_if<ProgramResult>(&cold_result))
+                    cold_program->raw_diagnostics += "\nwarm_start.retry=cold_after_invalid_result\nwarm_start.rejected_attempt_diagnostics:\n" + warm_diagnostics;
+                return cold_result;
             }
         }
         raw << "\ncertificates=" << (std::holds_alternative<ExactFarkasEvidence>(result.outcome.support)?"exact_farkas":"unavailable")
