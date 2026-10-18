@@ -157,8 +157,11 @@ separation, corrupt-byte replacement/rejection and the empty-option direct path.
 Two separate Windows Visual Studio core configurations also recorded Eigen/JSON
 archive misses followed by hash-verified hits in a fresh build directory.
 This proves local archive behavior, not hosted compiler-cache reuse or reduced
-wall-clock time. Five local CLI tests also pass for pin/patch invalidation,
+wall-clock time. Six local CLI tests also pass for pin/patch invalidation,
 incompatible compiler/configuration/options/lane keys and PR/manual trust scopes.
+The additional lane-ownership regression first reproduced a shared archive key
+between core and full builds, then passed after snapshots were partitioned by
+the complete compatibility context.
 Compiler-cache workflow integration and hosted evidence remain pending.
 
 Retain hosted links, exact head SHA, tool versions, options, archive hashes,
