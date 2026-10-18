@@ -653,6 +653,51 @@ TEST_CASE("affine and Minkowski error bounds compose independently checked 1D H 
     CHECK(empty_sum.evidence.error_bound->bound==0.0);
 }
 
+TEST_CASE("affine images compose exact higher-dimensional box coverage with candidate rounding") {
+    const auto box=take(sets::make_h({{"affine-box-coverage"},2,{}},
+        {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
+         take(numeric::snapshot_vector(Vector{3,0,1,1})),
+         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    const auto req=request(AffineImage{box,{1,2,{0.1,0.0}},{0.0}},
+        "compose-affine-box-coverage");
+    const auto result=take(run(req,dependencies()));
+
+    CHECK(support(result.output,{1})==0.30000000000000004);
+    CHECK(support(result.output,{-1})==0.0);
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0x1p-55);
+    CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& assumption) {
+            return assumption.find("axis-aligned box rows")!=std::string::npos;
+        }));
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
+TEST_CASE("Minkowski sums compose independent exact higher-dimensional box coverage") {
+    const auto box=[](std::string id,Vector bounds) {
+        return take(sets::make_h({{std::move(id)},2,{}},
+            {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
+             take(numeric::snapshot_vector(std::move(bounds))),
+             take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    };
+    const auto left=box("sum-box-left",{1,0,1,0});
+    const auto right=box("sum-box-right",{3,-2,3,-2});
+    const auto req=request(MinkowskiSum{left,right},"compose-sum-box-coverage");
+    const auto result=take(run(req,dependencies()));
+
+    CHECK(support(result.output,{1,0})==4.0);
+    CHECK(support(result.output,{-1,0})==-2.0);
+    CHECK(support(result.output,{0,1})==4.0);
+    CHECK(support(result.output,{0,-1})==-2.0);
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
+    CHECK(std::count_if(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
+        [](const std::string& assumption) {
+            return assumption.find("axis-aligned box rows")!=std::string::npos;
+        })==2);
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
 TEST_CASE("public geometry operation rejects an H-to-V vertex outside H rows despite zero reported residual") {
     auto h=take(sets::make_h({{"h-interval-inaccurate"},1,{}},
         {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),

@@ -66,9 +66,10 @@ vertices and arithmetic range failures do not publish a bound. A returned vertex
 small H-row residual alone cannot hide missing interval endpoints or box
 corners. These certificates cover stored binary64 rows interpreted as exact
 dyadic values, not pre-rounding authored real coefficients. They do not change
-validated-assurance admission. The affine-image/Minkowski adapter currently
-composes the ambient-one certificate only; the higher-dimensional box bound
-is conversion evidence and is not yet propagated through those operations.
+validated-assurance admission. The affine-image/Minkowski adapter independently
+recomputes ambient-one interval and supported axis-aligned box certificates
+before composing them through those operations. Other higher-dimensional
+conversion bounds are not yet propagated.
 
 `QhullOptions::observe` receives an owning `ConversionObservation` after each
 attempt. It records request identity, converter and LP backend identities,
