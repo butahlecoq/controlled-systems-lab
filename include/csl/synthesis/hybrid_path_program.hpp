@@ -23,6 +23,47 @@ using HybridPortfolioProgramResult = std::variant<std::vector<HybridPathProgram>
 using HybridPathProgramResult = std::variant<HybridPathProgram, Diagnostics, OperationStopped,
     model::HybridPathCompositionFailureReport>;
 
+struct HybridPathReachability {
+    model::HybridPath path;
+    sets::SetData joint_relation;
+    model::HybridRelationLimits relation_limits;
+    std::vector<model::HybridRelationOperationRecord> relation_operations;
+    Assurance assurance{Assurance::numerical};
+};
+using HybridPathReachabilityResult = std::variant<HybridPathReachability, Diagnostics,
+    OperationStopped, model::HybridPathCompositionFailureReport>;
+
+struct HybridReachabilityCapabilities {
+    bool retains_branch_labelled_joint_relation{};
+    Assurance assurance{Assurance::numerical};
+};
+
+// Replaceable reachability boundary for one fixed mode/edge path. The result
+// retains controls and all pre/post-reset coordinates in the joint relation.
+class HybridReachabilityAdapter {
+public:
+    virtual ~HybridReachabilityAdapter() = default;
+    virtual HybridReachabilityCapabilities capabilities() const noexcept = 0;
+    virtual HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const = 0;
+};
+
+// The initial implementation builds the full joint H relation directly. It
+// does not project intermediate coordinates or merge distinct edge paths.
+class JointHReachabilityAdapter final : public HybridReachabilityAdapter {
+public:
+    HybridReachabilityCapabilities capabilities() const noexcept override;
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const override;
+};
+
+HybridPathReachabilityResult compute_hybrid_path_reachability(
+    const HybridReachabilityAdapter&, const model::HybridSystem&,
+    const model::HybridRequest&, const model::HybridPath&,
+    model::HybridRelationLimits, std::stop_token cancellation = {});
+
 struct HybridDirectTrajectoryCapabilities {
     bool preserves_branch_labelled_joint_relation{};
     bool linear_objectives{};

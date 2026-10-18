@@ -19,6 +19,81 @@ ProgramId path_program_id(const model::HybridPath& path) {
         value += ":"+std::to_string(edge.value.size())+":"+edge.value;
     return ProgramId{std::move(value)};
 }
+Diagnostics hybrid_path_admission_errors(const model::HybridSystem& system,
+    const model::HybridRequest& request, const model::HybridPath& path) {
+    auto errors=model::check_hybrid_profile(system,request);
+    if(!errors.empty()) return errors;
+    if(path.edges.size()!=system.horizon || path.modes.size()!=path.edges.size()+1 || path.modes.empty() ||
+       path.modes.front()!=request.initial.mode ||
+       std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),path.modes.back())==
+           request.allowed_terminal_modes.end())
+        return one({DiagnosticCode::invalid_input,"hybrid.adapter.path",
+            "Adapter path does not match the admitted horizon, initial mode, and terminal modes"});
+    for(std::size_t i=0;i<path.edges.size();++i) {
+        const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate) {
+            return candidate.id==path.edges[i];
+        });
+        if(edge==system.edges.end() || edge->source!=path.modes[i] || edge->target!=path.modes[i+1])
+            return one({DiagnosticCode::invalid_input,"hybrid.adapter.path_edge",
+                "Adapter path contains an unknown or disconnected edge"});
+    }
+    return {};
+}
+bool same_limits(model::HybridRelationLimits left,model::HybridRelationLimits right) {
+    return left.max_variables==right.max_variables && left.max_rows==right.max_rows &&
+        left.max_matrix_elements==right.max_matrix_elements;
+}
+Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
+    model::HybridRelationLimits limits,
+    std::span<const model::HybridRelationOperationRecord> operations,bool require_nonempty,
+    std::optional<std::size_t> relation_dimension = std::nullopt) {
+    struct ExpectedOperation {
+        model::HybridRelationOperationKind kind;
+        std::size_t stage;
+        std::optional<model::HybridModeId> mode;
+        std::optional<model::HybridEdgeId> edge;
+    };
+    std::vector<ExpectedOperation> expected;
+    expected.push_back({model::HybridRelationOperationKind::initial_state,0,path.modes.front(),{}});
+    for(std::size_t stage=0;stage<=path.edges.size();++stage) {
+        expected.push_back({model::HybridRelationOperationKind::post_state_invariant,stage,path.modes[stage],{}});
+        if(stage==path.edges.size()) continue;
+        expected.push_back({model::HybridRelationOperationKind::mode_flow,stage,path.modes[stage],{}});
+        expected.push_back({model::HybridRelationOperationKind::continuous_control,stage,path.modes[stage],{}});
+        expected.push_back({model::HybridRelationOperationKind::pre_reset_invariant,stage+1,path.modes[stage],{}});
+        expected.push_back({model::HybridRelationOperationKind::transition_guard,stage,{},path.edges[stage]});
+        expected.push_back({model::HybridRelationOperationKind::reset_relation,stage,{},path.edges[stage]});
+    }
+    if((require_nonempty && operations.empty()) || operations.size()>expected.size() ||
+       (require_nonempty && operations.size()!=expected.size()))
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.operations",
+            "Adapter operation trace is empty, incomplete, or longer than the path operation plan"});
+    std::size_t previous_rows=0,previous_elements=0;
+    std::optional<std::size_t> joint_variables;
+    for(std::size_t i=0;i<operations.size();++i) {
+        const auto& operation=operations[i];
+        const auto& expected_operation=expected[i];
+        const bool row_overflow=operation.rows_added>std::numeric_limits<std::size_t>::max()-previous_rows;
+        const bool element_overflow=operation.cumulative_rows!=0 &&
+            operation.joint_variables>std::numeric_limits<std::size_t>::max()/operation.cumulative_rows;
+        if(operation.implementation_id.empty() || operation.implementation_version.empty() ||
+           operation.joint_variables>limits.max_variables || operation.cumulative_rows>limits.max_rows ||
+           operation.cumulative_matrix_elements>limits.max_matrix_elements ||
+           row_overflow || operation.cumulative_rows!=previous_rows+operation.rows_added ||
+           element_overflow || operation.cumulative_matrix_elements!=operation.cumulative_rows*operation.joint_variables ||
+           operation.cumulative_matrix_elements<previous_elements ||
+           (joint_variables && operation.joint_variables!=*joint_variables) ||
+           (relation_dimension && operation.joint_variables!=*relation_dimension) ||
+           operation.operation!=expected_operation.kind || operation.stage!=expected_operation.stage ||
+           operation.mode!=expected_operation.mode || operation.edge!=expected_operation.edge)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.operations",
+                "Adapter operation provenance is incomplete, out of path, or exceeds configured limits"});
+        joint_variables=operation.joint_variables;
+        previous_rows=operation.cumulative_rows;
+        previous_elements=operation.cumulative_matrix_elements;
+    }
+    return {};
+}
 }
 
 namespace {
@@ -92,6 +167,65 @@ HybridDirectTrajectoryCapabilities JointHDirectTrajectoryAdapter::capabilities()
     return {true,true,true,Assurance::numerical};
 }
 
+HybridReachabilityCapabilities JointHReachabilityAdapter::capabilities() const noexcept {
+    return {true,Assurance::numerical};
+}
+
+HybridPathReachabilityResult JointHReachabilityAdapter::compose_path(
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    const model::HybridPath& path,model::HybridRelationLimits limits,
+    std::stop_token cancellation) const {
+    auto composed=model::compose_hybrid_path_relation_with_report(system,request,path,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&composed)) return *failure;
+    auto relation=std::get<model::HybridComposedPathRelation>(std::move(composed));
+    return HybridPathReachability{path,std::move(relation.relation),relation.limits,
+        std::move(relation.operations),Assurance::numerical};
+}
+
+HybridPathReachabilityResult compute_hybrid_path_reachability(
+    const HybridReachabilityAdapter& adapter,const model::HybridSystem& system,
+    const model::HybridRequest& request,const model::HybridPath& path,
+    model::HybridRelationLimits limits,std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid reachability was cancelled before profile admission"};
+    const auto admission=hybrid_path_admission_errors(system,request,path);
+    if(!admission.empty()) return admission;
+    const auto capability=adapter.capabilities();
+    if(capability.assurance!=Assurance::numerical)
+        return one({DiagnosticCode::unsupported,"hybrid.reachability.assurance",
+            "Validated reachability assurance is unsupported until its evidence is carried in the result"});
+    if(!capability.retains_branch_labelled_joint_relation)
+        return one({DiagnosticCode::unsupported,"hybrid.reachability.branch_relation",
+            "Reachability adapter does not declare full branch-labelled joint-relation support"});
+    auto result=adapter.compose_path(system,request,path,limits,cancellation);
+    if(const auto* reachable=std::get_if<HybridPathReachability>(&result)) {
+        if(reachable->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.path",
+                "Reachability adapter returned a relation for a different path"});
+        if(!same_limits(reachable->relation_limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.limits",
+                "Reachability adapter returned limits different from those requested"});
+        if(reachable->assurance!=capability.assurance)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.assurance",
+                "Reachability result assurance does not match its declared capability"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,reachable->relation_operations,true,
+            reachable->joint_relation.metadata()->set.dimension);
+        if(!trace_errors.empty()) return trace_errors;
+    }
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result);
+       failure) {
+        if(failure->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_path",
+                "Reachability adapter returned a failure report for a different path"});
+        if(!same_limits(failure->limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_limits",
+                "Reachability failure report lost the configured relation limits"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,failure->operations,false);
+        if(!trace_errors.empty()) return trace_errors;
+    }
+    return result;
+}
+
 HybridPathProgramResult JointHDirectTrajectoryAdapter::build_path(
     const model::HybridSystem& system, const model::HybridRequest& request,
     const model::HybridPath& path, ProblemId problem, model::HybridRelationLimits limits,
@@ -108,22 +242,8 @@ HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAd
         return one({DiagnosticCode::invalid_input,"hybrid.program.problem","Problem identity must be nonempty"});
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Hybrid path program construction was cancelled before profile admission"};
-    const auto profile_errors=model::check_hybrid_profile(system,request);
-    if(!profile_errors.empty()) return profile_errors;
-    if(path.edges.size()!=system.horizon || path.modes.size()!=path.edges.size()+1 || path.modes.empty() ||
-       path.modes.front()!=request.initial.mode ||
-       std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),path.modes.back())==
-           request.allowed_terminal_modes.end())
-        return one({DiagnosticCode::invalid_input,"hybrid.adapter.path",
-            "Direct-trajectory request path does not match the admitted initial and terminal modes"});
-    for(std::size_t i=0;i<path.edges.size();++i) {
-        const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate) {
-            return candidate.id==path.edges[i];
-        });
-        if(edge==system.edges.end() || edge->source!=path.modes[i] || edge->target!=path.modes[i+1])
-            return one({DiagnosticCode::invalid_input,"hybrid.adapter.path_edge",
-                "Direct-trajectory request path contains an unknown or disconnected edge"});
-    }
+    const auto admission=hybrid_path_admission_errors(system,request,path);
+    if(!admission.empty()) return admission;
     const auto capability=adapter.capabilities();
     if(capability.assurance!=Assurance::numerical)
         return one({DiagnosticCode::unsupported,"hybrid.adapter.assurance",
@@ -147,13 +267,27 @@ HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAd
                 "Direct-trajectory adapter does not declare support for this terminal objective"});
     }
     auto built=adapter.build_path(system, request, path, std::move(problem), limits, policy, cancellation);
-    if(const auto* program=std::get_if<HybridPathProgram>(&built); program && program->path!=path)
-        return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.path",
-            "Direct-trajectory adapter returned a program for a different path"});
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built);
-       failure && failure->path!=path)
-        return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.failure_path",
-            "Direct-trajectory adapter returned a failure report for a different path"});
+    if(const auto* program=std::get_if<HybridPathProgram>(&built)) {
+        if(program->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.path",
+                "Direct-trajectory adapter returned a program for a different path"});
+        if(!same_limits(program->relation_limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.limits",
+                "Direct-trajectory adapter returned limits different from those requested"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,program->relation_operations,true,
+            program->joint_relation.metadata()->set.dimension);
+        if(!trace_errors.empty()) return trace_errors;
+    }
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built); failure) {
+        if(failure->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.failure_path",
+                "Direct-trajectory adapter returned a failure report for a different path"});
+        if(!same_limits(failure->limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.failure_limits",
+                "Direct-trajectory failure report lost the configured relation limits"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,failure->operations,false);
+        if(!trace_errors.empty()) return trace_errors;
+    }
     return built;
 }
 

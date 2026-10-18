@@ -67,6 +67,44 @@ public:
     }
 };
 
+class RejectingReachabilityAdapter final : public HybridReachabilityAdapter {
+public:
+    mutable int calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical}; }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        ++calls;
+        return model::HybridPathCompositionFailureReport{path,limits,{},
+            Diagnostic{DiagnosticCode::unsupported,"fixture.reachability","fixture rejection"}};
+    }
+};
+
+class MisreportingReachabilityAdapter final : public HybridReachabilityAdapter {
+public:
+    int corruption{};
+    HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical}; }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem& system,
+        const model::HybridRequest& request,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token cancellation) const override {
+        JointHReachabilityAdapter delegate;
+        auto result=delegate.compose_path(system,request,path,limits,cancellation);
+        if(auto* reachable=std::get_if<HybridPathReachability>(&result)) {
+            if(corruption==0) reachable->assurance=Assurance::validated;
+            else if(corruption==1) ++reachable->relation_limits.max_rows;
+            else if(corruption==2) ++reachable->relation_operations.front().rows_added;
+            else if(corruption==3) reachable->relation_operations.front().stage=1;
+            else {
+                for(auto& operation:reachable->relation_operations) {
+                    operation.joint_variables=0;
+                    operation.cumulative_matrix_elements=0;
+                }
+            }
+        }
+        return result;
+    }
+};
+
 std::pair<model::HybridSystem,model::HybridRequest> variable_size_parallel_profile() {
     auto source=model::HybridMode{{"source"},1,0,{"x"},{}};
     source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
@@ -366,6 +404,43 @@ TEST_CASE("hybrid path builder preserves pre-cancellation precedence over profil
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
     CHECK(adapter.calls==0);
+}
+
+TEST_CASE("hybrid reachability boundary retains a branch-labelled joint relation") {
+    JointHReachabilityAdapter adapter;
+    const auto result=compute_hybrid_path_reachability(adapter,example_system(),example_request(),
+        example_path(),{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(result));
+    const auto& reachable=std::get<HybridPathReachability>(result);
+    CHECK(reachable.path==example_path());
+    CHECK(reachable.assurance==Assurance::numerical);
+    CHECK_FALSE(reachable.relation_operations.empty());
+    CHECK(reachable.relation_limits.max_variables==16);
+}
+
+TEST_CASE("hybrid reachability boundary dispatches injected adapters and propagates rejection") {
+    RejectingReachabilityAdapter adapter;
+    const auto result=compute_hybrid_path_reachability(adapter,example_system(),example_request(),
+        example_path(),{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(result);
+    CHECK(failure.path==example_path());
+    CHECK(std::get<Diagnostic>(failure.failure).field=="fixture.reachability");
+    CHECK(adapter.calls==1);
+}
+
+TEST_CASE("hybrid reachability boundary rejects mismatched assurance and resource reports") {
+    for(const int corruption : {0,1,2,3,4}) {
+        MisreportingReachabilityAdapter adapter;
+        adapter.corruption=corruption;
+        const auto result=compute_hybrid_path_reachability(adapter,example_system(),example_request(),
+            example_path(),{16,64,1024});
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        const auto& field=std::get<Diagnostics>(result).front().field;
+        if(corruption==0) CHECK(field=="hybrid.reachability.assurance");
+        else if(corruption==1) CHECK(field=="hybrid.reachability.limits");
+        else CHECK(field=="hybrid.adapter.operations");
+    }
 }
 
 TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {

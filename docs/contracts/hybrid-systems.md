@@ -137,7 +137,13 @@ implementations can differ in representation and algorithms, but must preserve
 this logical payload and the same existential trajectory semantics. Operation
 capabilities and assurance remain explicit per adapter; a missing composition,
 reconstruction, or completeness capability is rejected before workspace
-creation. The direct-trajectory API is replaceable through
+creation. The fixed-path reachability API is replaceable through
+`HybridReachabilityAdapter` and returns a path-labelled joint relation with the
+configured limits and ordered operation trace. Its default implementation,
+`JointHReachabilityAdapter`, currently wraps the same full joint-H composer; it
+does not project intermediate coordinates or merge paths. This provides a
+replaceable reachability contract, but not yet an independent projected-set
+reachability algorithm. The direct-trajectory API is replaceable through
 `HybridDirectTrajectoryAdapter`; its default implementation,
 `JointHDirectTrajectoryAdapter`, builds a branch-labelled joint H relation and
 optimization program. Each direct adapter declares whether it preserves the
@@ -145,8 +151,7 @@ branch-labelled relation, which objective classes it supports, and its
 assurance level; the wrapper rejects missing branch or objective capabilities
 before dispatch. Injected adapters must preserve that result contract and
 return diagnostics or cancellation without publishing a partial portfolio.
-Separate reachability composition and complete-family verification adapters
-remain unimplemented.
+The complete-family verification adapter remains unimplemented.
 
 ## Initial supported profile and rejection boundary
 
@@ -224,8 +229,8 @@ records completed before a diagnostic or cancellation; path-program and
 portfolio builders propagate those failure reports without dropping the path
 identity. Solver-provider provenance remains attached to each branch
 execution. The trace records work performed by the current direct composer; it
-does not imply that a separate reachability adapter or hybrid family verifier
-has been implemented.
+does not imply that an independent projected-set reachability algorithm or a
+hybrid family verifier has been implemented.
 
 ## Independent test oracle requirements
 
