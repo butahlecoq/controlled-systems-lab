@@ -197,7 +197,8 @@ TEST_CASE("historical hull variants preserve literal support and exact certifica
                 geometry::make_basis_reuse_hull_reducer_registration(std::move(fallback)),
                 geometry::make_recursive_hull_reducer_registration(highs())};
             for (std::size_t method=0; method<registrations.size(); ++method) {
-                CAPTURE(cloud.problem.value,method);
+                CAPTURE(cloud.problem.value);
+                CAPTURE(method);
                 registry::Registry<registry::HullReducerPort> registry;
                 REQUIRE_FALSE(registry.add(registrations[method]));
                 auto plan=accepted(registry::prepare_pipeline(registry::select(registry,
@@ -220,7 +221,7 @@ TEST_CASE("historical hull variants preserve literal support and exact certifica
                 // interior/basic points are permitted and are never called vertices.
                 for (const auto& vertex : expected)
                     CHECK(std::find(actual.begin(),actual.end(),vertex)!=actual.end());
-                for (const Vector direction : {Vector{1,0},Vector{-1,0},Vector{0,1},Vector{0,-1},
+                for (const Vector& direction : {Vector{1,0},Vector{-1,0},Vector{0,1},Vector{0,-1},
                         Vector{1,1},Vector{-1,1},Vector{1,-1},Vector{-1,-1}}) {
                     CHECK(support(actual,direction)==support(expected,direction));
                     CHECK(support(actual,direction)==support(baseline_points,direction));
