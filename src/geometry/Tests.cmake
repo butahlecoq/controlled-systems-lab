@@ -93,7 +93,7 @@ csl_test_target(projection_predecessor_public_client geometry)
 
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
   add_executable(affine_sum_tests tests/contract/geometry/affine_sum_tests.cpp)
-  target_link_libraries(affine_sum_tests PRIVATE CSL::affine_sum CSL::highs_lp CSL::qhull_conversion CSL::phase_one doctest::doctest)
+  target_link_libraries(affine_sum_tests PRIVATE CSL::affine_sum CSL::polyhedral CSL::highs_lp CSL::qhull_conversion CSL::phase_one doctest::doctest)
   add_test(NAME affine_sum_tests COMMAND affine_sum_tests)
   csl_test_target(affine_sum_tests geometry)
 endif()

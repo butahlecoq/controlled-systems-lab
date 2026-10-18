@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/geometry/affine_sum.hpp>
+#include <csl/geometry/polyhedral_intersection.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/optimization/phase_one.hpp>
@@ -214,6 +215,35 @@ TEST_CASE("registered affine image preserves the literal shifted reversed interv
     REQUIRE(result.evidence.error_bound.has_value());
     CHECK(result.evidence.error_bound->bound==0.0);
     CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
+TEST_CASE("TEST-08 triangle intersection followed by affine image preserves the literal interval") {
+    const auto square=take(sets::make_h({{"chain-affine-square"},2,{}},
+        {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
+         take(numeric::snapshot_vector(Vector{1,0,1,0})),
+         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))}));
+    const auto cutting_halfspace=take(sets::make_h({{"chain-affine-cut"},2,{}},
+        {take(numeric::snapshot(Matrix{1,2,{1,1}})),
+         take(numeric::snapshot_vector(Vector{1})),
+         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))}));
+    const auto triangle=take(geometry::polyhedral::intersect_h(
+        square,cutting_halfspace,{"chain-affine-triangle"}));
+    const auto triangle_representation=triangle.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(triangle_representation));
+    const auto& triangle_h=std::get<sets::HRepresentation>(triangle_representation);
+    CHECK(triangle.metadata()->set.dimension==2);
+    CHECK(triangle_h.inequalities.rows()<=5);
+    CHECK(triangle_h.inequalities.cols()==2);
+    CHECK(triangle_h.equalities.rows()==0);
+
+    const auto req=request(AffineImage{triangle.as_handle(),{1,2,{1,0}},{0}},
+        "triangle-intersection-affine-image");
+    const auto result=take(run(req,dependencies()));
+    CHECK(support(result.output,{1})==doctest::Approx(1));
+    CHECK(support(result.output,{-1})==doctest::Approx(0));
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    CHECK(result.evidence.reference.identity==req.identity);
+    CHECK(result.evidence.reference.inputs==std::vector<SetId>{{"chain-affine-triangle"}});
 }
 
 TEST_CASE("fixed-seed integer rectangles have independently enumerated affine supports") {
