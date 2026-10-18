@@ -82,6 +82,34 @@ HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& sys
     return HybridPathProgram{path,std::move(relation),std::get<TerminalObjective>(std::move(lifted)),std::move(*program)};
 }
 
+HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::HybridSystem& system,
+    const model::HybridRequest& request,ProblemId problem,model::HybridEnumerationLimits enumeration_limits,
+    model::HybridRelationLimits relation_limits,optimization::ObjectivePolicy policy,
+    std::stop_token cancellation) {
+    if(problem.value.empty()) return one({DiagnosticCode::invalid_input,"hybrid.program.problem","Problem identity must be nonempty"});
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid portfolio construction was cancelled before profile admission"};
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    if(!profile_errors.empty()) return profile_errors;
+    const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,enumeration_limits);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
+    const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
+    std::vector<HybridPathProgram> programs;
+    programs.reserve(paths.size());
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid portfolio construction stopped between edge paths; no programs were published"};
+        auto built=build_hybrid_path_program(system,request,path,problem,relation_limits,policy,cancellation);
+        if(const auto* errors=std::get_if<Diagnostics>(&built)) return *errors;
+        if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
+        programs.push_back(std::get<HybridPathProgram>(std::move(built)));
+    }
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid portfolio construction was cancelled before publication"};
+    return programs;
+}
+
 HybridPortfolioExecution execute_hybrid_path_programs(
     std::span<const HybridPathProgram> programs,
     const registry::PreparedProvider<registry::LPPort>& lp,

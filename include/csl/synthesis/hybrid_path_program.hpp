@@ -15,12 +15,21 @@ struct HybridPathProgram {
     std::variant<LinearProgram, ConvexProgram> program;
 };
 
+using HybridPortfolioProgramResult = std::variant<std::vector<HybridPathProgram>, Diagnostics, OperationStopped>;
+
 using HybridPathProgramResult = std::variant<HybridPathProgram, Diagnostics, OperationStopped>;
 
 // Builds one directly formulated program per edge path. Branch identity is
 // encoded into the generated ProgramId so parallel paths remain separate.
 HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem&,
     const model::HybridRequest&, const model::HybridPath&, ProblemId,
+    model::HybridRelationLimits, optimization::ObjectivePolicy = {},
+    std::stop_token cancellation = {});
+
+// Enumerates and builds the complete allowed branch portfolio transactionally:
+// no partial branch-program list is returned on a limit, capability, or stop.
+HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::HybridSystem&,
+    const model::HybridRequest&, ProblemId, model::HybridEnumerationLimits,
     model::HybridRelationLimits, optimization::ObjectivePolicy = {},
     std::stop_token cancellation = {});
 

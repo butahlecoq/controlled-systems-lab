@@ -191,6 +191,27 @@ TEST_CASE("hybrid direct path programs admit quadratic and residual terminal obj
     CHECK(std::get<ConvexProgram>(std::get<HybridPathProgram>(residual).program).original_objective().dimension()==5);
 }
 
+TEST_CASE("hybrid portfolio builder returns every parallel edge branch transactionally") {
+    auto system=example_system();
+    auto parallel=system.edges.front();
+    parallel.id={"switch-parallel"};
+    system.edges.push_back(std::move(parallel));
+    const auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==2);
+    CHECK(programs[0].path.modes==programs[1].path.modes);
+    CHECK(programs[0].path.edges!=programs[1].path.edges);
+    const auto& first=std::get<LinearProgram>(programs[0].program);
+    const auto& second=std::get<LinearProgram>(programs[1].program);
+    CHECK(first.identity().program!=second.identity().program);
+
+    const auto limited=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{4,64,1024});
+    CHECK(std::holds_alternative<Diagnostics>(limited));
+}
+
 TEST_CASE("hybrid branch execution retains path and solver provenance on rejection") {
     auto built=build_hybrid_path_program(example_system(),example_request(),example_path(),
         {"hybrid-problem"},{16,64,1024});
