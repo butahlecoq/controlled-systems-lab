@@ -1,0 +1,13 @@
+{
+  "schema": "csl.opt12-release-build-log/1",
+  "source_commit": "7b732a53716ce963af83095fd2aeca8a681b76c4",
+  "configuration": "Release",
+  "generator": "Visual Studio 17 2022",
+  "command": "cmake --build build/dev-windows-opt12-0e83615 --config Release --parallel 8",
+  "configure_command": "cmake -S . -B build/dev-windows-opt12-0e83615 -DCSL_BUILD_REPORTS=ON",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 0,
+  "result": "success",
+  "log_file": "opt12-msbuild-output.log"
+}

@@ -240,7 +240,7 @@ def reference_matches(trial, scenario):
     return residual_passes(result["primal_residuals"], ("rows", "variables")) and residual_passes(result["dual_residuals"], ("stationarity", "signs"))
 
 
-def native_iterations(raw):
+def native_iterations(raw, expected_adapter_version=None):
     prefix = raw.split("\nnative.log:", 1)[0]
     fields = {}
     for line in prefix.splitlines():
@@ -248,7 +248,10 @@ def native_iterations(raw):
         key, value = line.split("=", 1)
         require(key not in fields, "duplicate native diagnostic key")
         fields[key] = value
-    require(fields.get("adapter.version") == "1.0.0+highs.1.11.0" and fields.get("native.version") == "1.11.0", "unsupported diagnostic version")
+    adapter_version = fields.get("adapter.version")
+    require(adapter_version in {"1.0.0+highs.1.11.0", "1.1.0+highs.1.11.0"} and fields.get("native.version") == "1.11.0", "unsupported diagnostic version")
+    if expected_adapter_version is not None:
+        require(adapter_version == expected_adapter_version, "diagnostic/backend identity mismatch")
     if fields.get("native.info") != "available":
         return {"available": False, "reason": "native info unavailable"}
     text = fields.get("native.simplex_iterations", "")
@@ -272,7 +275,12 @@ def _validate_view(view):
     provenance = payload["provenance"]
     require(re.fullmatch(r"[0-9a-f]{40}", provenance["source_commit"]) is not None, "source SHA required")
     require(type(provenance["tracked_clean"]) is bool and HEX.fullmatch(provenance["executable_sha256"]) is not None, "executable provenance")
-    require(provenance["backend"] == {"id": backend_id, "version": "1.0.0+highs.1.11.0"}, "backend identity")
+    backend_versions = {"csl.lp.highs": {"1.0.0+highs.1.11.0", "1.1.0+highs.1.11.0"},
+                        "csl.convex.highs": {"1.0.0+highs.1.11.0"}}
+    require(isinstance(provenance["backend"], dict) and
+            provenance["backend"].get("id") == backend_id and
+            provenance["backend"].get("version") in backend_versions.get(backend_id, set()),
+            "backend identity")
     if convex:
         if payload["purpose"]=="measurement" or "native_archive_sha256" in provenance:
             require(provenance["native_archive_sha256"]==CONVEX_ARCHIVE,"convex provenance archive differs from diagnostic pin")
@@ -376,7 +384,7 @@ def artifact_reference(ref):
 
 def artifact_links(report_id,ref="main"):
     label=artifact_reference(ref)
-    require(re.fullmatch(r"issue3-finite-catalogue-(?:[0-9a-f]{16}|[0-9a-f]{64})", report_id) is not None or re.fullmatch(r"b08-exact-[0-9a-f]{16}|b08-displayed-exact-[0-9a-f]{64}",report_id) is not None or re.fullmatch(r"geo06-(?:[0-9a-f]{16}|[0-9a-f]{64})",report_id) is not None or re.fullmatch(r"opt07-(?:[0-9a-f]{16}|[0-9a-f]{64})",report_id) is not None or re.fullmatch(r"(?:(?:lp|convex|opt04)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|opt05-hull-\d{8}-[0-9a-f]{8}|opt06-basis-reuse-\d{8}-[0-9a-f]{8}-r2|(?:opt05-hull|geo03)-\d{8}-[0-9a-f]{64}|opt06-basis-reuse-\d{8}-[0-9a-f]{8}-[0-9a-f]{64}|geo03-\d{8}-[0-9a-f]{12}|geo0[24]-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|geo05-[0-9a-f]{16}|geo05-[0-9a-f]{64}|syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|syn02-[0-9a-f]{64}|syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|syn01-[0-9a-f]{64}|syn07-ts01-\d{8}-[0-9a-f]{12}|syn07-ts01-[0-9a-f]{64}|syn04-strategy-b-ts0[12]-\d{8}-[0-9a-f]{8,12}|syn04-strategy-b-ts0[12]-[0-9a-f]{64}|syn03-strategy-a-ts01-\d{8}-[0-9a-f]{8,12}|syn03-strategy-a-ts01-[0-9a-f]{64}|syn03-strategy-a-ts02-\d{8}-[0-9a-f]{8,12}|syn03-strategy-a-ts02-[0-9a-f]{64}|syn-ts01-paired-20261014-b7f1ac0|syn-ts01-paired-[0-9a-f]{64})",report_id) is not None,"unsafe report identity")
+    require(re.fullmatch(r"issue3-finite-catalogue-(?:[0-9a-f]{16}|[0-9a-f]{64})", report_id) is not None or re.fullmatch(r"b08-exact-[0-9a-f]{16}|b08-displayed-exact-[0-9a-f]{64}",report_id) is not None or re.fullmatch(r"geo06-(?:[0-9a-f]{16}|[0-9a-f]{64})",report_id) is not None or re.fullmatch(r"opt07-(?:[0-9a-f]{16}|[0-9a-f]{64})",report_id) is not None or re.fullmatch(r"(?:(?:lp|convex|opt04)-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|opt05-hull-\d{8}-[0-9a-f]{8}|opt06-basis-reuse-\d{8}-[0-9a-f]{8}-r2|(?:opt05-hull|geo03)-\d{8}-[0-9a-f]{64}|opt06-basis-reuse-\d{8}-[0-9a-f]{8}-[0-9a-f]{64}|geo03-\d{8}-[0-9a-f]{12}|geo0[24]-\d{8}T\d{6}Z-(?:[0-9a-f]{12}|[0-9a-f]{64})|geo05-[0-9a-f]{16}|geo05-[0-9a-f]{64}|opt12-[0-9a-f]{12}|opt12-warm-start-[0-9a-f]{64}|syn02-terminal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|syn02-[0-9a-f]{64}|syn01-nominal-\d{8}-[0-9a-f]{8}-[0-9a-f]{12}|syn01-[0-9a-f]{64}|syn07-ts01-\d{8}-[0-9a-f]{12}|syn07-ts01-[0-9a-f]{64}|syn04-strategy-b-ts0[12]-\d{8}-[0-9a-f]{8,12}|syn04-strategy-b-ts0[12]-[0-9a-f]{64}|syn03-strategy-a-ts01-\d{8}-[0-9a-f]{8,12}|syn03-strategy-a-ts01-[0-9a-f]{64}|syn03-strategy-a-ts02-\d{8}-[0-9a-f]{8,12}|syn03-strategy-a-ts02-[0-9a-f]{64}|syn-ts01-paired-20261014-b7f1ac0|syn-ts01-paired-[0-9a-f]{64})",report_id) is not None,"unsafe report identity")
     base="https://github.com/butahlecoq/controlled-systems-lab/"
     path="/reports/algorithm-results/"+report_id
     return base+"tree/"+ref+path,base+"blob/"+ref+path+".zip",label
@@ -782,6 +790,11 @@ def _validate_trial_rows(trials,scenarios,provenance,clock,environment,convex,ba
                         require(all(block['context'][key]==environment[key] for key in ('absolute_tolerance','relative_tolerance')),
                                 'convex residual context differs from declared numerical policy')
             require(isinstance(result["raw_diagnostics"],str), "raw diagnostics required")
+            if not convex:
+                actual_backend = trial["registry"].get("actual")
+                if isinstance(actual_backend, dict) and actual_backend.get("id") == "csl.lp.highs":
+                    require(actual_backend == provenance["backend"], "returned LP backend differs from report provenance")
+                    native_iterations(result["raw_diagnostics"], actual_backend["version"])
         if convex:
             require(type(trial["public_run_entered"]) is bool and trial["public_run_entered"]==trial["timings"]["public_run"]["available"],"public entry boundary mismatch")
             require(trial["native_phases"]==convex_native_phases(trial,convex_route(scenarios[key]),scenarios[key]["solver"]["identity"]["program"]),"native phase projection differs")

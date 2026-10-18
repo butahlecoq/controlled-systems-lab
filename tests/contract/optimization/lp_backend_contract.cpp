@@ -144,7 +144,7 @@ struct Adapter {
     Factory limited;
 };
 std::vector<Adapter> selected() {
-    return {{{{"csl.lp.highs"},"1.0.0+highs.1.11.0"},
+    return {{{{"csl.lp.highs"},"1.1.0+highs.1.11.0"},
         []{return adapters::lp::make_highs_registration();},true,{},{},
         []{return adapters::lp::make_highs_registration({0});}}};
 }

@@ -5,6 +5,7 @@
 namespace csl::adapters::lp {
 struct HighsLPOptions {
     std::optional<std::size_t> simplex_iteration_limit;
+    bool cross_query_warm_start{};
 };
 using HighsLPRegistrationResult =
     std::variant<registry::Registration<registry::LPPort>, Diagnostics>;

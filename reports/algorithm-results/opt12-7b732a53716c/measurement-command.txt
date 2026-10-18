@@ -1,0 +1,1 @@
+python scripts/reports/opt12_collect.py --exe build/dev-windows/Release/csl_opt12_warm_start_measure.exe --build build/dev-windows --source-commit 7b732a53716ce963af83095fd2aeca8a681b76c4 --repetitions 7 --out <new-output-directory>

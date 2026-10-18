@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="430" viewBox="0 0 900 430">
+<rect width="900" height="430" fill="white"/>
+<style>text{font:14px system-ui,sans-serif;fill:#17202a}.axis{stroke:#687782}.cold{fill:#56758a}.warm{fill:#d27632}</style>
+<text x="70" y="30" font-weight="bold">Public solve wall time (ns)</text>
+<line class="axis" x1="70" y1="65" x2="70" y2="340"/>
+<text x="70" y="91">tiny-overhead</text>
+<rect class="cold" x="70" y="99" width="1.5" height="17"/>
+<text x="76.5" y="113">cold: 178800</text>
+<rect class="warm" x="70" y="124" width="1.0" height="17"/>
+<text x="76.0" y="138">warm: 46700</text>
+<text x="70" y="186">small-reuse</text>
+<rect class="cold" x="70" y="194" width="1.7" height="17"/>
+<text x="76.7" y="208">cold: 204400</text>
+<rect class="warm" x="70" y="219" width="1.0" height="17"/>
+<text x="76.0" y="233">warm: 64400</text>
+<text x="70" y="281">transfer-cost</text>
+<rect class="cold" x="70" y="289" width="346.2" height="17"/>
+<text x="421.2" y="303">cold: 4.22446e+07</text>
+<rect class="warm" x="70" y="314" width="360.0" height="17"/>
+<text x="435.0" y="328">warm: 4.39266e+07</text>
+<text x="510" y="30" font-weight="bold">Native component work (s)</text>
+<line class="axis" x1="510" y1="65" x2="510" y2="340"/>
+<text x="510" y="91">tiny-overhead</text>
+<rect class="cold" x="510" y="99" width="1.0" height="17"/>
+<text x="516.0" y="113">cold: 0.0001019</text>
+<rect class="warm" x="510" y="124" width="1.0" height="17"/>
+<text x="516.0" y="138">warm: 3.15e-05</text>
+<text x="510" y="186">small-reuse</text>
+<rect class="cold" x="510" y="194" width="1.2" height="17"/>
+<text x="516.2" y="208">cold: 0.0001244</text>
+<rect class="warm" x="510" y="219" width="1.0" height="17"/>
+<text x="516.0" y="233">warm: 4.48e-05</text>
+<text x="510" y="281">transfer-cost</text>
+<rect class="cold" x="510" y="289" width="340.4" height="17"/>
+<text x="855.4" y="303">cold: 0.0357031</text>
+<rect class="warm" x="510" y="314" width="360.0" height="17"/>
+<text x="875.0" y="328">warm: 0.0377611</text>
+<rect class="cold" x="70" y="400" width="14" height="14"/><text x="90" y="413">cold</text>
+<rect class="warm" x="150" y="400" width="14" height="14"/><text x="170" y="413">warm</text>
+</svg>
