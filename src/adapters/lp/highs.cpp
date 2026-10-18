@@ -244,6 +244,7 @@ class HighsLPWorkspace final : public LPWorkspace {
         auto retry_cold = [&](std::string_view cause) -> ProgramOutcome {
             raw << "\nwarm_start.fallback=" << cause;
             const auto warm_diagnostics=raw.str();
+            guard.detach();
             native_.reset();
             loaded_.reset();
             warm_basis_.reset();

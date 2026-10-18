@@ -166,8 +166,6 @@ TEST_CASE("warm starts preserve independently checked results across a degenerat
         {-1},0,{2,1,{0,1,2},{0,0},{1,1}},{{0,{}}},{{{},1},{{},1}}}));
     const auto changed_rows=accepted(make_linear_program({{{"native-test"},{"warm-degenerate-rhs-change"}},
         {-1},0,{2,1,{0,1,2},{0,0},{1,1}},{{0,{}}},{{{},1},{{},0.5}}}));
-    const auto infeasible=accepted(make_linear_program({{{"native-test"},{"warm-degenerate-infeasible"}},
-        {-1},0,{2,1,{0,1,2},{0,0},{1,1}},{{0,{}}},{{{},1},{{},-1}}}));
     auto registration=accepted(make_highs_registration({.cross_query_warm_start=true}));
     auto worker=registration.factory(degenerate);
     const auto first=accepted(worker->solve(degenerate,context()));
@@ -179,6 +177,17 @@ TEST_CASE("warm starts preserve independently checked results across a degenerat
     CHECK(second.raw_diagnostics.find("warm_start.setup_seconds=")!=std::string::npos);
     CHECK(second.raw_diagnostics.find("native.load_seconds=")!=std::string::npos);
     CHECK(second.raw_diagnostics.find("native.solve_seconds=")!=std::string::npos);
+}
+
+TEST_CASE("an infeasible query after an accepted degenerate warm basis returns a verified cold retry") {
+    const auto degenerate=accepted(make_linear_program({{{"native-test"},{"warm-degenerate-retry-source"}},
+        {-1},0,{2,1,{0,1,2},{0,0},{1,1}},{{0,{}}},{{{},1},{{},1}}}));
+    const auto infeasible=accepted(make_linear_program({{{"native-test"},{"warm-degenerate-infeasible"}},
+        {-1},0,{2,1,{0,1,2},{0,0},{1,1}},{{0,{}}},{{{},1},{{},-1}}}));
+    auto registration=accepted(make_highs_registration({.cross_query_warm_start=true}));
+    auto worker=registration.factory(degenerate);
+    const auto primed=accepted(worker->solve(degenerate,context()));
+    cost(primed,degenerate,-1);
     const auto infeasible_result=accepted(worker->solve(infeasible,context()));
     const auto cold_infeasible=cold_result(infeasible);
     CHECK(infeasible_result.termination==Termination::completed);
