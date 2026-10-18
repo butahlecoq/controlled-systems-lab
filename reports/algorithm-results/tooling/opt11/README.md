@@ -20,10 +20,17 @@ contains exactly `records.json`, `collection.json`, `raw-stdout.jsonl`,
 durations, LP call counts, recursive leaf/merge metrics, peak merge points,
 parallel overhead, runtime-reported HiGHS registration identity/version,
 configured single-thread/presolve/parallel settings, and explicit unavailable
-counters. The report is exploratory
-and makes no universal speedup or scalability claim. A publisher adapter,
-catalogue entry, independent report review, Pages deploy, and live byte/hash
-verification remain publication gates.
+counters. The report is exploratory and makes no universal speedup or
+scalability claim. The measured source commit is
+`488d4ca8888d91c44b64d5d2f0baf564d1c28ae7`. The validated native bundle is
+[`opt11-8cfbc0c65f420dfd`](../../opt11-8cfbc0c65f420dfd/), with native source
+archive [`opt11-8cfbc0c65f420dfd.source.zip`](../../opt11-8cfbc0c65f420dfd.source.zip).
+Its schema-3 publication identity is
+`opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865`;
+the public archive is
+[`opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865.zip`](../../opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865.zip).
+The public Pages URL and live hashes remain pending until the reviewed artifact
+is deployed from `main` and verified there.
 
 ## Functional smoke
 

@@ -35,6 +35,27 @@ review. Main-only Pages deployment and live exact-byte verification remain
 publication gates. OPT-07 issue #38 remains open for grouped and streaming
 reduction work.
 
+## OPT-11 recursive split-and-merge hull report
+
+The reviewed OPT-11 source is `488d4ca8888d91c44b64d5d2f0baf564d1c28ae7`.
+Its native bundle is
+[`opt11-8cfbc0c65f420dfd`](../../reports/algorithm-results/opt11-8cfbc0c65f420dfd/)
+and its schema-3 publication ID is
+`opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865`.
+The collection contains 18 complete alternating baseline/recursive pairs,
+with six measured pairs on each of three fixed 33-point clouds. The independent
+exact-dyadic oracle validated 1,274 deletion certificates; all 42 calls
+completed. In baseline/recursive order, median public-call durations were
+2,704,100/2,786,750 ns for `signed-grid`, 2,778,150/2,822,650 ns for
+`duplicate-collinear`, and 2,685,650/3,196,350 ns for `rank-one-offset`.
+Ranges overlap and no performance winner is supported. Timing includes
+recursive child LP-workspace creation and root async scheduling; it excludes
+parsing, injected workspace creation, validation, serialization and rendering.
+The source-mapped limiter is unavailable. These observations cover only the
+three fixed binary64 clouds on the recorded host/backend and establish no
+universal speedup, application-scale behavior, or scalability claim. Main-only
+deployment and live URL/hash verification remain required publication gates.
+
 ## GEO-07 registered dependent generator sum report
 
 The bounded GEO-07 dependent-sum bundle

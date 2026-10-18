@@ -260,6 +260,18 @@
       "measured_scope": "21 verified measured 100-call batches across three fixed ordered-hull clouds; performance interpretation inconclusive",
       "evidence_limits": "Three fixed small binary64 clouds; independent exact-dyadic deletion certificates and literal support checks apply only to represented inputs; single-adapter 100-call batches with no comparator, speedup, source-mapped limiter profile, or scalability claim",
       "zip_sha256": "287ac701e0c1f2d19d36f31747bde732fefa548398e8632738065e1b85bc167d"
+    },
+    {
+      "report_id": "opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865",
+      "payload_sha256": "1a6e2a877aadfac30b7336261f886a4c2ce164c8489f30e28b4912a6fa28faef",
+      "source_commit": "488d4ca8888d91c44b64d5d2f0baf564d1c28ae7",
+      "zip_sha256": "90b609866df72e0432ae7ef9dbe4f4692a321c6d7b84225a0cb1bf6254704767",
+      "report_kind": "opt11-recursive-hull",
+      "measured_scope": "18 alternating baseline/recursive pairs across 3 fixed clouds; 18 pairs complete; performance interpretation inconclusive",
+      "evidence_limits": "Fixed finite binary64 point clouds; exact dyadic certificates cover the represented inputs. Seven alternating paired batches per fixture; backend and host specific observations only; no universal speedup, application-scale, or scalability claim.",
+      "payload_schema": "csl.opt11-recursive-hull-report/1",
+      "native_payload_sha256": "8cfbc0c65f420dfd4aa6b8887f8719207037d9a25de21a3120e03a20b895807f",
+      "source_report_id": "opt11-8cfbc0c65f420dfd"
     }
   ]
 }
