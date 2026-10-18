@@ -31,4 +31,8 @@ csl_add_library(csl_witness_selector STATIC src/synthesis/witness_selector.cpp)
 
 target_link_libraries(csl_witness_selector PUBLIC CSL::registry CSL::optimization CSL::strategy_ts01)
 
+csl_add_library(csl_hybrid_path_program STATIC src/synthesis/hybrid_path_program.cpp)
+
+target_link_libraries(csl_hybrid_path_program PUBLIC CSL::model CSL::sets CSL::optimization CSL::convex)
+
 csl_install_headers(synthesis)
