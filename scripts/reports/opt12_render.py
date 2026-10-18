@@ -76,13 +76,19 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
     except zipfile.BadZipFile as error:
         raise ValueError("source-mapped profile archive is invalid") from error
     profile_trace = limiter_profile.get("trace", {})
-    if (type(profile_trace.get("target_process_samples")) is not int or profile_trace["target_process_samples"] <= 0
+    target_samples = profile_trace.get("target_process_samples") if isinstance(profile_trace, dict) else None
+    stack_rows = limiter_profile["dominant_sampled_stacks"]
+    if (type(target_samples) is not int or target_samples <= 0
             or profile_trace.get("lost_events") != 0 or profile_trace.get("lost_buffers") != 0
-            or not limiter_profile["dominant_sampled_stacks"]
-            or any(not isinstance(row, dict) or not isinstance(row.get("symbol"), str)
+            or not stack_rows
+            or any(not isinstance(row, dict)
+                   or not isinstance(row.get("symbol"), str) or not row["symbol"].strip()
                    or type(row.get("inclusive_hits")) is not int
+                   or not 0 <= row["inclusive_hits"] <= target_samples
                    or type(row.get("percent_of_target_samples")) not in (int, float)
-                   for row in limiter_profile["dominant_sampled_stacks"])):
+                   or not math.isfinite(row["percent_of_target_samples"])
+                   or not 0 <= row["percent_of_target_samples"] <= 100
+                   for row in stack_rows)):
         raise ValueError("source-mapped profile has missing samples or lost ETW events")
     with (root / "trials.csv").open(encoding="utf-8", newline="") as stream:
         csv_rows = list(csv.DictReader(stream))

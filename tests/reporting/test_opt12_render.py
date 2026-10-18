@@ -153,6 +153,21 @@ class Opt12RenderTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "profile archive hash differs"):
                 opt12_render.parse_evidence(records)
 
+    def test_source_mapped_profile_rejects_out_of_range_sample_statistics(self):
+        for field, value in (("inclusive_hits", -1), ("inclusive_hits", 101),
+                             ("percent_of_target_samples", -0.1),
+                             ("percent_of_target_samples", 100.1),
+                             ("percent_of_target_samples", float("nan"))):
+            with self.subTest(field=field, value=value), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                records = fixture(root)
+                profile_path = root / "limiter-profile.json"
+                profile = json.loads(profile_path.read_text(encoding="utf-8"))
+                profile["dominant_sampled_stacks"][0][field] = value
+                profile_path.write_text(json.dumps(profile), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "source-mapped profile has missing samples"):
+                    opt12_render.parse_evidence(records)
+
     def test_rehashed_noncanonical_fixture_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
