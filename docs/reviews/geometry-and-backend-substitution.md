@@ -2,6 +2,7 @@
 
 Issue: [REVIEW-02 / #70](https://github.com/butahlecoq/controlled-systems-lab/issues/70)  
 Reviewed base: `599701fb1bd3174d10c9b5d95e9b843d57f67623` (`origin/main`, 2026-10-18)  
+Reviewed head: `2ee69e5bce14b14aa28cefc208e1bc3686549679`
 Scope: implemented polyhedral geometry, hull membership/reduction, H/V conversion, LP/convex contracts, registration and approximation guarantee routes.
 
 ## Review result
@@ -16,7 +17,7 @@ This review covers the current implementation and recorded evidence. It does not
 
 `QhullOptions` can cap input ambient dimension and row count. With those limits unset, admission only checks Qhull's signed integer widths. H-to-V conversion also creates dense Eigen copies, a flattened native coordinate buffer, facet and vertex vectors, and an owning output snapshot. Output size can grow combinatorially with the input. There is no Qhull-specific byte reservation, output vertex/facet limit, or peak allocation estimate.
 
-The conversion contract already discloses the absence of default dimension, row, and combinatorial caps and identifies available memory as an implementation limit. This is therefore a known capability gap, not an undisclosed guarantee or a reason to misclassify an incomplete result. Task-level memory reservations can limit admission of concurrent work, but do not cap this adapter's allocator or native RSS. Applications needing a hard peak-memory limit must not treat this adapter as providing one until an operation-level reservation or output cap is available.
+The conversion contract already discloses the absence of default dimension, row, and combinatorial caps and identifies available memory as an implementation limit. This is therefore a known capability gap, not an undisclosed guarantee or a reason to misclassify an incomplete result. Task-level memory reservations can limit admission of concurrent work, but do not cap this adapter's allocator or native RSS. A hard peak-memory claim requires an enforceable allocation or byte budget; an output-count cap can supplement it but cannot bound Qhull's internal or transient allocations by itself.
 
 Relevant evidence: `src/adapters/polyhedral/qhull.cpp` admission and allocation paths (lines 103–131, 248–254, 406–425, 593–614); `include/csl/adapters/polyhedral/qhull.hpp` options; `docs/contracts/polyhedral-conversion.md` (lines 29–32).
 
@@ -69,4 +70,4 @@ The corresponding CTest selection passed: 6/6 tests. This verifies the current W
 
 ## Disposition
 
-The P2 allocation limitation is explicitly documented and does not contradict an advertised hard memory cap, so no blocking fix was opened from this review. The architecture should add a Qhull operation-level reservation or output cap before describing conversions as resource-bounded. All other acceptance areas reviewed above are clear within their declared profiles and evidence limits.
+The P2 allocation limitation is explicitly documented and does not contradict an advertised hard memory cap, so no blocking fix was opened from this review. Before describing conversions as having a hard peak-memory bound, the architecture needs enforceable allocation controls or a byte budget; an output cap can provide an additional bound on returned data. All other acceptance areas reviewed above are clear within their declared profiles and evidence limits.
