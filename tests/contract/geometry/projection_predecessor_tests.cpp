@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/reachability/nominal_predecessor.hpp>
 #include <csl/geometry/operation_admission.hpp>
+#include <csl/geometry/polyhedral_intersection.hpp>
 #include <iostream>
 #include <limits>
 #include <stop_token>
@@ -216,6 +217,43 @@ TEST_CASE("projection of the rational unit-square triangle is the exact interval
     }
     CHECK(has_lower);
     CHECK(has_upper);
+    CHECK(check_geometry_evidence(result.evidence,request).empty());
+}
+
+TEST_CASE("TEST-08 triangle intersection followed by projection preserves the literal interval") {
+    const auto square=h("chain-unit-square",2,
+        {4,2,{1,0,-1,0,0,1,0,-1}},{1,0,1,0},
+        {0,2,{}},{},{"x","y"});
+    const auto cutting_halfspace=h("chain-x-plus-y-halfspace",2,
+        {1,2,{1,1}},{1},{0,2,{}},{},{"x","y"});
+    const auto triangle=take(geometry::polyhedral::intersect_h(
+        square,cutting_halfspace,{"chain-unit-triangle"}));
+    const auto triangle_representation=triangle.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(triangle_representation));
+    const auto& triangle_h=std::get<sets::HRepresentation>(triangle_representation);
+    CHECK(triangle.metadata()->set.dimension==2);
+    CHECK(triangle_h.inequalities.cols()==2);
+    CHECK(triangle_h.inequalities.rows()<=5);
+    CHECK(triangle_h.equalities.rows()==0);
+    CHECK(contains(triangle.as_handle(),{0,0}));
+    CHECK(contains(triangle.as_handle(),{1,0}));
+    CHECK(contains(triangle.as_handle(),{0,1}));
+    CHECK_FALSE(contains(triangle.as_handle(),{0.75,0.75}));
+
+    const auto request=projection(triangle.as_handle(),{0});
+    const auto result=take(project(request,geometry::polyhedral::ProjectionOutput::h));
+    CHECK(result.output.metadata.dimension==1);
+    CHECK(contains(result.output,{0}));
+    CHECK(contains(result.output,{0.5}));
+    CHECK(contains(result.output,{1}));
+    CHECK_FALSE(contains(result.output,{-0.25}));
+    CHECK_FALSE(contains(result.output,{1.25}));
+    const auto projected_representation=take(sets::from_handle(result.output)).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(projected_representation));
+    const auto& projected_h=std::get<sets::HRepresentation>(projected_representation);
+    CHECK(projected_h.inequalities.cols()==1);
+    CHECK(projected_h.inequalities.rows()<=4);
+    CHECK(projected_h.equalities.rows()==0);
     CHECK(check_geometry_evidence(result.evidence,request).empty());
 }
 
