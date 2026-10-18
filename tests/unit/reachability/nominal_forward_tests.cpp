@@ -4,6 +4,7 @@
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
+#include <array>
 #include <limits>
 #include <iostream>
 #include <stop_token>
@@ -142,6 +143,41 @@ TEST_CASE("two step integrator returns literal reachable marginals and recovery 
     range(maps[1].source,0,1,{"u"});range(maps[1].target,0,1,{});
     range(maps[2].source,0,2,{});range(maps[2].target,0,2);
     CHECK(tube.stages[2].operation_lineage[0].reference.identity.request.value.ends_with("2/affine-state"));
+}
+TEST_CASE("clipped T-S01 chain retains literal marginals and stage shape counts") {
+    auto problem=integrator();
+    problem.states[1]=interval("X1-clipped",0,0.5);
+    const auto resolved_problem=resolved(std::move(problem));
+    const auto outcome=nominal_forward(resolved_problem,{"clipped-tube"},dependencies(),{});
+    if(!std::holds_alternative<ForwardTube>(outcome))explain(outcome);
+    REQUIRE(std::holds_alternative<ForwardTube>(outcome));
+    const auto& tube=std::get<ForwardTube>(outcome);
+    REQUIRE(tube.stages.size()==3);
+    range(tube.stages[0].marginal.output,0,0);
+    range(tube.stages[1].marginal.output,0,0.5);
+    range(tube.stages[2].marginal.output,0,1.5);
+
+    const auto shape=[](const SetHandle& set) {
+        const auto data=take(sets::from_handle(set));
+        const auto representation=data.representation();
+        const auto* h=std::get_if<sets::HRepresentation>(&representation);
+        REQUIRE(h);
+        return std::array<std::size_t,5>{data.metadata()->set.dimension,
+            h->inequalities.rows(),h->equalities.rows(),
+            h->inequalities.rows()*h->inequalities.cols(),
+            h->equalities.rows()*h->equalities.cols()};
+    };
+    using Shape=std::array<std::size_t,5>;
+    const Shape stage1_joint{3,6,2,18,6},stage1_propagation{1,4,0,4,0},
+        stage1_marginal{1,4,0,4,0},stage2_joint{3,8,1,24,3},
+        stage2_propagation{1,4,0,4,0},stage2_marginal{1,4,0,4,0};
+    CHECK(shape(tube.stages[1].joint_factor)==stage1_joint);
+    CHECK(shape(tube.stages[1].propagation_factor)==stage1_propagation);
+    CHECK(shape(tube.stages[1].marginal.output)==stage1_marginal);
+    CHECK(shape(tube.stages[2].joint_factor)==stage2_joint);
+    CHECK(shape(tube.stages[2].propagation_factor)==stage2_propagation);
+    CHECK(shape(tube.stages[2].marginal.output)==stage2_marginal);
+    CHECK(tube.stages[2].operation_lineage.size()==6);
 }
 TEST_CASE("LTV uses authored stage order offset and next constraints") {
     auto p=integrator();p.initial=KnownInitial{{1}};p.states={interval("X0",0,2),interval("X1",3,4),interval("X2",-5,-4)};
