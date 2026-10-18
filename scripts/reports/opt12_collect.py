@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import collector_common as common
-from opt12_fixtures import SCENARIOS, fixture_descriptions
+from opt12_fixtures import SCENARIOS, fixture_descriptions, validate_driver_fixture_events
 import report_data as data
 
 
@@ -178,7 +178,10 @@ def main() -> int:
         validate_build_identity(build_record, source_commit=head, build_owner=build_owner,
                                 compiler=compiler, graph=graph, cache=cache,
                                 system_processor=system_processor)
-        trials = parsed
+        validate_driver_fixture_events(parsed)
+        trials = [row for row in parsed if row.get("schema") == "csl.opt12-cost-trial/1"]
+        if len(trials) + len(SCENARIOS) != len(parsed):
+            raise ValueError("driver emitted an unknown OPT-12 event")
         if any(row.get("schema") != "csl.opt12-cost-trial/1" for row in trials):
             raise ValueError("unknown trial schema")
         expected_count = args.repetitions * len(SCENARIOS) * 2

@@ -12,7 +12,7 @@ import statistics
 import zipfile
 from pathlib import Path
 
-from opt12_fixtures import SCENARIOS, fixture_descriptions
+from opt12_fixtures import SCENARIOS, fixture_descriptions, validate_driver_fixture_events
 
 EVIDENCE_FILES = ("raw-events.jsonl", "raw-stderr.txt", "release-build-log.txt",
                   "build-provenance.json", "executable.sha256", "measurement.exe",
@@ -41,8 +41,12 @@ def parse_evidence(records_path: Path) -> tuple[dict, list[dict], dict[str, byte
     events = [json.loads(line) for line in raw_stdout.decode("utf-8").splitlines() if line]
     if not events or events[0].get("schema") != "csl.opt12-build/1":
         raise ValueError("raw event stream lacks its build identity")
-    if events[1:] != trials:
+    raw_trials = [event for event in events[1:] if event.get("schema") == "csl.opt12-cost-trial/1"]
+    if raw_trials != trials:
         raise ValueError("typed trial records differ from retained raw JSONL")
+    validate_driver_fixture_events(events[1:])
+    if len(raw_trials) + len(SCENARIOS) != len(events[1:]):
+        raise ValueError("raw event stream contains an unknown OPT-12 event")
     with (root / "trials.csv").open(encoding="utf-8", newline="") as stream:
         csv_rows = list(csv.DictReader(stream))
     if len(csv_rows) != len(trials):

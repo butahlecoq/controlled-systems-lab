@@ -34,7 +34,13 @@ def fixture(root: Path) -> Path:
                                "model_load_seconds": 0.001, "basis_transfer_seconds": 0.0001 if mode == "warm" else 0.0,
                                "solve_seconds": 0.002, "simplex_iterations": 1 if mode == "cold" else 0, "cache_state": "hit",
                                "basis_accepted": mode == "warm", "diagnostics": ""})
-    raw = ("\n".join(json.dumps(item, separators=(",", ":")) for item in [identity, *trials]) + "\n").encode()
+    fixture_events = [
+        {"schema": "csl.opt12-fixture/1", "scenario": name,
+         "fixture": {key: value for key, value in item.items() if key != "sha256"}}
+        for name, item in opt12_fixtures.fixture_descriptions().items()
+    ]
+    raw = ("\n".join(json.dumps(item, separators=(",", ":"))
+                     for item in [identity, *fixture_events, *trials]) + "\n").encode()
     stderr = b""
     build_log = b"Release build completed\n"
     (root / "raw-events.jsonl").write_bytes(raw)
@@ -83,7 +89,7 @@ class Opt12RenderTests(unittest.TestCase):
             self.assertIn("Warm reuse records higher median aggregate native work in:", page)
             self.assertIn("transfer-cost", page)
             self.assertIn("Simplex iteration counts are reported separately", page)
-            self.assertIn("column 99999: -1 to -2", page)
+            self.assertIn("column 0: -1 to 1; column 99999: 1 to -2", page)
             self.assertIn("comparison.svg", manifest["files"])
             with zipfile.ZipFile(root / "opt12-test.zip") as archive:
                 self.assertIn("opt12-test/index.html", archive.namelist())
@@ -121,6 +127,22 @@ class Opt12RenderTests(unittest.TestCase):
                                                    separators=(",", ":")).encode())
             records.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "differs from canonical scenario: transfer-cost"):
+                opt12_render.parse_evidence(records)
+
+    def test_driver_fixture_must_match_report_fixture(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records = fixture(root)
+            payload = json.loads(records.read_text(encoding="utf-8"))
+            events = [json.loads(line) for line in (root / "raw-events.jsonl").read_text(encoding="utf-8").splitlines()]
+            transfer = next(event for event in events if event.get("schema") == "csl.opt12-fixture/1"
+                            and event["scenario"] == "transfer-cost")
+            transfer["fixture"]["changed_rhs"] = 49998.0
+            raw = ("\n".join(json.dumps(item, separators=(",", ":")) for item in events) + "\n").encode()
+            (root / "raw-events.jsonl").write_bytes(raw)
+            payload["metadata"]["process"]["stdout_sha256"] = digest(raw)
+            records.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "driver fixture identities differ"):
                 opt12_render.parse_evidence(records)
 
     def test_raw_jsonl_must_match_typed_trials(self):

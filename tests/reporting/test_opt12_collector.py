@@ -68,6 +68,19 @@ class CMakeCompilerIdentityTests(unittest.TestCase):
                 'set(CMAKE_SYSTEM_PROCESSOR "AMD64")\n', encoding="utf-8")
             self.assertEqual(opt12_collect.cmake_system_processor(build), "AMD64")
 
+    def test_driver_fixture_events_are_bound_to_canonical_lp_inputs(self):
+        from opt12_fixtures import fixture_descriptions
+
+        events = [
+            {"schema": "csl.opt12-fixture/1", "scenario": name,
+             "fixture": {key: value for key, value in item.items() if key != "sha256"}}
+            for name, item in fixture_descriptions().items()
+        ]
+        opt12_collect.validate_driver_fixture_events(events)
+        events[-1]["fixture"]["expected_objective"] = -149997.0
+        with self.assertRaisesRegex(ValueError, "driver fixture identities differ"):
+            opt12_collect.validate_driver_fixture_events(events)
+
 
 if __name__ == "__main__":
     unittest.main()
