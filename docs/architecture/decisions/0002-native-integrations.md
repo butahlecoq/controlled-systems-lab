@@ -1,6 +1,6 @@
 # ADR 0002: pinned native integrations for the first contract probes
 
-Date: 2026-10-11. Status: CORE-01 implementation decision, pending integration review. Scope: reproducible probe defaults for [native interface revision 1](../../contracts/core-interfaces.md). The project license remains undecided; no project LICENSE file is added or changed.
+Date: 2026-10-11. Status: CORE-01 implementation decision; broader architecture review remains open under [issue #7](https://github.com/butahlecoq/controlled-systems-lab/issues/7). Scope: reproducible probe defaults for [native interface revision 1](../../contracts/core-interfaces.md). The project license remains undecided; no project LICENSE file is added or changed.
 
 ## Decision and alternatives
 
@@ -93,10 +93,31 @@ The [bounded JSON/doctest and installed-package review](../../research/issue7-pa
 records the pinned private JSON integration, test-only doctest integration,
 installed-client checks, removal of a duplicate JSON notice install, and use of
 the configured install library directory when locating the exported targets.
-This closes the source integration and default-layout harness review subgate.
-Hosted CI remains required to exercise the changes. Custom package layouts,
-cross-platform and race coverage, and final notice collection remain pending.
-The Eigen, HiGHS, and Qhull reviews are bounded component evidence;
-they do not settle the broader scientific numerical profile, geometry operation
-algebra, or capacity policy tracked by architecture issue #7, which remains
-open.
+PR [#456](https://github.com/butahlecoq/controlled-systems-lab/pull/456)
+merged at `8a82279882845655ddcf9371159a3b081b115dd0` after all twelve exact-head
+hosted jobs passed. The CI matrix covered Windows and Linux builds; the Linux
+core and HiGHS package profiles exercised the default installed-client
+layout. This closes the source integration and tested default-layout harness
+subgate. Custom package
+layouts and complete downstream notice collection remain unverified.
+
+## 2026-10-18 update: independent Qhull call-boundary evidence
+
+PR [#457](https://github.com/butahlecoq/controlled-systems-lab/pull/457)
+merged at `f2d52c7a8348d607237449fad03174b97b608fbc`. It adds a caller-owned
+`QhullOptions::before_native_call` hook immediately before `qh_new_qhull` and a
+test that synchronizes two separately prepared bounded H-to-V conversions at
+that boundary, then checks each result against literal square vertices. All
+twelve exact-head hosted jobs passed and independent specification and
+standards reviews found no remaining issues. This demonstrates simultaneous
+arrival at the native-call boundary for the exercised cases; it does not prove
+that the Qhull call bodies overlapped, establish race freedom, or guarantee
+general Qhull/HiGHS thread safety.
+
+The bounded Eigen, HiGHS, Qhull, and package reviews now have merged source and
+CI evidence, but issue #7 remains open. It still needs an initial geometry
+profile and capacity policy (including output/facet and memory limits), the
+broader operation algebra with operation-specific guarantees, stronger
+cross-platform race evidence, and equal-output comparison evidence. None of
+these component reviews decides the project license or the broader scientific
+numerical policy.
