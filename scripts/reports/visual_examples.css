@@ -5,3 +5,4 @@
 @media(max-width:650px){.shell{display:block;padding:1.2rem}aside{position:static;border-right:0;border-bottom:1px solid var(--line);padding-bottom:1.5rem}.brand br{display:none}aside .eyebrow{margin-top:1rem}nav{gap:.5rem}h1{font-size:2.7rem}h2{font-size:1.7rem}section{padding:2rem 0}figure{margin-inline:0}details{padding:.8rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 @media print{:root{color-scheme:light;--bg:white;--fg:#111;--muted:#333;--accent:#244a19;--line:#aaa}.shell{display:block;padding:0}aside,.skip{display:none}h1{font-size:2.5rem}section{break-inside:avoid}a{color:#244a19}}
+/* Temporary presentation-only CI routing probe; this branch is never merged. */
