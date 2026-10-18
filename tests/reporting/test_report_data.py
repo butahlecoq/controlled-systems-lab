@@ -236,6 +236,26 @@ class RecordTests(unittest.TestCase):
         retained=self.data.validate_view(self.data.seal(view['payload']))
         self.assertFalse(self.data.aggregate(retained)[0]['valid'])
 
+    def test_successful_lp_backend_identity_matches_raw_diagnostics(self):
+        view=self.fixture()
+        self.data.validate_view(view)
+
+        current=self.fixture();payload=current['payload']
+        current_version='1.1.0+highs.1.11.0'
+        payload['provenance']['backend']['version']=current_version
+        for trial in payload['trials']:
+            trial['registry']['actual']['version']=current_version
+            trial['result']['raw_diagnostics']=trial['result']['raw_diagnostics'].replace(
+                'adapter.version=1.0.0+highs.1.11.0',f'adapter.version={current_version}')
+        self.data.validate_view(self.data.seal(payload))
+
+        mismatched=self.fixture();payload=mismatched['payload']
+        payload['provenance']['backend']['version']=current_version
+        for trial in payload['trials']:
+            trial['registry']['actual']['version']=current_version
+        with self.assertRaisesRegex(ValueError,'diagnostic/backend identity mismatch'):
+            self.data.validate_view(self.data.seal(payload))
+
     def test_synthetic_measurement_shape_cannot_hide_spans_or_change_source(self):
         # Literal data only, no process execution or real measurement claim.
         view=self.fixture();p=view['payload'];p['purpose']='measurement'

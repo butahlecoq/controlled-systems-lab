@@ -240,7 +240,7 @@ def reference_matches(trial, scenario):
     return residual_passes(result["primal_residuals"], ("rows", "variables")) and residual_passes(result["dual_residuals"], ("stationarity", "signs"))
 
 
-def native_iterations(raw):
+def native_iterations(raw, expected_adapter_version=None):
     prefix = raw.split("\nnative.log:", 1)[0]
     fields = {}
     for line in prefix.splitlines():
@@ -248,7 +248,10 @@ def native_iterations(raw):
         key, value = line.split("=", 1)
         require(key not in fields, "duplicate native diagnostic key")
         fields[key] = value
-    require(fields.get("adapter.version") in {"1.0.0+highs.1.11.0", "1.1.0+highs.1.11.0"} and fields.get("native.version") == "1.11.0", "unsupported diagnostic version")
+    adapter_version = fields.get("adapter.version")
+    require(adapter_version in {"1.0.0+highs.1.11.0", "1.1.0+highs.1.11.0"} and fields.get("native.version") == "1.11.0", "unsupported diagnostic version")
+    if expected_adapter_version is not None:
+        require(adapter_version == expected_adapter_version, "diagnostic/backend identity mismatch")
     if fields.get("native.info") != "available":
         return {"available": False, "reason": "native info unavailable"}
     text = fields.get("native.simplex_iterations", "")
@@ -801,6 +804,8 @@ def _validate_trial_rows(trials,scenarios,provenance,clock,environment,convex,ba
         if trial["validation"]["passed"]:
             require(all(trial["timings"][p]["available"] for p in PHASES),"successful trial requires all measured phase spans")
             require(trial["registry"]["actual"]==provenance["backend"],"successful trial requires actual method provenance")
+            if not convex:
+                native_iterations(result["raw_diagnostics"], provenance["backend"]["version"])
             require(trial["harness"]["status"] == "returned" and reference_matches(trial,scenarios[key]), "inconsistent successful validation")
             require(trial["attempt"] == {"number":1,"state":"returned_result","workspace_reuse":False}, "current attempt mismatch")
             require(re.fullmatch(r"[0-9]+",trial["observation_token"]) is not None, "observation token required")
