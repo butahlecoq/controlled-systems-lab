@@ -294,6 +294,13 @@ TEST_CASE("projection fails explicitly at caller row limit without publishing a 
     auto joint=h("joint",2,{4,2,{1,1,-1,1,1,-1,-1,-1}},{2,2,2,2},{0,2,{}},{});
     auto result=project(projection(joint.as_handle(),{0}),geometry::polyhedral::ProjectionOutput::h,3);
     CHECK(std::holds_alternative<Unsupported>(result));
+    const auto boundary=take(project(projection(joint.as_handle(),{0}),
+        geometry::polyhedral::ProjectionOutput::h,4));
+    CHECK(contains(boundary.output,{-2}));
+    CHECK(contains(boundary.output,{0}));
+    CHECK(contains(boundary.output,{2}));
+    CHECK_FALSE(contains(boundary.output,{-2.125}));
+    CHECK_FALSE(contains(boundary.output,{2.125}));
 }
 
 TEST_CASE("zero-control predecessor preserves a lower-dimensional equality set") {
