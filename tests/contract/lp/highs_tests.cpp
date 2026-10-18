@@ -22,6 +22,10 @@ LinearProgram triangle(double offset = 0) {
     return accepted(make_linear_program({{{"native-test"}, {offset == 0 ? "triangle" : "offset"}},
         {-1, -2}, offset, {1, 2, {0, 2}, {0, 1}, {1, 1}}, {{0, {}}, {0, {}}}, {{{}, 1}}}));
 }
+LinearProgram rhs_lp(std::string id,double rhs,std::optional<double> upper_x2 = {}) {
+    return accepted(make_linear_program({{{"native-test"}, {std::move(id)}},
+        {-1,-2},0,{1,2,{0,2},{0,1},{1,1}},{{0,{}},{0,upper_x2}},{{{},rhs}}}));
+}
 Requirements requirements() {
     Requirements request;
     request.output.representation = {"csl.program-result.v1"};
@@ -48,7 +52,7 @@ void cost(const ProgramResult& result, const LinearProgram& program, double expe
 TEST_CASE("registered native triangle reports literal optimum and independent residuals") {
     const auto program = triangle();
     auto plan = prepare(program);
-    CHECK(plan.provenance()[0].actual->version == "1.0.0+highs.1.11.0");
+    CHECK(plan.provenance()[0].actual->version == "1.1.0+highs.1.11.0");
     auto [worker] = plan.create();
     CHECK(worker->basis() == nullptr);
     const auto result = accepted(worker->run(context()));
@@ -72,6 +76,85 @@ TEST_CASE("registered native triangle reports literal optimum and independent re
     CHECK(result.raw_diagnostics.find("Model status") != std::string::npos);
     CHECK(result.raw_diagnostics.find("native.version=1.11.0") != std::string::npos);
     CHECK(result.raw_diagnostics.find("native.model_status=7") != std::string::npos);
+}
+
+TEST_CASE("cross-query warm starts are optional, workspace-local, dimension-checked and independently verified") {
+    const auto first=rhs_lp("warm-first",1);
+    const auto changed_row=rhs_lp("warm-row-change",2);
+    const auto changed_bound=rhs_lp("warm-bound-change",2,1);
+    const auto changed_columns=accepted(make_linear_program({{{"native-test"},{"warm-column-change"}},
+        {-1,-2,-3},0,{1,3,{0,3},{0,1,2},{1,1,1}},{{0,{}},{0,{}},{0,{}}},{{{},2}}}));
+    auto registration=accepted(make_highs_registration({.cross_query_warm_start=true}));
+    auto warm=registration.factory(first);
+    const auto cold=accepted(warm->solve(first,context()));
+    CHECK(cold.outcome.value==MathematicalOutcome::optimal);
+    cost(cold,first,-2);
+    CHECK(cold.raw_diagnostics.find("warm_start.cache_state=empty")!=std::string::npos);
+    const auto changed=accepted(warm->solve(changed_row,context()));
+    INFO(changed.raw_diagnostics);
+    CHECK(changed.outcome.value==MathematicalOutcome::optimal);
+    cost(changed,changed_row,-4);
+    CHECK(changed.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);
+    CHECK(changed.raw_diagnostics.find("warm_start.accepted=true")!=std::string::npos);
+    const auto bounded=accepted(warm->solve(changed_bound,context()));
+    CHECK(bounded.outcome.value==MathematicalOutcome::optimal);
+    cost(bounded,changed_bound,-3);
+    const auto dimension_change=accepted(warm->solve(changed_columns,context()));
+    CHECK(dimension_change.outcome.value==MathematicalOutcome::optimal);
+    cost(dimension_change,changed_columns,-6);
+    CHECK(dimension_change.raw_diagnostics.find("warm_start.cache_state=invalidated_dimension_change")!=std::string::npos);
+    CHECK(dimension_change.raw_diagnostics.find("warm_start.fallback=cold_no_compatible_basis")!=std::string::npos);
+    CHECK(dimension_change.raw_diagnostics.find("warm_start.setup_seconds=")!=std::string::npos);
+    CHECK(dimension_change.raw_diagnostics.find("native.solve_seconds=")!=std::string::npos);
+
+    auto other_workspace=registration.factory(first);
+    const auto isolated=accepted(other_workspace->solve(first,context()));
+    CHECK(isolated.raw_diagnostics.find("warm_start.cache_state=empty")!=std::string::npos);
+    cost(isolated,first,-2);
+}
+
+TEST_CASE("warm starts fall back for a changed row dimension and retain exact infeasibility checks") {
+    const auto feasible=rhs_lp("warm-feasible",2);
+    const auto infeasible=accepted(make_linear_program({{{"native-test"},{"warm-infeasible"}},
+        {0},0,{2,1,{0,1,2},{0,0},{1,1}},{{{},{}}},{{{},0},{1,{}}}}));
+    auto registration=accepted(make_highs_registration({.cross_query_warm_start=true}));
+    auto worker=registration.factory(feasible);
+    cost(accepted(worker->solve(feasible,context())),feasible,-4);
+    const auto result=accepted(worker->solve(infeasible,context()));
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.value==MathematicalOutcome::infeasible);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(result.outcome.support));
+    CHECK(verify_linear_infeasibility_certificate(infeasible,std::get<ExactFarkasEvidence>(result.outcome.support).certificate()).index()==0);
+    CHECK(result.raw_diagnostics.find("warm_start.cache_state=invalidated_dimension_change")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("warm_start.next_cache=invalidated_after_result")!=std::string::npos);
+}
+
+TEST_CASE("warm starts preserve independently checked results across a degenerate basis") {
+    const auto degenerate=accepted(make_linear_program({{{"native-test"},{"warm-degenerate"}},
+        {-1},0,{2,1,{0,1,2},{0,0},{1,1}},{{0,{}}},{{{},1},{{},1}}}));
+    const auto changed_rows=accepted(make_linear_program({{{"native-test"},{"warm-degenerate-rhs-change"}},
+        {-1},0,{2,1,{0,1,2},{0,0},{1,1}},{{0,{}}},{{{},1},{{},0.5}}}));
+    const auto infeasible=accepted(make_linear_program({{{"native-test"},{"warm-degenerate-infeasible"}},
+        {-1},0,{2,1,{0,1,2},{0,0},{1,1}},{{0,{}}},{{{},1},{{},-1}}}));
+    auto registration=accepted(make_highs_registration({.cross_query_warm_start=true}));
+    auto worker=registration.factory(degenerate);
+    const auto first=accepted(worker->solve(degenerate,context()));
+    cost(first,degenerate,-1);
+    const auto second=accepted(worker->solve(changed_rows,context()));
+    INFO(second.raw_diagnostics);
+    cost(second,changed_rows,-0.5);
+    CHECK(second.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);
+    CHECK(second.raw_diagnostics.find("warm_start.setup_seconds=")!=std::string::npos);
+    CHECK(second.raw_diagnostics.find("native.load_seconds=")!=std::string::npos);
+    CHECK(second.raw_diagnostics.find("native.solve_seconds=")!=std::string::npos);
+    const auto infeasible_result=accepted(worker->solve(infeasible,context()));
+    CHECK(infeasible_result.termination==Termination::completed);
+    CHECK(infeasible_result.outcome.value==MathematicalOutcome::infeasible);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(infeasible_result.outcome.support));
+    CHECK(verify_linear_infeasibility_certificate(infeasible,std::get<ExactFarkasEvidence>(infeasible_result.outcome.support).certificate()).index()==0);
+    CHECK(infeasible_result.raw_diagnostics.find("warm_start.cache_state=compatible")!=std::string::npos);
+    CHECK(infeasible_result.raw_diagnostics.find("warm_start.accepted=true")!=std::string::npos);
+    CHECK(infeasible_result.raw_diagnostics.find("warm_start.next_cache=invalidated_after_result")!=std::string::npos);
 }
 
 TEST_CASE("literal offset equality free fixed infeasible unbounded and zero-dimensional LPs") {

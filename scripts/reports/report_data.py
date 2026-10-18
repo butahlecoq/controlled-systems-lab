@@ -248,7 +248,7 @@ def native_iterations(raw):
         key, value = line.split("=", 1)
         require(key not in fields, "duplicate native diagnostic key")
         fields[key] = value
-    require(fields.get("adapter.version") == "1.0.0+highs.1.11.0" and fields.get("native.version") == "1.11.0", "unsupported diagnostic version")
+    require(fields.get("adapter.version") in {"1.0.0+highs.1.11.0", "1.1.0+highs.1.11.0"} and fields.get("native.version") == "1.11.0", "unsupported diagnostic version")
     if fields.get("native.info") != "available":
         return {"available": False, "reason": "native info unavailable"}
     text = fields.get("native.simplex_iterations", "")

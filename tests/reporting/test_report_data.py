@@ -126,6 +126,7 @@ class RecordTests(unittest.TestCase):
     def test_diagnostics_parser_accepts_only_versioned_prefix(self):
         raw = "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.info=available\nnative.simplex_iterations=3\nnative.log:\nnative.simplex_iterations=999"
         self.assertEqual(self.data.native_iterations(raw)["value"], 3)
+        self.assertEqual(self.data.native_iterations(raw.replace("1.0.0", "1.1.0"))["value"], 3)
         for bad in (raw.replace("1.0.0", "2.0.0"), raw.replace("=3", "=3\nnative.simplex_iterations=4")):
             with self.assertRaises(ValueError):
                 self.data.native_iterations(bad)

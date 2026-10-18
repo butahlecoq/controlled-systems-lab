@@ -14,7 +14,7 @@
 namespace csl::adapters::lp {
 namespace {
 using namespace optimization;
-constexpr const char* adapter_version = "1.0.0+highs.1.11.0";
+constexpr const char* adapter_version = "1.1.0+highs.1.11.0";
 constexpr const char* archive_hash = "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275";
 Diagnostics diagnostic(DiagnosticCode code, std::string field, std::string message) {
     return {{code,std::move(field),std::move(message)}};
@@ -160,7 +160,12 @@ class HighsLPWorkspace final : public LPWorkspace {
     HighsLPOptions options_;
     std::unique_ptr<Highs> native_;
     std::optional<LinearProgram> loaded_;
+    std::optional<HighsBasis> warm_basis_;
+    std::size_t warm_rows_{};
+    std::size_t warm_columns_{};
     ProgramOutcome solve_native(const LinearProgram& p,const ExecutionContext& c) {
+        auto previous_basis=std::move(warm_basis_);
+        warm_basis_.reset();
         if (auto d = admission(p); !d.empty()) return Unsupported{std::move(d)};
         if (auto d = admission(c); !d.empty()) return Unsupported{std::move(d)};
         auto result = result_for(p);
@@ -216,7 +221,9 @@ class HighsLPWorkspace final : public LPWorkspace {
         raw << "\nmodel.reused=" << (reused ? "true" : "false");
         if (!reused) {
             loaded_.reset();
+            const auto load_start=std::chrono::steady_clock::now();
             const auto status = h.passModel(translate(p));
+            raw << "\nnative.load_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-load_start).count();
             raw << "\nnative.load_status=" << static_cast<int>(status);
             if (status == HighsStatus::kError) {
                 raw << "\nnative_run=false\nnative.info=unavailable\nnative.log:\n" << state.log;
@@ -224,13 +231,44 @@ class HighsLPWorkspace final : public LPWorkspace {
             }
             loaded_ = p;
         }
+        bool warm_accepted=false;
+        if(options_.cross_query_warm_start) {
+            const bool dimensions_match=previous_basis && warm_rows_==p.rows().size() && warm_columns_==p.variables().size();
+            raw << "\nwarm_start.enabled=true";
+            raw << "\nwarm_start.cache_state=" << (!previous_basis?"empty":dimensions_match?"compatible":"invalidated_dimension_change");
+            const auto warm_setup_start=std::chrono::steady_clock::now();
+            if(dimensions_match && previous_basis->valid && previous_basis->row_status.size()==p.rows().size() &&
+                previous_basis->col_status.size()==p.variables().size()) {
+                const auto basis_status=h.setBasis(*previous_basis);
+                warm_accepted=basis_status==HighsStatus::kOk;
+                raw << "\nwarm_start.install_status=" << static_cast<int>(basis_status)
+                    << "\nwarm_start.accepted=" << (warm_accepted?"true":"false");
+                if(!warm_accepted) {
+                    raw << "\nwarm_start.fallback=cold_after_rejection";
+                    require_option(h.clearModel());
+                    loaded_.reset();
+                    const auto load_start=std::chrono::steady_clock::now();
+                    const auto cold_status=h.passModel(translate(p));
+                    raw << "\nnative.cold_reload_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-load_start).count()
+                        << "\nnative.cold_reload_status=" << static_cast<int>(cold_status);
+                    if(cold_status==HighsStatus::kError) {
+                        result.raw_diagnostics=raw.str()+"\nnative_run=false\nnative.info=unavailable";
+                        return result;
+                    }
+                    loaded_=p;
+                }
+            } else raw << "\nwarm_start.accepted=false\nwarm_start.fallback=cold_no_compatible_basis";
+            raw << "\nwarm_start.setup_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-warm_setup_start).count();
+        } else raw << "\nwarm_start.enabled=false\nwarm_start.cache_state=disabled";
         state.poll();
         if (state.stop) {
             result.termination = *state.stop;
             raw << "\nnative_run=false\nstop=" << (*state.stop == Termination::cancelled ? "cancelled" : "deadline");
             result.raw_diagnostics = raw.str(); return result;
         }
+        const auto solve_start=std::chrono::steady_clock::now();
         const auto api = h.run();
+        raw << "\nnative.solve_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-solve_start).count();
         const auto model = h.getModelStatus();
         classify(result,api,model,state);
         raw << "\nnative_run=true\nnative.call_status=" << static_cast<int>(api)
@@ -304,6 +342,18 @@ class HighsLPWorkspace final : public LPWorkspace {
             const auto elapsed=std::chrono::duration<double>(std::chrono::steady_clock::now()-extraction_start).count();
             raw << "\ncertificate.extraction_seconds=" << std::setprecision(17) << elapsed;
         } else raw << "\ncertificate.extraction=not_requested";
+        if(options_.cross_query_warm_start) {
+            const auto& basis=h.getBasis();
+            const bool valid_result=result.termination==Termination::completed && result.outcome.value==MathematicalOutcome::optimal &&
+                result.primal.has_value() && optimization::check_program_result(result,p,Assurance::numerical).empty() &&
+                basis.valid && basis.row_status.size()==p.rows().size() && basis.col_status.size()==p.variables().size();
+            raw << "\nwarm_start.next_cache=" << (valid_result?"stored":"invalidated_after_result");
+            if(valid_result) {
+                warm_basis_=basis;
+                warm_rows_=p.rows().size();
+                warm_columns_=p.variables().size();
+            }
+        }
         raw << "\ncertificates=" << (std::holds_alternative<ExactFarkasEvidence>(result.outcome.support)?"exact_farkas":"unavailable")
             << "\nnative.log:\n" << state.log;
         result.raw_diagnostics = raw.str();
@@ -311,7 +361,7 @@ class HighsLPWorkspace final : public LPWorkspace {
     }
     ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext& c) override {
         try { return solve_native(p,c); }
-        catch (...) { loaded_.reset(); native_.reset(); throw; }
+        catch (...) { loaded_.reset(); native_.reset(); warm_basis_.reset(); throw; }
     }
 public:
     explicit HighsLPWorkspace(HighsLPOptions options) : options_(options) {}
