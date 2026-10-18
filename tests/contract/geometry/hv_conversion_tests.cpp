@@ -6,10 +6,13 @@
 #include "../../../src/geometry/conversion/exact_h_interval.hpp"
 #include <algorithm>
 #include <array>
+#include <barrier>
 #include <bit>
 #include <cmath>
 #include <cstdint>
+#include <future>
 #include <limits>
+#include <string>
 
 using namespace csl;
 using namespace csl::registry;
@@ -181,6 +184,69 @@ TEST_CASE("bounded H to V conversion retains the square under independent checks
     const auto& h_out=std::get<sets::HRepresentation>(h_rep);
     const std::array<double,2> inside{0.5,0.5}, edge{1,0}, outside{2,0};
     CHECK(satisfies(h_out,inside)); CHECK(satisfies(h_out,edge)); CHECK_FALSE(satisfies(h_out,outside));
+}
+
+TEST_CASE("independent Qhull workspaces convert separate bounded inputs concurrently") {
+    const auto make_worker = [](SetHandle input, std::string tag) {
+        const auto lp = take(make_highs_registration());
+        auto conversion = take(make_qhull_registration(lp));
+        Registry<ConversionPort> conversions;
+        REQUIRE_FALSE(conversions.add(std::move(conversion)).has_value());
+        auto req = request(std::move(input), "csl.polyhedron.v", std::move(tag));
+        auto prepared = prepare_pipeline(select(conversions, {{"csl.conversion.qhull"}, {}}, req,
+            conversion_requirements("csl.polyhedron.v")));
+        REQUIRE(std::holds_alternative<PreparedPipeline<ConversionPort>>(prepared));
+        auto [worker] = std::get<PreparedPipeline<ConversionPort>>(prepared).create();
+        return std::pair{std::move(req), std::move(worker)};
+    };
+
+    const auto first_input = square_h();
+    const auto second_input = make_h_handle("translated-square-h", 2,
+        Matrix{4, 2, {1, 0, -1, 0, 0, 1, 0, -1}}, Vector{3, -2, -1, 2});
+    const auto check_square = [](const OperationResult& result, const ConversionRequest& req,
+                                 double x_min, double x_max, double y_min, double y_max) {
+        CHECK(result.relation == SetRelation::equivalent);
+        CHECK(result.evidence.reference.identity == req.identity);
+        const auto converted = take(sets::from_handle(result.output));
+        const auto representation = converted.representation();
+        REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
+        const auto& v = std::get<sets::VRepresentation>(representation);
+        REQUIRE(v.vertices.rows() == 4);
+        CHECK(v.rays.rows() == 0);
+        const std::array<std::array<double, 2>, 4> expected{{
+            {x_min, y_min}, {x_min, y_max}, {x_max, y_min}, {x_max, y_max}}};
+        for (const auto& corner : expected) {
+            bool found = false;
+            for (std::size_t row = 0; row < v.vertices.rows(); ++row) {
+                found = found || (std::abs(v.vertices(row, 0) - corner[0]) < 1e-7 &&
+                                  std::abs(v.vertices(row, 1) - corner[1]) < 1e-7);
+            }
+            CHECK(found);
+        }
+    };
+
+    for (std::size_t iteration = 0; iteration < 16; ++iteration) {
+        auto [first_request, first_worker] = make_worker(first_input, "concurrent-square-" + std::to_string(iteration));
+        auto [second_request, second_worker] = make_worker(second_input,
+            "concurrent-translated-square-" + std::to_string(iteration));
+        std::barrier start_together{3};
+        auto first_future = std::async(std::launch::async, [&] {
+            start_together.arrive_and_wait();
+            return first_worker->run(context());
+        });
+        auto second_future = std::async(std::launch::async, [&] {
+            start_together.arrive_and_wait();
+            return second_worker->run(context());
+        });
+        start_together.arrive_and_wait();
+
+        const auto first_outcome = first_future.get();
+        const auto second_outcome = second_future.get();
+        REQUIRE(std::holds_alternative<OperationResult>(first_outcome));
+        REQUIRE(std::holds_alternative<OperationResult>(second_outcome));
+        check_square(std::get<OperationResult>(first_outcome), first_request, 0, 1, 0, 1);
+        check_square(std::get<OperationResult>(second_outcome), second_request, 2, 3, -2, -1);
+    }
 }
 
 TEST_CASE("simplex H/V conversions preserve literal membership, support, and empty cases") {
