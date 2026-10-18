@@ -89,9 +89,14 @@ were run as part of that review, and it does not establish numerical
 conditioning guarantees, a process-wide thread policy, universal index safety,
 independent-instance thread safety, or downstream packaging compliance.
 
-This ADR remains **pending integration review** for nlohmann JSON, doctest,
-CMake/package behavior, cross-platform and race coverage, and final notice
-collection. The Eigen, HiGHS, and Qhull reviews are bounded component evidence;
+The [bounded JSON/doctest and installed-package review](../../research/issue7-package-install-integration-review.md)
+records the pinned private JSON integration, test-only doctest integration,
+installed-client checks, removal of a duplicate JSON notice install, and use of
+the configured install library directory when locating the exported targets.
+This closes the source integration and default-layout harness review subgate.
+Hosted CI remains required to exercise the changes. Custom package layouts,
+cross-platform and race coverage, and final notice collection remain pending.
+The Eigen, HiGHS, and Qhull reviews are bounded component evidence;
 they do not settle the broader scientific numerical profile, geometry operation
 algebra, or capacity policy tracked by architecture issue #7, which remains
 open.

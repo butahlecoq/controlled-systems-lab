@@ -1,5 +1,11 @@
 # Copy only consumer inputs into a separate source tree. Its sole product
 # dependency is find_package(CSL CONFIG), resolved from the installed prefix.
+if(IS_ABSOLUTE "${CSL_INSTALL_LIBDIR}" OR
+   IS_ABSOLUTE "${CSL_INSTALL_INCLUDEDIR}" OR
+   IS_ABSOLUTE "${CSL_INSTALL_DATADIR}")
+  message(FATAL_ERROR
+    "installed_public_client requires relative install directories; absolute destinations are outside its temporary prefix")
+endif()
 set(work "${CSL_BUILD_DIR}/installed-consumer")
 file(MAKE_DIRECTORY "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/witness_selector_client.cpp" DESTINATION "${work}/source")
@@ -44,11 +50,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/farkas_factory_forge_client.cpp" DE
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
-if(IS_ABSOLUTE "${CSL_INSTALL_DATADIR}")
-  set(notices_root "${CSL_INSTALL_DATADIR}/CSL/notices")
-else()
-  set(notices_root "${prefix}/${CSL_INSTALL_DATADIR}/CSL/notices")
-endif()
+set(notices_root "${prefix}/${CSL_INSTALL_DATADIR}/CSL/notices")
 if(NOT EXISTS "${notices_root}/nlohmann-json-3.11.3/LICENSE.MIT")
   message(FATAL_ERROR "Installed input dependency notice is missing")
 endif()
@@ -76,11 +78,23 @@ if(CSL_EXPECT_QHULL AND NOT EXISTS
     "${notices_root}/Qhull-8.0.2/COPYING.txt")
   message(FATAL_ERROR "Installed Qhull dependency notice is missing")
 endif()
-file(READ "${prefix}/lib/cmake/CSL/CSLTargets.cmake" input_export)
+set(exports_file "${prefix}/${CSL_INSTALL_LIBDIR}/cmake/CSL/CSLTargets.cmake")
+if(NOT EXISTS "${exports_file}")
+  message(FATAL_ERROR "Installed CMake target export is missing: ${exports_file}")
+endif()
+file(READ "${exports_file}" input_export)
 if(input_export MATCHES "nlohmann|csl_json")
   message(FATAL_ERROR "Private input JSON dependency leaked into exports")
 endif()
-file(GLOB_RECURSE public_headers "${prefix}/include/csl/*.hpp")
+file(GLOB_RECURSE doctest_install_artifacts LIST_DIRECTORIES false
+  "${prefix}/*/doctest/*"
+  "${prefix}/*/cmake/doctest/*")
+if(doctest_install_artifacts)
+  message(FATAL_ERROR
+    "Test-only doctest artifacts were installed: ${doctest_install_artifacts}")
+endif()
+file(GLOB_RECURSE public_headers
+  "${prefix}/${CSL_INSTALL_INCLUDEDIR}/csl/*.hpp")
 if(NOT public_headers)
   message(FATAL_ERROR "No installed CSL public headers found for dependency audit.")
 endif()
