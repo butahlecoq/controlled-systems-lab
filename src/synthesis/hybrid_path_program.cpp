@@ -1,6 +1,7 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 namespace csl::synthesis {
@@ -109,6 +110,81 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::Hybrid
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Hybrid portfolio construction was cancelled before publication"};
     return programs;
+}
+
+HybridPortfolioObjectiveAnalysis compare_hybrid_portfolio_objective_bounds(
+    std::span<const HybridPathProgram> programs,const HybridPortfolioExecution& execution,
+    NumericalPolicy policy) {
+    if(!std::isfinite(policy.absolute_tolerance)||policy.absolute_tolerance<0||
+       !std::isfinite(policy.relative_tolerance)||policy.relative_tolerance<0)
+        return one({DiagnosticCode::invalid_input,"hybrid.objective.policy",
+            "Objective comparison tolerances must be finite and nonnegative"});
+    if(programs.empty())
+        return one({DiagnosticCode::invalid_input,"hybrid.objective.branches",
+            "At least one branch program is required for objective comparison"});
+    if(execution.branches.size()!=programs.size())
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.objective.branches",
+            "Execution branch count does not match the supplied programs"});
+
+    std::vector<double> lower_bounds(programs.size());
+    std::vector<double> upper_bounds(programs.size());
+    std::vector<std::size_t> unresolved;
+    for(std::size_t i=0;i<programs.size();++i) {
+        const auto& program=programs[i];
+        const auto& branch=execution.branches[i];
+        if(branch.path!=program.path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.objective.path",
+                "Execution branch order or path does not match the supplied programs"});
+        if(!branch.result || branch.termination!=Termination::completed ||
+           branch.outcome!=MathematicalOutcome::optimal ||
+           branch.result->termination!=Termination::completed ||
+           branch.result->outcome.value!=MathematicalOutcome::optimal ||
+           !execution.all_supplied_branches_completed) {
+            unresolved.push_back(i);
+            continue;
+        }
+        auto validate=[&]<class Program>(const Program& p) {
+            return optimization::check_program_result(*branch.result,p,Assurance::numerical);
+        };
+        const auto diagnostics=std::visit(validate,program.program);
+        if(!diagnostics.empty()) return diagnostics;
+        const auto& bounds=branch.result->objective;
+        if(!bounds.lower || !bounds.upper) {
+            unresolved.push_back(i);
+            continue;
+        }
+        auto established=[](const ProgramObjectiveBound& bound) {
+            return std::holds_alternative<NumericalCheck>(bound.evidence.support) ||
+                std::holds_alternative<SymbolicArgument>(bound.evidence.support);
+        };
+        if(!established(*bounds.lower)||!established(*bounds.upper)) {
+            unresolved.push_back(i);
+            continue;
+        }
+        lower_bounds[i]=bounds.lower->value;
+        upper_bounds[i]=bounds.upper->value;
+    }
+    if(!unresolved.empty()) return HybridPortfolioObjectiveIncomplete{std::move(unresolved)};
+
+    const auto global_lower=*std::min_element(lower_bounds.begin(),lower_bounds.end());
+    const auto global_upper=*std::min_element(upper_bounds.begin(),upper_bounds.end());
+    std::vector<model::HybridPath> potentially_optimal;
+    std::vector<HybridPortfolioBoundSource> lower_sources,upper_sources;
+    for(std::size_t i=0;i<programs.size();++i) {
+        const auto& evidence=execution.branches[i].result->objective;
+        if(lower_bounds[i]==global_lower)
+            lower_sources.push_back({programs[i].path,*evidence.lower});
+        if(upper_bounds[i]==global_upper)
+            upper_sources.push_back({programs[i].path,*evidence.upper});
+        const double scale=std::max({1.0,std::abs(lower_bounds[i]),std::abs(global_upper)});
+        const double normalized_gap=lower_bounds[i]/scale-global_upper/scale;
+        const bool within_tolerance=normalized_gap<=policy.relative_tolerance ||
+            normalized_gap-policy.relative_tolerance<=policy.absolute_tolerance/scale;
+        if(within_tolerance)
+            potentially_optimal.push_back(programs[i].path);
+    }
+    return HybridPortfolioObjectiveBounds{global_lower,global_upper,
+        std::move(potentially_optimal),std::move(lower_sources),std::move(upper_sources),policy};
 }
 
 HybridPortfolioExecution execute_hybrid_path_programs(

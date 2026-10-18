@@ -234,6 +234,70 @@ TEST_CASE("hybrid portfolio builder returns every parallel edge branch transacti
     CHECK(std::holds_alternative<Diagnostics>(limited));
 }
 
+TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
+    auto system=example_system();
+    auto second=system.edges.front(); second.id={"switch-second"};
+    auto third=system.edges.front(); third.id={"switch-third"};
+    system.edges.push_back(std::move(second));
+    system.edges.push_back(std::move(third));
+    const auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==3);
+
+    HybridPortfolioExecution execution;
+    execution.all_supplied_branches_completed=true;
+    const std::array<double,3> values{5,5,7};
+    for(std::size_t i=0;i<programs.size();++i) {
+        const auto& program=std::get<LinearProgram>(programs[i].program);
+        const auto evidence=ProgramBoundEvidence{program.identity(),
+            SymbolicArgument{"literal fixture bounds","synthetic test result"},{}};
+        ProgramResult result{Termination::completed,
+            {program.identity(),MathematicalOutcome::optimal,
+                SymbolicArgument{"literal fixture optimum","synthetic test result"},{}},
+            {},{ProgramObjectiveBound{values[i],evidence},ProgramObjectiveBound{values[i],evidence}},
+            "literal fixture result"};
+        execution.branches.push_back({programs[i].path,Termination::completed,
+            MathematicalOutcome::optimal,std::move(result),{}, {}});
+    }
+
+    const auto comparison=compare_hybrid_portfolio_objective_bounds(programs,execution,{0,0});
+    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveBounds>(comparison));
+    const auto& bounds=std::get<HybridPortfolioObjectiveBounds>(comparison);
+    CHECK(bounds.global_lower_bound==5);
+    CHECK(bounds.global_upper_bound==5);
+    REQUIRE(bounds.potentially_optimal_paths.size()==2);
+    CHECK(bounds.potentially_optimal_paths[0]==programs[0].path);
+    CHECK(bounds.potentially_optimal_paths[1]==programs[1].path);
+    REQUIRE(bounds.global_lower_bound_sources.size()==2);
+    REQUIRE(bounds.global_upper_bound_sources.size()==2);
+    CHECK(bounds.global_lower_bound_sources[0].path==programs[0].path);
+    CHECK(bounds.global_lower_bound_sources[0].bound.evidence.subject==
+        std::get<LinearProgram>(programs[0].program).identity());
+
+    auto incomplete=execution;
+    incomplete.branches[2].result->objective.lower.reset();
+    const auto partial=compare_hybrid_portfolio_objective_bounds(programs,incomplete,{0,0});
+    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(partial));
+    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(partial).
+        branches_without_comparable_bounds==std::vector<std::size_t>{2});
+
+    auto unsupported=execution;
+    unsupported.branches[2].result->objective.lower->evidence.support=Unestablished{};
+    const auto unestablished=compare_hybrid_portfolio_objective_bounds(programs,unsupported,{0,0});
+    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(unestablished));
+    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(unestablished).
+        branches_without_comparable_bounds==std::vector<std::size_t>{2});
+
+    auto inconsistent=execution;
+    inconsistent.branches[1].result->termination=Termination::cancelled;
+    const auto interrupted=compare_hybrid_portfolio_objective_bounds(programs,inconsistent,{0,0});
+    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(interrupted));
+    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(interrupted).
+        branches_without_comparable_bounds==std::vector<std::size_t>{1});
+}
+
 TEST_CASE("hybrid portfolio builder rejects a pre-cancelled request") {
     auto system=example_system();
     std::stop_source source;

@@ -52,6 +52,31 @@ struct HybridPortfolioExecution {
     bool all_supplied_branches_completed{};
 };
 
+// Objective-bound comparison is deliberately separate from complete-family
+// verification. The returned paths are branches that cannot yet be excluded
+// from the global minimum using the supplied numerical bounds; they are not
+// certified minimizer loci.
+struct HybridPortfolioBoundSource {
+    model::HybridPath path;
+    ProgramObjectiveBound bound;
+};
+struct HybridPortfolioObjectiveBounds {
+    double global_lower_bound;
+    double global_upper_bound;
+    std::vector<model::HybridPath> potentially_optimal_paths;
+    std::vector<HybridPortfolioBoundSource> global_lower_bound_sources;
+    std::vector<HybridPortfolioBoundSource> global_upper_bound_sources;
+    NumericalPolicy policy;
+};
+struct HybridPortfolioObjectiveIncomplete {
+    std::vector<std::size_t> branches_without_comparable_bounds;
+};
+using HybridPortfolioObjectiveAnalysis = std::variant<HybridPortfolioObjectiveBounds,
+    HybridPortfolioObjectiveIncomplete, Diagnostics>;
+
+HybridPortfolioObjectiveAnalysis compare_hybrid_portfolio_objective_bounds(
+    std::span<const HybridPathProgram>, const HybridPortfolioExecution&, NumericalPolicy);
+
 HybridPortfolioExecution execute_hybrid_path_programs(
     std::span<const HybridPathProgram>,
     const registry::PreparedProvider<registry::LPPort>&,
