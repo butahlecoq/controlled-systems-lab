@@ -846,6 +846,137 @@ TEST_CASE("independent one-step oracle matches exhaustive hybrid portfolio and t
     CHECK(oracle_optima==std::vector<std::string>{"tie-a","tie-b"});
 }
 
+TEST_CASE("independent two-stage oracle checks every edge history and tied mode sequence") {
+    model::HybridMode first{{"first"},1,1,{"x"},{"u"}};
+    first.flow=std::vector<LinearStage>{
+        {Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{1}},
+        {Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{1}}};
+    first.control_sets={Singleton{{0}},Singleton{{0}}};
+    first.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridMode middle{{"middle"},1,1,{"y"},{"v"}};
+    middle.flow=std::vector<LinearStage>{
+        {Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}},
+        {Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}}};
+    middle.control_sets={Singleton{{0}},Singleton{{0}}};
+    middle.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridMode terminal{{"terminal"},1,0,{"z"},{}};
+    terminal.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+    terminal.control_sets={UniversalSet{0},UniversalSet{0}};
+    terminal.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    const auto reset_to_middle=[](std::string id) {
+        return singleton_relation(std::move(id),{1,1});
+    };
+    const auto reset_to_terminal=[](std::string id,double post) {
+        return singleton_relation(std::move(id),{1,post});
+    };
+    model::HybridSystem system{2,{first,middle,terminal},
+        {{{"first-a"},{"first"},{"middle"},{Singleton{{1}},Singleton{{1}}},
+            {reset_to_middle("first-a-reset-0"),reset_to_middle("first-a-reset-1")}},
+         {{"first-b"},{"first"},{"middle"},{Singleton{{1}},Singleton{{1}}},
+            {reset_to_middle("first-b-reset-0"),reset_to_middle("first-b-reset-1")}},
+         {{"second-a"},{"middle"},{"terminal"},{Singleton{{1}},Singleton{{1}}},
+            {reset_to_terminal("second-a-reset-0",0),reset_to_terminal("second-a-reset-1",0)}},
+         {{"second-b"},{"middle"},{"terminal"},{Singleton{{1}},Singleton{{1}}},
+            {reset_to_terminal("second-b-reset-0",2),reset_to_terminal("second-b-reset-1",2)}}}};
+    model::HybridRequest request{{{"first"},{0}},{{"terminal"}},
+        {{{"terminal"},LinearTerminal{{1},0},"terminal-cost","J"}}};
+
+    // This oracle traverses the raw edge graph at each stage and directly
+    // evaluates the singleton controls, affine flows, guards, resets, and
+    // terminal costs. It does not call the production path enumerator,
+    // composer, or verifier.
+    struct OracleBranch { model::HybridPath path; Vector tuple; double cost; };
+    std::vector<OracleBranch> oracle;
+    const auto* first_flow=std::get_if<std::vector<LinearStage>>(&first.flow);
+    REQUIRE(first_flow!=nullptr);
+    for(const auto& first_edge:system.edges) {
+        if(first_edge.source!=request.initial.mode) continue;
+        const auto& initial_control=std::get<Singleton>(first.control_sets[0]).point;
+        const auto& first_stage=(*first_flow)[0];
+        const double first_pre=first_stage.A.values[0]*request.initial.state[0]+
+            first_stage.B.values[0]*initial_control[0]+first_stage.offset[0];
+        if(std::get<Singleton>(first_edge.guards[0]).point[0]!=first_pre) continue;
+        const auto first_reset_data=sets::from_handle(first_edge.reset_relations[0]);
+        REQUIRE(std::holds_alternative<sets::SetData>(first_reset_data));
+        const auto first_reset=std::get<sets::SetData>(first_reset_data).representation();
+        REQUIRE(std::holds_alternative<sets::SingletonRepresentation>(first_reset));
+        const auto& first_reset_point=std::get<sets::SingletonRepresentation>(first_reset).point;
+        if(first_reset_point[0]!=first_pre) continue;
+        const double middle_state=first_reset_point[1];
+        for(const auto& second_edge:system.edges) {
+            if(second_edge.source!=first_edge.target||
+               std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),
+                   second_edge.target)==request.allowed_terminal_modes.end()) continue;
+            const auto& middle_control=std::get<Singleton>(middle.control_sets[1]).point;
+            const auto& second_flow=std::get<std::vector<LinearStage>>(middle.flow)[1];
+            const double second_pre=second_flow.A.values[0]*middle_state+
+                second_flow.B.values[0]*middle_control[0]+second_flow.offset[0];
+            if(std::get<Singleton>(second_edge.guards[1]).point[0]!=second_pre) continue;
+            const auto second_reset_data=sets::from_handle(second_edge.reset_relations[1]);
+            REQUIRE(std::holds_alternative<sets::SetData>(second_reset_data));
+            const auto second_reset=std::get<sets::SetData>(second_reset_data).representation();
+            REQUIRE(std::holds_alternative<sets::SingletonRepresentation>(second_reset));
+            const auto& second_reset_point=std::get<sets::SingletonRepresentation>(second_reset).point;
+            if(second_reset_point[0]!=second_pre) continue;
+            const double terminal_state=second_reset_point[1];
+            oracle.push_back({{{request.initial.mode,first_edge.target,second_edge.target},
+                {first_edge.id,second_edge.id}},
+                {request.initial.state[0],initial_control[0],first_pre,middle_state,
+                 middle_control[0],second_pre,terminal_state},terminal_state});
+        }
+    }
+    REQUIRE(oracle.size()==4);
+    CHECK((oracle[0].path.edges==std::vector<model::HybridEdgeId>{{"first-a"},{"second-a"}}));
+    CHECK(oracle[0].tuple==Vector{0,0,1,1,0,1,0});
+    CHECK(oracle[0].cost==0);
+    CHECK((oracle[1].path.edges==std::vector<model::HybridEdgeId>{{"first-a"},{"second-b"}}));
+    CHECK(oracle[1].tuple==Vector{0,0,1,1,0,1,2});
+    CHECK(oracle[1].cost==2);
+    CHECK((oracle[2].path.edges==std::vector<model::HybridEdgeId>{{"first-b"},{"second-a"}}));
+    CHECK(oracle[2].tuple==Vector{0,0,1,1,0,1,0});
+    CHECK(oracle[2].cost==0);
+    CHECK((oracle[3].path.edges==std::vector<model::HybridEdgeId>{{"first-b"},{"second-b"}}));
+    CHECK(oracle[3].tuple==Vector{0,0,1,1,0,1,2});
+    CHECK(oracle[3].cost==2);
+
+    const auto built=build_hybrid_portfolio_programs(system,request,{"two-stage-oracle"},
+        {2,16},{32,256,8192});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle.size());
+    std::vector<bool> matched_oracle(oracle.size(),false);
+    for(std::size_t i=0;i<oracle.size();++i) {
+        const auto expected=std::find_if(oracle.begin(),oracle.end(),[&](const auto& branch) {
+            return branch.path==programs[i].path;
+        });
+        REQUIRE(expected!=oracle.end());
+        const auto oracle_index=static_cast<std::size_t>(std::distance(oracle.begin(),expected));
+        REQUIRE_FALSE(matched_oracle[oracle_index]);
+        matched_oracle[oracle_index]=true;
+        const auto representation=programs[i].joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& h=std::get<sets::HRepresentation>(representation);
+        CHECK(satisfies(h,expected->tuple));
+        CHECK(equality_rows_have_full_column_rank(h.equalities));
+        const auto& program=std::get<LinearProgram>(programs[i].program);
+        double cost=program.offset();
+        for(std::size_t j=0;j<program.objective().size();++j)
+            cost+=program.objective()[j]*expected->tuple[j];
+        CHECK(cost==expected->cost);
+    }
+    CHECK(std::all_of(matched_oracle.begin(),matched_oracle.end(),[](bool matched) { return matched; }));
+    const auto minimum=std::min_element(oracle.begin(),oracle.end(),[](const auto& left,const auto& right) {
+        return left.cost<right.cost;
+    })->cost;
+    std::vector<model::HybridPath> optimal_paths;
+    for(const auto& branch:oracle) if(branch.cost==minimum) optimal_paths.push_back(branch.path);
+    REQUIRE(optimal_paths.size()==2);
+    CHECK(optimal_paths[0].modes==optimal_paths[1].modes);
+    CHECK(optimal_paths[0].edges!=optimal_paths[1].edges);
+    CHECK(optimal_paths[0].edges[0].value=="first-a");
+    CHECK(optimal_paths[1].edges[0].value=="first-b");
+}
+
 TEST_CASE("independent interval oracle matches the full continuous hybrid branch") {
     model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
     source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
