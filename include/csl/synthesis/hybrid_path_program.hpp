@@ -85,6 +85,7 @@ struct HybridPathOptimalFaceCandidate {
     sets::SetData relation;
     Vector anchor;
     ProgramResult solver_result;
+    std::vector<registry::Provenance> providers;
     std::string characterization;
     std::vector<std::string> assumptions;
 };
@@ -93,6 +94,20 @@ using HybridPathOptimalFaceResult = std::variant<HybridPathOptimalFaceCandidate,
 
 HybridPathOptimalFaceResult build_hybrid_path_optimal_face_candidate(
     const HybridPathProgram&, const ProgramResult&, NumericalPolicy,
+    std::stop_token cancellation = {});
+
+struct HybridPortfolioOptimalFaceCandidates {
+    HybridPortfolioObjectiveBounds objective_bounds;
+    std::vector<HybridPathOptimalFaceCandidate> branches;
+};
+using HybridPortfolioOptimalFaceAnalysis = std::variant<HybridPortfolioOptimalFaceCandidates,
+    HybridPortfolioObjectiveIncomplete, Diagnostics, OperationStopped>;
+
+// Transactionally assembles a candidate face for every branch that objective
+// bounds cannot exclude. The result retains path and provider provenance but
+// is not a verified complete globally optimal family.
+HybridPortfolioOptimalFaceAnalysis assemble_hybrid_portfolio_optimal_face_candidates(
+    std::span<const HybridPathProgram>, const HybridPortfolioExecution&, NumericalPolicy,
     std::stop_token cancellation = {});
 
 HybridPortfolioExecution execute_hybrid_path_programs(

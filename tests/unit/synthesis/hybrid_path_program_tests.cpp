@@ -386,6 +386,57 @@ TEST_CASE("hybrid path optimal-face candidates preserve the full minimizer equat
     CHECK(std::get<Diagnostics>(rejected)[0].field=="hybrid.optimal_face.source_relation");
 }
 
+TEST_CASE("hybrid portfolio assembly retains every tied branch face transactionally") {
+    auto system=example_system();
+    auto parallel=system.edges.front();
+    parallel.id={"switch-parallel-face"};
+    system.edges.push_back(std::move(parallel));
+    auto request=example_request();
+    request.terminal_objectives[0].objective=LinearTerminal{{0,0},0};
+    const auto built=build_hybrid_portfolio_programs(system,request,{"hybrid-face-portfolio"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==2);
+
+    HybridPortfolioExecution execution;
+    execution.all_supplied_branches_completed=true;
+    for(const auto& branch:programs) {
+        const auto& program=std::get<LinearProgram>(branch.program);
+        const auto support=SymbolicArgument{"constant objective","all feasible points minimize"};
+        const ProgramBoundEvidence bound{program.identity(),support,{}};
+        ProgramResult result{Termination::completed,
+            {program.identity(),MathematicalOutcome::optimal,support,{}},Vector{2,0,2,0,0},
+            {ProgramObjectiveBound{0,bound},ProgramObjectiveBound{0,bound}},"constant objective fixture"};
+        execution.branches.push_back({branch.path,Termination::completed,MathematicalOutcome::optimal,
+            std::move(result),{{"fixture",{ModuleId{"test-provider"},{}},{}}},{}});
+    }
+    const auto assembled=assemble_hybrid_portfolio_optimal_face_candidates(programs,execution,{0,0});
+    REQUIRE(std::holds_alternative<HybridPortfolioOptimalFaceCandidates>(assembled));
+    const auto& portfolio=std::get<HybridPortfolioOptimalFaceCandidates>(assembled);
+    REQUIRE(portfolio.branches.size()==2);
+    CHECK(portfolio.branches[0].path==programs[0].path);
+    CHECK(portfolio.branches[1].path==programs[1].path);
+    REQUIRE(portfolio.branches[0].providers.size()==1);
+    CHECK(portfolio.branches[0].providers[0].port=="fixture");
+    CHECK(portfolio.branches[0].providers[0].requested.id.value=="test-provider");
+    CHECK(portfolio.branches[0].assumptions.back()=="family completeness and global cross-branch optimality remain unverified");
+
+    auto duplicate_programs=programs;
+    duplicate_programs.push_back(programs.front());
+    const auto duplicate_paths=assemble_hybrid_portfolio_optimal_face_candidates(
+        duplicate_programs,execution,{0,0});
+    REQUIRE(std::holds_alternative<Diagnostics>(duplicate_paths));
+    CHECK(std::get<Diagnostics>(duplicate_paths)[0].field=="hybrid.optimal_face.path");
+
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    const auto cancelled=assemble_hybrid_portfolio_optimal_face_candidates(
+        programs,execution,{0,0},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(cancelled));
+    CHECK(std::get<OperationStopped>(cancelled).reason==StopReason::cancelled);
+}
+
 TEST_CASE("hybrid portfolio builder rejects a pre-cancelled request") {
     auto system=example_system();
     std::stop_source source;

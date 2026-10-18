@@ -361,10 +361,51 @@ HybridPathOptimalFaceResult build_hybrid_path_optimal_face_candidate(
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Hybrid optimal-face construction was cancelled before publication"};
     return HybridPathOptimalFaceCandidate{branch.path,std::get<sets::SetData>(std::move(relation)),
-        *result.primal,result,std::move(characterization),
+        *result.primal,result,{},std::move(characterization),
         {"the solver anchor is a true global minimizer of the convex lifted objective",
          "the appended objective equations characterize every minimizer on the branch relation",
          "family completeness and global cross-branch optimality remain unverified"}};
+}
+
+HybridPortfolioOptimalFaceAnalysis assemble_hybrid_portfolio_optimal_face_candidates(
+    std::span<const HybridPathProgram> programs,const HybridPortfolioExecution& execution,
+    NumericalPolicy policy,std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid portfolio face assembly was cancelled before objective comparison"};
+    for(std::size_t i=0;i<programs.size();++i)
+        for(std::size_t j=i+1;j<programs.size();++j)
+            if(programs[i].path==programs[j].path)
+                return one({DiagnosticCode::evidence_mismatch,"hybrid.optimal_face.path",
+                    "Duplicate branch paths make execution provenance ambiguous"});
+    const auto comparison=compare_hybrid_portfolio_objective_bounds(programs,execution,policy);
+    if(const auto* errors=std::get_if<Diagnostics>(&comparison)) return *errors;
+    if(const auto* incomplete=std::get_if<HybridPortfolioObjectiveIncomplete>(&comparison)) return *incomplete;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid portfolio face assembly was cancelled after objective comparison"};
+    auto bounds=std::get<HybridPortfolioObjectiveBounds>(comparison);
+    std::vector<HybridPathOptimalFaceCandidate> candidates;
+    candidates.reserve(bounds.potentially_optimal_paths.size());
+    for(const auto& path:bounds.potentially_optimal_paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Hybrid portfolio face assembly was cancelled; no partial candidate list was returned"};
+        const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+            return program.path==path;
+        });
+        if(found==programs.end())
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.optimal_face.path",
+                "A potentially optimal path has no corresponding branch program"});
+        const auto index=static_cast<std::size_t>(std::distance(programs.begin(),found));
+        auto candidate=build_hybrid_path_optimal_face_candidate(*found,
+            *execution.branches[index].result,policy,cancellation);
+        if(const auto* errors=std::get_if<Diagnostics>(&candidate)) return *errors;
+        if(const auto* stopped=std::get_if<OperationStopped>(&candidate)) return *stopped;
+        auto face=std::get<HybridPathOptimalFaceCandidate>(std::move(candidate));
+        face.providers=execution.branches[index].providers;
+        candidates.push_back(std::move(face));
+    }
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid portfolio face assembly was cancelled before publication"};
+    return HybridPortfolioOptimalFaceCandidates{std::move(bounds),std::move(candidates)};
 }
 
 HybridPortfolioExecution execute_hybrid_path_programs(
