@@ -16,12 +16,28 @@ rounded summation. The arithmetic proves a statement about those stored binary64
 values; it does not by itself prove that they are an exact transcription of a
 physical model or account for model error.
 
+For row and variable lower/upper multipliers `l` and `u`, the verifier checks
+the exact stationarity identity
+
+```text
+Aᵀ(row_upper - row_lower) + variable_upper - variable_lower = 0
+```
+
+and requires this exact contradiction constant to be positive:
+
+```text
+Σ(row_lower * row_lower_bound - row_upper * row_upper_bound
+  + variable_lower * variable_lower_bound - variable_upper * variable_upper_bound)
+```
+
 `ExactFarkasEvidence` is sealed: only successful verification constructs it.
 The LP result boundary rechecks it against the exact immutable LP and accepts it
-only for an `infeasible` outcome. At the synthesis boundary, the embedded
-problem identity must also match. A strategy attaching generated-LP evidence to
-a source-level problem remains responsible for justifying that infeasibility
-transfers to that source problem.
+only for an `infeasible` outcome. This certifies the generated LP only. The
+synthesis boundary rejects generated-LP evidence as a source-level infeasibility
+claim, even when its embedded problem ID matches: no checked source-to-generated
+transfer certificate currently exists. Source-level validated infeasibility is
+therefore unsupported by this profile; synthesis leaves its source claim's
+support unestablished rather than attaching generated-program evidence.
 
 ## Claim scope and unsupported requests
 
@@ -48,6 +64,3 @@ LPs are covered by the reference tests in
 `tests/unit/optimization/linear_infeasibility_certificate_tests.cpp`. The
 contract is limited to infeasibility of the represented LP; no certificate
 here encloses rounding or uncertainty introduced before LP construction.
-
-See [exact linear infeasibility evidence](../architecture/exact-linear-infeasibility-evidence.md)
-for the equations and implementation details.
