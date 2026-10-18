@@ -30,11 +30,20 @@ struct ForwardTube {
     RequestId request;
     std::vector<ForwardStage> stages;
 };
+// A stage marginal already computed when a later operation stops. Its
+// evidence remains scoped to this marginal and never certifies tube completion.
+struct ForwardPartialRelation {
+    StageIndex stage;
+    OperationResult marginal;
+    SetHandle projection_source;
+    std::vector<std::size_t> source_coordinates;
+};
 // The prefix includes the empty marginal. No later stages were executed.
 struct EmptyForwardStage { ForwardTube prefix; StageIndex stage; GeometryEvidence evidence; };
 struct ForwardFailure {
     ForwardTube prefix;
     StageIndex stage;
+    std::optional<ForwardPartialRelation> partial_relation;
     std::optional<GeometryReference> active_request;
     std::vector<GeometryEvidence> completed_lineage;
     std::vector<RequestProvenance> providers;
