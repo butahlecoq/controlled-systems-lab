@@ -1,10 +1,14 @@
 include(FetchContent)
+include(${CMAKE_CURRENT_LIST_DIR}/DependencyArchive.cmake)
 
 # Private, pinned reentrant Qhull source. No Qhull header or application target is
 # exposed through CSL's public include tree.
+set(csl_qhull_archive_sha256 8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b)
+csl_dependency_archive_url(csl_qhull_archive_url qhull
+  https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/v8.0.2 ${csl_qhull_archive_sha256})
 FetchContent_Declare(csl_qhull
-  URL https://codeload.github.com/qhull/qhull/tar.gz/refs/tags/v8.0.2
-  URL_HASH SHA256=8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b
+  URL "${csl_qhull_archive_url}"
+  URL_HASH SHA256=${csl_qhull_archive_sha256}
   SOURCE_SUBDIR csl-no-build
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 FetchContent_MakeAvailable(csl_qhull)
