@@ -47,12 +47,12 @@ std::vector<std::string> attempts(const std::string& diagnostics) {
 std::string quote(const std::string& value);
 std::string json_number(const std::optional<std::string>& value);
 
-std::string phase_sum(const std::string& diagnostics,const std::string& key) {
+std::string phase_sum(const std::string& diagnostics,const std::string& key,bool absent_is_zero=false) {
     double sum=0;bool available=false;
     for(const auto& attempt:attempts(diagnostics))if(const auto value=field(attempt,key)) {
         sum+=std::stod(*value);available=true;
     }
-    if(!available)return "null";
+    if(!available)return absent_is_zero?"0":"null";
     std::ostringstream out;out<<std::setprecision(17)<<sum;return out.str();
 }
 
@@ -62,7 +62,7 @@ std::string attempt_timings(const std::string& diagnostics) {
         if(!first)out<<',';
         first=false;
         out<<"{\"model_load_seconds\":"<<json_number(field(attempt,"native.load_seconds"))
-            <<",\"basis_transfer_seconds\":"<<json_number(field(attempt,"warm_start.setup_seconds"))
+            <<",\"basis_transfer_seconds\":"<<json_number(field(attempt,"warm_start.setup_seconds").value_or("0"))
             <<",\"solve_seconds\":"<<json_number(field(attempt,"native.solve_seconds"))
             <<",\"cache_state\":"<<quote(field(attempt,"warm_start.cache_state").value_or("disabled"))
             <<",\"basis_accepted\":"<<(field(attempt,"warm_start.accepted").value_or("false"))
@@ -124,7 +124,7 @@ void run_pair(const std::string& scenario,std::size_t columns,std::size_t repeti
                 <<",\"order\":"<<order<<",\"status\":\"verified\",\"expected_objective\":"<<expected
                 <<",\"objective\":"<<primal->objective<<",\"wall_ns\":"<<elapsed
                 <<",\"model_load_seconds\":"<<phase_sum(result->raw_diagnostics,"native.load_seconds")
-                <<",\"basis_transfer_seconds\":"<<phase_sum(result->raw_diagnostics,"warm_start.setup_seconds")
+                <<",\"basis_transfer_seconds\":"<<phase_sum(result->raw_diagnostics,"warm_start.setup_seconds",true)
                 <<",\"solve_seconds\":"<<phase_sum(result->raw_diagnostics,"native.solve_seconds")
                 <<",\"native_attempts\":"<<attempt_timings(result->raw_diagnostics)
                 <<",\"simplex_iterations\":"<<json_number(field(result->raw_diagnostics,"native.simplex_iterations"))
