@@ -3,6 +3,7 @@
 #include <csl/registry/provider.hpp>
 #include <csl/sets/data.hpp>
 #include "../../geometry/conversion/affine_coordinates.hpp"
+#include "../../geometry/conversion/exact_h_rectangle.hpp"
 #include "../../geometry/conversion/exact_h_interval.hpp"
 #include <Eigen/Core>
 #include <Eigen/SVD>
@@ -560,6 +561,28 @@ public:
                     "global ambient-one H/V coverage checked against exact stored binary64 H rows");
                 if (auto errors=check_geometry_evidence(completed->evidence,request);!errors.empty())
                     return finish(Unsupported{std::move(errors)});
+            }
+        }
+        if (!want_h && request.input.metadata.dimension == 2 &&
+            std::holds_alternative<sets::HRepresentation>(rep)) {
+            if (auto* completed=std::get_if<OperationResult>(&result)) {
+                auto converted=sets::from_handle(completed->output);
+                if (std::holds_alternative<sets::SetData>(converted)) {
+                    const auto converted_rep=std::get<sets::SetData>(converted).representation();
+                    if (const auto* vertices=std::get_if<sets::VRepresentation>(&converted_rep)) {
+                        const auto bound=geometry::detail::certify_h_rectangle(
+                            std::get<sets::HRepresentation>(rep),*vertices);
+                        if (const auto* certified=std::get_if<double>(&bound)) {
+                            completed->evidence.error_bound=GeometryErrorBound{
+                                {"csl.geometry.metric.l-infinity"},*certified,
+                                "maximum absolute coordinate units; exact rectangle equality"};
+                            completed->evidence.assumptions.emplace_back(
+                                "global planar H/V coverage checked for an axis-aligned box over stored binary64 rows");
+                            if (auto errors=check_geometry_evidence(completed->evidence,request);!errors.empty())
+                                return finish(Unsupported{std::move(errors)});
+                        }
+                    }
+                }
             }
         }
         if (stopped(context,reason)) return finish(OperationStopped{reason,"Stopped before publishing conversion output."});
