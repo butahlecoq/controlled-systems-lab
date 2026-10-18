@@ -16,7 +16,7 @@ TEST_CASE("literal catalogue uses the actual registered LP and owns the returned
         for (const auto& error : trial.errors) INFO(error);
         REQUIRE(trial.passed());
         REQUIRE(trial.result.has_value());
-        CHECK(trial.actual_version == "1.0.0+highs.1.11.0");
+        CHECK(trial.actual_version == "1.1.0+highs.1.11.0");
         REQUIRE(trial.attempt.has_value());
         CHECK(trial.attempt->stamp.attempt() == 1);
         CHECK(trial.attempt->state == csl::SolveAttemptState::returned_result);

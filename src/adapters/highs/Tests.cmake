@@ -29,8 +29,17 @@ if(TARGET CSL::highs_lp)
 endif()
 
 if(TARGET CSL::highs_lp)
+  add_library(csl_highs_lp_test STATIC src/adapters/lp/highs.cpp)
+  target_compile_features(csl_highs_lp_test PUBLIC cxx_std_20)
+  target_compile_options(csl_highs_lp_test PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/permissive-> $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall;-Wextra;-Wpedantic;-Werror>)
+  target_include_directories(csl_highs_lp_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/support
+    ${csl_highs_SOURCE_DIR} ${csl_highs_SOURCE_DIR}/highs ${csl_highs_BINARY_DIR})
+  target_compile_definitions(csl_highs_lp_test PRIVATE CSL_HIGHSLP_TESTING
+    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\"")
+  target_link_libraries(csl_highs_lp_test PUBLIC CSL::optimization CSL::registry PRIVATE highs)
   add_executable(highs_lp_tests tests/contract/lp/highs_tests.cpp)
-  target_link_libraries(highs_lp_tests PRIVATE CSL::highs_lp doctest::doctest Threads::Threads)
+  target_link_libraries(highs_lp_tests PRIVATE csl_highs_lp_test doctest::doctest Threads::Threads)
+  target_include_directories(highs_lp_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/support)
   target_compile_definitions(highs_lp_tests PRIVATE
       "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\"")
   add_test(NAME highs_lp_tests COMMAND highs_lp_tests)

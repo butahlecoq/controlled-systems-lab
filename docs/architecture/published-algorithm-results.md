@@ -95,6 +95,12 @@ The [report-record contract](../contracts/algorithm-report-records.md) specifies
 
 Collection, plotting, rendering and static staging are separate commands under `scripts/reports`. Regenerate a reviewed bundle from saved `records.json` without rerunning the solver. Keep all failures and unavailable fields, inspect actual figures/pages, and retain raw JSONL, JSON/CSV, profile/build evidence and exact-byte manifests. Bundles live under `reports/algorithm-results/<report-id>/`, with a catalogue/index and adjacent offline ZIP. Destinations are immutable, and only allowlisted reviewed files enter the main-only Pages deployment workflow. The actual deployed versioned URL and downloads must be verified before algorithm-report completion is claimed.
 
+## OPT-12 workspace-local cross-query basis reuse
+
+Issue [OPT-12 #46](https://github.com/butahlecoq/controlled-systems-lab/issues/46) measures the optional HiGHS workspace-local warm-start path from source commit `7b732a53716ce963af83095fd2aeca8a681b76c4`. The native bundle [`opt12-7b732a53716c`](../../reports/algorithm-results/opt12-7b732a53716c/) retains 42 verified paired rows across three synthetic LPs and seven alternating repetitions per side. On the 100,000-column transfer-cost fixture, median aggregate native work is 35.7031 ms cold and 37.7611 ms warm; the ranges overlap (33.3761–41.2337 ms cold and 34.7062–45.2157 ms warm). A separate PDB-enabled Release CPU profile resolves the dominant sampled path through `LPWorkspace::solve`, the HiGHS LP workspace, and `Highs::run`; its diagnostic trace is excluded from timings and does not attribute the measured cold/warm latency difference. Performance interpretation remains inconclusive. The measurement does not establish that warm reuse is slower, a general speedup, or a worst-case complexity change.
+
+The timing workload is criterion 3 evidence only. The implementation contract tests in [`tests/contract/lp/highs_tests.cpp`](../../tests/contract/lp/highs_tests.cpp) cover optional activation, workspace isolation, row and column dimension invalidation, coefficient and bound changes, degenerate bases, rejected hints, cold retries, and independently checked cold/warm results for supported cases. The report is registered through the schema-3 catalogue/site adapter; publication remains pending until the main-only Pages deployment and live URL/download hashes are verified.
+
 ## SYN-04 registered Strategy B T-S01 report
 
 `SYN-04 #213` is a separate result bundle for the integrated public StrategyPort

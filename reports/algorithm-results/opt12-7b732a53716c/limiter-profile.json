@@ -1,0 +1,72 @@
+{
+  "artifacts": {
+    "stack-report.html": "0f012896c18710a4874af785235dfe7d84f97d5f18fa3010422390e9a50df90b",
+    "trace-summary.txt": "6a359df8c52776b5109ab8308ede4523d11dde74fc8bdc3ced0deba9f127355d",
+    "trace.etl": "f3605ee595a3d00286a5bb8c98af6094824937d57af74065dcf32afb704256f6"
+  },
+  "build": {
+    "compiler": "MSVC 19.44.35215.0",
+    "configuration": "Release",
+    "diagnostic_executable_sha256": "72415dc1c504d45e78aceacd954f6b4991ce276726bc2be7243b687054351497",
+    "matching_pdb_sha256": "1bb087f0164846b45a3c1cb31615f9614ce72a3bc76853ca7d7b874659d2bb5a",
+    "optimization": [
+      "/O2",
+      "/Ob2",
+      "/DNDEBUG"
+    ],
+    "symbols": [
+      "/Zi",
+      "/DEBUG"
+    ]
+  },
+  "collector": "Visual Studio 2022 DiagnosticsHub CPU Usage agent, CpuUsageHigh.json; xperf stack analysis with matching PDB",
+  "commands": [
+    "VSDiagnostics start <guid> /loadConfig:AgentConfigs\\CpuUsageHigh.json /scratchLocation:<profile-dir> /package:opt /launch:<diagnostic-exe> /launchArgs:20",
+    "VSDiagnostics stop <guid> /output:<profile.diagsession>",
+    "VSDiagnostics expandDiagSession <profile.diagsession>",
+    "xperf -i sc.user_aux.etl -symbols -o stack-report.html -a stack -process csl_opt12_warm_start_measure.exe -butterfly 1"
+  ],
+  "dominant_sampled_stacks": [
+    {
+      "inclusive_hits": 10898,
+      "percent_of_target_samples": 93.76,
+      "symbol": "csl::LPWorkspace::solve"
+    },
+    {
+      "inclusive_hits": 10898,
+      "percent_of_target_samples": 93.76,
+      "symbol": "csl::adapters::lp::(anonymous namespace)::HighsLPWorkspace::solve_native"
+    },
+    {
+      "inclusive_hits": 7853,
+      "percent_of_target_samples": 67.56,
+      "symbol": "Highs::run"
+    },
+    {
+      "inclusive_hits": 7187,
+      "percent_of_target_samples": 61.83,
+      "symbol": "solveLpSimplex"
+    }
+  ],
+  "evidence_archive_sha256": "ad2bb34602c5790ba9e5a31d4ef5410521c1061cc76d339a51549fe16b01919a",
+  "interpretation": "Source-resolved CPU samples identify the dominant sampled path through LPWorkspace::solve, HighsLPWorkspace::solve_native, Highs::run, and HiGHS simplex. This is a sampled CPU hotspot in a separate diagnostic workload; it does not attribute the measured cold/warm latency difference or establish warm reuse as slower.",
+  "measured_cpp_sources_unchanged": true,
+  "measured_source_commit": "7b732a53716ce963af83095fd2aeca8a681b76c4",
+  "profiled_source_commit": "e70c6bc7f84de3f3f75566cd99ea325d9a208e92",
+  "schema": "csl.opt12-source-mapped-profile/1",
+  "scope": "Separate PDB-enabled Release diagnostic run of the OPT-12 measurement executable with 20 paired repetitions; excluded from all latency statistics.",
+  "source_comparison": {
+    "changed_paths": [],
+    "command": "git diff --name-only 7b732a53716ce963af83095fd2aeca8a681b76c4 e70c6bc7f84de3f3f75566cd99ea325d9a208e92 -- src include benchmarks/reporting/opt12_warm_start_measure.cpp"
+  },
+  "trace": {
+    "cpu_count": 12,
+    "duration_seconds": 9.0840025,
+    "lost_buffers": 0,
+    "lost_events": 0,
+    "os_build": "Windows 11 10.0.22631",
+    "target_process_id": 25904,
+    "target_process_samples": 11623,
+    "total_sampleprof_events": 56443
+  }
+}

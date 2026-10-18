@@ -126,6 +126,7 @@ class RecordTests(unittest.TestCase):
     def test_diagnostics_parser_accepts_only_versioned_prefix(self):
         raw = "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.info=available\nnative.simplex_iterations=3\nnative.log:\nnative.simplex_iterations=999"
         self.assertEqual(self.data.native_iterations(raw)["value"], 3)
+        self.assertEqual(self.data.native_iterations(raw.replace("1.0.0", "1.1.0"))["value"], 3)
         for bad in (raw.replace("1.0.0", "2.0.0"), raw.replace("=3", "=3\nnative.simplex_iterations=4")):
             with self.assertRaises(ValueError):
                 self.data.native_iterations(bad)
@@ -234,6 +235,33 @@ class RecordTests(unittest.TestCase):
         trial['validation']={"passed":False,"errors":["failed before phase observation"]}
         retained=self.data.validate_view(self.data.seal(view['payload']))
         self.assertFalse(self.data.aggregate(retained)[0]['valid'])
+
+    def test_successful_lp_backend_identity_matches_raw_diagnostics(self):
+        view=self.fixture()
+        self.data.validate_view(view)
+
+        current=self.fixture();payload=current['payload']
+        current_version='1.1.0+highs.1.11.0'
+        payload['provenance']['backend']['version']=current_version
+        for trial in payload['trials']:
+            trial['registry']['actual']['version']=current_version
+            trial['result']['raw_diagnostics']=trial['result']['raw_diagnostics'].replace(
+                'adapter.version=1.0.0+highs.1.11.0',f'adapter.version={current_version}')
+        self.data.validate_view(self.data.seal(payload))
+
+        mismatched=self.fixture();payload=mismatched['payload']
+        payload['provenance']['backend']['version']=current_version
+        for trial in payload['trials']:
+            trial['registry']['actual']['version']=current_version
+        with self.assertRaisesRegex(ValueError,'diagnostic/backend identity mismatch'):
+            self.data.validate_view(self.data.seal(payload))
+
+        failed=self.fixture();payload=failed['payload'];trial=payload['trials'][0]
+        trial['validation']={'passed':False,'errors':['synthetic validation failure']}
+        trial['result']['raw_diagnostics']=trial['result']['raw_diagnostics'].replace(
+            'adapter.version=1.0.0+highs.1.11.0',f'adapter.version={current_version}')
+        with self.assertRaisesRegex(ValueError,'diagnostic/backend identity mismatch'):
+            self.data.validate_view(self.data.seal(payload))
 
     def test_synthetic_measurement_shape_cannot_hide_spans_or_change_source(self):
         # Literal data only, no process execution or real measurement claim.

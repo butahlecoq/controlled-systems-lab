@@ -23,6 +23,7 @@ import issue3_registered_reports as issue3_publication
 import syn01_registered_reports as syn01_publication
 import syn02_registered_reports as syn02_publication
 import syn_ts01_paired_registered_reports as syn_ts01_paired_publication
+import opt12_registered_reports as opt12_publication
 import opt11_registered_reports as opt11_publication
 SITE_PATH = Path(__file__).resolve().parents[2] / 'scripts' / 'reports' / 'site.py'
 SITE_SPEC = importlib.util.spec_from_file_location('csl_report_site', SITE_PATH)
@@ -469,7 +470,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))
@@ -478,7 +479,7 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertRegex(report['payload_sha256'],r'^[0-9a-f]{64}$')
             self.assertRegex(report['source_commit'],r'^[0-9a-f]{40}$')
             self.assertRegex(report['zip_sha256'],r'^[0-9a-f]{64}$')
-            if report['report_kind'] in ('opt05-hull','opt06-basis-reuse','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','syn01-nominal-forward','syn02-terminal-minimizers','syn-ts01-paired-comparison','opt11-recursive-hull'):
+            if report['report_kind'] in ('opt05-hull','opt06-basis-reuse','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','syn01-nominal-forward','syn02-terminal-minimizers','syn-ts01-paired-comparison','opt11-recursive-hull','opt12-warm-start'):
                 self.assertTrue({'measured_scope','evidence_limits'} <= set(report))
                 # Per-kind saved schemas/manifests are validated at the boundary,
                 # then projected into the same catalogue identity contract.
@@ -486,11 +487,12 @@ class RegisteredKindTests(unittest.TestCase):
                 self.assertNotEqual(report['report_id'],report['source_report_id'])
                 publisher=(syn02_publication if report['report_kind']=='syn02-terminal-minimizers' else
                            syn_ts01_paired_publication if report['report_kind']=='syn-ts01-paired-comparison' else
+                           opt12_publication if report['report_kind']=='opt12-warm-start' else
+                           opt11_publication if report['report_kind']=='opt11-recursive-hull' else
                            syn01_publication if report['report_kind']=='syn01-nominal-forward' else
                            geo02_publication if report['report_kind']=='geo02-affine-sum' else
                            geo05_publication if report['report_kind']=='geo05-projection-predecessor' else
-                           geo06_publication if report['report_kind']=='geo06-quickhull' else
-                           opt11_publication if report['report_kind']=='opt11-recursive-hull' else registered)
+                           geo06_publication if report['report_kind']=='geo06-quickhull' else registered)
                 if report['report_kind']=='b08-displayed-exact':
                     publisher=b08_publication
                 if report['report_kind']=='issue3-finite-catalogue':

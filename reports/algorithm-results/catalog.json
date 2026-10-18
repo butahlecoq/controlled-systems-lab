@@ -262,6 +262,18 @@
       "zip_sha256": "287ac701e0c1f2d19d36f31747bde732fefa548398e8632738065e1b85bc167d"
     },
     {
+      "report_id": "opt12-warm-start-b45c68fc3a6b164919ba3dac5e863688fd39cbb867dcc06c75f1e124c94b1386",
+      "report_kind": "opt12-warm-start",
+      "source_report_id": "opt12-7b732a53716c",
+      "payload_sha256": "9c7113b2e67fe6738452041d6ab698643d4ded41489e14ed6298bf57cf5e6da9",
+      "native_payload_sha256": "a5cb7221da477fe98b9f64a63c0fa65d310a25d7668e5262de4a728998ddde11",
+      "payload_schema": "csl.opt12-cost-report/1",
+      "source_commit": "7b732a53716ce963af83095fd2aeca8a681b76c4",
+      "measured_scope": "42 verified paired trial rows across three synthetic LP fixtures; 7 alternating repetitions per side; performance interpretation inconclusive",
+      "evidence_limits": "42 verified paired trials across three synthetic LPs on one recorded host; performance interpretation is inconclusive because observed transfer-cost ranges overlap and the separate source-mapped diagnostic profile does not attribute the cold/warm latency difference; no general speedup, application-scale, or worst-case complexity claim",
+      "zip_sha256": "116a0a1dd5b1551f1ef37591da88af10682dfe822a782c9b1b6d0a63366a85ed"
+    },
+    {
       "report_id": "opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865",
       "payload_sha256": "1a6e2a877aadfac30b7336261f886a4c2ce164c8489f30e28b4912a6fa28faef",
       "source_commit": "488d4ca8888d91c44b64d5d2f0baf564d1c28ae7",

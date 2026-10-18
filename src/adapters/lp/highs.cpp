@@ -3,6 +3,9 @@
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include "../certificate_verification.hpp"
 #include "../highs_session.hpp"
+#if defined(CSL_HIGHSLP_TESTING)
+#include "highs_warm_start_test_hook.hpp"
+#endif
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -13,8 +16,11 @@
 
 namespace csl::adapters::lp {
 namespace {
+#if defined(CSL_HIGHSLP_TESTING)
+thread_local bool reject_next_warm_basis_installation_for_test{};
+#endif
 using namespace optimization;
-constexpr const char* adapter_version = "1.0.0+highs.1.11.0";
+constexpr const char* adapter_version = "1.1.0+highs.1.11.0";
 constexpr const char* archive_hash = "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275";
 Diagnostics diagnostic(DiagnosticCode code, std::string field, std::string message) {
     return {{code,std::move(field),std::move(message)}};
@@ -157,10 +163,18 @@ void classify(ProgramResult& r,HighsStatus api,HighsModelStatus model,const Call
     }
 }
 class HighsLPWorkspace final : public LPWorkspace {
+    struct WarmBasisCache {
+        HighsBasis basis;
+        std::size_t rows{};
+        std::size_t columns{};
+    };
     HighsLPOptions options_;
     std::unique_ptr<Highs> native_;
     std::optional<LinearProgram> loaded_;
+    std::optional<WarmBasisCache> warm_basis_;
     ProgramOutcome solve_native(const LinearProgram& p,const ExecutionContext& c) {
+        auto previous_basis=std::move(warm_basis_);
+        warm_basis_.reset();
         if (auto d = admission(p); !d.empty()) return Unsupported{std::move(d)};
         if (auto d = admission(c); !d.empty()) return Unsupported{std::move(d)};
         auto result = result_for(p);
@@ -216,7 +230,9 @@ class HighsLPWorkspace final : public LPWorkspace {
         raw << "\nmodel.reused=" << (reused ? "true" : "false");
         if (!reused) {
             loaded_.reset();
+            const auto load_start=std::chrono::steady_clock::now();
             const auto status = h.passModel(translate(p));
+            raw << "\nnative.load_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-load_start).count();
             raw << "\nnative.load_status=" << static_cast<int>(status);
             if (status == HighsStatus::kError) {
                 raw << "\nnative_run=false\nnative.info=unavailable\nnative.log:\n" << state.log;
@@ -224,13 +240,52 @@ class HighsLPWorkspace final : public LPWorkspace {
             }
             loaded_ = p;
         }
+        bool warm_accepted=false;
+        auto retry_cold = [&](std::string_view cause) -> ProgramOutcome {
+            raw << "\nwarm_start.fallback=" << cause;
+            const auto warm_diagnostics=raw.str();
+            guard.detach();
+            native_.reset();
+            loaded_.reset();
+            warm_basis_.reset();
+            auto cold_result=solve_native(p,c);
+            if (auto* cold_program=std::get_if<ProgramResult>(&cold_result))
+                cold_program->raw_diagnostics += "\nwarm_start.retry=" + std::string(cause) + "\nwarm_start.rejected_attempt_diagnostics:\n" + warm_diagnostics;
+            return cold_result;
+        };
+        if(options_.cross_query_warm_start) {
+            const bool dimensions_match=previous_basis && previous_basis->rows==p.rows().size() && previous_basis->columns==p.variables().size();
+            raw << "\nwarm_start.enabled=true";
+            raw << "\nwarm_start.cache_state=" << (!previous_basis?"empty":dimensions_match?"compatible":"invalidated_dimension_change");
+            const auto warm_setup_start=std::chrono::steady_clock::now();
+            if(dimensions_match && previous_basis->basis.valid && previous_basis->basis.row_status.size()==p.rows().size() &&
+                previous_basis->basis.col_status.size()==p.variables().size()) {
+#if defined(CSL_HIGHSLP_TESTING)
+                const auto basis_status=reject_next_warm_basis_installation_for_test
+                    ? (reject_next_warm_basis_installation_for_test=false,HighsStatus::kError)
+                    : h.setBasis(previous_basis->basis);
+#else
+                const auto basis_status=h.setBasis(previous_basis->basis);
+#endif
+                warm_accepted=basis_status==HighsStatus::kOk;
+                raw << "\nwarm_start.install_status=" << static_cast<int>(basis_status)
+                    << "\nwarm_start.accepted=" << (warm_accepted?"true":"false");
+                if(!warm_accepted) {
+                    raw << "\nwarm_start.setup_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-warm_setup_start).count();
+                    return retry_cold("cold_after_rejection");
+                }
+            } else raw << "\nwarm_start.accepted=false\nwarm_start.fallback=cold_no_compatible_basis";
+            raw << "\nwarm_start.setup_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-warm_setup_start).count();
+        } else raw << "\nwarm_start.enabled=false\nwarm_start.cache_state=disabled";
         state.poll();
         if (state.stop) {
             result.termination = *state.stop;
             raw << "\nnative_run=false\nstop=" << (*state.stop == Termination::cancelled ? "cancelled" : "deadline");
             result.raw_diagnostics = raw.str(); return result;
         }
+        const auto solve_start=std::chrono::steady_clock::now();
         const auto api = h.run();
+        raw << "\nnative.solve_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-solve_start).count();
         const auto model = h.getModelStatus();
         classify(result,api,model,state);
         raw << "\nnative_run=true\nnative.call_status=" << static_cast<int>(api)
@@ -304,6 +359,21 @@ class HighsLPWorkspace final : public LPWorkspace {
             const auto elapsed=std::chrono::duration<double>(std::chrono::steady_clock::now()-extraction_start).count();
             raw << "\ncertificate.extraction_seconds=" << std::setprecision(17) << elapsed;
         } else raw << "\ncertificate.extraction=not_requested";
+        if(options_.cross_query_warm_start) {
+            const auto& basis=h.getBasis();
+            const bool valid_result=result.termination==Termination::completed && result.outcome.value==MathematicalOutcome::optimal &&
+                result.primal.has_value() && optimization::check_program_result(result,p,Assurance::numerical).empty() &&
+                basis.valid && basis.row_status.size()==p.rows().size() && basis.col_status.size()==p.variables().size();
+            raw << "\nwarm_start.next_cache=" << (valid_result?"stored":"invalidated_after_result");
+            if(valid_result) {
+                warm_basis_=WarmBasisCache{basis,p.rows().size(),p.variables().size()};
+            } else if(warm_accepted) {
+                // A basis accepted by HiGHS is still only a hint. If its result
+                // is not an independently checked optimum, discard that solver
+                // instance and solve once with a fresh, cold native solver.
+                return retry_cold("cold_after_invalid_result");
+            }
+        }
         raw << "\ncertificates=" << (std::holds_alternative<ExactFarkasEvidence>(result.outcome.support)?"exact_farkas":"unavailable")
             << "\nnative.log:\n" << state.log;
         result.raw_diagnostics = raw.str();
@@ -311,7 +381,7 @@ class HighsLPWorkspace final : public LPWorkspace {
     }
     ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext& c) override {
         try { return solve_native(p,c); }
-        catch (...) { loaded_.reset(); native_.reset(); throw; }
+        catch (...) { loaded_.reset(); native_.reset(); warm_basis_.reset(); throw; }
     }
 public:
     explicit HighsLPWorkspace(HighsLPOptions options) : options_(options) {}
@@ -324,6 +394,11 @@ public:
     std::unique_ptr<LPWorkspace> make_workspace() const override { return std::make_unique<HighsLPWorkspace>(options_); }
 };
 } // namespace
+#if defined(CSL_HIGHSLP_TESTING)
+void test_support::reject_next_warm_basis_installation() noexcept {
+    reject_next_warm_basis_installation_for_test=true;
+}
+#endif
 HighsLPRegistrationResult make_highs_registration(HighsLPOptions options) {
     if (options.simplex_iteration_limit && *options.simplex_iteration_limit > static_cast<std::size_t>(kHighsIInf))
         return diagnostic(DiagnosticCode::unsupported,"highs.simplex_iteration_limit","Native integer width exceeded");

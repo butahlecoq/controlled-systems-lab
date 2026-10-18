@@ -21,7 +21,7 @@ int main() {
     request.output.representation = {"csl.program-result.v1"};
     auto preparation = prepare_pipeline(select(registry,{{"csl.lp.highs"},{}},*program,request));
     auto* prepared = std::get_if<PreparedPipeline<LPPort>>(&preparation);
-    if (!prepared || prepared->provenance()[0].actual->version != "1.0.0+highs.1.11.0") return 4;
+    if (!prepared || prepared->provenance()[0].actual->version != "1.1.0+highs.1.11.0") return 4;
     auto [worker] = prepared->create();
     if (worker->basis()) return 5;
     const auto outcome = worker->run({{}, {}, {}, {1e-8,1e-8}, "installed"});
