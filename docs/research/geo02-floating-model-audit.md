@@ -177,8 +177,10 @@ It also certifies bounded, axis-aligned boxes in ambient dimensions 2 through
 H endpoints. The checker verifies that every returned V point is inside those
 intervals and every distinct box corner is present. Those two checks prove
 both inclusions for this box profile and publish a zero L-infinity bound. It
-caps corner enumeration at 4,096 and declines unsupported rows, unbounded
-inputs, nonfinite values, and arithmetic range failures. It does not cover
+also publishes zero for an empty output when supported axis-aligned stored
+rows prove the H set is empty. It caps corner enumeration at 4,096 and declines
+unsupported rows, nonempty unbounded inputs, nonfinite values, and arithmetic
+range failures. It does not cover
 rotated boxes, general higher-dimensional polytopes, or pre-rounding
 authored-real values. For ambient-one H inputs, the affine-image/Minkowski
 adapter independently reruns the interval checker on the original H rows and

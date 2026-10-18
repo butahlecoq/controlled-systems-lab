@@ -249,6 +249,36 @@ TEST_CASE("higher dimensional axis-aligned boxes receive exact global coverage c
         [](const std::string& assumption) { return assumption.find("axis-aligned box")!=std::string::npos; }));
 }
 
+TEST_CASE("exactly empty axis-aligned H boxes certify only empty conversion outputs") {
+    const auto input=make_h_handle("empty-box",3,
+        Matrix{6,3,{1,0,0, -1,0,0, 0,1,0, 0,-1,0, 0,0,1, 0,0,-1}},
+        Vector{0,-1,1,1,1,1});
+    const auto req=request(input,"csl.polyhedron.v","empty-box-coverage");
+    const auto outcome=convert(input,"csl.polyhedron.v","empty-box-coverage");
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    const auto& result=std::get<OperationResult>(outcome);
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+    REQUIRE(result.evidence.error_bound.has_value());
+    CHECK(result.evidence.error_bound->bound==0.0);
+    const auto output=take(sets::from_handle(result.output));
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(output.representation()));
+    CHECK(std::get<sets::VRepresentation>(output.representation()).vertices.rows()==0);
+
+    const auto h_data=take(sets::from_handle(input));
+    const auto& h=std::get<sets::HRepresentation>(h_data.representation());
+    CHECK(std::get<bool>(geometry::detail::exact_h_box_is_empty(h)));
+    const auto empty_v=take(sets::from_handle(make_v_handle("empty-box-v",3,Matrix{0,3,{}})));
+    const auto empty_certificate=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(empty_v.representation()));
+    REQUIRE(std::holds_alternative<double>(empty_certificate));
+    CHECK(std::get<double>(empty_certificate)==0.0);
+
+    const auto nonempty_v=take(sets::from_handle(make_v_handle("wrong-nonempty-box-v",3,Matrix{1,3,{0,0,0}})));
+    const auto mismatch=geometry::detail::certify_h_box(
+        h,std::get<sets::VRepresentation>(nonempty_v.representation()));
+    CHECK(std::holds_alternative<std::string>(mismatch));
+}
+
 TEST_CASE("box certificate rejects omitted corners and outside points but accepts interior vertices") {
     const auto h_data=take(sets::from_handle(unit_box_h("cube-h",3)));
     const auto& h=std::get<sets::HRepresentation>(h_data.representation());

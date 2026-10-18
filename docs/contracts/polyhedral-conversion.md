@@ -59,10 +59,10 @@ and general polytopes are outside this certificate.
 
 The supported profiles publish an outward-rounded L-infinity Hausdorff bound
 in `GeometryEvidence.error_bound`, measured in input-coordinate units. The
-box certificate publishes zero after exact corner coverage succeeds. An exact
-empty H set paired with an empty V output has bound zero by the empty-to-empty
-convention. Contradictory outputs, unbounded exact H inputs, nonfinite vertices
-and arithmetic range failures do not publish a bound. A returned vertex's
+box certificate publishes zero after exact corner coverage succeeds, or when
+supported axis-aligned constraints prove the H set empty and the output is
+empty. Contradictory outputs, unbounded nonempty exact H inputs, nonfinite
+vertices and arithmetic range failures do not publish a bound. A returned vertex's
 small H-row residual alone cannot hide missing interval endpoints or box
 corners. These certificates cover stored binary64 rows interpreted as exact
 dyadic values, not pre-rounding authored real coefficients. They do not change
