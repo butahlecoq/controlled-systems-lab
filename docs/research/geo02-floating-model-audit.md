@@ -125,7 +125,7 @@ and pairing summands for Minkowski addition. Direct finite V inputs have zero
 conversion error. Exact dyadic arithmetic composes and outward-rounds the
 result, and exact candidate deletion adds zero. Composition through H inputs
 is implemented for the bounded ambient-one interval profile and the bounded
-axis-aligned box profile in dimensions 2 through 12. Neither profile certifies
+axis-aligned box profile (dimensions 2 through 12). Neither profile certifies
 authored-real input uncertainty.
 
 The error is observable even with exact dyadic V inputs. Take a singleton
