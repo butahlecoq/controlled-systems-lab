@@ -227,6 +227,18 @@ public:
         std::stop_token cancellation) const = 0;
 };
 
+// Independent verifier for deterministic paths with integral singleton data.
+// It refuses continuous, nonintegral, or unsupported set representations.
+class ExactSingletonHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,
+        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
+        std::stop_token cancellation) const override;
+};
+
 // Enumerates the full permitted path inventory and validates that programs and
 // reports cover it exactly once. It does not promote a report into a complete
 // optimal-family publication.

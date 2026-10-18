@@ -155,8 +155,19 @@ The `HybridFamilyVerificationAdapter` boundary consumes the original model,
 request, exhaustive path inventory, branch programs, and candidate faces. Its
 wrapper checks complete path and report identity coverage. The report carries
 per-path feasibility, objective, and continuous-coverage statuses, but it is
-inspection data and cannot publish a `synthesis::OptimalFamily`. No concrete
-hybrid family verifier or compiled proof authority is implemented yet.
+inspection data and cannot publish a `synthesis::OptimalFamily`.
+`ExactSingletonHybridFamilyVerifier` independently enumerates edge paths and
+reconstructs trajectories using checked integer arithmetic. It supports only
+integral initial states, singleton controls, singleton-representation resets,
+universal/singleton/empty invariants and guards, and linear terminal
+objectives. For optimal branches it checks that the supplied program and
+candidate relations are the same singleton, using exact full-rank integer
+equality checks for H representations. Continuous, nonintegral, overflowing,
+or otherwise unsupported cases return unsupported status. Independent path
+enumeration is bounded by the admitted inventory and a one-million-node
+traversal ceiling; exceeding either returns unsupported. This bounded
+numerical verifier is not a compiled proof authority and does not certify
+general continuous branch coverage.
 
 ## Initial supported profile and rejection boundary
 
