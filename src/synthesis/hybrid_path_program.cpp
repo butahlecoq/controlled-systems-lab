@@ -487,13 +487,13 @@ HybridPathOptimalFaceResult build_hybrid_path_optimal_face_candidate(
     const auto evaluation_diagnostics=std::visit([&]<class Program>(const Program& program)->Diagnostics {
         if constexpr(std::is_same_v<Program,LinearProgram>) {
             auto evaluated=optimization::evaluate_primal(program,*result.primal,policy,
-                {"hybrid-optimal-face-primal","1"});
+                Verifier{ModuleId{"hybrid-optimal-face-primal"},"1"});
             if(const auto* errors=std::get_if<Diagnostics>(&evaluated)) return *errors;
             const auto& checked=std::get<optimization::PrimalEvaluation>(evaluated);
             return check_residuals(checked.residuals);
         } else {
             auto evaluated=optimization::evaluate_primal(program,*result.primal,policy,
-                {"hybrid-optimal-face-primal","1"});
+                Verifier{ModuleId{"hybrid-optimal-face-primal"},"1"});
             if(const auto* stopped=std::get_if<OperationStopped>(&evaluated)) {
                 evaluation_stop=*stopped;
                 return {};
@@ -582,7 +582,7 @@ HybridPathOptimalFaceResult build_hybrid_path_optimal_face_candidate(
         return one({DiagnosticCode::invalid_claim,"hybrid.optimal_face.arithmetic",
             "Optimal-face equations contain nonfinite binary64 values"});
     const auto& metadata=*branch.joint_relation.metadata();
-    auto relation=sets::make_h({metadata.id.value+":optimal-face-candidate",dimension,
+    auto relation=sets::make_h({SetId{metadata.id.value+":optimal-face-candidate"},dimension,
         metadata.coordinate_labels},{h->inequalities,h->upper_bounds,
         std::get<numeric::MatrixView>(matrix),std::get<numeric::VectorView>(values)});
     if(const auto* errors=std::get_if<Diagnostic>(&relation)) return one(*errors);

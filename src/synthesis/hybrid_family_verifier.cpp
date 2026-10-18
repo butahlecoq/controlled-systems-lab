@@ -421,7 +421,8 @@ HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
     bool coverage_unsupported=false;
     for(std::size_t i=0;i<paths.size();++i) {
         const auto& evaluation=evaluations[i];
-        HybridPathVerificationRecord record{paths[i]};
+        HybridPathVerificationRecord record{};
+        record.path=paths[i];
         const auto candidate=std::find_if(candidates.begin(),candidates.end(),
             [&](const auto& item){return item.path==paths[i];});
         if(evaluation.state==BranchState::unsupported) {
