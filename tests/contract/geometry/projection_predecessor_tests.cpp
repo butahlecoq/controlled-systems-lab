@@ -294,6 +294,33 @@ TEST_CASE("projection fails explicitly at caller row limit without publishing a 
     auto joint=h("joint",2,{4,2,{1,1,-1,1,1,-1,-1,-1}},{2,2,2,2},{0,2,{}},{});
     auto result=project(projection(joint.as_handle(),{0}),geometry::polyhedral::ProjectionOutput::h,3);
     CHECK(std::holds_alternative<Unsupported>(result));
+    const auto boundary=take(project(projection(joint.as_handle(),{0}),
+        geometry::polyhedral::ProjectionOutput::h,4));
+    CHECK(contains(boundary.output,{-2}));
+    CHECK(contains(boundary.output,{0}));
+    CHECK(contains(boundary.output,{2}));
+    CHECK_FALSE(contains(boundary.output,{-2.125}));
+    CHECK_FALSE(contains(boundary.output,{2.125}));
+    const auto boundary_data=take(sets::from_handle(boundary.output));
+    const auto boundary_representation=boundary_data.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(boundary_representation));
+    const auto& interval_h=std::get<sets::HRepresentation>(boundary_representation);
+    CHECK(interval_h.inequalities.cols()==1);
+    CHECK(interval_h.equalities.rows()==0);
+    bool has_lower=false;
+    bool has_upper=false;
+    for(std::size_t row=0;row<interval_h.inequalities.rows();++row) {
+        const auto coefficient=interval_h.inequalities(row,0);
+        const auto bound=interval_h.upper_bounds[row];
+        const bool lower=coefficient<0.0 && bound==-2.0*coefficient;
+        const bool upper=coefficient>0.0 && bound==2.0*coefficient;
+        const bool tautology=coefficient==0.0 && bound>=0.0;
+        CHECK((lower || upper || tautology));
+        has_lower=has_lower || lower;
+        has_upper=has_upper || upper;
+    }
+    CHECK(has_lower);
+    CHECK(has_upper);
 }
 
 TEST_CASE("zero-control predecessor preserves a lower-dimensional equality set") {

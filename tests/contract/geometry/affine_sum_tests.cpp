@@ -833,6 +833,11 @@ TEST_CASE("candidate limits and pre-request stops never publish successful geome
     geometry::AffineSumOptions options;
     options.max_candidates=3;
     CHECK(std::holds_alternative<Unsupported>(run(req,dependencies(),options)));
+    options.max_candidates=4;
+    const auto admitted=take(run(req,dependencies(),options));
+    CHECK(support(admitted.output,{1})==2.0);
+    CHECK(support(admitted.output,{-1})==0.0);
+    CHECK(check_geometry_evidence(admitted.evidence,req).empty());
     std::stop_source stop;
     stop.request_stop();
     auto ctx=context();ctx.cancellation=stop.get_token();
