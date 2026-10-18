@@ -2,11 +2,20 @@ name: Native C++20
 
 on:
   push:
+    branches: [main]
+    paths-ignore: ['**/*.md', 'reports/algorithm-results/**']
   pull_request:
+    paths-ignore: ['**/*.md', 'reports/algorithm-results/**']
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# A PR synchronization already validates its branch: do not also build pushes
+# to feature branches. Keep every main/manual run; supersede only the same PR.
+concurrency:
+  group: native-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   release:
