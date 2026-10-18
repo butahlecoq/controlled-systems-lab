@@ -45,6 +45,14 @@ class RejectingLP final : public LPWorkspace {
     }
 };
 
+class CompletingLP final : public LPWorkspace {
+    ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext&) override {
+        return ProgramResult{Termination::completed,
+            {program.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
+            {},{},"fixture completed"};
+    }
+};
+
 class RejectingConvex final : public ConvexWorkspace {
     ProgramOutcome do_solve(const ConvexProgram&,const ExecutionContext&) override {
         return Unsupported{{{DiagnosticCode::unsupported,"fixture.convex","fixture rejection"}}};
@@ -61,6 +69,16 @@ registry::PreparedProvider<registry::LPPort> lp_provider(std::stop_source* cance
         },
         [factory_calls](const LinearProgram&){++*factory_calls; return std::make_unique<RejectingLP>();}}));
     auto prepared=registry::prepare_provider(registry::select_provider(providers,{{"reject-lp"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
+}
+
+registry::PreparedProvider<registry::LPPort> completing_lp_provider() {
+    registry::Registry<registry::LPPort> providers;
+    REQUIRE_FALSE(providers.add({{{"completing-lp"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability{return registry::Offer{};},
+        [](const LinearProgram&){return std::make_unique<CompletingLP>();}}));
+    auto prepared=registry::prepare_provider(registry::select_provider(providers,{{"completing-lp"},{}}));
     REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(prepared));
     return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
 }
@@ -188,4 +206,22 @@ TEST_CASE("hybrid branch execution observes cancellation after provider preparat
     CHECK(*factory_calls==0);
     REQUIRE(report.branches[0].providers.size()==1);
     CHECK_FALSE(report.branches[0].result.has_value());
+}
+
+TEST_CASE("hybrid branch execution retains a completed solver result and provenance") {
+    auto built=build_hybrid_path_program(example_system(),example_request(),example_path(),
+        {"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(built));
+    const std::array<HybridPathProgram,1> programs{std::get<HybridPathProgram>(std::move(built))};
+    const auto report=execute_hybrid_path_programs(programs,completing_lp_provider(),convex_provider(),{});
+    REQUIRE(report.branches.size()==1);
+    CHECK(report.all_supplied_branches_completed);
+    CHECK(report.branches[0].path==example_path());
+    CHECK(report.branches[0].termination==Termination::completed);
+    CHECK(report.branches[0].outcome==MathematicalOutcome::undetermined);
+    REQUIRE(report.branches[0].result);
+    CHECK(report.branches[0].result->raw_diagnostics=="fixture completed");
+    REQUIRE(report.branches[0].providers.size()==1);
+    REQUIRE(report.branches[0].providers[0].actual);
+    CHECK(report.branches[0].providers[0].actual->id.value=="completing-lp");
 }
