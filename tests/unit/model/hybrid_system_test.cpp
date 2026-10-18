@@ -74,6 +74,17 @@ SetHandle singleton_relation(std::string id, Vector point) {
     return std::get<sets::SetData>(std::move(result)).as_handle();
 }
 
+SetHandle vertex_set(std::string id, std::size_t dimension) {
+    Matrix vertices{1,dimension,Vector(dimension,0)}, rays{0,dimension,{}};
+    auto v=numeric::snapshot(vertices), r=numeric::snapshot(rays);
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(v));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(r));
+    auto data=sets::make_v({SetId{std::move(id)},dimension,{}},
+        {std::get<numeric::MatrixView>(std::move(v)),std::get<numeric::MatrixView>(std::move(r))});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
 std::pair<HybridSystem,HybridRequest> dimension_changing_example() {
     auto source=mode("source",1,1,1), target=mode("target",2,1,1);
     target.state_coordinate_labels={"p","v"};
@@ -255,4 +266,14 @@ TEST_CASE("hybrid joint relation rejects capacity exhaustion without truncation 
     const auto cancelled=compose_hybrid_path_relation(system,request,path,{16,64,1024},source.get_token());
     REQUIRE(std::holds_alternative<OperationStopped>(cancelled));
     CHECK(std::get<OperationStopped>(cancelled).reason==StopReason::cancelled);
+}
+
+TEST_CASE("hybrid joint relation rejects V sets during capability preflight") {
+    auto [system,request]=dimension_changing_example();
+    system.edges[0].guards[0]=vertex_set("v-guard",1);
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto result=compose_hybrid_path_relation(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostic>(result));
+    CHECK(std::get<Diagnostic>(result).code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostic>(result).field=="hybrid.guard.representation");
 }

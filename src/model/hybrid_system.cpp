@@ -336,6 +336,29 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
             !reserve(modes[t+1]->state_dimension,state_offsets[t+1]))
             return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.variables","Joint relation exceeds its variable limit"};
     }
+    auto preflight = [](const SetHandle& handle, const char* field) -> std::optional<Diagnostic> {
+        const auto frozen=sets::from_handle(handle);
+        if(const auto* d=std::get_if<Diagnostic>(&frozen)) return *d;
+        const auto rep=std::get<sets::SetData>(frozen).representation();
+        if(std::holds_alternative<sets::HRepresentation>(rep) ||
+           std::holds_alternative<sets::EmptyRepresentation>(rep) ||
+           std::holds_alternative<sets::UniversalRepresentation>(rep) ||
+           std::holds_alternative<sets::SingletonRepresentation>(rep)) return std::nullopt;
+        return Diagnostic{DiagnosticCode::unsupported,field,
+            "Direct joint composition requires H, empty, universal, or singleton sets; V conversion is not implicit"};
+    };
+    auto preflight_set = [&](const AdmissibleSet& set, const char* field) -> std::optional<Diagnostic> {
+        if(const auto* handle=std::get_if<SetHandle>(&set)) return preflight(*handle,field);
+        return std::nullopt;
+    };
+    for(std::size_t t=0;t<system.horizon;++t) {
+        if(auto d=preflight_set(modes[t]->control_sets[t],"hybrid.control.representation")) return *d;
+        if(auto d=preflight_set(modes[t]->invariants[t],"hybrid.invariant.representation")) return *d;
+        if(auto d=preflight_set(modes[t]->invariants[t+1],"hybrid.invariant.representation")) return *d;
+        if(auto d=preflight_set(edges[t]->guards[t],"hybrid.guard.representation")) return *d;
+        if(auto d=preflight(edges[t]->reset_relations[t],"hybrid.reset.representation")) return *d;
+    }
+    if(auto d=preflight_set(modes.back()->invariants[system.horizon],"hybrid.invariant.representation")) return *d;
     std::vector<Vector> inequalities, equalities;
     Vector bounds, equality_values;
     auto append = [&](Vector row, double rhs, bool equality) -> bool {
