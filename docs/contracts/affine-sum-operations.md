@@ -75,9 +75,9 @@ metric is L-infinity Hausdorff distance on output coordinates,
 and its units are maximum absolute output-coordinate units. For candidate
 generation, the bound compares every generated binary64 point with the exact
 affine image or Minkowski pair operation on the stored (possibly converted)
-binary64 vertices. If `E_gen` is the largest such coordinate discrepancy and
-`E_H` is a certified H-to-V coverage bound from either supported exact
-interval or box profile. The affine-image bound includes
+binary64 vertices. Let `E_gen` be the largest such coordinate discrepancy and
+`E_H` a certified H-to-V coverage bound from either supported exact interval
+or box profile. The affine-image bound includes
 `max_row(sum_col(abs(M[row,col]))) * E_H + E_gen`. The Minkowski bound includes
 `E_H,left + E_H,right + E_gen`; direct finite V operands contribute zero
 conversion error. These compositions use exact dyadic accumulation and are
