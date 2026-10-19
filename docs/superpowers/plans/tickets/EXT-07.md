@@ -41,10 +41,12 @@ guards are intervals and resets are exact scalar affine relations. A separate
 raw-graph oracle covers tied two-stage continuous families, with a three-stage
 regression fixture for the generalized horizon path.
 This does not establish multiple free control parameters or a broad continuous
-polytope oracle; those acceptance requirements remain open. A combined
-verified-program builder now runs each built-in verifier's bounded-domain
-preflight before direct relation construction; custom bounded verifiers fail
-closed until they implement preflight. The fixed-path reachability adapter
+polytope oracle; those acceptance requirements remain open. Portfolio builders
+now preflight the complete enumerated path inventory for supported direct
+joint-H representations and variable/row/matrix resource limits before
+constructing any branch relation. The combined verified-program builder also
+runs each built-in verifier's bounded-domain preflight; custom bounded verifiers
+fail closed until they implement preflight. The fixed-path reachability adapter
 currently uses the direct joint-H composer; a separate projected-set
 implementation is not yet supplied.
 

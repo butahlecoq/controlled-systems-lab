@@ -8,6 +8,7 @@
 #include <csl/sets/data.hpp>
 #include <cstddef>
 #include <optional>
+#include <span>
 #include <string>
 #include <stop_token>
 #include <variant>
@@ -120,6 +121,8 @@ struct HybridPathCompositionFailureReport {
 };
 using HybridComposedPathRelationResult = std::variant<HybridComposedPathRelation,
     HybridPathCompositionFailureReport>;
+using HybridRelationPreflightResult = std::variant<std::monostate,
+    HybridPathCompositionFailureReport, Diagnostics, OperationStopped>;
 
 struct HybridModeCapabilitySummary {
     HybridModeId mode;
@@ -157,6 +160,12 @@ HybridPathEnumeration enumerate_hybrid_paths(
     std::stop_token cancellation = {});
 
 Diagnostics check_hybrid_profile(const HybridSystem&, const HybridRequest&);
+
+// Checks the complete supplied path inventory against direct joint-H operation
+// and resource limits without constructing any path relation.
+HybridRelationPreflightResult preflight_hybrid_path_relations(
+    const HybridSystem&, const HybridRequest&, std::span<const HybridPath>,
+    HybridRelationLimits, std::stop_token cancellation = {});
 
 // Builds the exact joint H-relation for one already enumerated branch. The
 // relation retains post states, controls, and pre-reset states as coordinates.
