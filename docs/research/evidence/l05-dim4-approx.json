@@ -5,7 +5,7 @@
   "simplex_sha256": "6f87f2c674519352f6801df60fe498a33ac091b79a5a6cbe76f0dcf4a20f6229",
   "approx_sha256": "7ca79821f39fde91b0eba8681c1b8775713441a1a1ff04159d963a52416b1c5a",
   "commented_threshold": 0.001,
-  "arithmetic": "NumPy binary64 translation of commented stagewise path; no MATLAB execution or validated arithmetic",
+  "arithmetic": "NumPy binary64 stable-tie translation of commented stagewise path; historical MATLAB tie order not run or verified; no validated arithmetic",
   "environment": {
     "python": "3.13.5",
     "numpy": "2.3.2",
@@ -71,6 +71,11 @@
   ],
   "terminal_vertices": 148,
   "terminal_volume": 34421.17014411157,
+  "quicksort_tie_sensitivity": {
+    "description": "NumPy quicksort ordering for tied distance ranks; sensitivity only, not historical MATLAB behavior",
+    "terminal_vertices": 150,
+    "terminal_volume": 34582.74177102231
+  },
   "terminal_reduced_to_complete_endpoint_max_distance": 8.331852114593072e-15,
   "terminal_only_reduction": {
     "vertices": 142,

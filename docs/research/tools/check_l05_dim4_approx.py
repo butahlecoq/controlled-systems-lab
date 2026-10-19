@@ -1,4 +1,4 @@
-"""Explore the commented four-state Approx_mod path with source-ordered floats.
+"""Explore the commented four-state Approx_mod path with NumPy binary64.
 
 This is a private-source audit, not a historical MATLAB execution or validated
 nonlinear enclosure. The private source is read only and hash gated.
@@ -66,7 +66,8 @@ def hyp_info(points, column: int, threshold: float, epsilon: float):
             raise RuntimeError("HypInfo pivot loop did not terminate")
 
 
-def approx_mod(points, threshold: float, scale: float = 10.0, epsilon: float = 1e-9):
+def approx_mod(points, threshold: float, scale: float = 10.0, epsilon: float = 1e-9,
+               sort_kind: str = "stable"):
     """Translate private Approx_mod normalization, ranking and deletion loops."""
     import numpy as np
 
@@ -80,7 +81,7 @@ def approx_mod(points, threshold: float, scale: float = 10.0, epsilon: float = 1
     normalized_span = normalized.max(axis=1) - normalized.min(axis=1)
     with np.errstate(divide="ignore", invalid="ignore"):
         distance = np.max(np.abs((normalized - center[:, None]) / normalized_span[:, None]), axis=0)
-    order = np.argsort(-distance, kind="stable")
+    order = np.argsort(-distance, kind=sort_kind)
     normalized = normalized[:, order]
     original = original[:, order]
     table = np.vstack([hyp_info(normalized, column, threshold, epsilon)[0]
@@ -104,7 +105,7 @@ def approx_mod(points, threshold: float, scale: float = 10.0, epsilon: float = 1
     return original.T, deletion_rounds
 
 
-def stagewise_linear(threshold: float):
+def stagewise_linear(threshold: float, sort_kind: str = "stable"):
     """Apply the source's commented reduction after each active hull filter."""
     import numpy as np
 
@@ -131,7 +132,7 @@ def stagewise_linear(threshold: float):
         images = controls @ input_matrix.T
         generated = np.vstack([row @ matrix.T + images for row in retained])
         hull, hull_pivots = convsm_mod(generated)
-        retained, deletion_rounds = approx_mod(hull, threshold)
+        retained, deletion_rounds = approx_mod(hull, threshold, sort_kind=sort_kind)
         yield stage, len(generated), len(hull), retained, hull_pivots, deletion_rounds
         reference = np.array([
             r1 + 0.5 * sine2 + (1.0 + 0.5 * cosine1) * 0.5,
@@ -160,6 +161,8 @@ def audit(source: Path, convsm: Path, simplex: Path, approx: Path, figures: dict
             "deletion_rounds": deletion_rounds,
         })
     terminal_hull = ConvexHull(retained)
+    quicksort_retained = list(stagewise_linear(0.001, sort_kind="quicksort"))[-1][3]
+    quicksort_hull = ConvexHull(quicksort_retained)
     complete_linear, _, _ = candidate_endpoints()
     endpoint_distance = float(cKDTree(complete_linear).query(retained)[0].max())
     if endpoint_distance > 1e-9:
@@ -188,11 +191,16 @@ def audit(source: Path, convsm: Path, simplex: Path, approx: Path, figures: dict
         "simplex_sha256": SIMPLEX_SHA256,
         "approx_sha256": APPROX_SHA256,
         "commented_threshold": 0.001,
-        "arithmetic": "NumPy binary64 translation of commented stagewise path; no MATLAB execution or validated arithmetic",
+        "arithmetic": "NumPy binary64 stable-tie translation of commented stagewise path; historical MATLAB tie order not run or verified; no validated arithmetic",
         "environment": {"python": platform.python_version(), "numpy": np.__version__, "scipy": scipy.__version__},
         "stages": stages,
         "terminal_vertices": len(terminal_hull.vertices),
         "terminal_volume": float(terminal_hull.volume),
+        "quicksort_tie_sensitivity": {
+            "description": "NumPy quicksort ordering for tied distance ranks; sensitivity only, not historical MATLAB behavior",
+            "terminal_vertices": len(quicksort_hull.vertices),
+            "terminal_volume": float(quicksort_hull.volume),
+        },
         "terminal_reduced_to_complete_endpoint_max_distance": endpoint_distance,
         "terminal_only_reduction": {
             "vertices": len(terminal_only_hull.vertices),
