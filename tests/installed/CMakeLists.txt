@@ -39,6 +39,13 @@ add_test(NAME installed_zonotope_reduction_client COMMAND installed_zonotope_red
 set_tests_properties(installed_zonotope_reduction_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed zonotope client: independently admitted axis cover passed")
 
+add_executable(installed_lazy_geometry_client lazy_geometry_client.cpp)
+target_link_libraries(installed_lazy_geometry_client PRIVATE CSL::lazy_geometry CSL::polyhedral)
+set_target_properties(installed_lazy_geometry_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_lazy_geometry_client COMMAND installed_lazy_geometry_client)
+set_tests_properties(installed_lazy_geometry_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed lazy geometry client: sampled support and budgeted V output passed")
+
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
 add_executable(installed_conversion_client conversion_client.cpp)
 target_link_libraries(installed_conversion_client PRIVATE CSL::qhull_conversion CSL::highs_lp)
