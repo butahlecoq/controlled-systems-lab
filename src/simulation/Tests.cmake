@@ -1,0 +1,4 @@
+add_executable(nonlinear_replay_tests tests/unit/simulation/nonlinear_replay_tests.cpp)
+target_link_libraries(nonlinear_replay_tests PRIVATE CSL::simulation doctest::doctest)
+add_test(NAME nonlinear_replay_tests COMMAND nonlinear_replay_tests)
+csl_test_target(nonlinear_replay_tests simulation)
