@@ -16,6 +16,8 @@ D(t) = [[0.05, 0], [0, 0], [0, -0.04], [0, 0]],  t = 0,…,4.
 
 It supplies no numerical bounds, vertices, or other set description for `W(t)` on the inspected numerical page. The matrix `D(t)` maps disturbance coordinates into the state; it does not constrain those coordinates. Therefore the printed data identify the disturbance channel but do not define the uncertainty set needed to compute a worst-case value. The reported plan count of 3125 enumerates the five control actions over five stages and does not determine the disturbance set.
 
+The earlier general Assumption 1 on physical PDF p. 6 does constrain each `W₁(t)` to be a convex, closed, bounded polyhedron with finitely many vertices. This supplies the set's structural class, but not its numerical bounds or vertices for B06; the numerical setup still does not define the disturbance catalogue used by the reported calculation.
+
 The page defines the available actions as `{1, 0.3, 0, -0.3, -1}` and indexes the five controls by `t = 0, …, 4`. It prints the unique reported linear minimax program sequence as
 
 ```text
