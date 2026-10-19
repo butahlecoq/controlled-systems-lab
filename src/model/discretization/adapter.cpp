@@ -58,7 +58,10 @@ DiscretizationResult discretize(const ContinuousAffineModel& source,
     std::vector<LinearStage> stages;
     stages.reserve(count);
     DiscretizationReceipt receipt{TimeDomain::continuous,TimeDomain::discrete,
-        source.hold,"rk4_step_doubling",
+        source.hold,std::holds_alternative<LinearStage>(source.coefficients)
+            ? CoefficientVariation::constant_lti
+            : CoefficientVariation::piecewise_linear_ltv,
+        "rk4_step_doubling",
         "Observed RK4 step-doubling local difference divided by 15; not a certified global error bound",
         options.absolute_tolerance,options.relative_tolerance,{}};
     receipt.stages.reserve(count);

@@ -7,7 +7,8 @@ LoadOptions)` return a variant of LoadedScenario, HistoricalScenario,
 InputFailure, UnsupportedInput or OperationStopped. Loading does not select a
 strategy, discretize a continuous model, run a solver, prove feasibility or
 produce a family of solutions. CLI execution and scenario catalogues are separate
-modules. No observation or reporting module is a dependency.
+modules. No observation or reporting module is a dependency. Continuous affine
+coefficients have a separate [loader and conversion contract](time-domains.md).
 
 ## Supported executable grammar
 

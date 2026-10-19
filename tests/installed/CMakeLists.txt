@@ -24,6 +24,12 @@ add_executable(installed_input_client input_client.cpp)
 target_link_libraries(installed_input_client PRIVATE CSL::input)
 set_target_properties(installed_input_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_input_client COMMAND installed_input_client)
+add_executable(installed_continuous_discretization_client continuous_discretization_client.cpp)
+target_link_libraries(installed_continuous_discretization_client PRIVATE CSL::input)
+set_target_properties(installed_continuous_discretization_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_continuous_discretization_client COMMAND installed_continuous_discretization_client)
+set_tests_properties(installed_continuous_discretization_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed continuous adapter: two physical intervals and source receipt passed")
 
 add_executable(installed_box_parallelotope_client box_parallelotope_client.cpp)
 target_link_libraries(installed_box_parallelotope_client PRIVATE CSL::approximation)

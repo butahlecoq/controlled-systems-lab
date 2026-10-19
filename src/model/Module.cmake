@@ -6,3 +6,5 @@ csl_add_library(csl_model STATIC src/model/linear_system.cpp
 target_link_libraries(csl_model PUBLIC CSL::numeric)
 
 csl_install_headers(model)
+
+install(FILES docs/contracts/time-domains.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)

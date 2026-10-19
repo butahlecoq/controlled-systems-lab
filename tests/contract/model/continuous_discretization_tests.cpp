@@ -31,6 +31,7 @@ TEST_CASE("continuous 2D double integrator uses physical durations and ZOH input
     CHECK(converted.receipt.source_domain==TimeDomain::continuous);
     CHECK(converted.receipt.output_domain==TimeDomain::discrete);
     CHECK(converted.receipt.hold==HoldConvention::zero_order_hold);
+    CHECK(converted.receipt.variation==CoefficientVariation::constant_lti);
     CHECK(converted.receipt.method=="rk4_step_doubling");
     REQUIRE(converted.receipt.stages.size()==2);
     CHECK(converted.receipt.stages[0].accepted_steps>0);
@@ -58,12 +59,24 @@ TEST_CASE("continuous affine forcing and singular generator stay explicit") {
     CHECK(stage.E.rows==1);CHECK(stage.E.cols==0);
 }
 
+TEST_CASE("external input is held across the physical interval") {
+    ContinuousAffineModel input{{1,0,1},{2,5},HoldConvention::zero_order_hold,
+        LinearStage{{1,1,{0}},{1,0,{}},{1,1,{2}},{1}}};
+    const auto converted=take<DiscretizedModel>(discretize(input));
+    const auto& stage=std::get<std::vector<LinearStage>>(converted.model.dynamics.stages).at(0);
+    check_near(stage.E.values[0],6);
+    check_near(stage.offset[0],3);
+    const auto discrete=take<LinearSystem>(snapshot(converted.model,converted.times));
+    check_near(take<Vector>(discrete.step({0},Vector{4},{},Vector{3}))[0],25);
+}
+
 TEST_CASE("piecewise linear LTV coefficients match independent analytic integrals") {
     const LinearStage a0{{1,1,{0}},{1,0,{}},{1,0,{}},{0}};
     const LinearStage a1{{1,1,{1}},{1,0,{}},{1,0,{}},{0}};
     ContinuousAffineModel growth{{1,0,0},{0,1},HoldConvention::zero_order_hold,
         std::vector<CoefficientEndpoints>{{a0,a1}}};
     auto result=take<DiscretizedModel>(discretize(growth));
+    CHECK(result.receipt.variation==CoefficientVariation::piecewise_linear_ltv);
     check_near(std::get<std::vector<LinearStage>>(result.model.dynamics.stages)[0].A.values[0],std::exp(0.5),1e-9);
 
     const LinearStage b0{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}};

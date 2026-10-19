@@ -9,6 +9,7 @@
 namespace csl::model {
 
 enum class HoldConvention { zero_order_hold };
+enum class CoefficientVariation { constant_lti, piecewise_linear_ltv };
 struct CoefficientEndpoints { LinearStage start, end; };
 using ContinuousCoefficients = std::variant<LinearStage,std::vector<CoefficientEndpoints>>;
 
@@ -33,6 +34,7 @@ struct StageIntegrationReceipt {
 struct DiscretizationReceipt {
     TimeDomain source_domain, output_domain;
     HoldConvention hold;
+    CoefficientVariation variation;
     std::string method, error_scope;
     double absolute_tolerance, relative_tolerance;
     std::vector<StageIntegrationReceipt> stages;
