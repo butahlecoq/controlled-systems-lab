@@ -23,7 +23,9 @@ csl_add_library(csl_polyhedral STATIC
 
 target_link_libraries(csl_polyhedral PUBLIC CSL::sets CSL::optimization CSL::registry)
 
-csl_add_library(csl_lazy_geometry STATIC src/geometry/lazy/expression.cpp)
+csl_add_library(csl_lazy_geometry STATIC
+  src/geometry/lazy/expression.cpp
+  src/geometry/lazy/support.cpp)
 target_link_libraries(csl_lazy_geometry PUBLIC CSL::sets CSL::registry)
 
 csl_add_library(csl_affine_sum STATIC src/geometry/affine_sum.cpp)

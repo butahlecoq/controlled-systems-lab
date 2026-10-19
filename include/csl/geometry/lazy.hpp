@@ -17,4 +17,10 @@ std::variant<ExpressionDescription, Diagnostics> inspect_expression(const SetHan
 
 registry::Registration<registry::GeometryPort> make_expression_registration();
 
+// The selected leaf support provider is copied into the registration. Its
+// registry may be destroyed after preparation; each leaf query is admitted
+// against that immutable provider before execution.
+registry::Registration<registry::GeometryPort> make_support_registration(
+    registry::PreparedProvider<registry::GeometryPort> leaf_support);
+
 } // namespace csl::geometry::lazy
