@@ -81,7 +81,9 @@ def capture(source: Path, destination: Path, commit: str, cmake: str) -> None:
         "configuration": "Release", "native_threads_requested": 1,
         "outer_workers_requested": 1, "native_threads_observed": None,
         "seed": None, "workspace_reuse": "none",
-        "timing_scope": "One public discretize, snapshot and two step calls, including literal checks; excludes fixture construction, CSV output and rendering",
+        "absolute_tolerance": 1e-10, "relative_tolerance": 1e-10,
+        "max_attempts_per_stage": 100000,
+        "timing_scope": "Fixture construction, one public discretize, snapshot and two step calls, including literal checks; excludes CSV output and rendering",
         "warmup_policy": "One excluded 100-call batch before seven measured 100-call batches",
     })
 

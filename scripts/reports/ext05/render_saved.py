@@ -146,8 +146,8 @@ certified global error bound.</p></div>
 <p>One excluded 100-call warmup preceded seven measured 100-call batches: 700 verified calls,
 zero observed failures. Median batch duration was {median:,} ns (range
 {measurement['min_batch_ns']:,}–{measurement['max_batch_ns']:,} ns). Each interval includes
-the public discretizer, snapshot, two state steps and literal checks; it excludes fixture
-construction, CSV output and rendering. These are single-adapter descriptive durations on
+fixture construction, the public discretizer, snapshot, two state steps and literal checks;
+it excludes CSV output and rendering. These are single-adapter descriptive durations on
 the recorded host, with no comparator, speedup or limiter attribution. Native internal
 counters and actual thread activity were unavailable.</p>
 <p>Source commit: <code>{source}</code>. The saved <a href="records.json">record</a>,

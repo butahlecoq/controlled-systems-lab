@@ -22,7 +22,7 @@ renderer reconstructs HTML, CSV, SVG, manifest and offline ZIP from saved
 bytes alone. The stager accepts one reviewed catalogue entry and the exact
 allowlisted bundle into the main-only Pages workflow.
 
-Batch duration includes public conversion, snapshot, two state steps and
-literal checks. It excludes fixture construction, CSV output and rendering.
+Batch duration includes fixture construction, public conversion, snapshot,
+two state steps and literal checks. It excludes CSV output and rendering.
 This is descriptive single-adapter timing on one host; no speedup or certified
 global error bound follows from it.
