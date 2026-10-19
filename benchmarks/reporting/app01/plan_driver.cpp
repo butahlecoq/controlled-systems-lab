@@ -143,6 +143,8 @@ const char* basis(const PlanCheck& report) {
     case StructuralBasis::universal_superset:return "universal_superset";
     case StructuralBasis::h_constraint_containment:return "h_constraint_containment";
     case StructuralBasis::h_point_containment:return "h_point_containment";
+    case StructuralBasis::v_h_containment:return "v_h_containment";
+    case StructuralBasis::h_v_containment:return "h_v_containment";
     }
     throw std::logic_error("unknown basis");
 }
