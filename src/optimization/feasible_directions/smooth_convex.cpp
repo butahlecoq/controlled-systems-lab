@@ -115,14 +115,13 @@ SmoothOutcome minimize(const LinearProgram& feasible_set, const SmoothObjective&
         Vector direction(n);
         double slope = 0;
         double residual = 0;
-        double scale = 1;
         for (std::size_t j = 0; j < n; ++j) {
             direction[j] = endpoint[j] - x[j];
             slope = std::fma(gradient[j], direction[j], slope);
             residual = std::hypot(residual, direction[j]);
-            scale = std::max(scale, std::abs(x[j]));
         }
-        const double threshold = numerical.absolute_tolerance + numerical.relative_tolerance * scale;
+        // A coordinate offset must not enlarge a projected-step stationarity threshold.
+        const double threshold = numerical.absolute_tolerance + numerical.relative_tolerance;
         if (!std::isfinite(slope) || !std::isfinite(residual) || !std::isfinite(threshold))
             return stopped(SmoothStopReason::numerical_failure, iteration);
         if (residual == 0)

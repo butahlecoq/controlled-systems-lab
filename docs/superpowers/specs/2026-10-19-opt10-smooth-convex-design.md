@@ -14,6 +14,23 @@ Issue #50 asks for an executable optimizer for caller-declared differentiable co
 
 At feasible `x`, evaluate finite `f(x)` and analytic `g(x)` with the declared dimension. Project `x-g(x)` onto the supplied polyhedron using OPT-09 and the injected LP workspace. Its displacement `d=p-x` is the projected feasible direction. A vanishing `d` is numerical first-order stationarity; a nonzero direction must have a negative finite slope `g·d`. The projected endpoint and every accepted iterate are checked against the original constraints. Backtracking starts at `alpha=1` and stays in `(0,1]`; it accepts only finite feasible candidates satisfying `f(x+alpha d) <= f(x)+c alpha g·d`, with `0<c<1`. Stop with a distinct stall if the bounded search reaches its count or minimum step. Cancellation, deadline, projection stop, objective failure, and iteration cap retain the last accepted feasible point. The projection solver's numerical tolerance and finite arithmetic limit the stationarity evidence; no convergence rate or error bound is inferred.
 
+## Cost and baseline evaluation
+
+The projected-step stopping threshold is `absolute_tolerance +
+relative_tolerance` in step units, independent of coordinate origin. Each
+outer iteration requests one bounded projection, one gradient, and at most
+`max_backtracks` extra objective values; at most `max_iterations` outer
+iterations run. The sparse linear model, one backend workspace, and a constant
+number of length-`n` vectors are retained. Backend memory and arithmetic cost
+depend on the chosen solver and are not bounded by iteration caps alone.
+
+A published-baseline evaluation requires a reviewed restoration of the
+historical A06 objective, constraints, numeric settings, and output convention.
+The first comparison would check like-for-like feasibility and objective
+values, then identify analytic-gradient versus finite-difference and guarantee
+differences before timing. Those inputs are unavailable for this ticket, so
+the saved analytic fixture is not presented as an A06 performance comparison.
+
 ## Tests and evidence
 
 Tests call the public API using analytic 1D and 2D convex quadratics, compare the final point and value with literal answers and an independent HiGHS convex QP solve, and check feasibility at every accepted point via a callback recorder. Cover an interior optimum, active box corner, equality face, zero direction, infeasible start, unsupported declaration, bad callback shape/nonfinite value, cancellation, bounded iteration, and a deliberately inconsistent callback that stalls Armijo. A standalone installed client checks package export. A separate saved-report harness will execute a supported two-dimensional analytic case through the public adapter, check its literal answer on every call, retain raw attempts/build provenance, and render a labelled 2D example and immutable HTML/ZIP bundle. Timings are descriptive single-adapter observations without comparator or speedup.

@@ -12,6 +12,24 @@ The reviewed OPT-09 adapter projects `x-g(x)` onto the original linear feasible 
 
 The line search begins at `alpha=1`, contracts by a factor strictly between zero and one, and accepts only finite strict objective decrease satisfying the Armijo condition `f(x+alpha d) <= f(x)+c alpha g(x)^T d` with `0<c<1`. The backtrack count and minimum step are explicit. Exhausting either returns `line_search_stall` with the last accepted feasible iterate. Cancellation, deadline, projection resource/operation stops, callback failures and iteration cap also preserve the last accepted point. A nonfinite initial objective is never retained as a valid `last_objective`.
 
+## Cost and evaluation plan
+
+The projected-step norm is compared in its own units with
+`absolute_tolerance + relative_tolerance`; translating coordinates does not
+relax this test. Each outer iteration requests at most one bounded OPT-09
+projection, one gradient, and `max_backtracks` extra objective values. At most
+`max_iterations` outer iterations run. The projection backend determines
+arithmetic cost; the adapter does not promise a polynomial runtime. It retains
+the sparse linear model, one projection workspace, and a constant number of
+dense vectors of length `n`, plus the backend's own working memory.
+
+A like-for-like comparison with a published A06 baseline first needs the
+archived objective, constraints, numeric settings, and output convention
+restored and reviewed. Once available, compare feasibility and objective
+values on the same problem before any timing study, and keep the
+finite-difference versus analytic-gradient and guarantee differences explicit.
+The current saved box quadratic is an independent functional example.
+
 ## Relation to A06 and evidence limits
 
 The A06 inventory identifies `ALOWER:617–764` as a finite-difference projected-gradient routine using `APGRAD`, `VERLIM`, external `FUNF`, and step policies a/b/c. This adapter requires an analytic gradient, calls the modern OPT-09 projection, and uses an explicit bounded Armijo search. It is a related modern method, not a line-by-line Pascal port or a reproduction of the archive's step policies, tolerances, runtime, or historical result. The archived objective implementation is not restored here. The independent HiGHS convex-QP comparisons and analytic examples check the supported fixtures; they do not certify arbitrary callbacks or a convergence rate.

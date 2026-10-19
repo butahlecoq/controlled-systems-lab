@@ -147,6 +147,20 @@ TEST_CASE("zero direction, infeasible start and unsupported declaration are dist
     CHECK(std::holds_alternative<Unsupported>(unsupported));
 }
 
+TEST_CASE("translated coordinates do not turn a unit projected step into stationarity") {
+    constexpr double origin = 1e6;
+    auto feasible = box("translated", {{origin, origin + 100}});
+    auto solver = workspace(feasible);
+    auto objective = quadratic("translated-quadratic", {origin + 1}, {1});
+    auto translated_context = context();
+    translated_context.numerical.relative_tolerance = 1e-5;
+    const auto result = accepted(minimize(feasible, objective, Vector{origin},
+        *solver, translated_context));
+    CHECK(result.iterations >= 1);
+    CHECK(std::abs(result.point[0] - (origin + 1)) <= 1e-6);
+    CHECK(result.projected_gradient_residual <= 1e-5);
+}
+
 TEST_CASE("cancelled, exhausted and stalled runs retain the last feasible point") {
     auto feasible = box("stops", {{0, 1}});
     auto solver = workspace(feasible);
