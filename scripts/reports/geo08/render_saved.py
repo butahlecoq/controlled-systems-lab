@@ -97,9 +97,10 @@ def figure(record: dict) -> bytes:
 <text x="705" y="385" fill="#f8f8f2">x</text><text x="96" y="80" fill="#f8f8f2">y</text>
 {outline(source, '#66d9ef')}{outline(mapped, '#fd971f')}
 <polygon points="{' '.join(xy(point) for point in ([1, -1], [4, -1], [4, 1], [1, 1]))}" fill="none" stroke="#a6e22e" stroke-width="3"/>
-<circle cx="590" cy="255" r="6" fill="#f92672"/><text x="600" y="250" fill="#f92672">(4,1): support 5 for (1,1)</text>
+<circle cx="590" cy="255" r="6" fill="#f92672"/><text x="365" y="235" fill="#f92672">(4,1): support 5 for (1,1)</text>
 <text x="35" y="495" fill="#66d9ef">Blue: source [0,1]²</text><text x="270" y="495" fill="#fd971f">Orange: affine image [1,3] × [-1,0]</text>
-<text x="35" y="530" fill="#a6e22e">Green: independent sum [1,4] × [-1,1] (16 stored V rows, including duplicates)</text>
+<text x="35" y="525" fill="#a6e22e">Green: independent sum [1,4] × [-1,1]</text>
+<text x="35" y="550" fill="#a6e22e">16 stored V rows, including duplicate points</text>
 </svg>\n'''
     collect.require(len(summed) == 16 and [4, 1] in summed,
                     "Saved GEO-08 fixture does not support the plotted answer")

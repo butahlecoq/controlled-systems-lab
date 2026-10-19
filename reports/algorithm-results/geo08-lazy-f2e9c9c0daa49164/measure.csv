@@ -1,0 +1,9 @@
+phase,repetition,calls,attempted,completed,status,verified,elapsed_ns,support,vertices,rays
+warmup,0,100,100,100,completed,true,3668800,5,16,0
+trial,0,100,100,100,completed,true,3737500,5,16,0
+trial,1,100,100,100,completed,true,3613000,5,16,0
+trial,2,100,100,100,completed,true,3606800,5,16,0
+trial,3,100,100,100,completed,true,3620200,5,16,0
+trial,4,100,100,100,completed,true,3618100,5,16,0
+trial,5,100,100,100,completed,true,3636500,5,16,0
+trial,6,100,100,100,completed,true,3418800,5,16,0

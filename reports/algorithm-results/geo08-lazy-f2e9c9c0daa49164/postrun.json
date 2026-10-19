@@ -1,0 +1,10 @@
+{
+  "commit": "87a747a644b5d1aa9887d01d09e0921c727fa921",
+  "executable_sha256": "864888147864c0fcea5cb935a4c89b80c77a5d1751657aa505e167c236a87e17",
+  "observed_utc": "2026-10-19T10:23:30.621866+00:00",
+  "phase": "postrun",
+  "schema": "csl.geo08-source-receipt/1",
+  "status": [],
+  "tracked_count": 1925,
+  "tree": "8340d8b3795757c976ffdfd47ad0cd491906769d"
+}

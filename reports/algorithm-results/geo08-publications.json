@@ -1,0 +1,14 @@
+{
+  "reports": [
+    {
+      "manifest_sha256": "ee57cf2d673053ff96997473fcaad9433ca91f1d6e846cf45e2b543a69cdd44c",
+      "renderer_sha256": "6bdda79455992060fbc7be11108775c108c4b36cd4eae2ea01ada0ceead1ed34",
+      "report_id": "geo08-lazy-f2e9c9c0daa49164",
+      "schema": "csl.geo08-lazy-geometry/1",
+      "source_commit": "87a747a644b5d1aa9887d01d09e0921c727fa921",
+      "stager_sha256": "462b2c79c838c383e198fc5a373d40fc06d16d18a0acc10caf1d0dd064afdf75",
+      "zip_sha256": "e596701abf13f4cd055d0360ac7426338b2d0d77d94a2a0a44a04bcfe162deca"
+    }
+  ],
+  "schema": "csl.geo08-publications/1"
+}
