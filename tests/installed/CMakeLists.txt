@@ -355,6 +355,7 @@ set(installed_contract_headers
   optimization/contracts.hpp
   optimization/zoutendijk/projection.hpp
   geometry/contracts.hpp
+  geometry/lazy.hpp
   synthesis/contracts.hpp
   numeric/data.hpp
 )
