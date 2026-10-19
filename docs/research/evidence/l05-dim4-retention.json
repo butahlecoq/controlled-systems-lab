@@ -1,0 +1,124 @@
+{
+  "schema": "l05-dim4-retention-audit-v1",
+  "source_sha256": "f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a",
+  "convsm_sha256": "e178858e42d5f6174d032d9415b9b7412b2e32ca9aa1b9bfbed7b202db65eaa6",
+  "simplex_sha256": "6f87f2c674519352f6801df60fe498a33ac091b79a5a6cbe76f0dcf4a20f6229",
+  "arithmetic": "NumPy binary64 translation of active archived column order; not a MATLAB execution or validated arithmetic",
+  "stages": [
+    {
+      "transition": 1,
+      "generated_columns": 4,
+      "retained_columns": 4,
+      "complete_corner_histories": 4,
+      "simplex_pivots": 8
+    },
+    {
+      "transition": 2,
+      "generated_columns": 16,
+      "retained_columns": 16,
+      "complete_corner_histories": 16,
+      "simplex_pivots": 65,
+      "full_hull_vertices": 16,
+      "retained_to_full_hull_vertex_distance": 0.0
+    },
+    {
+      "transition": 3,
+      "generated_columns": 64,
+      "retained_columns": 52,
+      "complete_corner_histories": 64,
+      "simplex_pivots": 264,
+      "full_hull_vertices": 52,
+      "retained_to_full_hull_vertex_distance": 0.0
+    },
+    {
+      "transition": 4,
+      "generated_columns": 208,
+      "retained_columns": 128,
+      "complete_corner_histories": 256,
+      "simplex_pivots": 1071,
+      "full_hull_vertices": 128,
+      "retained_to_full_hull_vertex_distance": 0.0
+    },
+    {
+      "transition": 5,
+      "generated_columns": 512,
+      "retained_columns": 260,
+      "complete_corner_histories": 1024,
+      "simplex_pivots": 2684,
+      "full_hull_vertices": 260,
+      "retained_to_full_hull_vertex_distance": 0.0
+    },
+    {
+      "transition": 6,
+      "generated_columns": 1040,
+      "retained_columns": 464,
+      "complete_corner_histories": 4096,
+      "simplex_pivots": 5481,
+      "full_hull_vertices": 464,
+      "retained_to_full_hull_vertex_distance": 0.0
+    },
+    {
+      "transition": 7,
+      "generated_columns": 1856,
+      "retained_columns": 756,
+      "complete_corner_histories": 16384,
+      "simplex_pivots": 9814,
+      "full_hull_vertices": 756,
+      "retained_to_full_hull_vertex_distance": 0.0
+    }
+  ],
+  "terminal_active_hull_volume": 40808.165574887025,
+  "printed_general_row": {
+    "vertices": 756,
+    "volume": 40808.17
+  },
+  "printed_modified_row": {
+    "vertices": 153,
+    "volume": 34764.47
+  },
+  "saved_linear_projections": {
+    "123": {
+      "figure_sha256": "ddaf5dad21ed9c15383bbf4567ab8a947e451c9c125aa521db787f7692a2b49e",
+      "axes_one_based": [
+        1,
+        2,
+        3
+      ],
+      "saved_linear_patch_vertices": 64,
+      "saved_linear_patch_hull_volume": 8647.143341217137,
+      "active_full_projected_hull_vertices": 184,
+      "active_full_projected_hull_volume": 9786.712300540932,
+      "saved_to_candidate_endpoint_max_distance": 7.32410687763558e-15,
+      "active_full_hull_to_saved_vertex_max_distance": 9.7310469275492
+    },
+    "234": {
+      "figure_sha256": "0c89b1e178d3153413cb57a94daa33b31eaf0f03ec3a80120d41db8f54efc9d5",
+      "axes_one_based": [
+        2,
+        3,
+        4
+      ],
+      "saved_linear_patch_vertices": 63,
+      "saved_linear_patch_hull_volume": 4714.438489038778,
+      "active_full_projected_hull_vertices": 182,
+      "active_full_projected_hull_volume": 5598.77398327061,
+      "saved_to_candidate_endpoint_max_distance": 1.7763568394002505e-15,
+      "active_full_hull_to_saved_vertex_max_distance": 8.003965659936188
+    },
+    "124": {
+      "figure_sha256": "cab103d50af80ea7ee7d0d4ab0c8c93a60140e232d4327f0f93ab22e7d23e64b",
+      "axes_one_based": [
+        1,
+        2,
+        4
+      ],
+      "saved_linear_patch_vertices": 66,
+      "saved_linear_patch_hull_volume": 6065.731227568063,
+      "active_full_projected_hull_vertices": 182,
+      "active_full_projected_hull_volume": 6963.4065571402825,
+      "saved_to_candidate_endpoint_max_distance": 7.32410687763558e-15,
+      "active_full_hull_to_saved_vertex_max_distance": 8.816541808561311
+    }
+  },
+  "modified_4d_row_reproduced": false
+}
