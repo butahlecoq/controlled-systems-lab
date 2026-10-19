@@ -84,6 +84,10 @@ TEST_CASE("numeric, quota and cancellation boundaries refuse before a model") {
     LoadOptions limited;limited.limits.input_bytes=8;
     error=take<InputFailure>(load(document,limited));
     CHECK(error.category==InputCategory::limit);
+    limited=LoadOptions{};limited.limits.expanded_scalars=2;
+    error=take<InputFailure>(load(document,limited));
+    CHECK(error.category==InputCategory::limit);
+    CHECK(error.path=="/times");
     std::stop_source cancellation;cancellation.request_stop();
     LoadOptions stopped;stopped.cancellation=cancellation.get_token();
     CHECK(std::holds_alternative<OperationStopped>(load(document,stopped)));

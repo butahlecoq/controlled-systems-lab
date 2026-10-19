@@ -51,9 +51,6 @@ def stage(catalog: Path, site_dir: Path) -> str:
     destination = site_dir / report_id
     report.collect.require(site_dir.is_dir() and not site_dir.is_symlink() and
                            not destination.exists(), "EXT-05 site route must be fresh")
-    destination.mkdir()
-    for path in bundle.iterdir():
-        (destination / path.name).write_bytes(path.read_bytes())
     index_path = site_dir / "index.html"
     index = index_path.read_text(encoding="utf-8")
     report.collect.require(index.count("</ul>") == 1 and report_id not in index,
@@ -65,6 +62,9 @@ def stage(catalog: Path, site_dir: Path) -> str:
             ' · <a href="' + escape(report_id) + '/' + escape(report_id) + '.zip">offline ZIP</a></li>')
     site.OfflineHTML({report_id + "/index.html", report_id + "/example-2d.html",
                       report_id + "/records.json", report_id + "/" + report_id + ".zip"}).feed(link)
+    destination.mkdir()
+    for path in bundle.iterdir():
+        (destination / path.name).write_bytes(path.read_bytes())
     index_path.write_text(index.replace("</ul>", link + "</ul>"), encoding="utf-8")
     return report_id
 

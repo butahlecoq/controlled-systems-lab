@@ -44,12 +44,26 @@ Observation run_once() {
         throw std::runtime_error("Time-domain receipt differs");
     const auto& stages=std::get<std::vector<LinearStage>>(result.model.dynamics.stages);
     if(stages.size()!=2)throw std::runtime_error("Expected two stages");
-    near(stages[0].A.values.at(1),1);
-    near(stages[1].A.values.at(1),2);
-    near(stages[0].B.values.at(0),0.5);
-    near(stages[0].B.values.at(1),1);
-    near(stages[1].B.values.at(0),2);
-    near(stages[1].B.values.at(1),2);
+    if(stages[0].A.rows!=2 || stages[0].A.cols!=2 ||
+       stages[1].A.rows!=2 || stages[1].A.cols!=2 ||
+       stages[0].B.rows!=2 || stages[0].B.cols!=1 ||
+       stages[1].B.rows!=2 || stages[1].B.cols!=1 ||
+       stages[0].E.rows!=2 || stages[0].E.cols!=0 ||
+       stages[1].E.rows!=2 || stages[1].E.cols!=0 ||
+       stages[0].offset.size()!=2 || stages[1].offset.size()!=2)
+        throw std::runtime_error("Transition shape differs");
+    constexpr double expected_a[2][4]={{1,1,0,1},{1,2,0,1}};
+    constexpr double expected_b[2][2]={{0.5,1},{2,2}};
+    for(std::size_t k=0;k<2;++k) {
+        if(stages[k].A.values.size()!=4 || stages[k].B.values.size()!=2 ||
+           !stages[k].E.values.empty())
+            throw std::runtime_error("Transition storage differs");
+        for(std::size_t i=0;i<4;++i)near(stages[k].A.values[i],expected_a[k][i]);
+        for(std::size_t i=0;i<2;++i) {
+            near(stages[k].B.values[i],expected_b[k][i]);
+            near(stages[k].offset[i],0);
+        }
+    }
     const auto model=snapshot(result.model,result.times);
     if(!std::holds_alternative<LinearSystem>(model))
         throw std::runtime_error("Discrete snapshot failed");

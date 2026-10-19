@@ -123,6 +123,7 @@ IntegrationResult integrate_stage(const LinearStage& start,const LinearStage& en
             estimate=std::max(estimate,local);
             ratio=std::max(ratio,local/scale);
         }
+        receipt.max_local_error_estimate=std::max(receipt.max_local_error_estimate,estimate);
         if(ratio>1) {
             ++receipt.rejected_steps;
             h=step/2;
@@ -131,7 +132,6 @@ IntegrationResult integrate_stage(const LinearStage& start,const LinearStage& en
         state=*two_halves;
         t=next;
         ++receipt.accepted_steps;
-        receipt.max_local_error_estimate=std::max(receipt.max_local_error_estimate,estimate);
         if(t<t1) {
             const double remaining=t1-t;
             h=ratio<1.0/32 ? (h<=remaining/2?h*2:remaining) : std::min(h,remaining);

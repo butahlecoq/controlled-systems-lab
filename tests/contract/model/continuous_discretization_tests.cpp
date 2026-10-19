@@ -70,6 +70,30 @@ TEST_CASE("external input is held across the physical interval") {
     check_near(take<Vector>(discrete.step({0},Vector{4},{},Vector{3}))[0],25);
 }
 
+TEST_CASE("receipt owns the exact continuous coefficient records") {
+    auto input=source({0,1,3});
+    const auto converted=take<DiscretizedModel>(discretize(input));
+    auto& original=std::get<LinearStage>(input.coefficients);
+    original.A.values[1]=100;
+    original.B.values[1]=100;
+    const auto& saved=std::get<LinearStage>(converted.receipt.source_coefficients);
+    CHECK(saved.A.values==Vector{0,1,0,0});
+    CHECK(saved.B.values==Vector{0,1});
+
+    const auto value=[](double a) {
+        return LinearStage{{1,1,{a}},{1,0,{}},{1,0,{}},{0}};
+    };
+    ContinuousAffineModel varying{{1,0,0},{0,1},HoldConvention::zero_order_hold,
+        std::vector<CoefficientEndpoints>{{value(0),value(1)}}};
+    const auto converted_ltv=take<DiscretizedModel>(discretize(varying));
+    std::get<std::vector<CoefficientEndpoints>>(varying.coefficients)[0].end.A.values[0]=9;
+    const auto& saved_ltv=std::get<std::vector<CoefficientEndpoints>>(
+        converted_ltv.receipt.source_coefficients);
+    REQUIRE(saved_ltv.size()==1);
+    CHECK(saved_ltv[0].start.A.values==Vector{0});
+    CHECK(saved_ltv[0].end.A.values==Vector{1});
+}
+
 TEST_CASE("piecewise linear LTV coefficients match independent analytic integrals") {
     const LinearStage a0{{1,1,{0}},{1,0,{}},{1,0,{}},{0}};
     const LinearStage a1{{1,1,{1}},{1,0,{}},{1,0,{}},{0}};
@@ -127,6 +151,15 @@ TEST_CASE("invalid grids, shapes, options and exhausted budgets publish no model
     CHECK(std::holds_alternative<OperationStopped>(discretize(input,stopped)));
     std::get<LinearStage>(input.coefficients).A.values[0]=std::numeric_limits<double>::infinity();
     CHECK(std::holds_alternative<Diagnostic>(discretize(input)));
+}
+
+TEST_CASE("stage receipt includes rejected local estimates") {
+    ContinuousAffineModel growth{{1,0,0},{0,1},HoldConvention::zero_order_hold,
+        LinearStage{{1,1,{10}},{1,0,{}},{1,0,{}},{0}}};
+    const auto result=take<DiscretizedModel>(discretize(growth));
+    REQUIRE(result.receipt.stages.size()==1);
+    CHECK(result.receipt.stages[0].rejected_steps>0);
+    CHECK(result.receipt.stages[0].max_local_error_estimate>1);
 }
 
 TEST_CASE("augmented width overflow and unresolvable physical times refuse") {

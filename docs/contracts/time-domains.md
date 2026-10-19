@@ -24,8 +24,10 @@ the attempt budget stop conversion without publishing a partial model.
 The output `SystemModel` is tagged `TimeDomain::discrete`; its stages are
 already integrated transitions for their physical intervals. `model::snapshot`
 uses them directly and never scales them by `times[k+1]-times[k]`. The receipt
-records source and output domains, coefficient variation, hold, method,
-tolerances, local-error scope, interval times and accepted/rejected steps. The
+records source and output domains, an owning copy of the exact continuous
+coefficient records, variation, hold, method, tolerances, local-error scope,
+interval times and accepted/rejected steps. The maximum local estimate includes
+both accepted and rejected finite attempts. The
 output time grid remains the input physical grid. Singular A is supported; no
 matrix inverse is used. This API does not represent descriptor mass matrices,
 nonlinear dynamics, other holds or continuous observations.

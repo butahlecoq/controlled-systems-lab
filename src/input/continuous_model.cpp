@@ -19,6 +19,7 @@ class Reader {
     }
 public:
     explicit Reader(const LoadOptions& options):options_(options) {}
+    void charge_times(std::size_t count) {charge(count,"/times");}
     std::size_t dimension(const Json& value,const std::string& path) {
         const auto size=detail::count(value,path);
         if(size>options_.limits.dimension)
@@ -128,6 +129,7 @@ ContinuousModelLoadResult load_continuous_model(std::span<const std::byte> bytes
         const auto& times=detail::member(root,"times","");
         if(!times.is_array() || times.empty() || times.size()>options.limits.horizon+1)
             detail::fail("/times","wrong grid size","one to horizon+1 physical state times",InputCategory::limit);
+        reader.charge_times(times.size());
         Vector grid;grid.reserve(times.size());
         for(std::size_t i=0;i<times.size();++i) {
             detail::poll(options);

@@ -76,15 +76,14 @@ def figure() -> bytes:
     # Physical axes: position horizontally, velocity vertically.
     points = [(0, 0), (1, 2), (3, 0)]
     xy = [(110 + 160*x, 330 - 110*y) for x, y in points]
-    line = " ".join(f"{x},{y}" for x, y in xy)
     circles = "\n".join(
         f'<circle cx="{x}" cy="{y}" r="6" fill="#f6c177"/>'
         f'<text x="{x+10}" y="{y-10}" fill="#e0def4" font-size="15">'
         f'x{k}=({points[k][0]},{points[k][1]})</text>'
         for k, (x, y) in enumerate(xy))
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 410" role="img" aria-labelledby="title desc">
-<title id="title">EXT-05 double-integrator state trajectory</title>
-<desc id="desc">Position and velocity states at times zero, one and three: (0,0), (1,2), (3,0).</desc>
+<title id="title">EXT-05 analytic double-integrator state trajectory</title>
+<desc id="desc">Exact quadratic position-velocity paths connect sampled states at times zero, one and three: (0,0), (1,2), (3,0).</desc>
 <rect width="700" height="410" fill="#16161e"/>
 <path d="M 75 330 H 640 M 110 365 V 55" stroke="#908caa"/>
 <g fill="#e0def4" font-family="sans-serif" font-size="16">
@@ -92,7 +91,7 @@ def figure() -> bytes:
 <text x="28" y="30">EXT-05 · continuous double integrator, explicit ZOH conversion</text>
 <text x="100" y="389">t=0</text><text x="250" y="389">t=1</text><text x="570" y="389">t=3</text>
 </g>
-<polyline points="{line}" fill="none" stroke="#9ccfd8" stroke-width="3"/>
+<path d="M 110 330 Q 110 220 270 110 Q 590 220 590 330" fill="none" stroke="#9ccfd8" stroke-width="3"/>
 {circles}
 </svg>'''
     return (svg + "\n").encode()
@@ -134,7 +133,8 @@ img{{width:100%;height:auto}} code{{overflow-wrap:anywhere}}
 Physical times are <code>[0,1,3]</code>; zero-order-held controls are <code>[2,-1]</code>.
 The initial state is <code>(0,0)</code>. Analytic transitions are
 <code>A_d=[[1,Δt],[0,1]]</code> and <code>B_d=[Δt²/2,Δt]</code>, yielding
-<code>(0,0) → (1,2) → (3,0)</code>.</p>
+<code>(0,0) → (1,2) → (3,0)</code>. The curved plot follows the analytic
+within-interval state paths; markers show the three sampled grid states.</p>
 <img src="trajectory-2d.svg" alt="Position and velocity state trajectory at times zero, one and three"></div>
 <div class="section"><h2>Recorded result</h2><table><thead><tr><th>Stage</th><th>Duration</th><th>A[0,1]</th><th>B[0]</th><th>B[1]</th><th>State after stage</th></tr></thead>
 <tbody><tr><td>0</td><td>1</td><td>1</td><td>0.5</td><td>1</td><td>(1,2)</td></tr>

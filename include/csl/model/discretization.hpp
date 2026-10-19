@@ -35,6 +35,7 @@ struct DiscretizationReceipt {
     TimeDomain source_domain, output_domain;
     HoldConvention hold;
     CoefficientVariation variation;
+    ContinuousCoefficients source_coefficients;
     std::string method, error_scope;
     double absolute_tolerance, relative_tolerance;
     std::vector<StageIntegrationReceipt> stages;

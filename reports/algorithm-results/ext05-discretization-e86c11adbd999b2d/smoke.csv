@@ -1,2 +1,0 @@
-phase,case,repetition,calls,status,verified,elapsed_ns,a01,b0,b1,x1_position,x1_velocity,x2_position,x2_velocity,accepted,rejected,local_estimate
-smoke,double-integrator,0,1,success,true,36700,2,2,2,1,2,3,0,2,0,0
