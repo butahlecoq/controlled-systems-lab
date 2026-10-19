@@ -20,6 +20,26 @@ Keep execution, measurement collection, scientific saved records, HTML rendering
 
 Independent review checks mathematical/evidence labels, measurement validity and module boundaries. Verify raw-record/HTML consistency and regeneration, visually inspect the page, and open the deployed URL before claiming publication. The orchestrator publishes the reviewed artifact. Private historical source code and raw archives remain unchanged and are not copied into the report site.
 
+## EXT-07 hybrid profile report
+
+The frozen implementation source is `2965baafa325550ad60ec91d44f5e3f86a832178`.
+The saved bundle
+[`ext07-hybrid-2cba9c13b79afd2b`](../../reports/algorithm-results/ext07-hybrid-2cba9c13b79afd2b/)
+contains a one-step scalar profile with interval control and guard, identity
+reset, and a linear terminal objective. Its analytic joint relation is
+`x0=0, x_pre1=u0, x1=u0, 0<=u0<=0.5`; the complete minimizing family is the
+singleton at zero. The registered HiGHS LP provider and independent bounded
+scalar family verifier completed 140 measured calls after an excluded warmup.
+On the recorded Windows 11 / MSVC Release host, median end-to-end batch time
+was 6,288,700 ns (range 5,492,300–9,158,900 ns); all seven batches matched the
+analytic result with no failures. These timings are descriptive for this one
+fixture and do not establish a performance winner, scalability, general
+polyhedral coverage, or validated arithmetic. The verifier supports one-step
+scalar interval systems only; continuous multi-stage verification remains an
+open EXT-07 acceptance item. The report and 2D control-versus-terminal-state
+example are versioned with raw rows and an offline ZIP. Main-only Pages
+publication and live URL/hash verification remain pending.
+
 ## OPT-07 ordered hull membership report
 
 The reviewed native bundle

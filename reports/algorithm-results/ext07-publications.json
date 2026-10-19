@@ -1,0 +1,15 @@
+{
+  "reports": [
+    {
+      "index_sha256": "04ed7e14c1b197e4d474c036763bce5c2c76b472ae809d3a0f8997450c6838b5",
+      "manifest_sha256": "2aae41690f642b2825253666e67c6bcef4526a67c0b18ead12ae5687c18066df",
+      "renderer_sha256": "d7331e1c2ae8dc19222eda92d76b42910820507cd04bfeee02a7ca4bcf99a902",
+      "report_id": "ext07-hybrid-2cba9c13b79afd2b",
+      "schema": "csl.ext07-hybrid-profile-report/1",
+      "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
+      "stager_sha256": "c0851254a51b4e1d3c928a63f70fd31f6b3ec9178ccce86aca5a969437c37afc",
+      "zip_sha256": "d5a8f3783c580f0b1b3c72a4d7173e608c0a0b9c59ce463a385dc5fddf1ba86c"
+    }
+  ],
+  "schema": "csl.ext07-publications/1"
+}
