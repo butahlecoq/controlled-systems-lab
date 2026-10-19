@@ -17,6 +17,7 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
     ReplayRecord result;
     result.plant = plant.identity;
     if (plant.parameters) result.parameters = *plant.parameters;
+    result.declared_initial_state = plant.initial_state;
     if (plant.times) result.times = *plant.times;
     result.state_units = plant.state_units;
     result.control_units = plant.control_units;
@@ -89,16 +90,20 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
             return invalid("controls[" + std::to_string(stage) + "]",
                 "Every control must match declared units and be finite.");
 
-    result.states.push_back(*plant.initial_state);
-    for (std::size_t stage=0; stage<controls.size(); ++stage) {
+    const auto interrupted = [&]() {
         if (context.cancellation.stop_requested()) {
             result.status = ReplayStatus::cancelled;
-            return finish();
+            return true;
         }
         if (context.deadline && std::chrono::steady_clock::now() >= *context.deadline) {
             result.status = ReplayStatus::resource_limit;
-            return finish();
+            return true;
         }
+        return false;
+    };
+    result.states.push_back(*plant.initial_state);
+    for (std::size_t stage=0; stage<controls.size(); ++stage) {
+        if (interrupted()) return finish();
         Vector next;
         try {
             next = plant.transition(result.states.back(), controls[stage], result.parameters,
@@ -109,6 +114,7 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
                 "The declared plant transition callback raised an exception."});
             return finish();
         }
+        if (interrupted()) return finish();
         if (next.size() != plant.state_units.size()) {
             result.status = ReplayStatus::callback_failure;
             result.diagnostics.push_back({DiagnosticCode::invalid_claim, "plant.transition",
@@ -123,14 +129,18 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
         }
         result.states.push_back(std::move(next));
     }
+    if (interrupted()) return finish();
+    double objective;
     try {
-        result.original_objective = plant.objective(result.states.back(), result.parameters);
+        objective = plant.objective(result.states.back(), result.parameters);
     } catch (...) {
         result.status = ReplayStatus::callback_failure;
         result.diagnostics.push_back({DiagnosticCode::invalid_claim, "plant.objective",
             "The declared plant objective callback raised an exception."});
         return finish();
     }
+    if (interrupted()) return finish();
+    result.original_objective = objective;
     if (!std::isfinite(*result.original_objective)) {
         result.original_objective.reset();
         result.status = ReplayStatus::numerical_failure;

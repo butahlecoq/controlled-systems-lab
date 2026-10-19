@@ -45,6 +45,7 @@ struct ReplayRecord {
     ReplayStatus status{ReplayStatus::unavailable};
     PlantIdentity plant;
     std::vector<PlantParameter> parameters;
+    std::optional<Vector> declared_initial_state;
     std::vector<std::string> state_units, control_units;
     std::string objective_name, objective_unit;
     std::optional<IntegrationMethod> integration;

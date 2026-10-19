@@ -11,12 +11,15 @@ is an authored exact discrete transition map:
 the callback receives the state at the interval start and its constant control,
 then returns the state at the next time. It is not a continuous ODE integrator.
 
-`replay` records the complete declaration, controls, computed states, original
+`replay` records the complete declaration (including the declared initial
+state), controls, computed states, original
 plant objective and its unit, field-specific diagnostics and a separate
 steady-clock replay duration. A missing declaration or incomplete control
 history returns `unavailable` with named `missing_prerequisites`. Invalid
 numeric inputs, nonfinite transition/objective outputs, callback failures,
-cancellation and deadline exhaustion remain distinct statuses. A failed replay
+cancellation and deadline exhaustion remain distinct statuses. The execution
+context is checked after transition and objective callbacks as well as before
+each stage. A failed replay
 retains its available prefix but has no completed objective. The callback and
 its declared source are caller-supplied evidence; this interface does not prove
 that a claimed physical plant or exact transition is scientifically valid.

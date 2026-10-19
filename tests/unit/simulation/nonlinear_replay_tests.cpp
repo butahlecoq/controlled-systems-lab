@@ -57,6 +57,7 @@ TEST_CASE("two tied linear control sums have different independent nonlinear rep
     CHECK(a.plant.name == "analytic.quadratic-step");
     CHECK(a.plant.source == "EXP-04 literal toy");
     CHECK(a.parameters[0].value == 1.0);
+    CHECK(a.declared_initial_state == Vector{0.0});
     CHECK(a.times == std::vector<double>{0.0, 1.0, 2.0});
     CHECK(a.controls == first);
     CHECK(a.state_units == std::vector<std::string>{"dimensionless"});
@@ -100,6 +101,7 @@ TEST_CASE("missing independent plant data and incomplete controls name prerequis
     CHECK(missing(absent, "plant.parameters"));
     CHECK(missing(absent, "plant.times"));
     CHECK(missing(absent, "plant.objective"));
+    CHECK(absent.declared_initial_state == Vector{0.0});
     CHECK(absent.states.empty());
 
     plant = analytic_toy();
@@ -160,5 +162,35 @@ TEST_CASE("unsupported declarations, cancellation and deadline do not create a c
     const auto limited = replay(plant, controls, expired);
     CHECK(limited.status == ReplayStatus::resource_limit);
     CHECK(limited.states == std::vector<Vector>{{0.0}});
+    CHECK_FALSE(limited.original_objective.has_value());
+}
+
+TEST_CASE("context exhaustion inside the final callbacks cannot report completion") {
+    const std::vector<Vector> controls{{0.0}, {1.0}};
+    auto plant = analytic_toy();
+    std::stop_source source;
+    ExecutionContext cancelled;
+    cancelled.cancellation = source.get_token();
+    plant.transition = [&source](std::span<const double> state,
+        std::span<const double> control, std::span<const PlantParameter> parameters,
+        double, double) {
+        if (control[0] == 1.0) source.request_stop();
+        return Vector{state[0] + control[0] + parameters[0].value * control[0] * control[0]};
+    };
+    const auto stopped = replay(plant, controls, cancelled);
+    CHECK(stopped.status == ReplayStatus::cancelled);
+    CHECK(stopped.states == std::vector<Vector>{{0.0}, {0.0}});
+    CHECK_FALSE(stopped.original_objective.has_value());
+
+    plant = analytic_toy();
+    ExecutionContext expired;
+    plant.objective = [&expired](std::span<const double> terminal,
+        std::span<const PlantParameter>) {
+        expired.deadline = std::chrono::steady_clock::now() - std::chrono::seconds(1);
+        return terminal[0];
+    };
+    const auto limited = replay(plant, controls, expired);
+    CHECK(limited.status == ReplayStatus::resource_limit);
+    CHECK(limited.states == std::vector<Vector>{{0.0}, {0.0}, {2.0}});
     CHECK_FALSE(limited.original_objective.has_value());
 }
