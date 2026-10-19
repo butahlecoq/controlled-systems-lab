@@ -1,7 +1,7 @@
 {
   "absolute_tolerance": 1e-10,
   "architecture": "AMD64",
-  "collected_utc": "2026-10-19T14:11:56.234961+00:00",
+  "collected_utc": "2026-10-19T14:18:35.824507+00:00",
   "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
   "configuration": "Release",
   "host": "DESKTOP-S9O3F6S",
@@ -17,8 +17,8 @@
   "python": "3.13.5",
   "relative_tolerance": 1e-10,
   "seed": null,
-  "source_commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
-  "source_tree": "2139129a7cf87abbf8cde25b6519ded630116cdb",
+  "source_commit": "9becda80d9a0eb7383fa2215f6b5c1932d3502a0",
+  "source_tree": "d3b50fac73dde08de8448caff230ccc21d8ae979",
   "timing_scope": "Feasible-set and objective construction, production LP registration/workspace, one public minimize call, and literal checks; excludes CSV output and rendering",
   "warmup_policy": "One excluded 100-call batch before seven measured 100-call batches",
   "workspace_reuse": "none"

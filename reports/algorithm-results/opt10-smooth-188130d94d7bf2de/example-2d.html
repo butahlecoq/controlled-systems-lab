@@ -1,13 +1,13 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OPT-10 · Declared smooth-convex adapter report</title><style>
+<title>OPT-10 · 2D feasible-direction example</title><style>
 body{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}
 div.header,div.main,div.footer{max-width:960px;margin:auto;padding:1.4rem}
 a{color:#9ccfd8} div.section{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}
 table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}
 td,th{border:1px solid #524f67;padding:.45rem;text-align:left;white-space:nowrap}
 img{width:100%;height:auto} code{overflow-wrap:anywhere}
-</style></head><body><div class="header"><p>Controlled Systems Lab · OPT-10</p><h1>Declared smooth-convex adapter report</h1><p>Saved numerical observations of the public OPT-10 adapter route.</p></div><div class="main">
+</style></head><body><div class="header"><p>Controlled Systems Lab · OPT-10</p><h1>2D feasible-direction example</h1><p>An analytic quadratic on a box shows the feasible start and constrained minimizer.</p></div><div class="main">
 <div class="section"><h2>Minimal input and analytic answer</h2>
 <p>The decision coordinates are <code>(x,y)</code>. The feasible box is
 <code>0 ≤ x ≤ 1</code>, <code>-1 ≤ y ≤ 1</code>. The supplied start is
@@ -29,18 +29,18 @@ conditional on the caller's convexity and gradient assertions. It is not a
 validated convexity certificate, numerical global-error bound or complete optimal family.</p></div>
 <div class="section"><h2>Measurement and scope</h2>
 <p>One excluded 100-call warmup preceded seven measured 100-call batches: 700 verified
-calls, zero observed failures. Median batch duration was 44,544,800 ns
-(range 42,693,900–45,765,600 ns). Each interval includes
+calls, zero observed failures. Median batch duration was 44,444,200 ns
+(range 40,495,400–49,417,700 ns). Each interval includes
 feasible-set/objective construction, production LP registration and workspace creation,
 the public minimization call and literal checks. It excludes CSV output and rendering.
 These are descriptive single-adapter durations on the recorded host; no comparator,
 speedup or source-mapped limiter is claimed. Native internal counters and actual
 thread activity were unavailable.</p>
-<p>Source commit: <code>3c2e0fc92ba9ff7642fc43f572785d48a5698e68</code>. The saved <a href="records.json">record</a>,
+<p>Source commit: <code>9becda80d9a0eb7383fa2215f6b5c1932d3502a0</code>. The saved <a href="records.json">record</a>,
 <a href="measure.csv">raw trial CSV</a>, <a href="summary.csv">summary CSV</a>,
-<a href="manifest.json">manifest</a> and <a href="opt10-smooth-bb66ac0f3f319ccd.zip">offline ZIP</a>
+<a href="manifest.json">manifest</a> and <a href="opt10-smooth-188130d94d7bf2de.zip">offline ZIP</a>
 bind the observation to the build and host receipts. Reproduce with
-<code>python scripts/reports/opt10/capture.py --source &lt;clean-checkout&gt; --capture &lt;new-directory&gt; --commit 3c2e0fc92ba9ff7642fc43f572785d48a5698e68 --cmake &lt;cmake&gt;</code>,
+<code>python scripts/reports/opt10/capture.py --source &lt;clean-checkout&gt; --capture &lt;new-directory&gt; --commit 9becda80d9a0eb7383fa2215f6b5c1932d3502a0 --cmake &lt;cmake&gt;</code>,
 then run <code>collect.py</code> and <code>render_saved.py</code> on the saved capture.</p></div>
-<p><a href="example-2d.html">2D example</a></p>
+<p><a href="index.html">Full report</a></p>
 </div><div class="footer">OPT-10 · saved binary64 evidence only</div></body></html>

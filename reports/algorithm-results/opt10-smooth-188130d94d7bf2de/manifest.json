@@ -1,0 +1,24 @@
+{
+  "report_id": "opt10-smooth-188130d94d7bf2de",
+  "schema": "csl.opt10-manifest/1",
+  "sha256": {
+    "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "CMakeCache.raw.txt": "c461fa18428ee7f535df51f9dad9b12638a2a273d32b8061a87b47cbb46cd0ea",
+    "build.log": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
+    "configure.log": "2da259dc0b6105d4dcd5339d92be439b88499ec87a33e3a53c5224ebd655a0f9",
+    "driver.cpp": "537bfdf9a2d8e5aaadb63e2bbf4e568133ad40692fc3d4b5df56216c4ff1512b",
+    "example-2d.html": "3ba5c1596048539196ea6f6325d5497c8e3d4490e9112f1b5e426a5e70949e5d",
+    "feasible-box-2d.svg": "67f587f00e73ec2c5b4d87e63daf95395b38102d04d8d376fcab08aeca457e9a",
+    "host.json": "b5c30fdf27ddaca1301d44aa5827721d73f538d7969065c3706f5ab103358eeb",
+    "index.html": "089785059008e29003e134f6863776d5cbf57f71526811124bb2a9d12415c8c5",
+    "measure.csv": "2c10747221134e6fdf04d783d73c024d08c0b10b52de7024c083716d11924744",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postrun.json": "c0a852b84eb5b82209e870d585b5962022fef658509736684505987efb160d8b",
+    "prebuild.json": "274b8e4deb49255e171bf5af04a34584d1144b508c338c1423fb548cc7072019",
+    "records.json": "5d76935511d64629d3428cbe437796d8373bca1cc5840575ff7e1b43cb7218e7",
+    "smoke.csv": "cf1fb3a8caa2f02bcac1fb19858ee6b5d9cdbed228714d2ec150709ebb38eefc",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary.csv": "e80868728df5afb4bbb864cfd2b3543b7fa92be75d6720160c3c00fd5f43ba17"
+  },
+  "source_commit": "9becda80d9a0eb7383fa2215f6b5c1932d3502a0"
+}

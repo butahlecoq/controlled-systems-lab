@@ -14,7 +14,7 @@
   "environment": {
     "absolute_tolerance": 1e-10,
     "architecture": "AMD64",
-    "collected_utc": "2026-10-19T14:11:56.234961+00:00",
+    "collected_utc": "2026-10-19T14:18:35.824507+00:00",
     "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
     "configuration": "Release",
     "host": "DESKTOP-S9O3F6S",
@@ -30,8 +30,8 @@
     "python": "3.13.5",
     "relative_tolerance": 1e-10,
     "seed": null,
-    "source_commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
-    "source_tree": "2139129a7cf87abbf8cde25b6519ded630116cdb",
+    "source_commit": "9becda80d9a0eb7383fa2215f6b5c1932d3502a0",
+    "source_tree": "d3b50fac73dde08de8448caff230ccc21d8ae979",
     "timing_scope": "Feasible-set and objective construction, production LP registration/workspace, one public minimize call, and literal checks; excludes CSV output and rendering",
     "warmup_policy": "One excluded 100-call batch before seven measured 100-call batches",
     "workspace_reuse": "none"
@@ -44,17 +44,17 @@
   },
   "measurement": {
     "failures": 0,
-    "max_batch_ns": 45765600,
+    "max_batch_ns": 49417700,
     "measured_calls": 700,
-    "median_batch_ns": 44544800,
-    "min_batch_ns": 42693900,
-    "raw_measure_sha256": "a5933b6f614cd306c72de036b0c97ac2eef7ffdaa137fe93396ede825486c55a",
-    "raw_smoke_sha256": "e49b771ad996e97d0ee0a23c263ceeb688e326cbc5ba968befe74e2369f6a5f3",
+    "median_batch_ns": 44444200,
+    "min_batch_ns": 40495400,
+    "raw_measure_sha256": "2c10747221134e6fdf04d783d73c024d08c0b10b52de7024c083716d11924744",
+    "raw_smoke_sha256": "cf1fb3a8caa2f02bcac1fb19858ee6b5d9cdbed228714d2ec150709ebb38eefc",
     "trials": [
       {
         "calls": "100",
         "case": "box-quadratic",
-        "elapsed_ns": "42693900",
+        "elapsed_ns": "42482100",
         "iterations": "1",
         "objective": "1",
         "objective_evaluations": "2",
@@ -69,7 +69,7 @@
       {
         "calls": "100",
         "case": "box-quadratic",
-        "elapsed_ns": "42812900",
+        "elapsed_ns": "49417700",
         "iterations": "1",
         "objective": "1",
         "objective_evaluations": "2",
@@ -84,7 +84,7 @@
       {
         "calls": "100",
         "case": "box-quadratic",
-        "elapsed_ns": "44799500",
+        "elapsed_ns": "45573800",
         "iterations": "1",
         "objective": "1",
         "objective_evaluations": "2",
@@ -99,7 +99,7 @@
       {
         "calls": "100",
         "case": "box-quadratic",
-        "elapsed_ns": "45765600",
+        "elapsed_ns": "44444200",
         "iterations": "1",
         "objective": "1",
         "objective_evaluations": "2",
@@ -114,7 +114,7 @@
       {
         "calls": "100",
         "case": "box-quadratic",
-        "elapsed_ns": "45157400",
+        "elapsed_ns": "44524900",
         "iterations": "1",
         "objective": "1",
         "objective_evaluations": "2",
@@ -129,7 +129,7 @@
       {
         "calls": "100",
         "case": "box-quadratic",
-        "elapsed_ns": "44014200",
+        "elapsed_ns": "43342700",
         "iterations": "1",
         "objective": "1",
         "objective_evaluations": "2",
@@ -144,7 +144,7 @@
       {
         "calls": "100",
         "case": "box-quadratic",
-        "elapsed_ns": "44544800",
+        "elapsed_ns": "40495400",
         "iterations": "1",
         "objective": "1",
         "objective_evaluations": "2",
@@ -160,7 +160,7 @@
     "warmup": {
       "calls": "100",
       "case": "box-quadratic",
-      "elapsed_ns": "45884200",
+      "elapsed_ns": "44166800",
       "iterations": "1",
       "objective": "1",
       "objective_evaluations": "2",
@@ -196,39 +196,39 @@
       ]
     ]
   },
-  "report_id": "opt10-smooth-bb66ac0f3f319ccd",
+  "report_id": "opt10-smooth-188130d94d7bf2de",
   "schema": "csl.opt10-smooth-convex-report/1",
-  "source_commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
+  "source_commit": "9becda80d9a0eb7383fa2215f6b5c1932d3502a0",
   "source_receipts": {
     "postrun": {
-      "commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
-      "executable_sha256": "b409285238d96ec9f7db67691908a94f0934e2f83b077a0321fe1e96624436ba",
-      "observed_utc": "2026-10-19T14:11:56.230725+00:00",
+      "commit": "9becda80d9a0eb7383fa2215f6b5c1932d3502a0",
+      "executable_sha256": "9598f99407f25e17ec4255915f0a801d936da1abfd0d5d7ff916a8df57458f71",
+      "observed_utc": "2026-10-19T14:18:35.820381+00:00",
       "phase": "postrun",
       "status": [],
-      "tree": "2139129a7cf87abbf8cde25b6519ded630116cdb"
+      "tree": "d3b50fac73dde08de8448caff230ccc21d8ae979"
     },
     "prebuild": {
-      "commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
-      "observed_utc": "2026-10-19T14:10:45.622059+00:00",
+      "commit": "9becda80d9a0eb7383fa2215f6b5c1932d3502a0",
+      "observed_utc": "2026-10-19T14:17:21.653674+00:00",
       "phase": "prebuild",
       "status": [],
-      "tree": "2139129a7cf87abbf8cde25b6519ded630116cdb"
+      "tree": "d3b50fac73dde08de8448caff230ccc21d8ae979"
     }
   },
   "source_sha256": {
     "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
-    "CMakeCache.raw.txt": "3a0ce8bc3c38dd7a8575e33c14b69780378dd5c9288a0a83c4cf78cf6ab9f1ae",
+    "CMakeCache.raw.txt": "c461fa18428ee7f535df51f9dad9b12638a2a273d32b8061a87b47cbb46cd0ea",
     "build.log": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
-    "configure.log": "875bfacffd1219de91b69e648c147dc80c005dead66d3f5af80077a84de7fbac",
+    "configure.log": "2da259dc0b6105d4dcd5339d92be439b88499ec87a33e3a53c5224ebd655a0f9",
     "driver.cpp": "537bfdf9a2d8e5aaadb63e2bbf4e568133ad40692fc3d4b5df56216c4ff1512b",
-    "host.json": "5a5b9bf3ae4baf439bda6b9d6f999191d04be6ba6ecd529366d58e13129b62d6",
-    "measure.csv": "a5933b6f614cd306c72de036b0c97ac2eef7ffdaa137fe93396ede825486c55a",
+    "host.json": "b5c30fdf27ddaca1301d44aa5827721d73f538d7969065c3706f5ab103358eeb",
+    "measure.csv": "2c10747221134e6fdf04d783d73c024d08c0b10b52de7024c083716d11924744",
     "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "postrun.json": "8a63923fea0599b62f1b12618aa0d7d0388877a7ed44b27f1e03599866b087ad",
-    "prebuild.json": "efca5e44097948b16d390b20f01cdfedd769e4b379684610afffe1d24fd12e1c",
-    "smoke.csv": "e49b771ad996e97d0ee0a23c263ceeb688e326cbc5ba968befe74e2369f6a5f3",
+    "postrun.json": "c0a852b84eb5b82209e870d585b5962022fef658509736684505987efb160d8b",
+    "prebuild.json": "274b8e4deb49255e171bf5af04a34584d1144b508c338c1423fb548cc7072019",
+    "smoke.csv": "cf1fb3a8caa2f02bcac1fb19858ee6b5d9cdbed228714d2ec150709ebb38eefc",
     "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
-  "source_tree": "2139129a7cf87abbf8cde25b6519ded630116cdb"
+  "source_tree": "d3b50fac73dde08de8448caff230ccc21d8ae979"
 }

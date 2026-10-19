@@ -7,11 +7,11 @@ objective, projected residual, and successful status. The SVG is a diagram of
 the feasible box and analytic solution; its dashed segment is illustrative,
 not an iteration trace.
 
-The frozen source commit is `3c2e0fc92ba9ff7642fc43f572785d48a5698e68`.
+The frozen source commit is `9becda80d9a0eb7383fa2215f6b5c1932d3502a0`.
 Use a clean detached checkout at that commit and a fresh capture directory:
 
 ```powershell
-python -B scripts/reports/opt10/capture.py --source D:\path\to\frozen-checkout --capture D:\path\to\fresh-capture --commit 3c2e0fc92ba9ff7642fc43f572785d48a5698e68 --cmake C:\path\to\cmake.exe
+python -B scripts/reports/opt10/capture.py --source D:\path\to\frozen-checkout --capture D:\path\to\fresh-capture --commit 9becda80d9a0eb7383fa2215f6b5c1932d3502a0 --cmake C:\path\to\cmake.exe
 python -B scripts/reports/opt10/collect.py --capture D:\path\to\fresh-capture --source D:\path\to\frozen-checkout --out reports/algorithm-results
 python -B scripts/reports/opt10/render_saved.py --bundle reports/algorithm-results/opt10-smooth-REPORT_ID
 python -B scripts/reports/opt10/render_saved.py --bundle reports/algorithm-results/opt10-smooth-REPORT_ID --check

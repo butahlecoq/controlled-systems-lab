@@ -25,9 +25,9 @@ class SavedSmoothConvexReport(unittest.TestCase):
     def test_saved_numerical_report_regenerates(self) -> None:
         details = render_saved.render(self.bundle, check=True)
         self.assertEqual(details["source_commit"],
-                         "3c2e0fc92ba9ff7642fc43f572785d48a5698e68")
+                         "9becda80d9a0eb7383fa2215f6b5c1932d3502a0")
         self.assertEqual(details["index_sha256"],
-                         "7ddc7be28964a789d18a834f2cf3520b1b28ed6bc36833ca8fe9bdc457b74505")
+                         "089785059008e29003e134f6863776d5cbf57f71526811124bb2a9d12415c8c5")
         self.assertEqual(stage_opt10.catalog_entry(self.bundle), self.entry)
         record = render_saved.validate(self.bundle)
         self.assertEqual(record["analytic"]["point"], [1, -1])

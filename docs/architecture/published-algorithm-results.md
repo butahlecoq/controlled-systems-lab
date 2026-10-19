@@ -214,7 +214,7 @@ not replace the distinct `csl.synthesis.ts01-analytic` measurement in SYN-07.
 ## OPT-10 smooth-convex feasible-directions report
 
 The OPT-10 report uses frozen source
-`3c2e0fc92ba9ff7642fc43f572785d48a5698e68` and a clean Release
+`9becda80d9a0eb7383fa2215f6b5c1932d3502a0` and a clean Release
 capture of the public feasible-directions adapter with the production HiGHS
 projection backend. Its two-dimensional box quadratic has the analytic
 constrained solution `(1, -1)` and objective `1`. Every observed call checks
