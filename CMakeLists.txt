@@ -27,6 +27,7 @@ option(CSL_BUILD_EXT04_REPORT "Build the EXT-04 observed replay report driver" O
 option(CSL_BUILD_EXP04_REPORT "Build the EXP-04 independent plant replay report driver" OFF)
 option(CSL_BUILD_APP02_REPORT "Build the APP-02 box and parallelotope report driver" OFF)
 option(CSL_BUILD_APP03_REPORT "Build the APP-03 zonotope reduction report driver" OFF)
+option(CSL_BUILD_APP04_REPORT "Build the APP-04 ellipsoid report driver" OFF)
 option(CSL_BUILD_GEO08_REPORT "Build the GEO-08 lazy geometry report driver" OFF)
 option(CSL_BUILD_FINITE_FEEDBACK_REPORT "Build the issue 5 finite feedback report driver" OFF)
 
