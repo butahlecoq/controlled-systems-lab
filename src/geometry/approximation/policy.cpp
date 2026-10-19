@@ -1,9 +1,11 @@
 #include <csl/geometry/approximation.hpp>
 #include <csl/sets/data.hpp>
+#include <csl/sets/generator_sets.hpp>
 #include "../exact_dyadic.hpp"
 
 #include <cmath>
 #include <chrono>
+#include <unordered_map>
 
 namespace csl::geometry::approximation {
 namespace {
@@ -105,6 +107,81 @@ bool h_contains_v(const sets::HRepresentation& h,const sets::VRepresentation& v,
     return h_rows_contain_v(h.inequalities,h.upper_bounds,v,false,context,interrupted) &&
            h_rows_contain_v(h.equalities,h.equality_values,v,true,context,interrupted);
 }
+bool generator_axis_cover(const sets::GeneratorSet& source,const sets::GeneratorSet& output,
+                          const ExecutionContext& context,bool& interrupted) {
+    using namespace detail::exact_detail;
+    if(source.center()!=output.center() ||
+       source.coordinate_labels()!=output.coordinate_labels() ||
+       output.equalities().rows!=0)return false;
+    const auto dimension=source.center().size();
+    const auto source_count=source.factor_ids().size();
+    const auto output_count=output.factor_ids().size();
+    std::unordered_map<std::string,std::size_t> source_positions;
+    for(std::size_t factor=0;factor<source_count;++factor)
+        source_positions.emplace(source.factor_ids()[factor].value,factor);
+    std::vector<bool> retained(source_count,false);
+    std::vector<bool> new_axis(output_count,false);
+    for(std::size_t factor=0;factor<output_count;++factor) {
+        if(context.cancellation.stop_requested() ||
+           (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+            interrupted=true;
+            return false;
+        }
+        const auto found=source_positions.find(output.factor_ids()[factor].value);
+        if(found!=source_positions.end()) {
+            retained[found->second]=true;
+            for(std::size_t row=0;row<dimension;++row) {
+                if(context.cancellation.stop_requested() ||
+                   (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                    interrupted=true;
+                    return false;
+                }
+                if(output.generators().values[row*output_count+factor]!=
+                   source.generators().values[row*source_count+found->second])return false;
+            }
+        } else {
+            std::size_t nonzero=0;
+            for(std::size_t row=0;row<dimension;++row) {
+                if(context.cancellation.stop_requested() ||
+                   (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                    interrupted=true;
+                    return false;
+                }
+                nonzero+=output.generators().values[row*output_count+factor]!=0;
+            }
+            if(nonzero>1)return false;
+            new_axis[factor]=true;
+        }
+    }
+    for(std::size_t row=0;row<dimension;++row) {
+        if(context.cancellation.stop_requested() ||
+           (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+            interrupted=true;
+            return false;
+        }
+        Integer required,available;
+        for(std::size_t factor=0;factor<source_count;++factor) {
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                interrupted=true;
+                return false;
+            }
+            if(!retained[factor] && !add_dyadic(required,
+                decode(std::abs(source.generators().values[row*source_count+factor]))))return false;
+        }
+        for(std::size_t factor=0;factor<output_count;++factor) {
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                interrupted=true;
+                return false;
+            }
+            if(new_axis[factor] && !add_dyadic(available,
+                decode(std::abs(output.generators().values[row*output_count+factor]))))return false;
+        }
+        if(compare_magnitude(required,available)>0)return false;
+    }
+    return true;
+}
 std::optional<StructuralBasis> structural_basis(const ApproximationRequest& request,
                                                  const OperationResult& result,
                                                  const ExecutionContext& context,bool& interrupted) {
@@ -113,6 +190,14 @@ std::optional<StructuralBasis> structural_basis(const ApproximationRequest& requ
         return StructuralBasis::identical_set;
     const auto reference=sets::from_handle(request.input);
     const auto native=sets::from_handle(result.output);
+    if(request.direction==SetRelation::outer) {
+        const auto source=sets::from_generator_handle(request.input);
+        const auto output=sets::from_generator_handle(result.output);
+        if(const auto* source_set=std::get_if<sets::GeneratorSet>(&source))
+            if(const auto* output_set=std::get_if<sets::GeneratorSet>(&output))
+                if(generator_axis_cover(*source_set,*output_set,context,interrupted))
+                    return StructuralBasis::generator_axis_cover;
+    }
     if(const auto* source=std::get_if<sets::SetData>(&reference);
        source && std::holds_alternative<sets::SetData>(native) &&
        source->metadata()->coordinate_labels==
@@ -159,6 +244,9 @@ std::optional<StructuralBasis> structural_basis(const ApproximationRequest& requ
     return std::nullopt;
 }
 bool within_budget(const SetHandle& output,std::size_t budget) {
+    const auto generator=sets::from_generator_handle(output);
+    if(const auto* set=std::get_if<sets::GeneratorSet>(&generator))
+        return set->factor_ids().size()<=budget;
     const auto native=sets::from_handle(output);
     const auto* data=std::get_if<sets::SetData>(&native);
     if(!data)return false;
@@ -221,7 +309,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
             StopReason::deadline_expired,"Approximation policy stopped before publishing an enclosure."};
     if(basis) {
         result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
-            "Same immutable set, empty subset, universal superset, exact H constraint retention, or exact binary64 H containment of native points and recession rays over the same ambient coordinates."};
+            "Same immutable set, empty subset, universal superset, exact H constraint retention, exact binary64 H containment of native points and recession rays, or exact stored-binary64 generator axis cover over the same ambient coordinates."};
         return EnclosedApproximation{std::move(result),*basis};
     }
     return Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",

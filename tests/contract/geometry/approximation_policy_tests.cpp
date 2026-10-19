@@ -2,7 +2,9 @@
 #include <doctest/doctest.h>
 #include <csl/geometry/approximation.hpp>
 #include <csl/sets/data.hpp>
+#include <csl/sets/generator_sets.hpp>
 #include <limits>
+#include <cmath>
 #include <chrono>
 #include <stop_token>
 
@@ -85,6 +87,64 @@ registry::Registry<registry::ApproximationPort> provider(const ApproximationRequ
 auto execute(const registry::Registry<registry::ApproximationPort>& registry,const ApproximationRequest& query) {
     return run_registered(registry,{{"fixture.approximation"},std::nullopt},query,ExecutionContext{});
 }
+SetHandle generator_set(const char* id, Vector center, Matrix columns,
+                        std::vector<const char*> names, Matrix equalities = {},
+                        Vector equality_values = {}) {
+    std::vector<sets::FactorId> factors;
+    for (const char* name:names) factors.push_back({name});
+    const auto dimension=center.size();
+    if (equalities.rows==0) equalities.cols=factors.size();
+    auto result=sets::make_generator_set({{id},std::move(center),std::move(columns),
+        std::move(factors),std::move(equalities),std::move(equality_values),
+        dimension==2?std::vector<std::string>{"x","y"}:std::vector<std::string>{"x"}});
+    REQUIRE(std::holds_alternative<sets::GeneratorSet>(result));
+    return std::get<sets::GeneratorSet>(std::move(result)).as_handle();
+}
+}
+
+TEST_CASE("native generator axis cover independently admits an outer relation") {
+    auto source=generator_set("source",{0,0},{2,2,{1,0.5,0.5,1}}, {"a","b"});
+    auto outer=generator_set("outer",{0,0},{2,2,{1.5,0,0,1.5}}, {"axis-x","axis-y"});
+    auto query=request(source,SetRelation::outer,outer.metadata.representation);
+    query.size_budget=2;
+    auto outcome=execute(provider(query,outer,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    CHECK(std::get<EnclosedApproximation>(outcome).result.output.id==SetId{"outer"});
+
+    auto too_small=generator_set("too-small",{0,0},{2,2,{1.25,0,0,1.5}}, {"axis-x","axis-y"});
+    outcome=execute(provider(query,too_small,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+
+    query.size_budget=1;
+    outcome=execute(provider(query,outer,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.budget");
+
+    auto changed_shared=generator_set("changed-shared",{0,0},
+        {2,2,{1.25,0,0.5,1.5}}, {"a","axis-y"});
+    query.size_budget=2;
+    outcome=execute(provider(query,changed_shared,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+
+    auto skew=generator_set("skew",{0,0},{2,1,{1.5,1.5}}, {"new"});
+    outcome=execute(provider(query,skew,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+}
+
+TEST_CASE("generator cover uses exact stored binary64 sums and relaxes source equalities") {
+    auto source=generator_set("source",{0},{1,2,{0.1,0.2}}, {"shared","other"},
+        {1,2,{1,0}},{0});
+    auto rounded=generator_set("rounded",{0},{1,1,{0.3}}, {"axis"});
+    auto query=request(source,SetRelation::outer,rounded.metadata.representation);
+    query.size_budget=1;
+    auto outcome=execute(provider(query,rounded,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+
+    auto outward=generator_set("outward",{0},
+        {1,1,{std::nextafter(0.3,std::numeric_limits<double>::infinity())}}, {"axis"});
+    outcome=execute(provider(query,outward,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    CHECK(std::get<EnclosedApproximation>(outcome).basis==StructuralBasis::generator_axis_cover);
 }
 
 TEST_CASE("registered inner approximation admits a structurally empty subset") {

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="610" viewBox="0 0 640 610" role="img" aria-label="Input planar zonotope and its independently admitted outer axis cover in x and y coordinates">
+<rect width="640" height="610" fill="#272822"/>
+<line x1="40" y1="250" x2="520" y2="250" stroke="#f8f8f2"/>
+<line x1="280" y1="25" x2="280" y2="480" stroke="#f8f8f2"/>
+<text x="525" y="255" fill="#f8f8f2">x</text><text x="286" y="25" fill="#f8f8f2">y</text>
+<polygon points="92.5,437.5 467.5,437.5 467.5,62.5 92.5,62.5" fill="none" stroke="#fd971f" stroke-width="3"/>
+<polygon points="92.5,437.5 342.5,437.5 467.5,312.5 467.5,62.5 217.5,62.5 92.5,187.5" fill="none" stroke="#66d9ef" stroke-width="3"/>
+<circle cx="92.5" cy="437.5" r="4" fill="#f8f8f2"/><circle cx="92.5" cy="187.5" r="4" fill="#f8f8f2"/><circle cx="217.5" cy="312.5" r="4" fill="#f8f8f2"/><circle cx="217.5" cy="62.5" r="4" fill="#f8f8f2"/><circle cx="342.5" cy="437.5" r="4" fill="#f8f8f2"/><circle cx="342.5" cy="187.5" r="4" fill="#f8f8f2"/><circle cx="467.5" cy="312.5" r="4" fill="#f8f8f2"/><circle cx="467.5" cy="62.5" r="4" fill="#f8f8f2"/>
+<text x="35" y="520" fill="#66d9ef">Blue: input generators (1,0), (0,1), (0.5,0.5)</text>
+<text x="35" y="547" fill="#fd971f">Orange: outer axis cover [-1.5,1.5] × [-1.5,1.5]</text>
+<text x="35" y="574" fill="#f8f8f2">White: all eight signed input generator sums</text></svg>

@@ -32,6 +32,13 @@ add_test(NAME installed_box_parallelotope_client COMMAND installed_box_parallelo
 set_tests_properties(installed_box_parallelotope_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed box/parallelotope client: rotated diamond bounds passed")
 
+add_executable(installed_zonotope_reduction_client zonotope_reduction_client.cpp)
+target_link_libraries(installed_zonotope_reduction_client PRIVATE CSL::approximation)
+set_target_properties(installed_zonotope_reduction_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_zonotope_reduction_client COMMAND installed_zonotope_reduction_client)
+set_tests_properties(installed_zonotope_reduction_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed zonotope client: independently admitted axis cover passed")
+
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
 add_executable(installed_conversion_client conversion_client.cpp)
 target_link_libraries(installed_conversion_client PRIVATE CSL::qhull_conversion CSL::highs_lp)

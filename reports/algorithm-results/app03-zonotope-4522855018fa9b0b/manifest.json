@@ -1,0 +1,24 @@
+{
+  "files": {
+    "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "CMakeCache.raw.txt": "52ba712f4e748a24c558330542474560f432d5f91d24d8cc1dba2932a564de08",
+    "build-provenance.json": "b8fedb5fb4d5d7982ffc96c35ab13749b49f5354a56925a0e0642165bdba5ab5",
+    "build.log": "0e80be7827f6be2215f18e4e866614858154f0d003698a22a9baf298e128ab25",
+    "configure.log": "538a11d8f0e28b742321864f96752bc0317efbc9778821d74f9906462ba6e481",
+    "driver.cpp": "4d9381458d96ddeaeaabe274294360929bc10d912eb20c748bf2510331c1cf51",
+    "example-2d.html": "6cab005abba2139863c9642a6ca1e8b2d379ea67977f4eeca11fa14217669a6b",
+    "host.json": "75361b2ec6736413b250f7d123a0bba27d33d122f45661c246398f3e93baa8c8",
+    "index.html": "b3d4b04afd09d1b70f3936da477a144d76010aa29ff326a055706d01927da9ef",
+    "measure.csv": "c8339d0bab8542d48f2c63f0a411dc31dbdc679ff85dc098e92cc0b07bcfd159",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postrun.json": "22b37efbf6671b6f7e170bad28397f1980e8507c0fa1dbf71bf8ab5f1f799d51",
+    "prebuild.json": "32f089397d092c3a2fd30e86387f09726f16efffe05dcd0edd0a8ffae2fa98c9",
+    "records.json": "bcbd54d441b627585c6f84df68762269f13f63555b04b44a8e2b37d20ff066e6",
+    "smoke.csv": "4b9f14675c2f8b32a5b59eef9c48b5f0d4547623092a7c012f4802e37a20c03c",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary.csv": "100b7b565859009cddcd609427589f1ad3ab52fd1b8c81539062ad248e21caa1",
+    "zonotope-2d.svg": "325c2ec3f5f2024c149a9b9ad16961ef6a1570e1af160407a7e45ef5d05af16f"
+  },
+  "report_id": "app03-zonotope-4522855018fa9b0b",
+  "schema": "csl.app03-report-manifest/1"
+}

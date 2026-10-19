@@ -1,0 +1,14 @@
+{
+  "reports": [
+    {
+      "manifest_sha256": "1690bad07b4c0811ae3fa6ed2a00415a7da8bd47da92aa065012cb9fda644de4",
+      "renderer_sha256": "c0bcc83093d3e1e2d4faf3d05c5b9f797a995d1ea4d66702960e97057024adf0",
+      "report_id": "app03-zonotope-4522855018fa9b0b",
+      "schema": "csl.app03-zonotope-reduction/1",
+      "source_commit": "e105a86b8e2ab7d09b1e7042fc5f0d5bc0ce5c40",
+      "stager_sha256": "419fcee7e19053d7aa5843f3834630ceaa1254d9c3547d1b4bddaf0753c87b18",
+      "zip_sha256": "8a8b790e0e13ab53f557d1500886ab26ac5fe06a2f06defff808c4ad71ca1504"
+    }
+  ],
+  "schema": "csl.app03-publications/1"
+}

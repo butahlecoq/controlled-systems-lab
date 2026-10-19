@@ -10,6 +10,17 @@ endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
 
+if(CSL_BUILD_APP03_REPORT)
+add_executable(csl_app03_zonotope_report benchmarks/reporting/app03/driver.cpp)
+target_link_libraries(csl_app03_zonotope_report PRIVATE CSL::approximation CSL::geometry_generators)
+target_compile_features(csl_app03_zonotope_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_app03_zonotope_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_app03_zonotope_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+endif()
+
 if(CSL_BUILD_APP02_REPORT)
 add_executable(csl_app02_approximation_report benchmarks/reporting/app02/driver.cpp)
 target_link_libraries(csl_app02_approximation_report PRIVATE CSL::approximation)

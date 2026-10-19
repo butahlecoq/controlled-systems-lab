@@ -1,0 +1,4 @@
+case,batches,calls_per_batch,successes,failures,median_batch_ns,min_batch_ns,max_batch_ns
+diamond-axis-cover,7,100,700,0,794000,788600,859600
+constrained-axis-cover,7,100,700,0,924700,919500,954100
+zero-column-exact,7,100,700,0,275100,266500,280500

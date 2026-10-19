@@ -26,6 +26,7 @@ when one of these independent structural checks succeeds:
 | Native H output and reference, same ordered native coordinates; every output inequality and equality row occurs unchanged in the reference | Reference is inside output (outer) |
 | Native singleton output and native H reference, same ordered native coordinates; the point satisfies every H row under exact stored binary64 arithmetic | Singleton is inside reference (inner) |
 | Native singleton reference and native H output, same ordered native coordinates; the point satisfies every H row under exact stored binary64 arithmetic | Reference is inside output (outer) |
+| Native generator source and unconstrained native generator output, same center and ordered coordinates; retained factor IDs have identical columns and independent new axis columns cover each omitted row's exact stored-binary64 absolute sum | Reference is inside output (outer) |
 
 Native V data with zero vertex rows is empty under the set contract, including
 when ray rows exist. This policy does not infer nontrivial containment from a
@@ -50,7 +51,7 @@ by those particular stored binary64 values, including large cancelling
 products; it does not prove that those values approximate a real-world model
 or that earlier numerical set construction was outward rounded.
 
-For native output, `size_budget` counts H inequality plus equality rows, V
+For native output, `size_budget` counts generator factor columns, H inequality plus equality rows, V
 vertex plus ray rows, or one singleton point. Empty and universal forms count
 zero. An unknown output size is rejected because the policy cannot verify the
 budget. No finite error bound is admitted without a separate bound verifier.
@@ -89,6 +90,35 @@ capability results. An H candidate that is not contained receives an
 independent-inclusion rejection. These relations concern the sets defined by
 stored binary64 values. They are not validated enclosures of prior real-model
 computations, an optimizer-family guarantee, or a finite Hausdorff bound.
+
+## Zonotope reduction adapters (APP-03)
+
+`<csl/geometry/zonotope_reduction.hpp>` registers two different methods.
+`make_zero_generator_removal_registration` uses `ConversionPort` to remove
+columns that are identically zero in an unconstrained native zonotope. The
+remaining columns retain their factor IDs and stored coefficients. The physical
+set is equivalent; constrained sources are rejected because a zero physical
+column can still participate in factor equalities.
+
+`make_axis_cover_registration` uses `ApproximationPort` for an outer native
+zonotope. It retains the largest-magnitude source columns that fit with axis
+replacement factors under the requested generator-column budget. Replacement
+factor IDs include the complete request and source identities, so separate
+requests through one registration do not accidentally synchronize. Every omitted
+column contributes its absolute stored coefficient to a coordinate radius;
+each radius is rounded outward from an exact dyadic sum. Retained IDs stay
+unchanged. Removed IDs are relaxed into independent axes, and source factor
+equalities are relaxed. The independent policy compares the immutable native
+handles, exact retained columns and exact per-coordinate radius inequalities;
+a forged provider result cannot establish inclusion by assertion.
+
+The evidence records input, retained and output factor counts, requested
+budget, and the dependency/equality relaxation. These are physical-set claims
+for mathematical sets defined by stored binary64 coefficients. They supply no
+error bound for prior rounded computations, realizable control witness,
+optimizer-family enclosure, or comparison to a historical paper. Intersections
+remain governed by their resulting representation class; these adapters never
+return an intersection as an ordinary zonotope.
 
 ## Objective and plan claims
 
@@ -155,9 +185,9 @@ relation. It is a numerically checked, concrete plan value.
 
 The initial APP-01 contract provided elementary structural enclosures, native H
 constraint containment, and native H/singleton containment. APP-02 adds the
-bounded V/H checks above. Zonotope and ellipsoid adapters still need independent
-claim-specific inclusion verification, output-size accounting, and contract
-tests on analytic inner/outer cases.
+bounded V/H checks above. APP-03 adds native generator-axis outer admission.
+Ellipsoid adapters still need independent claim-specific inclusion verification,
+output-size accounting, and contract tests on analytic inner/outer cases.
 The planned APP-02/03/04 adapters must not reinterpret numerical residuals or
 provider declarations as inclusion proofs. A producer-side proof that a
 declared stage reference is the complete reachable set, independent membership
