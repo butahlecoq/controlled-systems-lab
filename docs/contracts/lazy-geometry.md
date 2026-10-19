@@ -33,6 +33,10 @@ into source coordinates; independent sums add child support values. Finite
 answers include a maximizing point. Empty and unbounded answers remain
 distinct. The selected leaf provider is consulted for native V leaves. The
 result retains the query identity, input ID and numerical evidence limit.
+Affine direction products that underflow to zero are refused. The native V
+ray classification is checked against exact signs of the stored binary64
+direction and ray coordinates; disagreement with the selected leaf provider
+is refused rather than presented as finite support.
 
 `sample_support` evaluates a finite direction list against a prepared lazy
 support provider. Its `SampleCoverage::directions_only` label means precisely

@@ -84,6 +84,13 @@ GrowthResult estimate_node(const SetHandle& handle, GrowthCache& cache) {
     if (const auto* projection = std::get_if<Projection>(&operation)) {
         auto result = estimate_node(projection->input, cache);
         if (const auto* growth = std::get_if<RepresentationGrowth>(&result)) {
+            if (projection->coordinates.empty()) {
+                auto collapsed = *growth;
+                collapsed.estimated_vertices = growth->estimated_vertices ? 1 : 0;
+                collapsed.estimated_rays = 0;
+                cache.emplace(handle.payload.get(), collapsed);
+                return collapsed;
+            }
             std::size_t cells;
             if (!multiply(growth->estimated_vertices, handle.metadata.dimension, cells) ||
                 !multiply(growth->estimated_rays, handle.metadata.dimension, cells))
@@ -227,6 +234,11 @@ RowResult evaluate_node(const SetHandle& handle, const ExecutionContext& context
         auto source = evaluate_node(projection->input, context, cache);
         if (!std::holds_alternative<Rows>(source)) return source;
         const auto& rows = std::get<Rows>(source);
+        if (projection->coordinates.empty()) {
+            Rows result{{rows.vertices.rows ? 1u : 0u, 0, {}}, {0, 0, {}}};
+            cache.emplace(handle.payload.get(), result);
+            return result;
+        }
         Rows result{{rows.vertices.rows, projection->coordinates.size(),
                         Vector(rows.vertices.rows * projection->coordinates.size())},
                     {rows.rays.rows, projection->coordinates.size(),

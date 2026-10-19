@@ -8,6 +8,7 @@
 #include <csl/sets/data.hpp>
 
 #include <iostream>
+#include <limits>
 #include <stop_token>
 
 using namespace csl;
@@ -259,6 +260,22 @@ TEST_CASE("affine ray support distinguishes finite and unbounded directions") {
     CHECK(native.rays(0, 0) == -1.0);
 }
 
+TEST_CASE("affine support refuses a direction product that underflows to zero") {
+    const auto ray = take(sets::make_v({{"tiny-direction-ray"}, 1, {}},
+        {take(numeric::snapshot(Matrix{1, 1, {0}})),
+         take(numeric::snapshot(Matrix{1, 1, {1}}))})).as_handle();
+    const double tiny = std::numeric_limits<double>::min();
+    OperationRequest request{{{"p"}, {"tiny-affine"}, {"tiny-image"}},
+        {"csl.geometry.lazy-expression"}, AffineImage{ray, {1, 1, {tiny}}, {0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto expression = take<OperationResult>(create(request)).output;
+    const auto answer = support(expression, {tiny}, "tiny-support");
+    REQUIRE(std::holds_alternative<Unsupported>(answer));
+    const auto& diagnostics = std::get<Unsupported>(answer).diagnostics;
+    REQUIRE(diagnostics.size() == 1);
+    CHECK(diagnostics[0].field == "lazy.direction");
+}
+
 TEST_CASE("empty expression support stays empty and a cancelled materialization publishes nothing") {
     const auto empty = take(sets::make_empty({{"empty"}, 1, {}})).as_handle();
     OperationRequest request{{{"p"}, {"empty-image"}, {"empty-lazy"}},
@@ -321,4 +338,29 @@ TEST_CASE("materialization wrapper rejects a provider with a different identity"
     const auto& diagnostics = std::get<Unsupported>(cause).diagnostics;
     REQUIRE(diagnostics.size() == 1);
     CHECK(diagnostics[0].field == "lazy.provider");
+}
+
+TEST_CASE("zero-coordinate projection materializes the nonempty singleton") {
+    OperationRequest projection{{{"p"}, {"zero-projection"}, {"zero-lazy"}},
+        {"csl.geometry.lazy-expression"}, Projection{square(), {}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto expression = take<OperationResult>(create(projection)).output;
+    Registry<ConversionPort> registry;
+    auto entry = geometry::lazy::make_materializer({4, 0});
+    const Method method{entry.identity.id, entry.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
+    Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.v"};
+    requirements.output.relation = SetRelation::equivalent;
+    auto provider = take(prepare_provider(select_provider(registry, method, requirements)));
+    ConversionRequest request{{{"p"}, {"zero-materialization"}, {"zero-v"}},
+        expression, {"csl.polyhedron.v"}, Assurance::numerical};
+    const auto result = alternative<geometry::lazy::MaterializationResult>(
+        geometry::lazy::materialize_expression(request, {4, 0}, provider, {}));
+    CHECK(result.growth.estimated_vertices == 1);
+    CHECK(result.growth.realized_vertices == 1);
+    const auto native = take(sets::from_handle(result.result.output)).representation();
+    const auto vertices = std::get<sets::VRepresentation>(native).vertices;
+    CHECK(vertices.rows() == 1);
+    CHECK(vertices.cols() == 0);
 }

@@ -53,6 +53,7 @@ install(FILES docs/contracts/quickhull-2d.md DESTINATION ${CMAKE_INSTALL_DATADIR
 install(FILES docs/contracts/bounded-hull-checker.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
+install(FILES docs/contracts/lazy-geometry.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/approximation.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/generator-sets.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 

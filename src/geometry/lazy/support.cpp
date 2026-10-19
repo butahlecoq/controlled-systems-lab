@@ -1,5 +1,9 @@
 #include <csl/geometry/lazy.hpp>
 
+#include "../exact_dyadic.hpp"
+
+#include <csl/sets/data.hpp>
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -52,6 +56,26 @@ struct CacheHash {
 };
 using Cache = std::unordered_map<CacheKey, SupportResult, CacheHash>;
 
+std::variant<bool, Diagnostics> has_positive_ray(const SetHandle& input, const Vector& direction) {
+    auto imported = sets::from_handle(input);
+    if (const auto* failure = std::get_if<Diagnostic>(&imported)) return Diagnostics{*failure};
+    const auto native = std::get<sets::SetData>(std::move(imported)).representation();
+    if (std::holds_alternative<sets::EmptyRepresentation>(native)) return false;
+    const auto* v = std::get_if<sets::VRepresentation>(&native);
+    if (!v) return error("lazy.leaf", "Lazy support requires native V or empty leaves.");
+    if (v->vertices.rows() == 0) return false;
+    for (std::size_t row = 0; row < v->rays.rows(); ++row) {
+        detail::exact_detail::Integer dot;
+        for (std::size_t column = 0; column < direction.size(); ++column)
+            if (!detail::exact_detail::add_product(dot,
+                    detail::exact_detail::decode(direction[column]),
+                    detail::exact_detail::decode(v->rays(row, column))))
+                return error("lazy.ray", "Exact stored-binary64 ray sign exceeded the checked arithmetic range.");
+        if (!detail::exact_detail::is_zero(dot) && !dot.negative) return true;
+    }
+    return false;
+}
+
 Answer evaluate_node(const SetHandle& input, const Vector& direction,
         const GeometryRequestIdentity& parent, const std::string& path,
         const registry::PreparedProvider<registry::GeometryPort>& leaf_provider,
@@ -68,7 +92,14 @@ Answer evaluate_node(const SetHandle& input, const Vector& direction,
             return Unsupported{rejected->diagnostics};
         auto prepared = std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(admitted));
         auto outcome = std::get<0>(prepared.create())->run(context);
-        if (const auto* value = std::get_if<SupportResult>(&outcome)) return *value;
+        if (const auto* value = std::get_if<SupportResult>(&outcome)) {
+            auto ray = has_positive_ray(input, direction);
+            if (const auto* failure = std::get_if<Diagnostics>(&ray)) return Unsupported{*failure};
+            if (std::get<bool>(ray) != std::holds_alternative<UnboundedSupport>(value->value))
+                return Unsupported{error("lazy.ray", "Leaf support disagrees with exact stored-binary64 ray sign.",
+                    DiagnosticCode::evidence_mismatch)};
+            return *value;
+        }
         if (const auto* stop_result = std::get_if<OperationStopped>(&outcome)) return *stop_result;
         if (const auto* rejected = std::get_if<Unsupported>(&outcome)) return *rejected;
         return Unsupported{error("lazy.leaf_result", "Selected leaf provider returned a non-support result.",
@@ -83,8 +114,13 @@ Answer evaluate_node(const SetHandle& input, const Vector& direction,
     if (const auto* affine = std::get_if<AffineImage>(&operation)) {
         Vector transformed(affine->map.cols);
         for (std::size_t column = 0; column < affine->map.cols; ++column)
-            for (std::size_t row = 0; row < affine->map.rows; ++row)
-                transformed[column] += direction[row] * affine->map.values[row * affine->map.cols + column];
+            for (std::size_t row = 0; row < affine->map.rows; ++row) {
+                const double coefficient = affine->map.values[row * affine->map.cols + column];
+                const double product = direction[row] * coefficient;
+                if (direction[row] != 0.0 && coefficient != 0.0 && product == 0.0)
+                    return Unsupported{error("lazy.direction", "Affine direction product underflowed to zero.")};
+                transformed[column] += product;
+            }
         if (!finite(transformed)) return Unsupported{error("lazy.direction", "Transformed direction is nonfinite.")};
         auto child = evaluate_node(affine->input, transformed, parent, path + "0", leaf_provider, context, cache);
         if (const auto* result = std::get_if<SupportResult>(&child)) {
