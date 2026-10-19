@@ -142,6 +142,24 @@ speedup, source-mapped limiter, finite approximation error bound, validated
 prior rounding, MATLAB or ET comparison is supported. Independent saved-result
 review, main-only Pages deployment and live-byte verification remain gates.
 
+## EXT-05 continuous affine discretization
+
+Issue [EXT-05 #54](https://github.com/butahlecoq/controlled-systems-lab/issues/54)
+has a saved [two-state double-integrator bundle](../../reports/algorithm-results/ext05-discretization-e86c11adbd999b2d/)
+from frozen source `c1125dc393c84015a289dbb97c3bfc5f8b225673`.
+The public adapter integrates two unequal physical intervals under zero-order
+hold. Each call checks independent analytic transition entries and the full
+`(0,0) → (1,2) → (3,0)` state trajectory. The capture retains clean source,
+build, host and executable receipts, an excluded 100-call warmup and seven
+measured 100-call batches. All 700 measured calls passed their literals with
+zero observed failures. Batch duration includes fixture construction,
+conversion, snapshot, two state steps and checks; it excludes CSV output and
+rendering. These are descriptive single-adapter observations on one host, with
+no comparator, speedup or source-mapped limiter. The RK4 step-doubling local
+estimate is not a certified global error bound. The labelled 2D example is
+rendered from the same saved record. Independent saved-result review, main-only
+deployment and live-byte verification remain publication gates.
+
 ## EXP-04 independent nonlinear plant replay
 
 Issue [EXP-04 #56](https://github.com/butahlecoq/controlled-systems-lab/issues/56)
