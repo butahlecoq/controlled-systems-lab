@@ -226,6 +226,20 @@ The seven batches are descriptive single-adapter observations. They have no
 comparator, speedup, or global-optimality certificate. Main-only deployment
 and live URL byte verification are separate publication gates.
 
+## Issue 4 candidate Volterra enclosure
+
+The [saved candidate certificate](../../reports/algorithm-results/issue4-volterra-4cb35c7e9efbf2e8/)
+uses frozen checker source `9286b5ffa9313650ceea0fc033c1410395db22fe`.
+It records outward-rounded integer boxes for all 60 stages and a labelled 2D
+terminal-error illustration. Under identical control histories in the
+candidate's control-only corrected-coordinate recurrences, the terminal
+`L∞` difference is at most `11.384829795848264`. This is an analytic
+certificate for the stated discrete candidate, not a measured algorithm
+report or a reconstruction of L05 Table 1. It makes no runtime claim. The
+[research note](../research/issue4-volterra-enclosure.md) gives the derivation
+and historical limits. Independent scientific review, main-only Pages
+deployment and live URL verification remain gates; issue #4 stays open.
+
 ## SYN-04 registered Strategy B T-S02 report
 
 Issue #238 adds separate evidence for PR #237's merged exact constant-objective

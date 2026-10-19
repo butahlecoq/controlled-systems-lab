@@ -1,0 +1,12 @@
+{
+  "files_sha256": {
+    "bounds.csv": "64f3a173ee5d6b4d8d30e69c7acc6bdb947d662fd249c9e13a7552348df335a9",
+    "error-box.svg": "25f4716515c9664bb6951c7744b104ef07d838931af0162d50ebae1f7db14756",
+    "index.html": "ee748055323de74e49cd4e2e1b621024e8ff87c12701e2ed57638885b382d0b3",
+    "records.json": "8adb1f411b31da8d84e4a0ca4f8ea2b4c4b260e3a245d64c1d06ca5fc05edd8d"
+  },
+  "renderer_sha256": "4a4a55869d2c26a05adfa23c93761bcfe8ce714e48876a6a29253e2a7180d24a",
+  "report_id": "issue4-volterra-4cb35c7e9efbf2e8",
+  "schema": "issue4-volterra-report-v1",
+  "source_commit": "9286b5ffa9313650ceea0fc033c1410395db22fe"
+}
