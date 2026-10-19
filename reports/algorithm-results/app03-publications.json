@@ -1,13 +1,13 @@
 {
   "reports": [
     {
-      "manifest_sha256": "557f351f94f6f56f44b8227eacfb3c140b87fffcc8137d20d5b6a2ab8e124482",
-      "renderer_sha256": "d84e0f97156c2cca8ebac753bf1c1dd7de642d175b984ab97de9a20daf4d4790",
+      "manifest_sha256": "1690bad07b4c0811ae3fa6ed2a00415a7da8bd47da92aa065012cb9fda644de4",
+      "renderer_sha256": "c0bcc83093d3e1e2d4faf3d05c5b9f797a995d1ea4d66702960e97057024adf0",
       "report_id": "app03-zonotope-4522855018fa9b0b",
       "schema": "csl.app03-zonotope-reduction/1",
       "source_commit": "e105a86b8e2ab7d09b1e7042fc5f0d5bc0ce5c40",
-      "stager_sha256": "2ccd35c389eeb0e97e9feb12a9582c5e07eaa54577533065c6772b6cd79e4fb0",
-      "zip_sha256": "4daaa9f0f3e9f6704cfb6a5ffc1e7e02d398df24b2b82999c3dff7cd3b00f4b1"
+      "stager_sha256": "419fcee7e19053d7aa5843f3834630ceaa1254d9c3547d1b4bddaf0753c87b18",
+      "zip_sha256": "8a8b790e0e13ab53f557d1500886ab26ac5fe06a2f06defff808c4ad71ca1504"
     }
   ],
   "schema": "csl.app03-publications/1"
