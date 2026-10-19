@@ -341,6 +341,11 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectT
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
+    const auto preflight=model::preflight_hybrid_path_relations(system,request,paths,
+        relation_limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&preflight)) return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
     return build_hybrid_portfolio_programs_for_paths(adapter,system,request,
         std::move(problem),paths,relation_limits,policy,cancellation);
 }
@@ -381,6 +386,11 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     if(paths.empty())
         return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
             "No allowed hybrid path exists for the requested verifier plan"});
+    const auto relation_preflight=model::preflight_hybrid_path_relations(system,request,paths,
+        relation_limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&relation_preflight)) return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&relation_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&relation_preflight)) return *stopped;
     const auto admission=verifier.preflight(system,request,paths,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;

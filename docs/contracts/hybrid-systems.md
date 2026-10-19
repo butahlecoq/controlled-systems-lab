@@ -162,16 +162,17 @@ any candidate face's solver-provider provenance, to that path's verification
 record. The report carries per-path feasibility, objective, and continuous-
 coverage statuses, but it is inspection data and cannot publish a
 `synthesis::OptimalFamily`.
-When a verifier is requested during construction, use
-`build_hybrid_portfolio_programs_with_verifier`. It enumerates the complete
-path inventory and calls the verifier adapter's `preflight` before dispatching
-the direct-trajectory adapter, so an unsupported bounded-verifier domain is
-rejected before branch relations are composed. The built-in singleton and
-scalar interval verifiers check each enumerated path; a custom bounded verifier
-must implement preflight, and the default implementation fails closed. This
-domain check supplements later relation, candidate, and report validation. The
-lower-level program builder remains available when no family-verifier plan is
-requested.
+Portfolio construction enumerates the complete path inventory and runs a
+structural relation preflight for every path before dispatching the
+direct-trajectory adapter. Unsupported set representations and joint variable,
+row, or matrix-element limits are reported with the affected path and stage,
+before any branch relation is constructed. When a verifier is requested during
+construction, use `build_hybrid_portfolio_programs_with_verifier`; after the
+relation preflight it also calls the verifier adapter's `preflight`. The built-in
+singleton and scalar interval verifiers check each enumerated path; a custom
+bounded verifier must implement preflight, and the default implementation fails
+closed. These admission checks supplement later relation, candidate, and report
+validation.
 `ExactSingletonHybridFamilyVerifier` independently enumerates edge paths and
 reconstructs trajectories using checked integer arithmetic. It supports only
 integral initial states, singleton controls, singleton-representation resets,
@@ -273,10 +274,11 @@ creating a provider workspace or running an algorithm:
    evidence as complete.
 
 The current implementation does not yet satisfy this full admission contract.
-The combined verified builder preflights the declared verifier domain before
-branch-program construction, while later checks still validate the produced
-relations and reports. Complete preflight of every relation/provider operation
-and general continuous-family support remain EXT-07 acceptance work.
+Portfolio builders preflight the complete enumerated path set for supported
+direct joint-H representations and relation resource limits before branch
+construction. The verified builder additionally preflights the verifier domain.
+Other provider operations, terminal-policy coverage, and general
+continuous-family support remain EXT-07 acceptance work.
 
 The initial profile does not infer support from the presence of lower-level
 types. It rejects, before workspace creation, nonempty temporal couplings until
@@ -325,7 +327,7 @@ single-parameter scalar interval profile described above. No compiled verifier
 covers multiple free continuous parameters or general continuous polytope
 families. These verifier domains reject unsupported input when verification
 runs; `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
-verifier domains before building branch programs. Broader provider-operation
+verifier domains before building branch programs. General provider-operation
 admission and multiple-parameter verifier coverage remain incomplete.
 
 ## Independent test oracle requirements

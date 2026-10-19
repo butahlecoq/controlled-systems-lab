@@ -389,6 +389,17 @@ SetHandle interval(std::string id,double lower,double upper) {
     return std::get<sets::SetData>(std::move(data)).as_handle();
 }
 
+SetHandle vertex_guard(std::string id) {
+    const auto vertices=numeric::snapshot(Matrix{1,1,{0}});
+    const auto rays=numeric::snapshot(Matrix{0,1,{}});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rays));
+    auto data=sets::make_v({SetId{std::move(id)},1,{"guard-coordinate"}},
+        {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
 SetHandle affine_reset() {
     auto inequalities=numeric::snapshot(Matrix{0,3,{}});
     auto upper=numeric::snapshot_vector(Vector{});
@@ -750,6 +761,27 @@ TEST_CASE("verifier preflight rejects an unsupported domain before relation cons
     REQUIRE(std::holds_alternative<Diagnostics>(default_rejected));
     CHECK(std::get<Diagnostics>(default_rejected).front().field=="hybrid.verification.preflight");
     CHECK(default_trajectory.calls==0);
+}
+
+TEST_CASE("portfolio preflights every path before constructing the first relation") {
+    auto system=example_system();
+    auto unsupported=system.edges.front();
+    unsupported.id={"unsupported-switch"};
+    unsupported.guards[0]=vertex_guard("unsupported-portfolio-guard");
+    system.edges.push_back(std::move(unsupported));
+
+    RejectingTrajectoryAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs(trajectory,system,example_request(),
+        {"portfolio-preflight"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+    CHECK(std::get<model::HybridPathCompositionFailureReport>(result).path.edges[0].value==
+        "unsupported-switch");
+    CHECK(std::get<model::HybridPathCompositionFailureReport>(result).failure.index()==0);
+    CHECK(std::get<Diagnostic>(std::get<model::HybridPathCompositionFailureReport>(result).failure).field==
+        "hybrid.guard.representation");
+    CHECK(std::get<Diagnostic>(std::get<model::HybridPathCompositionFailureReport>(result).failure).
+        explanation.find("stage 0 edge unsupported-switch")!=std::string::npos);
+    CHECK(trajectory.calls==0);
 }
 
 TEST_CASE("hybrid family verification adapter receives the exhaustive path inventory") {
