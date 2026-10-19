@@ -146,7 +146,17 @@ configured limits and ordered operation trace. Its default implementation,
 `JointHReachabilityAdapter`, currently wraps the same full joint-H composer; it
 does not project intermediate coordinates or merge paths. This provides a
 replaceable reachability contract, but not yet an independent projected-set
-reachability algorithm. The direct-trajectory API is replaceable through
+reachability algorithm. Each reachability adapter must preflight its supported
+operations and limits for the fixed path before the wrapper queries capabilities
+or starts composition. The default preflight fails closed; the built-in joint-H
+adapter uses the structural set-representation and joint-relation-limit checks.
+Built-in joint-H structural failures retain path and stage context. The
+reachability and family-verification preflight hooks have default
+implementations, so derived adapters remain source compatible, though a
+reachability adapter must override the fail-closed default to be usable. These
+public virtual additions change adapter vtables; downstream prebuilt adapters
+must be rebuilt. CSL does not promise a stable C++ binary/plugin ABI.
+The direct-trajectory API is replaceable through
 `HybridDirectTrajectoryAdapter`; its default implementation,
 `JointHDirectTrajectoryAdapter`, builds a branch-labelled joint H relation and
 optimization program. Each direct adapter declares whether it preserves the
