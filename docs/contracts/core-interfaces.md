@@ -303,3 +303,14 @@ the existing accounting-only contract; allocation failure returns a query resour
 limit. Unsupported families/directions and known provider capabilities reject before
 solving. Generic representations, singleton proofs and validated queries are outside
 this slice.
+
+## Directional ellipsoid representation
+
+The immutable native `csl.ellipsoid.directional2d` payload stores a planar
+center, independent orientation rows, projected bounds and radii. Import
+validates its `SetHandle` envelope. The approximation policy admits an outer
+relation from a bounded native planar V set only after exact stored-binary64
+vertex checks. A finite family preserves separate reviewed members and means
+intersection for outer members or union for inner members. The complete public
+contract and supported input class are in
+[ellipsoidal approximation](ellipsoidal-approximation.md).

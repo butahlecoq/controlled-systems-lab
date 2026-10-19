@@ -1,0 +1,12 @@
+{
+  "architecture": "AMD64",
+  "collected_utc": "2026-10-19T11:47:53.406980+00:00",
+  "host": "DESKTOP-S9O3F6S",
+  "logical_processors": 12,
+  "os": "Windows-11-10.0.22631-SP0",
+  "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+  "python": "3.13.5",
+  "source_commit": "5c11288e436f41ae832ab6ac89e180f6cf00a43d",
+  "source_status": [],
+  "source_tree": "f6d932bb4e4494f393095449bcf0ecc82b5bdd5a"
+}

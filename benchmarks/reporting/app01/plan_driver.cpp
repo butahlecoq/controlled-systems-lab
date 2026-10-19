@@ -146,6 +146,7 @@ const char* basis(const PlanCheck& report) {
     case StructuralBasis::v_h_containment:return "v_h_containment";
     case StructuralBasis::h_v_containment:return "h_v_containment";
     case StructuralBasis::generator_axis_cover:return "generator_axis_cover";
+    case StructuralBasis::v_ellipsoid_containment:return "v_ellipsoid_containment";
     }
     throw std::logic_error("unknown basis");
 }

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 500" role="img" aria-labelledby="title desc">
+<title id="title">Two directional ellipsoids enclosing a square</title>
+<desc id="desc">The square from minus one to one on both axes sits inside an axis circle of radius square root of two and a diagonal-orientation circle of radius two.</desc>
+<rect width="840" height="500" fill="#16161e"/>
+<path d="M 280 250 H 765 M 500 35 V 465" stroke="#6e6a86" stroke-width="1"/>
+<circle cx="500" cy="250" r="200.00000000" fill="none" stroke="#9ccfd8" stroke-width="3" stroke-dasharray="8 5"/>
+<circle cx="500" cy="250" r="141.42135624" fill="none" stroke="#c4a7e7" stroke-width="3"/>
+<polygon points="400,350 600,350 600,150 400,150" fill="#f6c177" fill-opacity=".18" stroke="#f6c177" stroke-width="3"/>
+<circle cx="400" cy="350" r="5" fill="#f6c177"/><circle cx="600" cy="350" r="5" fill="#f6c177"/><circle cx="600" cy="150" r="5" fill="#f6c177"/><circle cx="400" cy="150" r="5" fill="#f6c177"/>
+<g fill="#e0def4" font-family="sans-serif" font-size="15"><text x="770" y="255">x</text><text x="505" y="30">y</text>
+<text x="20" y="30">APP-04: stored binary64 square and outer ellipsoids</text>
+<text x="25" y="390" fill="#f6c177">Square vertices (±1, ±1)</text>
+<text x="25" y="420" fill="#c4a7e7">Axis orientation: radius √2</text>
+<text x="25" y="450" fill="#9ccfd8">Diagonal orientation: radius 2</text></g>
+</svg>

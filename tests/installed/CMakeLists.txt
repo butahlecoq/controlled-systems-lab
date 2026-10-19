@@ -29,6 +29,13 @@ add_executable(installed_box_parallelotope_client box_parallelotope_client.cpp)
 target_link_libraries(installed_box_parallelotope_client PRIVATE CSL::approximation)
 set_target_properties(installed_box_parallelotope_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_box_parallelotope_client COMMAND installed_box_parallelotope_client)
+
+add_executable(installed_ellipsoidal_client ellipsoidal_client.cpp)
+target_link_libraries(installed_ellipsoidal_client PRIVATE CSL::approximation)
+set_target_properties(installed_ellipsoidal_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_ellipsoidal_client COMMAND installed_ellipsoidal_client)
+set_tests_properties(installed_ellipsoidal_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed ellipsoidal client: two reviewed outer members passed")
 set_tests_properties(installed_box_parallelotope_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed box/parallelotope client: rotated diamond bounds passed")
 

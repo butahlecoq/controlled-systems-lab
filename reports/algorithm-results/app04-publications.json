@@ -1,0 +1,14 @@
+{
+  "reports": [
+    {
+      "manifest_sha256": "f6c23288c3325b260b6cfc797bd0c93f28d705f43d7b802d49cc69bddcc9f1f8",
+      "renderer_sha256": "a71856b751f1f14a0758ca03621bda5981d79d5589007c9adbefdd1a96139c0d",
+      "report_id": "app04-ellipsoid-fd302c34092f8b19",
+      "schema": "csl.app04-directional-ellipsoid/1",
+      "source_commit": "5c11288e436f41ae832ab6ac89e180f6cf00a43d",
+      "stager_sha256": "b1667e0188d6c10cc9ca1cc882f0905a3dd2746485d977b6837732f0b5cfd0f0",
+      "zip_sha256": "6b8e5599db4c7f1c16641d2c5cce1e82e3929263645e79a7b107ab878ebd22bf"
+    }
+  ],
+  "schema": "csl.app04-publications/1"
+}
