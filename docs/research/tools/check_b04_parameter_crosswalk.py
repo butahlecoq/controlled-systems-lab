@@ -73,6 +73,10 @@ def audit():
     kernel_slope = tuple(rational(kernel["c1"]) * x for x in kernel_derivative)
     displayed_initial = tuple(rational(historical["problem"]["initial_state"][i]) for i in (0, 2))
     displayed_b = tuple(rational(historical["problem"]["dynamics"]["B"][i][0]) for i in (0, 2))
+    nominal_flow, _ = flow_and_slope(printed_law, Fraction(0))
+    linear_initial_from_equation_1_4 = tuple(
+        flow + coefficient * delta_initial for flow, coefficient in zip(nominal_flow, displayed_b)
+    )
     saved_initial = tuple(rational(saved["model_derivation"]["x0"][i]) for i in (0, 2))
     a01_b = tuple(rational(saved["model_derivation"]["B_exact_expressions"][i]) for i in (0, 2))
 
@@ -80,6 +84,8 @@ def audit():
         "printed_nonlinear_initial": [str(x) for x in printed_initial],
         "displayed_linear_initial": [str(x) for x in displayed_initial],
         "printed_nonlinear_initial_matches_displayed": printed_initial == displayed_initial,
+        "linear_initial_from_equation_1_4": [str(x) for x in linear_initial_from_equation_1_4],
+        "equation_1_4_matches_displayed_linear_initial": linear_initial_from_equation_1_4 == displayed_initial,
         "kernel_nonlinear_initial": [str(x) for x in kernel_initial],
         "saved_initial": [str(x) for x in saved_initial],
         "kernel_initial_minus_saved": [str(a - b) for a, b in zip(kernel_initial, saved_initial)],

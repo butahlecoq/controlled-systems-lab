@@ -34,7 +34,7 @@ The supplied PDF has table/figure placeholders. The [published counterpart, R40]
 
 L16's related adaptive demonstration uses [-1,1], but it is not canonical B04 evidence: its fitted control coefficients differ, and L28's uniform-grid branch has a documented mass-memory defect. Neither those bounds nor its nonlinear coefficients are imported into the historical scenario. The owner subsequently recalled that B04 most likely also used [-1,1]; this is recorded as a provisional hypothesis, while canonical confirmation remains open.
 
-An [exact parameter cross-check](b04-parameter-crosswalk.md) evaluates the article's printed nonlinear flow law at its listed initial mixture perturbation. It does not match the displayed linear initial flows; under direct same-unit incremental control, its reference derivatives also differ from the displayed `B`. The separate saved-run kernel and A01 coefficients agree with each other, but do not identify the missing historical generator or reconcile the article's input convention.
+An [exact parameter cross-check](b04-parameter-crosswalk.md) finds that the article's own linear initialization equation, nominal flows, printed `B` and mixture perturbation predict initial flows different from its displayed `x0`. The printed nonlinear flow law at that perturbation also gives different values, but nonlinear-versus-linear difference alone can reflect linearization error. Under direct same-unit incremental control, its reference derivatives differ from displayed `B`. The separate saved-run kernel and A01 coefficients agree with each other, but do not identify the missing historical generator or reconcile the article's input convention.
 
 ## Exact inconsistency and lower bound
 

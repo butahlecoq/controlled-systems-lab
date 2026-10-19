@@ -12,6 +12,8 @@ class B04ParameterCrosswalkTest(unittest.TestCase):
                          ["3862615640/3169317", "928513375/2112878"])
         self.assertEqual(result["displayed_linear_initial"], ["152113/125", "438787/1000"])
         self.assertFalse(result["printed_nonlinear_initial_matches_displayed"])
+        self.assertEqual(result["linear_initial_from_equation_1_4"], ["90136/75", "11218/25"])
+        self.assertFalse(result["equation_1_4_matches_displayed_linear_initial"])
         self.assertEqual(result["printed_nonlinear_reference_input_slope"],
                          ["1014/55", "-2439/220"])
         self.assertEqual(result["displayed_linear_B_flow_rows"], ["17", "-12"])
