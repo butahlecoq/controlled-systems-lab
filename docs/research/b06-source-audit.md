@@ -4,7 +4,19 @@ Date: 2026-10-19. This audit resolves an OCR ambiguity in the displayed B06 line
 
 ## Source and reading
 
-L09 is registered in the [source inventory](inventory.json) with SHA-256 `bb32b230e600fd0871322768dbf42d181fa7a0a288b97c717659a6448e3b72aa`. The local source matched that hash. PDF p. 11 was inspected visually at the paragraph that reports the final set of program minimax controls.
+L09 is registered in the [source inventory](inventory.json) with SHA-256 `bb32b230e600fd0871322768dbf42d181fa7a0a288b97c717659a6448e3b72aa` (638,778 bytes). The local source matched that hash. Physical PDF pp. 10-12 were inspected visually for the generic disturbance notation, B06 numerical data, reported controls, and nonlinear terminal result.
+
+## Disturbance domain in the numerical example
+
+The general minimax formulation on physical PDF p. 10 writes the disturbance history as `w(·) ∈ W(0,T)`. This defines a symbol for the admissible history set but does not give its values. In the B06 numerical setup on physical PDF p. 11, the article says `w(t) ∈ R²` and prints
+
+```text
+D(t) = [[0.05, 0], [0, 0], [0, -0.04], [0, 0]],  t = 0,…,4.
+```
+
+It supplies no numerical bounds, vertices, or other set description for `W(t)` on the inspected numerical page. The matrix `D(t)` maps disturbance coordinates into the state; it does not constrain those coordinates. Therefore the printed data identify the disturbance channel but do not define the uncertainty set needed to compute a worst-case value. The reported plan count of 3125 enumerates the five control actions over five stages and does not determine the disturbance set.
+
+The earlier general Assumption 1 on physical PDF p. 6 does constrain each `W₁(t)` to be a convex, closed, bounded polyhedron with finitely many vertices. This supplies the set's structural class, but not its numerical bounds or vertices for B06; the numerical setup still does not define the disturbance catalogue used by the reported calculation.
 
 The page defines the available actions as `{1, 0.3, 0, -0.3, -1}` and indexes the five controls by `t = 0, …, 4`. It prints the unique reported linear minimax program sequence as
 
@@ -26,4 +38,4 @@ The linear Table 2 row's displayed center `(29.83, 6.73, 19.87, 5)` has exact sq
 
 The linear finite-action minimax result described on p. 11 reports criterion `10.11`. Table 2 on physical PDF p. 16 (printed p. 6) gives a rounded nonlinear row `(30, 6.03, 20, 4.47)` and criterion `9.049`; the higher-precision nonlinear state is printed in the p. 12 prose above.
 
-The numerical example gives the disturbance matrix and says the disturbance belongs to an admissible set, but the archived text and inspected numerical pages do not supply numeric bounds or vertices for that set. The reported worst-case result therefore remains non-reproducible from the transcribed inputs. The audit resolves the sequence's printed sign/order and its stated use for the nonlinear result, and checks the printed objective values at their displayed centers. It does not supply missing disturbance data, a historical run configuration, or independent validation of either reported optimization/simulation.
+The reported worst-case result therefore remains non-reproducible from the transcribed inputs. The audit resolves the sequence's printed sign/order and its stated use for the nonlinear result, checks the printed objective values at their displayed centers, and records the exact boundary of the disturbance data on the source pages. It does not supply missing disturbance data, a historical run configuration, or independent validation of either reported optimization/simulation.
