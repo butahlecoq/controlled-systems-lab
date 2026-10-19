@@ -1,0 +1,60 @@
+{
+  "source_id": "L09",
+  "source_sha256": "bb32b230e600fd0871322768dbf42d181fa7a0a288b97c717659a6448e3b72aa",
+  "source_bytes": 638778,
+  "scope": "Exact B06 criterion at L09 displayed terminal-coordinate centers",
+  "criterion": "L09 physical PDF p.11; sqrt((30-x1)^2+x2^2+2.25(20-x3)^2+2.25x4^2+(x2-1.5x4)^2)",
+  "coordinates": {
+    "linear_table_center": "physical PDF p.16 (printed p.6), Table 2",
+    "nonlinear_table_center": "physical PDF p.16 (printed p.6), Table 2",
+    "nonlinear_text_center": "physical PDF p.12 prose"
+  },
+  "linear_table_center": {
+    "terminal_coordinates": [
+      "29.83",
+      "6.73",
+      "19.87",
+      "5"
+    ],
+    "reported_criterion": "10.11",
+    "criterion_decimal_places": 2,
+    "criterion_squared_at_center": "4088109/40000",
+    "reported_criterion_squared_interval": [
+      "4084441/40000",
+      "4092529/40000"
+    ],
+    "center_rounds_to_reported_criterion": true
+  },
+  "nonlinear_table_center": {
+    "terminal_coordinates": [
+      "30",
+      "6.03",
+      "20",
+      "4.47"
+    ],
+    "reported_criterion": "9.049",
+    "criterion_decimal_places": 3,
+    "criterion_squared_at_center": "1635471/20000",
+    "reported_criterion_squared_interval": [
+      "327501409/4000000",
+      "327573801/4000000"
+    ],
+    "center_rounds_to_reported_criterion": false
+  },
+  "nonlinear_text_center": {
+    "terminal_coordinates": [
+      "30",
+      "6.0345",
+      "20",
+      "4.4731"
+    ],
+    "reported_criterion": "9.049",
+    "criterion_decimal_places": 3,
+    "criterion_squared_at_center": "16378084179/200000000",
+    "reported_criterion_squared_interval": [
+      "327501409/4000000",
+      "327573801/4000000"
+    ],
+    "center_rounds_to_reported_criterion": true
+  }
+}
