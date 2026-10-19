@@ -13,7 +13,8 @@ import statistics
 import subprocess
 
 SCHEMA = "csl.geo08-lazy-geometry/1"
-FIELDS = ["phase", "repetition", "calls", "status", "verified", "elapsed_ns",
+FIELDS = ["phase", "repetition", "calls", "attempted", "completed",
+          "status", "verified", "elapsed_ns",
           "support", "vertices", "rays"]
 FIXTURE = {"source_id": "geo08-square", "dimension": 2,
            "vertices": [[0, 0], [1, 0], [0, 1], [1, 1]], "rays": [],
@@ -58,9 +59,11 @@ def rows(path: Path, phase: str) -> list[dict]:
     require(len(result) == len(expected), "Raw GEO-08 row count differs")
     for row, (kind, repetition, calls) in zip(result, expected):
         require(None not in row and
-                (row["phase"], row["repetition"], row["calls"], row["status"],
+                (row["phase"], row["repetition"], row["calls"], row["attempted"],
+                 row["completed"], row["status"],
                  row["verified"], row["support"], row["vertices"], row["rays"]) ==
-                (kind, str(repetition), str(calls), "completed", "true", "5", "16", "0"),
+                (kind, str(repetition), str(calls), str(calls), str(calls),
+                 "completed", "true", "5", "16", "0"),
                 "Unverified GEO-08 observation or changed fixture")
         require(re.fullmatch(r"[1-9][0-9]*", row["elapsed_ns"]) is not None,
                 "Missing positive GEO-08 public-call duration")

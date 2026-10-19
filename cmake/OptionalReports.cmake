@@ -22,7 +22,7 @@ endif()
 if(BUILD_TESTING)
 add_test(NAME geo08_report_smoke COMMAND csl_geo08_lazy_report smoke)
 set_tests_properties(geo08_report_smoke PROPERTIES
-  PASS_REGULAR_EXPRESSION "smoke,0,1,completed,true,[0-9]+,5,16,0")
+  PASS_REGULAR_EXPRESSION "smoke,0,1,1,1,completed,true,[0-9]+,5,16,0")
 endif()
 endif()
 

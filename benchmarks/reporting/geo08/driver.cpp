@@ -117,15 +117,20 @@ bool batch(const SetHandle& source, const Providers& selected,
         std::string_view phase, int repetition, int calls) {
     std::chrono::nanoseconds elapsed{};
     bool verified = true;
+    int attempted = 0;
+    int completed = 0;
     for (int call = 0; call < calls; ++call) {
+        ++attempted;
         const auto start = std::chrono::steady_clock::now();
         try { verified = checked_call(source, selected); }
         catch (const std::exception&) { verified = false; }
         const auto end = std::chrono::steady_clock::now();
         elapsed += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
         if (!verified) break;
+        ++completed;
     }
     std::cout << phase << ',' << repetition << ',' << calls << ','
+              << attempted << ',' << completed << ','
               << (verified ? "completed" : "failed") << ','
               << (verified ? "true" : "false") << ',' << elapsed.count() << ','
               << (verified ? "5,16,0" : "unavailable,unavailable,unavailable") << '\n';
@@ -138,7 +143,7 @@ int main(int argc, char** argv) {
             std::string_view(argv[1]) != "measure")) return EXIT_FAILURE;
     const auto selected = providers();
     const auto source = square();
-    std::cout << "phase,repetition,calls,status,verified,elapsed_ns,support,vertices,rays\n";
+    std::cout << "phase,repetition,calls,attempted,completed,status,verified,elapsed_ns,support,vertices,rays\n";
     if (std::string_view(argv[1]) == "smoke")
         return batch(source, selected, "smoke", 0, 1) ? EXIT_SUCCESS : EXIT_FAILURE;
     if (!batch(source, selected, "warmup", 0, 100)) return EXIT_FAILURE;
