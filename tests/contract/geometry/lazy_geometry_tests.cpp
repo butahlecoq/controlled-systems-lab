@@ -8,6 +8,7 @@
 #include <csl/sets/data.hpp>
 
 #include <iostream>
+#include <chrono>
 #include <limits>
 #include <stop_token>
 
@@ -107,6 +108,30 @@ TEST_CASE("lazy affine expression retains its source and copied operands") {
     CHECK(take(sets::from_handle(affine.input)).metadata()->set.dimension == 2);
 }
 
+TEST_CASE("lazy expression rejects forged envelope and validated assurance") {
+    OperationRequest request{{{"p"}, {"forgery-image"}, {"forgery-lazy"}},
+        {"csl.geometry.lazy-expression"},
+        AffineImage{square(), {2, 2, {1, 0, 0, 1}}, {0, 0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto handle = take<OperationResult>(create(request)).output;
+    auto forged = handle;
+    forged.id = {"different-output"};
+    CHECK(std::holds_alternative<Diagnostics>(geometry::lazy::inspect_expression(forged)));
+    forged = handle;
+    forged.metadata.dimension = 3;
+    CHECK(std::holds_alternative<Diagnostics>(geometry::lazy::inspect_expression(forged)));
+    request.assurance = Assurance::validated;
+    Registry<GeometryPort> registry;
+    auto entry = geometry::lazy::make_expression_registration();
+    const Method method{entry.identity.id, entry.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
+    Requirements requirements;
+    requirements.output.representation = {"csl.geometry.lazy-v"};
+    requirements.output.relation = SetRelation::equivalent;
+    const auto provider = take(prepare_provider(select_provider(registry, method, requirements)));
+    CHECK(std::holds_alternative<Rejection>(provider.prepare(request)));
+}
+
 TEST_CASE("lazy support matches a transformed square and its nested projection") {
     const auto source = square();
     OperationRequest affine{{{"p"}, {"affine"}, {"mapped-square"}},
@@ -148,6 +173,35 @@ TEST_CASE("finite support directions remain labelled samples") {
     CHECK(std::get<double>(samples.samples[0].answer.value) == 3.0);
     CHECK(samples.samples[1].direction == Vector{0, 1});
     CHECK(std::get<double>(samples.samples[1].answer.value) == 0.0);
+}
+
+TEST_CASE("lazy support admission checks the selected leaf provider") {
+    OperationRequest expression_request{{{"p"}, {"refused-affine"}, {"refused-lazy"}},
+        {"csl.geometry.lazy-expression"},
+        AffineImage{square(), {2, 2, {1, 0, 0, 1}}, {0, 0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto expression = take<OperationResult>(create(expression_request)).output;
+    Registry<GeometryPort> leaves;
+    auto refusing_leaf = geometry::polyhedral::make_support_registration();
+    refusing_leaf.capabilities = [](const OperationRequest&, const Requirements&) -> Capability {
+        return Diagnostics{{DiagnosticCode::unsupported, "test.leaf", "Leaf provider refuses the query."}};
+    };
+    const Method leaf_method{refusing_leaf.identity.id, refusing_leaf.identity.version};
+    REQUIRE_FALSE(leaves.add(std::move(refusing_leaf)).has_value());
+    const auto leaf_provider = take(prepare_provider(select_provider(leaves, leaf_method)));
+    Registry<GeometryPort> lazy_registry;
+    auto lazy_entry = geometry::lazy::make_support_registration(leaf_provider);
+    const Method lazy_method{lazy_entry.identity.id, lazy_entry.identity.version};
+    REQUIRE_FALSE(lazy_registry.add(std::move(lazy_entry)).has_value());
+    const auto lazy_provider = take(prepare_provider(select_provider(lazy_registry, lazy_method)));
+    OperationRequest query{{{"p"}, {"refused-query"}, {"refused-support"}},
+        {"csl.geometry.lazy-support"}, SupportQuery{expression, {1, 0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto admitted = lazy_provider.prepare(query);
+    REQUIRE(std::holds_alternative<Rejection>(admitted));
+    const auto& diagnostics = std::get<Rejection>(admitted).diagnostics;
+    REQUIRE(diagnostics.size() == 1);
+    CHECK(diagnostics[0].field == "test.leaf");
 }
 
 TEST_CASE("explicit materialization reports V growth and rejects a smaller vertex budget") {
@@ -269,9 +323,13 @@ TEST_CASE("affine support refuses a direction product that underflows to zero") 
         {"csl.geometry.lazy-expression"}, AffineImage{ray, {1, 1, {tiny}}, {0}},
         SetRelation::equivalent, Assurance::numerical};
     const auto expression = take<OperationResult>(create(request)).output;
-    const auto answer = support(expression, {tiny}, "tiny-support");
-    REQUIRE(std::holds_alternative<Unsupported>(answer));
-    const auto& diagnostics = std::get<Unsupported>(answer).diagnostics;
+    auto provider = lazy_support_provider();
+    OperationRequest query{{{"p"}, {"tiny-support"}, {"sampled-support"}},
+        {"csl.geometry.lazy-support"}, SupportQuery{expression, {tiny}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto admitted = provider.prepare(query);
+    REQUIRE(std::holds_alternative<Rejection>(admitted));
+    const auto& diagnostics = std::get<Rejection>(admitted).diagnostics;
     REQUIRE(diagnostics.size() == 1);
     CHECK(diagnostics[0].field == "lazy.direction");
 }
@@ -363,4 +421,52 @@ TEST_CASE("zero-coordinate projection materializes the nonempty singleton") {
     const auto vertices = std::get<sets::VRepresentation>(native).vertices;
     CHECK(vertices.rows() == 1);
     CHECK(vertices.cols() == 0);
+}
+
+TEST_CASE("materialization rejects vertex growth overflow and an expired deadline") {
+    auto source = take(sets::make_v({{"two-points"}, 1, {}},
+        {take(numeric::snapshot(Matrix{2, 1, {0, 1}})),
+         take(numeric::snapshot(Matrix{0, 1, {}}))})).as_handle();
+    for (std::size_t level = 0; level < std::numeric_limits<std::size_t>::digits; ++level) {
+        const auto name = "doubling-" + std::to_string(level);
+        OperationRequest request{{{"p"}, {name}, {name}},
+            {"csl.geometry.lazy-expression"}, MinkowskiSum{source, source},
+            SetRelation::equivalent, Assurance::numerical};
+        source = take<OperationResult>(create(request)).output;
+    }
+    Registry<ConversionPort> registry;
+    auto entry = geometry::lazy::make_materializer({std::numeric_limits<std::size_t>::max(), 0});
+    const Method method{entry.identity.id, entry.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
+    Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.v"};
+    requirements.output.relation = SetRelation::equivalent;
+    const auto provider = take(prepare_provider(select_provider(registry, method, requirements)));
+    ConversionRequest overflow_request{{{"p"}, {"overflow"}, {"overflow-v"}},
+        source, {"csl.polyhedron.v"}, Assurance::numerical};
+    const auto overflow = alternative<geometry::lazy::MaterializationFailure>(
+        geometry::lazy::materialize_expression(overflow_request,
+            {std::numeric_limits<std::size_t>::max(), 0}, provider, {}));
+    REQUIRE(std::holds_alternative<Unsupported>(overflow.cause));
+    REQUIRE_FALSE(std::get<Unsupported>(overflow.cause).diagnostics.empty());
+    CHECK(std::get<Unsupported>(overflow.cause).diagnostics[0].field == "lazy.growth");
+
+    OperationRequest small{{{"p"}, {"deadline-image"}, {"deadline-lazy"}},
+        {"csl.geometry.lazy-expression"},
+        AffineImage{square(), {2, 2, {1, 0, 0, 1}}, {0, 0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto small_handle = take<OperationResult>(create(small)).output;
+    ConversionRequest deadline_request{{{"p"}, {"deadline"}, {"deadline-v"}},
+        small_handle, {"csl.polyhedron.v"}, Assurance::numerical};
+    ExecutionContext expired;
+    expired.deadline = std::chrono::steady_clock::now() - std::chrono::seconds(1);
+    const auto deadline = alternative<geometry::lazy::MaterializationFailure>(
+        geometry::lazy::materialize_expression(deadline_request, {4, 0}, provider, expired));
+    REQUIRE(std::holds_alternative<OperationStopped>(deadline.cause));
+    CHECK(std::get<OperationStopped>(deadline.cause).reason == StopReason::deadline_expired);
+    CHECK(deadline.reference.identity == deadline_request.identity);
+    CHECK(deadline.provider.actual_module == ModuleId{"csl.geometry.lazy-materializer"});
+    CHECK(deadline.lineage.size() == 1);
+    CHECK(deadline.growth.estimated_vertices == 4);
+    CHECK(deadline.growth.realized_vertices == 0);
 }

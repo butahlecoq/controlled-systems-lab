@@ -33,6 +33,9 @@ into source coordinates; independent sums add child support values. Finite
 answers include a maximizing point. Empty and unbounded answers remain
 distinct. The selected leaf provider is consulted for native V leaves. The
 result retains the query identity, input ID and numerical evidence limit.
+Support admission checks each reached leaf query against the caller-selected
+prepared provider before creating a workspace. A provider refusal remains a
+rejection rather than a late partial answer.
 Affine direction products that underflow to zero are refused. The native V
 ray classification is checked against exact signs of the stored binary64
 direction and ray coordinates; disagreement with the selected leaf provider

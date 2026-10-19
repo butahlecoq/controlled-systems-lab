@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cmath>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace csl::geometry::lazy {
@@ -55,6 +56,60 @@ struct CacheHash {
     }
 };
 using Cache = std::unordered_map<CacheKey, SupportResult, CacheHash>;
+
+std::variant<Vector, Diagnostics> affine_direction(const AffineImage& affine, const Vector& direction) {
+    Vector transformed(affine.map.cols);
+    for (std::size_t column = 0; column < affine.map.cols; ++column)
+        for (std::size_t row = 0; row < affine.map.rows; ++row) {
+            const double coefficient = affine.map.values[row * affine.map.cols + column];
+            const double product = direction[row] * coefficient;
+            if (direction[row] != 0.0 && coefficient != 0.0 && product == 0.0)
+                return error("lazy.direction", "Affine direction product underflowed to zero.");
+            transformed[column] += product;
+        }
+    if (!finite(transformed)) return error("lazy.direction", "Transformed direction is nonfinite.");
+    return transformed;
+}
+
+Diagnostics preflight_node(const SetHandle& input, const Vector& direction,
+        const GeometryRequestIdentity& parent, const std::string& path,
+        const registry::PreparedProvider<registry::GeometryPort>& leaf_provider,
+        std::unordered_set<CacheKey, CacheHash>& seen) {
+    if (input.metadata.representation.value != "csl.geometry.lazy-v") {
+        const auto& selected = leaf_provider.provenance();
+        if (!selected.actual)
+            return error("lazy.leaf_provider", "Selected leaf support identity is unavailable.");
+        OperationRequest request{child_identity(parent, path), selected.actual->id,
+            SupportQuery{input, direction}, SetRelation::equivalent, Assurance::numerical};
+        auto admitted = leaf_provider.prepare(request);
+        if (const auto* rejected = std::get_if<registry::Rejection>(&admitted))
+            return rejected->diagnostics;
+        return {};
+    }
+    auto inspected = inspect_expression(input);
+    if (const auto* failure = std::get_if<Diagnostics>(&inspected)) return *failure;
+    if (!seen.insert(CacheKey{input.payload.get(), direction}).second) return {};
+    const auto& operation = std::get<ExpressionDescription>(inspected).operation;
+    if (const auto* affine = std::get_if<AffineImage>(&operation)) {
+        auto transformed = affine_direction(*affine, direction);
+        if (const auto* failure = std::get_if<Diagnostics>(&transformed)) return *failure;
+        return preflight_node(affine->input, std::get<Vector>(std::move(transformed)),
+            parent, path + "0", leaf_provider, seen);
+    }
+    if (const auto* projection = std::get_if<Projection>(&operation)) {
+        Vector embedded(projection->input.metadata.dimension);
+        for (std::size_t column = 0; column < direction.size(); ++column)
+            embedded[projection->coordinates[column]] = direction[column];
+        return preflight_node(projection->input, embedded, parent, path + "0", leaf_provider, seen);
+    }
+    if (const auto* sum = std::get_if<MinkowskiSum>(&operation)) {
+        if (auto failures = preflight_node(sum->left, direction, parent, path + "0", leaf_provider, seen);
+                !failures.empty()) return failures;
+        return preflight_node(sum->right, direction, parent, path + "1", leaf_provider, seen);
+    }
+    return error("lazy.operation", "Expression payload contains an unsupported operation.",
+        DiagnosticCode::evidence_mismatch);
+}
 
 std::variant<bool, Diagnostics> has_positive_ray(const SetHandle& input, const Vector& direction) {
     auto imported = sets::from_handle(input);
@@ -112,17 +167,10 @@ Answer evaluate_node(const SetHandle& input, const Vector& direction,
     if (const auto found = cache.find(key); found != cache.end()) return found->second;
     const auto& operation = std::get<ExpressionDescription>(inspected).operation;
     if (const auto* affine = std::get_if<AffineImage>(&operation)) {
-        Vector transformed(affine->map.cols);
-        for (std::size_t column = 0; column < affine->map.cols; ++column)
-            for (std::size_t row = 0; row < affine->map.rows; ++row) {
-                const double coefficient = affine->map.values[row * affine->map.cols + column];
-                const double product = direction[row] * coefficient;
-                if (direction[row] != 0.0 && coefficient != 0.0 && product == 0.0)
-                    return Unsupported{error("lazy.direction", "Affine direction product underflowed to zero.")};
-                transformed[column] += product;
-            }
-        if (!finite(transformed)) return Unsupported{error("lazy.direction", "Transformed direction is nonfinite.")};
-        auto child = evaluate_node(affine->input, transformed, parent, path + "0", leaf_provider, context, cache);
+        auto transformed = affine_direction(*affine, direction);
+        if (const auto* failure = std::get_if<Diagnostics>(&transformed)) return Unsupported{*failure};
+        auto child = evaluate_node(affine->input, std::get<Vector>(std::move(transformed)),
+            parent, path + "0", leaf_provider, context, cache);
         if (const auto* result = std::get_if<SupportResult>(&child)) {
             if (!std::holds_alternative<double>(result->value)) {
                 cache.emplace(std::move(key), *result);
@@ -206,7 +254,8 @@ Answer evaluate(const SetHandle& input, const Vector& direction,
     return evaluate_node(input, direction, parent, path, leaf_provider, context, cache);
 }
 
-Diagnostics shape(const OperationRequest& request, const registry::Requirements& requirements) {
+Diagnostics shape(const OperationRequest& request, const registry::Requirements& requirements,
+        const registry::PreparedProvider<registry::GeometryPort>& leaf_provider) {
     if (request.identity.problem.value.empty() || request.identity.request.value.empty() ||
         request.identity.ideal_output.value.empty())
         return error("lazy.identity", "Complete support query identity is required.", DiagnosticCode::invalid_input);
@@ -223,7 +272,8 @@ Diagnostics shape(const OperationRequest& request, const registry::Requirements&
         return error("lazy.direction", "Directions must be finite binary64 values.", DiagnosticCode::invalid_input);
     const auto inspected = inspect_expression(query.input);
     if (const auto* failure = std::get_if<Diagnostics>(&inspected)) return *failure;
-    return {};
+    std::unordered_set<CacheKey, CacheHash> seen;
+    return preflight_node(query.input, query.direction, request.identity, "root", leaf_provider, seen);
 }
 
 class Workspace final : public SetOperatorWorkspace {
@@ -234,7 +284,8 @@ public:
 
     OperationOutcome apply(const OperationRequest& request, const ExecutionContext& context) override {
         if (stopped(context)) return stop(context);
-        if (auto failures = shape(request, {}); !failures.empty()) return Unsupported{std::move(failures)};
+        if (auto failures = shape(request, {}, leaf_provider_); !failures.empty())
+            return Unsupported{std::move(failures)};
         const auto& query = std::get<SupportQuery>(request.operation);
         auto answer = evaluate(query.input, query.direction, request.identity, "root", leaf_provider_, context);
         if (const auto* failure = std::get_if<Unsupported>(&answer)) return *failure;
@@ -253,8 +304,9 @@ public:
 registry::Registration<registry::GeometryPort> make_support_registration(
         registry::PreparedProvider<registry::GeometryPort> leaf_support) {
     return {{{module}, "1.0.0"},
-        [](const OperationRequest& request, const registry::Requirements& requirements) -> registry::Capability {
-            if (auto failures = shape(request, requirements); !failures.empty()) return failures;
+        [leaf_support](const OperationRequest& request, const registry::Requirements& requirements)
+                -> registry::Capability {
+            if (auto failures = shape(request, requirements, leaf_support); !failures.empty()) return failures;
             registry::Output output;
             output.relation = SetRelation::equivalent;
             return registry::Offer{output};
