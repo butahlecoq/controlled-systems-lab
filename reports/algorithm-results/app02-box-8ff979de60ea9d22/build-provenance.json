@@ -1,0 +1,17 @@
+{
+  "architecture": "x64",
+  "build_log_sha256": "0e80be7827f6be2215f18e4e866614858154f0d003698a22a9baf298e128ab25",
+  "cmake_cache_sha256": "e740fb3b010f2931549b43b6c164919d7287d2f42db1eee6dd4f2e4103e46641",
+  "cmake_compiler_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+  "cmake_options": {
+    "BUILD_TESTING": "OFF",
+    "CSL_BUILD_APP02_REPORT": "ON",
+    "CSL_ENABLE_HIGHS": "OFF",
+    "CSL_ENABLE_QHULL": "OFF"
+  },
+  "compiler": "MSVC 19.44 / Visual Studio 2022",
+  "configuration": "Release",
+  "configure_log_sha256": "b8172e04be2178106b69a434ec132b6129c2d8add66b3cb3ed586791dbee21bb",
+  "driver_source_sha256": "dc04bff45f56fe6c0533e90df3d35cd0f3833e5c1ef14c3f849425945126afaa",
+  "executable_sha256": "d266071b3968166ef6d1599fcaaa9551a05d1b9c75d9bf239e348149da4e84eb"
+}

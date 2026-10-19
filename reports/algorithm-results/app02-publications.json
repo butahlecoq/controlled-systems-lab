@@ -1,0 +1,14 @@
+{
+  "reports": [
+    {
+      "manifest_sha256": "ed610f4788a071fcd716557cbdef3e6f98804313e52ebf3ec0621d1440c5e01d",
+      "renderer_sha256": "ba32dfa0e4e9b7b42aa293060007730f1d1fe2a5803cb8267596d38a9ca78588",
+      "report_id": "app02-box-8ff979de60ea9d22",
+      "schema": "csl.app02-box-parallelotope/1",
+      "source_commit": "8fecba49e34c37e5e01c40218a8f014a179818fd",
+      "stager_sha256": "d63f67e8496b8cd225f3a4ca78ca274b80ea8553e619fda6473412184a3dd0be",
+      "zip_sha256": "648e60179d05be4217b12897a575f8e666aef66ec72c375f606732cf428dac9c"
+    }
+  ],
+  "schema": "csl.app02-publications/1"
+}
