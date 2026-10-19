@@ -830,6 +830,27 @@ HybridFamilyVerificationCapabilities OneStepScalarIntervalHybridFamilyVerifier::
     return {true,true,true,Assurance::numerical};
 }
 
+HybridFamilyVerificationPreflightResult OneStepScalarIntervalHybridFamilyVerifier::preflight(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::stop_token cancellation) const {
+    if(system.horizon!=1)
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_interval_horizon",
+            "OneStepScalarIntervalHybridFamilyVerifier supports horizon one only"}};
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "One-step scalar verifier admission was cancelled between paths"};
+        const auto branch=evaluate(system,request,path,{},cancellation);
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "One-step scalar verifier admission was cancelled during reconstruction"};
+        if(branch.state==ScalarBranch::State::unsupported)
+            return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_interval_domain",
+                detail::describe_hybrid_path(path)+": "+branch.reason}};
+    }
+    return std::monostate{};
+}
+
 HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify(
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
     std::span<const HybridPathProgram> programs,
@@ -1025,6 +1046,24 @@ HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify
 
 HybridFamilyVerificationCapabilities SingleParameterScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {
     return {true,true,true,Assurance::numerical};
+}
+
+HybridFamilyVerificationPreflightResult SingleParameterScalarIntervalHybridFamilyVerifier::preflight(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::stop_token cancellation) const {
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Single-parameter scalar verifier admission was cancelled between paths"};
+        const auto branch=evaluate_scalar_parameter_path(system,request,path,cancellation);
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Single-parameter scalar verifier admission was cancelled during reconstruction"};
+        if(branch.state==ScalarParameterBranch::State::unsupported)
+            return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_parameter_domain",
+                detail::describe_hybrid_path(path)+": "+branch.reason}};
+    }
+    return std::monostate{};
 }
 
 HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier::verify(
@@ -1272,6 +1311,16 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
 
 HybridFamilyVerificationCapabilities TwoStageScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {
     return SingleParameterScalarIntervalHybridFamilyVerifier{}.capabilities();
+}
+
+HybridFamilyVerificationPreflightResult TwoStageScalarIntervalHybridFamilyVerifier::preflight(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::stop_token cancellation) const {
+    if(system.horizon!=2)
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.two_stage_horizon",
+            "TwoStageScalarIntervalHybridFamilyVerifier requires a two-stage system"}};
+    return SingleParameterScalarIntervalHybridFamilyVerifier{}.preflight(
+        system,request,paths,cancellation);
 }
 
 HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verify(

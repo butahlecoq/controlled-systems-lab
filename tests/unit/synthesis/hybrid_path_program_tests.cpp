@@ -301,6 +301,13 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override {
         return {true,true,true,Assurance::numerical};
     }
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"fixture preflight cancelled"};
+        return std::monostate{};
+    }
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath> paths,
         std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
@@ -328,6 +335,19 @@ public:
         return HybridFamilyVerificationReport{"fixture.hybrid.verifier","1",policy,
             Assurance::numerical,std::move(inventory),std::move(branches),
             global,coverage};
+    }
+};
+
+class DefaultPreflightHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override {
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
+        NumericalPolicy,std::stop_token) const override {
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid.verifier","not used"}};
     }
 };
 
@@ -667,6 +687,69 @@ TEST_CASE("hybrid reachability boundary rejects mismatched assurance and resourc
         else if(corruption==1) CHECK(field=="hybrid.reachability.limits");
         else CHECK(field=="hybrid.adapter.operations");
     }
+}
+
+TEST_CASE("verifier preflight rejects an unsupported domain before relation construction") {
+    OneStepScalarIntervalHybridFamilyVerifier verifier;
+    RejectingTrajectoryAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs_with_verifier(verifier,trajectory,
+        example_system(),example_request(),{"preflight-rejected"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    const auto& admission_error=std::get<Diagnostics>(result).front();
+    CHECK(admission_error.field=="hybrid.verification.scalar_interval_domain");
+    CHECK(admission_error.explanation.find("stage 0 edge switch")!=std::string::npos);
+    CHECK(trajectory.calls==0);
+
+    model::HybridMode source{{"preflight-source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    source.control_sets={interval("preflight-supported-control",0,1)};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"preflight-target"},1,1,{"x"},{"u"}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0}},Matrix{1,0,{}},Vector{0}};
+    target.control_sets={Singleton{{0}}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    const auto inequalities=numeric::snapshot(Matrix{0,2,{}});
+    const auto upper_bounds=numeric::snapshot_vector(Vector{});
+    const auto equalities=numeric::snapshot(Matrix{1,2,{1,-1}});
+    const auto equality_values=numeric::snapshot_vector(Vector{0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(upper_bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(equality_values));
+    const auto identity_data=sets::make_h({{"preflight-identity-reset"},2,{"pre","post"}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper_bounds),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(equality_values)});
+    REQUIRE(std::holds_alternative<sets::SetData>(identity_data));
+    model::HybridSystem supported_system{1,{source,target},
+        {{{"preflight-edge"},{"preflight-source"},{"preflight-target"},
+          {interval("preflight-supported-guard",0,1)},
+          {std::get<sets::SetData>(identity_data).as_handle()}}}};
+    model::HybridRequest supported_request{{{"preflight-source"},{0}},{{"preflight-target"}},
+        {{{"preflight-target"},LinearTerminal{{1},0},"terminal-state","units"}}};
+    const auto accepted=build_hybrid_portfolio_programs_with_verifier(verifier,trajectory,
+        supported_system,supported_request,{"preflight-accepted"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(accepted));
+    CHECK(std::get<Diagnostics>(accepted).front().field=="fixture.hybrid_adapter");
+    CHECK(trajectory.calls==1);
+
+    auto [integral_system,integral_request]=exact_singleton_portfolio();
+    ExactSingletonHybridFamilyVerifier exact_verifier;
+    RejectingTrajectoryAdapter exact_trajectory;
+    const auto exact_accepted=build_hybrid_portfolio_programs_with_verifier(exact_verifier,
+        exact_trajectory,integral_system,integral_request,{"exact-preflight-accepted"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(exact_accepted));
+    CHECK(std::get<Diagnostics>(exact_accepted).front().field=="fixture.hybrid_adapter");
+    CHECK(exact_trajectory.calls==1);
+
+    DefaultPreflightHybridFamilyVerifier default_verifier;
+    RejectingTrajectoryAdapter default_trajectory;
+    const auto default_rejected=build_hybrid_portfolio_programs_with_verifier(
+        default_verifier,default_trajectory,supported_system,supported_request,
+        {"default-preflight-rejected"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(default_rejected));
+    CHECK(std::get<Diagnostics>(default_rejected).front().field=="hybrid.verification.preflight");
+    CHECK(default_trajectory.calls==0);
 }
 
 TEST_CASE("hybrid family verification adapter receives the exhaustive path inventory") {
