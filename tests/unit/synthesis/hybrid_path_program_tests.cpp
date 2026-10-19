@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <string_view>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -2121,6 +2122,115 @@ TEST_CASE("two-stage scalar interval verifier checks tied continuous families in
     REQUIRE(infeasible_record!=disjoint_report.branches.end());
     CHECK(infeasible_record->feasibility==HybridVerificationStatus::unsupported);
     CHECK(infeasible_record->continuous_coverage==HybridVerificationStatus::unsupported);
+}
+
+TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite horizons") {
+    const auto make_reset=[](const std::string& id,double pre,double post,double rhs) {
+        auto inequalities=numeric::snapshot(Matrix{0,2,{}});
+        auto upper=numeric::snapshot_vector(Vector{});
+        auto equalities=numeric::snapshot(Matrix{1,2,{pre,post}});
+        auto values=numeric::snapshot_vector(Vector{rhs});
+        REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+        REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
+        REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+        REQUIRE(std::holds_alternative<numeric::VectorView>(values));
+        auto data=sets::make_h({SetId{id},2,{"pre","post"}},
+            {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
+             std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(values)});
+        REQUIRE(std::holds_alternative<sets::SetData>(data));
+        return std::get<sets::SetData>(std::move(data)).as_handle();
+    };
+    const auto scalar_mode=[](std::string id) {
+        model::HybridMode mode{{std::move(id)},1,1,{"x"},{"u"}};
+        const LinearStage flow{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+        mode.flow=std::vector<LinearStage>{flow,flow,flow};
+        mode.control_sets={interval("multi-horizon-free",0,1),Singleton{{0}},Singleton{{0}}};
+        mode.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+        return mode;
+    };
+    auto start=scalar_mode("start");
+    auto middle=scalar_mode("middle");
+    auto late=scalar_mode("late");
+    auto terminal=scalar_mode("terminal");
+    const auto identity=make_reset("multi-horizon-identity",1,-1,0);
+    const auto constant_zero=make_reset("multi-horizon-zero",0,1,0);
+    const auto constant_one=make_reset("multi-horizon-one",0,1,1);
+    const std::vector<AdmissibleSet> universal_guards(3,UniversalSet{1});
+    const std::vector<SetHandle> unused_resets(3,universal("multi-horizon-unused-reset",2));
+    std::vector<model::HybridTransitionEdge> edges{
+        {{"enter"},{"start"},{"middle"},universal_guards,{identity,unused_resets[1],unused_resets[2]}},
+        {{"continue"},{"middle"},{"late"},universal_guards,{unused_resets[0],identity,unused_resets[2]}},
+        {{"tie-a"},{"late"},{"terminal"},
+            {UniversalSet{1},UniversalSet{1},interval("multi-horizon-guard-a",0,0.5)},
+            {unused_resets[0],unused_resets[1],constant_zero}},
+        {{"tie-b"},{"late"},{"terminal"},
+            {UniversalSet{1},UniversalSet{1},interval("multi-horizon-guard-b",0,1)},
+            {unused_resets[0],unused_resets[1],constant_zero}},
+        {{"worse"},{"late"},{"terminal"},
+            {UniversalSet{1},UniversalSet{1},Singleton{{1}}},
+            {unused_resets[0],unused_resets[1],constant_one}}};
+    model::HybridSystem system{3,{start,middle,late,terminal},std::move(edges)};
+    model::HybridRequest request{{{"start"},{0}},{{"terminal"}},
+        {{{"terminal"},LinearTerminal{{1},0},"terminal-state","units"}}};
+
+    struct OracleEdge { const char* id; double lower; double upper; double cost; };
+    const std::array<OracleEdge,3> oracle{{
+        {"tie-a",0,0.5,0},{"tie-b",0,1,0},{"worse",1,1,1}}};
+    for(const auto& expected:oracle) {
+        CHECK(expected.lower==(std::string_view(expected.id)=="worse"?1:0));
+        CHECK(expected.upper==(std::string_view(expected.id)=="tie-a"?0.5:1));
+        CHECK(expected.cost==(std::string_view(expected.id)=="worse"?1:0));
+    }
+    const auto built=build_hybrid_portfolio_programs(system,request,{"multi-horizon-verifier"},
+        {3,32},{64,1024,16384});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle.size());
+    for(const auto& expected:oracle) {
+        const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+            return program.path.edges.back().value==expected.id;
+        });
+        REQUIRE(found!=programs.end());
+        const auto representation=found->joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& relation=std::get<sets::HRepresentation>(representation);
+        const auto tuple_at=[&](double free_control) {
+            return Vector{0,free_control,free_control,free_control,0,free_control,
+                free_control,0,free_control,expected.cost};
+        };
+        CHECK(satisfies(relation,tuple_at(expected.lower)));
+        CHECK(satisfies(relation,tuple_at(expected.upper)));
+        if(std::string_view(expected.id)=="tie-a")
+            CHECK_FALSE(satisfies(relation,tuple_at(0.75)));
+        if(std::string_view(expected.id)=="worse")
+            CHECK_FALSE(satisfies(relation,tuple_at(0.5)));
+    }
+    std::vector<HybridPathOptimalFaceCandidate> candidates;
+    for(std::size_t i=0;i<2;++i) {
+        const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+            return program.path.edges.back().value==oracle[i].id;
+        });
+        REQUIRE(found!=programs.end());
+        candidates.push_back(exact_candidate(*found,Vector(10,0)));
+    }
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
+        {3,32},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.verifier_id=="csl.hybrid.scalar-single-parameter-interval");
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    for(const auto& expected:oracle) {
+        const auto record=std::find_if(report.branches.begin(),report.branches.end(),[&](const auto& item) {
+            return item.path.edges.back().value==expected.id;
+        });
+        REQUIRE(record!=report.branches.end());
+        CHECK(record->feasibility==HybridVerificationStatus::established);
+        CHECK(record->objective_optimality==(expected.cost==0?HybridVerificationStatus::established:
+            HybridVerificationStatus::refuted));
+        CHECK(record->continuous_coverage==HybridVerificationStatus::established);
+    }
 }
 
 TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects continuous domains") {
