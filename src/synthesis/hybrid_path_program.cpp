@@ -230,8 +230,26 @@ HybridDirectTrajectoryCapabilities JointHDirectTrajectoryAdapter::capabilities()
     return {true,true,true,Assurance::numerical};
 }
 
+HybridReachabilityPreflightResult HybridReachabilityAdapter::preflight(
+    const model::HybridSystem&,const model::HybridRequest&,const model::HybridPath&,
+    model::HybridRelationLimits,std::stop_token cancellation) const {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid reachability preflight was cancelled before adapter admission"};
+    return Diagnostics{{DiagnosticCode::unsupported,"hybrid.reachability.preflight",
+        "Reachability adapter must implement preflight before it can be used"}};
+}
+
 HybridReachabilityCapabilities JointHReachabilityAdapter::capabilities() const noexcept {
     return {true,Assurance::numerical};
+}
+
+HybridReachabilityPreflightResult JointHReachabilityAdapter::preflight(
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    const model::HybridPath& path,model::HybridRelationLimits limits,
+    std::stop_token cancellation) const {
+    return model::preflight_hybrid_path_relations(system,request,
+        std::span<const model::HybridPath>(&path,1),limits,cancellation);
 }
 
 HybridPathReachabilityResult JointHReachabilityAdapter::compose_path(
@@ -253,6 +271,21 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
         return OperationStopped{StopReason::cancelled,"Hybrid reachability was cancelled before profile admission"};
     const auto admission=hybrid_path_admission_errors(system,request,path);
     if(!admission.empty()) return admission;
+    const auto path_preflight=adapter.preflight(system,request,path,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&path_preflight)) {
+        if(failure->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.preflight_path",
+                "Reachability preflight returned a failure report for a different path"});
+        if(!same_limits(failure->limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.preflight_limits",
+                "Reachability preflight failure report lost the configured relation limits"});
+        return *failure;
+    }
+    if(const auto* errors=std::get_if<Diagnostics>(&path_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&path_preflight)) return *stopped;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid reachability was cancelled after adapter preflight"};
     const auto capability=adapter.capabilities();
     if(capability.assurance!=Assurance::numerical)
         return one({DiagnosticCode::unsupported,"hybrid.reachability.assurance",
@@ -260,6 +293,9 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
     if(!capability.retains_branch_labelled_joint_relation)
         return one({DiagnosticCode::unsupported,"hybrid.reachability.branch_relation",
             "Reachability adapter does not declare full branch-labelled joint-relation support"});
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid reachability was cancelled after capability admission"};
     auto result=adapter.compose_path(system,request,path,limits,cancellation);
     if(const auto* reachable=std::get_if<HybridPathReachability>(&result)) {
         if(reachable->path!=path)

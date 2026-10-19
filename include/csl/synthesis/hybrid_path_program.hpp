@@ -38,6 +38,7 @@ struct HybridReachabilityCapabilities {
     bool retains_branch_labelled_joint_relation{};
     Assurance assurance{Assurance::numerical};
 };
+using HybridReachabilityPreflightResult = model::HybridRelationPreflightResult;
 
 // Replaceable reachability boundary for one fixed mode/edge path. The result
 // retains controls and all pre/post-reset coordinates in the joint relation.
@@ -45,6 +46,12 @@ class HybridReachabilityAdapter {
 public:
     virtual ~HybridReachabilityAdapter() = default;
     virtual HybridReachabilityCapabilities capabilities() const noexcept = 0;
+    // Adapters must admit their supported operations and limits before the
+    // wrapper queries capabilities or starts path composition. The default
+    // fails closed for adapters that have not declared an admission plan.
+    virtual HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const;
     virtual HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const = 0;
@@ -55,6 +62,9 @@ public:
 class JointHReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     HybridReachabilityCapabilities capabilities() const noexcept override;
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const override;
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const override;

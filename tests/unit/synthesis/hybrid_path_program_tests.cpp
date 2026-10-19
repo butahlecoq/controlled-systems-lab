@@ -294,7 +294,17 @@ public:
 class RejectingReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     mutable int calls{};
-    HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical}; }
+    mutable int capability_calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
+        const model::HybridRequest& request,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token cancellation) const override {
+        return model::preflight_hybrid_path_relations(system,request,
+            std::span<const model::HybridPath>(&path,1),limits,cancellation);
+    }
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&,const model::HybridPath& path,
         model::HybridRelationLimits limits,std::stop_token) const override {
@@ -304,10 +314,89 @@ public:
     }
 };
 
+class DefaultPreflightReachabilityAdapter final : public HybridReachabilityAdapter {
+public:
+    mutable int calls{};
+    mutable int capability_calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        ++calls;
+        return model::HybridPathCompositionFailureReport{path,limits,{},
+            Diagnostic{DiagnosticCode::unsupported,"fixture.reachability","fixture rejection"}};
+    }
+};
+
+class MisreportingReachabilityPreflightAdapter final : public HybridReachabilityAdapter {
+public:
+    int corruption{};
+    mutable int capability_calls{};
+    mutable int calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        auto reported_path=path;
+        auto reported_limits=limits;
+        if(corruption==0) reported_path.edges.front().value+="-wrong";
+        else ++reported_limits.max_rows;
+        return model::HybridPathCompositionFailureReport{std::move(reported_path),
+            reported_limits,{},Diagnostic{DiagnosticCode::unsupported,
+                "fixture.reachability.preflight","fixture preflight rejection"}};
+    }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        ++calls;
+        return model::HybridPathCompositionFailureReport{path,limits,{},
+            Diagnostic{DiagnosticCode::unsupported,"fixture.reachability","not expected"}};
+    }
+};
+
+class CancellingReachabilityPreflightAdapter final : public HybridReachabilityAdapter {
+public:
+    explicit CancellingReachabilityPreflightAdapter(std::stop_source& cancellation)
+        : cancellation_(&cancellation) {}
+    mutable int capability_calls{};
+    mutable int calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,
+        model::HybridRelationLimits,std::stop_token) const override {
+        cancellation_->request_stop();
+        return std::monostate{};
+    }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        ++calls;
+        return model::HybridPathCompositionFailureReport{path,limits,{},
+            Diagnostic{DiagnosticCode::unsupported,"fixture.reachability","not expected"}};
+    }
+private:
+    std::stop_source* cancellation_;
+};
+
 class MisreportingReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     int corruption{};
     HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical}; }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
+        const model::HybridRequest& request,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token cancellation) const override {
+        return model::preflight_hybrid_path_relations(system,request,
+            std::span<const model::HybridPath>(&path,1),limits,cancellation);
+    }
     HybridPathReachabilityResult compose_path(const model::HybridSystem& system,
         const model::HybridRequest& request,const model::HybridPath& path,
         model::HybridRelationLimits limits,std::stop_token cancellation) const override {
@@ -848,6 +937,68 @@ TEST_CASE("hybrid reachability boundary dispatches injected adapters and propaga
     CHECK(failure.path==example_path());
     CHECK(std::get<Diagnostic>(failure.failure).field=="fixture.reachability");
     CHECK(adapter.calls==1);
+}
+
+TEST_CASE("hybrid reachability preflights unsupported relations and limits before adapter calls") {
+    auto unsupported_system=example_system();
+    unsupported_system.edges.front().guards.front()=vertex_guard("unsupported-reachability-guard");
+    RejectingReachabilityAdapter unsupported_adapter;
+    const auto unsupported=compute_hybrid_path_reachability(unsupported_adapter,
+        unsupported_system,example_request(),example_path(),{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(unsupported));
+    const auto& unsupported_failure=
+        std::get<model::HybridPathCompositionFailureReport>(unsupported);
+    REQUIRE(std::holds_alternative<Diagnostic>(unsupported_failure.failure));
+    CHECK(std::get<Diagnostic>(unsupported_failure.failure).field=="hybrid.guard.representation");
+    CHECK(unsupported_adapter.capability_calls==0);
+    CHECK(unsupported_adapter.calls==0);
+
+    RejectingReachabilityAdapter limited_adapter;
+    const auto limited=compute_hybrid_path_reachability(limited_adapter,example_system(),
+        example_request(),example_path(),{1,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(limited));
+    const auto& limited_failure=std::get<model::HybridPathCompositionFailureReport>(limited);
+    REQUIRE(std::holds_alternative<Diagnostic>(limited_failure.failure));
+    CHECK(std::get<Diagnostic>(limited_failure.failure).field=="hybrid.relation.variables");
+    CHECK(limited_adapter.capability_calls==0);
+    CHECK(limited_adapter.calls==0);
+}
+
+TEST_CASE("reachability adapter default preflight fails closed before capability queries") {
+    DefaultPreflightReachabilityAdapter adapter;
+    const auto result=compute_hybrid_path_reachability(adapter,example_system(),
+        example_request(),example_path(),{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.reachability.preflight");
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.calls==0);
+}
+
+TEST_CASE("reachability boundary validates preflight failure path and limits") {
+    for(const int corruption : {0,1}) {
+        MisreportingReachabilityPreflightAdapter adapter;
+        adapter.corruption=corruption;
+        const auto result=compute_hybrid_path_reachability(adapter,example_system(),
+            example_request(),example_path(),{16,64,1024});
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        const auto& diagnostic=std::get<Diagnostics>(result).front();
+        if(corruption==0) CHECK(diagnostic.field=="hybrid.reachability.preflight_path");
+        else CHECK(diagnostic.field=="hybrid.reachability.preflight_limits");
+        CHECK(diagnostic.code==DiagnosticCode::evidence_mismatch);
+        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.calls==0);
+    }
+}
+
+TEST_CASE("reachability boundary stops after a cancelling successful preflight") {
+    std::stop_source cancellation;
+    CancellingReachabilityPreflightAdapter adapter{cancellation};
+    const auto result=compute_hybrid_path_reachability(adapter,example_system(),
+        example_request(),example_path(),{16,64,1024},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.calls==0);
 }
 
 TEST_CASE("hybrid reachability boundary rejects mismatched assurance and resource reports") {
