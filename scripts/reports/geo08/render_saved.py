@@ -48,14 +48,22 @@ def validate(bundle: Path) -> dict:
                     pre["observed_utc"] < post["observed_utc"] <= host["collected_utc"] and
                     post["executable_sha256"] == build["executable_sha256"],
                     "GEO-08 saved source/build receipts differ")
+    collect.require(build["provenance_sanitization"] ==
+                    "Public receipts replace absolute source and build directories with <SOURCE_DIR> and <BUILD_DIR>; unredacted capture remains local",
+                    "GEO-08 public provenance policy differs")
     for name, field in (("driver.cpp", "driver_source_sha256"),
-                        ("configure.log", "configure_log_sha256"),
-                        ("build.log", "build_log_sha256"),
-                        ("CMakeCache.raw.txt", "cmake_cache_sha256"),
-                        ("CMakeCXXCompiler.raw.cmake", "cmake_compiler_sha256")):
+                        ("configure.public.log", "configure_log_sha256"),
+                        ("build.public.log", "build_log_sha256"),
+                        ("CMakeCache.public.txt", "cmake_cache_sha256"),
+                        ("CMakeCXXCompiler.public.cmake", "cmake_compiler_sha256")):
         collect.require(collect.sha((bundle / name).read_bytes()) == build[field],
                         "GEO-08 build receipt differs: " + name)
-    cache = (bundle / "CMakeCache.raw.txt").read_text(encoding="utf-8")
+    cache = (bundle / "CMakeCache.public.txt").read_text(encoding="utf-8")
+    collect.require("<SOURCE_DIR>" in cache and "<BUILD_DIR>" in cache and
+                    all(".worktrees" not in (bundle / name).read_text(encoding="utf-8")
+                        for name in ("configure.public.log", "build.public.log",
+                                     "CMakeCache.public.txt", "CMakeCXXCompiler.public.cmake")),
+                    "GEO-08 local checkout path leaked into public receipt")
     collect.require(all(option + ":BOOL=" + value in cache for option, value in
                         (("BUILD_TESTING", "OFF"), ("CSL_ENABLE_HIGHS", "OFF"),
                          ("CSL_ENABLE_QHULL", "OFF"), ("CSL_BUILD_GEO08_REPORT", "ON"))) and
@@ -76,7 +84,14 @@ def validate(bundle: Path) -> dict:
                "median_batch_ns": statistics.median(trials),
                "min_batch_ns": min(trials), "max_batch_ns": max(trials)}
     collect.require(measured == record["measurement"]["trials"] and
-                    summary == record["measurement"]["summary"],
+                    summary == record["measurement"]["summary"] and
+                    record["measurement"]["native_threads_requested"] ==
+                    record["measurement"]["native_threads_actual"] ==
+                    "not applicable: no native solver backend" and
+                    record["measurement"]["random_seed"] ==
+                    "not applicable: deterministic fixture and driver" and
+                    record["measurement"]["result_comparison"] ==
+                    "literal exact equality for finite binary64 support, evidence, growth and all 16 returned V rows; no numerical tolerance",
                     "GEO-08 saved trials or summary differ")
     return record
 
@@ -129,8 +144,8 @@ body{{background:#272822;color:#f8f8f2;font:16px/1.55 system-ui,sans-serif;max-w
 <figure><img src="lazy-2d.svg" alt="Labelled x-y plot of square, affine image, Minkowski sum and support corner"><figcaption>This drawing illustrates saved input and output shapes, not intermediate execution steps. The 16 returned V rows include duplicate points.</figcaption></figure>
 <h2>Check by hand</h2><p>The affine image is [1,3] × [-1,0], so the independent sum is [1,4] × [-1,1]. Its support in direction (1,1) is 4+1=5 at (4,1). The driver checks that answer, evidence scope, growth 8→16, and each of the 16 returned rows on every call.</p>
 <h2>Observed work</h2><table><caption>Descriptive checked 100-call batch durations</caption><thead><tr><th>Batches</th><th>Measured calls</th><th>Median</th><th>Range</th><th>Failures</th></tr></thead><tbody><tr><td>7</td><td>700</td><td>{summary['median_batch_ns']} ns</td><td>{summary['min_batch_ns']}–{summary['max_batch_ns']} ns</td><td>0</td></tr></tbody></table>
-<p>One excluded 100-call warmup preceded seven measured 100-call batches. Each steady-clock interval includes expression construction, support, explicit materialization, fresh workspaces and literal result checks. Source and selected provider registration, CSV writing, process launch and rendering are excluded. One worker and one native thread were requested and used. Internal counters are unavailable. These single-route observations establish no competitor, speedup, source-mapped limiter or scalability conclusion.</p>
-<p>Host {escape(record['environment']['host'])}: {escape(record['environment']['processor'])}; {escape(record['environment']['os'])}. The <a href="build-provenance.json">build receipt</a>, <a href="configure.log">configure log</a>, <a href="build.log">build log</a>, raw CMake cache and compiler receipt describe the Release configuration. HiGHS and Qhull were disabled.</p>
+<p>One excluded 100-call warmup preceded seven measured 100-call batches. Each steady-clock interval includes expression construction, support, explicit materialization, fresh workspaces and literal result checks. Source and selected provider registration, CSV writing, process launch and rendering are excluded. One worker ran the deterministic fixture; native solver threads and random seed are not applicable. The driver compares the finite binary64 support, evidence, growth and all 16 V rows with literal exact equality and no tolerance. Internal counters are unavailable. These single-route observations establish no competitor, speedup, source-mapped limiter or scalability conclusion.</p>
+<p>Host {escape(record['environment']['host'])}: {escape(record['environment']['processor'])}; {escape(record['environment']['os'])}. The <a href="build-provenance.json">build receipt</a>, <a href="configure.public.log">configure log</a>, <a href="build.public.log">build log</a>, CMake cache and compiler receipt describe the Release configuration. Public receipts replace local source and build directory paths with placeholders. HiGHS and Qhull were disabled.</p>
 <h2>Evidence and reproduction</h2><p>Mathematical equivalence and these stored binary64 outputs do not establish validated rounding or an inclusion enclosure. A finite direction sample is not a complete set. The <a href="records.json">raw record</a> contains complete inputs, source and executable hashes, all trial rows and timing scope.</p>
 <pre>cmake -S . -B build/geo08-example -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_GEO08_REPORT=ON
 cmake --build build/geo08-example --config Release --target csl_geo08_lazy_report

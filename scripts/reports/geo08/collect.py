@@ -8,7 +8,6 @@ import io
 import json
 from pathlib import Path
 import re
-import shutil
 import statistics
 import subprocess
 
@@ -26,8 +25,8 @@ FIXTURE = {"source_id": "geo08-square", "dimension": 2,
            "expected_v_rows": {"vertices": 16, "rays": 0}}
 SAVED = ("driver.cpp", "smoke.csv", "measure.csv", "smoke.stderr.txt",
          "measure.stderr.txt", "host.json", "prebuild.json", "postrun.json",
-         "configure.log", "build.log", "CMakeCache.raw.txt",
-         "CMakeCXXCompiler.raw.cmake", "build-provenance.json", "records.json")
+         "configure.public.log", "build.public.log", "CMakeCache.public.txt",
+         "CMakeCXXCompiler.public.cmake", "build-provenance.json", "records.json")
 
 
 def require(condition: bool, message: str) -> None:
@@ -68,6 +67,18 @@ def rows(path: Path, phase: str) -> list[dict]:
         require(re.fullmatch(r"[1-9][0-9]*", row["elapsed_ns"]) is not None,
                 "Missing positive GEO-08 public-call duration")
     return result
+
+
+def public_receipt(path: Path, source: Path, build_dir: Path) -> bytes:
+    """Keep compiler/configuration evidence while replacing local checkout paths."""
+    value = path.read_text(encoding="utf-8")
+    for directory, label in ((build_dir, "<BUILD_DIR>"), (source, "<SOURCE_DIR>")):
+        pattern = r"[\\/]".join(re.escape(part) for part in
+                                  directory.as_posix().replace("\\", "/").split("/"))
+        value = re.sub(pattern, label, value, flags=re.IGNORECASE)
+        require(re.search(pattern, value, flags=re.IGNORECASE) is None,
+                "Local path remains in public GEO-08 receipt")
+    return value.encode("utf-8")
 
 
 def collect(capture: Path, source: Path, destination: Path) -> Path:
@@ -116,16 +127,25 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
     measured = rows(capture / "measure.csv", "measure")
     trials = [int(row["elapsed_ns"]) for row in measured if row["phase"] == "trial"]
     require(len(smoke) == 1 and len(trials) == 7, "Seven checked GEO-08 trials required")
+    public = {"configure.public.log": public_receipt(capture / "configure.log", source,
+                                                       capture / "measure-build"),
+              "build.public.log": public_receipt(capture / "build.log", source,
+                                                   capture / "measure-build"),
+              "CMakeCache.public.txt": public_receipt(cache, source,
+                                                       capture / "measure-build"),
+              "CMakeCXXCompiler.public.cmake": public_receipt(compiler, source,
+                                                               capture / "measure-build")}
     build = {"configuration": "Release", "architecture": "x64",
-             "compiler_receipt": compiler.read_text(encoding="utf-8"),
+             "provenance_sanitization": "Public receipts replace absolute source and build directories with <SOURCE_DIR> and <BUILD_DIR>; unredacted capture remains local",
+             "compiler_receipt": public["CMakeCXXCompiler.public.cmake"].decode("utf-8"),
              "cmake_options": {"BUILD_TESTING": "OFF", "CSL_ENABLE_HIGHS": "OFF",
                  "CSL_ENABLE_QHULL": "OFF", "CSL_BUILD_GEO08_REPORT": "ON"},
              "executable_sha256": sha(executable.read_bytes()),
              "driver_source_sha256": sha(driver.read_bytes()),
-             "configure_log_sha256": sha((capture / "configure.log").read_bytes()),
-             "build_log_sha256": sha((capture / "build.log").read_bytes()),
-             "cmake_cache_sha256": sha(cache.read_bytes()),
-             "cmake_compiler_sha256": sha(compiler.read_bytes())}
+             "configure_log_sha256": sha(public["configure.public.log"]),
+             "build_log_sha256": sha(public["build.public.log"]),
+             "cmake_cache_sha256": sha(public["CMakeCache.public.txt"]),
+             "cmake_compiler_sha256": sha(public["CMakeCXXCompiler.public.cmake"])}
     record = {"schema": SCHEMA, "source_commit": commit, "source_tree": tree,
               "module": "CSL::lazy_geometry 1.0.0",
               "backend": "native stored-binary64 expression, support and V enumeration",
@@ -144,7 +164,10 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
                   "warmup": "one excluded 100-call batch",
                   "measured_order": "seven sequential 100-call batches",
                   "workers_requested": 1, "workers_actual": 1,
-                  "native_threads_requested": 1, "native_threads_actual": 1,
+                  "native_threads_requested": "not applicable: no native solver backend",
+                  "native_threads_actual": "not applicable: no native solver backend",
+                  "random_seed": "not applicable: deterministic fixture and driver",
+                  "result_comparison": "literal exact equality for finite binary64 support, evidence, growth and all 16 returned V rows; no numerical tolerance",
                   "workspace_reuse": "fresh expression/support/conversion workspace per call; source and selected providers reused",
                   "internal_counters": "unavailable", "failures": 0,
                   "raw_smoke_sha256": sha((capture / "smoke.csv").read_bytes()),
@@ -160,12 +183,11 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
     require(not output.exists(), "Immutable GEO-08 report ID already exists")
     output.mkdir()
     for name in ("smoke.csv", "measure.csv", "smoke.stderr.txt",
-                 "measure.stderr.txt", "host.json", "prebuild.json",
-                 "postrun.json", "configure.log", "build.log"):
-        shutil.copyfile(capture / name, output / name)
-    shutil.copyfile(cache, output / "CMakeCache.raw.txt")
-    shutil.copyfile(compiler, output / "CMakeCXXCompiler.raw.cmake")
-    shutil.copyfile(driver, output / "driver.cpp")
+                 "measure.stderr.txt", "host.json", "prebuild.json", "postrun.json"):
+        (output / name).write_bytes((capture / name).read_bytes())
+    for name, content in public.items():
+        (output / name).write_bytes(content)
+    (output / "driver.cpp").write_bytes(driver.read_bytes())
     (output / "build-provenance.json").write_bytes(encoded(build))
     (output / "records.json").write_bytes(encoded(record))
     return output
