@@ -96,6 +96,11 @@ target_link_libraries(ellipsoidal_set_tests PRIVATE CSL::approximation doctest::
 add_test(NAME ellipsoidal_set_tests COMMAND ellipsoidal_set_tests)
 csl_test_target(ellipsoidal_set_tests geometry)
 
+add_executable(ellipsoidal_approximation_tests tests/contract/geometry/ellipsoidal_approximation_tests.cpp)
+target_link_libraries(ellipsoidal_approximation_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
+add_test(NAME ellipsoidal_approximation_tests COMMAND ellipsoidal_approximation_tests)
+csl_test_target(ellipsoidal_approximation_tests geometry)
+
 add_executable(approximation_reachable_plan_tests tests/contract/geometry/approximation_reachable_plan_tests.cpp)
 target_link_libraries(approximation_reachable_plan_tests PRIVATE CSL::approximation doctest::doctest)
 add_test(NAME approximation_reachable_plan_tests COMMAND approximation_reachable_plan_tests)

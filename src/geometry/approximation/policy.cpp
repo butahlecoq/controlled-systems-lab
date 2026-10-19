@@ -1,4 +1,5 @@
 #include <csl/geometry/approximation.hpp>
+#include <csl/geometry/ellipsoidal.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/sets/generator_sets.hpp>
 #include "../exact_dyadic.hpp"
@@ -182,6 +183,34 @@ bool generator_axis_cover(const sets::GeneratorSet& source,const sets::Generator
     }
     return true;
 }
+bool v_ellipsoid_cover(const sets::VRepresentation& source,
+                       const ellipsoidal::EllipsoidSet& output,
+                       const ExecutionContext& context,bool& interrupted) {
+    using namespace detail::exact_detail;
+    if(source.vertices.rows()==0 || source.rays.rows()!=0)return false;
+    for(std::size_t vertex=0;vertex<source.vertices.rows();++vertex) {
+        for(std::size_t row=0;row<2;++row) {
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                interrupted=true;
+                return false;
+            }
+            Integer projection,limit;
+            for(std::size_t coordinate=0;coordinate<2;++coordinate) {
+                const auto coefficient=decode(output.orientation().values[row*2+coordinate]);
+                if(!add_product(projection,coefficient,
+                     decode(source.vertices(vertex,coordinate))))return false;
+                auto negative_center=decode(output.center()[coordinate]);
+                negative_center.negative=!negative_center.negative;
+                if(!add_product(projection,coefficient,negative_center))return false;
+            }
+            projection.negative=false;
+            if(!add_dyadic(limit,decode(output.projected_bounds()[row])) ||
+               compare_magnitude(projection,limit)>0)return false;
+        }
+    }
+    return true;
+}
 std::optional<StructuralBasis> structural_basis(const ApproximationRequest& request,
                                                  const OperationResult& result,
                                                  const ExecutionContext& context,bool& interrupted) {
@@ -190,6 +219,17 @@ std::optional<StructuralBasis> structural_basis(const ApproximationRequest& requ
         return StructuralBasis::identical_set;
     const auto reference=sets::from_handle(request.input);
     const auto native=sets::from_handle(result.output);
+    if(request.direction==SetRelation::outer) {
+        const auto imported=ellipsoidal::from_ellipsoid_handle(result.output);
+        if(const auto* source=std::get_if<sets::SetData>(&reference))
+            if(const auto* ellipse=std::get_if<ellipsoidal::EllipsoidSet>(&imported))
+                if(source->metadata()->coordinate_labels==ellipse->coordinate_labels()) {
+                    const auto representation=source->representation();
+                    if(const auto* v=std::get_if<sets::VRepresentation>(&representation))
+                        if(v_ellipsoid_cover(*v,*ellipse,context,interrupted))
+                            return StructuralBasis::v_ellipsoid_containment;
+                }
+    }
     if(request.direction==SetRelation::outer) {
         const auto source=sets::from_generator_handle(request.input);
         const auto output=sets::from_generator_handle(result.output);
@@ -244,6 +284,8 @@ std::optional<StructuralBasis> structural_basis(const ApproximationRequest& requ
     return std::nullopt;
 }
 bool within_budget(const SetHandle& output,std::size_t budget) {
+    if(std::holds_alternative<ellipsoidal::EllipsoidSet>(
+        ellipsoidal::from_ellipsoid_handle(output)))return budget>=1;
     const auto generator=sets::from_generator_handle(output);
     if(const auto* set=std::get_if<sets::GeneratorSet>(&generator))
         return set->factor_ids().size()<=budget;
@@ -309,7 +351,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
             StopReason::deadline_expired,"Approximation policy stopped before publishing an enclosure."};
     if(basis) {
         result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
-            "Same immutable set, empty subset, universal superset, exact H constraint retention, exact binary64 H containment of native points and recession rays, or exact stored-binary64 generator axis cover over the same ambient coordinates."};
+            "Same immutable set, empty subset, universal superset, exact H constraint retention, exact binary64 H containment of native points and recession rays, exact stored-binary64 generator axis cover, or exact V vertex bounds within a directional ellipsoid over the same ambient coordinates."};
         return EnclosedApproximation{std::move(result),*basis};
     }
     return Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",
