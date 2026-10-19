@@ -151,15 +151,20 @@ operations and limits for the fixed path before the wrapper queries capabilities
 or starts composition. The default preflight fails closed; the built-in joint-H
 adapter uses the structural set-representation and joint-relation-limit checks.
 Built-in joint-H structural failures retain path and stage context. The
-reachability and family-verification preflight hooks have default
-implementations, so derived adapters remain source compatible, though a
-reachability adapter must override the fail-closed default to be usable. These
-public virtual additions change adapter vtables; downstream prebuilt adapters
-must be rebuilt. CSL does not promise a stable C++ binary/plugin ABI.
+reachability, direct-trajectory, and family-verification preflight hooks have
+default implementations, so derived adapters remain source compatible. A
+reachability adapter must override its fail-closed default to be usable; a
+direct-trajectory adapter using a representation other than joint-H must
+override the structural joint-H default. These public virtual additions change
+adapter vtables; downstream prebuilt adapters must be rebuilt. CSL does not
+promise a stable C++ binary/plugin ABI.
 The direct-trajectory API is replaceable through
-`HybridDirectTrajectoryAdapter`; its default implementation,
-`JointHDirectTrajectoryAdapter`, builds a branch-labelled joint H relation and
-optimization program. Each direct adapter declares whether it preserves the
+`HybridDirectTrajectoryAdapter`; each adapter preflights its complete fixed-path
+inventory and relation limits before capability queries or branch builds.
+Preflight failures must identify a requested path and preserve the configured
+limits. The default adapter, `JointHDirectTrajectoryAdapter`, builds a
+branch-labelled joint H relation and optimization program. Each direct adapter
+declares whether it preserves the
 branch-labelled relation, which objective classes it supports, and its
 assurance level; the wrapper rejects missing branch or objective capabilities
 before dispatch. Injected adapters must preserve that result contract and
@@ -172,17 +177,20 @@ any candidate face's solver-provider provenance, to that path's verification
 record. The report carries per-path feasibility, objective, and continuous-
 coverage statuses, but it is inspection data and cannot publish a
 `synthesis::OptimalFamily`.
-Portfolio construction enumerates the complete path inventory and runs a
-structural relation preflight for every path before dispatching the
-direct-trajectory adapter. Unsupported set representations and joint variable,
-row, or matrix-element limits are reported with the affected path and stage,
-before any branch relation is constructed. It also checks the adapter's
+Portfolio construction enumerates the complete path inventory and calls the
+trajectory adapter's exact-operation and resource preflight before its
+capabilities or any branch build. The default joint-H adapter checks structural
+set representations and joint variable, row, or matrix-element limits across
+every path; unsupported operations and limits are reported with affected path
+and stage before any branch relation is constructed. Adapters using another
+exact representation may implement their own operation preflight within the
+same result contract. It also checks the adapter's
 declared assurance, branch-relation support, and linear/convex terminal-objective
 support for every path before dispatching any path. Unsupported objective
 support identifies the candidate path and terminal stage. When a verifier is
 requested during construction, use `build_hybrid_portfolio_programs_with_verifier`;
-after the relation preflight it calls the verifier adapter's `preflight`, then
-checks trajectory-adapter capabilities across the same inventory. The built-in
+after trajectory operation preflight it calls the verifier adapter's `preflight`,
+then checks trajectory-adapter capabilities across the same inventory. The built-in
 path and portfolio builders reject unknown assurance values and non-finite or
 negative tolerances before calling injected adapter methods. Validated objective
 assurance is unsupported because the hybrid objective path currently supports
