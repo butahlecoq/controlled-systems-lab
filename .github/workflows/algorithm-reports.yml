@@ -60,6 +60,9 @@ jobs:
             if test -f reports/algorithm-results/ext04-publications.json; then
               python scripts/reports/stage_ext04.py --catalog reports/algorithm-results/ext04-publications.json --site build/report-site
             fi
+            if test -f reports/algorithm-results/exp04-publications.json; then
+              python scripts/reports/stage_exp04.py --catalog reports/algorithm-results/exp04-publications.json --site build/report-site
+            fi
             if test -f reports/algorithm-results/geo07-publications.json; then
               python scripts/reports/stage_geo07.py --catalog reports/algorithm-results/geo07-publications.json --site build/report-site
             fi

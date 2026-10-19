@@ -94,6 +94,22 @@ binary64 coordinates and does not establish general geometric correctness.
 Independent report review, main-only deployment and verified live links remain
 publication gates.
 
+## EXP-04 independent nonlinear plant replay
+
+Issue [EXP-04 #56](https://github.com/butahlecoq/controlled-systems-lab/issues/56)
+has a saved [analytic replay bundle](../../reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/)
+from frozen numerical source `eb4497e08f1532c732163e677d5d7aa03697c7de`.
+It retains four declared scalar/two-state control histories, literal full-path
+and objective checks, one excluded 1,000-call warmup per case and seven
+rotated measured 1,000-call batches per case. The 28,000 measured public replay
+calls completed with zero recorded failures. The HTML includes a labelled
+two-dimensional state trajectory, raw input and result links, host/build
+provenance, clean source receipts, raw build logs and an offline bundle. These are exploratory, descriptive
+single-adapter durations. No speedup, source-mapped limiter, nonlinear
+optimality, B04 reconstruction or validated rounding claim is supported.
+Independent saved-result review, main-only Pages deployment and live byte
+verification remain gates before issue closure.
+
 ## Reference-LP pipeline
 
 The [report-record contract](../contracts/algorithm-report-records.md) specifies the executable, saved schemas, exact timing scopes, independent literals, build/environment provenance, commands and OBS migration. `csl_lp_report --smoke` is a bounded functional test. Accepted seven-trial measurements and the separate counter profile follow review of a fixed clean Release code commit; their source identity is distinct from the later artifact commit.

@@ -24,6 +24,7 @@ option(CSL_BUILD_SYN07_REPORT "Build the T-S01 exact-family measurement driver" 
 option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driver" OFF)
 option(CSL_BUILD_ISSUE3_REPORT "Build the finite-action minimax numerical report driver" OFF)
 option(CSL_BUILD_EXT04_REPORT "Build the EXT-04 observed replay report driver" OFF)
+option(CSL_BUILD_EXP04_REPORT "Build the EXP-04 independent plant replay report driver" OFF)
 option(CSL_BUILD_FINITE_FEEDBACK_REPORT "Build the issue 5 finite feedback report driver" OFF)
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)
@@ -41,7 +42,7 @@ include(cmake/ModulePolicy.cmake)
 # Include module-owned declarations in the project scope so dependency pins and
 # package state remain shared. The same order is used for focused test ownership.
 set(csl_modules contracts numeric optimization registry sets model geometry problem controllers
-  reachability synthesis verification input execution artifacts adapters/highs adapters/polyhedral application)
+  reachability synthesis verification simulation input execution artifacts adapters/highs adapters/polyhedral application)
 foreach(module IN LISTS csl_modules)
   include(src/${module}/Module.cmake)
 endforeach()
