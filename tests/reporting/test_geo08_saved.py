@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
@@ -15,7 +16,7 @@ spec = importlib.util.spec_from_file_location(
 render = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(render)
-BUNDLE = ROOT / "reports/algorithm-results/geo08-lazy-f2e9c9c0daa49164"
+BUNDLE = ROOT / "reports/algorithm-results/geo08-lazy-6dbdd6b2f9235837"
 CATALOG = ROOT / "reports/algorithm-results/geo08-publications.json"
 
 
@@ -24,7 +25,7 @@ class SavedGeo08Test(unittest.TestCase):
         render.render(BUNDLE, check=True)
         record = render.validate(BUNDLE)
         self.assertEqual(record["source_commit"],
-                         "87a747a644b5d1aa9887d01d09e0921c727fa921")
+                         "64ace8666a0e6ca1fc6ba5a5d44d6cd0dd1df33d")
         self.assertEqual(record["measurement"]["summary"]["successes"], 700)
         self.assertEqual(record["measurement"]["summary"]["failures"], 0)
         self.assertEqual([int(row["completed"]) for row in
@@ -42,6 +43,17 @@ class SavedGeo08Test(unittest.TestCase):
                 b"100,100,99,completed,true,", 1))
             with self.assertRaises(ValueError):
                 render.render(copy, check=True)
+
+    def test_public_receipts_hide_local_checkout_paths(self) -> None:
+        for name in ("configure.public.log", "build.public.log",
+                     "CMakeCache.public.txt", "CMakeCXXCompiler.public.cmake"):
+            self.assertNotIn(b".worktrees", (BUNDLE / name).read_bytes())
+        cache = (BUNDLE / "CMakeCache.public.txt").read_bytes()
+        self.assertIn(b"<SOURCE_DIR>", cache)
+        self.assertIn(b"<BUILD_DIR>", cache)
+        with zipfile.ZipFile(BUNDLE / "bundle.zip") as archive:
+            self.assertTrue(all(b".worktrees" not in archive.read(name)
+                                for name in archive.namelist()))
 
     def test_catalog_stages_exact_report_and_example(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

@@ -1,9 +1,0 @@
-{
-  "commit": "87a747a644b5d1aa9887d01d09e0921c727fa921",
-  "observed_utc": "2026-10-19T10:22:52.239644+00:00",
-  "phase": "prebuild",
-  "schema": "csl.geo08-source-receipt/1",
-  "status": [],
-  "tracked_count": 1925,
-  "tree": "8340d8b3795757c976ffdfd47ad0cd491906769d"
-}
