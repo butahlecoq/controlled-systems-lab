@@ -162,6 +162,16 @@ any candidate face's solver-provider provenance, to that path's verification
 record. The report carries per-path feasibility, objective, and continuous-
 coverage statuses, but it is inspection data and cannot publish a
 `synthesis::OptimalFamily`.
+When a verifier is requested during construction, use
+`build_hybrid_portfolio_programs_with_verifier`. It enumerates the complete
+path inventory and calls the verifier adapter's `preflight` before dispatching
+the direct-trajectory adapter, so an unsupported bounded-verifier domain is
+rejected before branch relations are composed. The built-in singleton and
+scalar interval verifiers check each enumerated path; a custom bounded verifier
+must implement preflight, and the default implementation fails closed. This
+domain check supplements later relation, candidate, and report validation. The
+lower-level program builder remains available when no family-verifier plan is
+requested.
 `ExactSingletonHybridFamilyVerifier` independently enumerates edge paths and
 reconstructs trajectories using checked integer arithmetic. It supports only
 integral initial states, singleton controls, singleton-representation resets,
@@ -263,11 +273,10 @@ creating a provider workspace or running an algorithm:
    evidence as complete.
 
 The current implementation does not yet satisfy this full admission contract.
-Model and relation-composition preflights cover their declared capabilities,
-but verifier admission is request-scoped and may occur after branch-program
-construction. Unsupported verifier plans therefore remain an EXT-07 acceptance
-gap; the bounded verifiers described above must not be treated as general
-continuous-family support.
+The combined verified builder preflights the declared verifier domain before
+branch-program construction, while later checks still validate the produced
+relations and reports. Complete preflight of every relation/provider operation
+and general continuous-family support remain EXT-07 acceptance work.
 
 The initial profile does not infer support from the presence of lower-level
 types. It rejects, before workspace creation, nonempty temporal couplings until
@@ -315,9 +324,9 @@ one-step scalar interval families, and the bounded finite-horizon
 single-parameter scalar interval profile described above. No compiled verifier
 covers multiple free continuous parameters or general continuous polytope
 families. These verifier domains reject unsupported input when verification
-runs, but portfolio construction does not yet reject every unsupported
-verifier plan before building branch programs, including for the
-single-parameter verifier.
+runs; `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
+verifier domains before building branch programs. Broader provider-operation
+admission and multiple-parameter verifier coverage remain incomplete.
 
 ## Independent test oracle requirements
 

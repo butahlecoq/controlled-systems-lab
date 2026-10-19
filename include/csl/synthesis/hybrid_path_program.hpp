@@ -5,6 +5,7 @@
 #include <csl/optimization/linear_program.hpp>
 #include <csl/registry/provider.hpp>
 #include <span>
+#include <variant>
 
 namespace csl::synthesis {
 
@@ -211,6 +212,8 @@ struct HybridFamilyVerificationReport {
 };
 using HybridFamilyVerificationResult = std::variant<HybridFamilyVerificationReport,
     Diagnostics, OperationStopped>;
+using HybridFamilyVerificationPreflightResult =
+    std::variant<std::monostate, Diagnostics, OperationStopped>;
 
 struct HybridFamilyVerificationCapabilities {
     bool checks_original_hybrid_feasibility{};
@@ -225,6 +228,11 @@ class HybridFamilyVerificationAdapter {
 public:
     virtual ~HybridFamilyVerificationAdapter() = default;
     virtual HybridFamilyVerificationCapabilities capabilities() const noexcept = 0;
+    // Bounded adapters override this to reject unsupported model domains
+    // before branch relation construction. The default fails closed.
+    virtual HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const;
     virtual HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
@@ -237,6 +245,9 @@ public:
 class ExactSingletonHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
@@ -251,6 +262,9 @@ public:
 class OneStepScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
@@ -264,6 +278,9 @@ public:
 class SingleParameterScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
@@ -276,11 +293,22 @@ public:
 class TwoStageScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
         NumericalPolicy,std::stop_token cancellation) const override;
 };
+
+// Enumerates the request path inventory, rejects unsupported verifier plans,
+// then constructs the branch relation programs transactionally.
+HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
+    const HybridFamilyVerificationAdapter&, const HybridDirectTrajectoryAdapter&,
+    const model::HybridSystem&, const model::HybridRequest&, ProblemId,
+    model::HybridEnumerationLimits, model::HybridRelationLimits,
+    optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
 
 // Enumerates the full permitted path inventory and validates that programs and
 // reports cover it exactly once. It does not promote a report into a complete

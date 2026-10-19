@@ -300,6 +300,32 @@ HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& sys
         policy, cancellation);
 }
 
+namespace {
+HybridPortfolioProgramResult build_hybrid_portfolio_programs_for_paths(
+    const HybridDirectTrajectoryAdapter& adapter,const model::HybridSystem& system,
+    const model::HybridRequest& request,ProblemId problem,std::span<const model::HybridPath> paths,
+    model::HybridRelationLimits relation_limits,optimization::ObjectivePolicy policy,
+    std::stop_token cancellation) {
+    std::vector<HybridPathProgram> programs;
+    programs.reserve(paths.size());
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Hybrid portfolio construction stopped between edge paths; no programs were published"};
+        auto built=build_hybrid_path_program(adapter,system,request,path,problem,
+            relation_limits,policy,cancellation);
+        if(const auto* errors=std::get_if<Diagnostics>(&built)) return *errors;
+        if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
+        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) return *failure;
+        programs.push_back(std::get<HybridPathProgram>(std::move(built)));
+    }
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid portfolio construction was cancelled before publication"};
+    return programs;
+}
+}
+
 HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectTrajectoryAdapter& adapter,
     const model::HybridSystem& system,
     const model::HybridRequest& request,ProblemId problem,model::HybridEnumerationLimits enumeration_limits,
@@ -315,20 +341,8 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectT
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
-    std::vector<HybridPathProgram> programs;
-    programs.reserve(paths.size());
-    for(const auto& path:paths) {
-        if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,"Hybrid portfolio construction stopped between edge paths; no programs were published"};
-        auto built=build_hybrid_path_program(adapter,system,request,path,problem,relation_limits,policy,cancellation);
-        if(const auto* errors=std::get_if<Diagnostics>(&built)) return *errors;
-        if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
-        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) return *failure;
-        programs.push_back(std::get<HybridPathProgram>(std::move(built)));
-    }
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Hybrid portfolio construction was cancelled before publication"};
-    return programs;
+    return build_hybrid_portfolio_programs_for_paths(adapter,system,request,
+        std::move(problem),paths,relation_limits,policy,cancellation);
 }
 
 HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::HybridSystem& system,
@@ -338,6 +352,43 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::Hybrid
     const JointHDirectTrajectoryAdapter adapter;
     return build_hybrid_portfolio_programs(adapter, system, request, std::move(problem),
         enumeration_limits, relation_limits, policy, cancellation);
+}
+
+HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
+    const HybridFamilyVerificationAdapter& verifier,const HybridDirectTrajectoryAdapter& trajectory,
+    const model::HybridSystem& system,const model::HybridRequest& request,ProblemId problem,
+    model::HybridEnumerationLimits enumeration_limits,model::HybridRelationLimits relation_limits,
+    optimization::ObjectivePolicy policy,std::stop_token cancellation) {
+    if(problem.value.empty()) return one({DiagnosticCode::invalid_input,"hybrid.program.problem",
+        "Problem identity must be nonempty"});
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid verified portfolio construction was cancelled before profile admission"};
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    if(!profile_errors.empty()) return profile_errors;
+    const auto capability=verifier.capabilities();
+    if(capability.assurance!=Assurance::numerical||
+       !capability.checks_original_hybrid_feasibility||
+       !capability.checks_global_objective_optimality||
+       !capability.checks_continuous_branch_coverage)
+        return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
+            "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
+    const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,enumeration_limits,cancellation);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
+    if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
+    const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
+    if(paths.empty())
+        return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
+            "No allowed hybrid path exists for the requested verifier plan"});
+    const auto admission=verifier.preflight(system,request,paths,cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid verified portfolio construction was cancelled after verifier preflight"};
+    return build_hybrid_portfolio_programs_for_paths(trajectory,system,request,
+        std::move(problem),paths,relation_limits,policy,cancellation);
 }
 
 HybridPortfolioObjectiveAnalysis compare_hybrid_portfolio_objective_bounds(
@@ -634,6 +685,16 @@ HybridPortfolioOptimalFaceAnalysis assemble_hybrid_portfolio_optimal_face_candid
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Hybrid portfolio face assembly was cancelled before publication"};
     return HybridPortfolioOptimalFaceCandidates{std::move(bounds),std::move(candidates)};
+}
+
+HybridFamilyVerificationPreflightResult HybridFamilyVerificationAdapter::preflight(
+    const model::HybridSystem&,const model::HybridRequest&,std::span<const model::HybridPath>,
+    std::stop_token cancellation) const {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid verifier admission was cancelled before dispatch"};
+    return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.preflight",
+        "Verifier adapter must explicitly admit its request domain before verified portfolio construction"}};
 }
 
 HybridFamilyVerificationResult verify_hybrid_portfolio_family(
