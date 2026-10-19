@@ -180,4 +180,13 @@ TEST_CASE("separate reduction requests produce independent replacement factors")
     auto sum=geometry::generators::minkowski_sum(first_set,second_set,{"independent-sum"});
     REQUIRE(std::holds_alternative<sets::GeneratorSet>(sum));
     CHECK(std::get<sets::GeneratorSet>(sum).generators().values==Vector{2,2,0,0});
+
+    query.identity.request={"first-reduction"};
+    query.identity.ideal_output={"third-reference"};
+    query.input=first.as_handle();
+    auto third_run=run_registered(entries,method,query,ExecutionContext{});
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(third_run));
+    auto third_set=take(sets::from_generator_handle(
+        std::get<EnclosedApproximation>(third_run).result.output));
+    CHECK(first_set.factor_ids()[0]!=third_set.factor_ids()[0]);
 }

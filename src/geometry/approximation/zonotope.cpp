@@ -221,6 +221,7 @@ public:
         const auto axis_scope="app03-axis/"+
             component(request.identity.problem.value)+
             component(request.identity.request.value)+
+            component(request.identity.ideal_output.value)+
             component(request.input.id.value)+
             component(output_id_.value)+"/";
         std::size_t axis_column=retained_count;
