@@ -16,6 +16,16 @@ sqrt((30-x1)^2 + x2^2 + 2.25(20-x3)^2 + 2.25 x4^2).
 
 The example prints phase restrictions `29 <= x1(t) <= 31` and `19.5 <= x3(t) <= 20.5` for stages 1 through 5. Its reported nonlinear terminal state and criterion are `(30,5.81,20,4.39)` and `8.82`; the reported worst-case linear state is `(29.78,6.43,19.82,4.87)`. Runtime is reported as 66 seconds on MATLAB R2014a and an Intel Core i7-3770 at 3.4 GHz with 8 GB RAM. The listed GPU is not evidence that the computation used it.
 
+## Terminal objective cross-check
+
+Evaluating the printed objective at the centers of the printed terminal states gives `9.73802983` for the linear row and `8.78170399` for the nonlinear row, rather than the respective tabulated `9.77` and `8.82`.
+
+For the linear row, all four state coordinates are printed to two decimal places. Under the conditional assumption that they were rounded to the nearest hundredth, the exact maximum squared objective over the closed coordinate-rounding box is `7600761/80000`, giving a maximum norm of `9.74728232`. A value printed as `9.77` to the nearest hundredth has squared lower endpoint `(9.765)^2 = 3814209/40000`, which is larger. Thus ordinary two-decimal rounding of the displayed linear state cannot account for the printed linear objective.
+
+The nonlinear row prints `x1=30` and `x3=20` without decimal places, but `x2` and `x4` to hundredths. Under nearest-to-displayed-precision rounding, allowing `±0.5` for the integer coordinates and `±0.005` for the other two gives an upper norm of `8.83672910`; the reported `8.82` is compatible with that wider box. The center calculation is a discrepancy, but the printed precision does not establish a nonlinear state/objective inconsistency.
+
+These checks do not identify which input, state, criterion or reported value generated either row. The linear result is a display-rounding incompatibility under the stated convention, not a diagnosis of its cause.
+
 ## Inputs that prevent reproduction
 
 Equations (8)-(9) define a known admissible disturbance set `V1(t)` and the numerical example supplies the matrix `D(t)`, but the extracted text contains no numeric bounds, vertices, or stage/inter-stage dependence for `V1(t)`. Visual inspection of the numerical pages confirms that they print `D(t)` and the output, not `V1(t)`. Without `V1(t)`, the adversarial histories used for robust feasibility and worst-case cost are not determined; the counts 365 and the value 9.77 cannot be independently recomputed from the printed data.

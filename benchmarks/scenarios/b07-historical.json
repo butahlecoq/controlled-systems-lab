@@ -257,6 +257,39 @@
       "fuel_from_table": 205,
       "fuel_in_printed_x0": 207,
       "status": "inconsistent_under_printed_initialization_equation"
+    },
+    "terminal_objective_crosswalk": {
+      "linear": {
+        "printed_state": [
+          "29.78",
+          "6.43",
+          "19.82",
+          "4.87"
+        ],
+        "objective_at_printed_center": "9.738029831541901",
+        "state_precision_assumption": "nearest_hundredth_for_each_coordinate",
+        "maximum_squared_objective_over_closed_rounding_box": "7600761/80000",
+        "maximum_objective_over_rounding_box": "9.74728231354771",
+        "reported_objective": "9.77",
+        "reported_objective_rounding_lower_endpoint": "9.765",
+        "reported_objective_rounding_lower_squared": "3814209/40000",
+        "status": "incompatible_with_nearest_hundredth_rounding_of_the_printed_state"
+      },
+      "nonlinear": {
+        "printed_state": [
+          "30",
+          "5.81",
+          "20",
+          "4.39"
+        ],
+        "objective_at_printed_center": "8.781703991822999",
+        "state_precision_assumption": "nearest_to_each_coordinate_as_printed",
+        "maximum_squared_objective_over_closed_rounding_box": "2498809/32000",
+        "maximum_objective_over_rounding_box": "8.836729103576731",
+        "reported_objective": "8.82",
+        "status": "center_differs_but_displayed_precision_does_not_exclude_reported_value"
+      },
+      "interpretation": "Arithmetic and rounding compatibility checks only; they do not identify which input, state, criterion or reported value generated either row."
     }
   },
   "reported": {
