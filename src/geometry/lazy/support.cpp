@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <unordered_map>
 #include <utility>
 
 namespace csl::geometry::lazy {
@@ -36,10 +37,25 @@ GeometryRequestIdentity child_identity(const GeometryRequestIdentity& parent, co
     return {parent.problem, {scope(parent.request.value)}, {scope(parent.ideal_output.value)}};
 }
 
-Answer evaluate(const SetHandle& input, const Vector& direction,
+struct CacheKey {
+    const SetPayload* payload;
+    Vector direction;
+    bool operator==(const CacheKey&) const = default;
+};
+struct CacheHash {
+    std::size_t operator()(const CacheKey& key) const {
+        std::size_t value = std::hash<const SetPayload*>{}(key.payload);
+        for (const double component : key.direction)
+            value ^= std::hash<double>{}(component) + 0x9e3779b9U + (value << 6) + (value >> 2);
+        return value;
+    }
+};
+using Cache = std::unordered_map<CacheKey, SupportResult, CacheHash>;
+
+Answer evaluate_node(const SetHandle& input, const Vector& direction,
         const GeometryRequestIdentity& parent, const std::string& path,
         const registry::PreparedProvider<registry::GeometryPort>& leaf_provider,
-        const ExecutionContext& context) {
+        const ExecutionContext& context, Cache& cache) {
     if (stopped(context)) return stop(context);
     if (input.metadata.representation.value != "csl.geometry.lazy-v") {
         const auto& provenance = leaf_provider.provenance();
@@ -61,6 +77,8 @@ Answer evaluate(const SetHandle& input, const Vector& direction,
 
     auto inspected = inspect_expression(input);
     if (const auto* failure = std::get_if<Diagnostics>(&inspected)) return Unsupported{*failure};
+    CacheKey key{input.payload.get(), direction};
+    if (const auto found = cache.find(key); found != cache.end()) return found->second;
     const auto& operation = std::get<ExpressionDescription>(inspected).operation;
     if (const auto* affine = std::get_if<AffineImage>(&operation)) {
         Vector transformed(affine->map.cols);
@@ -68,9 +86,12 @@ Answer evaluate(const SetHandle& input, const Vector& direction,
             for (std::size_t row = 0; row < affine->map.rows; ++row)
                 transformed[column] += direction[row] * affine->map.values[row * affine->map.cols + column];
         if (!finite(transformed)) return Unsupported{error("lazy.direction", "Transformed direction is nonfinite.")};
-        auto child = evaluate(affine->input, transformed, parent, path + "0", leaf_provider, context);
+        auto child = evaluate_node(affine->input, transformed, parent, path + "0", leaf_provider, context, cache);
         if (const auto* result = std::get_if<SupportResult>(&child)) {
-            if (!std::holds_alternative<double>(result->value)) return *result;
+            if (!std::holds_alternative<double>(result->value)) {
+                cache.emplace(std::move(key), *result);
+                return *result;
+            }
             double value = std::get<double>(result->value);
             for (std::size_t row = 0; row < direction.size(); ++row)
                 value += direction[row] * affine->offset[row];
@@ -84,7 +105,9 @@ Answer evaluate(const SetHandle& input, const Vector& direction,
                     maximizer[row] += affine->map.values[row * affine->map.cols + column] * (*result->maximizer)[column];
             }
             if (!finite(maximizer)) return Unsupported{error("lazy.maximizer", "Affine maximizer is nonfinite.")};
-            return SupportResult{value, std::move(maximizer), result->evidence};
+            SupportResult answer{value, std::move(maximizer), result->evidence};
+            cache.emplace(std::move(key), answer);
+            return answer;
         }
         return child;
     }
@@ -92,26 +115,37 @@ Answer evaluate(const SetHandle& input, const Vector& direction,
         Vector embedded(projection->input.metadata.dimension);
         for (std::size_t column = 0; column < direction.size(); ++column)
             embedded[projection->coordinates[column]] = direction[column];
-        auto child = evaluate(projection->input, embedded, parent, path + "0", leaf_provider, context);
+        auto child = evaluate_node(projection->input, embedded, parent, path + "0", leaf_provider, context, cache);
         if (const auto* result = std::get_if<SupportResult>(&child)) {
-            if (!result->maximizer) return *result;
+            if (!result->maximizer) {
+                cache.emplace(std::move(key), *result);
+                return *result;
+            }
             Vector maximizer;
             for (const auto index : projection->coordinates) maximizer.push_back((*result->maximizer)[index]);
-            return SupportResult{result->value, std::move(maximizer), result->evidence};
+            SupportResult answer{result->value, std::move(maximizer), result->evidence};
+            cache.emplace(std::move(key), answer);
+            return answer;
         }
         return child;
     }
     if (const auto* sum = std::get_if<MinkowskiSum>(&operation)) {
-        auto left = evaluate(sum->left, direction, parent, path + "0", leaf_provider, context);
+        auto left = evaluate_node(sum->left, direction, parent, path + "0", leaf_provider, context, cache);
         if (!std::holds_alternative<SupportResult>(left)) return left;
-        auto right = evaluate(sum->right, direction, parent, path + "1", leaf_provider, context);
+        auto right = evaluate_node(sum->right, direction, parent, path + "1", leaf_provider, context, cache);
         if (!std::holds_alternative<SupportResult>(right)) return right;
         const auto& a = std::get<SupportResult>(left);
         const auto& b = std::get<SupportResult>(right);
-        if (std::holds_alternative<EmptySupport>(a.value) || std::holds_alternative<EmptySupport>(b.value))
-            return SupportResult{EmptySupport{}, {}, a.evidence};
-        if (std::holds_alternative<UnboundedSupport>(a.value) || std::holds_alternative<UnboundedSupport>(b.value))
-            return SupportResult{UnboundedSupport{}, {}, a.evidence};
+        if (std::holds_alternative<EmptySupport>(a.value) || std::holds_alternative<EmptySupport>(b.value)) {
+            SupportResult answer{EmptySupport{}, {}, a.evidence};
+            cache.emplace(std::move(key), answer);
+            return answer;
+        }
+        if (std::holds_alternative<UnboundedSupport>(a.value) || std::holds_alternative<UnboundedSupport>(b.value)) {
+            SupportResult answer{UnboundedSupport{}, {}, a.evidence};
+            cache.emplace(std::move(key), answer);
+            return answer;
+        }
         if (!a.maximizer || !b.maximizer)
             return Unsupported{error("lazy.maximizer", "Finite sum support omitted a child maximizer.",
                 DiagnosticCode::evidence_mismatch)};
@@ -121,10 +155,19 @@ Answer evaluate(const SetHandle& input, const Vector& direction,
             maximizer[i] = (*a.maximizer)[i] + (*b.maximizer)[i];
         if (!std::isfinite(value) || !finite(maximizer))
             return Unsupported{error("lazy.value", "Summed support value or maximizer is nonfinite.")};
-        return SupportResult{value, std::move(maximizer), a.evidence};
+        SupportResult answer{value, std::move(maximizer), a.evidence};
+        cache.emplace(std::move(key), answer);
+        return answer;
     }
     return Unsupported{error("lazy.operation", "Expression payload contains an unsupported operation.",
         DiagnosticCode::evidence_mismatch)};
+}
+Answer evaluate(const SetHandle& input, const Vector& direction,
+        const GeometryRequestIdentity& parent, const std::string& path,
+        const registry::PreparedProvider<registry::GeometryPort>& leaf_provider,
+        const ExecutionContext& context) {
+    Cache cache;
+    return evaluate_node(input, direction, parent, path, leaf_provider, context, cache);
 }
 
 Diagnostics shape(const OperationRequest& request, const registry::Requirements& requirements) {
