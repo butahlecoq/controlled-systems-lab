@@ -1,0 +1,4 @@
+phase,case,repetition,calls,status,verified,elapsed_ns,basis,vertices,radius_x,radius_y
+smoke,square-axis,0,1,enclosed,true,42400,v_ellipsoid,4,1.4142135623730951,1.4142135623730951
+smoke,square-diagonal,0,1,enclosed,true,14200,v_ellipsoid,4,2.8284271247461903,2.8284271247461903
+smoke,horizontal-segment,0,1,enclosed,true,8600,v_ellipsoid,2,1.4142135623730951,0

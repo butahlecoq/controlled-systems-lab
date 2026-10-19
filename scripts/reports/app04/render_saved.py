@@ -84,24 +84,24 @@ def figure(record: dict) -> bytes:
     diagonal_r = float(diagonal["radius_x"]) / 2**0.5
     # The diagonal orientation [[1,1],[1,-1]] maps equal radii to a circle
     # with physical radius r/sqrt(2).
-    square = " ".join(f"{320+100*x},{220-100*y}" for x, y in
+    square = " ".join(f"{500+100*x},{250-100*y}" for x, y in
                       record["fixtures"]["square-axis"]["input_vertices"])
-    points = "".join(f'<circle cx="{320+100*x}" cy="{220-100*y}" r="5" fill="#f6c177"/>'
+    points = "".join(f'<circle cx="{500+100*x}" cy="{250-100*y}" r="5" fill="#f6c177"/>'
                      for x, y in record["fixtures"]["square-axis"]["input_vertices"])
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" role="img" aria-labelledby="title desc">
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 500" role="img" aria-labelledby="title desc">
 <title id="title">Two directional ellipsoids enclosing a square</title>
 <desc id="desc">The square from minus one to one on both axes sits inside an axis circle of radius square root of two and a diagonal-orientation circle of radius two.</desc>
-<rect width="640" height="440" fill="#16161e"/>
-<path d="M 70 220 H 570 M 320 25 V 410" stroke="#6e6a86" stroke-width="1"/>
-<circle cx="320" cy="220" r="{diagonal_r*100:.8f}" fill="none" stroke="#9ccfd8" stroke-width="3" stroke-dasharray="8 5"/>
-<circle cx="320" cy="220" r="{axis_r*100:.8f}" fill="none" stroke="#c4a7e7" stroke-width="3"/>
+<rect width="840" height="500" fill="#16161e"/>
+<path d="M 280 250 H 765 M 500 35 V 465" stroke="#6e6a86" stroke-width="1"/>
+<circle cx="500" cy="250" r="{diagonal_r*100:.8f}" fill="none" stroke="#9ccfd8" stroke-width="3" stroke-dasharray="8 5"/>
+<circle cx="500" cy="250" r="{axis_r*100:.8f}" fill="none" stroke="#c4a7e7" stroke-width="3"/>
 <polygon points="{square}" fill="#f6c177" fill-opacity=".18" stroke="#f6c177" stroke-width="3"/>
 {points}
-<g fill="#e0def4" font-family="sans-serif" font-size="15"><text x="574" y="225">x</text><text x="325" y="30">y</text>
+<g fill="#e0def4" font-family="sans-serif" font-size="15"><text x="770" y="255">x</text><text x="505" y="30">y</text>
 <text x="20" y="30">APP-04: stored binary64 square and outer ellipsoids</text>
-<text x="25" y="365" fill="#f6c177">Square vertices (±1, ±1)</text>
-<text x="25" y="388" fill="#c4a7e7">Axis orientation: radius √2</text>
-<text x="25" y="411" fill="#9ccfd8">Diagonal orientation: radius 2</text></g>
+<text x="25" y="390" fill="#f6c177">Square vertices (±1, ±1)</text>
+<text x="25" y="420" fill="#c4a7e7">Axis orientation: radius √2</text>
+<text x="25" y="450" fill="#9ccfd8">Diagonal orientation: radius 2</text></g>
 </svg>'''
     return (svg + "\n").encode()
 
@@ -126,7 +126,7 @@ def page(record: dict, example: bool) -> bytes:
         f'<td>{row["median_batch_ns"]}</td><td>{row["min_batch_ns"]}–{row["max_batch_ns"]}</td></tr>'
         for row in record["measurement"]["summary"])
     fixture_rows = "".join(
-        f'<tr><th scope="row">{escape(name)}</th><td><code>{escape(str(item["input_vertices"]))}</code></td>'
+        f'<tr><th scope="row">{escape(name)} <code>{escape(item["method"])}</code></th><td><code>{escape(str(item["input_vertices"]))}</code></td>'
         f'<td><code>{escape(str(item["orientation_rows"]))}</code></td>'
         f'<td><code>{escape(str(item["projected_bounds"]))}</code></td></tr>'
         for name, item in record["fixtures"].items())

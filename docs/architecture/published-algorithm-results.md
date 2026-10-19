@@ -126,6 +126,22 @@ limiter, finite approximation error bound or validated real-arithmetic claim
 is supported. Independent saved-result review, main-only Pages deployment and
 live-byte verification remain publication gates.
 
+## APP-04 directional ellipsoidal approximation
+
+Issue [APP-04 #34](https://github.com/butahlecoq/controlled-systems-lab/issues/34)
+has a saved [three-case bundle](../../reports/algorithm-results/app04-ellipsoid-83ca6b07e9d01766/)
+from frozen public adapter source `86f8b257cc2f8dc535917645c62b5b206b994e25`.
+Two planar square orientations and a degenerate segment check literal center,
+orientation, projected bounds, PSD radii and complete vertex inclusion after
+every public call. The approximation policy independently admits exact
+stored-binary64 containment. One excluded warmup and seven rotated 100-call
+batches per case yielded 2,100 verified measured calls with zero observed
+failures. The labelled 2D SVG and example page are regenerated from the same
+saved records. These are descriptive single-adapter durations; no competitor,
+speedup, source-mapped limiter, finite approximation error bound, validated
+prior rounding, MATLAB or ET comparison is supported. Independent saved-result
+review, main-only Pages deployment and live-byte verification remain gates.
+
 ## EXP-04 independent nonlinear plant replay
 
 Issue [EXP-04 #56](https://github.com/butahlecoq/controlled-systems-lab/issues/56)
