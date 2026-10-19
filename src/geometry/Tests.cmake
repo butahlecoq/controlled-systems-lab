@@ -71,6 +71,16 @@ target_link_libraries(approximation_policy_tests PRIVATE CSL::approximation CSL:
 add_test(NAME approximation_policy_tests COMMAND approximation_policy_tests)
 csl_test_target(approximation_policy_tests geometry)
 
+add_executable(zonotope_reduction_tests tests/contract/geometry/zonotope_reduction_tests.cpp)
+target_link_libraries(zonotope_reduction_tests PRIVATE CSL::approximation CSL::geometry_generators doctest::doctest)
+add_test(NAME zonotope_reduction_tests COMMAND zonotope_reduction_tests)
+csl_test_target(zonotope_reduction_tests geometry)
+
+add_executable(zonotope_reduction_public_client tests/installed/zonotope_reduction_client.cpp)
+target_link_libraries(zonotope_reduction_public_client PRIVATE CSL::approximation CSL::geometry_generators)
+add_test(NAME zonotope_reduction_public_client COMMAND zonotope_reduction_public_client)
+csl_test_target(zonotope_reduction_public_client geometry)
+
 add_executable(box_parallelotope_tests tests/contract/geometry/box_parallelotope_tests.cpp)
 target_link_libraries(box_parallelotope_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
 add_test(NAME box_parallelotope_tests COMMAND box_parallelotope_tests)
