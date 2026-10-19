@@ -7,6 +7,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -32,6 +33,10 @@ class SavedContinuousReport(unittest.TestCase):
         self.assertEqual(record["analytic"]["trajectory"], [[0, 0], [1, 2], [3, 0]])
         self.assertEqual(record["measurement"]["measured_calls"], 700)
         self.assertEqual(record["measurement"]["failures"], 0)
+        with zipfile.ZipFile(self.bundle / (self.bundle.name + ".zip")) as archive:
+            self.assertTrue(all(item.compress_type == zipfile.ZIP_STORED and
+                                item.create_system == 3
+                                for item in archive.infolist()))
 
     def test_changed_raw_observation_refuses_publication(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

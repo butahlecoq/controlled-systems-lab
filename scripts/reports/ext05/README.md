@@ -18,9 +18,10 @@ The capture retains clean prebuild and postrun source receipts, build logs,
 CMake configuration, compiler file, executable hash, host metadata, one smoke
 row, an excluded warmup and seven measured batches. The collector checks all
 rows against literal analytic values before saving a versioned record. The
-renderer reconstructs HTML, CSV, SVG, manifest and offline ZIP from saved
-bytes alone. The stager accepts one reviewed catalogue entry and the exact
-allowlisted bundle into the main-only Pages workflow.
+renderer reconstructs HTML, CSV, SVG, manifest and a stored, cross-platform
+byte-stable offline ZIP from saved bytes alone. The stager accepts one reviewed
+catalogue entry and the exact allowlisted bundle into the main-only Pages
+workflow.
 
 Batch duration includes fixture construction, public conversion, snapshot,
 two state steps and literal checks. It excludes CSV output and rendering.

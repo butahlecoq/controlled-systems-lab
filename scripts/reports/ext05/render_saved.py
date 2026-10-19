@@ -163,13 +163,13 @@ then run <code>collect.py</code> and <code>render_saved.py</code> on the saved c
 
 def offline_zip(files: dict[str, bytes]) -> bytes:
     output = io.BytesIO()
-    with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+    with zipfile.ZipFile(output, "w", zipfile.ZIP_STORED) as archive:
         for name, data in sorted(files.items()):
             item = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
-            item.compress_type = zipfile.ZIP_DEFLATED
+            item.create_system = 3
+            item.compress_type = zipfile.ZIP_STORED
             item.external_attr = 0o644 << 16
-            archive.writestr(item, data, compress_type=zipfile.ZIP_DEFLATED,
-                             compresslevel=9)
+            archive.writestr(item, data, compress_type=zipfile.ZIP_STORED)
     return output.getvalue()
 
 
