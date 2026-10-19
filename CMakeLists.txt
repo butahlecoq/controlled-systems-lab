@@ -25,6 +25,7 @@ option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driv
 option(CSL_BUILD_ISSUE3_REPORT "Build the finite-action minimax numerical report driver" OFF)
 option(CSL_BUILD_EXT04_REPORT "Build the EXT-04 observed replay report driver" OFF)
 option(CSL_BUILD_EXP04_REPORT "Build the EXP-04 independent plant replay report driver" OFF)
+option(CSL_BUILD_APP02_REPORT "Build the APP-02 box and parallelotope report driver" OFF)
 option(CSL_BUILD_FINITE_FEEDBACK_REPORT "Build the issue 5 finite feedback report driver" OFF)
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)

@@ -10,6 +10,24 @@ endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
 
+if(CSL_BUILD_APP02_REPORT)
+add_executable(csl_app02_approximation_report benchmarks/reporting/app02/driver.cpp)
+target_link_libraries(csl_app02_approximation_report PRIVATE CSL::approximation)
+target_compile_features(csl_app02_approximation_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_app02_approximation_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_app02_approximation_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME app02_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/app02/check_smoke.py
+  $<TARGET_FILE:csl_app02_approximation_report>)
+set_tests_properties(app02_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_EXP04_REPORT)
 add_executable(csl_exp04_replay_report benchmarks/reporting/exp04/driver.cpp)
 target_link_libraries(csl_exp04_replay_report PRIVATE CSL::simulation)
