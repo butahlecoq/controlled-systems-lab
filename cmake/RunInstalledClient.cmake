@@ -43,6 +43,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/terminal_minimizers_client.cpp" DES
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/convex_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/run_statistics_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/input_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/continuous_discretization_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/conversion_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/polyhedral_intersection_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/projection_predecessor_client.cpp" DESTINATION "${work}/source")

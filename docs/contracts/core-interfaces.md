@@ -35,6 +35,9 @@ This delivery contains values, coarse abstract ports and small structural guards
 Revision 1.2 replaces the authored observation aggregate with canonical maps,
 constant/indexed providers and explicit source/measurement/availability schedules.
 MODEL-01 implements the separate [immutable discrete model module](linear-model.md).
+EXT-05 adds an [explicit continuous-affine conversion boundary](time-domains.md)
+that publishes discrete transitions with a method receipt before snapshot or
+problem construction; this does not change the revision 1 discrete model seam.
 The preceding implementation exclusions describe the original CORE-01 delivery;
 subsequent modules retain their own documented scope. No operation/evidence port
 or numeric/registry interface changes in revision 1.2.

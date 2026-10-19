@@ -19,7 +19,8 @@ The grid has T+1 finite, strictly increasing times, with at least one entry.
 States are indexed `[0,T]` and transitions/controls `[0,T)`. The grid is copied
 once and is the sole physical-time authority. Continuous or unknown time-domain
 metadata returns `unsupported` at `model.time_domain`. Supplied discrete
-transitions are used directly, with no discretization.
+transitions are used directly, with no discretization. Continuous affine
+coefficients use the separate [explicit conversion contract](time-domains.md).
 
 Dynamics are `x_(k+1)=A_k*x_k+B_k*u_k+E_k*w_k+a_k`, with dimensions n states,
 m controls and p external inputs. A is n×n, B n×m, E n×p and a length n.

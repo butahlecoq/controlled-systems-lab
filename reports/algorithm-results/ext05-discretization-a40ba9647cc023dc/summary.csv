@@ -1,0 +1,2 @@
+case,measured_batches,calls_per_batch,successes,failures,median_batch_ns,min_batch_ns,max_batch_ns
+double-integrator,7,100,700,0,947100,936500,1012900
