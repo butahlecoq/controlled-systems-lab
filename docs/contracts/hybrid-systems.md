@@ -166,9 +166,13 @@ Portfolio construction enumerates the complete path inventory and runs a
 structural relation preflight for every path before dispatching the
 direct-trajectory adapter. Unsupported set representations and joint variable,
 row, or matrix-element limits are reported with the affected path and stage,
-before any branch relation is constructed. When a verifier is requested during
-construction, use `build_hybrid_portfolio_programs_with_verifier`; after the
-relation preflight it also calls the verifier adapter's `preflight`. The built-in
+before any branch relation is constructed. It also checks the adapter's
+declared assurance, branch-relation support, and linear/convex terminal-objective
+support for every path before dispatching any path. Unsupported objective
+support identifies the candidate path and terminal stage. When a verifier is
+requested during construction, use `build_hybrid_portfolio_programs_with_verifier`;
+after the relation preflight it calls the verifier adapter's `preflight`, then
+checks trajectory-adapter capabilities across the same inventory. The built-in
 singleton and scalar interval verifiers check each enumerated path; a custom
 bounded verifier must implement preflight, and the default implementation fails
 closed. These admission checks supplement later relation, candidate, and report
@@ -327,8 +331,10 @@ single-parameter scalar interval profile described above. No compiled verifier
 covers multiple free continuous parameters or general continuous polytope
 families. These verifier domains reject unsupported input when verification
 runs; `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
-verifier domains before building branch programs. General provider-operation
-admission and multiple-parameter verifier coverage remain incomplete.
+verifier domains and declared trajectory objective capabilities before building
+branch programs. Objective-policy semantics, general provider-operation
+admission, independent projected-set reachability, and multiple-parameter
+verifier coverage remain incomplete.
 
 ## Independent test oracle requirements
 

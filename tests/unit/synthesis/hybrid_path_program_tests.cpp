@@ -237,6 +237,41 @@ public:
     }
 };
 
+class LinearOnlyRejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int calls{};
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        return {true,true,false,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&, ProblemId,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid_adapter","fixture rejection"}};
+    }
+};
+
+class CancellingCapabilityTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    explicit CancellingCapabilityTrajectoryAdapter(std::stop_source& cancellation)
+        : cancellation_(&cancellation) {}
+    mutable int calls{};
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        cancellation_->request_stop();
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&, ProblemId,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid_adapter","fixture rejection"}};
+    }
+private:
+    std::stop_source* cancellation_;
+};
+
 class MismatchingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override { return {true,true,true,Assurance::numerical}; }
@@ -616,6 +651,49 @@ TEST_CASE("hybrid portfolio builder dispatches through the injected direct traje
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="fixture.hybrid_adapter");
     CHECK(adapter.calls==1);
+}
+
+TEST_CASE("hybrid portfolio preflights all terminal objective capabilities before adapter dispatch") {
+    auto system=example_system();
+    auto second_terminal=system.modes.back();
+    second_terminal.id={"target-quadratic"};
+    system.modes.push_back(std::move(second_terminal));
+    auto second_edge=system.edges.front();
+    second_edge.id={"switch-quadratic"};
+    second_edge.target={"target-quadratic"};
+    system.edges.push_back(std::move(second_edge));
+
+    auto request=example_request();
+    request.allowed_terminal_modes.push_back({"target-quadratic"});
+    request.terminal_objectives.push_back({{"target-quadratic"},
+        QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0},"energy","J"});
+
+    LinearOnlyRejectingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,request,
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.objective");
+    CHECK(adapter.calls==0);
+
+    FixtureHybridFamilyVerifier verifier;
+    LinearOnlyRejectingTrajectoryAdapter verified_adapter;
+    const auto verified=build_hybrid_portfolio_programs_with_verifier(verifier,verified_adapter,
+        system,request,{"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(verified));
+    CHECK(std::get<Diagnostics>(verified).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.portfolio.objective");
+    CHECK(verified_adapter.calls==0);
+}
+
+TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
+    std::stop_source cancellation;
+    CancellingCapabilityTrajectoryAdapter adapter{cancellation};
+    const auto result=build_hybrid_portfolio_programs(adapter,example_system(),example_request(),
+        {"hybrid-problem"},{1,8},{16,64,1024},{},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.calls==0);
 }
 
 TEST_CASE("hybrid path builder rejects an adapter result with mismatched branch identity") {
