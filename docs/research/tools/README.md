@@ -32,6 +32,8 @@ python docs/research/tools/verify_docs.py
 
 The B04 consistency utility uses only Python standard-library rational arithmetic. It reads the historical manifest, checks terminal invariants and computes an unrestricted terminal-plane lower bound; it does not solve missing historical constraints. Results are in [b04-consistency.json](../b04-consistency.json).
 
+The [B04 parameter cross-check](../b04-parameter-crosswalk.md) uses `check_b04_parameter_crosswalk.py` to compare the published nonlinear law, displayed linear initial data, and the separately saved kernel with exact rational arithmetic. Run `python -B docs/research/tools/check_b04_parameter_crosswalk.py` and `python -B -m unittest docs.research.tools.test_b04_parameter_crosswalk`. It neither loads private originals nor reconstructs the historical T=16 run.
+
 The verification utility checks document links, original hashes where originals exist, inventory coverage, Python syntax, and reference JSON consistency. It is documentation/research verification, not a product test suite.
 
 ## B04 saved-witness reference check

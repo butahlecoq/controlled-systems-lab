@@ -48,6 +48,8 @@ The [GEO-02 floating-model audit](geo02-floating-model-audit.md) separates exact
 
 [B04 restoration](b04-restoration.md) records the owner-selected nominal scenario, its versioned historical manifest and an exact terminal-invariant audit. Source gaps and the model/result inconsistency remain explicit before implementation comparisons.
 
+[B04 parameter cross-check](b04-parameter-crosswalk.md) evaluates the printed nonlinear flow law with exact rational arithmetic and distinguishes it from the displayed linear input data and the separate saved-run kernel.
+
 ## Larger local archive
 
 The [targeted follow-up search](archive-followup.md) records recovered MATLAB/Pascal algorithms, B04 tables, minimax adaptive run data and the local zonotope paper. Its selected-source register supplements the initial inventory.
