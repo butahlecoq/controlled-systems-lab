@@ -1,8 +1,9 @@
 {
   "build": {
     "architecture": "x64",
-    "build_log_sha256": "1caddc3c377f182d8f16549eba6b013279a11211b956c1333e35966ca1e0a2e5",
-    "cmake_cache_sha256": "e38489ba769df1137a0f0411d4ba3eb34e559d586315a737e1dbd5bf26882340",
+    "build_log_language": "English MSBuild output requested with VSLANG=1033, DOTNET_CLI_UI_LANGUAGE=en-US, PreferredUILang=en-US and /p:PreferredUILang=en-US; raw build log has no Cyrillic text.",
+    "build_log_sha256": "de4043c83428b8395e726770447bf30a5ddfa3deddb5787bbafd8efa290e9649",
+    "cmake_cache_sha256": "a326312f2a023d86de528597b8f256784e437a7adb70a1062fb1631cf0044a46",
     "cmake_compiler_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
     "cmake_options": {
       "BUILD_TESTING": "OFF",
@@ -10,17 +11,17 @@
       "CSL_ENABLE_HIGHS": "OFF",
       "CSL_ENABLE_QHULL": "OFF"
     },
-    "command": "python -m cmake -S . -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report",
+    "command": "python -m cmake -S <frozen-source> -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report -- /p:PreferredUILang=en-US",
     "compiler": "MSVC 19.44 / Visual Studio 2022",
     "configuration": "Release",
-    "configure_log_sha256": "9819f21cdd21dcaa448de9b87b2ff94ba28d5f55b2b636438e5c7f657d7ca17b",
+    "configure_log_sha256": "6081f83adcb4e2cdcd7e4aea42298fc93082f824ea3c8078fcf9c27fb04a4254",
     "driver_source_sha256": "8d50a7831f19629d18364edf58706eede5e93f0defe33a432be507e04571da23",
-    "executable_sha256": "ca55045f720dce84a170ac54a85b217bc7cde150faf099b9e91dbf8173d9d03b",
+    "executable_sha256": "db2c0f062db98b2436efa1e81311928429bf6befba70e66105aa83cff6f3e5ee",
     "raw_logs": "Configure/build logs and CMake cache/compiler receipts are saved in the versioned bundle."
   },
   "environment": {
     "architecture": "AMD64",
-    "collected_utc": "2026-10-19T05:48:35.1535351Z",
+    "collected_utc": "2026-10-19T05:54:28.7032203Z",
     "cpu": {
       "Name": "12th Gen Intel(R) Core(TM) i5-12400F",
       "NumberOfCores": 6,
@@ -286,17 +287,17 @@
     "measured_order": "seven rotated four-case rounds; 1000 fresh public replay calls per case per round",
     "native_threads_actual": 1,
     "native_threads_requested": 1,
-    "raw_measure_sha256": "0f4c49ee16d72894b5b2841e0088df5ecdf14064d706c108cbfaa5cbc1239265",
-    "raw_smoke_sha256": "786fd4211094f5b4fdce9e1169f72bf4b147777c36e9be1ef1dc9f830e3fd0ff",
+    "raw_measure_sha256": "aaef7d263b0ec2d016ada892b0732a062567a7d9a61d21a8985f5b930a1f1205",
+    "raw_smoke_sha256": "07fac776f0366d3fc025fa595a668eda2f321d0465f665c5ec40a8b238231525",
     "summary": [
       {
         "batches": 7,
         "calls_per_batch": 1000,
         "case": "scalar-endpoint",
         "failures": 0,
-        "max_batch_ns": 505900,
-        "median_batch_ns": 498200,
-        "min_batch_ns": 489800,
+        "max_batch_ns": 520600,
+        "median_batch_ns": 514300,
+        "min_batch_ns": 500100,
         "successes": 7000
       },
       {
@@ -304,9 +305,9 @@
         "calls_per_batch": 1000,
         "case": "scalar-even",
         "failures": 0,
-        "max_batch_ns": 560500,
-        "median_batch_ns": 500700,
-        "min_batch_ns": 493300,
+        "max_batch_ns": 530300,
+        "median_batch_ns": 518800,
+        "min_batch_ns": 496400,
         "successes": 7000
       },
       {
@@ -314,9 +315,9 @@
         "calls_per_batch": 1000,
         "case": "plane-forward",
         "failures": 0,
-        "max_batch_ns": 537600,
-        "median_batch_ns": 513100,
-        "min_batch_ns": 506000,
+        "max_batch_ns": 525500,
+        "median_batch_ns": 520400,
+        "min_batch_ns": 515700,
         "successes": 7000
       },
       {
@@ -324,9 +325,9 @@
         "calls_per_batch": 1000,
         "case": "plane-reverse",
         "failures": 0,
-        "max_batch_ns": 518400,
-        "median_batch_ns": 514000,
-        "min_batch_ns": 502500,
+        "max_batch_ns": 640500,
+        "median_batch_ns": 521300,
+        "min_batch_ns": 517300,
         "successes": 7000
       }
     ],
@@ -334,7 +335,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "501600",
+        "elapsed_ns": "523000",
         "objective": "2",
         "phase": "warmup",
         "repetition": "0",
@@ -346,7 +347,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "510200",
+        "elapsed_ns": "535400",
         "objective": "1.5",
         "phase": "warmup",
         "repetition": "0",
@@ -358,7 +359,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "516000",
+        "elapsed_ns": "528100",
         "objective": "3",
         "phase": "warmup",
         "repetition": "0",
@@ -370,7 +371,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "515200",
+        "elapsed_ns": "539500",
         "objective": "2",
         "phase": "warmup",
         "repetition": "0",
@@ -382,7 +383,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "505900",
+        "elapsed_ns": "517900",
         "objective": "2",
         "phase": "trial",
         "repetition": "0",
@@ -394,7 +395,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "520500",
+        "elapsed_ns": "523400",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "0",
@@ -406,7 +407,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "506000",
+        "elapsed_ns": "519200",
         "objective": "3",
         "phase": "trial",
         "repetition": "0",
@@ -418,7 +419,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "502500",
+        "elapsed_ns": "640500",
         "objective": "2",
         "phase": "trial",
         "repetition": "0",
@@ -430,7 +431,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "493300",
+        "elapsed_ns": "522300",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "1",
@@ -442,7 +443,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "509300",
+        "elapsed_ns": "523800",
         "objective": "3",
         "phase": "trial",
         "repetition": "1",
@@ -454,7 +455,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "513100",
+        "elapsed_ns": "533800",
         "objective": "2",
         "phase": "trial",
         "repetition": "1",
@@ -466,7 +467,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "496500",
+        "elapsed_ns": "514300",
         "objective": "2",
         "phase": "trial",
         "repetition": "1",
@@ -478,7 +479,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "515000",
+        "elapsed_ns": "520400",
         "objective": "3",
         "phase": "trial",
         "repetition": "2",
@@ -490,7 +491,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "517100",
+        "elapsed_ns": "524600",
         "objective": "2",
         "phase": "trial",
         "repetition": "2",
@@ -502,7 +503,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "489800",
+        "elapsed_ns": "518900",
         "objective": "2",
         "phase": "trial",
         "repetition": "2",
@@ -514,7 +515,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "494700",
+        "elapsed_ns": "518800",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "2",
@@ -526,7 +527,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "509900",
+        "elapsed_ns": "520700",
         "objective": "2",
         "phase": "trial",
         "repetition": "3",
@@ -538,7 +539,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "493200",
+        "elapsed_ns": "520600",
         "objective": "2",
         "phase": "trial",
         "repetition": "3",
@@ -550,7 +551,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "560500",
+        "elapsed_ns": "511400",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "3",
@@ -562,7 +563,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "537600",
+        "elapsed_ns": "525500",
         "objective": "3",
         "phase": "trial",
         "repetition": "3",
@@ -574,7 +575,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "502800",
+        "elapsed_ns": "511000",
         "objective": "2",
         "phase": "trial",
         "repetition": "4",
@@ -586,7 +587,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "500700",
+        "elapsed_ns": "502600",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "4",
@@ -598,46 +599,10 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "507300",
+        "elapsed_ns": "522600",
         "objective": "3",
         "phase": "trial",
         "repetition": "4",
-        "status": "complete",
-        "terminal_x": "3",
-        "terminal_y": "1",
-        "verified": "true"
-      },
-      {
-        "calls": "1000",
-        "case": "plane-reverse",
-        "elapsed_ns": "516000",
-        "objective": "2",
-        "phase": "trial",
-        "repetition": "4",
-        "status": "complete",
-        "terminal_x": "2",
-        "terminal_y": "1",
-        "verified": "true"
-      },
-      {
-        "calls": "1000",
-        "case": "scalar-even",
-        "elapsed_ns": "504000",
-        "objective": "1.5",
-        "phase": "trial",
-        "repetition": "5",
-        "status": "complete",
-        "terminal_x": "1.5",
-        "terminal_y": "0",
-        "verified": "true"
-      },
-      {
-        "calls": "1000",
-        "case": "plane-forward",
-        "elapsed_ns": "516600",
-        "objective": "3",
-        "phase": "trial",
-        "repetition": "5",
         "status": "complete",
         "terminal_x": "3",
         "terminal_y": "1",
@@ -646,7 +611,43 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "518400",
+        "elapsed_ns": "521300",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "530300",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "518300",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "520000",
         "objective": "2",
         "phase": "trial",
         "repetition": "5",
@@ -658,7 +659,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "499800",
+        "elapsed_ns": "514300",
         "objective": "2",
         "phase": "trial",
         "repetition": "5",
@@ -670,7 +671,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "513100",
+        "elapsed_ns": "515700",
         "objective": "3",
         "phase": "trial",
         "repetition": "6",
@@ -682,7 +683,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "514000",
+        "elapsed_ns": "517300",
         "objective": "2",
         "phase": "trial",
         "repetition": "6",
@@ -694,7 +695,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "498200",
+        "elapsed_ns": "500100",
         "objective": "2",
         "phase": "trial",
         "repetition": "6",
@@ -706,7 +707,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "499000",
+        "elapsed_ns": "496400",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "6",
@@ -721,15 +722,15 @@
     "workers_requested": 1,
     "workspace_reuse": "fresh ReplayRecord for each call; immutable plant and control declarations reused"
   },
-  "report_id": "exp04-replay-c9c239d4bb0bfea1",
+  "report_id": "exp04-replay-93fe3b87795e1d3a",
   "schema": "csl.exp04-independent-replay/1",
   "scope": "Independent exact-discrete plant replay for four authored analytic histories",
   "source_commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
   "source_receipts": {
     "postrun": {
       "commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
-      "executable_sha256": "ca55045f720dce84a170ac54a85b217bc7cde150faf099b9e91dbf8173d9d03b",
-      "observed_utc": "2026-10-19T05:48:33.9677706Z",
+      "executable_sha256": "db2c0f062db98b2436efa1e81311928429bf6befba70e66105aa83cff6f3e5ee",
+      "observed_utc": "2026-10-19T05:54:27.5144215Z",
       "phase": "postrun",
       "schema": "csl.exp04-source-receipt/1",
       "status": [],
@@ -738,7 +739,7 @@
     },
     "prebuild": {
       "commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
-      "observed_utc": "2026-10-19T05:48:11.1251177Z",
+      "observed_utc": "2026-10-19T05:54:05.4316206Z",
       "phase": "prebuild",
       "schema": "csl.exp04-source-receipt/1",
       "status": [],

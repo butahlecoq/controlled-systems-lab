@@ -1,0 +1,20 @@
+{
+  "architecture": "x64",
+  "build_log_language": "English MSBuild output requested with VSLANG=1033, DOTNET_CLI_UI_LANGUAGE=en-US, PreferredUILang=en-US and /p:PreferredUILang=en-US; raw build log has no Cyrillic text.",
+  "build_log_sha256": "de4043c83428b8395e726770447bf30a5ddfa3deddb5787bbafd8efa290e9649",
+  "cmake_cache_sha256": "a326312f2a023d86de528597b8f256784e437a7adb70a1062fb1631cf0044a46",
+  "cmake_compiler_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+  "cmake_options": {
+    "BUILD_TESTING": "OFF",
+    "CSL_BUILD_EXP04_REPORT": "ON",
+    "CSL_ENABLE_HIGHS": "OFF",
+    "CSL_ENABLE_QHULL": "OFF"
+  },
+  "command": "python -m cmake -S <frozen-source> -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report -- /p:PreferredUILang=en-US",
+  "compiler": "MSVC 19.44 / Visual Studio 2022",
+  "configuration": "Release",
+  "configure_log_sha256": "6081f83adcb4e2cdcd7e4aea42298fc93082f824ea3c8078fcf9c27fb04a4254",
+  "driver_source_sha256": "8d50a7831f19629d18364edf58706eede5e93f0defe33a432be507e04571da23",
+  "executable_sha256": "db2c0f062db98b2436efa1e81311928429bf6befba70e66105aa83cff6f3e5ee",
+  "raw_logs": "Configure/build logs and CMake cache/compiler receipts are saved in the versioned bundle."
+}

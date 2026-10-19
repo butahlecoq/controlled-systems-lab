@@ -97,7 +97,7 @@ publication gates.
 ## EXP-04 independent nonlinear plant replay
 
 Issue [EXP-04 #56](https://github.com/butahlecoq/controlled-systems-lab/issues/56)
-has a saved [analytic replay bundle](../../reports/algorithm-results/exp04-replay-c9c239d4bb0bfea1/)
+has a saved [analytic replay bundle](../../reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/)
 from frozen numerical source `eb4497e08f1532c732163e677d5d7aa03697c7de`.
 It retains four declared scalar/two-state control histories, literal full-path
 and objective checks, one excluded 1,000-call warmup per case and seven

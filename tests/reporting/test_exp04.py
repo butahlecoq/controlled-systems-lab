@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location("exp04_stage_test", ROOT / "script
 stage = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(stage)
-BUNDLE = ROOT / "reports/algorithm-results/exp04-replay-c9c239d4bb0bfea1"
+BUNDLE = ROOT / "reports/algorithm-results/exp04-replay-93fe3b87795e1d3a"
 CATALOG = ROOT / "reports/algorithm-results/exp04-publications.json"
 
 

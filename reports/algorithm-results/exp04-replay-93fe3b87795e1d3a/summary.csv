@@ -1,0 +1,5 @@
+case,batches,calls_per_batch,successes,failures,median_batch_ns,min_batch_ns,max_batch_ns
+scalar-endpoint,7,1000,7000,0,514300,500100,520600
+scalar-even,7,1000,7000,0,518800,496400,530300
+plane-forward,7,1000,7000,0,520400,515700,525500
+plane-reverse,7,1000,7000,0,521300,517300,640500

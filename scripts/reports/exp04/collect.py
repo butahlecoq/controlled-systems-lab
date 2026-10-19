@@ -130,12 +130,14 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
     compiler_files = list((capture / "measure-build/CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
     require(len(compiler_files) == 1, "one captured C++ compiler identity required")
     compiler = compiler_files[0].read_text(encoding="utf-8")
+    build_log = (capture / "build.log").read_text(encoding="utf-8-sig")
     require(all(option + ":BOOL=" + value in cache for option, value in
                 (("BUILD_TESTING", "OFF"), ("CSL_ENABLE_HIGHS", "OFF"),
                  ("CSL_ENABLE_QHULL", "OFF"), ("CSL_BUILD_EXP04_REPORT", "ON"))) and
             "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" in cache and
             'CMAKE_CXX_COMPILER_VERSION "19.44.' in compiler and
-            "csl_exp04_replay_report.exe" in (capture / "build.log").read_text(encoding="utf-8-sig"),
+            "csl_exp04_replay_report.exe" in build_log and
+            not any("\u0400" <= letter <= "\u04ff" for letter in build_log),
             "captured Release build configuration differs")
     require((capture / "smoke.stderr.txt").read_bytes() == b"" and
             (capture / "measure.stderr.txt").read_bytes() == b"",
@@ -156,7 +158,8 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
              "architecture": "x64", "cmake_options": {
                  "BUILD_TESTING": "OFF", "CSL_ENABLE_HIGHS": "OFF",
                  "CSL_ENABLE_QHULL": "OFF", "CSL_BUILD_EXP04_REPORT": "ON"},
-             "command": "python -m cmake -S . -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report",
+             "command": "python -m cmake -S <frozen-source> -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report -- /p:PreferredUILang=en-US",
+             "build_log_language": "English MSBuild output requested with VSLANG=1033, DOTNET_CLI_UI_LANGUAGE=en-US, PreferredUILang=en-US and /p:PreferredUILang=en-US; raw build log has no Cyrillic text.",
              "executable_sha256": sha(executable.read_bytes()),
              "driver_source_sha256": sha(driver.read_bytes()),
              "configure_log_sha256": sha((capture / "configure.log").read_bytes()),
