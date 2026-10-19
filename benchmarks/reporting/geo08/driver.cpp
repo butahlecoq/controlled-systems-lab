@@ -3,6 +3,7 @@
 #include <csl/numeric/data.hpp>
 #include <csl/sets/data.hpp>
 
+#include <array>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
@@ -99,10 +100,17 @@ bool checked_call(const SetHandle& source, const Providers& selected) {
     const auto native = take(sets::from_handle(output.result.output)).representation();
     const auto* v = std::get_if<sets::VRepresentation>(&native);
     if (!v || v->vertices.rows() != 16 || v->vertices.cols() != 2) return false;
-    bool corner_found = false;
-    for (std::size_t row = 0; row < v->vertices.rows(); ++row)
-        corner_found |= v->vertices(row, 0) == 4.0 && v->vertices(row, 1) == 1.0;
-    return corner_found;
+    constexpr std::array<std::array<double, 2>, 4> corners{{
+        {{0, 0}}, {{1, 0}}, {{0, 1}}, {{1, 1}}}};
+    std::size_t row = 0;
+    for (const auto& mapped_corner : corners)
+        for (const auto& source_corner : corners) {
+            const double x = 1 + 2 * mapped_corner[0] + source_corner[0];
+            const double y = -1 + mapped_corner[1] + source_corner[1];
+            if (v->vertices(row, 0) != x || v->vertices(row, 1) != y) return false;
+            ++row;
+        }
+    return true;
 }
 
 bool batch(const SetHandle& source, const Providers& selected,

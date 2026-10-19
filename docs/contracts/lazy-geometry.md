@@ -42,6 +42,10 @@ zero. The native V
 ray classification is checked against exact signs of the stored binary64
 direction and ray coordinates; disagreement with the selected leaf provider
 is refused rather than presented as finite support.
+If an affine expression can reach a nonempty V ray, every transformed
+direction component must equal its exact stored-binary64 dot product; a rounded
+component is refused because it could change a later ray dot product even
+while retaining its own sign.
 
 `sample_support` evaluates a finite direction list against a prepared lazy
 support provider. Its `SampleCoverage::directions_only` label means precisely

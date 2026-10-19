@@ -57,7 +57,48 @@ struct CacheHash {
 };
 using Cache = std::unordered_map<CacheKey, SupportResult, CacheHash>;
 
-std::variant<Vector, Diagnostics> affine_direction(const AffineImage& affine, const Vector& direction) {
+using RayCache = std::unordered_map<const SetPayload*, bool>;
+std::variant<bool, Diagnostics> contains_rays(const SetHandle& input, RayCache& cache) {
+    if (const auto found = cache.find(input.payload.get()); found != cache.end()) return found->second;
+    if (input.metadata.representation.value != "csl.geometry.lazy-v") {
+        auto imported = sets::from_handle(input);
+        if (const auto* failure = std::get_if<Diagnostic>(&imported)) return Diagnostics{*failure};
+        const auto native = std::get<sets::SetData>(std::move(imported)).representation();
+        const auto* v = std::get_if<sets::VRepresentation>(&native);
+        if (!v && !std::holds_alternative<sets::EmptyRepresentation>(native))
+            return error("lazy.leaf", "Lazy support requires native V or empty leaves.");
+        const bool result = v && v->vertices.rows() != 0 && v->rays.rows() != 0;
+        cache.emplace(input.payload.get(), result);
+        return result;
+    }
+    auto inspected = inspect_expression(input);
+    if (const auto* failure = std::get_if<Diagnostics>(&inspected)) return *failure;
+    const auto& operation = std::get<ExpressionDescription>(inspected).operation;
+    if (const auto* affine = std::get_if<AffineImage>(&operation)) {
+        auto result = contains_rays(affine->input, cache);
+        if (const auto* rays = std::get_if<bool>(&result)) cache.emplace(input.payload.get(), *rays);
+        return result;
+    }
+    if (const auto* projection = std::get_if<Projection>(&operation)) {
+        auto result = contains_rays(projection->input, cache);
+        if (const auto* rays = std::get_if<bool>(&result)) cache.emplace(input.payload.get(), *rays);
+        return result;
+    }
+    if (const auto* sum = std::get_if<MinkowskiSum>(&operation)) {
+        auto left = contains_rays(sum->left, cache);
+        if (const auto* failure = std::get_if<Diagnostics>(&left)) return *failure;
+        auto right = contains_rays(sum->right, cache);
+        if (const auto* failure = std::get_if<Diagnostics>(&right)) return *failure;
+        const bool result = std::get<bool>(left) || std::get<bool>(right);
+        cache.emplace(input.payload.get(), result);
+        return result;
+    }
+    return error("lazy.operation", "Expression payload contains an unsupported operation.",
+        DiagnosticCode::evidence_mismatch);
+}
+
+std::variant<Vector, Diagnostics> affine_direction(const AffineImage& affine, const Vector& direction,
+        bool exact_for_rays) {
     Vector transformed(affine.map.cols);
     for (std::size_t column = 0; column < affine.map.cols; ++column) {
         detail::exact_detail::Integer exact;
@@ -78,9 +119,25 @@ std::variant<Vector, Diagnostics> affine_direction(const AffineImage& affine, co
         if (exact_zero != (transformed[column] == 0.0) ||
             (!exact_zero && exact.negative != (transformed[column] < 0.0)))
             return error("lazy.direction", "Rounded affine direction changed the exact stored-binary64 sign.");
+        if (exact_for_rays) {
+            auto rounded = detail::exact_detail::decode(transformed[column]);
+            rounded.negative = !rounded.negative;
+            if (!detail::exact_detail::add_dyadic(exact, rounded))
+                return error("lazy.direction", "Exact affine direction comparison exceeded the checked arithmetic range.");
+            if (!detail::exact_detail::is_zero(exact))
+                return error("lazy.direction", "Affine direction rounded before an unbounded leaf query.");
+        }
     }
     if (!finite(transformed)) return error("lazy.direction", "Transformed direction is nonfinite.");
     return transformed;
+}
+
+std::variant<Vector, Diagnostics> checked_affine_direction(const AffineImage& affine,
+        const Vector& direction) {
+    RayCache cache;
+    auto rays = contains_rays(affine.input, cache);
+    if (const auto* failure = std::get_if<Diagnostics>(&rays)) return *failure;
+    return affine_direction(affine, direction, std::get<bool>(rays));
 }
 
 Diagnostics preflight_node(const SetHandle& input, const Vector& direction,
@@ -103,7 +160,7 @@ Diagnostics preflight_node(const SetHandle& input, const Vector& direction,
     if (!seen.insert(CacheKey{input.payload.get(), direction}).second) return {};
     const auto& operation = std::get<ExpressionDescription>(inspected).operation;
     if (const auto* affine = std::get_if<AffineImage>(&operation)) {
-        auto transformed = affine_direction(*affine, direction);
+        auto transformed = checked_affine_direction(*affine, direction);
         if (const auto* failure = std::get_if<Diagnostics>(&transformed)) return *failure;
         return preflight_node(affine->input, std::get<Vector>(std::move(transformed)),
             parent, path + "0", leaf_provider, seen);
@@ -179,7 +236,7 @@ Answer evaluate_node(const SetHandle& input, const Vector& direction,
     if (const auto found = cache.find(key); found != cache.end()) return found->second;
     const auto& operation = std::get<ExpressionDescription>(inspected).operation;
     if (const auto* affine = std::get_if<AffineImage>(&operation)) {
-        auto transformed = affine_direction(*affine, direction);
+        auto transformed = checked_affine_direction(*affine, direction);
         if (const auto* failure = std::get_if<Diagnostics>(&transformed)) return Unsupported{*failure};
         auto child = evaluate_node(affine->input, std::get<Vector>(std::move(transformed)),
             parent, path + "0", leaf_provider, context, cache);

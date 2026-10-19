@@ -368,6 +368,27 @@ TEST_CASE("affine support refuses cancellation of a nonzero exact direction") {
     CHECK(diagnostics[0].field == "lazy.direction");
 }
 
+TEST_CASE("affine support refuses rounded ray dot cancellation across coordinates") {
+    const auto ray = take(sets::make_v({{"two-coordinate-ray"}, 2, {}},
+        {take(numeric::snapshot(Matrix{1, 2, {0, 0}})),
+         take(numeric::snapshot(Matrix{1, 2, {1, -1}}))})).as_handle();
+    const double ulp = std::ldexp(1.0, -52);
+    OperationRequest request{{{"p"}, {"cross-cancellation-affine"}, {"cross-cancellation-image"}},
+        {"csl.geometry.lazy-expression"},
+        AffineImage{ray, {2, 2, {0, 1.0 - ulp, -1, 0}}, {0, 0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto expression = take<OperationResult>(create(request)).output;
+    auto provider = lazy_support_provider();
+    OperationRequest query{{{"p"}, {"cross-cancellation-support"}, {"sampled-support"}},
+        {"csl.geometry.lazy-support"}, SupportQuery{expression, {1.0 + ulp, -1.0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto admitted = provider.prepare(query);
+    REQUIRE(std::holds_alternative<Rejection>(admitted));
+    const auto& diagnostics = std::get<Rejection>(admitted).diagnostics;
+    REQUIRE(diagnostics.size() == 1);
+    CHECK(diagnostics[0].field == "lazy.direction");
+}
+
 TEST_CASE("empty expression support stays empty and a cancelled materialization publishes nothing") {
     const auto empty = take(sets::make_empty({{"empty"}, 1, {}})).as_handle();
     OperationRequest request{{{"p"}, {"empty-image"}, {"empty-lazy"}},
