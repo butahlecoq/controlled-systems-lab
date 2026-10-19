@@ -1,4 +1,9 @@
 if(TARGET CSL::highs_lp)
+  add_executable(historical_hull_differential_test tests/unit/geometry/historical_hull_differential_test.cpp)
+  target_link_libraries(historical_hull_differential_test PRIVATE CSL::hull CSL::quickhull_2d CSL::highs_lp doctest::doctest)
+  add_test(NAME historical_hull_differential_test COMMAND historical_hull_differential_test)
+  csl_test_target(historical_hull_differential_test geometry)
+
   add_executable(hull_reducer_test tests/unit/geometry/hull_reducer_test.cpp)
   target_link_libraries(hull_reducer_test PRIVATE CSL::hull CSL::highs_lp doctest::doctest)
   add_test(NAME hull_reducer_test COMMAND hull_reducer_test)

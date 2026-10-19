@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <future>
 #include <thread>
+#include <algorithm>
+#include <array>
 using namespace csl;
 using namespace csl::optimization;
 using namespace csl::registry;
@@ -92,6 +94,28 @@ TEST_CASE("signed triangle has literal degenerate pivot and original row signs")
         CHECK(s.trace[i].auxiliary_before==before[i]);CHECK(s.trace[i].auxiliary_after==after[i]);
         CHECK(std::get<po::ArtificialVariable>(s.trace[i].leaving).row==i);
     }
+}
+
+TEST_CASE("signed barycentric solutions agree with literal weights and reference LP under every column permutation") {
+    const std::array<Vector,3> columns{{{-1,-1,1},{1,-1,1},{-1,1,1}}};
+    const Vector literal_weights{0.5,0.25,0.25};
+    std::array<std::size_t,3> permutation{0,1,2};
+    do {
+        SparseMatrix matrix{3,3,{0,3,6,9},{0,1,2,0,1,2,0,1,2},{}};
+        for (std::size_t row=0; row<3; ++row)
+            for (const auto column : permutation) matrix.values.push_back(columns[column][row]);
+        const auto p=accepted(po::make_program({{"permuted-signed"},{"barycentric"}},matrix,Vector{-0.5,-0.5,1}));
+        Vector expected;
+        for (const auto column : permutation) expected.push_back(literal_weights[column]);
+        auto [workspace]=prepare(p).create();
+        candidate(accepted(workspace->run(context())),p,expected);
+        candidate(accepted(workspace->run(context())),p,expected);
+#ifdef CSL_PHASE_ONE_REFERENCE
+        const auto provider=accepted(adapters::lp::make_highs_registration());
+        auto reference=provider.factory(p); REQUIRE(reference);
+        candidate(accepted(reference->solve(p,context())),p,expected);
+#endif
+    } while (std::next_permutation(permutation.begin(),permutation.end()));
 }
 TEST_CASE("edge outside and duplicate ties retain uncertainty and least basic index") {
     const auto edge=triangle({.5,0,1},"edge");auto [e]=prepare(edge).create();candidate(accepted(e->run(context())),edge,{.5,.5,0});
