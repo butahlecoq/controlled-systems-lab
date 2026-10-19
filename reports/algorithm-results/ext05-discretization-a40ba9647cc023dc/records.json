@@ -1,0 +1,301 @@
+{
+  "analytic": {
+    "trajectory": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        3,
+        0
+      ]
+    ],
+    "transition_A01": [
+      1,
+      2
+    ],
+    "transition_B0": [
+      0.5,
+      2
+    ],
+    "transition_B1": [
+      1,
+      2
+    ]
+  },
+  "environment": {
+    "absolute_tolerance": 1e-10,
+    "architecture": "AMD64",
+    "collected_utc": "2026-10-19T13:07:40.264868+00:00",
+    "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
+    "configuration": "Release",
+    "host": "DESKTOP-S9O3F6S",
+    "logical_processors": 12,
+    "max_attempts_per_stage": 100000,
+    "native_threads_observed": null,
+    "native_threads_requested": 1,
+    "os": "Windows-11-10.0.22631-SP0",
+    "outer_workers_requested": 1,
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "relative_tolerance": 1e-10,
+    "seed": null,
+    "source_commit": "6cc1740a59ca95e4a575e921cef793c2ac262e9f",
+    "source_tree": "f882679431bd2a64e0c265663eeb3309aa16fc3c",
+    "timing_scope": "Fixture construction, one public discretize, snapshot and two step calls, including literal checks; excludes CSV output and rendering",
+    "warmup_policy": "One excluded 100-call batch before seven measured 100-call batches",
+    "workspace_reuse": "none"
+  },
+  "evidence_scope": {
+    "assurance": "ordinary binary64 numerical evaluation",
+    "internal_counters": "unavailable",
+    "local_error": "RK4 step-doubling difference divided by 15 is an observed local estimate, not a certified global bound",
+    "performance": "Single-adapter descriptive durations on one host and one fixed case; no comparator, speedup or limiter attribution"
+  },
+  "measurement": {
+    "failures": 0,
+    "max_batch_ns": 1012900,
+    "measured_calls": 700,
+    "median_batch_ns": 947100,
+    "min_batch_ns": 936500,
+    "raw_measure_sha256": "f5d5722abc7f38a099ccaa440cc3b68d43d27f8f776c38755b5790caa0c6cd7a",
+    "raw_smoke_sha256": "29cfd485a2979b86cfdb280efe804b4d520250eb2b8d3a599f35abffcd0eaf1f",
+    "trials": [
+      {
+        "a01": "2",
+        "accepted": "2",
+        "b0": "2",
+        "b1": "2",
+        "calls": "100",
+        "case": "double-integrator",
+        "elapsed_ns": "948200",
+        "local_estimate": "0",
+        "phase": "trial",
+        "rejected": "0",
+        "repetition": "0",
+        "status": "success",
+        "verified": "true",
+        "x1_position": "1",
+        "x1_velocity": "2",
+        "x2_position": "3",
+        "x2_velocity": "0"
+      },
+      {
+        "a01": "2",
+        "accepted": "2",
+        "b0": "2",
+        "b1": "2",
+        "calls": "100",
+        "case": "double-integrator",
+        "elapsed_ns": "949600",
+        "local_estimate": "0",
+        "phase": "trial",
+        "rejected": "0",
+        "repetition": "1",
+        "status": "success",
+        "verified": "true",
+        "x1_position": "1",
+        "x1_velocity": "2",
+        "x2_position": "3",
+        "x2_velocity": "0"
+      },
+      {
+        "a01": "2",
+        "accepted": "2",
+        "b0": "2",
+        "b1": "2",
+        "calls": "100",
+        "case": "double-integrator",
+        "elapsed_ns": "1012900",
+        "local_estimate": "0",
+        "phase": "trial",
+        "rejected": "0",
+        "repetition": "2",
+        "status": "success",
+        "verified": "true",
+        "x1_position": "1",
+        "x1_velocity": "2",
+        "x2_position": "3",
+        "x2_velocity": "0"
+      },
+      {
+        "a01": "2",
+        "accepted": "2",
+        "b0": "2",
+        "b1": "2",
+        "calls": "100",
+        "case": "double-integrator",
+        "elapsed_ns": "947100",
+        "local_estimate": "0",
+        "phase": "trial",
+        "rejected": "0",
+        "repetition": "3",
+        "status": "success",
+        "verified": "true",
+        "x1_position": "1",
+        "x1_velocity": "2",
+        "x2_position": "3",
+        "x2_velocity": "0"
+      },
+      {
+        "a01": "2",
+        "accepted": "2",
+        "b0": "2",
+        "b1": "2",
+        "calls": "100",
+        "case": "double-integrator",
+        "elapsed_ns": "943000",
+        "local_estimate": "0",
+        "phase": "trial",
+        "rejected": "0",
+        "repetition": "4",
+        "status": "success",
+        "verified": "true",
+        "x1_position": "1",
+        "x1_velocity": "2",
+        "x2_position": "3",
+        "x2_velocity": "0"
+      },
+      {
+        "a01": "2",
+        "accepted": "2",
+        "b0": "2",
+        "b1": "2",
+        "calls": "100",
+        "case": "double-integrator",
+        "elapsed_ns": "941800",
+        "local_estimate": "0",
+        "phase": "trial",
+        "rejected": "0",
+        "repetition": "5",
+        "status": "success",
+        "verified": "true",
+        "x1_position": "1",
+        "x1_velocity": "2",
+        "x2_position": "3",
+        "x2_velocity": "0"
+      },
+      {
+        "a01": "2",
+        "accepted": "2",
+        "b0": "2",
+        "b1": "2",
+        "calls": "100",
+        "case": "double-integrator",
+        "elapsed_ns": "936500",
+        "local_estimate": "0",
+        "phase": "trial",
+        "rejected": "0",
+        "repetition": "6",
+        "status": "success",
+        "verified": "true",
+        "x1_position": "1",
+        "x1_velocity": "2",
+        "x2_position": "3",
+        "x2_velocity": "0"
+      }
+    ],
+    "warmup": {
+      "a01": "2",
+      "accepted": "2",
+      "b0": "2",
+      "b1": "2",
+      "calls": "100",
+      "case": "double-integrator",
+      "elapsed_ns": "981500",
+      "local_estimate": "0",
+      "phase": "warmup",
+      "rejected": "0",
+      "repetition": "0",
+      "status": "success",
+      "verified": "true",
+      "x1_position": "1",
+      "x1_velocity": "2",
+      "x2_position": "3",
+      "x2_velocity": "0"
+    }
+  },
+  "model": {
+    "A": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "B": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ],
+    "E_shape": [
+      2,
+      0
+    ],
+    "coefficient_variation": "constant_lti",
+    "controls": [
+      2,
+      -1
+    ],
+    "hold": "zero_order_hold",
+    "initial_state": [
+      0,
+      0
+    ],
+    "offset": [
+      0,
+      0
+    ],
+    "time_domain": "continuous",
+    "times": [
+      0,
+      1,
+      3
+    ]
+  },
+  "report_id": "ext05-discretization-a40ba9647cc023dc",
+  "schema": "csl.ext05-discretization-report/1",
+  "source_commit": "6cc1740a59ca95e4a575e921cef793c2ac262e9f",
+  "source_receipts": {
+    "postrun": {
+      "commit": "6cc1740a59ca95e4a575e921cef793c2ac262e9f",
+      "executable_sha256": "7d92f97b4d5392de1cfbdbf55c56d0b82ba258b6eefc92dc201eb7675f9833ab",
+      "observed_utc": "2026-10-19T13:07:40.263690+00:00",
+      "phase": "postrun",
+      "status": [],
+      "tree": "f882679431bd2a64e0c265663eeb3309aa16fc3c"
+    },
+    "prebuild": {
+      "commit": "6cc1740a59ca95e4a575e921cef793c2ac262e9f",
+      "observed_utc": "2026-10-19T13:07:25.160201+00:00",
+      "phase": "prebuild",
+      "status": [],
+      "tree": "f882679431bd2a64e0c265663eeb3309aa16fc3c"
+    }
+  },
+  "source_sha256": {
+    "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "CMakeCache.raw.txt": "039bc9a0cd4d268050598f08e9c889f39f875024b6e972cb1ea999c396e52b44",
+    "build.log": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
+    "configure.log": "1783e55db9b3659ecb0ba8dd4fb463a85a8c512d3a97d3f5796913fb1c9aca24",
+    "driver.cpp": "74ceb8717cb91b722dce2d3c82e985202188a27ae2772cd5fd3ac3ebba214810",
+    "host.json": "e050568020b37eca218935042c868e160a5b4c79d391cff5b27fa9a55262f65a",
+    "measure.csv": "f5d5722abc7f38a099ccaa440cc3b68d43d27f8f776c38755b5790caa0c6cd7a",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postrun.json": "70df199b17f8463dde03edfc95b520bea61bd74e7f250d630e5853839906400a",
+    "prebuild.json": "bdff4ef790a7eca19b882184fa08e1fd2c9c02a758044229d7bfb2dbfe1fa7a3",
+    "smoke.csv": "29cfd485a2979b86cfdb280efe804b4d520250eb2b8d3a599f35abffcd0eaf1f",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_tree": "f882679431bd2a64e0c265663eeb3309aa16fc3c"
+}

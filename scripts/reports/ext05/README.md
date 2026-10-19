@@ -26,3 +26,11 @@ Batch duration includes fixture construction, public conversion, snapshot,
 two state steps and literal checks. It excludes CSV output and rendering.
 This is descriptive single-adapter timing on one host; no speedup or certified
 global error bound follows from it.
+
+The accepted clean source is `6cc1740a59ca95e4a575e921cef793c2ac262e9f`.
+Its capture is retained outside the repository at
+`D:\work\PhD\captures\ext05-capture-20261019-v3`. Earlier v1/v2 captures
+were superseded after timing-scope and review corrections; their bytes remain
+outside the repository for audit, and their unmerged candidate is retained in
+Git history. The reviewed candidate is `ext05-discretization-a40ba9647cc023dc`.
+Capture paths are audit inputs, not runtime or install dependencies.
