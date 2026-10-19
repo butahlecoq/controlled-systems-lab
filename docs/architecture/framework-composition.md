@@ -93,6 +93,7 @@ does not claim to save a paired proof-bearing result.
 Headers live under `include/csl`. Authoritative contracts cover
 [resolved problems](../contracts/resolved-problems.md), [registry](../contracts/registry.md),
 [trajectory verification](../contracts/trajectory-verification.md),
+[certificate verification](../contracts/certificates.md),
 [run records](../contracts/run-statistics.md) and [reports](../contracts/algorithm-report-records.md).
 Native types stay behind adapters; mutable workspaces are exclusive per solve.
 

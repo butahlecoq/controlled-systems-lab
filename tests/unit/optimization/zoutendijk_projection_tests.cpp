@@ -49,6 +49,10 @@ protected:
 };
 std::vector<Fixture> fixtures() {
     return {
+        {"box-corner", polyhedron("box-corner", {0, 2, {0}, {}, {}}, {{0, 1}, {0, 1}}, {}),
+            {2, -1}, {0.5, 0.5}, {1, 0}},
+        {"box-interior", polyhedron("box-interior", {0, 2, {0}, {}, {}}, {{0, 1}, {0, 1}}, {}),
+            {0.25, 0.75}, {0.5, 0.5}, {0.25, 0.75}},
         {"interval", polyhedron("interval", {0, 1, {0}, {}, {}}, {{0, 1}}, {}), {-2}, {0.5}, {0}},
         {"box", polyhedron("box", {0, 2, {0}, {}, {}}, {{0, 1}, {0, 1}}, {}), {2, 0.25}, {0.5, 0.5}, {1, 0.25}},
         {"face", polyhedron("face", {1, 2, {0, 2}, {0, 1}, {1, 1}}, {{0, {}}, {0, {}}}, {{1, 1}}),
@@ -184,4 +188,55 @@ TEST_CASE("interrupted direction solves preserve the last iterate without an opt
     const auto cancellation = project(feasible, Vector{2}, Vector{0.25}, *workspace, stopped_context);
     REQUIRE(std::holds_alternative<ProjectionStopped>(cancellation));
     CHECK(std::get<ProjectionStopped>(cancellation).reason == ProjectionStopReason::cancelled);
+}
+
+TEST_CASE("every limiting row is considered after negative and zero directional derivatives") {
+    // From (0,0) toward (2,0): -x and y cannot limit a positive x step.
+    // Both later x upper bounds must be checked, irrespective of row order.
+    for (const bool reverse_limits : {false, true}) {
+        const auto feasible = polyhedron("all-direction-rows",
+            {4, 2, {0, 1, 2, 3, 4}, {0, 1, 0, 0}, {-1, 1, 1, 1}},
+            {{{}, {}}, {{}, {}}},
+            {{{}, 1}, {{}, 1}, {{}, reverse_limits ? 0.25 : 0.75},
+                {{}, reverse_limits ? 0.75 : 0.25}});
+        auto backend = accepted(adapters::lp::make_highs_registration());
+        auto workspace = backend.factory(feasible);
+        REQUIRE(workspace);
+        const auto result = accepted(project(feasible, Vector{2, 0}, Vector{0, 0},
+            *workspace, context()));
+        REQUIRE(result.point.size() == 2);
+        CHECK(result.point[0] == doctest::Approx(0.25).epsilon(1e-7));
+        CHECK(result.point[1] == doctest::Approx(0).epsilon(1e-7));
+        CHECK(result.distance == doctest::Approx(1.75).epsilon(1e-7));
+    }
+}
+
+TEST_CASE("projection distinguishes an empty set iteration exhaustion and arithmetic overflow") {
+    const auto empty = polyhedron("empty-set", {2, 1, {0, 1, 2}, {0, 0}, {1, 1}},
+        {{{}, {}}}, {{{}, 0}, {1, {}}});
+    auto backend = accepted(adapters::lp::make_highs_registration());
+    auto workspace = backend.factory(empty);
+    REQUIRE(workspace);
+    const auto invalid = project(empty, Vector{2}, Vector{0}, *workspace, context());
+    REQUIRE(std::holds_alternative<Diagnostics>(invalid));
+    REQUIRE_FALSE(std::get<Diagnostics>(invalid).empty());
+    CHECK(std::get<Diagnostics>(invalid).front().field == "zoutendijk.start");
+
+    const auto box = polyhedron("iteration-cap", {0, 2, {0}, {}, {}}, {{0, 1}, {0, 1}}, {});
+    const auto capped = project(box, Vector{2, -1}, Vector{0.5, 0.5}, *workspace, context(), {1});
+    REQUIRE(std::holds_alternative<ProjectionStopped>(capped));
+    const auto& stopped = std::get<ProjectionStopped>(capped);
+    CHECK(stopped.reason == ProjectionStopReason::resource_limit);
+    CHECK(stopped.iterations == 1);
+    REQUIRE(stopped.last_feasible_iterate.size() == 2);
+    for (const auto coordinate : stopped.last_feasible_iterate) {
+        CHECK(coordinate >= 0);
+        CHECK(coordinate <= 1);
+    }
+
+    const auto line = polyhedron("overflow", {0, 1, {0}, {}, {}}, {{{}, {}}}, {});
+    const auto overflow = project(line, Vector{1e308}, Vector{-1e308}, *workspace, context());
+    REQUIRE(std::holds_alternative<ProjectionStopped>(overflow));
+    CHECK(std::get<ProjectionStopped>(overflow).reason == ProjectionStopReason::numerical_failure);
+    CHECK(std::get<ProjectionStopped>(overflow).last_feasible_iterate == Vector{-1e308});
 }

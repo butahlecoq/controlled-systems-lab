@@ -19,3 +19,8 @@ add_executable(input_public_client tests/installed/input_client.cpp)
 target_link_libraries(input_public_client PRIVATE CSL::input)
 add_test(NAME input_public_client COMMAND input_public_client)
 csl_test_target(input_public_client input)
+
+add_executable(continuous_model_tests tests/contract/input/continuous_model_tests.cpp)
+target_link_libraries(continuous_model_tests PRIVATE CSL::input doctest::doctest)
+add_test(NAME continuous_model_tests COMMAND continuous_model_tests)
+csl_test_target(continuous_model_tests input)

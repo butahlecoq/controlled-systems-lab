@@ -1,5 +1,9 @@
 # Scientific review and contributions
 
+For public API, dependency, installation, example and publication changes, record
+the PR's release/package impact using the [delivery guide](docs/agents/delivery.md).
+It covers GitHub Releases, when Packages is useful, and minimal Pages examples.
+
 This repository contains a C++20 library and its research dossier. The owner selected C++ as the main implementation language, with C++20 as the working standard and Python allowed for independent verification. Start implementation with the [development guide](docs/build/development.md), [current composition](docs/architecture/framework-composition.md) and canonical [glossary](docs/research/glossary.md). Read [the research index](docs/research/README.md), [foundations](docs/research/scientific-foundations.md) and [architecture hypothesis](docs/architecture/initial-architecture.md) first.
 
 Use issues for scientific corrections, reproduction reports and algorithm proposals. Cite an Lxx source identifier or a primary external reference, the formula/page, exact assumptions and a minimal example where possible. Distinguish a proven discrepancy, an interpretation question, a numerical observation and an implementation defect.

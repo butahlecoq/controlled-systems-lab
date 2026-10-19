@@ -1,0 +1,32 @@
+name: Validation ownership routing
+
+on:
+  workflow_call:
+    outputs:
+      native:
+        value: ${{ jobs.route.outputs.native }}
+      reports:
+        value: ${{ jobs.route.outputs.reports }}
+
+permissions:
+  contents: read
+
+jobs:
+  route:
+    runs-on: ubuntu-24.04
+    outputs:
+      native: ${{ steps.paths.outputs.native }}
+      reports: ${{ steps.paths.outputs.reports }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Exercise real Git event routing
+        run: python -m unittest discover -s tests/ci -p 'test_*.py'
+      - name: Classify the complete event diff
+        id: paths
+        run: python scripts/ci/route_changes.py

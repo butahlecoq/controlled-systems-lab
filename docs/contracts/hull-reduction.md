@@ -133,3 +133,80 @@ points used by those queries. `zero_width_coordinates` and
 recursive QuickHull counter is reported. Nonfinite, mismatched, or unsafe
 box arithmetic falls back to input-order streaming and is still validated by
 the shared reducer.
+
+### Recursive split-and-merge hull strategy
+
+`make_recursive_hull_reducer_registration(lp_provider)` registers the new
+`csl.hull.recursive-split-merge` strategy. The supplied LP registration is the
+selected membership backend; the strategy creates its own exclusive LP
+workspaces from that registration. Its deterministic partition policy sorts
+original point IDs by lexicographic coordinate order, using the original ID
+only to break coordinate-identical ties, then splits each node at the midpoint
+of that order. The leaf threshold is fixed at 16 points. A node with at most
+that many points is reduced with the existing exact-certified reducer.
+
+For any finite point sets `A` and `B`, `conv(A union B) =
+conv(conv(A) union conv(B))`. A leaf reduction retains a subset with the same
+convex hull as that leaf. Applying the identity at each internal node therefore
+preserves the input hull through every merge. The merge candidate set is the
+union of the child retained IDs; the existing reducer checks its candidates
+with exact dyadic convex-combination certificates, so uncertain outcomes remain
+retained. Certificate IDs always refer to the original `PointCloud`.
+
+When the common `ResourcePolicy` allows at least two outer workers, the root's
+two child subtrees run concurrently, each with a separately created LP
+workspace. Deeper recursion within each subtree is sequential; the merge runs
+after both children finish and reuses one now-idle child workspace. With one
+outer worker, both subtrees still have exclusive workspaces and run in
+deterministic left-then-right order. Each workspace receives the unchanged
+caller `ExecutionContext`, preserving the shared resource budget, deadline,
+cancellation token and numerical policy. No nested parallel scheduling is
+used.
+
+`RecursiveReductionMetrics` records leaf and merge node counts, LP calls
+separately for leaves and merges, the maximum number of points present in any
+merge candidate set, the number of concurrently executed child subtrees, and
+measured root-level parallel overhead. Parallel overhead is the root elapsed
+wall time minus the longer of the two measured child-subtree wall times,
+clamped to zero; it includes scheduling, synchronization and merge work. These
+counters describe one execution and do not imply a general speedup. If child
+workspace creation or a recursive child returns diagnostics, the strategy
+returns diagnostics without publishing a partial reduction.
+
+#### Complexity, representation costs and evaluation
+
+The guarantee assumes a finite point cloud with equal coordinate dimension,
+and an LP provider whose completed responses are correctly bound to each
+membership request. Exact dyadic certificates authorize removals; uncertain
+responses retain points. For any finite input, the convex-hull identity above
+preserves the represented hull at each partition and merge. It does not promise
+that every non-extreme point is removed, nor a particular retained vertex
+ordering.
+
+For `n` points of dimension `d`, each internal node sorts its IDs. With balanced
+midpoint splits and leaf size 16, sorting costs `O(d n log^2 n)` coordinate
+comparisons in the worst case across all levels. ID partitioning and merging
+cost `O(n log n)` total ID operations, excluding the LP reducer. If every point
+survives every merge candidate set, the sum of candidate counts across merge
+levels is `O(n log n)`; LP call and solver cost therefore depend on that
+data-dependent candidate count and the selected backend, and have no
+backend-independent time bound. The reported `peak_merge_points` is the largest
+single candidate set, bounded by `n`.
+
+The input cloud uses `O(nd)` coordinate storage. Partition ID vectors and
+recursive stacks use `O(n)` additional ID storage at a time, excluding result
+records. The reducer retains attempts and certificates from leaves and merges;
+in the worst case those records can total `O(n log n)` because a candidate may
+be reconsidered at each merge level. Two LP workspaces may be live at once for
+root children, plus the retained merge result data. Actual workspace memory is
+provider-specific and is not included in the point-count metric.
+
+Evaluation compares support and certificate validity with the independent
+baseline reducer on signed, duplicate and affine-degenerate fixtures and input
+permutations. Performance evidence is reported separately using fixed clean
+Release source and harness commits, raw per-repetition records, environment and
+resource provenance, and a measured interval that identifies workspace setup,
+recursive work and verification. Any recursive-vs-baseline timing comparison
+requires alternating tuned repetitions and a separate limiter profile; small
+fixture measurements without that evidence remain descriptive, with no
+universal speedup claim.

@@ -462,12 +462,12 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
             if(exact_direct_h_encoding) {
                 result.outcome={p.identity(),MathematicalOutcome::infeasible,*exact,{
                     "Generated program "+expected_program.program.value+" has an exact verified Farkas infeasibility certificate.",
-                    "Source-to-program equivalence is the direct H-row joint-history encoding with identity-ordered source-history coordinates."
+                    "Source infeasibility still lacks a checked source-to-generated-program transfer certificate."
                 }};
                 result.family.reset();result.complete_proposal.reset();result.partial_proposal.reset();
                 result.objective={};result.incumbents.clear();
             } else {
-                result.outcome={p.identity(),MathematicalOutcome::infeasible,Unestablished{}, {
+                result.outcome={p.identity(),MathematicalOutcome::undetermined,Unestablished{}, {
                     "Source generated program: "+evidence.outcome.subject.program.value+".",
                     "Transfer from generated-program infeasibility to the resolved problem is not independently validated."
                 }};

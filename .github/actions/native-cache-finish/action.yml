@@ -1,0 +1,61 @@
+name: Preserve native cache evidence
+description: Record work counters and save successful snapshots in their permitted scope.
+inputs:
+  lane:
+    description: Artifact lane identifier.
+    required: true
+  clean:
+    description: Disable cache saves.
+    default: 'false'
+  build_success:
+    description: Caller job success before this step.
+    required: true
+  archive_key:
+    description: Archive key from setup.
+    required: true
+  compiler_key:
+    description: Compiler key from setup.
+    required: true
+  compiler_enabled:
+    description: Whether setup enabled ccache.
+    required: true
+  save_allowed:
+    description: Trust decision from setup.
+    required: true
+  archive_hit:
+    description: Archive restore result.
+    required: false
+  compiler_hit:
+    description: Compiler restore result.
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Record compiler work counts
+      if: inputs.compiler_enabled == 'true'
+      shell: bash
+      run: |
+        ccache --show-stats > .ci-cache/evidence/compiler-summary.txt
+        ccache --print-stats > .ci-cache/evidence/compiler-counters.txt
+        cat .ci-cache/evidence/compiler-summary.txt
+    - name: Save verified archive snapshot
+      if: inputs.clean != 'true' && inputs.build_success == 'true' && inputs.save_allowed == 'true' && inputs.archive_hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-cache/archives/*.tar.gz
+        key: ${{ inputs.archive_key }}
+    - name: Save compatible compiler snapshot
+      if: inputs.compiler_enabled == 'true' && inputs.build_success == 'true' && inputs.save_allowed == 'true' && inputs.compiler_hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-cache/objects
+        key: ${{ inputs.compiler_key }}
+    - name: Upload cache context and actual work counters
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: native-cache-${{ inputs.lane }}-${{ github.run_attempt }}
+        path: .ci-cache/evidence/
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 7

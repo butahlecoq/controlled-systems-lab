@@ -118,7 +118,7 @@ The complete literal fixture `tests/reporting/fixtures/view-v1.json` is conspicu
 
 Every successful row requires all six observed phase spans, actual backend provenance and a returned current first attempt; configured source identity must agree with the saved source. Native iteration availability/value/unit/scope is typed and must agree with the recognized retained diagnostic prefix. Failed/stopped/Unsupported rows may retain unavailable phases with reasons. Infeasible/unbounded literal reference matches do not require invented objective candidates.
 
-Native iteration extraction recognizes only the exact `adapter.version=1.0.0+highs.1.11.0` / native1.11.0 prefix, before `native.log:`. Duplicate keys or a conflicting version fail. Arbitrary native log text is never interpreted as evidence or a runtime decomposition.
+Native iteration extraction recognizes the exact `adapter.version=1.0.0+highs.1.11.0` and `adapter.version=1.1.0+highs.1.11.0` / native1.11.0 prefixes, before `native.log:`. Duplicate keys or a conflicting version fail. Arbitrary native log text is never interpreted as evidence or a runtime decomposition.
 
 ### Canonical bytes and file hashes
 

@@ -1,0 +1,9 @@
+phase,case,repetition,calls,status,verified,elapsed_ns,x,y,objective,projected_residual,iterations,objective_evaluations
+warmup,box-quadratic,0,100,success,true,44166800,1,-1,1,0,1,2
+trial,box-quadratic,0,100,success,true,42482100,1,-1,1,0,1,2
+trial,box-quadratic,1,100,success,true,49417700,1,-1,1,0,1,2
+trial,box-quadratic,2,100,success,true,45573800,1,-1,1,0,1,2
+trial,box-quadratic,3,100,success,true,44444200,1,-1,1,0,1,2
+trial,box-quadratic,4,100,success,true,44524900,1,-1,1,0,1,2
+trial,box-quadratic,5,100,success,true,43342700,1,-1,1,0,1,2
+trial,box-quadratic,6,100,success,true,40495400,1,-1,1,0,1,2

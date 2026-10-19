@@ -2,17 +2,20 @@ name: Algorithm report records and site
 
 on:
   pull_request:
-    paths: ['benchmarks/reporting/**', 'scripts/reports/**', 'tests/reporting/**', 'reports/algorithm-results/**', 'cmake/Report*', 'CMakeLists.txt', '.github/workflows/algorithm-reports.yml']
   push:
     branches: [main]
-    paths: ['benchmarks/reporting/**', 'scripts/reports/**', 'tests/reporting/**', 'reports/algorithm-results/**', 'cmake/Report*', 'CMakeLists.txt', '.github/workflows/algorithm-reports.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  route:
+    uses: ./.github/workflows/validation-routing.yml
+
   validate:
+    needs: route
+    if: needs.route.outputs.reports == 'true'
     runs-on: ubuntu-24.04
     outputs:
       has_reports: ${{ steps.catalog.outputs.has_reports }}
@@ -32,6 +35,7 @@ jobs:
       - name: Validate frozen issue 3 saved measurement and projections
         run: python scripts/reports/issue3/render_saved.py --bundle reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f --check
       - name: Build and smoke the APP-01 public plan-check driver
+        if: needs.route.outputs.native == 'true'
         shell: bash
         run: |
           cmake -S . -B build/app01-report-ci -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_APP01_REPORT=ON
@@ -50,11 +54,34 @@ jobs:
             if test -f reports/algorithm-results/app01-publications.json; then
               python scripts/reports/stage_app01.py --catalog reports/algorithm-results/app01-publications.json --site build/report-site
             fi
+            if test -f reports/algorithm-results/app02-publications.json; then
+              python scripts/reports/stage_app02.py --catalog reports/algorithm-results/app02-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/app03-publications.json; then
+              python scripts/reports/stage_app03.py --catalog reports/algorithm-results/app03-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/app04-publications.json; then
+              python scripts/reports/stage_app04.py --catalog reports/algorithm-results/app04-publications.json --site build/report-site
+            fi
             if test -f reports/algorithm-results/ext01-publications.json; then
               python scripts/reports/stage_ext01.py --catalog reports/algorithm-results/ext01-publications.json --site build/report-site
             fi
             if test -f reports/algorithm-results/ext04-publications.json; then
               python scripts/reports/stage_ext04.py --catalog reports/algorithm-results/ext04-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext05-publications.json; then
+              python scripts/reports/stage_ext05.py --catalog reports/algorithm-results/ext05-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/opt10-publications.json; then
+              python scripts/reports/stage_opt10.py --catalog reports/algorithm-results/opt10-publications.json --site build/report-site
+            fi
+            if test -d reports/algorithm-results/issue4-volterra-7dce05b47c50c27a; then
+              python scripts/reports/stage_issue4_volterra.py \
+                --source reports/algorithm-results/issue4-volterra-7dce05b47c50c27a \
+                --site build/report-site
+            fi
+            if test -f reports/algorithm-results/exp04-publications.json; then
+              python scripts/reports/stage_exp04.py --catalog reports/algorithm-results/exp04-publications.json --site build/report-site
             fi
             if test -f reports/algorithm-results/geo07-publications.json; then
               python scripts/reports/stage_geo07.py --catalog reports/algorithm-results/geo07-publications.json --site build/report-site
@@ -64,6 +91,9 @@ jobs:
             fi
             if test -f reports/algorithm-results/geo07-dependent-publications.json; then
               python scripts/reports/stage_geo07_dependent.py --catalog reports/algorithm-results/geo07-dependent-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/geo08-publications.json; then
+              python scripts/reports/stage_geo08.py --catalog reports/algorithm-results/geo08-publications.json --site build/report-site
             fi
             if test -f reports/algorithm-results/finite-feedback-publications.json; then
               python scripts/reports/stage_finite_feedback.py --catalog reports/algorithm-results/finite-feedback-publications.json --site build/report-site
@@ -78,11 +108,33 @@ jobs:
             echo 'No measured catalogue has been committed; publication remains pending.'
             echo 'has_reports=false' >> "$GITHUB_OUTPUT"
           fi
+      - name: Stage minimal 2D visual examples from reviewed saved results
+        if: steps.catalog.outputs.has_reports == 'true'
+        run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site
       - name: Upload reviewed static site on main only
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.catalog.outputs.has_reports == 'true'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: build/report-site
+
+  report-status:
+    name: Reporting validation
+    if: always()
+    needs: [route, validate]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require routing and complete requested reporting validation
+        env:
+          ROUTE_RESULT: ${{ needs.route.result }}
+          REPORTS: ${{ needs.route.outputs.reports }}
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+        run: |
+          test "$ROUTE_RESULT" = success
+          if [ "$REPORTS" = true ]; then
+            test "$VALIDATE_RESULT" = success
+          else
+            test "$REPORTS" = false
+          fi
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.validate.outputs.has_reports == 'true'

@@ -24,11 +24,11 @@ struct CallbackState {
 // Callback detachment precedes destruction of the borrowed state, including
 // partial activation failure. A guard cannot be copied to another session.
 template<class Check> class CallbackGuard {
-    Highs& native_;
+    Highs* native_;
 public:
-    CallbackGuard(Highs& native,CallbackState& state,Check check):native_(native) {
+    CallbackGuard(Highs& native,CallbackState& state,Check check):native_(&native) {
         try {
-            check(native_.setCallback([](int type,const std::string& message,
+            check(native_->setCallback([](int type,const std::string& message,
                 const HighsCallbackOutput*,HighsCallbackInput* input,void* user) {
                 auto& capture=*static_cast<CallbackState*>(user);
                 if (type==kCallbackLogging) capture.log+=message;
@@ -37,16 +37,22 @@ public:
                     if (input && capture.stop) input->user_interrupt=true;
                 }
             },&state));
-            check(native_.startCallback(kCallbackLogging));
-            check(native_.startCallback(kCallbackSimplexInterrupt));
+            check(native_->startCallback(kCallbackLogging));
+            check(native_->startCallback(kCallbackSimplexInterrupt));
         } catch (...) {
-            native_.setCallback(HighsCallbackFunctionType{},nullptr);
+            detach();
             throw;
         }
     }
     CallbackGuard(const CallbackGuard&)=delete;
     CallbackGuard& operator=(const CallbackGuard&)=delete;
-    ~CallbackGuard() { native_.setCallback(HighsCallbackFunctionType{},nullptr); }
+    void detach() noexcept {
+        if (native_) {
+            native_->setCallback(HighsCallbackFunctionType{},nullptr);
+            native_=nullptr;
+        }
+    }
+    ~CallbackGuard() { detach(); }
 };
 // Keep tolerance, iteration limits, solver selection, model clearing/reuse,
 // warm starts and QP readback in each adapter's audited numerical profile.

@@ -24,6 +24,40 @@ add_executable(installed_input_client input_client.cpp)
 target_link_libraries(installed_input_client PRIVATE CSL::input)
 set_target_properties(installed_input_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_input_client COMMAND installed_input_client)
+add_executable(installed_continuous_discretization_client continuous_discretization_client.cpp)
+target_link_libraries(installed_continuous_discretization_client PRIVATE CSL::input)
+set_target_properties(installed_continuous_discretization_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_continuous_discretization_client COMMAND installed_continuous_discretization_client)
+set_tests_properties(installed_continuous_discretization_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed continuous adapter: two physical intervals and source receipt passed")
+
+add_executable(installed_box_parallelotope_client box_parallelotope_client.cpp)
+target_link_libraries(installed_box_parallelotope_client PRIVATE CSL::approximation)
+set_target_properties(installed_box_parallelotope_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_box_parallelotope_client COMMAND installed_box_parallelotope_client)
+
+add_executable(installed_ellipsoidal_client ellipsoidal_client.cpp)
+target_link_libraries(installed_ellipsoidal_client PRIVATE CSL::approximation)
+set_target_properties(installed_ellipsoidal_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_ellipsoidal_client COMMAND installed_ellipsoidal_client)
+set_tests_properties(installed_ellipsoidal_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed ellipsoidal client: two reviewed outer members passed")
+set_tests_properties(installed_box_parallelotope_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed box/parallelotope client: rotated diamond bounds passed")
+
+add_executable(installed_zonotope_reduction_client zonotope_reduction_client.cpp)
+target_link_libraries(installed_zonotope_reduction_client PRIVATE CSL::approximation)
+set_target_properties(installed_zonotope_reduction_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_zonotope_reduction_client COMMAND installed_zonotope_reduction_client)
+set_tests_properties(installed_zonotope_reduction_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed zonotope client: independently admitted axis cover passed")
+
+add_executable(installed_lazy_geometry_client lazy_geometry_client.cpp)
+target_link_libraries(installed_lazy_geometry_client PRIVATE CSL::lazy_geometry CSL::polyhedral)
+set_target_properties(installed_lazy_geometry_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_lazy_geometry_client COMMAND installed_lazy_geometry_client)
+set_tests_properties(installed_lazy_geometry_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed lazy geometry client: sampled support and budgeted V output passed")
 
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
 add_executable(installed_conversion_client conversion_client.cpp)
@@ -78,6 +112,13 @@ add_executable(installed_model_client model_client.cpp)
 target_link_libraries(installed_model_client PRIVATE CSL::model)
 set_target_properties(installed_model_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_model_client COMMAND installed_model_client)
+
+add_executable(installed_simulation_client simulation_client.cpp)
+target_link_libraries(installed_simulation_client PRIVATE CSL::simulation)
+set_target_properties(installed_simulation_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_simulation_client COMMAND installed_simulation_client)
+set_tests_properties(installed_simulation_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed simulation client: independent nonlinear terminal 1.5 passed")
 
 add_executable(installed_finite_feedback_client finite_feedback_client.cpp)
 target_link_libraries(installed_finite_feedback_client PRIVATE CSL::finite_feedback_port)
@@ -163,6 +204,13 @@ set_target_properties(installed_zoutendijk_projection_client PROPERTIES CXX_EXTE
 add_test(NAME installed_zoutendijk_projection_client COMMAND installed_zoutendijk_projection_client)
 set_tests_properties(installed_zoutendijk_projection_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed Zoutendijk client: success and stopped result types are distinct")
+
+add_executable(installed_feasible_directions_client feasible_directions_client.cpp)
+target_link_libraries(installed_feasible_directions_client PRIVATE CSL::feasible_directions)
+set_target_properties(installed_feasible_directions_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_feasible_directions_client COMMAND installed_feasible_directions_client)
+set_tests_properties(installed_feasible_directions_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed feasible-directions client: public adapter linked and outcome types checked")
 
 if(TARGET CSL::highs_lp)
 add_executable(installed_highs_client highs_client.cpp)
@@ -326,7 +374,9 @@ set(installed_contract_headers
   execution/contracts.hpp
   optimization/contracts.hpp
   optimization/zoutendijk/projection.hpp
+  optimization/feasible_directions/smooth_convex.hpp
   geometry/contracts.hpp
+  geometry/lazy.hpp
   synthesis/contracts.hpp
   numeric/data.hpp
 )

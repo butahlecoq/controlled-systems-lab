@@ -134,7 +134,11 @@ TEST_CASE("LP and synthesis outcome validation permit only infeasibility-scoped 
     auto wrong_outcome=valid_claim;wrong_outcome.value=MathematicalOutcome::optimal;
     CHECK_FALSE(check_outcome_evidence(wrong_outcome,program.identity(),Assurance::numerical).empty());
     auto source_claim=SynthesisOutcomeClaim{program.identity().problem,MathematicalOutcome::infeasible,proof,{}};
-    CHECK(check_outcome_evidence(source_claim,program.identity().problem,Assurance::validated).empty());
+    const auto source_diagnostics=check_outcome_evidence(source_claim,program.identity().problem,Assurance::validated);
+    CHECK(std::any_of(source_diagnostics.begin(),source_diagnostics.end(),[](const Diagnostic& diagnostic){
+        return diagnostic.code==DiagnosticCode::unsupported&&diagnostic.field=="outcome.support.source_transfer";
+    }));
+    CHECK_FALSE(check_outcome_evidence(source_claim,program.identity().problem,Assurance::numerical).empty());
     CHECK_FALSE(check_outcome_evidence(source_claim,ProblemId{"another-source"},Assurance::numerical).empty());
     source_claim.value=MathematicalOutcome::optimal;
     CHECK_FALSE(check_outcome_evidence(source_claim,program.identity().problem,Assurance::numerical).empty());

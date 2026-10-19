@@ -38,6 +38,18 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 
 [Reachability proof audit](reachability-proof-audit.md) and [adaptive-policy proof audit](adaptive-policy-proof-audit.md) publish the reviewed conditional proofs, counterexamples and source-policy distinctions for Q04/Q05. The [reachability source correspondence](reachability-source-correspondence.md) compares L05's Table 1 claims with the archived L26/W12 listing without treating that listing as the historical experiment generator. The [provenance record](proof-audit-provenance.json) preserves the proof reports' correction/version chains; both original scientific issues remain open.
 
+The [L05 saved-figure audit](l05-saved-figure-audit.md) recovers terminal polygons whose counts and areas match all three reported Example 1 rows, then checks exact containment of the stored binary64 hulls. It does not certify nonlinear reachability or identify the historical generator.
+
+The [L05 linear zonotope reconstruction](l05-linear-zonotope-reconstruction.md) independently reconstructs the candidate's 60-stage affine-control reachable polygons and matches all saved general-linear stages to floating-point precision. Exact checks of saved polygons show modified-in-general inclusion at every plotted stage, while the linear and nonlinear plotted hulls cross at stages 2–54; historical generator identity and nonlinear enclosure remain open.
+
+The [L05 four-state candidate reconstruction](l05-example2-candidate-reconstruction.md) independently enumerates the archived seven-transition, two-control model. Its full linear and nonlinear corner-history hulls match the printed Example 2 general and nonlinear count/volume rows and three saved 3D projections; the modified 4D row and historical generator remain unresolved.
+
+The [L05 four-state active-filter audit](l05-example2-retention-audit.md) translates the archived `ConvSM_mod` path in source column order. It matches the complete general linear 4D hull, while the saved 3D linear patches are strict subsets of its projections; the modified 4D construction remains unidentified.
+
+The [L05 four-state reduction hypothesis](l05-example2-approximation-hypothesis.md) tests the script's commented `Approx_mod` call at every transition. Its 148-vertex terminal inner candidate and projected patches differ from the printed modified row and saved figures, narrowing but not resolving their generating provenance.
+
+The [L05 primary paper claim audit](l05-primary-claim-audit.md) separates its exact linear reachable-set definition, unproved modified point-pruning claim, and numerical nonlinear comparison from validated inclusion or model-error evidence.
+
 The [issue #5 feedback contract follow-up](feedback-contract-followup.md) turns the reviewed policy distinctions into a bounded robust predecessor and evidence handoff without claiming an implemented feedback solver.
 
 The [exact finite policy-class reference](finite-policy-class-reference.md) independently enumerates an authored two-step counterexample's fixed plans, executed replanning selector and globally causal value. Its three-point disturbance catalogue checks decision order but does not certify L13's continuous model or historical program.
@@ -47,6 +59,8 @@ The [GEO-02 floating-model audit](geo02-floating-model-audit.md) separates exact
 ## Selected first benchmark
 
 [B04 restoration](b04-restoration.md) records the owner-selected nominal scenario, its versioned historical manifest and an exact terminal-invariant audit. Source gaps and the model/result inconsistency remain explicit before implementation comparisons.
+
+[B04 parameter cross-check](b04-parameter-crosswalk.md) evaluates the printed nonlinear flow law with exact rational arithmetic and distinguishes it from the displayed linear input data and the separate saved-run kernel.
 
 ## Larger local archive
 

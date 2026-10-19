@@ -1,10 +1,14 @@
 include(FetchContent)
+include(${CMAKE_CURRENT_LIST_DIR}/DependencyArchive.cmake)
 
 function(csl_add_private_highs)
   # ADR 0002 pin; keep upstream options scoped away from CSL's tests/toolchain.
+  set(csl_highs_archive_sha256 2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275)
+  csl_dependency_archive_url(csl_highs_archive_url highs
+    https://codeload.github.com/ERGO-Code/HiGHS/tar.gz/refs/tags/v1.11.0 ${csl_highs_archive_sha256})
   FetchContent_Declare(csl_highs
-    URL https://codeload.github.com/ERGO-Code/HiGHS/tar.gz/refs/tags/v1.11.0
-    URL_HASH SHA256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+    URL "${csl_highs_archive_url}"
+    URL_HASH SHA256=${csl_highs_archive_sha256}
     SOURCE_SUBDIR csl-no-build)
   FetchContent_MakeAvailable(csl_highs)
   # Keep the upstream archive/hash pinned and apply this narrowly scoped

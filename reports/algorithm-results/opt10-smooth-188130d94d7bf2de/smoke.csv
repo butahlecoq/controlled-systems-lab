@@ -1,0 +1,2 @@
+phase,case,repetition,calls,status,verified,elapsed_ns,x,y,objective,projected_residual,iterations,objective_evaluations
+smoke,box-quadratic,0,1,success,true,1318300,1,-1,1,0,1,2

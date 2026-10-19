@@ -4,6 +4,7 @@
 /docs/research/extracted/
 /tmp/
 /build/
+/.ci-cache/
 /install/
 /cmake-build-*/
 __pycache__/

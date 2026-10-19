@@ -1,5 +1,11 @@
 # Controlled Systems Lab
 
+Explore the [minimal 2D visual examples](https://butahlecoq.github.io/controlled-systems-lab/examples/):
+convex hulls with original vertex IDs, collinear endpoints, and square/diamond
+intersection. Each plot includes complete inputs, expected answers, native
+reproduction instructions and links to reviewed saved reports. These educational
+illustrations accompany the [numerical report archive](https://butahlecoq.github.io/controlled-systems-lab/).
+
 C++20 library and research repository for constrained discrete-time control. The library currently provides immutable affine models and problem data, JSON scenario intake, registered LP/convex backends, phase-I feasibility, execution and numerical reporting. Start with the installed-package examples below.
 
 Strategy A (reachability, terminal minimization and backward recovery), Strategy B (direct joint optimization), witness selection and independent trajectory verification are implemented. Complete optimal families are supported only for the reviewed T-S01/T-S02 profiles; general family coverage and trusted proof serialization remain pending. See the [current framework composition](docs/architecture/framework-composition.md) for the module map, public interfaces and missing glue.

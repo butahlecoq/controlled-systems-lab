@@ -5,7 +5,10 @@ Link `CSL::highs_lp`, add the returned registration to `Registry<LPPort>`, selec
 `csl.lp.highs`, then prepare, create, and run through the existing registry.
 Registration returns `Diagnostics` for unsupported configuration. Selection uses
 output representation `csl.program-result.v1`, binary64, numerical assurance.
-The adapter version is `1.0.0+highs.1.11.0`. There is no automatic fallback.
+The adapter version is `1.1.0+highs.1.11.0`. Cross-query simplex warm starts are
+disabled by default; enable `HighsLPOptions::cross_query_warm_start` to retain a
+private basis within one workspace. A rejected hint falls back to a fresh cold
+model. There is no fallback to a different backend.
 
 ```cpp
 using namespace csl;

@@ -35,7 +35,7 @@ with the affine map `x=c+Gξ` and ordered factor IDs identifying every H axis
 and map column. This is an explicit exact representation
 conversion in real-set algebra; it is not an ambient H/V materialization.
 No general intersection, ambient H conversion, support, membership,
-constraint feasibility, or generator reduction is exposed by the native slice.
+or constraint feasibility is exposed by the native slice.
 An intersection must use a richer representation and must not be returned as
 an ordinary zonotope through silent enclosure. Finite and mixed action
 catalogues are outside this continuous-factor contract.
@@ -71,6 +71,12 @@ does not certify rounded coordinates. There is no performance claim.
 Generator and equality storage can grow with repeated sums, and conversion
 can grow exponentially in the number of factors. No automatic reduction is
 performed.
+
+The separate [APP-03 reduction adapters](approximation.md#zonotope-reduction-adapters-app-03)
+offer exact zero-column removal and an explicit budgeted outer axis cover. The
+second method relaxes omitted `FactorId` dependencies and factor equalities;
+the independent approximation policy checks stored-binary64 inclusion. Neither
+method silently changes the native algebra above.
 
 The unit tests use independent literal H-polyhedron membership queries for a
 box image, the synchronized cancellation singleton, and a constrained sum.

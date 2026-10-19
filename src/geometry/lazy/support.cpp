@@ -1,0 +1,426 @@
+#include <csl/geometry/lazy.hpp>
+
+#include "../exact_dyadic.hpp"
+
+#include <csl/sets/data.hpp>
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+
+namespace csl::geometry::lazy {
+namespace {
+constexpr const char* module = "csl.geometry.lazy-support";
+using Answer = std::variant<SupportResult, OperationStopped, Unsupported>;
+
+Diagnostics error(std::string field, std::string explanation,
+        DiagnosticCode code = DiagnosticCode::unsupported) {
+    return {{code, std::move(field), std::move(explanation)}};
+}
+
+bool stopped(const ExecutionContext& context) {
+    return context.cancellation.stop_requested() ||
+        (context.deadline && std::chrono::steady_clock::now() >= *context.deadline);
+}
+
+OperationStopped stop(const ExecutionContext& context) {
+    return {context.cancellation.stop_requested() ? StopReason::cancelled : StopReason::deadline_expired,
+        "Lazy support query stopped before publication."};
+}
+
+bool finite(const Vector& values) {
+    return std::all_of(values.begin(), values.end(), [](double value) { return std::isfinite(value); });
+}
+
+GeometryRequestIdentity child_identity(const GeometryRequestIdentity& parent, const std::string& path) {
+    const auto scope = [&](const std::string& value) {
+        return std::to_string(value.size()) + ":" + value + "/" + path;
+    };
+    return {parent.problem, {scope(parent.request.value)}, {scope(parent.ideal_output.value)}};
+}
+
+struct CacheKey {
+    const SetPayload* payload;
+    Vector direction;
+    bool operator==(const CacheKey&) const = default;
+};
+struct CacheHash {
+    std::size_t operator()(const CacheKey& key) const {
+        std::size_t value = std::hash<const SetPayload*>{}(key.payload);
+        for (const double component : key.direction)
+            value ^= std::hash<double>{}(component) + 0x9e3779b9U + (value << 6) + (value >> 2);
+        return value;
+    }
+};
+using Cache = std::unordered_map<CacheKey, SupportResult, CacheHash>;
+
+using RayCache = std::unordered_map<const SetPayload*, bool>;
+std::variant<bool, Diagnostics> contains_rays(const SetHandle& input, RayCache& cache) {
+    if (const auto found = cache.find(input.payload.get()); found != cache.end()) return found->second;
+    if (input.metadata.representation.value != "csl.geometry.lazy-v") {
+        auto imported = sets::from_handle(input);
+        if (const auto* failure = std::get_if<Diagnostic>(&imported)) return Diagnostics{*failure};
+        const auto native = std::get<sets::SetData>(std::move(imported)).representation();
+        const auto* v = std::get_if<sets::VRepresentation>(&native);
+        if (!v && !std::holds_alternative<sets::EmptyRepresentation>(native))
+            return error("lazy.leaf", "Lazy support requires native V or empty leaves.");
+        const bool result = v && v->vertices.rows() != 0 && v->rays.rows() != 0;
+        cache.emplace(input.payload.get(), result);
+        return result;
+    }
+    auto inspected = inspect_expression(input);
+    if (const auto* failure = std::get_if<Diagnostics>(&inspected)) return *failure;
+    const auto& operation = std::get<ExpressionDescription>(inspected).operation;
+    if (const auto* affine = std::get_if<AffineImage>(&operation)) {
+        auto result = contains_rays(affine->input, cache);
+        if (const auto* rays = std::get_if<bool>(&result)) cache.emplace(input.payload.get(), *rays);
+        return result;
+    }
+    if (const auto* projection = std::get_if<Projection>(&operation)) {
+        auto result = contains_rays(projection->input, cache);
+        if (const auto* rays = std::get_if<bool>(&result)) cache.emplace(input.payload.get(), *rays);
+        return result;
+    }
+    if (const auto* sum = std::get_if<MinkowskiSum>(&operation)) {
+        auto left = contains_rays(sum->left, cache);
+        if (const auto* failure = std::get_if<Diagnostics>(&left)) return *failure;
+        auto right = contains_rays(sum->right, cache);
+        if (const auto* failure = std::get_if<Diagnostics>(&right)) return *failure;
+        const bool result = std::get<bool>(left) || std::get<bool>(right);
+        cache.emplace(input.payload.get(), result);
+        return result;
+    }
+    return error("lazy.operation", "Expression payload contains an unsupported operation.",
+        DiagnosticCode::evidence_mismatch);
+}
+
+std::variant<Vector, Diagnostics> affine_direction(const AffineImage& affine, const Vector& direction,
+        bool exact_for_rays) {
+    Vector transformed(affine.map.cols);
+    for (std::size_t column = 0; column < affine.map.cols; ++column) {
+        detail::exact_detail::Integer exact;
+        for (std::size_t row = 0; row < affine.map.rows; ++row) {
+            const double coefficient = affine.map.values[row * affine.map.cols + column];
+            if (!detail::exact_detail::add_product(exact,
+                    detail::exact_detail::decode(direction[row]),
+                    detail::exact_detail::decode(coefficient)))
+                return error("lazy.direction", "Exact transformed-direction sign exceeded the checked arithmetic range.");
+            const double product = direction[row] * coefficient;
+            if (direction[row] != 0.0 && coefficient != 0.0 && product == 0.0)
+                return error("lazy.direction", "Affine direction product underflowed to zero.");
+            transformed[column] += product;
+        }
+        if (!std::isfinite(transformed[column]))
+            return error("lazy.direction", "Transformed direction is nonfinite.");
+        const bool exact_zero = detail::exact_detail::is_zero(exact);
+        if (exact_zero != (transformed[column] == 0.0) ||
+            (!exact_zero && exact.negative != (transformed[column] < 0.0)))
+            return error("lazy.direction", "Rounded affine direction changed the exact stored-binary64 sign.");
+        if (exact_for_rays) {
+            auto rounded = detail::exact_detail::decode(transformed[column]);
+            rounded.negative = !rounded.negative;
+            if (!detail::exact_detail::add_dyadic(exact, rounded))
+                return error("lazy.direction", "Exact affine direction comparison exceeded the checked arithmetic range.");
+            if (!detail::exact_detail::is_zero(exact))
+                return error("lazy.direction", "Affine direction rounded before an unbounded leaf query.");
+        }
+    }
+    if (!finite(transformed)) return error("lazy.direction", "Transformed direction is nonfinite.");
+    return transformed;
+}
+
+std::variant<Vector, Diagnostics> checked_affine_direction(const AffineImage& affine,
+        const Vector& direction) {
+    RayCache cache;
+    auto rays = contains_rays(affine.input, cache);
+    if (const auto* failure = std::get_if<Diagnostics>(&rays)) return *failure;
+    return affine_direction(affine, direction, std::get<bool>(rays));
+}
+
+Diagnostics preflight_node(const SetHandle& input, const Vector& direction,
+        const GeometryRequestIdentity& parent, const std::string& path,
+        const registry::PreparedProvider<registry::GeometryPort>& leaf_provider,
+        std::unordered_set<CacheKey, CacheHash>& seen) {
+    if (input.metadata.representation.value != "csl.geometry.lazy-v") {
+        const auto& selected = leaf_provider.provenance();
+        if (!selected.actual)
+            return error("lazy.leaf_provider", "Selected leaf support identity is unavailable.");
+        OperationRequest request{child_identity(parent, path), selected.actual->id,
+            SupportQuery{input, direction}, SetRelation::equivalent, Assurance::numerical};
+        auto admitted = leaf_provider.prepare(request);
+        if (const auto* rejected = std::get_if<registry::Rejection>(&admitted))
+            return rejected->diagnostics;
+        return {};
+    }
+    auto inspected = inspect_expression(input);
+    if (const auto* failure = std::get_if<Diagnostics>(&inspected)) return *failure;
+    if (!seen.insert(CacheKey{input.payload.get(), direction}).second) return {};
+    const auto& operation = std::get<ExpressionDescription>(inspected).operation;
+    if (const auto* affine = std::get_if<AffineImage>(&operation)) {
+        auto transformed = checked_affine_direction(*affine, direction);
+        if (const auto* failure = std::get_if<Diagnostics>(&transformed)) return *failure;
+        return preflight_node(affine->input, std::get<Vector>(std::move(transformed)),
+            parent, path + "0", leaf_provider, seen);
+    }
+    if (const auto* projection = std::get_if<Projection>(&operation)) {
+        Vector embedded(projection->input.metadata.dimension);
+        for (std::size_t column = 0; column < direction.size(); ++column)
+            embedded[projection->coordinates[column]] = direction[column];
+        return preflight_node(projection->input, embedded, parent, path + "0", leaf_provider, seen);
+    }
+    if (const auto* sum = std::get_if<MinkowskiSum>(&operation)) {
+        if (auto failures = preflight_node(sum->left, direction, parent, path + "0", leaf_provider, seen);
+                !failures.empty()) return failures;
+        return preflight_node(sum->right, direction, parent, path + "1", leaf_provider, seen);
+    }
+    return error("lazy.operation", "Expression payload contains an unsupported operation.",
+        DiagnosticCode::evidence_mismatch);
+}
+
+std::variant<bool, Diagnostics> has_positive_ray(const SetHandle& input, const Vector& direction) {
+    auto imported = sets::from_handle(input);
+    if (const auto* failure = std::get_if<Diagnostic>(&imported)) return Diagnostics{*failure};
+    const auto native = std::get<sets::SetData>(std::move(imported)).representation();
+    if (std::holds_alternative<sets::EmptyRepresentation>(native)) return false;
+    const auto* v = std::get_if<sets::VRepresentation>(&native);
+    if (!v) return error("lazy.leaf", "Lazy support requires native V or empty leaves.");
+    if (v->vertices.rows() == 0) return false;
+    for (std::size_t row = 0; row < v->rays.rows(); ++row) {
+        detail::exact_detail::Integer dot;
+        for (std::size_t column = 0; column < direction.size(); ++column)
+            if (!detail::exact_detail::add_product(dot,
+                    detail::exact_detail::decode(direction[column]),
+                    detail::exact_detail::decode(v->rays(row, column))))
+                return error("lazy.ray", "Exact stored-binary64 ray sign exceeded the checked arithmetic range.");
+        if (!detail::exact_detail::is_zero(dot) && !dot.negative) return true;
+    }
+    return false;
+}
+
+Answer evaluate_node(const SetHandle& input, const Vector& direction,
+        const GeometryRequestIdentity& parent, const std::string& path,
+        const registry::PreparedProvider<registry::GeometryPort>& leaf_provider,
+        const ExecutionContext& context, Cache& cache) {
+    if (stopped(context)) return stop(context);
+    if (input.metadata.representation.value != "csl.geometry.lazy-v") {
+        const auto& provenance = leaf_provider.provenance();
+        if (!provenance.actual)
+            return Unsupported{error("lazy.leaf_provider", "Selected leaf support identity is unavailable.")};
+        OperationRequest request{child_identity(parent, path), provenance.actual->id,
+            SupportQuery{input, direction}, SetRelation::equivalent, Assurance::numerical};
+        auto admitted = leaf_provider.prepare(request);
+        if (const auto* rejected = std::get_if<registry::Rejection>(&admitted))
+            return Unsupported{rejected->diagnostics};
+        auto prepared = std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(admitted));
+        auto outcome = std::get<0>(prepared.create())->run(context);
+        if (const auto* value = std::get_if<SupportResult>(&outcome)) {
+            auto ray = has_positive_ray(input, direction);
+            if (const auto* failure = std::get_if<Diagnostics>(&ray)) return Unsupported{*failure};
+            if (std::get<bool>(ray) != std::holds_alternative<UnboundedSupport>(value->value))
+                return Unsupported{error("lazy.ray", "Leaf support disagrees with exact stored-binary64 ray sign.",
+                    DiagnosticCode::evidence_mismatch)};
+            return *value;
+        }
+        if (const auto* stop_result = std::get_if<OperationStopped>(&outcome)) return *stop_result;
+        if (const auto* rejected = std::get_if<Unsupported>(&outcome)) return *rejected;
+        return Unsupported{error("lazy.leaf_result", "Selected leaf provider returned a non-support result.",
+            DiagnosticCode::evidence_mismatch)};
+    }
+
+    auto inspected = inspect_expression(input);
+    if (const auto* failure = std::get_if<Diagnostics>(&inspected)) return Unsupported{*failure};
+    CacheKey key{input.payload.get(), direction};
+    if (const auto found = cache.find(key); found != cache.end()) return found->second;
+    const auto& operation = std::get<ExpressionDescription>(inspected).operation;
+    if (const auto* affine = std::get_if<AffineImage>(&operation)) {
+        auto transformed = checked_affine_direction(*affine, direction);
+        if (const auto* failure = std::get_if<Diagnostics>(&transformed)) return Unsupported{*failure};
+        auto child = evaluate_node(affine->input, std::get<Vector>(std::move(transformed)),
+            parent, path + "0", leaf_provider, context, cache);
+        if (const auto* result = std::get_if<SupportResult>(&child)) {
+            if (!std::holds_alternative<double>(result->value)) {
+                cache.emplace(std::move(key), *result);
+                return *result;
+            }
+            double value = std::get<double>(result->value);
+            for (std::size_t row = 0; row < direction.size(); ++row)
+                value += direction[row] * affine->offset[row];
+            if (!std::isfinite(value)) return Unsupported{error("lazy.value", "Affine support value is nonfinite.")};
+            if (!result->maximizer) return Unsupported{error("lazy.maximizer", "Finite leaf support omitted its maximizer.",
+                DiagnosticCode::evidence_mismatch)};
+            Vector maximizer(affine->map.rows);
+            for (std::size_t row = 0; row < affine->map.rows; ++row) {
+                maximizer[row] = affine->offset[row];
+                for (std::size_t column = 0; column < affine->map.cols; ++column)
+                    maximizer[row] += affine->map.values[row * affine->map.cols + column] * (*result->maximizer)[column];
+            }
+            if (!finite(maximizer)) return Unsupported{error("lazy.maximizer", "Affine maximizer is nonfinite.")};
+            SupportResult answer{value, std::move(maximizer), result->evidence};
+            cache.emplace(std::move(key), answer);
+            return answer;
+        }
+        return child;
+    }
+    if (const auto* projection = std::get_if<Projection>(&operation)) {
+        Vector embedded(projection->input.metadata.dimension);
+        for (std::size_t column = 0; column < direction.size(); ++column)
+            embedded[projection->coordinates[column]] = direction[column];
+        auto child = evaluate_node(projection->input, embedded, parent, path + "0", leaf_provider, context, cache);
+        if (const auto* result = std::get_if<SupportResult>(&child)) {
+            if (!result->maximizer) {
+                cache.emplace(std::move(key), *result);
+                return *result;
+            }
+            Vector maximizer;
+            for (const auto index : projection->coordinates) maximizer.push_back((*result->maximizer)[index]);
+            SupportResult answer{result->value, std::move(maximizer), result->evidence};
+            cache.emplace(std::move(key), answer);
+            return answer;
+        }
+        return child;
+    }
+    if (const auto* sum = std::get_if<MinkowskiSum>(&operation)) {
+        auto left = evaluate_node(sum->left, direction, parent, path + "0", leaf_provider, context, cache);
+        if (!std::holds_alternative<SupportResult>(left)) return left;
+        auto right = evaluate_node(sum->right, direction, parent, path + "1", leaf_provider, context, cache);
+        if (!std::holds_alternative<SupportResult>(right)) return right;
+        const auto& a = std::get<SupportResult>(left);
+        const auto& b = std::get<SupportResult>(right);
+        if (std::holds_alternative<EmptySupport>(a.value) || std::holds_alternative<EmptySupport>(b.value)) {
+            SupportResult answer{EmptySupport{}, {}, a.evidence};
+            cache.emplace(std::move(key), answer);
+            return answer;
+        }
+        if (std::holds_alternative<UnboundedSupport>(a.value) || std::holds_alternative<UnboundedSupport>(b.value)) {
+            SupportResult answer{UnboundedSupport{}, {}, a.evidence};
+            cache.emplace(std::move(key), answer);
+            return answer;
+        }
+        if (!a.maximizer || !b.maximizer)
+            return Unsupported{error("lazy.maximizer", "Finite sum support omitted a child maximizer.",
+                DiagnosticCode::evidence_mismatch)};
+        const double value = std::get<double>(a.value) + std::get<double>(b.value);
+        Vector maximizer(a.maximizer->size());
+        for (std::size_t i = 0; i < maximizer.size(); ++i)
+            maximizer[i] = (*a.maximizer)[i] + (*b.maximizer)[i];
+        if (!std::isfinite(value) || !finite(maximizer))
+            return Unsupported{error("lazy.value", "Summed support value or maximizer is nonfinite.")};
+        SupportResult answer{value, std::move(maximizer), a.evidence};
+        cache.emplace(std::move(key), answer);
+        return answer;
+    }
+    return Unsupported{error("lazy.operation", "Expression payload contains an unsupported operation.",
+        DiagnosticCode::evidence_mismatch)};
+}
+Answer evaluate(const SetHandle& input, const Vector& direction,
+        const GeometryRequestIdentity& parent, const std::string& path,
+        const registry::PreparedProvider<registry::GeometryPort>& leaf_provider,
+        const ExecutionContext& context) {
+    Cache cache;
+    return evaluate_node(input, direction, parent, path, leaf_provider, context, cache);
+}
+
+Diagnostics shape(const OperationRequest& request, const registry::Requirements& requirements,
+        const registry::PreparedProvider<registry::GeometryPort>& leaf_provider) {
+    if (request.identity.problem.value.empty() || request.identity.request.value.empty() ||
+        request.identity.ideal_output.value.empty())
+        return error("lazy.identity", "Complete support query identity is required.", DiagnosticCode::invalid_input);
+    if (request.implementation.value != module || !std::holds_alternative<SupportQuery>(request.operation))
+        return error("lazy.operation", "Selected lazy support module requires SupportQuery.");
+    if (request.assurance != Assurance::numerical || requirements.output.assurance != Assurance::numerical)
+        return error("lazy.assurance", "Validated lazy support is unavailable.");
+    if (request.required_relation != SetRelation::equivalent ||
+        (requirements.output.relation && *requirements.output.relation != SetRelation::equivalent))
+        return error("lazy.relation", "Lazy support requires equivalent relation semantics.");
+    if (auto result = check_operation_shape(request); !result.empty()) return result;
+    const auto& query = std::get<SupportQuery>(request.operation);
+    if (!finite(query.direction))
+        return error("lazy.direction", "Directions must be finite binary64 values.", DiagnosticCode::invalid_input);
+    const auto inspected = inspect_expression(query.input);
+    if (const auto* failure = std::get_if<Diagnostics>(&inspected)) return *failure;
+    std::unordered_set<CacheKey, CacheHash> seen;
+    return preflight_node(query.input, query.direction, request.identity, "root", leaf_provider, seen);
+}
+
+class Workspace final : public SetOperatorWorkspace {
+    registry::PreparedProvider<registry::GeometryPort> leaf_provider_;
+public:
+    explicit Workspace(registry::PreparedProvider<registry::GeometryPort> provider)
+        : leaf_provider_(std::move(provider)) {}
+
+    OperationOutcome apply(const OperationRequest& request, const ExecutionContext& context) override {
+        if (stopped(context)) return stop(context);
+        if (auto failures = shape(request, {}, leaf_provider_); !failures.empty())
+            return Unsupported{std::move(failures)};
+        const auto& query = std::get<SupportQuery>(request.operation);
+        auto answer = evaluate(query.input, query.direction, request.identity, "root", leaf_provider_, context);
+        if (const auto* failure = std::get_if<Unsupported>(&answer)) return *failure;
+        if (const auto* stop_result = std::get_if<OperationStopped>(&answer)) return *stop_result;
+        auto result = std::get<SupportResult>(std::move(answer));
+        result.evidence = {geometry_reference(request), GeometryClaimScope::support_value,
+            Unestablished{}, {"Composed binary64 support sample; no validated rounding or global enclosure claim."}, {}};
+        if (auto failures = check_geometry_evidence(result.evidence, request); !failures.empty())
+            return Unsupported{std::move(failures)};
+        if (stopped(context)) return stop(context);
+        return result;
+    }
+};
+} // namespace
+
+registry::Registration<registry::GeometryPort> make_support_registration(
+        registry::PreparedProvider<registry::GeometryPort> leaf_support) {
+    return {{{module}, "1.0.0"},
+        [leaf_support](const OperationRequest& request, const registry::Requirements& requirements)
+                -> registry::Capability {
+            if (auto failures = shape(request, requirements, leaf_support); !failures.empty()) return failures;
+            registry::Output output;
+            output.relation = SetRelation::equivalent;
+            return registry::Offer{output};
+        },
+        [leaf_support = std::move(leaf_support)](const OperationRequest&) {
+            return std::make_unique<Workspace>(leaf_support);
+        }};
+}
+
+SampleOutcome sample_support(const registry::PreparedProvider<registry::GeometryPort>& provider,
+        const SetHandle& input, const std::vector<Vector>& directions,
+        const GeometryRequestIdentity& identity, const ExecutionContext& context) {
+    if (identity.problem.value.empty() || identity.request.value.empty() || identity.ideal_output.value.empty())
+        return Unsupported{error("lazy.identity", "Complete support-sample identity is required.",
+            DiagnosticCode::invalid_input)};
+    if (const auto inspected = inspect_expression(input); std::holds_alternative<Diagnostics>(inspected))
+        return Unsupported{std::get<Diagnostics>(inspected)};
+    if (!provider.provenance().actual || provider.provenance().actual->id.value != module)
+        return Unsupported{error("lazy.provider", "A prepared lazy-support provider is required.",
+            DiagnosticCode::invalid_input)};
+    SupportSamples result{{identity, {input.id}}, SampleCoverage::directions_only, {}};
+    for (std::size_t index = 0; index < directions.size(); ++index) {
+        if (stopped(context)) return stop(context);
+        const auto& direction = directions[index];
+        if (direction.size() != input.metadata.dimension || !finite(direction))
+            return Unsupported{error("lazy.direction", "Sample direction has wrong dimension or nonfinite entry.",
+                DiagnosticCode::invalid_input)};
+        const auto scoped = child_identity(identity, "sample" + std::to_string(index));
+        OperationRequest request{scoped, {module}, SupportQuery{input, direction},
+            SetRelation::equivalent, Assurance::numerical};
+        auto admitted = provider.prepare(request);
+        if (const auto* rejected = std::get_if<registry::Rejection>(&admitted))
+            return Unsupported{rejected->diagnostics};
+        auto prepared = std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(admitted));
+        auto outcome = std::get<0>(prepared.create())->run(context);
+        if (const auto* sample = std::get_if<SupportResult>(&outcome)) {
+            if (auto failures = check_geometry_evidence(sample->evidence, request); !failures.empty())
+                return Unsupported{std::move(failures)};
+            result.samples.push_back({direction, *sample});
+        } else if (const auto* interrupted = std::get_if<OperationStopped>(&outcome)) return *interrupted;
+        else if (const auto* refused = std::get_if<Unsupported>(&outcome)) return *refused;
+        else return Unsupported{error("lazy.result", "Support provider returned a non-support outcome.",
+            DiagnosticCode::evidence_mismatch)};
+    }
+    if (stopped(context)) return stop(context);
+    return result;
+}
+} // namespace csl::geometry::lazy

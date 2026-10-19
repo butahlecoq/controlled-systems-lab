@@ -22,3 +22,8 @@ add_executable(model_public_client tests/installed/model_client.cpp)
 target_link_libraries(model_public_client PRIVATE CSL::model)
 add_test(NAME model_public_client COMMAND model_public_client)
 csl_test_target(model_public_client model)
+
+add_executable(continuous_discretization_tests tests/contract/model/continuous_discretization_tests.cpp)
+target_link_libraries(continuous_discretization_tests PRIVATE CSL::model doctest::doctest)
+add_test(NAME continuous_discretization_tests COMMAND continuous_discretization_tests)
+csl_test_target(continuous_discretization_tests model)

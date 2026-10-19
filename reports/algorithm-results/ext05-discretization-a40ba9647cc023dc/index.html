@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXT-05 · Continuous-model discretization report</title><style>
+body{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}
+div.header,div.main,div.footer{max-width:960px;margin:auto;padding:1.4rem}
+a{color:#9ccfd8} div.section{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}
+td,th{border:1px solid #524f67;padding:.45rem;text-align:left;white-space:nowrap}
+img{width:100%;height:auto} code{overflow-wrap:anywhere}
+</style></head><body><div class="header"><p>Controlled Systems Lab · EXT-05</p><h1>Continuous-model discretization report</h1><p>Saved numerical observations of the public EXT-05 conversion route.</p></div><div class="main">
+<div class="section"><h2>Minimal input and analytic answer</h2>
+<p>State coordinates are position and velocity. The continuous rates are
+<code>A=[[0,1],[0,0]]</code>, <code>B=[[0],[1]]</code>, zero offset and no external port.
+Physical times are <code>[0,1,3]</code>; zero-order-held controls are <code>[2,-1]</code>.
+The initial state is <code>(0,0)</code>. Analytic transitions are
+<code>A_d=[[1,Δt],[0,1]]</code> and <code>B_d=[Δt²/2,Δt]</code>, yielding
+<code>(0,0) → (1,2) → (3,0)</code>. The curved plot follows the analytic
+within-interval state paths; markers show the three sampled grid states.</p>
+<img src="trajectory-2d.svg" alt="Position and velocity state trajectory at times zero, one and three"></div>
+<div class="section"><h2>Recorded result</h2><table><thead><tr><th>Stage</th><th>Duration</th><th>A[0,1]</th><th>B[0]</th><th>B[1]</th><th>State after stage</th></tr></thead>
+<tbody><tr><td>0</td><td>1</td><td>1</td><td>0.5</td><td>1</td><td>(1,2)</td></tr>
+<tr><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td><td>(3,0)</td></tr></tbody></table>
+<p>Every saved call checked these independent literals. The receipt records constant LTI rates,
+zero-order hold, RK4 step doubling and an observed local estimate. That estimate is not a
+certified global error bound.</p></div>
+<div class="section"><h2>Measurement and scope</h2>
+<p>One excluded 100-call warmup preceded seven measured 100-call batches: 700 verified calls,
+zero observed failures. Median batch duration was 947,100 ns (range
+936,500–1,012,900 ns). Each interval includes
+fixture construction, the public discretizer, snapshot, two state steps and literal checks;
+it excludes CSV output and rendering. These are single-adapter descriptive durations on
+the recorded host, with no comparator, speedup or limiter attribution. Native internal
+counters and actual thread activity were unavailable.</p>
+<p>Source commit: <code>6cc1740a59ca95e4a575e921cef793c2ac262e9f</code>. The saved <a href="records.json">record</a>,
+<a href="measure.csv">raw trial CSV</a>, <a href="summary.csv">summary CSV</a>,
+<a href="manifest.json">manifest</a> and <a href="ext05-discretization-a40ba9647cc023dc.zip">offline ZIP</a>
+bind the result to the build and host receipts. Reproduce with
+<code>python scripts/reports/ext05/capture.py --source &lt;clean-checkout&gt; --capture &lt;new-directory&gt; --commit 6cc1740a59ca95e4a575e921cef793c2ac262e9f --cmake &lt;cmake&gt;</code>,
+then run <code>collect.py</code> and <code>render_saved.py</code> on the saved capture.</p></div>
+<p><a href="example-2d.html">2D example</a></p>
+</div><div class="footer">EXT-05 · saved binary64 evidence only</div></body></html>

@@ -1,0 +1,93 @@
+{
+  "schema": "l05-dim4-candidate-audit-v1",
+  "candidate_source_sha256": "f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a",
+  "transitions": 7,
+  "independent_controls_per_transition": 2,
+  "endpoint_histories": 16384,
+  "linear": {
+    "generators": 14,
+    "theoretical_maximum_vertices": 756,
+    "computed_hull_vertices": 756,
+    "computed_hull_volume": 40808.16557488733,
+    "independent_generator_determinant_volume": 40808.16557488736,
+    "generator_4_minors": 1001,
+    "minimum_absolute_generator_4_minor": 1.401038305599715e-05,
+    "reported_row_at_printed_precision": {
+      "vertices": 756,
+      "volume": 40808.17
+    }
+  },
+  "nonlinear_corner_history_hull": {
+    "vertices": 436,
+    "volume": 47795.758789498876,
+    "reported_row_at_printed_precision": {
+      "vertices": 436,
+      "volume": 47795.76
+    }
+  },
+  "saved_3d_projections": {
+    "123": {
+      "figure_sha256": "ddaf5dad21ed9c15383bbf4567ab8a947e451c9c125aa521db787f7692a2b49e",
+      "axes_one_based": [
+        1,
+        2,
+        3
+      ],
+      "saved_nonlinear_vertices": 121,
+      "candidate_nonlinear_projected_hull_vertices": 121,
+      "nonlinear_vertex_set_distance": 7.32410687763558e-15,
+      "saved_linear_associated_vertices": 64,
+      "linear_associated_to_candidate_endpoint_max_distance": 0.0,
+      "mat_file_header": "MATLAB 5.0 MAT-file, Platform: PCWIN64, Created on: Tue Feb 20 09:23:04 2018",
+      "embedded_matlabroot_releases": [
+        "R2015b"
+      ]
+    },
+    "234": {
+      "figure_sha256": "0c89b1e178d3153413cb57a94daa33b31eaf0f03ec3a80120d41db8f54efc9d5",
+      "axes_one_based": [
+        2,
+        3,
+        4
+      ],
+      "saved_nonlinear_vertices": 169,
+      "candidate_nonlinear_projected_hull_vertices": 169,
+      "nonlinear_vertex_set_distance": 0.0,
+      "saved_linear_associated_vertices": 63,
+      "linear_associated_to_candidate_endpoint_max_distance": 0.0,
+      "mat_file_header": "MATLAB 5.0 MAT-file, Platform: PCWIN64, Created on: Tue Feb 20 09:26:36 2018",
+      "embedded_matlabroot_releases": [
+        "R2015b"
+      ]
+    },
+    "124": {
+      "figure_sha256": "cab103d50af80ea7ee7d0d4ab0c8c93a60140e232d4327f0f93ab22e7d23e64b",
+      "axes_one_based": [
+        1,
+        2,
+        4
+      ],
+      "saved_nonlinear_vertices": 136,
+      "candidate_nonlinear_projected_hull_vertices": 136,
+      "nonlinear_vertex_set_distance": 7.105427357601002e-15,
+      "saved_linear_associated_vertices": 66,
+      "linear_associated_to_candidate_endpoint_max_distance": 0.0,
+      "mat_file_header": "MATLAB 5.0 MAT-file, Platform: PCWIN64, Created on: Tue Feb 20 09:28:35 2018",
+      "embedded_matlabroot_releases": [
+        "R2015b"
+      ]
+    }
+  },
+  "current_candidate_script_third_projection_one_based": [
+    1,
+    3,
+    4
+  ],
+  "saved_third_projection_one_based": [
+    1,
+    2,
+    4
+  ],
+  "modified_4d_row_reproduced": false,
+  "scope": "candidate full corner-history hulls and saved projections; no versioned historical generator, modified 4D row, physical coordinate map, or validated arithmetic claim"
+}

@@ -13,8 +13,8 @@ All numbers below are **reported**, unless explicitly labelled computed in this 
 | B03 | L07, PDF pp. 52–55 | Reachability and convex-hull algorithm comparisons | Runtime/iteration data below | Recover complete model/input generation and random seeds |
 | B04 | L11, PDF pp. 12–14 | Nominal convex terminal control, n=4, T=16 | Objective 30.899, runtime 0.4 s | Selected first; missing canonical bounds/histories and a proved displayed-model/result inconsistency |
 | B05 | L08, numerical-example section and Table 2 | Optimal adaptive vs open-loop, T=16 | Nine tabulated outcomes; 0.4 s open-loop, 10 s adaptive | Table 2 policy labels cross-checked to the published PDF; canonical run inputs and provenance remain unresolved |
-| B06 | L09, PDF pp. 10–12 | Unconstrained finite-action minimax, n=4, T=5 | Worst-case 10.11, nonlinear trajectory 9.049, runtime 300 s | Disturbance specification and exact sign of extracted control vector require original inspection |
-| B07 | L10, PDF pp. 10–13 | State-constrained finite-action minimax, n=4, T=5 | 3125 candidates, 365 feasible; worst-case 9.77, runtime 66 s | Disturbance set and full physical-model parameters to recover |
+| B06 | L09, PDF pp. 10–12 | Unconstrained finite-action minimax, n=4, T=5 | Worst-case 10.11, nonlinear trajectory 9.049, runtime 300 s | See the [B06 source audit](b06-source-audit.md); the scan identifies the linear minimax sequence used for the nonlinear output, but disturbance bounds and independent reproduction remain unresolved |
+| B07 | L10, PDF pp. 10–13 | State-constrained finite-action minimax, n=4, T=5 | 3125 candidates, 365 feasible; worst-case 9.77, runtime 66 s | See the [B07 source audit](b07-source-audit.md) and [historical manifest](../../benchmarks/scenarios/b07-historical.json); disturbance bounds, stock initialization, time discretization and linear terminal-row discrepancy remain unresolved |
 | B08 | L04, PDF pp. 11–13 | Finite-action minimax, n=4, T=4 | 625 plans, worst-case 67.12, runtime 37 s | Independent discrete floating reference computed; nonlinear cost/table inconsistency |
 | B09 | L13, PDF pp. 11–14 | Minimax adaptive fuel study, n=4, T=4, q=9 | Adaptive reported cost 22.657 on original model | Full control catalogue/error bounds/plant integration to transcribe; criterion/table inconsistency |
 
@@ -97,7 +97,7 @@ $$
 2.25x_4^2+(x_2-1.5x_4)^2}.
 $$
 
-Reported: 3125 plans; worst-case 10.11; nonlinear state (30,6.0345,20,4.4731) and cost 9.049; runtime 300 s. The extracted control sequence has ambiguous minus-sign placement; recover it visually rather than treating OCR as authoritative.
+Reported: 3125 plans; worst-case 10.11; nonlinear state (30,6.0345,20,4.4731) and cost 9.049; runtime 300 s. L09 p. 11 visually prints the unique linear minimax sequence `(-0.3, 1, 0, 0, 0.3)` for control indices 0–4; p. 12 states that this found minimax control is applied to the original nonlinear system for the reported terminal result. The disturbance bounds and independent reproduction remain unresolved; see the [B06 source audit](b06-source-audit.md).
 
 B07/L10 uses
 
@@ -107,6 +107,8 @@ $$
 $$
 
 and robust flow limits x1 in [29,31], x3 in [19.5,20.5] at steps 1–5. Reported: 3125 plans, 365 robustly feasible; optimal plan (1,0,0.3,-0.3,0); worst-case 9.77. Nonlinear state (30,5.81,20,4.39), reported cost 8.82; worst-case linear state (29.78,6.43,19.82,4.87), reported cost 9.77; runtime 66 s.
+
+These values are transcribed, not reproduced. L10 does not give numeric vertices or bounds for the disturbance sets used in its robust calculations. Its printed stock-initialization equation and nonlinear parameter table imply stocks (305,205), while the numerical example prints initial stocks (302,207). The [source audit](b07-source-audit.md) records these gaps and the printed `-10/T` stock-flow entries without silently resolving them. The [historical manifest](../../benchmarks/scenarios/b07-historical.json) therefore remains non-executable.
 
 These are different objectives and feasibility domains. Their runtimes are not a clean speedup comparison.
 

@@ -1,0 +1,127 @@
+{
+  "schema": "l05-dim4-approx-audit-v1",
+  "source_sha256": "f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a",
+  "convsm_sha256": "e178858e42d5f6174d032d9415b9b7412b2e32ca9aa1b9bfbed7b202db65eaa6",
+  "simplex_sha256": "6f87f2c674519352f6801df60fe498a33ac091b79a5a6cbe76f0dcf4a20f6229",
+  "approx_sha256": "7ca79821f39fde91b0eba8681c1b8775713441a1a1ff04159d963a52416b1c5a",
+  "commented_threshold": 0.001,
+  "arithmetic": "NumPy binary64 stable-tie translation of commented stagewise path; historical MATLAB tie order not run or verified; no validated arithmetic",
+  "environment": {
+    "python": "3.13.5",
+    "numpy": "2.3.2",
+    "scipy": "1.16.3"
+  },
+  "stages": [
+    {
+      "transition": 1,
+      "generated_columns": 4,
+      "pre_reduction_hull_columns": 4,
+      "post_reduction_columns": 4,
+      "hull_pivots": 8,
+      "deletion_rounds": 0
+    },
+    {
+      "transition": 2,
+      "generated_columns": 16,
+      "pre_reduction_hull_columns": 16,
+      "post_reduction_columns": 16,
+      "hull_pivots": 65,
+      "deletion_rounds": 0
+    },
+    {
+      "transition": 3,
+      "generated_columns": 64,
+      "pre_reduction_hull_columns": 52,
+      "post_reduction_columns": 52,
+      "hull_pivots": 341,
+      "deletion_rounds": 0
+    },
+    {
+      "transition": 4,
+      "generated_columns": 208,
+      "pre_reduction_hull_columns": 128,
+      "post_reduction_columns": 75,
+      "hull_pivots": 1129,
+      "deletion_rounds": 17
+    },
+    {
+      "transition": 5,
+      "generated_columns": 300,
+      "pre_reduction_hull_columns": 178,
+      "post_reduction_columns": 116,
+      "hull_pivots": 1582,
+      "deletion_rounds": 26
+    },
+    {
+      "transition": 6,
+      "generated_columns": 464,
+      "pre_reduction_hull_columns": 246,
+      "post_reduction_columns": 130,
+      "hull_pivots": 2497,
+      "deletion_rounds": 32
+    },
+    {
+      "transition": 7,
+      "generated_columns": 520,
+      "pre_reduction_hull_columns": 256,
+      "post_reduction_columns": 148,
+      "hull_pivots": 2594,
+      "deletion_rounds": 35
+    }
+  ],
+  "terminal_vertices": 148,
+  "terminal_volume": 34421.17014411157,
+  "quicksort_tie_sensitivity": {
+    "description": "NumPy quicksort ordering for tied distance ranks; sensitivity only, not historical MATLAB behavior",
+    "terminal_vertices": 150,
+    "terminal_volume": 34582.74177102231
+  },
+  "terminal_reduced_to_complete_endpoint_max_distance": 8.331852114593072e-15,
+  "terminal_only_reduction": {
+    "vertices": 142,
+    "volume": 32089.220837141474,
+    "deletion_rounds": 93
+  },
+  "printed_modified_row": {
+    "vertices": 153,
+    "volume": 34764.47
+  },
+  "saved_linear_projections": {
+    "123": {
+      "figure_sha256": "ddaf5dad21ed9c15383bbf4567ab8a947e451c9c125aa521db787f7692a2b49e",
+      "axes_one_based": [
+        1,
+        2,
+        3
+      ],
+      "saved_vertices": 64,
+      "candidate_projected_vertices": 59,
+      "saved_to_candidate_vertex_max_distance": 7.495866956233992,
+      "candidate_to_saved_vertex_max_distance": 8.844373177919408
+    },
+    "234": {
+      "figure_sha256": "0c89b1e178d3153413cb57a94daa33b31eaf0f03ec3a80120d41db8f54efc9d5",
+      "axes_one_based": [
+        2,
+        3,
+        4
+      ],
+      "saved_vertices": 63,
+      "candidate_projected_vertices": 61,
+      "saved_to_candidate_vertex_max_distance": 6.473332171243204,
+      "candidate_to_saved_vertex_max_distance": 8.003965659936188
+    },
+    "124": {
+      "figure_sha256": "cab103d50af80ea7ee7d0d4ab0c8c93a60140e232d4327f0f93ab22e7d23e64b",
+      "axes_one_based": [
+        1,
+        2,
+        4
+      ],
+      "saved_vertices": 66,
+      "candidate_projected_vertices": 65,
+      "saved_to_candidate_vertex_max_distance": 6.9559668455803045,
+      "candidate_to_saved_vertex_max_distance": 6.899385698473939
+    }
+  }
+}

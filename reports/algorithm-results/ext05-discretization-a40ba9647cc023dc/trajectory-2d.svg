@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 410" role="img" aria-labelledby="title desc">
+<title id="title">EXT-05 analytic double-integrator state trajectory</title>
+<desc id="desc">Exact quadratic position-velocity paths connect sampled states at times zero, one and three: (0,0), (1,2), (3,0).</desc>
+<rect width="700" height="410" fill="#16161e"/>
+<path d="M 75 330 H 640 M 110 365 V 55" stroke="#908caa"/>
+<g fill="#e0def4" font-family="sans-serif" font-size="16">
+<text x="540" y="355">position</text><text x="20" y="65">velocity</text>
+<text x="28" y="30">EXT-05 · continuous double integrator, explicit ZOH conversion</text>
+<text x="100" y="389">t=0</text><text x="250" y="389">t=1</text><text x="570" y="389">t=3</text>
+</g>
+<path d="M 110 330 Q 110 220 270 110 Q 590 220 590 330" fill="none" stroke="#9ccfd8" stroke-width="3"/>
+<circle cx="110" cy="330" r="6" fill="#f6c177"/><text x="120" y="320" fill="#e0def4" font-size="15">x0=(0,0)</text>
+<circle cx="270" cy="110" r="6" fill="#f6c177"/><text x="280" y="100" fill="#e0def4" font-size="15">x1=(1,2)</text>
+<circle cx="590" cy="330" r="6" fill="#f6c177"/><text x="600" y="320" fill="#e0def4" font-size="15">x2=(3,0)</text>
+</svg>

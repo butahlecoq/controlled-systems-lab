@@ -1,4 +1,9 @@
 if(TARGET CSL::highs_lp)
+  add_executable(historical_hull_differential_test tests/unit/geometry/historical_hull_differential_test.cpp)
+  target_link_libraries(historical_hull_differential_test PRIVATE CSL::hull CSL::quickhull_2d CSL::highs_lp doctest::doctest)
+  add_test(NAME historical_hull_differential_test COMMAND historical_hull_differential_test)
+  csl_test_target(historical_hull_differential_test geometry)
+
   add_executable(hull_reducer_test tests/unit/geometry/hull_reducer_test.cpp)
   target_link_libraries(hull_reducer_test PRIVATE CSL::hull CSL::highs_lp doctest::doctest)
   add_test(NAME hull_reducer_test COMMAND hull_reducer_test)
@@ -8,6 +13,11 @@ if(TARGET CSL::highs_lp)
   target_link_libraries(ordered_reducer_test PRIVATE CSL::hull CSL::highs_lp doctest::doctest)
   add_test(NAME ordered_reducer_test COMMAND ordered_reducer_test)
   csl_test_target(ordered_reducer_test geometry)
+
+  add_executable(recursive_reducer_test tests/unit/geometry/recursive_reducer_test.cpp)
+  target_link_libraries(recursive_reducer_test PRIVATE CSL::hull CSL::highs_lp doctest::doctest)
+  add_test(NAME recursive_reducer_test COMMAND recursive_reducer_test)
+  csl_test_target(recursive_reducer_test geometry)
 endif()
 
 add_executable(quickhull_2d_test tests/unit/geometry/quickhull_2d_test.cpp)
@@ -51,15 +61,50 @@ target_link_libraries(support_query_tests PRIVATE CSL::polyhedral doctest::docte
 add_test(NAME support_query_tests COMMAND support_query_tests)
 csl_test_target(support_query_tests geometry)
 
+add_executable(lazy_geometry_tests tests/contract/geometry/lazy_geometry_tests.cpp)
+target_link_libraries(lazy_geometry_tests PRIVATE CSL::lazy_geometry CSL::polyhedral doctest::doctest)
+add_test(NAME lazy_geometry_tests COMMAND lazy_geometry_tests)
+csl_test_target(lazy_geometry_tests geometry)
+
 add_executable(support_query_contract_tests tests/contract/geometry/support_query_contract_tests.cpp)
 target_link_libraries(support_query_contract_tests PRIVATE CSL::polyhedral doctest::doctest)
 add_test(NAME support_query_contract_tests COMMAND support_query_contract_tests)
 csl_test_target(support_query_contract_tests geometry)
 
 add_executable(approximation_policy_tests tests/contract/geometry/approximation_policy_tests.cpp)
-target_link_libraries(approximation_policy_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
+target_link_libraries(approximation_policy_tests PRIVATE CSL::approximation CSL::geometry_generators doctest::doctest)
 add_test(NAME approximation_policy_tests COMMAND approximation_policy_tests)
 csl_test_target(approximation_policy_tests geometry)
+
+add_executable(zonotope_reduction_tests tests/contract/geometry/zonotope_reduction_tests.cpp)
+target_link_libraries(zonotope_reduction_tests PRIVATE CSL::approximation CSL::geometry_generators doctest::doctest)
+add_test(NAME zonotope_reduction_tests COMMAND zonotope_reduction_tests)
+csl_test_target(zonotope_reduction_tests geometry)
+
+add_executable(zonotope_reduction_public_client tests/installed/zonotope_reduction_client.cpp)
+target_link_libraries(zonotope_reduction_public_client PRIVATE CSL::approximation CSL::geometry_generators)
+add_test(NAME zonotope_reduction_public_client COMMAND zonotope_reduction_public_client)
+csl_test_target(zonotope_reduction_public_client geometry)
+
+add_executable(box_parallelotope_tests tests/contract/geometry/box_parallelotope_tests.cpp)
+target_link_libraries(box_parallelotope_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
+add_test(NAME box_parallelotope_tests COMMAND box_parallelotope_tests)
+csl_test_target(box_parallelotope_tests geometry)
+
+add_executable(ellipsoidal_set_tests tests/contract/geometry/ellipsoidal_set_tests.cpp)
+target_link_libraries(ellipsoidal_set_tests PRIVATE CSL::approximation doctest::doctest)
+add_test(NAME ellipsoidal_set_tests COMMAND ellipsoidal_set_tests)
+csl_test_target(ellipsoidal_set_tests geometry)
+
+add_executable(ellipsoidal_approximation_tests tests/contract/geometry/ellipsoidal_approximation_tests.cpp)
+target_link_libraries(ellipsoidal_approximation_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
+add_test(NAME ellipsoidal_approximation_tests COMMAND ellipsoidal_approximation_tests)
+csl_test_target(ellipsoidal_approximation_tests geometry)
+
+add_executable(ellipsoidal_family_tests tests/contract/geometry/ellipsoidal_family_tests.cpp)
+target_link_libraries(ellipsoidal_family_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
+add_test(NAME ellipsoidal_family_tests COMMAND ellipsoidal_family_tests)
+csl_test_target(ellipsoidal_family_tests geometry)
 
 add_executable(approximation_reachable_plan_tests tests/contract/geometry/approximation_reachable_plan_tests.cpp)
 target_link_libraries(approximation_reachable_plan_tests PRIVATE CSL::approximation doctest::doctest)

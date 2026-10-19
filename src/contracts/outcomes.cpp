@@ -25,6 +25,8 @@ Diagnostics check_outcome(const OutcomeClaim<Subject>& claim, const Subject& exp
         } else {
             if(proof->subject().problem!=expected)
                 result.push_back({DiagnosticCode::evidence_mismatch,"outcome.support.problem","Exact Farkas evidence belongs to another source problem"});
+            result.push_back({DiagnosticCode::unsupported,"outcome.support.source_transfer",
+                "Generated-program infeasibility does not establish source-problem infeasibility without a checked transfer certificate"});
         }
         return result;
     }
