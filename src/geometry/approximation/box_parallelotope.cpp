@@ -21,7 +21,7 @@ bool stopped(const ExecutionContext& context) {
         (context.deadline && std::chrono::steady_clock::now()>=*context.deadline);
 }
 OperationStopped stop(const ExecutionContext& context) {
-    return {context.cancellation.stop_requested()?StopReason::cancelled:StopReason::resource_limit,
+    return {context.cancellation.stop_requested()?StopReason::cancelled:StopReason::deadline_expired,
         "Box approximation stopped before publishing an enclosure."};
 }
 std::string matrix_rows(const Matrix& matrix) {

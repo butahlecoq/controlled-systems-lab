@@ -3,6 +3,7 @@
 #include <csl/geometry/approximation.hpp>
 #include <csl/geometry/box_parallelotope.hpp>
 #include <csl/sets/data.hpp>
+#include <chrono>
 
 using namespace csl;
 using namespace csl::geometry::approximation;
@@ -67,6 +68,18 @@ TEST_CASE("registered box encloses every vertex of a shifted interval polygon") 
     CHECK(h.upper_bounds[1]==1.0);
     CHECK(h.upper_bounds[2]==3.0);
     CHECK(h.upper_bounds[3]==0.0);
+}
+
+TEST_CASE("box producer reports an expired deadline before enclosure publication") {
+    const auto input=polygon("deadline-diamond",Matrix{4,2,{0,2,2,0,0,-2,-2,0}});
+    registry::Registry<registry::ApproximationPort> methods;
+    REQUIRE_FALSE(methods.add(make_box_registration({"deadline-output"})).has_value());
+    ExecutionContext context;
+    context.deadline=std::chrono::steady_clock::now()-std::chrono::seconds(1);
+    const auto result=run_registered(methods,{{"csl.approximation.box"},std::nullopt},
+        outer(input),context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::deadline_expired);
 }
 
 TEST_CASE("registered rotated parallelotope has literal support bounds") {

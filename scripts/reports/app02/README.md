@@ -21,6 +21,9 @@ configuration, literal raw driver rows and exact source bytes. The saved rendere
 reconstructs HTML, SVG, summary, manifest and offline ZIP without rerunning the
 adapter. The extension catalogue binds renderer and stager bytes. The main-only
 site workflow stages the immutable bundle and a separate `app02-example` page.
+The saved `input_sha256` value covers the full authored case declaration,
+including the set, relation, orientation or proposed corners and budget. It is
+a request identity: cases with the same source set can have different hashes.
 
 One excluded 100-call warmup per case precedes seven rotated five-case rounds
 of 100 calls each. The 3,500 measured calls had zero recorded failures. Each
