@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
 project(csl_core01_probes LANGUAGES C CXX)
 include(FetchContent)
+include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/DependencyArchive.cmake)
 
 # Isolated integration project; CORE-02 owns the future product build.
 set(BUILD_TESTING OFF CACHE BOOL "Disable dependency tests" FORCE)
@@ -13,8 +14,11 @@ set(DOCTEST_WITH_TESTS OFF CACHE BOOL "Disable dependency tests" FORCE)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-FetchContent_Declare(doctest URL https://codeload.github.com/doctest/doctest/tar.gz/refs/tags/v2.4.11
-  URL_HASH SHA256=632ed2c05a7f53fa961381497bf8069093f0d6628c5f26286161fbd32a560186)
+set(csl_doctest_archive_sha256 632ed2c05a7f53fa961381497bf8069093f0d6628c5f26286161fbd32a560186)
+csl_dependency_archive_url(csl_doctest_archive_url doctest
+  https://codeload.github.com/doctest/doctest/tar.gz/refs/tags/v2.4.11 ${csl_doctest_archive_sha256})
+FetchContent_Declare(doctest URL "${csl_doctest_archive_url}"
+  URL_HASH SHA256=${csl_doctest_archive_sha256})
 FetchContent_MakeAvailable(doctest)
 enable_testing()
 
@@ -44,13 +48,22 @@ add_test(NAME caller_example COMMAND caller_example)
 option(CSL_DEPENDENCY_PROBES "Build numerical and parser probes" ON)
 if(CSL_DEPENDENCY_PROBES)
   # Eigen is consumed as headers, avoiding its own test/install build graph.
-  FetchContent_Declare(eigen URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
-    URL_HASH SHA256=8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72
+  set(csl_eigen_archive_sha256 8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72)
+  csl_dependency_archive_url(csl_eigen_archive_url eigen
+    https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz ${csl_eigen_archive_sha256})
+  set(csl_highs_archive_sha256 2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275)
+  csl_dependency_archive_url(csl_highs_archive_url highs
+    https://codeload.github.com/ERGO-Code/HiGHS/tar.gz/refs/tags/v1.11.0 ${csl_highs_archive_sha256})
+  set(csl_json_archive_sha256 0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406)
+  csl_dependency_archive_url(csl_json_archive_url json
+    https://codeload.github.com/nlohmann/json/tar.gz/refs/tags/v3.11.3 ${csl_json_archive_sha256})
+  FetchContent_Declare(eigen URL "${csl_eigen_archive_url}"
+    URL_HASH SHA256=${csl_eigen_archive_sha256}
     SOURCE_SUBDIR csl-no-build)
-  FetchContent_Declare(highs URL https://codeload.github.com/ERGO-Code/HiGHS/tar.gz/refs/tags/v1.11.0
-    URL_HASH SHA256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275)
-  FetchContent_Declare(json URL https://codeload.github.com/nlohmann/json/tar.gz/refs/tags/v3.11.3
-    URL_HASH SHA256=0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406)
+  FetchContent_Declare(highs URL "${csl_highs_archive_url}"
+    URL_HASH SHA256=${csl_highs_archive_sha256})
+  FetchContent_Declare(json URL "${csl_json_archive_url}"
+    URL_HASH SHA256=${csl_json_archive_sha256})
   FetchContent_MakeAvailable(eigen highs json)
   add_executable(dependency_probes dependency_probes.cpp)
   target_compile_features(dependency_probes PRIVATE cxx_std_20)

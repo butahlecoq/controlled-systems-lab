@@ -1,0 +1,2899 @@
+{
+  "experiment_source_head": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+  "interpretation": "One equivalent cold/warm pair establishes cache reuse, not a repeatable runtime speedup or an algorithm benchmark.",
+  "key_invalidation": {
+    "cases": [
+      {
+        "case": "baseline",
+        "hosted_inventory_counts": {
+          "archive_key": 1,
+          "compiler_prefix": 1
+        },
+        "keys": {
+          "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687",
+          "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-",
+          "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+          "save_allowed": "true",
+          "scope": "branch-c178c498ee3d6ebf"
+        },
+        "mutation_file": null,
+        "new_text": null,
+        "old_text": null
+      },
+      {
+        "case": "pin",
+        "hosted_inventory_counts": {
+          "archive_key": 0,
+          "compiler_prefix": 0
+        },
+        "keys": {
+          "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-b3886d2a21817b2a90c330aa144b46442fa23883d86f3e713e7a377f6eb60848",
+          "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-b3886d2a21817b2a90c330aa144b46442fa23883d86f3e713e7a377f6eb60848-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-b3886d2a21817b2a90c330aa144b46442fa23883d86f3e713e7a377f6eb60848-",
+          "inputs_sha256": "0eec0d6806cc4a0a30665dc0ca7412bb660356a1df78def04fec4d22617d2824",
+          "save_allowed": "true",
+          "scope": "branch-c178c498ee3d6ebf"
+        },
+        "mutation_file": "cmake/HighsDependencies.cmake",
+        "new_text": "v1.11.1",
+        "old_text": "v1.11.0"
+      },
+      {
+        "case": "patch",
+        "hosted_inventory_counts": {
+          "archive_key": 0,
+          "compiler_prefix": 0
+        },
+        "keys": {
+          "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-046f7e8624f93ee3e236faf1cb3616ebd29623170be8a04a63695a9a135565d1",
+          "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-046f7e8624f93ee3e236faf1cb3616ebd29623170be8a04a63695a9a135565d1-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-046f7e8624f93ee3e236faf1cb3616ebd29623170be8a04a63695a9a135565d1-",
+          "inputs_sha256": "ce29f3e849e0c21c39917d6140238b2e8ce4b6384409daab8d26ba4c986bab60",
+          "save_allowed": "true",
+          "scope": "branch-c178c498ee3d6ebf"
+        },
+        "mutation_file": "cmake/ApplyPinnedHighsPatch.cmake",
+        "new_text": "next = 0;",
+        "old_text": "next = nullptr;"
+      },
+      {
+        "case": "patch-contract",
+        "hosted_inventory_counts": {
+          "archive_key": 0,
+          "compiler_prefix": 0
+        },
+        "keys": {
+          "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-ce2e23d222a27b3f44a7d804f8685e67cf090b4850ee82ec9df1fd1d6cd0e6a1",
+          "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-ce2e23d222a27b3f44a7d804f8685e67cf090b4850ee82ec9df1fd1d6cd0e6a1-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-ce2e23d222a27b3f44a7d804f8685e67cf090b4850ee82ec9df1fd1d6cd0e6a1-",
+          "inputs_sha256": "d3c5dc27a12ee341b6dbfa9ab911457d0336b0282195e7388275528ae00a50db",
+          "save_allowed": "true",
+          "scope": "branch-c178c498ee3d6ebf"
+        },
+        "mutation_file": "tests/cmake/pinned_highs_patch_contract.cmake",
+        "new_text": null,
+        "old_text": null
+      }
+    ],
+    "context": {
+      "arch": "X64",
+      "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+      "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+      "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+      "configuration": "Release",
+      "generator": "Ninja",
+      "lane": "package-core",
+      "options": "cmake --preset core -DCSL_BUILD_SYN07_REPORT=ON",
+      "os": "Linux"
+    },
+    "method": "Real compatibility generator on copies of frozen source inputs; read-only hosted cache inventory lookup by exact archive key and strict compiler prefix. No changed vendor was built.",
+    "observed_at_utc": "2026-10-18T21:42:26.519364+00:00"
+  },
+  "repository": "butahlecoq/controlled-systems-lab",
+  "runs": {
+    "clean": {
+      "conclusion": "success",
+      "event": "workflow_dispatch",
+      "head_sha": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+      "id": 39168428358,
+      "jobs": [
+        {
+          "completed_at": "2026-10-18T21:34:30Z",
+          "conclusion": "success",
+          "name": "route / route",
+          "started_at": "2026-10-18T21:34:22Z",
+          "steps": []
+        },
+        {
+          "completed_at": "2026-10-18T21:48:40Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / ASan and UBSan (public modules and consumers)",
+          "started_at": "2026-10-18T21:34:32Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:34:42Z",
+              "conclusion": "success",
+              "name": "Restore instrumented validation caches",
+              "started_at": "2026-10-18T21:34:41Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:34:58Z",
+              "conclusion": "success",
+              "name": "Configure instrumented public modules and consumers",
+              "started_at": "2026-10-18T21:34:42Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:45:23Z",
+              "conclusion": "success",
+              "name": "Run cmake --build tmp/sanitizers --parallel 4",
+              "started_at": "2026-10-18T21:34:58Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:48:33Z",
+              "conclusion": "success",
+              "name": "Run ctest --test-dir tmp/sanitizers --output-on-failure --no-tests=error",
+              "started_at": "2026-10-18T21:45:23Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:48:36Z",
+              "conclusion": "success",
+              "name": "Preserve instrumented cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:48:33Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:57:50Z",
+          "conclusion": "success",
+          "name": "Release / Windows MSVC x64",
+          "started_at": "2026-10-18T21:34:32Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:34:57Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:34:55Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:35:44Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:35:13Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:55:15Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:35:44Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:43Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:55:15Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:46Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:57:44Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:47:30Z",
+          "conclusion": "success",
+          "name": "Release / Linux GCC 13 x64",
+          "started_at": "2026-10-18T21:34:32Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:34:39Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:34:38Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:34:46Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:34:40Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:08Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:34:46Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:47:27Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:46:08Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:47:28Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:47:27Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:52:02Z",
+          "conclusion": "success",
+          "name": "Release / Linux Clang 18 x64",
+          "started_at": "2026-10-18T21:35:42Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:35:49Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:35:49Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:35:59Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:35:51Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:50:07Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:35:59Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:51:59Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:50:07Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:52:00Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:51:59Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:47:46Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / highs installed package",
+          "started_at": "2026-10-18T21:38:14Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:38:21Z",
+              "conclusion": "success",
+              "name": "Restore selected package validation caches",
+              "started_at": "2026-10-18T21:38:21Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:38:27Z",
+              "conclusion": "success",
+              "name": "Configure selected package and backend-neutral report regression",
+              "started_at": "2026-10-18T21:38:21Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:36Z",
+              "conclusion": "success",
+              "name": "Run cmake --build --preset highs",
+              "started_at": "2026-10-18T21:38:27Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:47:41Z",
+              "conclusion": "success",
+              "name": "Run ctest --preset highs",
+              "started_at": "2026-10-18T21:46:36Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:47:43Z",
+              "conclusion": "success",
+              "name": "Preserve package cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:47:41Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:43:02Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / core installed package",
+          "started_at": "2026-10-18T21:37:47Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:37:54Z",
+              "conclusion": "success",
+              "name": "Restore selected package validation caches",
+              "started_at": "2026-10-18T21:37:53Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:37:56Z",
+              "conclusion": "success",
+              "name": "Configure selected package and backend-neutral report regression",
+              "started_at": "2026-10-18T21:37:54Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:42:26Z",
+              "conclusion": "success",
+              "name": "Run cmake --build --preset core",
+              "started_at": "2026-10-18T21:37:56Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:43:00Z",
+              "conclusion": "success",
+              "name": "Run ctest --preset core",
+              "started_at": "2026-10-18T21:42:26Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:43:01Z",
+              "conclusion": "success",
+              "name": "Preserve package cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:43:00Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:57:55Z",
+          "conclusion": "success",
+          "name": "Native validation",
+          "started_at": "2026-10-18T21:57:52Z",
+          "steps": []
+        }
+      ],
+      "lanes": {
+        "gcc-sanitizers": {
+          "artifact": {
+            "digest": "sha256:ae4203088b898683111acd30b825d2b9d19a3cf23ced6315838bf911e0fcea5a",
+            "expires_at": "2026-10-25T21:48:35Z",
+            "files_sha256": {
+              "context.json": "fa707b2f287799358480c627fd193d668f9a5a649c0b6a42e181a681b311fae2",
+              "keys.json": "78755335911befb1dddeb98da3c6a4319d0d7b5565a776f31deea48c26bd43fd",
+              "restore.json": "570dd3924620cff67199fe3d5a291e18692599da990aa03e4d82f64608c011e7"
+            },
+            "id": 12151996797,
+            "name": "native-cache-gcc-sanitizers-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Debug",
+            "generator": "Ninja",
+            "lane": "gcc-sanitizers",
+            "options": "-DCSL_DEPENDENCY_PROBES=OFF -DCMAKE_CXX_FLAGS=\"-fsanitize=address,undefined -fno-omit-frame-pointer\" -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address,undefined\"",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-42c40e529c8d129de1e43c2459f370b27515994da4ee5728faec2e8018dd20a0",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-42c40e529c8d129de1e43c2459f370b27515994da4ee5728faec2e8018dd20a0-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-42c40e529c8d129de1e43c2459f370b27515994da4ee5728faec2e8018dd20a0-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "package-core": {
+          "artifact": {
+            "digest": "sha256:638eed033474329230dbdc872717cef98f319f89f6161576d54c38494ec891a2",
+            "expires_at": "2026-10-25T21:43:00Z",
+            "files_sha256": {
+              "context.json": "05a89d2a4630244fa0bc62520e0c382a9fd0e5c160567e9154c764a3ad9c0c19",
+              "keys.json": "98b210485c2d7e13a6353c648f0e7f0ee6ab3cb0a0a39f3b0921aad3f78a4c9b",
+              "restore.json": "570dd3924620cff67199fe3d5a291e18692599da990aa03e4d82f64608c011e7"
+            },
+            "id": 12151786912,
+            "name": "native-cache-package-core-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "package-core",
+            "options": "cmake --preset core -DCSL_BUILD_SYN07_REPORT=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-5cfc6355b445deafc9fb34dab4117d37d1ca6c6e550407b9f4fb063accd32a40",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-5cfc6355b445deafc9fb34dab4117d37d1ca6c6e550407b9f4fb063accd32a40-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-5cfc6355b445deafc9fb34dab4117d37d1ca6c6e550407b9f4fb063accd32a40-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "package-highs": {
+          "artifact": {
+            "digest": "sha256:c75b188bd40a2ccbf405e7031866b090f70d55d1780d425e6088dfc040cae3e3",
+            "expires_at": "2026-10-25T21:47:42Z",
+            "files_sha256": {
+              "context.json": "0a4e4aceae1abfa60c4cf5b577d2d88b69cf31109d3bf57046040aef192cfd95",
+              "keys.json": "baa30c548d0fc3be29381a891a052802f43098af59e61881a8a64efd3f1630ab",
+              "restore.json": "570dd3924620cff67199fe3d5a291e18692599da990aa03e4d82f64608c011e7"
+            },
+            "id": 12151882311,
+            "name": "native-cache-package-highs-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "package-highs",
+            "options": "cmake --preset highs ",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-a73aa6bb76736916774957ae175ddc097db40082621d4b51a726fcb9091cb877",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-a73aa6bb76736916774957ae175ddc097db40082621d4b51a726fcb9091cb877-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-a73aa6bb76736916774957ae175ddc097db40082621d4b51a726fcb9091cb877-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-cl": {
+          "artifact": {
+            "digest": "sha256:110b15e1f5efea4857f794c51feed39829f97e0e469b60d0c10d5dd88c913d40",
+            "expires_at": "2026-10-25T21:57:45Z",
+            "files_sha256": {
+              "context.json": "c249557be9d8c2dd52e93c229539f1a3dd48058db638d44b9b6b638f017545a0",
+              "keys.json": "770378034c879fffc32982c4eb7029fcb7b95ab7306ccedefc29ba9e05e6948e",
+              "restore.json": "431d321c6867aa327ff787870592fbf363cf34e349f592715ac45306720d1930"
+            },
+            "id": 12152366667,
+            "name": "native-cache-release-cl-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "MSVC v143 / Visual Studio 17 2022 (archive cache only)",
+            "configuration": "Release",
+            "generator": "Visual Studio 17 2022",
+            "lane": "release-cl",
+            "options": "-G \"Visual Studio 17 2022\" -A x64 -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Windows"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382-",
+            "inputs_sha256": "86a5c3ba1e6ac80a4354e8d6d47f91f07b2ac930f6e3be3d843a9cd92262b6f5",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-clang-18": {
+          "artifact": {
+            "digest": "sha256:12b5536e0dc876bdca066cb045adad70981ca0fbd503069e78d7499a82aeac07",
+            "expires_at": "2026-10-25T21:51:59Z",
+            "files_sha256": {
+              "context.json": "7457a7d6b7524419459ef8a6c6e1fbb53f78e2ef27948c70dbe2bb4efefeeee5",
+              "keys.json": "20034dbb9301de25773c4948f212806549a8ba5f669514cbc9b3eaf3ab3bc526",
+              "restore.json": "570dd3924620cff67199fe3d5a291e18692599da990aa03e4d82f64608c011e7"
+            },
+            "id": 12151932652,
+            "name": "native-cache-release-clang-18-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin; CXX=Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "release-clang-18",
+            "options": "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-4c8cc042c7fc1b1535969bc6180063c1b162f16274070f28b9f3b3371fcf76f0",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-4c8cc042c7fc1b1535969bc6180063c1b162f16274070f28b9f3b3371fcf76f0-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-4c8cc042c7fc1b1535969bc6180063c1b162f16274070f28b9f3b3371fcf76f0-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-gcc-13": {
+          "artifact": {
+            "digest": "sha256:b5a22242a796f996d3635c9435ec0a35dade5c3650251a95370690e807b4264e",
+            "expires_at": "2026-10-25T21:47:28Z",
+            "files_sha256": {
+              "context.json": "2f2890f8f9e19affc99d9ef46a2d7d7b6dda75e9b43c5a7468bb13cdf2b45196",
+              "keys.json": "bff1ce15b971371e7916d5abf28cf1d61aa89225a8b6080528788b9f2c07db85",
+              "restore.json": "570dd3924620cff67199fe3d5a291e18692599da990aa03e4d82f64608c011e7"
+            },
+            "id": 12152110547,
+            "name": "native-cache-release-gcc-13-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "release-gcc-13",
+            "options": "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-f660ebfa18d1d256ac87946514df1260dfeb714b71a7eb78de399398ec5de3a6",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-f660ebfa18d1d256ac87946514df1260dfeb714b71a7eb78de399398ec5de3a6-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-f660ebfa18d1d256ac87946514df1260dfeb714b71a7eb78de399398ec5de3a6-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        }
+      }
+    },
+    "cold": {
+      "conclusion": "success",
+      "event": "workflow_dispatch",
+      "head_sha": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+      "id": 39168299468,
+      "jobs": [
+        {
+          "completed_at": "2026-10-18T21:32:47Z",
+          "conclusion": "success",
+          "name": "route / route",
+          "started_at": "2026-10-18T21:32:38Z",
+          "steps": []
+        },
+        {
+          "completed_at": "2026-10-18T21:39:55Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / core installed package",
+          "started_at": "2026-10-18T21:32:50Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:33:14Z",
+              "conclusion": "success",
+              "name": "Restore selected package validation caches",
+              "started_at": "2026-10-18T21:32:57Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:33:18Z",
+              "conclusion": "success",
+              "name": "Configure selected package and backend-neutral report regression",
+              "started_at": "2026-10-18T21:33:14Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:39:02Z",
+              "conclusion": "success",
+              "name": "Run cmake --build --preset core",
+              "started_at": "2026-10-18T21:33:18Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:39:47Z",
+              "conclusion": "success",
+              "name": "Run ctest --preset core",
+              "started_at": "2026-10-18T21:39:02Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:39:52Z",
+              "conclusion": "success",
+              "name": "Preserve package cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:39:47Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:46:16Z",
+          "conclusion": "success",
+          "name": "Release / Linux GCC 13 x64",
+          "started_at": "2026-10-18T21:32:49Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:33:06Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:32:57Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:33:14Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:33:07Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:44:48Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:33:14Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:10Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:44:48Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:14Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:46:11Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:49:57Z",
+          "conclusion": "success",
+          "name": "Release / Linux Clang 18 x64",
+          "started_at": "2026-10-18T21:32:50Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:33:09Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:32:57Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:33:19Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:33:10Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:47:53Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:33:19Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:49:48Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:47:53Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:49:54Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:49:48Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:49:49Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / ASan and UBSan (public modules and consumers)",
+          "started_at": "2026-10-18T21:32:49Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:33:06Z",
+              "conclusion": "success",
+              "name": "Restore instrumented validation caches",
+              "started_at": "2026-10-18T21:32:56Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:33:13Z",
+              "conclusion": "success",
+              "name": "Configure instrumented public modules and consumers",
+              "started_at": "2026-10-18T21:33:06Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:01Z",
+              "conclusion": "success",
+              "name": "Run cmake --build tmp/sanitizers --parallel 4",
+              "started_at": "2026-10-18T21:33:13Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:49:43Z",
+              "conclusion": "success",
+              "name": "Run ctest --test-dir tmp/sanitizers --output-on-failure --no-tests=error",
+              "started_at": "2026-10-18T21:46:01Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:49:47Z",
+              "conclusion": "success",
+              "name": "Preserve instrumented cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:49:43Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:43:05Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / highs installed package",
+          "started_at": "2026-10-18T21:32:50Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:33:08Z",
+              "conclusion": "success",
+              "name": "Restore selected package validation caches",
+              "started_at": "2026-10-18T21:32:58Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:33:15Z",
+              "conclusion": "success",
+              "name": "Configure selected package and backend-neutral report regression",
+              "started_at": "2026-10-18T21:33:08Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:41:48Z",
+              "conclusion": "success",
+              "name": "Run cmake --build --preset highs",
+              "started_at": "2026-10-18T21:33:15Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:42:56Z",
+              "conclusion": "success",
+              "name": "Run ctest --preset highs",
+              "started_at": "2026-10-18T21:41:48Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:43:02Z",
+              "conclusion": "success",
+              "name": "Preserve package cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:42:56Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:55:40Z",
+          "conclusion": "success",
+          "name": "Release / Windows MSVC x64",
+          "started_at": "2026-10-18T21:32:49Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:33:12Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:33:10Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:33:57Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:33:27Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:53:10Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:33:57Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:55:33Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:53:10Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:55:37Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:55:35Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:55:45Z",
+          "conclusion": "success",
+          "name": "Native validation",
+          "started_at": "2026-10-18T21:55:42Z",
+          "steps": []
+        }
+      ],
+      "lanes": {
+        "gcc-sanitizers": {
+          "artifact": {
+            "digest": "sha256:dcec5eb8a2e2e4d0a5d495f47d55e962f090ff742d6e87725a20f5b2c2b13add",
+            "expires_at": "2026-10-25T21:49:46Z",
+            "files_sha256": {
+              "compiler-counters.txt": "a57028ecbed5f1688835ea36a14f21e361b303eeb89cd5d967d51200011431b2",
+              "compiler-summary.txt": "067de2e9afe40fa52650ddfd482f3475399de4372d7472cd3d554ed05995d94e",
+              "context.json": "1cec2b222f9ed70e3b3e208bcb12d33a82b50d2749351bd24c06d6f0f1cafcb2",
+              "keys.json": "a19fe307cb932d93ee5db9e7ace35eeccc49513460eca4764c745a1d0086114a",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12151771759,
+            "name": "native-cache-gcc-sanitizers-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 473,
+            "cache_size_kibibyte": 398320,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 2,
+            "direct_cache_miss": 479,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 948,
+            "internal_error": 0,
+            "local_storage_hit": 4,
+            "local_storage_miss": 473,
+            "local_storage_read_hit": 6,
+            "local_storage_read_miss": 956,
+            "local_storage_write": 948,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 2,
+            "preprocessed_cache_miss": 477,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792360165,
+            "stats_zeroed_timestamp": 1792359186,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Debug",
+            "generator": "Ninja",
+            "lane": "gcc-sanitizers",
+            "options": "-DCSL_DEPENDENCY_PROBES=OFF -DCMAKE_CXX_FLAGS=\"-fsanitize=address,undefined -fno-omit-frame-pointer\" -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address,undefined\"",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "package-core": {
+          "artifact": {
+            "digest": "sha256:6fe68a8a11d6f11604df8432fa8b5f83d8c3c9f3c5a11a4347d76541bb559b52",
+            "expires_at": "2026-10-25T21:39:51Z",
+            "files_sha256": {
+              "compiler-counters.txt": "b63a3110053197f46928dc624878d3ef3df4eeda3a0268d2c206d5a0e8e36747",
+              "compiler-summary.txt": "0e0538027d7e6604ea466c6c8b61245973b2e0366dafb06661b1da96d068438a",
+              "context.json": "d7fcfa1c0f12f84765d6e7f4510489bddc1399c2297537fc2eb32cc78736b74e",
+              "keys.json": "007ac31d146a153fad2914622fff58fe48b5934c28c74544359dd37f6613bafd",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12151681233,
+            "name": "native-cache-package-core-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 206,
+            "cache_size_kibibyte": 19392,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 2,
+            "direct_cache_miss": 212,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 414,
+            "internal_error": 0,
+            "local_storage_hit": 4,
+            "local_storage_miss": 206,
+            "local_storage_read_hit": 6,
+            "local_storage_read_miss": 422,
+            "local_storage_write": 414,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 2,
+            "preprocessed_cache_miss": 210,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792359587,
+            "stats_zeroed_timestamp": 1792359193,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "package-core",
+            "options": "cmake --preset core -DCSL_BUILD_SYN07_REPORT=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "package-highs": {
+          "artifact": {
+            "digest": "sha256:3859248270d717389725e7588cab84fc8905bc246efdb5b4b07e22c7ed4cbe3c",
+            "expires_at": "2026-10-25T21:43:01Z",
+            "files_sha256": {
+              "compiler-counters.txt": "b866d5b39c9aac0050540cbd36fa84efef55b030086a882ab51bc9fb3396222b",
+              "compiler-summary.txt": "a52768a84bbedb3dc4f70fc90de4d350db5b4fa0b81258e358088fb43e2f3a17",
+              "context.json": "0872b61871d447d821690a306d7cb2a526262144c4163217d9d84b3a0495ffee",
+              "keys.json": "fa84bb480b70a59c2a5391d098cd27c57fdeb12c21818399af9df1bfdd183c0f",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12151911473,
+            "name": "native-cache-package-highs-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 439,
+            "cache_size_kibibyte": 30344,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 2,
+            "direct_cache_miss": 445,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 880,
+            "internal_error": 0,
+            "local_storage_hit": 4,
+            "local_storage_miss": 439,
+            "local_storage_read_hit": 6,
+            "local_storage_read_miss": 888,
+            "local_storage_write": 880,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 2,
+            "preprocessed_cache_miss": 443,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792359772,
+            "stats_zeroed_timestamp": 1792359188,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "package-highs",
+            "options": "cmake --preset highs ",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-cl": {
+          "artifact": {
+            "digest": "sha256:853db55042d09706c6920f22856b442556d271aaae5ac9198002522ba5e4b694",
+            "expires_at": "2026-10-25T21:55:36Z",
+            "files_sha256": {
+              "context.json": "c249557be9d8c2dd52e93c229539f1a3dd48058db638d44b9b6b638f017545a0",
+              "keys.json": "770378034c879fffc32982c4eb7029fcb7b95ab7306ccedefc29ba9e05e6948e",
+              "restore.json": "431d321c6867aa327ff787870592fbf363cf34e349f592715ac45306720d1930"
+            },
+            "id": 12152261003,
+            "name": "native-cache-release-cl-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "MSVC v143 / Visual Studio 17 2022 (archive cache only)",
+            "configuration": "Release",
+            "generator": "Visual Studio 17 2022",
+            "lane": "release-cl",
+            "options": "-G \"Visual Studio 17 2022\" -A x64 -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Windows"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382-",
+            "inputs_sha256": "86a5c3ba1e6ac80a4354e8d6d47f91f07b2ac930f6e3be3d843a9cd92262b6f5",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-clang-18": {
+          "artifact": {
+            "digest": "sha256:bdfa9040e6debfab22cb397323a2e04154321df2a3bc32e0098802549c7dd74b",
+            "expires_at": "2026-10-25T21:49:53Z",
+            "files_sha256": {
+              "compiler-counters.txt": "9410b4e3b26e2f847ceca24524b013873977b63788fdd0d3906b5b482f449caa",
+              "compiler-summary.txt": "c5eca8e8cf21dec5c47e6ec47851af03c3194e4e0872ed62e76cbdfcdd0ee25a",
+              "context.json": "9e50e3565ed1ce5210be6bff70c62c821eabfb4c4058015a089621b2f1101e92",
+              "keys.json": "a72d38927000932d6ae8859a240591a69b3eaf4d63efade98d0a50e88de9ff10",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12152021905,
+            "name": "native-cache-release-clang-18-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 672,
+            "cache_size_kibibyte": 39932,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 4,
+            "direct_cache_miss": 684,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 1352,
+            "internal_error": 0,
+            "local_storage_hit": 12,
+            "local_storage_miss": 672,
+            "local_storage_read_hit": 16,
+            "local_storage_read_miss": 1360,
+            "local_storage_write": 1352,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 8,
+            "preprocessed_cache_miss": 676,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792360184,
+            "stats_zeroed_timestamp": 1792359189,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin; CXX=Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "release-clang-18",
+            "options": "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-gcc-13": {
+          "artifact": {
+            "digest": "sha256:4848cdfada230618b894a428e53eebe4c34ad6ebdc865d9f6fe18a3966e4d6eb",
+            "expires_at": "2026-10-25T21:46:14Z",
+            "files_sha256": {
+              "compiler-counters.txt": "c154fe1ad62873d256166b9096e5c18940a9450ce1a579daed664740c77b7c8a",
+              "compiler-summary.txt": "228f5b5842e94c311e179cdc896df79252a17c2d87d847685265c719f69ee694",
+              "context.json": "2f807ff11f966b3b6bd5998c1b7d2b17c12400d008a263fea6054768c1aa0772",
+              "keys.json": "fc01fff8b1554ba728f21ab237eaa33f7881328e149b357146709c8de1ac40ae",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12151537771,
+            "name": "native-cache-release-gcc-13-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 676,
+            "cache_size_kibibyte": 41824,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 4,
+            "direct_cache_miss": 688,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 1360,
+            "internal_error": 0,
+            "local_storage_hit": 12,
+            "local_storage_miss": 676,
+            "local_storage_read_hit": 16,
+            "local_storage_read_miss": 1368,
+            "local_storage_write": 1360,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 8,
+            "preprocessed_cache_miss": 680,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792359966,
+            "stats_zeroed_timestamp": 1792359186,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "release-gcc-13",
+            "options": "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        }
+      }
+    },
+    "pr": {
+      "conclusion": "success",
+      "event": "pull_request",
+      "head_sha": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+      "id": 39168262592,
+      "jobs": [
+        {
+          "completed_at": "2026-10-18T21:32:19Z",
+          "conclusion": "success",
+          "name": "route / route",
+          "started_at": "2026-10-18T21:32:08Z",
+          "steps": []
+        },
+        {
+          "completed_at": "2026-10-18T21:42:35Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / highs installed package",
+          "started_at": "2026-10-18T21:32:21Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:32:39Z",
+              "conclusion": "success",
+              "name": "Restore selected package validation caches",
+              "started_at": "2026-10-18T21:32:29Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:32:45Z",
+              "conclusion": "success",
+              "name": "Configure selected package and backend-neutral report regression",
+              "started_at": "2026-10-18T21:32:39Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:41:23Z",
+              "conclusion": "success",
+              "name": "Run cmake --build --preset highs",
+              "started_at": "2026-10-18T21:32:45Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:42:32Z",
+              "conclusion": "success",
+              "name": "Run ctest --preset highs",
+              "started_at": "2026-10-18T21:41:23Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:42:33Z",
+              "conclusion": "success",
+              "name": "Preserve package cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:42:32Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:46:11Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / ASan and UBSan (public modules and consumers)",
+          "started_at": "2026-10-18T21:32:21Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:32:47Z",
+              "conclusion": "success",
+              "name": "Restore instrumented validation caches",
+              "started_at": "2026-10-18T21:32:31Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:32:56Z",
+              "conclusion": "success",
+              "name": "Configure instrumented public modules and consumers",
+              "started_at": "2026-10-18T21:32:47Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:43:04Z",
+              "conclusion": "success",
+              "name": "Run cmake --build tmp/sanitizers --parallel 4",
+              "started_at": "2026-10-18T21:32:56Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:06Z",
+              "conclusion": "success",
+              "name": "Run ctest --test-dir tmp/sanitizers --output-on-failure --no-tests=error",
+              "started_at": "2026-10-18T21:43:04Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:08Z",
+              "conclusion": "success",
+              "name": "Preserve instrumented cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:46:06Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:46:20Z",
+          "conclusion": "success",
+          "name": "Release / Linux GCC 13 x64",
+          "started_at": "2026-10-18T21:32:21Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:32:40Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:32:30Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:32:52Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:32:42Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:44:50Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:32:52Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:15Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:44:50Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:46:17Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:46:16Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:55:14Z",
+          "conclusion": "success",
+          "name": "Release / Windows MSVC x64",
+          "started_at": "2026-10-18T21:32:21Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:32:45Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:32:43Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:33:32Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:33:00Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:52:41Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:33:32Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:55:07Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:52:41Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:55:10Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:55:08Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:49:22Z",
+          "conclusion": "success",
+          "name": "Release / Linux Clang 18 x64",
+          "started_at": "2026-10-18T21:32:21Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:32:45Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:32:29Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:32:56Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:32:46Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:47:22Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:32:56Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:49:19Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:47:22Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:49:20Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:49:19Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:38:12Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / core installed package",
+          "started_at": "2026-10-18T21:32:21Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:32:50Z",
+              "conclusion": "success",
+              "name": "Restore selected package validation caches",
+              "started_at": "2026-10-18T21:32:30Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:32:55Z",
+              "conclusion": "success",
+              "name": "Configure selected package and backend-neutral report regression",
+              "started_at": "2026-10-18T21:32:50Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:37:31Z",
+              "conclusion": "success",
+              "name": "Run cmake --build --preset core",
+              "started_at": "2026-10-18T21:32:55Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:38:08Z",
+              "conclusion": "success",
+              "name": "Run ctest --preset core",
+              "started_at": "2026-10-18T21:37:32Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:38:09Z",
+              "conclusion": "success",
+              "name": "Preserve package cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:38:08Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:55:19Z",
+          "conclusion": "success",
+          "name": "Native validation",
+          "started_at": "2026-10-18T21:55:16Z",
+          "steps": []
+        }
+      ],
+      "lanes": {
+        "gcc-sanitizers": {
+          "artifact": {
+            "digest": "sha256:8723c50ac4b61f120fb784755d46d31ab06afde7f23895a7f82187f22282ddb7",
+            "expires_at": "2026-10-25T21:46:07Z",
+            "files_sha256": {
+              "compiler-counters.txt": "0230210eaa8b2f2e0230f7b46359ac3ed57f76756279bf8b33ab4233340e14fd",
+              "compiler-summary.txt": "067de2e9afe40fa52650ddfd482f3475399de4372d7472cd3d554ed05995d94e",
+              "context.json": "1cec2b222f9ed70e3b3e208bcb12d33a82b50d2749351bd24c06d6f0f1cafcb2",
+              "keys.json": "607631f7c0dee2c4b4f049a33581d65ed1df7a11526d6a2a66fbcc138a56259f",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12151832106,
+            "name": "native-cache-gcc-sanitizers-1"
+          },
+          "build_source_revision": "e138617af69b5969c88cd12d270f2c3457d679ea",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 473,
+            "cache_size_kibibyte": 398320,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 2,
+            "direct_cache_miss": 479,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 948,
+            "internal_error": 0,
+            "local_storage_hit": 4,
+            "local_storage_miss": 473,
+            "local_storage_read_hit": 6,
+            "local_storage_read_miss": 956,
+            "local_storage_write": 948,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 2,
+            "preprocessed_cache_miss": 477,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792359950,
+            "stats_zeroed_timestamp": 1792359167,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Debug",
+            "generator": "Ninja",
+            "lane": "gcc-sanitizers",
+            "options": "-DCSL_DEPENDENCY_PROBES=OFF -DCMAKE_CXX_FLAGS=\"-fsanitize=address,undefined -fno-omit-frame-pointer\" -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address,undefined\"",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-main-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493",
+            "compiler_key": "csl-objects-v1-main-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493-e138617af69b5969c88cd12d270f2c3457d679ea",
+            "compiler_prefix": "csl-objects-v1-main-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "false",
+            "scope": "main"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "package-core": {
+          "artifact": {
+            "digest": "sha256:e64daa3d979149493feda006e254429f256e5e994c83824e3d2751cccf151101",
+            "expires_at": "2026-10-25T21:38:08Z",
+            "files_sha256": {
+              "compiler-counters.txt": "409ccf28958f820e3e33a72caceac7dc6f7f64763dc18e82fce9b13dd83f63ec",
+              "compiler-summary.txt": "0e0538027d7e6604ea466c6c8b61245973b2e0366dafb06661b1da96d068438a",
+              "context.json": "d7fcfa1c0f12f84765d6e7f4510489bddc1399c2297537fc2eb32cc78736b74e",
+              "keys.json": "022e2f9f2dff6c87cbec8ae2524ed0483c9b8f658423e4897f22c04dc2ddf3a0",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12150574940,
+            "name": "native-cache-package-core-1"
+          },
+          "build_source_revision": "e138617af69b5969c88cd12d270f2c3457d679ea",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 206,
+            "cache_size_kibibyte": 19392,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 2,
+            "direct_cache_miss": 212,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 414,
+            "internal_error": 0,
+            "local_storage_hit": 4,
+            "local_storage_miss": 206,
+            "local_storage_read_hit": 6,
+            "local_storage_read_miss": 422,
+            "local_storage_write": 414,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 2,
+            "preprocessed_cache_miss": 210,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792359488,
+            "stats_zeroed_timestamp": 1792359170,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "package-core",
+            "options": "cmake --preset core -DCSL_BUILD_SYN07_REPORT=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-main-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687",
+            "compiler_key": "csl-objects-v1-main-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-e138617af69b5969c88cd12d270f2c3457d679ea",
+            "compiler_prefix": "csl-objects-v1-main-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "false",
+            "scope": "main"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "package-highs": {
+          "artifact": {
+            "digest": "sha256:f18b4bb424053083c11d05c2f71954bef0e2cf8481e335e0468e56647afbdef4",
+            "expires_at": "2026-10-25T21:42:33Z",
+            "files_sha256": {
+              "compiler-counters.txt": "a1077c6a82cc0c5a08cceba74a1c057f4909412345b619ebaa4b00cf42a1dbce",
+              "compiler-summary.txt": "a52768a84bbedb3dc4f70fc90de4d350db5b4fa0b81258e358088fb43e2f3a17",
+              "context.json": "0872b61871d447d821690a306d7cb2a526262144c4163217d9d84b3a0495ffee",
+              "keys.json": "6519e23632e89a7c957e3f5531652c155e674f4455a056131c924095d495ab3d",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12151509054,
+            "name": "native-cache-package-highs-1"
+          },
+          "build_source_revision": "e138617af69b5969c88cd12d270f2c3457d679ea",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 439,
+            "cache_size_kibibyte": 30344,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 2,
+            "direct_cache_miss": 445,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 880,
+            "internal_error": 0,
+            "local_storage_hit": 4,
+            "local_storage_miss": 439,
+            "local_storage_read_hit": 6,
+            "local_storage_read_miss": 888,
+            "local_storage_write": 880,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 2,
+            "preprocessed_cache_miss": 443,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792359748,
+            "stats_zeroed_timestamp": 1792359159,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "package-highs",
+            "options": "cmake --preset highs ",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-main-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7",
+            "compiler_key": "csl-objects-v1-main-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7-e138617af69b5969c88cd12d270f2c3457d679ea",
+            "compiler_prefix": "csl-objects-v1-main-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "false",
+            "scope": "main"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-cl": {
+          "artifact": {
+            "digest": "sha256:98251f74baa48840a016be587ab31e4826dfb9f8ee0f4768f1e2e07a07dd97e2",
+            "expires_at": "2026-10-25T21:55:09Z",
+            "files_sha256": {
+              "context.json": "c249557be9d8c2dd52e93c229539f1a3dd48058db638d44b9b6b638f017545a0",
+              "keys.json": "ed04c64ac3f1998cb72b66c798a6617643841a226a47d0461aa2ce93da0de009",
+              "restore.json": "431d321c6867aa327ff787870592fbf363cf34e349f592715ac45306720d1930"
+            },
+            "id": 12152441030,
+            "name": "native-cache-release-cl-1"
+          },
+          "build_source_revision": "e138617af69b5969c88cd12d270f2c3457d679ea",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "MSVC v143 / Visual Studio 17 2022 (archive cache only)",
+            "configuration": "Release",
+            "generator": "Visual Studio 17 2022",
+            "lane": "release-cl",
+            "options": "-G \"Visual Studio 17 2022\" -A x64 -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Windows"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-main-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382",
+            "compiler_key": "csl-objects-v1-main-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382-e138617af69b5969c88cd12d270f2c3457d679ea",
+            "compiler_prefix": "csl-objects-v1-main-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382-",
+            "inputs_sha256": "86a5c3ba1e6ac80a4354e8d6d47f91f07b2ac930f6e3be3d843a9cd92262b6f5",
+            "save_allowed": "false",
+            "scope": "main"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-clang-18": {
+          "artifact": {
+            "digest": "sha256:4d5e8276cca7657d243eea27bc7bdeed85018784ac4c35d97926f632c6c95acf",
+            "expires_at": "2026-10-25T21:49:19Z",
+            "files_sha256": {
+              "compiler-counters.txt": "84112a7681b34050e1312703a6752208d0e94d52f8ca704a08b82d5875bb8931",
+              "compiler-summary.txt": "c5eca8e8cf21dec5c47e6ec47851af03c3194e4e0872ed62e76cbdfcdd0ee25a",
+              "context.json": "9e50e3565ed1ce5210be6bff70c62c821eabfb4c4058015a089621b2f1101e92",
+              "keys.json": "f476f65a5e550044dd1d5d007d24567951dfc4a2602bf438341281ef27a5ee26",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12152190667,
+            "name": "native-cache-release-clang-18-1"
+          },
+          "build_source_revision": "e138617af69b5969c88cd12d270f2c3457d679ea",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 672,
+            "cache_size_kibibyte": 39932,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 4,
+            "direct_cache_miss": 684,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 1352,
+            "internal_error": 0,
+            "local_storage_hit": 12,
+            "local_storage_miss": 672,
+            "local_storage_read_hit": 16,
+            "local_storage_read_miss": 1360,
+            "local_storage_write": 1352,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 8,
+            "preprocessed_cache_miss": 676,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792360154,
+            "stats_zeroed_timestamp": 1792359165,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin; CXX=Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "release-clang-18",
+            "options": "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-main-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab",
+            "compiler_key": "csl-objects-v1-main-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab-e138617af69b5969c88cd12d270f2c3457d679ea",
+            "compiler_prefix": "csl-objects-v1-main-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "false",
+            "scope": "main"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-gcc-13": {
+          "artifact": {
+            "digest": "sha256:b0f5f8cba0ab2924ee3c1d62742dc8555c22764bbe615de849b6b38a4476c14a",
+            "expires_at": "2026-10-25T21:46:16Z",
+            "files_sha256": {
+              "compiler-counters.txt": "93f9abaa4842718c9d921e54345c245c35ff63f782fb06716cdb8825f8ce6955",
+              "compiler-summary.txt": "228f5b5842e94c311e179cdc896df79252a17c2d87d847685265c719f69ee694",
+              "context.json": "2f807ff11f966b3b6bd5998c1b7d2b17c12400d008a263fea6054768c1aa0772",
+              "keys.json": "3a8dee8b533344cf95705f864b81b9b4871ae7ee4144675927b129589efb25e0",
+              "restore.json": "fe17e85ae895fddc8b43cd9c1ec403855e4186e609b21b76f586abec8d3fe9dc"
+            },
+            "id": 12151547819,
+            "name": "native-cache-release-gcc-13-1"
+          },
+          "build_source_revision": "e138617af69b5969c88cd12d270f2c3457d679ea",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 676,
+            "cache_size_kibibyte": 41824,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 4,
+            "direct_cache_miss": 688,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 1360,
+            "internal_error": 0,
+            "local_storage_hit": 12,
+            "local_storage_miss": 676,
+            "local_storage_read_hit": 16,
+            "local_storage_read_miss": 1368,
+            "local_storage_write": 1360,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 8,
+            "preprocessed_cache_miss": 680,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792359971,
+            "stats_zeroed_timestamp": 1792359160,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "release-gcc-13",
+            "options": "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-main-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe",
+            "compiler_key": "csl-objects-v1-main-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe-e138617af69b5969c88cd12d270f2c3457d679ea",
+            "compiler_prefix": "csl-objects-v1-main-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "false",
+            "scope": "main"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        }
+      }
+    },
+    "warm": {
+      "conclusion": "success",
+      "event": "workflow_dispatch",
+      "head_sha": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+      "id": 39170021830,
+      "jobs": [
+        {
+          "completed_at": "2026-10-18T21:56:33Z",
+          "conclusion": "success",
+          "name": "route / route",
+          "started_at": "2026-10-18T21:56:24Z",
+          "steps": []
+        },
+        {
+          "completed_at": "2026-10-18T22:01:51Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / ASan and UBSan (public modules and consumers)",
+          "started_at": "2026-10-18T21:56:35Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:57:01Z",
+              "conclusion": "success",
+              "name": "Restore instrumented validation caches",
+              "started_at": "2026-10-18T21:56:44Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:09Z",
+              "conclusion": "success",
+              "name": "Configure instrumented public modules and consumers",
+              "started_at": "2026-10-18T21:57:01Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:58:59Z",
+              "conclusion": "success",
+              "name": "Run cmake --build tmp/sanitizers --parallel 4",
+              "started_at": "2026-10-18T21:57:09Z"
+            },
+            {
+              "completed_at": "2026-10-18T22:01:46Z",
+              "conclusion": "success",
+              "name": "Run ctest --test-dir tmp/sanitizers --output-on-failure --no-tests=error",
+              "started_at": "2026-10-18T21:58:59Z"
+            },
+            {
+              "completed_at": "2026-10-18T22:01:48Z",
+              "conclusion": "success",
+              "name": "Preserve instrumented cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T22:01:46Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:57:15Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / core installed package",
+          "started_at": "2026-10-18T21:56:36Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:56:56Z",
+              "conclusion": "success",
+              "name": "Restore selected package validation caches",
+              "started_at": "2026-10-18T21:56:43Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:56:57Z",
+              "conclusion": "success",
+              "name": "Configure selected package and backend-neutral report regression",
+              "started_at": "2026-10-18T21:56:56Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:01Z",
+              "conclusion": "success",
+              "name": "Run cmake --build --preset core",
+              "started_at": "2026-10-18T21:56:57Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:10Z",
+              "conclusion": "success",
+              "name": "Run ctest --preset core",
+              "started_at": "2026-10-18T21:57:01Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:11Z",
+              "conclusion": "success",
+              "name": "Preserve package cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:57:10Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:57:23Z",
+          "conclusion": "success",
+          "name": "Linux GCC 13 / highs installed package",
+          "started_at": "2026-10-18T21:56:35Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:56:54Z",
+              "conclusion": "success",
+              "name": "Restore selected package validation caches",
+              "started_at": "2026-10-18T21:56:42Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:56:59Z",
+              "conclusion": "success",
+              "name": "Configure selected package and backend-neutral report regression",
+              "started_at": "2026-10-18T21:56:54Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:04Z",
+              "conclusion": "success",
+              "name": "Run cmake --build --preset highs",
+              "started_at": "2026-10-18T21:56:59Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:20Z",
+              "conclusion": "success",
+              "name": "Run ctest --preset highs",
+              "started_at": "2026-10-18T21:57:04Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:21Z",
+              "conclusion": "success",
+              "name": "Preserve package cache evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:57:20Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T22:19:37Z",
+          "conclusion": "success",
+          "name": "Release / Windows MSVC x64",
+          "started_at": "2026-10-18T21:56:35Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:56:55Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:56:53Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:39Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:57:11Z"
+            },
+            {
+              "completed_at": "2026-10-18T22:17:05Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:57:39Z"
+            },
+            {
+              "completed_at": "2026-10-18T22:19:31Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T22:17:05Z"
+            },
+            {
+              "completed_at": "2026-10-18T22:19:34Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T22:19:32Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:57:31Z",
+          "conclusion": "success",
+          "name": "Release / Linux Clang 18 x64",
+          "started_at": "2026-10-18T21:56:35Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:56:53Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:56:40Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:03Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:56:54Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:12Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:57:03Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:27Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:57:12Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:28Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:57:27Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T21:57:34Z",
+          "conclusion": "success",
+          "name": "Release / Linux GCC 13 x64",
+          "started_at": "2026-10-18T21:56:35Z",
+          "steps": [
+            {
+              "completed_at": "2026-10-18T21:57:01Z",
+              "conclusion": "success",
+              "name": "Restore compatible validation caches",
+              "started_at": "2026-10-18T21:56:43Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:07Z",
+              "conclusion": "success",
+              "name": "Configure",
+              "started_at": "2026-10-18T21:57:02Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:14Z",
+              "conclusion": "success",
+              "name": "Build",
+              "started_at": "2026-10-18T21:57:07Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:29Z",
+              "conclusion": "success",
+              "name": "Test source and installed clients plus literal numeric probes",
+              "started_at": "2026-10-18T21:57:14Z"
+            },
+            {
+              "completed_at": "2026-10-18T21:57:31Z",
+              "conclusion": "success",
+              "name": "Preserve cache work evidence and permitted snapshots",
+              "started_at": "2026-10-18T21:57:29Z"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-10-18T22:19:42Z",
+          "conclusion": "success",
+          "name": "Native validation",
+          "started_at": "2026-10-18T22:19:39Z",
+          "steps": []
+        }
+      ],
+      "lanes": {
+        "gcc-sanitizers": {
+          "artifact": {
+            "digest": "sha256:152a0ad25139ee5681a0cffcc848df0793065f7c70c85a43e76a40b9471b8dd0",
+            "expires_at": "2026-10-25T22:01:47Z",
+            "files_sha256": {
+              "compiler-counters.txt": "aab9cca7f25faaa1da80fa7c5f3f850dec23ae329059af64643ee730540ee6eb",
+              "compiler-summary.txt": "73ec9d3d51bf469ee0c9dc14c37378390468c5c599706a9960d0bbaa44226516",
+              "context.json": "1cec2b222f9ed70e3b3e208bcb12d33a82b50d2749351bd24c06d6f0f1cafcb2",
+              "keys.json": "a19fe307cb932d93ee5db9e7ace35eeccc49513460eca4764c745a1d0086114a",
+              "restore.json": "ac1f9043d7e61c1ab691daee7b74d65e211801e88a3cf5e74ad7b1ee2aa47023"
+            },
+            "id": 12151872551,
+            "name": "native-cache-gcc-sanitizers-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 22,
+            "cache_size_kibibyte": 398500,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 455,
+            "direct_cache_miss": 26,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 992,
+            "internal_error": 0,
+            "local_storage_hit": 455,
+            "local_storage_miss": 22,
+            "local_storage_read_hit": 910,
+            "local_storage_read_miss": 52,
+            "local_storage_write": 44,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 0,
+            "preprocessed_cache_miss": 26,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792360872,
+            "stats_zeroed_timestamp": 1792360621,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Debug",
+            "generator": "Ninja",
+            "lane": "gcc-sanitizers",
+            "options": "-DCSL_DEPENDENCY_PROBES=OFF -DCMAKE_CXX_FLAGS=\"-fsanitize=address,undefined -fno-omit-frame-pointer\" -DCMAKE_EXE_LINKER_FLAGS=\"-fsanitize=address,undefined\"",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "true",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "true",
+            "OBJECT_MATCH": "csl-objects-v1-branch-c178c498ee3d6ebf-f8b77711955844270763368bd68e531888c41d7275142b63bd93010474df2493-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27"
+          }
+        },
+        "package-core": {
+          "artifact": {
+            "digest": "sha256:05bc8e43c76ac43fe2413ad89d75a045124a8cf3f23870432cb8c96a95a218ea",
+            "expires_at": "2026-10-25T21:57:10Z",
+            "files_sha256": {
+              "compiler-counters.txt": "13dc091b883c2d97da07889853fa2cd8cdde3bf42830e8cc123a3d9ee1b35e19",
+              "compiler-summary.txt": "1de58ceff2475af0b6ace1b67774e06004c5c5fbb5782cdf88c4e676aec8157b",
+              "context.json": "d7fcfa1c0f12f84765d6e7f4510489bddc1399c2297537fc2eb32cc78736b74e",
+              "keys.json": "007ac31d146a153fad2914622fff58fe48b5934c28c74544359dd37f6613bafd",
+              "restore.json": "5b52a893de3d219028230a8d0578bba60bdf11add9607352abbaee4de47afa9c"
+            },
+            "id": 12152172202,
+            "name": "native-cache-package-core-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 3,
+            "cache_size_kibibyte": 19416,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 207,
+            "direct_cache_miss": 7,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 420,
+            "internal_error": 0,
+            "local_storage_hit": 207,
+            "local_storage_miss": 3,
+            "local_storage_read_hit": 414,
+            "local_storage_read_miss": 14,
+            "local_storage_write": 6,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 0,
+            "preprocessed_cache_miss": 7,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792360630,
+            "stats_zeroed_timestamp": 1792360616,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "package-core",
+            "options": "cmake --preset core -DCSL_BUILD_SYN07_REPORT=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "true",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "true",
+            "OBJECT_MATCH": "csl-objects-v1-branch-c178c498ee3d6ebf-c5e8bbe360f1cd4378108ba2a584f51d957e7d62ef876afaaf4041884489e687-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27"
+          }
+        },
+        "package-highs": {
+          "artifact": {
+            "digest": "sha256:871249cbb7ae1fd97e1262d2c4dbb8159c6490292edbc981d72341e403225e42",
+            "expires_at": "2026-10-25T21:57:20Z",
+            "files_sha256": {
+              "compiler-counters.txt": "fb66f1ab7a9f0c8a1bc0a56914282845e2227a2351ed850ed27ac225cef2de87",
+              "compiler-summary.txt": "a954d612e4d82d98c12a187913fe77561f25726fd10439dbfeaba86a04dad792",
+              "context.json": "0872b61871d447d821690a306d7cb2a526262144c4163217d9d84b3a0495ffee",
+              "keys.json": "fa84bb480b70a59c2a5391d098cd27c57fdeb12c21818399af9df1bfdd183c0f",
+              "restore.json": "ba1dbd7780d358e8324e565c0e5f0fca3c2dff16ab6e21fc702f5b92ba8013c5"
+            },
+            "id": 12152535858,
+            "name": "native-cache-package-highs-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 22,
+            "cache_size_kibibyte": 30524,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 421,
+            "direct_cache_miss": 26,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 924,
+            "internal_error": 0,
+            "local_storage_hit": 421,
+            "local_storage_miss": 22,
+            "local_storage_read_hit": 842,
+            "local_storage_read_miss": 52,
+            "local_storage_write": 44,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 0,
+            "preprocessed_cache_miss": 26,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792360636,
+            "stats_zeroed_timestamp": 1792360614,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "package-highs",
+            "options": "cmake --preset highs ",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "true",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "true",
+            "OBJECT_MATCH": "csl-objects-v1-branch-c178c498ee3d6ebf-e67607f94744df545500331c8e7f0fb317b155e6419245a89c3f676d207c92a7-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27"
+          }
+        },
+        "release-cl": {
+          "artifact": {
+            "digest": "sha256:f47607753fd1626fc10bb17c099d3220a34766f77f53b13ebca92f77f2dce8ef",
+            "expires_at": "2026-10-25T22:19:33Z",
+            "files_sha256": {
+              "context.json": "c249557be9d8c2dd52e93c229539f1a3dd48058db638d44b9b6b638f017545a0",
+              "keys.json": "770378034c879fffc32982c4eb7029fcb7b95ab7306ccedefc29ba9e05e6948e",
+              "restore.json": "5da2f131adb523b7be0b5620c42c506826a7b56e5ed161470ba21dc4c3387b51"
+            },
+            "id": 12153061074,
+            "name": "native-cache-release-cl-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {},
+          "context": {
+            "arch": "X64",
+            "ccache": "disabled",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "MSVC v143 / Visual Studio 17 2022 (archive cache only)",
+            "configuration": "Release",
+            "generator": "Visual Studio 17 2022",
+            "lane": "release-cl",
+            "options": "-G \"Visual Studio 17 2022\" -A x64 -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Windows"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-0109bcc6239217c0ed9d10fd210a000e458275d8a8ceaaf872e2a302663f9382-",
+            "inputs_sha256": "86a5c3ba1e6ac80a4354e8d6d47f91f07b2ac930f6e3be3d843a9cd92262b6f5",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "true",
+            "COMPILER_ENABLED": "false",
+            "OBJECT_HIT": "",
+            "OBJECT_MATCH": ""
+          }
+        },
+        "release-clang-18": {
+          "artifact": {
+            "digest": "sha256:33e19623f31a994b1a5ceba0d7483c2786714c66f02d42582c6b48cc711f3586",
+            "expires_at": "2026-10-25T21:57:28Z",
+            "files_sha256": {
+              "compiler-counters.txt": "0ccde1715cba72dea0d7a945fe3b4275cc366dd3bb8315986d2f90ec987aff77",
+              "compiler-summary.txt": "72eae973ace7d5a90ce2e4b59b51014170e7c6699bc96894f62925364b57d96c",
+              "context.json": "9e50e3565ed1ce5210be6bff70c62c821eabfb4c4058015a089621b2f1101e92",
+              "keys.json": "a72d38927000932d6ae8859a240591a69b3eaf4d63efade98d0a50e88de9ff10",
+              "restore.json": "e091671bd697400eb3779b907f9419583a429e2cd8e32a261ca278bdd72fd0b2"
+            },
+            "id": 12151971900,
+            "name": "native-cache-release-clang-18-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 38,
+            "cache_size_kibibyte": 40244,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 646,
+            "direct_cache_miss": 42,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 1428,
+            "internal_error": 0,
+            "local_storage_hit": 646,
+            "local_storage_miss": 38,
+            "local_storage_read_hit": 1292,
+            "local_storage_read_miss": 84,
+            "local_storage_write": 76,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 0,
+            "preprocessed_cache_miss": 42,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792360645,
+            "stats_zeroed_timestamp": 1792360613,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin; CXX=Ubuntu clang version 18.1.3 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/bin",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "release-clang-18",
+            "options": "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "true",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "true",
+            "OBJECT_MATCH": "csl-objects-v1-branch-c178c498ee3d6ebf-ebaa59755a60c023a5a5e995ce52e5d8c9d3cbd3626a753b18bdd53f92be10ab-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27"
+          }
+        },
+        "release-gcc-13": {
+          "artifact": {
+            "digest": "sha256:baefd8049d3e70179c17458e0add8870346cf3cb9d8fb1ec3961c61bdf3ad435",
+            "expires_at": "2026-10-25T21:57:30Z",
+            "files_sha256": {
+              "compiler-counters.txt": "90bf3be3a8eca50d536657ac3d6bf6eded67094a28d2d4b14ee021dc5d48612b",
+              "compiler-summary.txt": "081c95f3a9266ac781843bc1ed7dafd6a1949107ff6e09b9ee4c5c1fd1c03829",
+              "context.json": "2f807ff11f966b3b6bd5998c1b7d2b17c12400d008a263fea6054768c1aa0772",
+              "keys.json": "fc01fff8b1554ba728f21ab237eaa33f7881328e149b357146709c8de1ac40ae",
+              "restore.json": "ef1fe078e50f7e0b002e3d68049f98e04798cb695cd64ff1f59a88c2ba536bde"
+            },
+            "id": 12152012979,
+            "name": "native-cache-release-gcc-13-1"
+          },
+          "build_source_revision": "bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+          "compiler_counters_raw": {
+            "autoconf_test": 0,
+            "bad_compiler_arguments": 0,
+            "bad_input_file": 0,
+            "bad_output_file": 0,
+            "cache_miss": 42,
+            "cache_size_kibibyte": 42168,
+            "called_for_link": 0,
+            "called_for_preprocessing": 0,
+            "cleanups_performed": 0,
+            "compile_failed": 4,
+            "compiler_check_failed": 0,
+            "compiler_produced_empty_output": 0,
+            "compiler_produced_no_output": 0,
+            "compiler_produced_stdout": 0,
+            "could_not_find_compiler": 0,
+            "could_not_use_modules": 0,
+            "could_not_use_precompiled_header": 0,
+            "direct_cache_hit": 646,
+            "direct_cache_miss": 46,
+            "disabled": 0,
+            "error_hashing_extra_file": 0,
+            "files_in_cache": 1444,
+            "internal_error": 0,
+            "local_storage_hit": 646,
+            "local_storage_miss": 42,
+            "local_storage_read_hit": 1292,
+            "local_storage_read_miss": 92,
+            "local_storage_write": 84,
+            "max_cache_size_kibibyte": 976562,
+            "max_files_in_cache": 0,
+            "missing_cache_file": 0,
+            "modified_input_file": 0,
+            "multiple_source_files": 0,
+            "no_input_file": 0,
+            "output_to_stdout": 0,
+            "preprocessed_cache_hit": 0,
+            "preprocessed_cache_miss": 46,
+            "preprocessor_error": 0,
+            "recache": 0,
+            "remote_storage_error": 0,
+            "remote_storage_hit": 0,
+            "remote_storage_miss": 0,
+            "remote_storage_read_hit": 0,
+            "remote_storage_read_miss": 0,
+            "remote_storage_timeout": 0,
+            "remote_storage_write": 0,
+            "stats_updated_timestamp": 1792360645,
+            "stats_zeroed_timestamp": 1792360620,
+            "unsupported_code_directive": 0,
+            "unsupported_compiler_option": 0,
+            "unsupported_environment_variable": 0,
+            "unsupported_source_language": 0
+          },
+          "context": {
+            "arch": "X64",
+            "ccache": "ccache version 4.9.1\nFeatures: file-storage http-storage redis+unix-storage redis-storage\n\nCopyright (C) 2002-2007 Andrew Tridgell\nCopyright (C) 2009-2024 Joel Rosdahl and other contributors\n\nSee <https://ccache.dev/credits.html> for a complete list of contributors.\n\nThis program is free software; you can redistribute it and/or modify it under\nthe terms of the GNU General Public License as published by the Free Software\nFoundation; either version 3 of the License, or (at your option) any later\nversion.",
+            "cmake": "cmake version 3.31.6\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+            "compiler": "CC=gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.; CXX=g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+            "configuration": "Release",
+            "generator": "Ninja",
+            "lane": "release-gcc-13",
+            "options": "-G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON",
+            "os": "Linux"
+          },
+          "keys": {
+            "archive_key": "csl-archives-v1-branch-c178c498ee3d6ebf-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe",
+            "compiler_key": "csl-objects-v1-branch-c178c498ee3d6ebf-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27",
+            "compiler_prefix": "csl-objects-v1-branch-c178c498ee3d6ebf-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe-",
+            "inputs_sha256": "82546481d017f1d1d6e7e9637636e7c06282ffb1b54fff303f47efccdf051628",
+            "save_allowed": "true",
+            "scope": "branch-c178c498ee3d6ebf"
+          },
+          "restore": {
+            "ARCHIVE_HIT": "true",
+            "COMPILER_ENABLED": "true",
+            "OBJECT_HIT": "true",
+            "OBJECT_MATCH": "csl-objects-v1-branch-c178c498ee3d6ebf-a516bfd21e7c87e0714dd56224d0505262d6e7bc202fcecde20d0304ef763afe-bf028c6ebc9f736e294e1dd1a5985e55b61b2d27"
+          }
+        }
+      }
+    }
+  },
+  "schema": "csl-native-cache-hosted-evidence-v1",
+  "source_log_sha256": {
+    "clean-package-core.log": "c8ab43f261b1a75790b3ebabefca57c6c5f961add5106d4b8017f329e6360246",
+    "cold-package-core.log": "8ece1ebde1e191297a1a94999b6906c119f8f9ea3dad59e18edf605f08297adf",
+    "cold-routing.log": "b0dbe828089ed4d56d49e3a1f87ff010b55884d89c077c7bc312f8f1923b4550",
+    "pr-package-core.log": "8988fd95788a46e1c88bc2b51a939b3b3b45c35f56affaaf32e241dbf8e421b2",
+    "warm-package-core.log": "c15b1c5747bfcb58592f43a2f9fce3ba94eedfbd7e1e17f62434a51ea2c3278f",
+    "warm-release-gcc-13.log": "0440b59a9f5eb0fb450279b1cf09517bca9f1c1c32f04634ab89ad630d066ab9",
+    "windows-baseline.log": "4ae4ef73eb296ebe17ea0e0457d0bc22f2eebfcfff20dbe2b1926971d63f0730"
+  }
+}
