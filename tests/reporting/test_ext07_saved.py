@@ -33,9 +33,11 @@ class Ext07SavedReportTests(unittest.TestCase):
     def test_stager_copies_only_the_validated_bundle_and_adds_links(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
+            staged_bundle = root / self.bundle.name
+            shutil.copytree(self.bundle, staged_bundle)
             catalog = root / "ext07-publications.json"
             catalog.write_text(json.dumps({"schema": "csl.ext07-publications/1",
-                                           "reports": [stage_ext07.catalog_entry(self.bundle)]}),
+                                           "reports": [stage_ext07.catalog_entry(staged_bundle)]}),
                                encoding="utf-8")
             site = root / "site"
             site.mkdir()

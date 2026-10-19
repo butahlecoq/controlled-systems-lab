@@ -124,22 +124,22 @@ header,main,footer{{max-width:980px;margin:auto;padding:1.3rem}}a{{color:#9ccfd8
 .section{{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}}
 table{{border-collapse:collapse;width:100%;display:block;overflow-x:auto}}td,th{{border:1px solid #524f67;padding:.45rem;text-align:left;white-space:nowrap}}
 img{{width:100%;height:auto}}code{{overflow-wrap:anywhere}}
-</style></head><body><header><p>Controlled Systems Lab · EXT-07</p><h1>{title}</h1><p>{intro}</p></header><main>
-<section class="section"><h2>Input and analytic result</h2>
+</style></head><body><div><p>Controlled Systems Lab · EXT-07</p><h1>{title}</h1><p>{intro}</p></div><div>
+<div class="section"><h2>Input and analytic result</h2>
 <p>There are two modes (<code>coast</code> and <code>terminal</code>) and one permitted edge.
 The scalar flow is <code>x_pre=x₀+u₀</code>, with <code>x₀=0</code>, <code>u₀∈[0,1]</code>,
 guard <code>x_pre∈[0,0.5]</code>, identity reset and terminal objective <code>minimize x₁</code>.
 The full joint relation is <code>x₀=0, x_pre=u₀, x₁=u₀, 0≤u₀≤0.5</code>.
 Its complete minimizer family is the point <code>(x₀,u₀,x_pre,x₁)=(0,0,0,0)</code>.</p>
-<img src="joint-relation-2d.svg" alt="Control versus terminal state for the feasible one-step hybrid relation, with its unique minimum marked"></section>
-<section class="section"><h2>Observed branch and verification</h2>
+<img src="joint-relation-2d.svg" alt="Control versus terminal state for the feasible one-step hybrid relation, with its unique minimum marked"></div>
+<div class="section"><h2>Observed branch and verification</h2>
 <table><thead><tr><th>Paths</th><th>H rows</th><th>Dense row entries</th><th>Provider</th><th>Outcome</th><th>Feasibility</th><th>Optimality</th><th>Family coverage</th></tr></thead>
 <tbody><tr><td>1</td><td>7</td><td>28</td><td>{provider}</td><td>completed / optimal</td>
 <td>established</td><td>established</td><td>established</td></tr></tbody></table>
 <p>Every measured repetition matched objective 0 and control 0 within <code>1e-8</code>.
 The verifier uses numerical binary64 checks; this is not validated arithmetic. {escape(bound_note)}
-{escape(residual_note)}</p></section>
-<section class="section"><h2>Measurements</h2>
+{escape(residual_note)}</p></div>
+<div class="section"><h2>Measurements</h2>
 <p>One excluded 10-call warmup preceded seven measured 20-call batches: 140 measured calls and
 zero observed failures. Median total batch duration: {measurement['median_batch_end_to_end_ns']:,} ns
 (range {measurement['min_batch_end_to_end_ns']:,}–{measurement['max_batch_end_to_end_ns']:,} ns).
@@ -153,9 +153,9 @@ or scalability claim. Thread and backend details, all raw repetitions, source/bu
 are retained in the <a href="records.json">versioned record</a>,
 <a href="measure.jsonl">raw trials</a>, <a href="smoke.jsonl">smoke row</a>,
 <a href="summary.csv">summary CSV</a>, <a href="manifest.json">manifest</a>, and
-<a href="{report_id}.zip">offline ZIP</a>. Source commit: <code>{source}</code>.</p></section>
+<a href="{report_id}.zip">offline ZIP</a>. Source commit: <code>{source}</code>.</p></div>
 <p><a href="{'index.html' if example else 'example-2d.html'}">{'Full report' if example else 'Open the 2D example'}</a></p>
-</main><footer>EXT-07 · one-step scalar interval evidence only</footer></body></html>'''
+</div><div>EXT-07 · one-step scalar interval evidence only</div></body></html>'''
     return html.encode()
 
 
