@@ -256,6 +256,120 @@ public:
     }
 };
 
+class RejectingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    int corruption{2};
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++preflight_calls;
+        auto path=paths.back();
+        auto reported_limits=limits;
+        if(corruption==0) path.edges.front().value+="-wrong";
+        if(corruption==1) ++reported_limits.max_rows;
+        return model::HybridPathCompositionFailureReport{std::move(path),reported_limits,{},
+            Diagnostic{DiagnosticCode::unsupported,"fixture.trajectory.preflight",
+                "fixture rejects a later path operation"}};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.trajectory","unexpected build"}};
+    }
+};
+
+class CancellingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    explicit CancellingTrajectoryPreflightAdapter(std::stop_source& cancellation)
+        : cancellation_(&cancellation) {}
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        cancellation_->request_stop();
+        return std::monostate{};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.trajectory","unexpected build"}};
+    }
+private:
+    std::stop_source* cancellation_;
+};
+
+class AdmittingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++preflight_calls;
+        return std::monostate{};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.alternate_representation",
+            "fixture stopped after custom operation admission"}};
+    }
+};
+
+class InventoryOnlyTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++preflight_calls;
+        if(paths.size()==2) return std::monostate{};
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.inventory_only",
+            "preflight requires the complete path inventory"}};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.inventory_build",
+            "fixture stopped after full inventory admission"}};
+    }
+};
+
 class CancellingCapabilityTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     explicit CancellingCapabilityTrajectoryAdapter(std::stop_source& cancellation)
@@ -869,6 +983,16 @@ TEST_CASE("hybrid path builder validates objective policy before adapter dispatc
     CHECK(std::get<Diagnostics>(unknown_assurance).front().field=="hybrid.adapter.objective_policy");
     CHECK(unknown_assurance_adapter.calls==0);
     CHECK(unknown_assurance_adapter.capability_calls==0);
+}
+
+TEST_CASE("hybrid path builder stops if adapter capabilities request cancellation") {
+    std::stop_source cancellation;
+    CancellingCapabilityTrajectoryAdapter adapter{cancellation};
+    const auto result=build_hybrid_path_program(adapter,example_system(),example_request(),
+        example_path(),{"hybrid-problem"},{16,64,1024},{},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.calls==0);
 }
 
 TEST_CASE("hybrid path builder rejects an adapter result with mismatched branch identity") {
@@ -2928,6 +3052,82 @@ TEST_CASE("hybrid portfolio builder rolls back after a later dimension limit fai
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
     CHECK(diagnostic->field=="hybrid.relation.variables");
+}
+
+TEST_CASE("direct trajectory adapters preflight the full path inventory before capabilities or builds") {
+    auto [system,request]=variable_size_parallel_profile();
+    RejectingTrajectoryPreflightAdapter adapter;
+    const auto portfolio=build_hybrid_portfolio_programs(adapter,system,
+        request,{"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(portfolio));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(portfolio);
+    CHECK(failure.path.edges==std::vector<model::HybridEdgeId>{{"to-large"}});
+    CHECK(std::get<Diagnostic>(failure.failure).field=="fixture.trajectory.preflight");
+    CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.build_calls==0);
+
+    RejectingTrajectoryPreflightAdapter single_adapter;
+    const auto single=build_hybrid_path_program(single_adapter,example_system(),
+        example_request(),example_path(),{"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(single));
+    CHECK(std::get<model::HybridPathCompositionFailureReport>(single).path==example_path());
+    CHECK(single_adapter.preflight_calls==1);
+    CHECK(single_adapter.capability_calls==0);
+    CHECK(single_adapter.build_calls==0);
+}
+
+TEST_CASE("direct trajectory adapters may admit a representation outside the joint-H default") {
+    auto system=example_system();
+    system.edges.front().guards.front()=vertex_guard("alternate-guard");
+    AdmittingTrajectoryPreflightAdapter adapter;
+    const auto result=build_hybrid_path_program(adapter,system,example_request(),
+        example_path(),{"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.alternate_representation");
+    CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.build_calls==1);
+}
+
+TEST_CASE("direct trajectory preflight failures must retain requested path and limits") {
+    for(const int corruption : {0,1}) {
+        RejectingTrajectoryPreflightAdapter adapter;
+        adapter.corruption=corruption;
+        const auto result=build_hybrid_path_program(adapter,example_system(),
+            example_request(),example_path(),{"hybrid-problem"},{16,64,1024});
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        const auto& diagnostic=std::get<Diagnostics>(result).front();
+        CHECK(diagnostic.code==DiagnosticCode::evidence_mismatch);
+        CHECK(diagnostic.field==(corruption==0?"hybrid.adapter.preflight_path":
+            "hybrid.adapter.preflight_limits"));
+        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.build_calls==0);
+    }
+}
+
+TEST_CASE("portfolio uses one inventory-wide trajectory preflight before branch builds") {
+    auto [system,request]=variable_size_parallel_profile();
+    InventoryOnlyTrajectoryPreflightAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,request,
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.inventory_build");
+    CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.build_calls==1);
+}
+
+TEST_CASE("direct trajectory preflight observes cancellation before capabilities and builds") {
+    std::stop_source cancellation;
+    CancellingTrajectoryPreflightAdapter adapter{cancellation};
+    const auto result=build_hybrid_path_program(adapter,example_system(),
+        example_request(),example_path(),{"hybrid-problem"},{16,64,1024},
+        {},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.build_calls==0);
 }
 
 TEST_CASE("hybrid branch execution retains path and solver provenance on rejection") {

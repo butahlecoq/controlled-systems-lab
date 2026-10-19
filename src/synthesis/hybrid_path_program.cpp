@@ -57,6 +57,38 @@ Diagnostics hybrid_path_admission_errors(const model::HybridSystem& system,
 using HybridTrajectoryPortfolioPreflightResult =
     std::variant<std::monostate,Diagnostics,OperationStopped>;
 
+HybridDirectTrajectoryPreflightResult preflight_hybrid_trajectory_operations(
+    const HybridDirectTrajectoryAdapter& adapter,const model::HybridSystem& system,
+    const model::HybridRequest& request,std::span<const model::HybridPath> paths,
+    model::HybridRelationLimits limits,optimization::ObjectivePolicy policy,
+    std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid trajectory operation preflight was cancelled before adapter admission"};
+    if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
+        return Diagnostics{*policy_error};
+    const auto result=adapter.preflight(system,request,paths,limits,policy,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
+        if(std::find(paths.begin(),paths.end(),failure->path)==paths.end())
+            return Diagnostics{{DiagnosticCode::evidence_mismatch,
+                "hybrid.adapter.preflight_path",
+                "Direct-trajectory preflight returned a failure for a path outside the request"}};
+        if(failure->limits.max_variables!=limits.max_variables||
+           failure->limits.max_rows!=limits.max_rows||
+           failure->limits.max_matrix_elements!=limits.max_matrix_elements)
+            return Diagnostics{{DiagnosticCode::evidence_mismatch,
+                "hybrid.adapter.preflight_limits",
+                "Direct-trajectory preflight failure report lost the configured relation limits"}};
+        return *failure;
+    }
+    if(const auto* errors=std::get_if<Diagnostics>(&result)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid trajectory construction was cancelled after adapter preflight"};
+    return std::monostate{};
+}
+
 HybridTrajectoryPortfolioPreflightResult preflight_hybrid_trajectory_capabilities(
     const HybridDirectTrajectoryAdapter& adapter,const model::HybridRequest& request,
     std::span<const model::HybridPath> paths,optimization::ObjectivePolicy policy,
@@ -333,6 +365,48 @@ HybridPathProgramResult JointHDirectTrajectoryAdapter::build_path(
         policy, cancellation);
 }
 
+HybridDirectTrajectoryPreflightResult HybridDirectTrajectoryAdapter::preflight(
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    std::span<const model::HybridPath> paths,model::HybridRelationLimits limits,
+    optimization::ObjectivePolicy,std::stop_token cancellation) const {
+    return model::preflight_hybrid_path_relations(system,request,paths,limits,cancellation);
+}
+
+namespace {
+HybridPathProgramResult dispatch_hybrid_path_program(
+    const HybridDirectTrajectoryAdapter& adapter,const model::HybridSystem& system,
+    const model::HybridRequest& request,const model::HybridPath& path,ProblemId problem,
+    model::HybridRelationLimits limits,optimization::ObjectivePolicy policy,
+    std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid path program construction was cancelled before adapter dispatch"};
+    auto built=adapter.build_path(system,request,path,std::move(problem),limits,policy,cancellation);
+    if(const auto* program=std::get_if<HybridPathProgram>(&built)) {
+        if(program->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.path",
+                "Direct-trajectory adapter returned a program for a different path"});
+        if(!same_limits(program->relation_limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.limits",
+                "Direct-trajectory adapter returned limits different from those requested"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,program->relation_operations,true,
+            program->joint_relation.metadata()->set.dimension);
+        if(!trace_errors.empty()) return trace_errors;
+    }
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) {
+        if(failure->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.failure_path",
+                "Direct-trajectory adapter returned a failure report for a different path"});
+        if(!same_limits(failure->limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.failure_limits",
+                "Direct-trajectory failure report lost the configured relation limits"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,failure->operations,false);
+        if(!trace_errors.empty()) return trace_errors;
+    }
+    return built;
+}
+}
+
 HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAdapter& adapter,
     const model::HybridSystem& system, const model::HybridRequest& request,
     const model::HybridPath& path, ProblemId problem, model::HybridRelationLimits limits,
@@ -345,6 +419,13 @@ HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAd
     if(!admission.empty()) return admission;
     if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
         return one(*policy_error);
+    const std::array<model::HybridPath,1> paths{path};
+    const auto operation_preflight=preflight_hybrid_trajectory_operations(
+        adapter,system,request,paths,limits,policy,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
+        return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
     const auto capability=adapter.capabilities();
     if(capability.assurance!=Assurance::numerical)
         return one({DiagnosticCode::unsupported,"hybrid.adapter.assurance",
@@ -367,29 +448,11 @@ HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAd
             return one({DiagnosticCode::unsupported,"hybrid.adapter.objective",
                 "Direct-trajectory adapter does not declare support for this terminal objective"});
     }
-    auto built=adapter.build_path(system, request, path, std::move(problem), limits, policy, cancellation);
-    if(const auto* program=std::get_if<HybridPathProgram>(&built)) {
-        if(program->path!=path)
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.path",
-                "Direct-trajectory adapter returned a program for a different path"});
-        if(!same_limits(program->relation_limits,limits))
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.limits",
-                "Direct-trajectory adapter returned limits different from those requested"});
-        const auto trace_errors=hybrid_operation_trace_errors(path,limits,program->relation_operations,true,
-            program->joint_relation.metadata()->set.dimension);
-        if(!trace_errors.empty()) return trace_errors;
-    }
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built); failure) {
-        if(failure->path!=path)
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.failure_path",
-                "Direct-trajectory adapter returned a failure report for a different path"});
-        if(!same_limits(failure->limits,limits))
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.failure_limits",
-                "Direct-trajectory failure report lost the configured relation limits"});
-        const auto trace_errors=hybrid_operation_trace_errors(path,limits,failure->operations,false);
-        if(!trace_errors.empty()) return trace_errors;
-    }
-    return built;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid path program construction was cancelled after capability admission"};
+    return dispatch_hybrid_path_program(adapter,system,request,path,std::move(problem),limits,
+        policy,cancellation);
 }
 
 HybridPathProgramResult build_hybrid_path_program(const model::HybridSystem& system,
@@ -413,7 +476,7 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_for_paths(
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
                 "Hybrid portfolio construction stopped between edge paths; no programs were published"};
-        auto built=build_hybrid_path_program(adapter,system,request,path,problem,
+        auto built=dispatch_hybrid_path_program(adapter,system,request,path,problem,
             relation_limits,policy,cancellation);
         if(const auto* errors=std::get_if<Diagnostics>(&built)) return *errors;
         if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
@@ -442,11 +505,12 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectT
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
-    const auto preflight=model::preflight_hybrid_path_relations(system,request,paths,
-        relation_limits,cancellation);
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&preflight)) return *failure;
-    if(const auto* errors=std::get_if<Diagnostics>(&preflight)) return *errors;
-    if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
+    const auto operation_preflight=preflight_hybrid_trajectory_operations(
+        adapter,system,request,paths,relation_limits,policy,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
+        return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
         adapter,request,paths,policy,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
@@ -493,11 +557,12 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     if(paths.empty())
         return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
             "No allowed hybrid path exists for the requested verifier plan"});
-    const auto relation_preflight=model::preflight_hybrid_path_relations(system,request,paths,
-        relation_limits,cancellation);
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&relation_preflight)) return *failure;
-    if(const auto* errors=std::get_if<Diagnostics>(&relation_preflight)) return *errors;
-    if(const auto* stopped=std::get_if<OperationStopped>(&relation_preflight)) return *stopped;
+    const auto operation_preflight=preflight_hybrid_trajectory_operations(
+        trajectory,system,request,paths,relation_limits,policy,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
+        return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
     const auto admission=verifier.preflight(system,request,paths,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;

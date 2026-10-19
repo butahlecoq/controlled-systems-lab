@@ -81,12 +81,21 @@ struct HybridDirectTrajectoryCapabilities {
     bool convex_objectives{};
     Assurance assurance{Assurance::numerical};
 };
+using HybridDirectTrajectoryPreflightResult = model::HybridRelationPreflightResult;
 
 // Replaceable direct-trajectory boundary. Implementations return the same
 // branch-labelled joint relation, lifted objective, and optimization program.
 class HybridDirectTrajectoryAdapter {
 public:
     virtual ~HybridDirectTrajectoryAdapter() = default;
+    // Adapters admit their exact operation plan and resource needs for the
+    // complete fixed-path inventory before capability queries or branch builds.
+    // The default declares the built-in joint-H representation boundary; adapters
+    // using another representation must override it.
+    virtual HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token cancellation) const;
     virtual HybridDirectTrajectoryCapabilities capabilities() const noexcept = 0;
     virtual HybridPathProgramResult build_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&, ProblemId,
