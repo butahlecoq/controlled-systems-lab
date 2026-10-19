@@ -31,12 +31,38 @@ def validate(bundle: Path) -> dict:
                     "source report identity differs")
     collect.require(record["fixtures"] == collect.fixture(), "saved literal fixtures differ")
     host = collect.read_json(bundle / "host.json")
+    pre = collect.read_json(bundle / "prebuild.json")
+    post = collect.read_json(bundle / "postrun.json")
     build = collect.read_json(bundle / "build-provenance.json")
     collect.require(host == record["environment"] and build == record["build"] and
+                    record["source_receipts"] == {"prebuild": pre, "postrun": post} and
+                    pre["schema"] == post["schema"] == "csl.exp04-source-receipt/1" and
+                    pre["phase"] == "prebuild" and post["phase"] == "postrun" and
+                    pre["commit"] == post["commit"] == host["source_commit"] and
+                    pre["tree"] == post["tree"] == host["source_tree"] and
+                    pre["status"] == post["status"] == host["source_status"] == [] and
+                    pre["tracked_count"] == post["tracked_count"] and
+                    pre["observed_utc"] < post["observed_utc"] <= host["collected_utc"] and
+                    post["executable_sha256"] == build["executable_sha256"] and
                     host["source_commit"] == collect.SOURCE and host["source_status"] == [] and
-                    host["source_tree"] == record["source_tree"] and
+                    host["source_tree"] == record["source_tree"] == collect.SOURCE_TREE and
                     collect.sha((bundle / "driver.cpp").read_bytes()) == build["driver_source_sha256"],
                     "saved source/build provenance differs")
+    for name, field in (("configure.log", "configure_log_sha256"),
+                        ("build.log", "build_log_sha256"),
+                        ("CMakeCache.raw.txt", "cmake_cache_sha256"),
+                        ("CMakeCXXCompiler.raw.cmake", "cmake_compiler_sha256")):
+        collect.require(collect.sha((bundle / name).read_bytes()) == build[field],
+                        "saved build receipt hash differs: " + name)
+    cache = (bundle / "CMakeCache.raw.txt").read_text(encoding="utf-8")
+    compiler = (bundle / "CMakeCXXCompiler.raw.cmake").read_text(encoding="utf-8")
+    collect.require(all(option + ":BOOL=" + value in cache for option, value in
+                        (("BUILD_TESTING", "OFF"), ("CSL_ENABLE_HIGHS", "OFF"),
+                         ("CSL_ENABLE_QHULL", "OFF"), ("CSL_BUILD_EXP04_REPORT", "ON"))) and
+                    "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" in cache and
+                    'CMAKE_CXX_COMPILER_VERSION "19.44.' in compiler and
+                    "csl_exp04_replay_report.exe" in (bundle / "build.log").read_text(encoding="utf-8-sig"),
+                    "saved build receipt configuration differs")
     collect.require((bundle / "smoke.stderr.txt").read_bytes() == b"" and
                     (bundle / "measure.stderr.txt").read_bytes() == b"", "saved driver stderr differs")
     collect.require(collect.sha((bundle / "smoke.csv").read_bytes()) ==
@@ -124,10 +150,10 @@ a{{color:#66d9ef}}h1,h2{{color:#a6e22e}}code{{color:#fd971f}}table{{border-colla
 <p>The two-state plant starts at (x,y)=(0,0), times are 0,1,3, and controls are one-dimensional. Its transition is x[k+1]=x[k]+(t[k+1]−t[k])u[k]+u[k]² and y[k+1]=y[k]+u[k]. State units are length and action; terminal x in length is the original objective. Reversing (0,1) to (1,0) changes the terminal state from (3,1) to (2,1).</p>
 <table><caption>Literal checked public replay outcomes and descriptive 1,000-call batch time</caption><thead><tr><th scope="col">Case</th><th scope="col">Ordered controls</th><th scope="col">Terminal state</th><th scope="col">Original objective</th><th scope="col">Median batch duration</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
 <figure aria-label="Two-state physical trajectory"><img src="trajectory.svg" alt="Two labelled two-state trajectories at physical times 0, 1 and 3"><figcaption>Two-dimensional state coordinates and stages. Forward controls are (0,1); reverse controls are (1,0). Reproduce with the saved driver and commands below.</figcaption></figure>
-<h2>Measurement scope and limits</h2><p>One excluded warmup batch and seven rotated measured batches per case, each with 1,000 fresh public replay calls. Every call checked the complete literal trajectory, terminal objective, declaration and status after its measured interval. The batch duration sums the public record's steady-clock replay duration; fixture construction, oracle checks, serialization, process launch and rendering are outside that interval. A single worker and one native thread were requested and used; immutable plant and controls were reused. No internal counter or source-mapped limiter was available. These single-adapter timings are exploratory and support no speedup or broad performance conclusion.</p>
+<h2>Measurement scope and limits</h2><p>One excluded warmup batch and seven rotated measured batches per case, each with 1,000 fresh public replay calls. Every call checked the complete literal trajectory, terminal objective, plant name, declared initial state, controls, physical times and status after its measured interval. The batch duration sums the public record's steady-clock replay duration; fixture construction, oracle checks, serialization, process launch and rendering are outside that interval. A single worker and one native thread were requested and used; immutable plant and controls were reused. No internal counter or source-mapped limiter was available. These single-adapter timings are exploratory and support no speedup or broad performance conclusion.</p>
 <p>Host: {escape(record['environment']['cpu']['Name'])}, {escape(record['environment']['os'])} {escape(record['environment']['os_version'])}, MSVC 19.44 x64 Release. No HiGHS or Qhull backend was enabled. The four cases completed all 28,000 measured replay calls with zero recorded failures; smoke and warmup calls are excluded from those totals.</p>
 <h2>Reproduce and inspect</h2><p>Configure a fresh source checkout at the linked commit with <code>python -m cmake -S . -B build/exp04 -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON</code>, build target <code>csl_exp04_replay_report</code> in Release, then run it with <code>smoke</code> and <code>measure</code>. The driver source, exact inputs, raw CSV and file hashes are saved here.</p>
-<ul><li><a href="records.json">Raw record and full input declarations</a></li><li><a href="measure.csv">Measured CSV</a></li><li><a href="smoke.csv">Smoke CSV</a></li><li><a href="summary.csv">Summary CSV</a></li><li><a href="driver.cpp">Frozen driver source</a></li><li><a href="build-provenance.json">Build provenance</a></li></ul><p>The offline bundle is linked from the site catalogue.</p>
+<ul><li><a href="records.json">Raw record and full input declarations</a></li><li><a href="measure.csv">Measured CSV</a></li><li><a href="smoke.csv">Smoke CSV</a></li><li><a href="summary.csv">Summary CSV</a></li><li><a href="driver.cpp">Frozen driver source</a></li><li><a href="build-provenance.json">Build provenance</a></li><li><a href="configure.log">Configure log</a></li><li><a href="build.log">Build log</a></li><li><a href="prebuild.json">Prebuild source receipt</a></li><li><a href="postrun.json">Postrun source receipt</a></li></ul><p>The offline bundle is linked from the site catalogue.</p>
 <small>Report ID: {escape(record['report_id'])}. No fitted archival coefficients or invented control histories are used.</small></body></html>\n'''
     return page.encode()
 

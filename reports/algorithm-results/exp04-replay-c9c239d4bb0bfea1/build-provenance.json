@@ -1,6 +1,8 @@
 {
   "architecture": "x64",
-  "build_log_sha256": "4a8d373d8095f00ecf013218c62d798c7009b6bc3bd70067a4fbadbcd9c52fee",
+  "build_log_sha256": "1caddc3c377f182d8f16549eba6b013279a11211b956c1333e35966ca1e0a2e5",
+  "cmake_cache_sha256": "e38489ba769df1137a0f0411d4ba3eb34e559d586315a737e1dbd5bf26882340",
+  "cmake_compiler_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
   "cmake_options": {
     "BUILD_TESTING": "OFF",
     "CSL_BUILD_EXP04_REPORT": "ON",
@@ -10,8 +12,8 @@
   "command": "python -m cmake -S . -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report",
   "compiler": "MSVC 19.44 / Visual Studio 2022",
   "configuration": "Release",
-  "configure_log_sha256": "21a673253987e9a9d98af8e77cfb1054d099e644dc404ff1fe1654137cbe52d2",
+  "configure_log_sha256": "9819f21cdd21dcaa448de9b87b2ff94ba28d5f55b2b636438e5c7f657d7ca17b",
   "driver_source_sha256": "8d50a7831f19629d18364edf58706eede5e93f0defe33a432be507e04571da23",
-  "executable_sha256": "5d28b9d4d8712fc73c0f6aa9a9534d1a870c0af1e7db97d5c9a4e3079abe3e40",
-  "raw_logs": "Build logs were retained in the local capture; hashes identify those exact bytes."
+  "executable_sha256": "ca55045f720dce84a170ac54a85b217bc7cde150faf099b9e91dbf8173d9d03b",
+  "raw_logs": "Configure/build logs and CMake cache/compiler receipts are saved in the versioned bundle."
 }

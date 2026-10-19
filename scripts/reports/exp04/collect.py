@@ -13,13 +13,16 @@ import statistics
 import subprocess
 
 SOURCE = "eb4497e08f1532c732163e677d5d7aa03697c7de"
+SOURCE_TREE = "b68a51f8d46cb59c69d4c0add81e1e54d218f19b"
 SCHEMA = "csl.exp04-independent-replay/1"
 FIELDS = ["phase", "case", "repetition", "calls", "status", "verified",
           "elapsed_ns", "terminal_x", "terminal_y", "objective"]
 EXPECTED = {"scalar-endpoint": ("2", "0"), "scalar-even": ("1.5", "0"),
             "plane-forward": ("3", "1"), "plane-reverse": ("2", "1")}
 SOURCE_FILES = ("driver.cpp", "smoke.csv", "measure.csv", "smoke.stderr.txt",
-                "measure.stderr.txt", "host.json", "build-provenance.json", "records.json")
+                "measure.stderr.txt", "host.json", "prebuild.json", "postrun.json",
+                "configure.log", "build.log", "CMakeCache.raw.txt",
+                "CMakeCXXCompiler.raw.cmake", "build-provenance.json", "records.json")
 
 
 def require(value: bool, message: str) -> None:
@@ -97,10 +100,23 @@ def rows(path: Path, purpose: str) -> list[dict]:
 
 def collect(capture: Path, source: Path, destination: Path) -> Path:
     require(destination.is_dir(), "report collection root missing")
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip()
+    tree = subprocess.check_output(["git", "rev-parse", "HEAD^{tree}"], cwd=source, text=True).strip()
+    status = subprocess.check_output(["git", "status", "--porcelain=v1", "--untracked-files=all"],
+                                     cwd=source, text=True)
+    require(commit == SOURCE and tree == SOURCE_TREE and status == "",
+            "collector requires a clean frozen source checkout")
+    pre = read_json(capture / "prebuild.json")
+    post = read_json(capture / "postrun.json")
     host = read_json(capture / "host.json")
-    require(host.get("source_commit") == SOURCE and host.get("source_status") == [] and
-            re.fullmatch(r"[0-9a-f]{40}", host.get("source_tree", "")),
-            "capture source identity or clean-tree receipt differs")
+    require(pre.get("schema") == post.get("schema") == "csl.exp04-source-receipt/1" and
+            pre.get("phase") == "prebuild" and post.get("phase") == "postrun" and
+            pre.get("commit") == post.get("commit") == host.get("source_commit") == SOURCE and
+            pre.get("tree") == post.get("tree") == host.get("source_tree") == tree and
+            pre.get("status") == post.get("status") == host.get("source_status") == [] and
+            pre.get("tracked_count") == post.get("tracked_count") and
+            pre.get("observed_utc") < post.get("observed_utc") <= host.get("collected_utc"),
+            "capture source identity or clean-tree receipts differ")
     driver = source / "benchmarks/reporting/exp04/driver.cpp"
     committed_driver = subprocess.check_output(
         ["git", "show", SOURCE + ":benchmarks/reporting/exp04/driver.cpp"], cwd=source)
@@ -108,6 +124,8 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
             "driver source differs from frozen numerical commit")
     executable = capture / "measure-build/Release/csl_exp04_replay_report.exe"
     require(executable.is_file(), "frozen Release executable missing")
+    require(sha(executable.read_bytes()) == post.get("executable_sha256"),
+            "postrun executable identity differs")
     cache = (capture / "measure-build/CMakeCache.txt").read_text(encoding="utf-8")
     compiler_files = list((capture / "measure-build/CMakeFiles").glob("*/CMakeCXXCompiler.cmake"))
     require(len(compiler_files) == 1, "one captured C++ compiler identity required")
@@ -143,7 +161,9 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
              "driver_source_sha256": sha(driver.read_bytes()),
              "configure_log_sha256": sha((capture / "configure.log").read_bytes()),
              "build_log_sha256": sha((capture / "build.log").read_bytes()),
-             "raw_logs": "Build logs were retained in the local capture; hashes identify those exact bytes."}
+             "cmake_cache_sha256": sha((capture / "measure-build/CMakeCache.txt").read_bytes()),
+             "cmake_compiler_sha256": sha(compiler_files[0].read_bytes()),
+             "raw_logs": "Configure/build logs and CMake cache/compiler receipts are saved in the versioned bundle."}
     inputs = fixture()
     record = {"schema": SCHEMA, "source_commit": SOURCE, "source_tree": host["source_tree"],
               "scope": "Independent exact-discrete plant replay for four authored analytic histories",
@@ -151,6 +171,7 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
                          "No nonlinear optimization, feasibility certificate, or optimal family is claimed.",
                          "Descriptive single-adapter timings only; no comparator, speedup, limiter profile, or broad performance inference."],
               "fixtures": inputs, "environment": host, "build": build,
+              "source_receipts": {"prebuild": pre, "postrun": post},
               "measurement": {"clock": "std::chrono::steady_clock",
                               "interval": "ReplayRecord.replay_time from entry of public replay to return; per-call durations summed within each 1000-call batch",
                               "excludes": ["driver fixture construction", "post-call literal oracle checks", "CSV serialization", "process launch", "HTML rendering"],
@@ -168,8 +189,11 @@ def collect(capture: Path, source: Path, destination: Path) -> Path:
     output = destination / record_id
     require(not output.exists(), "immutable report ID already exists")
     output.mkdir(parents=True)
-    for name in ("smoke.csv", "measure.csv", "smoke.stderr.txt", "measure.stderr.txt", "host.json"):
+    for name in ("smoke.csv", "measure.csv", "smoke.stderr.txt", "measure.stderr.txt",
+                 "host.json", "prebuild.json", "postrun.json", "configure.log", "build.log"):
         shutil.copyfile(capture / name, output / name)
+    shutil.copyfile(capture / "measure-build/CMakeCache.txt", output / "CMakeCache.raw.txt")
+    shutil.copyfile(compiler_files[0], output / "CMakeCXXCompiler.raw.cmake")
     shutil.copyfile(driver, output / "driver.cpp")
     (output / "build-provenance.json").write_bytes(encoded(build))
     (output / "records.json").write_bytes(encoded(record))

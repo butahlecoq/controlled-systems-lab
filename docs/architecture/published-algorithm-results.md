@@ -97,14 +97,14 @@ publication gates.
 ## EXP-04 independent nonlinear plant replay
 
 Issue [EXP-04 #56](https://github.com/butahlecoq/controlled-systems-lab/issues/56)
-has a saved [analytic replay bundle](../../reports/algorithm-results/exp04-replay-b17d106e0b66a9b5/)
+has a saved [analytic replay bundle](../../reports/algorithm-results/exp04-replay-c9c239d4bb0bfea1/)
 from frozen numerical source `eb4497e08f1532c732163e677d5d7aa03697c7de`.
 It retains four declared scalar/two-state control histories, literal full-path
 and objective checks, one excluded 1,000-call warmup per case and seven
 rotated measured 1,000-call batches per case. The 28,000 measured public replay
 calls completed with zero recorded failures. The HTML includes a labelled
 two-dimensional state trajectory, raw input and result links, host/build
-provenance and an offline bundle. These are exploratory, descriptive
+provenance, clean source receipts, raw build logs and an offline bundle. These are exploratory, descriptive
 single-adapter durations. No speedup, source-mapped limiter, nonlinear
 optimality, B04 reconstruction or validated rounding claim is supported.
 Independent saved-result review, main-only Pages deployment and live byte

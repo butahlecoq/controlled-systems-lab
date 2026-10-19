@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location("exp04_stage_test", ROOT / "script
 stage = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(stage)
-BUNDLE = ROOT / "reports/algorithm-results/exp04-replay-b17d106e0b66a9b5"
+BUNDLE = ROOT / "reports/algorithm-results/exp04-replay-c9c239d4bb0bfea1"
 CATALOG = ROOT / "reports/algorithm-results/exp04-publications.json"
 
 
@@ -49,6 +49,24 @@ class Exp04SavedReportTests(unittest.TestCase):
             shutil.copytree(BUNDLE, copy)
             page = copy / "index.html"
             page.write_bytes(page.read_bytes().replace(b"28,000", b"29,000", 1))
+            with self.assertRaises(ValueError):
+                stage.report.render(copy, check=True)
+
+    def test_build_log_mutation_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            copy = Path(temporary) / BUNDLE.name
+            shutil.copytree(BUNDLE, copy)
+            log = copy / "build.log"
+            log.write_bytes(log.read_bytes() + b"unexpected build output\n")
+            with self.assertRaises(ValueError):
+                stage.report.render(copy, check=True)
+
+    def test_source_receipt_mutation_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            copy = Path(temporary) / BUNDLE.name
+            shutil.copytree(BUNDLE, copy)
+            pre = copy / "prebuild.json"
+            pre.write_bytes(pre.read_bytes().replace(b"eb4497e", b"deadbeef", 1))
             with self.assertRaises(ValueError):
                 stage.report.render(copy, check=True)
 

@@ -1,0 +1,31 @@
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule D:/work/PhD/worktrees/issue56-measure-frozen/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  problem.cpp
+  outcomes.cpp
+  execution.cpp
+  geometry.cpp
+  synthesis.cpp
+  model.cpp
+  Компиляция…
+  model.cpp
+  synthesis.cpp
+  geometry.cpp
+  problem.cpp
+  execution.cpp
+  outcomes.cpp
+  csl_contracts.vcxproj -> D:\work\PhD\agent-work\issue56\v2\measure-build\Release\csl_contracts.lib
+  Building Custom Rule D:/work/PhD/worktrees/issue56-measure-frozen/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  nonlinear_replay.cpp
+  Компиляция…
+  nonlinear_replay.cpp
+  csl_simulation.vcxproj -> D:\work\PhD\agent-work\issue56\v2\measure-build\Release\csl_simulation.lib
+  Building Custom Rule D:/work/PhD/worktrees/issue56-measure-frozen/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  driver.cpp
+  Компиляция…
+  driver.cpp
+  csl_exp04_replay_report.vcxproj -> D:\work\PhD\agent-work\issue56\v2\measure-build\Release\csl_exp04_replay_report.exe

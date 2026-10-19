@@ -1,7 +1,9 @@
 {
   "build": {
     "architecture": "x64",
-    "build_log_sha256": "4a8d373d8095f00ecf013218c62d798c7009b6bc3bd70067a4fbadbcd9c52fee",
+    "build_log_sha256": "1caddc3c377f182d8f16549eba6b013279a11211b956c1333e35966ca1e0a2e5",
+    "cmake_cache_sha256": "e38489ba769df1137a0f0411d4ba3eb34e559d586315a737e1dbd5bf26882340",
+    "cmake_compiler_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
     "cmake_options": {
       "BUILD_TESTING": "OFF",
       "CSL_BUILD_EXP04_REPORT": "ON",
@@ -11,14 +13,14 @@
     "command": "python -m cmake -S . -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report",
     "compiler": "MSVC 19.44 / Visual Studio 2022",
     "configuration": "Release",
-    "configure_log_sha256": "21a673253987e9a9d98af8e77cfb1054d099e644dc404ff1fe1654137cbe52d2",
+    "configure_log_sha256": "9819f21cdd21dcaa448de9b87b2ff94ba28d5f55b2b636438e5c7f657d7ca17b",
     "driver_source_sha256": "8d50a7831f19629d18364edf58706eede5e93f0defe33a432be507e04571da23",
-    "executable_sha256": "5d28b9d4d8712fc73c0f6aa9a9534d1a870c0af1e7db97d5c9a4e3079abe3e40",
-    "raw_logs": "Build logs were retained in the local capture; hashes identify those exact bytes."
+    "executable_sha256": "ca55045f720dce84a170ac54a85b217bc7cde150faf099b9e91dbf8173d9d03b",
+    "raw_logs": "Configure/build logs and CMake cache/compiler receipts are saved in the versioned bundle."
   },
   "environment": {
     "architecture": "AMD64",
-    "collected_utc": "2026-10-19T05:36:55.9082880Z",
+    "collected_utc": "2026-10-19T05:48:35.1535351Z",
     "cpu": {
       "Name": "12th Gen Intel(R) Core(TM) i5-12400F",
       "NumberOfCores": 6,
@@ -284,17 +286,17 @@
     "measured_order": "seven rotated four-case rounds; 1000 fresh public replay calls per case per round",
     "native_threads_actual": 1,
     "native_threads_requested": 1,
-    "raw_measure_sha256": "abdf18e3b6675a7e1d7a4822ba31c32b1c07295b02058c3b14e6feec3b30bf48",
-    "raw_smoke_sha256": "d5d9b08845faceb54c6c7b03bd7383629e6702d9a3360ca6f5e4d799d47463e6",
+    "raw_measure_sha256": "0f4c49ee16d72894b5b2841e0088df5ecdf14064d706c108cbfaa5cbc1239265",
+    "raw_smoke_sha256": "786fd4211094f5b4fdce9e1169f72bf4b147777c36e9be1ef1dc9f830e3fd0ff",
     "summary": [
       {
         "batches": 7,
         "calls_per_batch": 1000,
         "case": "scalar-endpoint",
         "failures": 0,
-        "max_batch_ns": 882900,
-        "median_batch_ns": 786900,
-        "min_batch_ns": 541100,
+        "max_batch_ns": 505900,
+        "median_batch_ns": 498200,
+        "min_batch_ns": 489800,
         "successes": 7000
       },
       {
@@ -302,9 +304,9 @@
         "calls_per_batch": 1000,
         "case": "scalar-even",
         "failures": 0,
-        "max_batch_ns": 962000,
-        "median_batch_ns": 625200,
-        "min_batch_ns": 525000,
+        "max_batch_ns": 560500,
+        "median_batch_ns": 500700,
+        "min_batch_ns": 493300,
         "successes": 7000
       },
       {
@@ -312,9 +314,9 @@
         "calls_per_batch": 1000,
         "case": "plane-forward",
         "failures": 0,
-        "max_batch_ns": 939400,
-        "median_batch_ns": 546800,
-        "min_batch_ns": 538400,
+        "max_batch_ns": 537600,
+        "median_batch_ns": 513100,
+        "min_batch_ns": 506000,
         "successes": 7000
       },
       {
@@ -322,9 +324,9 @@
         "calls_per_batch": 1000,
         "case": "plane-reverse",
         "failures": 0,
-        "max_batch_ns": 967600,
-        "median_batch_ns": 717600,
-        "min_batch_ns": 549000,
+        "max_batch_ns": 518400,
+        "median_batch_ns": 514000,
+        "min_batch_ns": 502500,
         "successes": 7000
       }
     ],
@@ -332,7 +334,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "741300",
+        "elapsed_ns": "501600",
         "objective": "2",
         "phase": "warmup",
         "repetition": "0",
@@ -344,7 +346,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "535700",
+        "elapsed_ns": "510200",
         "objective": "1.5",
         "phase": "warmup",
         "repetition": "0",
@@ -356,7 +358,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "753300",
+        "elapsed_ns": "516000",
         "objective": "3",
         "phase": "warmup",
         "repetition": "0",
@@ -368,7 +370,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "562900",
+        "elapsed_ns": "515200",
         "objective": "2",
         "phase": "warmup",
         "repetition": "0",
@@ -380,7 +382,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "867500",
+        "elapsed_ns": "505900",
         "objective": "2",
         "phase": "trial",
         "repetition": "0",
@@ -392,7 +394,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "525000",
+        "elapsed_ns": "520500",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "0",
@@ -404,7 +406,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "544800",
+        "elapsed_ns": "506000",
         "objective": "3",
         "phase": "trial",
         "repetition": "0",
@@ -416,7 +418,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "554400",
+        "elapsed_ns": "502500",
         "objective": "2",
         "phase": "trial",
         "repetition": "0",
@@ -428,7 +430,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "671200",
+        "elapsed_ns": "493300",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "1",
@@ -440,7 +442,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "538400",
+        "elapsed_ns": "509300",
         "objective": "3",
         "phase": "trial",
         "repetition": "1",
@@ -452,7 +454,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "799900",
+        "elapsed_ns": "513100",
         "objective": "2",
         "phase": "trial",
         "repetition": "1",
@@ -464,7 +466,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "786900",
+        "elapsed_ns": "496500",
         "objective": "2",
         "phase": "trial",
         "repetition": "1",
@@ -476,7 +478,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "538800",
+        "elapsed_ns": "515000",
         "objective": "3",
         "phase": "trial",
         "repetition": "2",
@@ -488,7 +490,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "717600",
+        "elapsed_ns": "517100",
         "objective": "2",
         "phase": "trial",
         "repetition": "2",
@@ -500,7 +502,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "882900",
+        "elapsed_ns": "489800",
         "objective": "2",
         "phase": "trial",
         "repetition": "2",
@@ -512,7 +514,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "813300",
+        "elapsed_ns": "494700",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "2",
@@ -524,7 +526,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "751500",
+        "elapsed_ns": "509900",
         "objective": "2",
         "phase": "trial",
         "repetition": "3",
@@ -536,7 +538,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "841400",
+        "elapsed_ns": "493200",
         "objective": "2",
         "phase": "trial",
         "repetition": "3",
@@ -548,7 +550,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "962000",
+        "elapsed_ns": "560500",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "3",
@@ -560,7 +562,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "939400",
+        "elapsed_ns": "537600",
         "objective": "3",
         "phase": "trial",
         "repetition": "3",
@@ -572,7 +574,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "563100",
+        "elapsed_ns": "502800",
         "objective": "2",
         "phase": "trial",
         "repetition": "4",
@@ -584,7 +586,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "546600",
+        "elapsed_ns": "500700",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "4",
@@ -596,46 +598,10 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "546800",
+        "elapsed_ns": "507300",
         "objective": "3",
         "phase": "trial",
         "repetition": "4",
-        "status": "complete",
-        "terminal_x": "3",
-        "terminal_y": "1",
-        "verified": "true"
-      },
-      {
-        "calls": "1000",
-        "case": "plane-reverse",
-        "elapsed_ns": "554100",
-        "objective": "2",
-        "phase": "trial",
-        "repetition": "4",
-        "status": "complete",
-        "terminal_x": "2",
-        "terminal_y": "1",
-        "verified": "true"
-      },
-      {
-        "calls": "1000",
-        "case": "scalar-even",
-        "elapsed_ns": "625200",
-        "objective": "1.5",
-        "phase": "trial",
-        "repetition": "5",
-        "status": "complete",
-        "terminal_x": "1.5",
-        "terminal_y": "0",
-        "verified": "true"
-      },
-      {
-        "calls": "1000",
-        "case": "plane-forward",
-        "elapsed_ns": "769400",
-        "objective": "3",
-        "phase": "trial",
-        "repetition": "5",
         "status": "complete",
         "terminal_x": "3",
         "terminal_y": "1",
@@ -644,7 +610,43 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "967600",
+        "elapsed_ns": "516000",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "504000",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "516600",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "518400",
         "objective": "2",
         "phase": "trial",
         "repetition": "5",
@@ -656,7 +658,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "551700",
+        "elapsed_ns": "499800",
         "objective": "2",
         "phase": "trial",
         "repetition": "5",
@@ -668,7 +670,7 @@
       {
         "calls": "1000",
         "case": "plane-forward",
-        "elapsed_ns": "557700",
+        "elapsed_ns": "513100",
         "objective": "3",
         "phase": "trial",
         "repetition": "6",
@@ -680,7 +682,7 @@
       {
         "calls": "1000",
         "case": "plane-reverse",
-        "elapsed_ns": "549000",
+        "elapsed_ns": "514000",
         "objective": "2",
         "phase": "trial",
         "repetition": "6",
@@ -692,7 +694,7 @@
       {
         "calls": "1000",
         "case": "scalar-endpoint",
-        "elapsed_ns": "541100",
+        "elapsed_ns": "498200",
         "objective": "2",
         "phase": "trial",
         "repetition": "6",
@@ -704,7 +706,7 @@
       {
         "calls": "1000",
         "case": "scalar-even",
-        "elapsed_ns": "558100",
+        "elapsed_ns": "499000",
         "objective": "1.5",
         "phase": "trial",
         "repetition": "6",
@@ -719,9 +721,30 @@
     "workers_requested": 1,
     "workspace_reuse": "fresh ReplayRecord for each call; immutable plant and control declarations reused"
   },
-  "report_id": "exp04-replay-b17d106e0b66a9b5",
+  "report_id": "exp04-replay-c9c239d4bb0bfea1",
   "schema": "csl.exp04-independent-replay/1",
   "scope": "Independent exact-discrete plant replay for four authored analytic histories",
   "source_commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
+  "source_receipts": {
+    "postrun": {
+      "commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
+      "executable_sha256": "ca55045f720dce84a170ac54a85b217bc7cde150faf099b9e91dbf8173d9d03b",
+      "observed_utc": "2026-10-19T05:48:33.9677706Z",
+      "phase": "postrun",
+      "schema": "csl.exp04-source-receipt/1",
+      "status": [],
+      "tracked_count": 1814,
+      "tree": "b68a51f8d46cb59c69d4c0add81e1e54d218f19b"
+    },
+    "prebuild": {
+      "commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
+      "observed_utc": "2026-10-19T05:48:11.1251177Z",
+      "phase": "prebuild",
+      "schema": "csl.exp04-source-receipt/1",
+      "status": [],
+      "tracked_count": 1814,
+      "tree": "b68a51f8d46cb59c69d4c0add81e1e54d218f19b"
+    }
+  },
   "source_tree": "b68a51f8d46cb59c69d4c0add81e1e54d218f19b"
 }

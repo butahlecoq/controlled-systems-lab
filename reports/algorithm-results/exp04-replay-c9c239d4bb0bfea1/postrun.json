@@ -1,0 +1,10 @@
+{
+  "schema": "csl.exp04-source-receipt/1",
+  "phase": "postrun",
+  "commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
+  "tree": "b68a51f8d46cb59c69d4c0add81e1e54d218f19b",
+  "status": [],
+  "tracked_count": 1814,
+  "executable_sha256": "ca55045f720dce84a170ac54a85b217bc7cde150faf099b9e91dbf8173d9d03b",
+  "observed_utc": "2026-10-19T05:48:33.9677706Z"
+}
