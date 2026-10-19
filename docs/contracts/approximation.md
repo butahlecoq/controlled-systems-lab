@@ -27,6 +27,7 @@ when one of these independent structural checks succeeds:
 | Native singleton output and native H reference, same ordered native coordinates; the point satisfies every H row under exact stored binary64 arithmetic | Singleton is inside reference (inner) |
 | Native singleton reference and native H output, same ordered native coordinates; the point satisfies every H row under exact stored binary64 arithmetic | Reference is inside output (outer) |
 | Native generator source and unconstrained native generator output, same center and ordered coordinates; retained factor IDs have identical columns and independent new axis columns cover each omitted row's exact stored-binary64 absolute sum | Reference is inside output (outer) |
+| Native bounded planar V source and native directional ellipsoid output, same ordered coordinates; every vertex projection is within its exact stored-binary64 bound and each radius satisfies `r_i² ≥ 2m_i²` | Reference is inside output (outer) |
 
 Native V data with zero vertex rows is empty under the set contract, including
 when ray rows exist. This policy does not infer nontrivial containment from a
@@ -52,7 +53,7 @@ products; it does not prove that those values approximate a real-world model
 or that earlier numerical set construction was outward rounded.
 
 For native output, `size_budget` counts generator factor columns, H inequality plus equality rows, V
-vertex plus ray rows, or one singleton point. Empty and universal forms count
+vertex plus ray rows, one singleton point, or one directional ellipsoid. Empty and universal forms count
 zero. An unknown output size is rejected because the policy cannot verify the
 budget. No finite error bound is admitted without a separate bound verifier.
 Cancellation, stops and provider rejection remain distinct outcomes.

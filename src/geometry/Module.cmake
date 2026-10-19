@@ -39,7 +39,7 @@ target_link_libraries(csl_geometry_generators PUBLIC CSL::sets)
 csl_add_library(csl_generator_adapter STATIC src/geometry/generators/adapter.cpp)
 target_link_libraries(csl_generator_adapter PUBLIC CSL::geometry_generators CSL::registry)
 
-csl_add_library(csl_approximation STATIC src/geometry/approximation/policy.cpp src/geometry/approximation/reachable_plan.cpp src/geometry/approximation/box_parallelotope.cpp src/geometry/approximation/zonotope.cpp src/geometry/approximation/ellipsoidal_set.cpp src/geometry/approximation/ellipsoidal.cpp)
+csl_add_library(csl_approximation STATIC src/geometry/approximation/policy.cpp src/geometry/approximation/reachable_plan.cpp src/geometry/approximation/box_parallelotope.cpp src/geometry/approximation/zonotope.cpp src/geometry/approximation/ellipsoidal_set.cpp src/geometry/approximation/ellipsoidal.cpp src/geometry/approximation/ellipsoidal_family.cpp)
 target_link_libraries(csl_approximation PUBLIC CSL::sets CSL::registry CSL::verification PRIVATE CSL::geometry_generators)
 
 install(FILES docs/contracts/projection-and-predecessor.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
@@ -55,6 +55,7 @@ install(FILES docs/contracts/bounded-hull-checker.md DESTINATION ${CMAKE_INSTALL
 install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/lazy-geometry.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/approximation.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
+install(FILES docs/contracts/ellipsoidal-approximation.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/generator-sets.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 csl_install_headers(geometry)
