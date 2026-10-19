@@ -1,0 +1,234 @@
+{
+  "analytic": {
+    "gradient": [
+      -1,
+      1
+    ],
+    "objective": 1,
+    "point": [
+      1,
+      -1
+    ],
+    "projected_residual": 0
+  },
+  "environment": {
+    "absolute_tolerance": 1e-10,
+    "architecture": "AMD64",
+    "collected_utc": "2026-10-19T14:11:56.234961+00:00",
+    "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
+    "configuration": "Release",
+    "host": "DESKTOP-S9O3F6S",
+    "logical_processors": 12,
+    "max_backtracks": 40,
+    "max_iterations": 1000,
+    "max_projection_iterations": 1000,
+    "native_threads_observed": null,
+    "native_threads_requested": 1,
+    "os": "Windows-11-10.0.22631-SP0",
+    "outer_workers_requested": 1,
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "relative_tolerance": 1e-10,
+    "seed": null,
+    "source_commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
+    "source_tree": "2139129a7cf87abbf8cde25b6519ded630116cdb",
+    "timing_scope": "Feasible-set and objective construction, production LP registration/workspace, one public minimize call, and literal checks; excludes CSV output and rendering",
+    "warmup_policy": "One excluded 100-call batch before seven measured 100-call batches",
+    "workspace_reuse": "none"
+  },
+  "evidence_scope": {
+    "assurance": "ordinary binary64 numerical evaluation",
+    "internal_counters": "unavailable",
+    "performance": "Single-adapter descriptive durations on one host and one fixed case; no comparator, speedup or limiter attribution",
+    "stationarity": "Numerical projected-gradient stationarity conditional on caller-declared convexity; not a validated or global error certificate"
+  },
+  "measurement": {
+    "failures": 0,
+    "max_batch_ns": 45765600,
+    "measured_calls": 700,
+    "median_batch_ns": 44544800,
+    "min_batch_ns": 42693900,
+    "raw_measure_sha256": "a5933b6f614cd306c72de036b0c97ac2eef7ffdaa137fe93396ede825486c55a",
+    "raw_smoke_sha256": "e49b771ad996e97d0ee0a23c263ceeb688e326cbc5ba968befe74e2369f6a5f3",
+    "trials": [
+      {
+        "calls": "100",
+        "case": "box-quadratic",
+        "elapsed_ns": "42693900",
+        "iterations": "1",
+        "objective": "1",
+        "objective_evaluations": "2",
+        "phase": "trial",
+        "projected_residual": "0",
+        "repetition": "0",
+        "status": "success",
+        "verified": "true",
+        "x": "1",
+        "y": "-1"
+      },
+      {
+        "calls": "100",
+        "case": "box-quadratic",
+        "elapsed_ns": "42812900",
+        "iterations": "1",
+        "objective": "1",
+        "objective_evaluations": "2",
+        "phase": "trial",
+        "projected_residual": "0",
+        "repetition": "1",
+        "status": "success",
+        "verified": "true",
+        "x": "1",
+        "y": "-1"
+      },
+      {
+        "calls": "100",
+        "case": "box-quadratic",
+        "elapsed_ns": "44799500",
+        "iterations": "1",
+        "objective": "1",
+        "objective_evaluations": "2",
+        "phase": "trial",
+        "projected_residual": "0",
+        "repetition": "2",
+        "status": "success",
+        "verified": "true",
+        "x": "1",
+        "y": "-1"
+      },
+      {
+        "calls": "100",
+        "case": "box-quadratic",
+        "elapsed_ns": "45765600",
+        "iterations": "1",
+        "objective": "1",
+        "objective_evaluations": "2",
+        "phase": "trial",
+        "projected_residual": "0",
+        "repetition": "3",
+        "status": "success",
+        "verified": "true",
+        "x": "1",
+        "y": "-1"
+      },
+      {
+        "calls": "100",
+        "case": "box-quadratic",
+        "elapsed_ns": "45157400",
+        "iterations": "1",
+        "objective": "1",
+        "objective_evaluations": "2",
+        "phase": "trial",
+        "projected_residual": "0",
+        "repetition": "4",
+        "status": "success",
+        "verified": "true",
+        "x": "1",
+        "y": "-1"
+      },
+      {
+        "calls": "100",
+        "case": "box-quadratic",
+        "elapsed_ns": "44014200",
+        "iterations": "1",
+        "objective": "1",
+        "objective_evaluations": "2",
+        "phase": "trial",
+        "projected_residual": "0",
+        "repetition": "5",
+        "status": "success",
+        "verified": "true",
+        "x": "1",
+        "y": "-1"
+      },
+      {
+        "calls": "100",
+        "case": "box-quadratic",
+        "elapsed_ns": "44544800",
+        "iterations": "1",
+        "objective": "1",
+        "objective_evaluations": "2",
+        "phase": "trial",
+        "projected_residual": "0",
+        "repetition": "6",
+        "status": "success",
+        "verified": "true",
+        "x": "1",
+        "y": "-1"
+      }
+    ],
+    "warmup": {
+      "calls": "100",
+      "case": "box-quadratic",
+      "elapsed_ns": "45884200",
+      "iterations": "1",
+      "objective": "1",
+      "objective_evaluations": "2",
+      "phase": "warmup",
+      "projected_residual": "0",
+      "repetition": "0",
+      "status": "success",
+      "verified": "true",
+      "x": "1",
+      "y": "-1"
+    }
+  },
+  "problem": {
+    "gradient": [
+      "x-2",
+      "y+2"
+    ],
+    "objective": "0.5*((x-2)^2+(y+2)^2)",
+    "objective_claim": "caller-declared differentiable convex",
+    "rows": [],
+    "start": [
+      0,
+      0
+    ],
+    "variables": [
+      [
+        0,
+        1
+      ],
+      [
+        -1,
+        1
+      ]
+    ]
+  },
+  "report_id": "opt10-smooth-bb66ac0f3f319ccd",
+  "schema": "csl.opt10-smooth-convex-report/1",
+  "source_commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
+  "source_receipts": {
+    "postrun": {
+      "commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
+      "executable_sha256": "b409285238d96ec9f7db67691908a94f0934e2f83b077a0321fe1e96624436ba",
+      "observed_utc": "2026-10-19T14:11:56.230725+00:00",
+      "phase": "postrun",
+      "status": [],
+      "tree": "2139129a7cf87abbf8cde25b6519ded630116cdb"
+    },
+    "prebuild": {
+      "commit": "3c2e0fc92ba9ff7642fc43f572785d48a5698e68",
+      "observed_utc": "2026-10-19T14:10:45.622059+00:00",
+      "phase": "prebuild",
+      "status": [],
+      "tree": "2139129a7cf87abbf8cde25b6519ded630116cdb"
+    }
+  },
+  "source_sha256": {
+    "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "CMakeCache.raw.txt": "3a0ce8bc3c38dd7a8575e33c14b69780378dd5c9288a0a83c4cf78cf6ab9f1ae",
+    "build.log": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
+    "configure.log": "875bfacffd1219de91b69e648c147dc80c005dead66d3f5af80077a84de7fbac",
+    "driver.cpp": "537bfdf9a2d8e5aaadb63e2bbf4e568133ad40692fc3d4b5df56216c4ff1512b",
+    "host.json": "5a5b9bf3ae4baf439bda6b9d6f999191d04be6ba6ecd529366d58e13129b62d6",
+    "measure.csv": "a5933b6f614cd306c72de036b0c97ac2eef7ffdaa137fe93396ede825486c55a",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postrun.json": "8a63923fea0599b62f1b12618aa0d7d0388877a7ed44b27f1e03599866b087ad",
+    "prebuild.json": "efca5e44097948b16d390b20f01cdfedd769e4b379684610afffe1d24fd12e1c",
+    "smoke.csv": "e49b771ad996e97d0ee0a23c263ceeb688e326cbc5ba968befe74e2369f6a5f3",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_tree": "2139129a7cf87abbf8cde25b6519ded630116cdb"
+}

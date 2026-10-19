@@ -211,6 +211,21 @@ with an inconclusive performance conclusion. This report is one strategy only,
 has no comparator or speedup claim, and does not close SYN-04 issue #67. It does
 not replace the distinct `csl.synthesis.ts01-analytic` measurement in SYN-07.
 
+## OPT-10 smooth-convex feasible-directions report
+
+The OPT-10 report uses frozen source
+`3c2e0fc92ba9ff7642fc43f572785d48a5698e68` and a clean Release
+capture of the public feasible-directions adapter with the production HiGHS
+projection backend. Its two-dimensional box quadratic has the analytic
+constrained solution `(1, -1)` and objective `1`. Every observed call checks
+that literal result. The saved raw rows, source and build receipts, manifest,
+offline ZIP, and illustrative two-dimensional figure are catalogued for
+main-only Pages staging. See the [reproduction notes](../../scripts/reports/opt10/README.md).
+
+The seven batches are descriptive single-adapter observations. They have no
+comparator, speedup, or global-optimality certificate. Main-only deployment
+and live URL byte verification are separate publication gates.
+
 ## SYN-04 registered Strategy B T-S02 report
 
 Issue #238 adds separate evidence for PR #237's merged exact constant-objective
