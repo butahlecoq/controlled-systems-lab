@@ -56,6 +56,40 @@ zero. An unknown output size is rejected because the policy cannot verify the
 budget. No finite error bound is admitted without a separate bound verifier.
 Cancellation, stops and provider rejection remain distinct outcomes.
 
+## Native box and parallelotope adapters (APP-02)
+
+`<csl/geometry/box_parallelotope.hpp>` registers four binary64 methods on the
+separate approximation port. `make_box_registration` computes one- or
+two-dimensional outer axis-aligned H slabs from every vertex of a bounded
+native V input. `make_parallelotope_registration` takes two independent finite
+orientation rows and computes the four outer H slabs of a two-dimensional
+rotated parallelotope. Its support products are accumulated exactly from the
+stored binary64 values and rounded upward into finite binary64 H bounds. No V
+rays are admitted by these bounded producers.
+
+`make_inscribed_box_registration` and
+`make_inscribed_parallelotope_registration` take four ordered binary64 corners
+as explicit candidate constructions. The adapter checks exact diagonal sums,
+nonzero area and, for boxes, axis alignment. It returns a native V set only
+for a two-dimensional H input. The policy independently verifies **every**
+candidate corner against **every** H inequality/equality row under exact
+stored-value arithmetic. Convexity of H sets then proves inclusion of the
+whole candidate V hull. The same policy checks every V vertex and recession
+ray against every output H row for outer admission. Changing a label or a
+single bound can invalidate admission; a provider assertion alone cannot pass.
+
+The result evidence records orientation rows or ordered corners, requested
+primitive budget, actual input and output row/vertex counts, and an unavailable
+finite approximation-error bound. An outer box uses two H rows per coordinate;
+a two-dimensional parallelotope uses four H rows; an inner candidate uses four
+V vertices. Degenerate bounded V inputs can produce zero-width outer slabs.
+Empty V inputs, V inputs with rays, unsupported dimensions, invalid orientation,
+insufficient budgets and unsupported output representations receive named
+capability results. An H candidate that is not contained receives an
+independent-inclusion rejection. These relations concern the sets defined by
+stored binary64 values. They are not validated enclosures of prior real-model
+computations, an optimizer-family guarantee, or a finite Hausdorff bound.
+
 ## Objective and plan claims
 
 `objective_bound_side` gives the direction for the extremum of the *same*
@@ -119,12 +153,11 @@ relation. It is a numerically checked, concrete plan value.
 
 ## Remaining APP-01 work
 
-This incremental contract does not close #24. It provides elementary structural
-enclosures, native H constraint containment, and native H/singleton
-containment. A nontrivial box,
-parallelotope, zonotope or ellipsoid adapter needs
-an independent inclusion verifier with claim-specific evidence, a compatible
-output-size accounting method, and contract tests on analytic inner/outer cases.
+The initial APP-01 contract provided elementary structural enclosures, native H
+constraint containment, and native H/singleton containment. APP-02 adds the
+bounded V/H checks above. Zonotope and ellipsoid adapters still need independent
+claim-specific inclusion verification, output-size accounting, and contract
+tests on analytic inner/outer cases.
 The planned APP-02/03/04 adapters must not reinterpret numerical residuals or
 provider declarations as inclusion proofs. A producer-side proof that a
 declared stage reference is the complete reachable set, independent membership
