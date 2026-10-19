@@ -18,7 +18,7 @@ From a clean checkout at the frozen source commit:
 
 ```sh
 python scripts/reports/ext07/capture.py --source <clean-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>
-python scripts/reports/ext07/collect.py --capture <fresh-capture> --source <clean-source> --out reports/algorithm-results
+python scripts/reports/ext07/ext07_collect.py --capture <fresh-capture> --source <clean-source> --out reports/algorithm-results
 python scripts/reports/ext07/render_saved.py --bundle reports/algorithm-results/<report-id>
 python scripts/reports/ext07/render_saved.py --bundle reports/algorithm-results/<report-id> --check
 python scripts/reports/stage_ext07.py --source reports/algorithm-results/<report-id>

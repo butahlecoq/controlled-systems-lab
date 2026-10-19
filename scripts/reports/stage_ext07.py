@@ -6,10 +6,8 @@ from html import escape
 import importlib.util
 import json
 from pathlib import Path
-import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports/ext07"))
 spec = importlib.util.spec_from_file_location(
     "ext07_saved_renderer", ROOT / "scripts/reports/ext07/render_saved.py")
 report = importlib.util.module_from_spec(spec)

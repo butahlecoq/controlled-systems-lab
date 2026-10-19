@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 import shutil
@@ -8,12 +9,19 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports/ext07"))
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 
-import collect
-import render_saved
-import stage_ext07
+def load_module(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+render_saved = load_module("csl_ext07_test_renderer", ROOT / "scripts/reports/ext07/render_saved.py")
+stage_ext07 = load_module("csl_ext07_test_stager", ROOT / "scripts/reports/stage_ext07.py")
+collect = render_saved.collect
 
 
 class Ext07SavedReportTests(unittest.TestCase):

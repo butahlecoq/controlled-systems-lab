@@ -5,12 +5,17 @@ import argparse
 import csv
 import hashlib
 from html import escape
+import importlib.util
 import io
 import json
 from pathlib import Path
 import zipfile
 
-import collect
+_collect_spec = importlib.util.spec_from_file_location(
+    "csl_ext07_report_collect", Path(__file__).with_name("ext07_collect.py"))
+collect = importlib.util.module_from_spec(_collect_spec)
+assert _collect_spec.loader is not None
+_collect_spec.loader.exec_module(collect)
 
 RENDERED = ("index.html", "example-2d.html", "joint-relation-2d.svg", "summary.csv")
 
