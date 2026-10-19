@@ -296,3 +296,29 @@ TEST_CASE("empty expression support stays empty and a cancelled materialization 
         take(sets::from_handle(completed.result.output)).representation());
     CHECK(native.vertices.rows() == 0);
 }
+
+TEST_CASE("materialization wrapper rejects a provider with a different identity") {
+    OperationRequest expression_request{{{"p"}, {"identity-image"}, {"identity-lazy"}},
+        {"csl.geometry.lazy-expression"},
+        AffineImage{square(), {2, 2, {1, 0, 0, 1}}, {0, 0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto expression = take<OperationResult>(create(expression_request)).output;
+    ConversionRequest request{{{"p"}, {"identity-materialization"}, {"identity-v"}},
+        expression, {"csl.polyhedron.v"}, Assurance::numerical};
+    Registry<ConversionPort> registry;
+    auto entry = geometry::lazy::make_materializer({4, 0});
+    entry.identity.id = {"csl.geometry.some-other-converter"};
+    const Method method{entry.identity.id, entry.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
+    Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.v"};
+    requirements.output.relation = SetRelation::equivalent;
+    auto provider = take(prepare_provider(select_provider(registry, method, requirements)));
+    const auto outcome = geometry::lazy::materialize_expression(request, {4, 0}, provider, {});
+    REQUIRE(std::holds_alternative<geometry::lazy::MaterializationFailure>(outcome));
+    const auto& cause = std::get<geometry::lazy::MaterializationFailure>(outcome).cause;
+    REQUIRE(std::holds_alternative<Unsupported>(cause));
+    const auto& diagnostics = std::get<Unsupported>(cause).diagnostics;
+    REQUIRE(diagnostics.size() == 1);
+    CHECK(diagnostics[0].field == "lazy.provider");
+}

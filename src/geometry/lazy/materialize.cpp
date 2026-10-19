@@ -370,6 +370,9 @@ MaterializationOutcome materialize_expression(const ConversionRequest& request,
         return MaterializationFailure{reference, selected, lineage, growth, budget, std::move(cause)};
     };
     if (stopped(context)) return failure(stop(context));
+    if (!selected.actual_module || selected.actual_module->value != module)
+        return failure(Unsupported{error("lazy.provider", "A prepared lazy materializer is required.",
+            DiagnosticCode::invalid_input)});
     if (auto failures = check_budget(growth, budget); !failures.empty())
         return failure(Unsupported{std::move(failures)});
     auto admitted = provider.prepare(request);
@@ -387,12 +390,23 @@ MaterializationOutcome materialize_expression(const ConversionRequest& request,
             DiagnosticCode::evidence_mismatch)});
     auto data = sets::from_handle(result.output);
     if (const auto* rejected = std::get_if<Diagnostic>(&data)) return failure(Unsupported{{*rejected}});
-    const auto native = std::get<sets::SetData>(std::move(data)).representation();
+    const auto materialized = std::get<sets::SetData>(std::move(data));
+    const auto native = materialized.representation();
     const auto* v = std::get_if<sets::VRepresentation>(&native);
     if (!v) return failure(Unsupported{error("lazy.result", "Materializer returned a non-V payload.",
         DiagnosticCode::evidence_mismatch)});
     growth.realized_vertices = v->vertices.rows();
     growth.realized_rays = v->rays.rows();
+    const auto inspected = inspect_expression(request.input);
+    if (!std::holds_alternative<ExpressionDescription>(inspected) ||
+        result.output.id.value != request.identity.ideal_output.value ||
+        materialized.metadata()->coordinate_labels !=
+            std::get<ExpressionDescription>(inspected).coordinate_labels ||
+        growth.realized_vertices != growth.estimated_vertices ||
+        growth.realized_rays != growth.estimated_rays ||
+        growth.realized_vertices > budget.max_vertices || growth.realized_rays > budget.max_rays)
+        return failure(Unsupported{error("lazy.result", "Materialized output differs from the admitted expression or row budget.",
+            DiagnosticCode::evidence_mismatch)});
     return MaterializationResult{std::move(result), selected, std::move(lineage), growth, budget};
 }
 } // namespace csl::geometry::lazy
