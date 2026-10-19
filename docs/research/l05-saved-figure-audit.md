@@ -33,3 +33,5 @@ python -B -O -m unittest docs.research.tools.test_l05_saved_figures -v
 The checker rejects wrong source hashes or changed plot structure. The public test checks exact area, hull inclusion, a collinear rejection and the source-hash gate; it cannot replay the private FIG. No MATLAB execution, benchmark, or timing reproduction was performed.
 
 Issue #4 still needs a versioned historical Table 1 driver and inputs, the actual support/retention predicate and its approximation contract, a justified common-coordinate mapping, full feasible-history/constraint coverage, and evaluated physical nonlinear, discretization and arithmetic bounds. The [candidate-only same-control enclosure](issue4-volterra-enclosure.md) remains separate.
+
+A subsequent [linear zonotope reconstruction](l05-linear-zonotope-reconstruction.md) matches all 60 saved general-linear stage polygons to the candidate's independent affine-control zonotope and finds that the saved linear and nonlinear hulls cross at stages 2–54. The terminal nesting above is therefore not a stagewise nonlinear inclusion claim.
