@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 440" role="img" aria-labelledby="title desc">
+<title id="title">OPT-10 feasible box and analytic minimizer</title>
+<desc id="desc">The feasible box spans x from zero to one and y from minus one to one. The supplied start is at zero, zero. The independently derived minimizer is at one, minus one. The connecting segment illustrates feasibility and is not a saved iteration trace.</desc>
+<rect width="700" height="440" fill="#16161e"/>
+<g fill="#e0def4" font-family="sans-serif" font-size="16">
+<text x="48" y="32">OPT-10 · smooth convex quadratic on a 2D box</text>
+<text x="495" y="400">x</text><text x="54" y="65">y</text>
+<text x="80" y="424">The segment illustrates feasible points, not a saved iterate trace.</text>
+</g>
+<path d="M 85 350 H 570 M 100 375 V 50" stroke="#908caa"/>
+<rect x="100" y="50" width="400" height="300" fill="#31748f" fill-opacity=".17" stroke="#9ccfd8" stroke-width="3"/>
+<path d="M 100 200 L 500 350" stroke="#f6c177" stroke-width="2" stroke-dasharray="7 6"/>
+<circle cx="100" cy="200" r="7" fill="#ebbcba"/>
+<circle cx="500" cy="350" r="8" fill="#f6c177"/>
+<g fill="#e0def4" font-family="sans-serif" font-size="15">
+<text x="115" y="192">start (0, 0)</text>
+<text x="345" y="340">minimizer (1, -1)</text>
+<text x="106" y="70">y = 1</text><text x="106" y="343">y = -1</text>
+<text x="105" y="375">x = 0</text><text x="453" y="375">x = 1</text>
+</g>
+</svg>

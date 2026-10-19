@@ -205,6 +205,13 @@ add_test(NAME installed_zoutendijk_projection_client COMMAND installed_zoutendij
 set_tests_properties(installed_zoutendijk_projection_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed Zoutendijk client: success and stopped result types are distinct")
 
+add_executable(installed_feasible_directions_client feasible_directions_client.cpp)
+target_link_libraries(installed_feasible_directions_client PRIVATE CSL::feasible_directions)
+set_target_properties(installed_feasible_directions_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_feasible_directions_client COMMAND installed_feasible_directions_client)
+set_tests_properties(installed_feasible_directions_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed feasible-directions client: public adapter linked and outcome types checked")
+
 if(TARGET CSL::highs_lp)
 add_executable(installed_highs_client highs_client.cpp)
 target_link_libraries(installed_highs_client PRIVATE CSL::highs_lp)
@@ -367,6 +374,7 @@ set(installed_contract_headers
   execution/contracts.hpp
   optimization/contracts.hpp
   optimization/zoutendijk/projection.hpp
+  optimization/feasible_directions/smooth_convex.hpp
   geometry/contracts.hpp
   geometry/lazy.hpp
   synthesis/contracts.hpp

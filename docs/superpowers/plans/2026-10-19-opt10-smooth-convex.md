@@ -1,0 +1,9 @@
+# OPT-10 implementation plan
+
+Base: `b6f00d96c0fc3d7ce9aaf5bae4f3d5443602236a`. Issue: #50. Design: `docs/superpowers/specs/2026-10-19-opt10-smooth-convex-design.md`.
+
+1. Add `include/csl/optimization/feasible_directions/smooth_convex.hpp` with the exact objective declaration, policy, outcome variants, evidence and stop reasons. Add failing public unit tests in `tests/unit/optimization/smooth_convex_tests.cpp` for literal 1D/2D quadratics, zero direction, infeasible starts, unsupported declaration, callback failures, cancellation and stalls. Register target in `src/optimization/Tests.cmake`.
+2. Implement `src/optimization/feasible_directions/smooth_convex.cpp` using `zoutendijk::project` for checked projected directions and Armijo backtracking. Register/install `csl_feasible_directions` in `src/optimization/Module.cmake`. Run focused Release tests, then add a separate HiGHS QP comparison and installed external consumer.
+3. Document mathematical and source boundaries in `docs/research/feasible-directions.md` and update the module/delivery map. Ensure the OPT-09 contract stays intact, unsupported or stopped results retain their status, and no generic callback becomes a certified convex program.
+4. Freeze a clean source commit. Add a public 2D report driver with literal checks on every timed call, collect a small reproducible single-adapter observation with raw records and provenance, render saved HTML/SVG/ZIP, and stage it through the existing catalogue/Pages workflow. Verify saved-byte regeneration and inspect the example visually.
+5. Run full native and reporting tests plus installed consumer; request independent specification, standards/package and scientific reviews at exact base/head. Post their findings and fixes on the PR. Merge only after exact-head CI passes; verify live Pages bytes and issue closure. Audit disk, branches and worktrees and remove only accounted disposable output.

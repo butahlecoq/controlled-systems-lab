@@ -27,6 +27,10 @@ csl_add_library(csl_zoutendijk_projection STATIC src/optimization/zoutendijk/pro
 
 target_link_libraries(csl_zoutendijk_projection PUBLIC CSL::optimization)
 
+csl_add_library(csl_feasible_directions STATIC src/optimization/feasible_directions/smooth_convex.cpp)
+
+target_link_libraries(csl_feasible_directions PUBLIC CSL::zoutendijk_projection)
+
 csl_add_library(csl_worst_case_vertex STATIC src/optimization/worst_case_vertex.cpp)
 
 target_link_libraries(csl_worst_case_vertex PUBLIC CSL::objectives CSL::sets)
