@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <cmath>
 #include <limits>
 #include <stop_token>
 
@@ -241,6 +242,18 @@ TEST_CASE("explicit materialization reports V growth and rejects a smaller verte
     const auto vertices = std::get<sets::VRepresentation>(data.representation()).vertices;
     CHECK(vertices.rows() == 16);
     CHECK(vertices.cols() == 2);
+    const auto lazy_answer = alternative<SupportResult>(
+        support(expression, {1, 1}, "sum-lazy-reference"));
+    CHECK(std::get<double>(lazy_answer.value) == 6.0);
+    auto polyhedral = leaf_support_provider();
+    OperationRequest direct_query{{{"p"}, {"sum-polyhedral-reference"}, {"sum-support"}},
+        {"csl.geometry.polyhedral-support"}, SupportQuery{success.result.output, {1, 1}},
+        SetRelation::equivalent, Assurance::numerical};
+    auto direct_pipeline = take(polyhedral.prepare(direct_query));
+    const auto direct_answer = alternative<SupportResult>(
+        std::get<0>(direct_pipeline.create())->run({}));
+    CHECK(std::get<double>(direct_answer.value) == 6.0);
+    CHECK(std::get<double>(lazy_answer.value) == std::get<double>(direct_answer.value));
 
     const auto failure = alternative<geometry::lazy::MaterializationFailure>(run(15));
     CHECK(failure.budget.max_vertices == 15);
@@ -326,6 +339,27 @@ TEST_CASE("affine support refuses a direction product that underflows to zero") 
     auto provider = lazy_support_provider();
     OperationRequest query{{{"p"}, {"tiny-support"}, {"sampled-support"}},
         {"csl.geometry.lazy-support"}, SupportQuery{expression, {tiny}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto admitted = provider.prepare(query);
+    REQUIRE(std::holds_alternative<Rejection>(admitted));
+    const auto& diagnostics = std::get<Rejection>(admitted).diagnostics;
+    REQUIRE(diagnostics.size() == 1);
+    CHECK(diagnostics[0].field == "lazy.direction");
+}
+
+TEST_CASE("affine support refuses cancellation of a nonzero exact direction") {
+    const auto ray = take(sets::make_v({{"cancellation-ray"}, 1, {}},
+        {take(numeric::snapshot(Matrix{1, 1, {0}})),
+         take(numeric::snapshot(Matrix{1, 1, {-1}}))})).as_handle();
+    const double ulp = std::ldexp(1.0, -52);
+    OperationRequest request{{{"p"}, {"cancellation-affine"}, {"cancellation-image"}},
+        {"csl.geometry.lazy-expression"},
+        AffineImage{ray, {2, 1, {1.0 - ulp, 1.0}}, {0, 0}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto expression = take<OperationResult>(create(request)).output;
+    auto provider = lazy_support_provider();
+    OperationRequest query{{{"p"}, {"cancellation-support"}, {"sampled-support"}},
+        {"csl.geometry.lazy-support"}, SupportQuery{expression, {1.0 + ulp, -1.0}},
         SetRelation::equivalent, Assurance::numerical};
     const auto admitted = provider.prepare(query);
     REQUIRE(std::holds_alternative<Rejection>(admitted));

@@ -59,14 +59,26 @@ using Cache = std::unordered_map<CacheKey, SupportResult, CacheHash>;
 
 std::variant<Vector, Diagnostics> affine_direction(const AffineImage& affine, const Vector& direction) {
     Vector transformed(affine.map.cols);
-    for (std::size_t column = 0; column < affine.map.cols; ++column)
+    for (std::size_t column = 0; column < affine.map.cols; ++column) {
+        detail::exact_detail::Integer exact;
         for (std::size_t row = 0; row < affine.map.rows; ++row) {
             const double coefficient = affine.map.values[row * affine.map.cols + column];
+            if (!detail::exact_detail::add_product(exact,
+                    detail::exact_detail::decode(direction[row]),
+                    detail::exact_detail::decode(coefficient)))
+                return error("lazy.direction", "Exact transformed-direction sign exceeded the checked arithmetic range.");
             const double product = direction[row] * coefficient;
             if (direction[row] != 0.0 && coefficient != 0.0 && product == 0.0)
                 return error("lazy.direction", "Affine direction product underflowed to zero.");
             transformed[column] += product;
         }
+        if (!std::isfinite(transformed[column]))
+            return error("lazy.direction", "Transformed direction is nonfinite.");
+        const bool exact_zero = detail::exact_detail::is_zero(exact);
+        if (exact_zero != (transformed[column] == 0.0) ||
+            (!exact_zero && exact.negative != (transformed[column] < 0.0)))
+            return error("lazy.direction", "Rounded affine direction changed the exact stored-binary64 sign.");
+    }
     if (!finite(transformed)) return error("lazy.direction", "Transformed direction is nonfinite.");
     return transformed;
 }

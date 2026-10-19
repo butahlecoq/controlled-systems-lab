@@ -10,6 +10,17 @@ endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
 
+if(CSL_BUILD_GEO08_REPORT)
+add_executable(csl_geo08_lazy_report benchmarks/reporting/geo08/driver.cpp)
+target_link_libraries(csl_geo08_lazy_report PRIVATE CSL::lazy_geometry CSL::polyhedral)
+target_compile_features(csl_geo08_lazy_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_geo08_lazy_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_geo08_lazy_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+endif()
+
 if(CSL_BUILD_APP03_REPORT)
 add_executable(csl_app03_zonotope_report benchmarks/reporting/app03/driver.cpp)
 target_link_libraries(csl_app03_zonotope_report PRIVATE CSL::approximation CSL::geometry_generators)

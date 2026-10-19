@@ -36,7 +36,9 @@ result retains the query identity, input ID and numerical evidence limit.
 Support admission checks each reached leaf query against the caller-selected
 prepared provider before creating a workspace. A provider refusal remains a
 rejection rather than a late partial answer.
-Affine direction products that underflow to zero are refused. The native V
+Affine directions whose rounded zero or sign disagrees with the exact
+stored-binary64 dot product are refused, as are products that underflow to
+zero. The native V
 ray classification is checked against exact signs of the stored binary64
 direction and ray coordinates; disagreement with the selected leaf provider
 is refused rather than presented as finite support.
