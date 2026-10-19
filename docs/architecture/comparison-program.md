@@ -1,6 +1,6 @@
-# Reconciled comparison program (owner review draft)
+# Reconciled comparison program
 
-Status: review draft for Wayfinder #390/#405. This document and proposed backlog remain behind the existing publication/implementation and no-merge review gate. The owner delegated detailed parameter selection; the defaults below incorporate that delegation and the owner-approved refinements in #399 / PR #410 comments, without changing the gate. Research audit dossiers are in `docs/research/comparison-*.md` and linked from issues #391–#398.
+Status: published planning contract from [PR #410](https://github.com/butahlecoq/controlled-systems-lab/pull/410), merged as `469b0ab65f293caacc3a2c1e742380083a3f992f`. The decision and backlog handoff in [#405](https://github.com/butahlecoq/controlled-systems-lab/issues/405) is closed. The owner delegated detailed parameter selection; the defaults below incorporate that delegation and the refinements in #399 / PR #410 comments. This contract does not authorize benchmark execution or claim completed comparisons. Research audit dossiers are in `docs/research/comparison-*.md` and linked from issues #391–#398.
 
 ## Purpose and evidence boundary
 
@@ -40,11 +40,11 @@ Paired results use a separate content-addressed `csl.comparison-record/1`, keyed
 
 No comparison-level speed or quality winner is claimed until both sides use matched inputs and their applicable independent oracle passes. Report inconclusive outcomes where evidence or timing cannot support a winner. Reproduction claims require recovered historical inputs and documented correspondence; a similar problem statement is insufficient. Later set representations (hybrid zonotopes, polynomial zonotopes, ellipsotopes) are excluded from this first comparison program; revisit them only after general approximation producers and independent inclusion verifiers exist. The estimator and replanning loop is also excluded: EXT-04 observation semantics alone do not define an estimator, and replanning runs must not be presented as globally optimal causal synthesis. Any such work requires a separate contract and remains behind issue #5 where its information pattern applies.
 
-## Proposed backlog delta for owner review
+## Backlog disposition and remaining delivery
 
-Do not create duplicate tickets where the live graph already has an owner. Candidate edits below name exact existing tickets; the final tracker diff still needs issue-body and native-dependency review against the live graph. All new tickets should carry the family implementation/unit-test labels used by adjacent tickets and be attached as children of #390 only after owner approval.
+The [#405 handoff](https://github.com/butahlecoq/controlled-systems-lab/issues/405) applied the issue-body, label and native-dependency changes from the reviewed spec. Existing tickets were extended rather than duplicated; six new comparison-program children were attached to #390. The table records their intended scope, not completion. Query the live issue tracker for current claims, blockers and status.
 
-| Operation | Ticket or proposed title | Proposed scope and acceptance |
+| Disposition | Ticket or scope | Adopted scope and acceptance |
 |---|---|---|
 | Edit | INP-03 #72, scenario templates | Add fixture manifest/schema, deterministic generator and per-track seeds/serialization/hashes; encode both comparison/local resource profiles, enforcement scope and outcome retention. Depends on existing scenario loader. |
 | Edit | TEST-12 #74 and TEST-13 #77, comparison fixtures | Add hull/H/V matrix and analytic fixtures; independent validity and completeness checks with verified/incorrect/inconclusive evidence tiers and bounded checker budgets; numerical/sample diagnostics cannot imply completeness. Use exact/analytic low-dimensional checks and do not infer correctness from volume. |
@@ -52,14 +52,16 @@ Do not create duplicate tickets where the live graph already has an owner. Candi
 | Edit | EXP-02 #94 | Add this program's hull/V-H/optimization substitution axes and resolved hull and dimension-specific H/V/control ladders, named IID tracks and seeds; keep axes independently configured and extend only where two compatible methods exist. Preserve the five alternating Release repetitions and separate limiter profile. |
 | Edit | EXP-03 #99 and TEST-20 #100 | Keep approximation comparison after the first exact strategy suite; require existing APP-01 #24 policies, APP-02 #33 boxes/parallelotopes, APP-03 #42 zonotopes, APP-04 #34 ellipsoids, GEO-08 #52, and a complete independent inclusion oracle. #100 already lists these dependencies; do not create a duplicate approximation-comparison ticket. |
 | Edit | GEO-03 #31 | Reconcile the old ray-support wording with the delivered bounded-only contract. Keep rays/unbounded explicitly unsupported in stage one; any extension needs a second usable backend and independent round-trip/containment fixtures. |
-| Create | Add horizon-3 double-integrator comparison scenario (new INP-family child under #390) | #44 is closed and will not be edited. Depend on scenario-template and comparison-record support (#72/#83); add literal expected behavior through resolve/prepare/execute/report. Label as generality evidence only. |
-| Create | Port each recoverable archived method under `tools/legacy-ports/<artifact-id>/` | One ticket per method/artifact after source mapping. Acceptance: source/provenance hashes, pinned inputs/environment, `DEVIATIONS.md`, independent quality oracle, retained unsuccessful attempts. Block only on that artifact's unrecovered input, not #2/#10 globally. |
-| Create | Add finite-catalog fixed-plan minimax paired comparison | Depend on finite-catalog minimax/oracle and OBS-04 #83; check `exists u, for all w`, all-stage constraints, shared inputs, and explicit unsupported outcomes. Do not claim adaptive or continuous-action optimality. |
+| Create | INP-04 #421, horizon-3 double-integrator scenario | #44 is closed and will not be edited. Depend on scenario-template and comparison-record support (#72/#83); add literal expected behavior through resolve/prepare/execute/report. Label as generality evidence only. |
+| Create | OPT-13 #424 and OPT-14 #425, faithful archived hull ports | These two source-bound tickets cover their verified active helper closures. Further ports require one ticket per recovered method/artifact. Acceptance: source/provenance hashes, pinned inputs/environment, `DEVIATIONS.md`, independent quality oracle, retained unsuccessful attempts. Block only on that artifact's unrecovered input, not #2/#10 globally. |
+| Create | TEST-25 #426, bounded independent geometry checker | Check source-index validity and all-input containment with an exact dyadic 2D oracle. Reject a missing extreme corner; accept retained redundant points when the hull is unchanged. Preserve budget and inconclusive/failure status. |
+| Create | EXP-05 #422, finite-catalog fixed-plan minimax pair | Depend on finite-catalog minimax/oracle and OBS-04 #83; check `exists u, for all w`, all-stage constraints, shared inputs, and explicit unsupported outcomes. Do not claim adaptive or continuous-action optimality. |
+| Create | EXP-06 #423, bounded 2D geometry pilot | Depend on #83, #94, #424 and #426. A modern-only smoke is not a legacy comparison. Use bit-identical inputs and source/runtime identity; no benchmark is authorized by this ticket. |
 | Deferred scope decision | Adaptive observation and estimator/replanning comparison | No new delivery ticket until issue #5 resolves the information pattern and an estimator contract exists. Replanning is not globally optimal causal control. |
 | Deferred scope decision | Hybrid/polynomial zonotope and ellipsotope comparison | No new issue in this program. Revisit after general approximation producers and independent inclusion evidence exist; ellipsoidal work remains under APP-04 #34. |
 | Deferred scope decision | Nonlinear linearization adapter | Outside this map; requires its own nonlinear model, validity-region, residual-bound and constraint-propagation contract. |
 
-The list is a review-ready intended diff, not a live tracker mutation. Exact parent links, blocking edges, labels and ticket owners must be checked against the current issue graph immediately before applying it. Existing tickets #83/#84/#94/#99/#100 are extended rather than duplicated.
+As checked on 2026-10-19, #424, #425 and #426 are closed; #72, #83, #94 and #421–#423 remain open. The latter three are blocked by live prerequisites. Closure of the map records decisions and delegation, not implementation completion. The live graph, rather than this status snapshot, remains authoritative.
 
 ## Explicit exclusions and gates
 
@@ -71,7 +73,7 @@ The list is a review-ready intended diff, not a live tracker mutation. Exact par
 - No hybrid zonotope, polynomial zonotope, or ellipsotope comparisons in the first program; reconsider only after approximation producers and independent inclusion verifiers are available.
 - No estimator/replanning-loop comparison in this map; that needs separate observation and estimator contracts, with issue #5 governing adaptive-policy semantics.
 - No redistribution of archive source code.
-- The owner must review this summary and the final live backlog diff before the spec is published or issues are created/edited, as required by [#405](https://github.com/butahlecoq/controlled-systems-lab/issues/405).
+- The decision and backlog publication gate was handled under [#405](https://github.com/butahlecoq/controlled-systems-lab/issues/405) and reviewed [PR #410](https://github.com/butahlecoq/controlled-systems-lab/pull/410); its handoff records no separate human re-review event. Future implementation and publication retain their own review gates.
 
 ## Disposition of the map’s former “Not yet specified” items
 
@@ -85,7 +87,7 @@ The list is a review-ready intended diff, not a live tracker mutation. Exact par
 8. Linearization-near-reference work is outside this map and requires its own nonlinear input, residual-bound, and validity contracts (#401/#397).
 9. Estimator/replanning work is outside this map; EXT-04 observation semantics do not supply an estimator or prove globally optimal causal control (#395).
 
-These dispositions replace the map’s stale “Not yet specified” bullets. They are proposed edits to #390 for owner review, not yet applied. Detailed parameter selection has been delegated; this does not waive the existing review/no-merge gate.
+These dispositions resolve the map's former “Not yet specified” decisions. Detailed parameter selection was delegated. Child tickets carry the remaining implementation, comparison and publication work; their open status does not reopen a settled map decision.
 
 
 ## Research basis
