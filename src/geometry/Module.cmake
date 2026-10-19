@@ -23,6 +23,12 @@ csl_add_library(csl_polyhedral STATIC
 
 target_link_libraries(csl_polyhedral PUBLIC CSL::sets CSL::optimization CSL::registry)
 
+csl_add_library(csl_lazy_geometry STATIC
+  src/geometry/lazy/expression.cpp
+  src/geometry/lazy/support.cpp
+  src/geometry/lazy/materialize.cpp)
+target_link_libraries(csl_lazy_geometry PUBLIC CSL::sets CSL::registry)
+
 csl_add_library(csl_affine_sum STATIC src/geometry/affine_sum.cpp)
 
 target_link_libraries(csl_affine_sum PUBLIC CSL::sets CSL::hull CSL::registry)
@@ -47,6 +53,7 @@ install(FILES docs/contracts/quickhull-2d.md DESTINATION ${CMAKE_INSTALL_DATADIR
 install(FILES docs/contracts/bounded-hull-checker.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
+install(FILES docs/contracts/lazy-geometry.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/approximation.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/generator-sets.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 

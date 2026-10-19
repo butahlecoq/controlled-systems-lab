@@ -61,6 +61,11 @@ target_link_libraries(support_query_tests PRIVATE CSL::polyhedral doctest::docte
 add_test(NAME support_query_tests COMMAND support_query_tests)
 csl_test_target(support_query_tests geometry)
 
+add_executable(lazy_geometry_tests tests/contract/geometry/lazy_geometry_tests.cpp)
+target_link_libraries(lazy_geometry_tests PRIVATE CSL::lazy_geometry CSL::polyhedral doctest::doctest)
+add_test(NAME lazy_geometry_tests COMMAND lazy_geometry_tests)
+csl_test_target(lazy_geometry_tests geometry)
+
 add_executable(support_query_contract_tests tests/contract/geometry/support_query_contract_tests.cpp)
 target_link_libraries(support_query_contract_tests PRIVATE CSL::polyhedral doctest::doctest)
 add_test(NAME support_query_contract_tests COMMAND support_query_contract_tests)
