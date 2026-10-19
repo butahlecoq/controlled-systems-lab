@@ -454,6 +454,25 @@ bool relation_is_line_interval(const sets::SetData& data,double initial,double p
         // trajectory while remaining tolerance-close. Require a point-defining
         // equality system for a singleton relation.
         if(*equality_rank!=4) return false;
+        Vector point=base;
+        for(std::size_t column=0;column<point.size();++column) {
+            double increment=0;
+            if(!exact_product(direction[column],interval.lower,increment)||
+               !exact_sum(point[column],increment,point[column])) {
+                exactness_established=false;
+                return false;
+            }
+        }
+        for(std::size_t row=0;row<h->inequalities.rows();++row) {
+            if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return false; }
+            double value=0;
+            if(!exact_dot(h->inequalities,row,point,value)) {
+                exactness_established=false;
+                return false;
+            }
+            if(!std::isfinite(h->upper_bounds[row])||value>h->upper_bounds[row]) return false;
+        }
+        return true;
     }
     double lower=-std::numeric_limits<double>::infinity();
     double upper=std::numeric_limits<double>::infinity();

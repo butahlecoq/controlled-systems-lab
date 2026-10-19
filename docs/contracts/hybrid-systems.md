@@ -216,8 +216,12 @@ must use an exact polyhedral relation operation supported by the selected provid
 "Exact" describes the set operation: no geometric approximation or
 cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
-recorded separately, and complete-family publication requires a profile-specific
-compiled verifier; no such hybrid verifier currently exists.
+recorded separately. The implementation includes an exact integral singleton
+verifier and a numerical one-step scalar interval verifier. The latter supports
+bounded scalar interval controls/sets and deterministic scalar affine resets;
+it does not verify continuous multi-stage families or general-dimensional
+relations. These bounded verifiers do not establish the full EXT-07 acceptance
+contract.
 
 Operation admission is complete and occurs before any workspace is created:
 
@@ -275,9 +279,13 @@ failed composition reports retain the configured limits and the operation
 records completed before a diagnostic or cancellation; path-program and
 portfolio builders propagate those failure reports without dropping the path
 identity. Solver-provider provenance remains attached to each branch
-execution. The trace records work performed by the current direct composer; it
-does not imply that an independent projected-set reachability algorithm or a
-compiled hybrid family verifier has been implemented.
+execution. The default reachability adapter wraps this same direct joint-H
+composer; an independently implemented projected-set reachability algorithm
+is not yet available. The compiled verifiers currently cover integral
+singleton paths and one-step scalar interval families only; no compiled
+verifier covers general continuous multi-stage hybrid families. Their
+capability admission is request-scoped and does not currently reject every
+unsupported verifier plan before branch program construction.
 
 ## Independent test oracle requirements
 
