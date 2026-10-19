@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://butahlecoq.github.io/controlled-systems-lab/schemas/model/continuous-v1.schema.json",
+  "title": "CSL continuous affine model input v1",
+  "$comment": "Authoring aid; the native loader also enforces strict finite binary64, duplicate-key, dimensional, grid and resource rules.",
+  "type": "object",
+  "properties": {
+    "schema": {"const": "csl.continuous-model/1"},
+    "dimensions": {
+      "type": "object",
+      "properties": {
+        "state": {"type": "integer", "minimum": 0, "maximum": 256},
+        "control": {"type": "integer", "minimum": 0, "maximum": 256},
+        "external": {"type": "integer", "minimum": 0, "maximum": 256}
+      },
+      "required": ["state", "control", "external"],
+      "additionalProperties": false
+    },
+    "times": {"$ref": "#/$defs/vector"},
+    "hold": {"const": "zero_order_hold"},
+    "coefficients": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"const": "continuous_lti"},
+            "A": {"$ref": "#/$defs/matrix"},
+            "B": {"$ref": "#/$defs/matrix"},
+            "E": {"$ref": "#/$defs/matrix"},
+            "offset": {"$ref": "#/$defs/vector"}
+          },
+          "required": ["kind", "A", "B", "E", "offset"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"const": "continuous_piecewise_linear_ltv"},
+            "stages": {
+              "type": "array", "items": {
+                "type": "object",
+                "properties": {
+                  "start": {"$ref": "#/$defs/stage"},
+                  "end": {"$ref": "#/$defs/stage"}
+                },
+                "required": ["start", "end"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["kind", "stages"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "integration": {
+      "type": "object",
+      "properties": {
+        "absolute_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "relative_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "max_attempts_per_stage": {"type": "integer", "minimum": 1}
+      },
+      "required": ["absolute_tolerance", "relative_tolerance", "max_attempts_per_stage"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["schema", "dimensions", "times", "hold", "coefficients", "integration"],
+  "additionalProperties": false,
+  "$defs": {
+    "vector": {"type": "array", "items": {"type": "number"}},
+    "matrix": {
+      "oneOf": [
+        {"type": "array", "items": {"$ref": "#/$defs/vector"}},
+        {
+          "type": "object",
+          "properties": {
+            "rows": {"type": "integer", "minimum": 0},
+            "cols": {"type": "integer", "minimum": 0},
+            "values": {"$ref": "#/$defs/vector"}
+          },
+          "required": ["rows", "cols", "values"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "stage": {
+      "type": "object",
+      "properties": {
+        "A": {"$ref": "#/$defs/matrix"},
+        "B": {"$ref": "#/$defs/matrix"},
+        "E": {"$ref": "#/$defs/matrix"},
+        "offset": {"$ref": "#/$defs/vector"}
+      },
+      "required": ["A", "B", "E", "offset"],
+      "additionalProperties": false
+    }
+  }
+}
