@@ -14,8 +14,16 @@ u^e(·) = {u^e(t)}_{t=0}^4 = {-0.3, 1, 0, 0, 0.3}.
 
 Thus the first sign is negative and the final action is positive `0.3`. The extracted text's displaced minus signs should not be used to infer a different sequence.
 
-## Scope and unresolved inputs
+On physical PDF p. 12, L09 states that the found program minimax control `u^e(·)` is applied to the original nonlinear system and gives terminal state `(30, 6.0345, 20, 4.4731)` and criterion `9.049`. This links the displayed linear sequence to the source-reported nonlinear row. It is a reported input association, not an independent reproduction of the nonlinear simulation.
 
-This reading applies to the linear finite-action minimax result described on p. 11, which reports criterion `10.11`. Table 2 separately reports nonlinear terminal coordinates `(30, 6.03, 20, 4.47)` and criterion `9.049`. The page does not establish, in a way independently recoverable from the extracted table, the exact nonlinear control path or its correspondence to the displayed linear sequence.
+## Printed objective check
 
-The numerical example gives the disturbance matrix and says the disturbance belongs to an admissible set, but the archived text and inspected numerical page do not supply numeric bounds or vertices for that set. The reported worst-case result therefore remains non-reproducible from the transcribed inputs. This source check resolves only the sequence's printed sign and order; it does not supply missing disturbance data, a historical run configuration, or independent validation of either reported result.
+For the B06 criterion printed on p. 11, exact rational evaluation at the p. 12 nonlinear terminal coordinates gives squared value `16378084179/200000000` (`81.890420895`). This lies inside the square of the nearest-thousandth interval for the reported `9.049`, namely `[9.0485², 9.0495²)`. The criterion at the rounded Table 2 coordinates `(30, 6.03, 20, 4.47)` has squared center `1635471/20000`; that center alone does not round to `9.049`, but the more precise state printed in the preceding text does. Exact calculations are saved in [B06 reported-cost evidence](evidence/b06-reported-rounding.json) and can be regenerated with the [checker](tools/check_b06_reported_rounding.py).
+
+The linear Table 2 row's displayed center `(29.83, 6.73, 19.87, 5)` has exact squared criterion `4088109/40000`. Its square lies inside the square of the nearest-hundredth interval for `10.11`, `[10.105², 10.115²)`. These are center evaluations of displayed coordinates; they do not identify unrounded states or independently validate worst-case optimization.
+
+## Remaining inputs
+
+The linear finite-action minimax result described on p. 11 reports criterion `10.11`. Table 2 on physical PDF p. 16 (printed p. 6) gives a rounded nonlinear row `(30, 6.03, 20, 4.47)` and criterion `9.049`; the higher-precision nonlinear state is printed in the p. 12 prose above.
+
+The numerical example gives the disturbance matrix and says the disturbance belongs to an admissible set, but the archived text and inspected numerical pages do not supply numeric bounds or vertices for that set. The reported worst-case result therefore remains non-reproducible from the transcribed inputs. The audit resolves the sequence's printed sign/order and its stated use for the nonlinear result, and checks the printed objective values at their displayed centers. It does not supply missing disturbance data, a historical run configuration, or independent validation of either reported optimization/simulation.
