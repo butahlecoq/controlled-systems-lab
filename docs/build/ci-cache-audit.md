@@ -4,7 +4,8 @@ Audit for [#481](https://github.com/butahlecoq/controlled-systems-lab/issues/481
 2026-10-19. Source baseline: `3cfed6cc96aa9bac4ecd0d1a936ed0575011fd6d`.
 Recommend verified archive downloads on every platform and compiler caching for
 Linux Ninja builds. Preserve the complete [native event/matrix policy](ci.md).
-This is a design and evidence inventory; cache effectiveness remains unmeasured.
+This records the design and the completed hosted cache experiment. The experiment
+proves reuse in one equivalent cold/warm pair; runtime benefit remains inconclusive.
 
 ## Repeated work and coverage
 
@@ -178,7 +179,8 @@ manual runs. Context, keys, restore results and actual compiler counters are
 uploaded as `native-cache-<lane>-<attempt>` Actions artifacts with seven-day
 retention; these are temporary validation evidence, not published install bundles.
 The 369-test reporting suite also passed locally (six skips, no failures).
-Hosted cold/warm/invalidation evidence and independent PR review remain pending.
+Hosted cold/warm, clean and PR-policy evidence are recorded below. Independent
+Spec and Standards reviews are linked in [PR #490](https://github.com/butahlecoq/controlled-systems-lab/pull/490).
 
 Retain hosted links, exact head SHA, tool versions, options, archive hashes,
 cache keys and restore/save results for each experiment:
@@ -196,8 +198,66 @@ cache keys and restore/save results for each experiment:
    empty launchers, retaining all jobs and tests. Normal local builds must also
    work with no cache directory or launcher configured.
 
-These miss/hit/invalidation demonstrations are still required. No speedup claim
-is justified yet. If reporting one later, compare equivalent repeated hosted
-runs and separate queue, download/configure, compile, link and test intervals;
-include cache overhead and inconclusive results. Functional CI timing is not
-algorithm benchmark evidence and authorizes no numerical benchmark rerun.
+## Hosted experiment, exact source `bf028c6`
+
+The [durable evidence record](ci-cache-evidence-2026-10-19.json) preserves the
+actual context, full keys, restore results, raw ccache counters, run/job/selected
+step timestamps, Actions artifact IDs/digests, each artifact file's SHA256 and
+the source-log SHA256s. All four runs used source
+`bf028c6ebc9f736e294e1dd1a5985e55b61b2d27`; the PR run used GitHub's
+synthetic merge checkout, while branch dispatches built that source directly.
+The hosted artifacts have seven-day retention, so the JSON retains their
+provenance and observations after expiry.
+
+| Run | Native result | Observed policy |
+| --- | --- | --- |
+| [PR 39168262592](https://github.com/butahlecoq/controlled-systems-lab/actions/runs/39168262592) | Six lanes and aggregate passed | Main-compatible restore scope; all six `save_allowed=false`. |
+| [Cold branch dispatch 39168299468](https://github.com/butahlecoq/controlled-systems-lab/actions/runs/39168299468) | Six lanes and aggregate passed | All six archive restores and five Linux compiler restores missed; eleven new snapshots were saved in the branch namespace. |
+| [Clean dispatch 39168428358](https://github.com/butahlecoq/controlled-systems-lab/actions/runs/39168428358) | Six lanes and aggregate passed | `clean=true`: no cache restore/save and disabled C/C++ launchers. |
+| [Warm branch dispatch 39170021830](https://github.com/butahlecoq/controlled-systems-lab/actions/runs/39170021830) | Six lanes and aggregate passed | Same per-lane context and keys as cold; all six archive and five Linux compiler restores hit. |
+
+The same five Linux contexts used GCC 13 or Clang 18, CMake 3.31.6 and ccache
+4.9.1, with Release or sanitizer options kept in separate keys. Windows used
+Visual Studio and archive-only caching. The cold and warm jobs configured fresh
+build directories. The warm Release GCC log records CMake's hash-verified
+archive reuse for Eigen, JSON, HiGHS, Qhull and doctest, including separate
+product/probe extraction; the package-core log records verified Eigen, JSON and
+doctest reuse. The raw hashes and artifact provenance are in the JSON.
+
+| Lane | Cold ccache hits / misses | Warm ccache hits / misses | Warm archive / compiler restore |
+| --- | ---: | ---: | --- |
+| Release GCC 13 | 12 / 676 | 646 / 42 | hit / hit |
+| Release Clang 18 | 12 / 672 | 646 / 38 | hit / hit |
+| Package core | 4 / 206 | 207 / 3 | hit / hit |
+| Package HiGHS | 4 / 439 | 421 / 22 | hit / hit |
+| GCC sanitizers | 4 / 473 | 455 / 22 | hit / hit |
+| Windows MSVC | no ccache | no ccache | hit / not enabled |
+
+Hits are `direct_cache_hit + preprocessed_cache_hit`; misses are ccache's
+`cache_miss` counter, each zeroed before that job's work. These are work counts,
+not a speedup ratio. Every completed Linux lane also reported four
+`compile_failed` entries in both cold and warm counters; their cause was not
+established. All native tests passed. The clean core job alone passed 75 CTests
+with empty archive/compiler restore fields and no launchers; the clean matrix
+passed all six lane and aggregate gates. The separate [reporting PR run
+39168262688](https://github.com/butahlecoq/controlled-systems-lab/actions/runs/39168262688)
+also passed.
+
+For pin/patch invalidation, the real key generator read copies of the frozen
+Git inputs and the hosted core context. Its baseline keys match the uploaded
+core artifact and existing cache inventory. Independently changing the HiGHS
+pin (`v1.11.0` to `v1.11.1`), patch postimage (`next = nullptr;` to
+`next = 0;`) or patch-contract bytes changed both archive and compiler keys;
+the hosted inventory returned zero matches for the changed exact archive keys
+and strict compiler prefixes. These are key/inventory misses, not executed
+changed-vendor builds. The four real CMake archive tests separately checked
+fresh extraction, changed-pin separation, corrupt-entry replacement/rejection
+and the explicit empty-cache path. The product keeps its pinned patch while the
+independent probe uses upstream HiGHS. Sanitizer and backend options have
+different compatibility keys and cannot restore one another's object snapshot.
+
+The run and step timestamps are kept separately in the JSON. One equivalent
+cold/warm pair establishes reuse but does not establish a repeatable runtime
+benefit. No performance benchmark or numerical algorithm benchmark was run.
+Any later speedup report needs repeated equivalent hosted samples, overhead
+and queue/configure/compile/link/test interval analysis before a claim.
