@@ -36,6 +36,8 @@ class Ext07SavedReportTests(unittest.TestCase):
         self.assertEqual(render_saved.render(self.bundle, check=True)["report_id"], self.bundle.name)
         entry = stage_ext07.catalog_entry(self.bundle)
         self.assertEqual(entry["source_commit"], collect.read_json(self.bundle / "records.json")["source_commit"])
+        self.assertEqual(entry["collector_sha256"], collect.sha(
+            (ROOT / "scripts/reports/ext07/ext07_collect.py").read_bytes()))
         self.assertEqual(entry["zip_sha256"], collect.sha((self.bundle / (self.bundle.name + ".zip")).read_bytes()))
 
     def test_stager_copies_only_the_validated_bundle_and_adds_links(self) -> None:

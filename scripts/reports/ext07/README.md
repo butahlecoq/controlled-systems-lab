@@ -14,11 +14,16 @@ general polyhedral dimensions, or application-scale performance. There is no
 comparator or speedup claim. The 2D example uses control and terminal state as
 axes and labels the underlying system as scalar.
 
-From a clean checkout at the frozen source commit:
+Run these commands from a clean report-tools checkout. Set `<frozen-source>`
+to a separate clean checkout of the measured source commit recorded in the
+bundle (currently `2965baafa325550ad60ec91d44f5e3f86a832178`). The report tools
+may be newer than that measured source; the collector verifies that the driver
+matches the frozen commit, and the publication catalogue binds the collector,
+renderer, and stager hashes.
 
 ```sh
-python scripts/reports/ext07/capture.py --source <clean-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>
-python scripts/reports/ext07/ext07_collect.py --capture <fresh-capture> --source <clean-source> --out reports/algorithm-results
+python scripts/reports/ext07/capture.py --source <frozen-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>
+python scripts/reports/ext07/ext07_collect.py --capture <fresh-capture> --source <frozen-source> --out reports/algorithm-results
 python scripts/reports/ext07/render_saved.py --bundle reports/algorithm-results/<report-id>
 python scripts/reports/ext07/render_saved.py --bundle reports/algorithm-results/<report-id> --check
 python scripts/reports/stage_ext07.py --source reports/algorithm-results/<report-id>

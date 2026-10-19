@@ -29,6 +29,8 @@ def catalog_entry(bundle: Path) -> dict:
     for name in ("index.html", "example-2d.html"):
         site.OfflineHTML(allowed).feed((bundle / name).read_text(encoding="utf-8"))
     return {**details, "schema": "csl.ext07-hybrid-profile-report/1",
+            "collector_sha256": report.collect.sha(
+                (ROOT / "scripts/reports/ext07/ext07_collect.py").read_bytes()),
             "renderer_sha256": report.collect.sha(
                 (ROOT / "scripts/reports/ext07/render_saved.py").read_bytes()),
             "stager_sha256": report.collect.sha(Path(__file__).read_bytes())}
