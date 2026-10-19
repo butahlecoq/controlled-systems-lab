@@ -7,6 +7,21 @@
 namespace csl::synthesis {
 namespace {
 Diagnostics one(Diagnostic diagnostic) { return Diagnostics{std::move(diagnostic)}; }
+std::optional<Diagnostic> hybrid_objective_policy_error(optimization::ObjectivePolicy policy) {
+    if(policy.assurance!=Assurance::numerical && policy.assurance!=Assurance::validated)
+        return Diagnostic{DiagnosticCode::invalid_input,"hybrid.adapter.objective_policy",
+            "Hybrid objective assurance value is unknown"};
+    if(!std::isfinite(policy.numerical.absolute_tolerance)||
+       policy.numerical.absolute_tolerance<0||
+       !std::isfinite(policy.numerical.relative_tolerance)||
+       policy.numerical.relative_tolerance<0)
+        return Diagnostic{DiagnosticCode::invalid_input,"hybrid.adapter.objective_policy",
+            "Hybrid objective tolerances must be finite and nonnegative"};
+    if(policy.assurance==Assurance::validated)
+        return Diagnostic{DiagnosticCode::unsupported,"hybrid.adapter.objective_policy",
+            "Hybrid objective construction currently supports numerical assurance only"};
+    return {};
+}
 std::optional<Termination> interruption(const ExecutionContext& context) {
     if(context.cancellation.stop_requested()) return Termination::cancelled;
     if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)
@@ -44,10 +59,13 @@ using HybridTrajectoryPortfolioPreflightResult =
 
 HybridTrajectoryPortfolioPreflightResult preflight_hybrid_trajectory_capabilities(
     const HybridDirectTrajectoryAdapter& adapter,const model::HybridRequest& request,
-    std::span<const model::HybridPath> paths,std::stop_token cancellation) {
+    std::span<const model::HybridPath> paths,optimization::ObjectivePolicy policy,
+    std::stop_token cancellation) {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid trajectory capability preflight was cancelled before adapter admission"};
+    if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
+        return one(*policy_error);
     const auto capability=adapter.capabilities();
     if(capability.assurance!=Assurance::numerical)
         return one({DiagnosticCode::unsupported,"hybrid.adapter.assurance",
@@ -289,6 +307,8 @@ HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAd
         return OperationStopped{StopReason::cancelled,"Hybrid path program construction was cancelled before profile admission"};
     const auto admission=hybrid_path_admission_errors(system,request,path);
     if(!admission.empty()) return admission;
+    if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
+        return one(*policy_error);
     const auto capability=adapter.capabilities();
     if(capability.assurance!=Assurance::numerical)
         return one({DiagnosticCode::unsupported,"hybrid.adapter.assurance",
@@ -392,7 +412,7 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectT
     if(const auto* errors=std::get_if<Diagnostics>(&preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        adapter,request,paths,cancellation);
+        adapter,request,paths,policy,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
     return build_hybrid_portfolio_programs_for_paths(adapter,system,request,
@@ -420,6 +440,8 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
             "Hybrid verified portfolio construction was cancelled before profile admission"};
     const auto profile_errors=model::check_hybrid_profile(system,request);
     if(!profile_errors.empty()) return profile_errors;
+    if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
+        return one(*policy_error);
     const auto capability=verifier.capabilities();
     if(capability.assurance!=Assurance::numerical||
        !capability.checks_original_hybrid_feasibility||
@@ -444,7 +466,7 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        trajectory,request,paths,cancellation);
+        trajectory,request,paths,policy,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
     if(cancellation.stop_requested())

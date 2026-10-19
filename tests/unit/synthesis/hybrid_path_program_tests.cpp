@@ -227,7 +227,11 @@ model::HybridPath example_path() {
 class RejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     mutable int calls{};
-    HybridDirectTrajectoryCapabilities capabilities() const noexcept override { return {true,true,true,Assurance::numerical}; }
+    mutable int capability_calls{};
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
     HybridPathProgramResult build_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&, ProblemId,
         model::HybridRelationLimits, optimization::ObjectivePolicy,
@@ -328,17 +332,21 @@ public:
 class FixtureHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     mutable int calls{};
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
     bool omit_last_branch{};
     bool claim_established_aggregates{};
     bool claim_coverage_only{};
     bool mark_all_branches_refuted{};
     bool inject_candidate_providers{};
     HybridFamilyVerificationCapabilities capabilities() const noexcept override {
+        ++capability_calls;
         return {true,true,true,Assurance::numerical};
     }
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath>,
         std::stop_token cancellation) const override {
+        ++preflight_calls;
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,"fixture preflight cancelled"};
         return std::monostate{};
@@ -694,6 +702,84 @@ TEST_CASE("hybrid portfolio capability preflight honors cancellation before scan
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
     CHECK(adapter.calls==0);
+}
+
+TEST_CASE("hybrid portfolio preflights objective policy before adapter dispatch") {
+    RejectingTrajectoryAdapter validated_adapter;
+    optimization::ObjectivePolicy validated_policy;
+    validated_policy.assurance=Assurance::validated;
+    const auto validated=build_hybrid_portfolio_programs(validated_adapter,
+        example_system(),example_request(),{"hybrid-problem"},{1,8},{16,64,1024},
+        validated_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(validated));
+    CHECK(std::get<Diagnostics>(validated).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(validated).front().field=="hybrid.adapter.objective_policy");
+    CHECK(validated_adapter.calls==0);
+    CHECK(validated_adapter.capability_calls==0);
+
+    FixtureHybridFamilyVerifier verifier;
+    RejectingTrajectoryAdapter verified_adapter;
+    const auto verified=build_hybrid_portfolio_programs_with_verifier(verifier,verified_adapter,
+        example_system(),example_request(),{"hybrid-problem"},{1,8},{16,64,1024},
+        validated_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(verified));
+    CHECK(std::get<Diagnostics>(verified).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.adapter.objective_policy");
+    CHECK(verified_adapter.calls==0);
+    CHECK(verified_adapter.capability_calls==0);
+    CHECK(verifier.capability_calls==0);
+    CHECK(verifier.preflight_calls==0);
+
+    RejectingTrajectoryAdapter invalid_tolerance_adapter;
+    optimization::ObjectivePolicy invalid_tolerance_policy;
+    invalid_tolerance_policy.numerical.absolute_tolerance=
+        std::numeric_limits<double>::quiet_NaN();
+    const auto invalid_tolerance=build_hybrid_portfolio_programs(invalid_tolerance_adapter,
+        example_system(),example_request(),{"hybrid-problem"},{1,8},{16,64,1024},
+        invalid_tolerance_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(invalid_tolerance));
+    CHECK(std::get<Diagnostics>(invalid_tolerance).front().code==DiagnosticCode::invalid_input);
+    CHECK(std::get<Diagnostics>(invalid_tolerance).front().field=="hybrid.adapter.objective_policy");
+    CHECK(invalid_tolerance_adapter.calls==0);
+    CHECK(invalid_tolerance_adapter.capability_calls==0);
+}
+
+TEST_CASE("hybrid path builder validates objective policy before adapter dispatch") {
+    RejectingTrajectoryAdapter validated_adapter;
+    optimization::ObjectivePolicy validated_policy;
+    validated_policy.assurance=Assurance::validated;
+    const auto validated=build_hybrid_path_program(validated_adapter,example_system(),
+        example_request(),example_path(),{"hybrid-problem"},{16,64,1024},validated_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(validated));
+    CHECK(std::get<Diagnostics>(validated).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(validated).front().field=="hybrid.adapter.objective_policy");
+    CHECK(validated_adapter.calls==0);
+    CHECK(validated_adapter.capability_calls==0);
+
+    RejectingTrajectoryAdapter invalid_tolerance_adapter;
+    optimization::ObjectivePolicy invalid_tolerance_policy;
+    invalid_tolerance_policy.numerical.absolute_tolerance=
+        std::numeric_limits<double>::quiet_NaN();
+    const auto invalid_tolerance=build_hybrid_path_program(invalid_tolerance_adapter,
+        example_system(),example_request(),example_path(),{"hybrid-problem"},
+        {16,64,1024},invalid_tolerance_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(invalid_tolerance));
+    CHECK(std::get<Diagnostics>(invalid_tolerance).front().code==DiagnosticCode::invalid_input);
+    CHECK(std::get<Diagnostics>(invalid_tolerance).front().field=="hybrid.adapter.objective_policy");
+    CHECK(invalid_tolerance_adapter.calls==0);
+    CHECK(invalid_tolerance_adapter.capability_calls==0);
+
+    RejectingTrajectoryAdapter unknown_assurance_adapter;
+    optimization::ObjectivePolicy unknown_assurance_policy;
+    unknown_assurance_policy.assurance=static_cast<Assurance>(255);
+    const auto unknown_assurance=build_hybrid_path_program(unknown_assurance_adapter,
+        example_system(),example_request(),example_path(),{"hybrid-problem"},
+        {16,64,1024},unknown_assurance_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(unknown_assurance));
+    CHECK(std::get<Diagnostics>(unknown_assurance).front().code==DiagnosticCode::invalid_input);
+    CHECK(std::get<Diagnostics>(unknown_assurance).front().field=="hybrid.adapter.objective_policy");
+    CHECK(unknown_assurance_adapter.calls==0);
+    CHECK(unknown_assurance_adapter.capability_calls==0);
 }
 
 TEST_CASE("hybrid path builder rejects an adapter result with mismatched branch identity") {

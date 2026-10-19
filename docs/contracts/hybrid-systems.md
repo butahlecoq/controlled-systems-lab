@@ -173,6 +173,12 @@ support identifies the candidate path and terminal stage. When a verifier is
 requested during construction, use `build_hybrid_portfolio_programs_with_verifier`;
 after the relation preflight it calls the verifier adapter's `preflight`, then
 checks trajectory-adapter capabilities across the same inventory. The built-in
+path and portfolio builders reject unknown assurance values and non-finite or
+negative tolerances before calling injected adapter methods. Validated objective
+assurance is unsupported because the hybrid objective path currently supports
+numerical assurance only. The single-path wrapper checks policy before querying
+trajectory capabilities; the verified portfolio builder checks it before
+querying verifier capabilities or running verifier preflight. The built-in
 singleton and scalar interval verifiers check each enumerated path; a custom
 bounded verifier must implement preflight, and the default implementation fails
 closed. These admission checks supplement later relation, candidate, and report
@@ -332,9 +338,10 @@ covers multiple free continuous parameters or general continuous polytope
 families. These verifier domains reject unsupported input when verification
 runs; `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
 verifier domains and declared trajectory objective capabilities before building
-branch programs. Objective-policy semantics, general provider-operation
-admission, independent projected-set reachability, and multiple-parameter
-verifier coverage remain incomplete.
+branch programs. Validated objective assurance remains unsupported; adapter-
+specific objective-policy semantics, general provider-operation admission,
+independent projected-set reachability, and multiple-parameter verifier
+coverage remain incomplete.
 
 ## Independent test oracle requirements
 
