@@ -58,13 +58,16 @@ PreparedProvider<GeometryPort> leaf_support_provider() {
     return take(prepare_provider(select_provider(registry, method)));
 }
 
-OperationOutcome support(const SetHandle& input, Vector direction, std::string request_id) {
+PreparedProvider<GeometryPort> lazy_support_provider() {
     Registry<GeometryPort> registry;
     auto entry = geometry::lazy::make_support_registration(leaf_support_provider());
     const Method method{entry.identity.id, entry.identity.version};
     REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
-    Requirements requirements;
-    auto provider = take(prepare_provider(select_provider(registry, method, requirements)));
+    return take(prepare_provider(select_provider(registry, method)));
+}
+
+OperationOutcome support(const SetHandle& input, Vector direction, std::string request_id) {
+    auto provider = lazy_support_provider();
     OperationRequest request{{{"p"}, {std::move(request_id)}, {"sampled-support"}},
         {"csl.geometry.lazy-support"}, SupportQuery{input, std::move(direction)},
         SetRelation::equivalent, Assurance::numerical};
@@ -124,4 +127,23 @@ TEST_CASE("lazy support matches a transformed square and its nested projection")
     REQUIRE(std::holds_alternative<double>(projected_answer.value));
     CHECK(std::get<double>(projected_answer.value) == 3.0);
     CHECK(projected_answer.maximizer == Vector{3});
+}
+
+TEST_CASE("finite support directions remain labelled samples") {
+    OperationRequest affine{{{"p"}, {"affine"}, {"mapped-square"}},
+        {"csl.geometry.lazy-expression"},
+        AffineImage{square(), {2, 2, {2, 0, 0, 1}}, {1, -1}},
+        SetRelation::equivalent, Assurance::numerical};
+    const auto mapped = take<OperationResult>(create(affine)).output;
+    const auto provider = lazy_support_provider();
+    const GeometryRequestIdentity identity{{"p"}, {"two-directions"}, {"sample-only"}};
+    const auto samples = alternative<geometry::lazy::SupportSamples>(
+        geometry::lazy::sample_support(provider, mapped, {{1, 0}, {0, 1}}, identity, {}));
+    CHECK(samples.coverage == geometry::lazy::SampleCoverage::directions_only);
+    CHECK(samples.reference == GeometryReference{identity, {{"mapped-square"}}});
+    REQUIRE(samples.samples.size() == 2);
+    CHECK(samples.samples[0].direction == Vector{1, 0});
+    CHECK(std::get<double>(samples.samples[0].answer.value) == 3.0);
+    CHECK(samples.samples[1].direction == Vector{0, 1});
+    CHECK(std::get<double>(samples.samples[1].answer.value) == 0.0);
 }

@@ -23,4 +23,19 @@ registry::Registration<registry::GeometryPort> make_expression_registration();
 registry::Registration<registry::GeometryPort> make_support_registration(
     registry::PreparedProvider<registry::GeometryPort> leaf_support);
 
+enum class SampleCoverage { directions_only };
+struct SupportSample { Vector direction; SupportResult answer; };
+struct SupportSamples {
+    GeometryReference reference;
+    SampleCoverage coverage{SampleCoverage::directions_only};
+    std::vector<SupportSample> samples;
+};
+using SampleOutcome = std::variant<SupportSamples, Unsupported, OperationStopped>;
+
+// Finite directions are diagnostics, not a materialized set or a global
+// inclusion certificate. No partial batch is published on a stop or refusal.
+SampleOutcome sample_support(const registry::PreparedProvider<registry::GeometryPort>& provider,
+    const SetHandle& input, const std::vector<Vector>& directions,
+    const GeometryRequestIdentity& identity, const ExecutionContext& context);
+
 } // namespace csl::geometry::lazy

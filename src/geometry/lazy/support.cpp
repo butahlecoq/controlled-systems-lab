@@ -184,4 +184,43 @@ registry::Registration<registry::GeometryPort> make_support_registration(
             return std::make_unique<Workspace>(leaf_support);
         }};
 }
+
+SampleOutcome sample_support(const registry::PreparedProvider<registry::GeometryPort>& provider,
+        const SetHandle& input, const std::vector<Vector>& directions,
+        const GeometryRequestIdentity& identity, const ExecutionContext& context) {
+    if (identity.problem.value.empty() || identity.request.value.empty() || identity.ideal_output.value.empty())
+        return Unsupported{error("lazy.identity", "Complete support-sample identity is required.",
+            DiagnosticCode::invalid_input)};
+    if (const auto inspected = inspect_expression(input); std::holds_alternative<Diagnostics>(inspected))
+        return Unsupported{std::get<Diagnostics>(inspected)};
+    if (!provider.provenance().actual || provider.provenance().actual->id.value != module)
+        return Unsupported{error("lazy.provider", "A prepared lazy-support provider is required.",
+            DiagnosticCode::invalid_input)};
+    SupportSamples result{{identity, {input.id}}, SampleCoverage::directions_only, {}};
+    for (std::size_t index = 0; index < directions.size(); ++index) {
+        if (stopped(context)) return stop(context);
+        const auto& direction = directions[index];
+        if (direction.size() != input.metadata.dimension || !finite(direction))
+            return Unsupported{error("lazy.direction", "Sample direction has wrong dimension or nonfinite entry.",
+                DiagnosticCode::invalid_input)};
+        const auto scoped = child_identity(identity, "sample" + std::to_string(index));
+        OperationRequest request{scoped, {module}, SupportQuery{input, direction},
+            SetRelation::equivalent, Assurance::numerical};
+        auto admitted = provider.prepare(request);
+        if (const auto* rejected = std::get_if<registry::Rejection>(&admitted))
+            return Unsupported{rejected->diagnostics};
+        auto prepared = std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(admitted));
+        auto outcome = std::get<0>(prepared.create())->run(context);
+        if (const auto* sample = std::get_if<SupportResult>(&outcome)) {
+            if (auto failures = check_geometry_evidence(sample->evidence, request); !failures.empty())
+                return Unsupported{std::move(failures)};
+            result.samples.push_back({direction, *sample});
+        } else if (const auto* interrupted = std::get_if<OperationStopped>(&outcome)) return *interrupted;
+        else if (const auto* refused = std::get_if<Unsupported>(&outcome)) return *refused;
+        else return Unsupported{error("lazy.result", "Support provider returned a non-support outcome.",
+            DiagnosticCode::evidence_mismatch)};
+    }
+    if (stopped(context)) return stop(context);
+    return result;
+}
 } // namespace csl::geometry::lazy
