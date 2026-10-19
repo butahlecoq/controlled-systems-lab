@@ -42,6 +42,8 @@ The [L05 saved-figure audit](l05-saved-figure-audit.md) recovers terminal polygo
 
 The [L05 linear zonotope reconstruction](l05-linear-zonotope-reconstruction.md) independently reconstructs the candidate's 60-stage affine-control reachable polygons and matches all saved general-linear stages to floating-point precision. Exact checks of saved polygons show modified-in-general inclusion at every plotted stage, while the linear and nonlinear plotted hulls cross at stages 2–54; historical generator identity and nonlinear enclosure remain open.
 
+The [L05 four-state candidate reconstruction](l05-example2-candidate-reconstruction.md) independently enumerates the archived seven-transition, two-control model. Its full linear and nonlinear corner-history hulls match the printed Example 2 general and nonlinear count/volume rows and three saved 3D projections; the modified 4D row and historical generator remain unresolved.
+
 The [issue #5 feedback contract follow-up](feedback-contract-followup.md) turns the reviewed policy distinctions into a bounded robust predecessor and evidence handoff without claiming an implemented feedback solver.
 
 The [exact finite policy-class reference](finite-policy-class-reference.md) independently enumerates an authored two-step counterexample's fixed plans, executed replanning selector and globally causal value. Its three-point disturbance catalogue checks decision order but does not certify L13's continuous model or historical program.

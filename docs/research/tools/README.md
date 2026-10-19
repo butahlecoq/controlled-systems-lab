@@ -40,6 +40,8 @@ The [L05 saved-figure checker](check_l05_saved_figures.py) requires SciPy only t
 
 The [L05 linear zonotope checker](check_l05_linear_zonotope.py) uses the same private `4.fig` plus the hash-identified `Volterra.m` candidate. Run `python -B -O -m docs.research.tools.check_l05_linear_zonotope --source "$privateL05/Volterra.m" --figure "$privateL05/4.fig"` and `python -B -O -m unittest docs.research.tools.test_l05_linear_zonotope -v`. Its [derived record](../evidence/l05-linear-zonotope.json) compares all 60 candidate linear stages and reports exact inclusion checks on saved plotted hulls without exposing vertices or claiming historical generator identity.
 
+The [L05 four-state candidate checker](check_l05_dim4_candidate.py) hash-gates private `Dim4.m` and `2.1.fig`–`2.3.fig`, enumerates all seven-stage control corners and compares the candidate's 4D hull rows and saved 3D projections. Run `python -B -O -m docs.research.tools.check_l05_dim4_candidate --source "$privateL05/Dim4.m" --figure-123 "$privateL05/2.1.fig" --figure-234 "$privateL05/2.2.fig" --figure-124 "$privateL05/2.3.fig"`; the [derived record](../evidence/l05-dim4-candidate.json) contains no source vertices. The modified 4D row and generating revision are not recovered.
+
 ## B04 saved-witness reference check
 
 [check_b04_saved_witnesses.py](check_b04_saved_witnesses.py) reproduces the [curated B04 witness/replay checks](../b04-saved-witnesses.md). It requires Python 3, NumPy and SciPy (`loadmat` with `simplify_cells`); the recorded run used Python 3.13.5, NumPy 2.3.2 and SciPy 1.16.3. PyMuPDF, MATLAB, a solver and archived executable code are not required. These are documented dependencies and observed versions, not new project dependency pins.
